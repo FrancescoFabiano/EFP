@@ -6,6 +6,8 @@
 *.lo
 *.o
 *.obj
+build/
+
 
 # Precompiled Headers
 *.gch
@@ -30,3 +32,7 @@
 *.exe
 *.out
 *.app
+bin/
+
+# Project
+nbproject/
