@@ -49,7 +49,7 @@ using namespace std;
 
 /***********************************************************************
  Do not change the following
-************************************************************************/
+ ************************************************************************/
 
 class Action;
 class Domain;
@@ -58,7 +58,7 @@ class Domain;
 
 /***********************************************************************
  Constants
-************************************************************************/
+ ************************************************************************/
 #define NEGATION_SYMBOL "-"
 
 // maximum fluent/action name length
@@ -70,17 +70,17 @@ class Domain;
 #define ERROR_004 ""
 
 enum Algorithm {
-	GREEDY
+    GREEDY
 };
 
 enum Semantics {
-	PC,
-	PH
+    PC,
+    PH
 };
 
 enum Task {
-	SEARCH,
-	DOPLAN
+    SEARCH,
+    DOPLAN
 };
 
 // timers
@@ -102,28 +102,28 @@ enum Task {
 
 /***********************************************************************
  Types -- For scanner & parser
-************************************************************************/
+ ************************************************************************/
 // for scanner & parser
 typedef set<string> StringList;
 typedef set<StringList> StringList2;
 
 enum Heuristics {
-	NUMSATGOALS,
-	PLANNINGGRAPH,
-	SUMPLANNINGGRAPH,
-	NOTUSE
+    NUMSATGOALS,
+    PLANNINGGRAPH,
+    SUMPLANNINGGRAPH,
+    NOTUSE
 
 };
 
 enum PropositionType {
-	STATIC,		//not an action
-	DYNAMIC,		//ontic action, an edge
-	EXECUTABILITY,	//ontic action
-	IMPOSSIBILITY,	//ontic action
-	DETERMINATION,   	//sensing action (peek_a), creates Kripke
-	ANNOUNCEMENT,    	//announcement action (shout_tail_a), creates Kripke
-	OBSERVANCE,		//sensing action
-	AWARENESS		//sensing action
+    STATIC, //not an action
+    DYNAMIC, //ontic action, an edge
+    EXECUTABILITY, //ontic action
+    IMPOSSIBILITY, //ontic action
+    DETERMINATION, //sensing action (peek_a), creates Kripke
+    ANNOUNCEMENT, //announcement action (shout_tail_a), creates Kripke
+    OBSERVANCE, //sensing action
+    AWARENESS //sensing action
 };
 
 typedef unsigned short Fluent;
@@ -144,430 +144,429 @@ typedef set<Literal> Literals;
 
 /* Belief Formulae Implementation */
 enum BFNodeType {
-	fluForm,
-	BForm,
-	propForm,
-	EForm,
-	CForm,
-	BFEmpty
+    fluForm,
+    BForm,
+    propForm,
+    EForm,
+    CForm,
+    BFEmpty
 };
+
 enum BFOperator {
-	BFAND,
-	BFOR,
-	BFNOT,
-	NONE
+    BFAND,
+    BFOR,
+    BFNOT,
+    NONE
 };
+
 class BFNode {
 public:
-	//map<string,Fluent> ff_map; // for mapping string to corresponding fluent (integer)
-	string agentPro;		//i, or the agent this belief node belongs to
+    //map<string,Fluent> ff_map; // for mapping string to corresponding fluent (integer)
+    string agentPro; //i, or the agent this belief node belongs to
 
-	//agent in number form
-	Agent agentPro2;
+    //agent in number form
+    Agent agentPro2;
 
-	BFNodeType node_type;		//Which case of belief formula this node is
+    BFNodeType node_type; //Which case of belief formula this node is
 
-	/* Four forms of belief formulae */
+    /* Four forms of belief formulae */
 
-	//fluForm
-	StringList2 flu_form;
-	//fluent formula in number form
-	FluentFormula* fluform;
+    //fluForm
+    StringList2 flu_form;
+    //fluent formula in number form
+    FluentFormula* fluform;
 
-	//BForm
-	// B(i,φ): where φ is a belief formula
-	BFNode* bfnode1;
-
-
-	//propForm
-	//a formula of the form φ1 ∨ φ2, φ1 ∧ φ2, φ1 ⇒ φ2, or ¬φ1 where φ1, φ2 are belief formulae
-	// use BFNode bfnode1;
-	BFNode* bfnode2;
-	BFOperator bfOperator;
+    //BForm
+    // B(i,φ): where φ is a belief formula
+    BFNode* bfnode1;
 
 
-	//EForm or CForm
-	//a formula of the form E(α,φ) or C(α,φ): where φ is a belief formula and ∅≠ α⊆AG;  E(α,φ)/C(α,φ) are group formulae
-	// use BFNode bfnode1;
-	StringList groupAgent;
-	//groupAgent in number form
-	Agents agents;
+    //propForm
+    //a formula of the form φ1 ∨ φ2, φ1 ∧ φ2, φ1 ⇒ φ2, or ¬φ1 where φ1, φ2 are belief formulae
+    // use BFNode bfnode1;
+    BFNode* bfnode2;
+    BFOperator bfOperator;
 
 
-	void set_flu(FluentFormula* in) {
-		fluform = in;
-	}
+    //EForm or CForm
+    //a formula of the form E(α,φ) or C(α,φ): where φ is a belief formula and ∅≠ α⊆AG;  E(α,φ)/C(α,φ) are group formulae
+    // use BFNode bfnode1;
+    StringList groupAgent;
+    //groupAgent in number form
+    Agents agents;
 
-	void print() const {
+    void set_flu(FluentFormula* in) {
+        fluform = in;
+    }
 
-		bool first = true;
-		StringList::const_iterator it;
-		StringList2::const_iterator it2;
-		bool first2 = true;
-		cout << "(";
-		switch (node_type) {
+    void print() const {
 
-		case fluForm:
-			for (it2 = flu_form.begin(); it2 != flu_form.end(); it2++) {
-				if (!first2)
-					cout << " | ";
-				first2 = false;
-				first = true;
-				cout << "(";
-				for (it = it2->begin(); it != it2->end(); it++) {
-					if (!first)
-						cout << " AND ";
-					first = false;
-					cout << *it;
-				}
-				cout << ")";
-			}
-			cout << ")";
-			break;
+        bool first = true;
+        StringList::const_iterator it;
+        StringList2::const_iterator it2;
+        bool first2 = true;
+        cout << "(";
+        switch (node_type) {
 
-		case BForm:
-			cout << "B(" << agentPro << ",";
-			bfnode1->print();
-			cout << ")";
-			cout << ")";
-			break;
+            case fluForm:
+                for (it2 = flu_form.begin(); it2 != flu_form.end(); it2++) {
+                    if (!first2)
+                        cout << " | ";
+                    first2 = false;
+                    first = true;
+                    cout << "(";
+                    for (it = it2->begin(); it != it2->end(); it++) {
+                        if (!first)
+                            cout << " AND ";
+                        first = false;
+                        cout << *it;
+                    }
+                    cout << ")";
+                }
+                cout << ")";
+                break;
 
-		case CForm:
-			cout << "C(";
-			for (it = groupAgent.begin(); it != groupAgent.end(); it++) {
-				if (!first)
-					cout << ",";
-				first = false;
-				cout << *it;
-			}
-			cout << ",";
-			bfnode1->print();
-			cout << ")";
-			cout << ")";
-			break;
+            case BForm:
+                cout << "B(" << agentPro << ",";
+                bfnode1->print();
+                cout << ")";
+                cout << ")";
+                break;
 
-		case EForm:
-			cout << "E(";
-			for (it = groupAgent.begin(); it != groupAgent.end(); it++) {
-				if (!first)
-					cout << ",";
-				first = false;
-				cout << *it;
-			}
-			cout << ",";
-			bfnode1->print();
-			cout << ")";
-			cout << ")";
-			break;
+            case CForm:
+                cout << "C(";
+                for (it = groupAgent.begin(); it != groupAgent.end(); it++) {
+                    if (!first)
+                        cout << ",";
+                    first = false;
+                    cout << *it;
+                }
+                cout << ",";
+                bfnode1->print();
+                cout << ")";
+                cout << ")";
+                break;
 
-		case propForm:
-			if (bfOperator == BFNOT)
-				cout << " NOT ";
-			else if (bfOperator == NONE)
-				cout << "(";
-			bfnode1->print();
-			if (bfOperator == NONE)
-				cout << ")";
-			if (bfOperator == BFAND)
-				cout << " AND ";
-			else if (bfOperator == BFOR)
-				cout << " OR ";
-			if (bfnode2 != NULL)
-				bfnode2->print();
-			cout << ")";
-			break;
+            case EForm:
+                cout << "E(";
+                for (it = groupAgent.begin(); it != groupAgent.end(); it++) {
+                    if (!first)
+                        cout << ",";
+                    first = false;
+                    cout << *it;
+                }
+                cout << ",";
+                bfnode1->print();
+                cout << ")";
+                cout << ")";
+                break;
 
-		case BFEmpty: /* static */
-			break;
+            case propForm:
+                if (bfOperator == BFNOT)
+                    cout << " NOT ";
+                else if (bfOperator == NONE)
+                    cout << "(";
+                bfnode1->print();
+                if (bfOperator == NONE)
+                    cout << ")";
+                if (bfOperator == BFAND)
+                    cout << " AND ";
+                else if (bfOperator == BFOR)
+                    cout << " OR ";
+                if (bfnode2 != NULL)
+                    bfnode2->print();
+                cout << ")";
+                break;
 
-		default: /* static */
-			break;
+            case BFEmpty: /* static */
+                break;
 
-		} //switch
-	}; // print
-	
-	void print(map<string, Fluent> ff_map, map<string, Agent> a_map) const {
+            default: /* static */
+                break;
 
-		bool first = true;
-		StringList::const_iterator it;
-		StringList2::const_iterator it2;
-		bool first2 = true;
-		cout << "(";
-		switch (node_type) {
+        } //switch
+    }; // print
 
-		case fluForm:
-			for (it2 = flu_form.begin(); it2 != flu_form.end(); it2++) {
-				if (!first2)
-					cout << " | ";
-				first2 = false;
-				first = true;
-				cout << "(";
-				for (it = it2->begin(); it != it2->end(); it++) {
-					if (!first)
-						cout << " AND ";
-					first = false;
-					cout << ground_lit(*it, ff_map);
-				}
-				cout << ")";
-			}
-			cout << ")";
-			break;
+    void print(map<string, Fluent> ff_map, map<string, Agent> a_map) const {
 
-		case BForm:
-			cout << "B(" << ground_agent(agentPro, a_map) << ",";
-			bfnode1->print(ff_map, a_map);
-			cout << ")";
-			cout << ")";
-			break;
+        bool first = true;
+        StringList::const_iterator it;
+        StringList2::const_iterator it2;
+        bool first2 = true;
+        cout << "(";
+        switch (node_type) {
 
-		case CForm:
-			cout << "C(";
-			for (it = groupAgent.begin(); it != groupAgent.end(); it++) {
-				if (!first)
-					cout << ",";
-				first = false;
-				cout << ground_agent(*it, a_map);
-			}
-			cout << ",";
-			bfnode1->print(ff_map, a_map);
-			cout << ")";
-			cout << ")";
-			break;
+            case fluForm:
+                for (it2 = flu_form.begin(); it2 != flu_form.end(); it2++) {
+                    if (!first2)
+                        cout << " | ";
+                    first2 = false;
+                    first = true;
+                    cout << "(";
+                    for (it = it2->begin(); it != it2->end(); it++) {
+                        if (!first)
+                            cout << " AND ";
+                        first = false;
+                        cout << ground_lit(*it, ff_map);
+                    }
+                    cout << ")";
+                }
+                cout << ")";
+                break;
 
-		case EForm:
-			cout << "E(";
-			for (it = groupAgent.begin(); it != groupAgent.end(); it++) {
-				if (!first)
-					cout << ",";
-				first = false;
-				cout << ground_agent(*it, a_map);
-			}
-			cout << ",";
-			bfnode1->print(ff_map, a_map);
-			cout << ")";
-			cout << ")";
-			break;
+            case BForm:
+                cout << "B(" << ground_agent(agentPro, a_map) << ",";
+                bfnode1->print(ff_map, a_map);
+                cout << ")";
+                cout << ")";
+                break;
 
-		case propForm:
-			if (bfOperator == BFNOT)
-				cout << " NOT ";
-			else if (bfOperator == NONE)
-				cout << "(";
-			bfnode1->print(ff_map, a_map);
-			if (bfOperator == NONE)
-				cout << ")";
+            case CForm:
+                cout << "C(";
+                for (it = groupAgent.begin(); it != groupAgent.end(); it++) {
+                    if (!first)
+                        cout << ",";
+                    first = false;
+                    cout << ground_agent(*it, a_map);
+                }
+                cout << ",";
+                bfnode1->print(ff_map, a_map);
+                cout << ")";
+                cout << ")";
+                break;
 
-			if (bfOperator == BFAND)
-				cout << " & ";
-			else if (bfOperator == BFOR)
-				cout << " | ";
-			if (bfnode2 != NULL)
-				bfnode2->print(ff_map, a_map);
-			cout << ")";
-			break;
+            case EForm:
+                cout << "E(";
+                for (it = groupAgent.begin(); it != groupAgent.end(); it++) {
+                    if (!first)
+                        cout << ",";
+                    first = false;
+                    cout << ground_agent(*it, a_map);
+                }
+                cout << ",";
+                bfnode1->print(ff_map, a_map);
+                cout << ")";
+                cout << ")";
+                break;
 
-		case BFEmpty: /* static */
-			break;
+            case propForm:
+                if (bfOperator == BFNOT)
+                    cout << " NOT ";
+                else if (bfOperator == NONE)
+                    cout << "(";
+                bfnode1->print(ff_map, a_map);
+                if (bfOperator == NONE)
+                    cout << ")";
 
-		default: /* static */
-			break;
+                if (bfOperator == BFAND)
+                    cout << " & ";
+                else if (bfOperator == BFOR)
+                    cout << " | ";
+                if (bfnode2 != NULL)
+                    bfnode2->print(ff_map, a_map);
+                cout << ")";
+                break;
 
-		} //switch
-	}; // print
+            case BFEmpty: /* static */
+                break;
 
-	Literal ground_lit(const string& x, map<string, Fluent> ff_map) const
-	{
-		map<string, Literal>::const_iterator p = ff_map.find(x);
+            default: /* static */
+                break;
 
-		if (p != ff_map.end()) {
-			return (p->second);
-		}
+        } //switch
+    }; // print
 
-		cout << "ERROR: Literal " << x << " is undeclared." << endl;
-		cout << "Check the fluent declaration." << endl << endl;
+    Literal ground_lit(const string& x, map<string, Fluent> ff_map) const {
+        map<string, Literal>::const_iterator p = ff_map.find(x);
 
-		exit(1);
-	}
-	
-	Agent ground_agent(const string& x, map<string, Agent> a_map) const
-	{
-		map<string, Literal>::const_iterator p = a_map.find(x);
+        if (p != ff_map.end()) {
+            return (p->second);
+        }
 
-		if (p != a_map.end()) {
-			return (p->second);
-		}
+        cout << "ERROR: Literal " << x << " is undeclared." << endl;
+        cout << "Check the fluent declaration." << endl << endl;
 
-		cout << "ERROR: Agent " << x << " is undeclared." << endl;
-		cout << "Check the agent declaration." << endl << endl;
+        exit(1);
+    }
 
-		exit(1);
-	}
+    Agent ground_agent(const string& x, map<string, Agent> a_map) const {
+        map<string, Literal>::const_iterator p = a_map.find(x);
+
+        if (p != a_map.end()) {
+            return (p->second);
+        }
+
+        cout << "ERROR: Agent " << x << " is undeclared." << endl;
+        cout << "Check the agent declaration." << endl << endl;
+
+        exit(1);
+    }
 }; //class
 typedef list<BFNode> Nodes;
 
-
 class Proposition {
 public:
-	PropositionType n_type;
-	string act_name;
-	StringList precond;
-	StringList effect;
-	string agentPro;
-	//string fluentPro;
-	StringList2 flu_form;
-	BFNode bel_form;
+    PropositionType n_type;
+    string act_name;
+    StringList precond;
+    StringList effect;
+    string agentPro;
+    //string fluentPro;
+    StringList2 flu_form;
+    BFNode bel_form;
+
+    const StringList* get_precondition() const {
+        return &precond;
+    };
+
+    const StringList* get_effect() const {
+        return &effect;
+    };
+
+    void print() const {
+        bool first = true;
+        bool first2 = true;
+        bool if_flu_form = false; //to stop “if” from printing too many times
+        StringList::const_iterator it;
+        StringList2::const_iterator it2;
+
+        switch (n_type) {
+            case DYNAMIC:
+                cout << act_name << " causes ";
+                break;
+            case EXECUTABILITY:
+                cout << "executable " << act_name << " if ";
+                bel_form.print();
+                break;
+            case IMPOSSIBILITY:
+                cout << "impossible " << act_name << " ";
+                break;
+            case DETERMINATION:
+                cout << act_name << " determines ";
+                break;
+            case ANNOUNCEMENT:
+                cout << act_name << " announces ";
+                break;
+            case OBSERVANCE:
+                cout << agentPro << " observes " << act_name;
+                break;
+            case AWARENESS:
+                cout << agentPro << " aware of " << act_name;
+                break;
+            default: /* static */
+                break;
+        }
 
 
-	const StringList* get_precondition() const {
-		return &precond;
-	};
+        for (it = effect.begin(); it != effect.end(); it++) {
+            if (!first)
+                cout << ",";
+            first = false;
+            cout << *it;
+        }
 
-	const StringList* get_effect() const {
-		return &effect;
-	};
-
-	void print() const {
-		bool first = true;
-		bool first2 = true;
-		bool if_flu_form = false;     //to stop “if” from printing too many times
-		StringList::const_iterator it;
-		StringList2::const_iterator it2;
-
-		switch (n_type) {
-		case DYNAMIC:
-			cout << act_name << " causes ";
-			break;
-		case EXECUTABILITY:
-			cout << "executable " << act_name << " if ";
-			bel_form.print();
-			break;
-		case IMPOSSIBILITY:
-			cout << "impossible " << act_name << " ";
-			break;
-		case DETERMINATION:
-			cout << act_name << " determines ";
-			break;
-		case ANNOUNCEMENT:
-			cout << act_name << " announces ";
-			break;
-		case OBSERVANCE:
-			cout << agentPro << " observes " << act_name;
-			break;
-		case AWARENESS:
-			cout << agentPro << " aware of " << act_name;
-			break;
-		default: /* static */
-			break;
-		}
+        first = true;
+        for (it = precond.begin(); it != precond.end(); it++) {
+            if (!first)
+                cout << ",";
+            else
+                cout << " if ";
+            first = false;
+            cout << *it;
+        }
 
 
-		for (it = effect.begin(); it != effect.end(); it++) {
-			if (!first)
-				cout << ",";
-			first = false;
-			cout << *it;
-		}
+        first2 = true;
+        for (it2 = flu_form.begin(); it2 != flu_form.end(); it2++) {
+            if ((n_type == AWARENESS || n_type == OBSERVANCE) && !if_flu_form) {
+                cout << " if ";
+                if_flu_form = true;
+            }
+            if (!first2)
+                cout << " | ";
+            first2 = false;
+            first = true;
+            cout << "(";
+            for (it = it2->begin(); it != it2->end(); it++) {
+                if (!first)
+                    cout << " AND ";
+                first = false;
+                cout << *it;
+            }
+            cout << ")";
+        }
 
-		first = true;
-		for (it = precond.begin(); it != precond.end(); it++) {
-			if (!first)
-				cout << ",";
-			else
-				cout << " if ";
-			first = false;
-			cout << *it;
-		}
+        if (bel_form.bfnode1 != NULL || n_type == DYNAMIC) {
+            cout << " if ";
+            bel_form.print();
+        }
+        cout << endl;
 
-
-		first2 = true;
-		for (it2 = flu_form.begin(); it2 != flu_form.end(); it2++) {
-			if ((n_type == AWARENESS || n_type == OBSERVANCE) && !if_flu_form) {
-				cout << " if ";
-				if_flu_form = true;
-			}
-			if (!first2)
-				cout << " | ";
-			first2 = false;
-			first = true;
-			cout << "(";
-			for (it = it2->begin(); it != it2->end(); it++) {
-				if (!first)
-					cout << " AND ";
-				first = false;
-				cout << *it;
-			}
-			cout << ")";
-		}
-
-		if (bel_form.bfnode1 != NULL || n_type == DYNAMIC) {
-			cout << " if ";
-			bel_form.print();
-		}
-		cout << endl;
-
-	};
+    };
 
 };
 typedef list<Proposition> PropositionList;
 
 class Fluents_BF {
 protected:
-	Literals l_head;
-	BFNode b_body;
+    Literals l_head;
+    BFNode b_body;
 public:
-	Fluents_BF();
-	~Fluents_BF();
+    Fluents_BF();
+    ~Fluents_BF();
 
-	void set_l_head(Literals bd);
-	void set_bn_body(const BFNode&);
+    void set_l_head(Literals bd);
+    void set_bn_body(const BFNode&);
 
-	const Literals* get_head() const;
-	const BFNode* get_body() const;
+    const Literals* get_head() const;
+    const BFNode* get_body() const;
 };
 typedef list<Fluents_BF> Fluents_BF_list;
 
 class Agent_FF {
 protected:
-	Agent a_head;
-	FluentFormula ff_body;
+    Agent a_head;
+    FluentFormula ff_body;
 public:
-	Agent_FF();
-	~Agent_FF();
+    Agent_FF();
+    ~Agent_FF();
 
-	void set_a_head(Agent bd);
-	void set_ff_body(FluentFormula);
+    void set_a_head(Agent bd);
+    void set_ff_body(FluentFormula);
 
-	Agent get_head() const;
-	FluentFormula get_body() const;
+    Agent get_head() const;
+    FluentFormula get_body() const;
 };
 typedef list<Agent_FF> Agent_FF_list;
 
 class InitRequire {
 public:
-	FluentFormula pointed; //for pointed state
-	FluentFormula musthave; //check for every state
-	Agent_FF_list correctintepret; //check for edges connecting states have a fluentformula
-	Agent_FF_list sameintepret; //check for edges connecting states have the same interpret on a fluentformula
+    FluentFormula pointed; //for pointed state
+    FluentFormula musthave; //check for every state
+    Agent_FF_list correctintepret; //check for edges connecting states have a fluentformula
+    Agent_FF_list sameintepret; //check for edges connecting states have the same interpret on a fluentformula
 
-	//void set_pointed(FluentFormula);
-	//void set_musthave(FluentFormula);
-	void add_correct(const Agent& ag, const FluentFormula& ff) {
-		Agent_FF af;
-		af.set_a_head(ag);
-		af.set_ff_body(ff);
-		correctintepret.push_back(af);
-	};
-	void add_same(const Agent& ag, const FluentFormula& ff) {
-		Agent_FF af;
-		af.set_a_head(ag);
-		af.set_ff_body(ff);
-		sameintepret.push_back(af);
-	};
+    //void set_pointed(FluentFormula);
+    //void set_musthave(FluentFormula);
 
-	//const FluentFormula get_pointed() const;
-	//const FluentFormula get_musthave() const;
-	//const Agent_FF_list get_correct() const;
-	//const Agent_FF_list get_same() const;
+    void add_correct(const Agent& ag, const FluentFormula& ff) {
+        Agent_FF af;
+        af.set_a_head(ag);
+        af.set_ff_body(ff);
+        correctintepret.push_back(af);
+    };
+
+    void add_same(const Agent& ag, const FluentFormula& ff) {
+        Agent_FF af;
+        af.set_a_head(ag);
+        af.set_ff_body(ff);
+        sameintepret.push_back(af);
+    };
+
+    //const FluentFormula get_pointed() const;
+    //const FluentFormula get_musthave() const;
+    //const Agent_FF_list get_correct() const;
+    //const Agent_FF_list get_same() const;
 };
 
 #endif

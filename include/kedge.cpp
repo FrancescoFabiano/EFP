@@ -4,77 +4,85 @@
 
 /*********************************************************************
  Kedge implementation
-**********************************************************************/
+ **********************************************************************/
 
-Kedge::Kedge()
+Kedge::Kedge () {
+ }
+
+Kedge::Kedge (Kedge* e)
 {
-
+  from = e->get_from ();
+  to = e->get_to ();
+  label = e->get_label ();
+  id = e->get_id ();
 }
 
-Kedge::Kedge(Kedge* e)
-{
-	from = e->get_from();
-	to = e->get_to();
-	label = e->get_label();
-	id = e->get_id();
-}
-Kedge::~Kedge()
-{
+Kedge::~Kedge () {
+ }
 
+int
+Kedge::get_from ()
+{
+  return from;
 }
 
-int Kedge::get_from()
+int
+Kedge::get_to ()
 {
-	return from;
+  return to;
 }
 
-int Kedge::get_to()
+Agent
+Kedge::get_label ()
 {
-	return to;
+  return label;
 }
 
-Agent Kedge::get_label()
+int
+Kedge::get_id ()
 {
-	return label;
+  return id;
 }
 
-int Kedge::get_id()
+bool
+Kedge::get_exist ()
 {
-	return id;
+  return exists;
 }
 
-bool Kedge::get_exist()
+void
+Kedge::set_from (int ks)
 {
-	return exists;
+  from = ks;
 }
 
-void Kedge::set_from(int ks)
+void
+Kedge::set_to (int ks)
 {
-	from = ks;
+  to = ks;
 }
 
-void Kedge::set_to(int ks)
+void
+Kedge::set_label (Agent agent)
 {
-	to = ks;
+  label = agent;
 }
 
-void Kedge::set_label(Agent agent)
+void
+Kedge::set_id (int ident)
 {
-	label = agent;
+  id = ident;
 }
 
-void Kedge::set_id(int ident)
+void
+Kedge::set_exist (bool ex)
 {
-	id = ident;
+  exists = ex;
 }
 
-void Kedge::set_exist(bool ex)
+void
+Kedge::print_info ()
 {
-	exists = ex;
-}
-
-void Kedge::print_info()
-{
-	cout << "edge id " << id << " label: " << label << " from: " << from << " to " << to << endl;	
+  cout << "edge id " << id << " label: " << label << " from: " << from << " to " << to << endl;
 }
 
