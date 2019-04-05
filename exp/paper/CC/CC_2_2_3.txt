@@ -98,7 +98,7 @@ b observes tell_b_b2_1;
 
 executable tell_b_b2_3 if B(b, at_b2_3);
 tell_b_b2_3 announces at_b2_3;
-a observes tell_b_b2_3;
+a observes tell_b_b2_3 if at_a_1;
 b observes tell_b_b2_3;
 
 

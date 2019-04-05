@@ -1,134 +1,101 @@
-/* main.cc */
+/* 
+ * File:   main.cpp
+ * Author: Francesco
+ *
+ * Created on April 1, 2019, 1:18 PM
+ */
 
-#include "../include/reader.h"
-#include "../include/timer.h"
-#include "../include/planner.h"
-#include "../include/kstate.h"
-#include "../include/kripke.h"
+#include <iostream>
 #include <stdio.h>
 #include <string.h>
+#include "../include/utilities/reader.h"
+#include "../include/utilities/domain.h"
 
 #define VERSION "2.0"
-#define DEBUG
 
-// functions
-void print_usage (char*);
+//@TODO: Understand this, why out of main?
+reader domain_reader;
 
-Reader reader;
-Timer timer;
-Kripke test;
 
-int
-main (int argc, char **argv)
+void print_usage(char* prog_name)
 {
-  int i;
-  Planner planner (&reader, &timer);
+	std::cout << "USAGE:" << std::endl;
+	std::cout << "  " << prog_name << " input_domain [options]" << std::endl << std::endl;
+	std::cout << "OPTIONS:" << std::endl;
+	std::cout << " -spg" << std::endl;
+	std::cout << "     Find the plan using the sum planning graph heuristic." << std::endl;
+	std::cout << " -mpg" << std::endl;
+	std::cout << "     Find the plan using the max planning graph heuristic." << std::endl;
+	std::cout << "  -e action1 action2 action3 ..." << std::endl;
+	std::cout << "     Perform a sequence of actions and print out" << std::endl;
+	std::cout << "     results step by step. The planner does not" << std::endl;
+	std::cout << "     search for a plan." << std::endl << std::endl;
+	std::cout << "EXAMPLES:" << std::endl;
+	std::cout << "  " << prog_name << " ex.al" << std::endl;
+	std::cout << "     Find a conformant plan for ex.al. The system will" << std::endl;
+	std::cout << "     automatically detect necessary fluents to be considered." << std::endl;
+	std::cout << "  " << prog_name << " ex.al -e \"move(2,table)\" \"move(1,2)\" -p" << std::endl;
+	std::cout << "     Execute the plan [move(2,table);move(1,2)]." << std::endl;
+	std::cout << "     The possible world semantics is used." << std::endl << std::endl;
 
-  cout << "EFP version " << VERSION <<
-          " - Built date: " << BUILT_DATE << endl;
-
-  if (argc < 2)
-    print_usage (argv[0]);
-
-  i = 2;
-  while (i < argc)
-    {
-      if (strcmp (argv[i], "-pc") == 0)
-        {
-          planner.m_semantics = PC;
-        }
-      else if (strcmp (argv[i], "-debug") == 0)
-        {
-          cout << " debug is on " << endl;
-          planner.debug = true;
-        }
-      else if (strcmp (argv[i], "-mpg") == 0)
-        {
-          cout << " search with planning graph heuristic " << endl;
-          planner.m_heuristic = PLANNINGGRAPH;
-          planner.useHeuristic = true;
-        }
-      else if (strcmp (argv[i], "-spg") == 0)
-        {
-          cout << " search with planning graph heuristic " << endl;
-          planner.m_heuristic = SUMPLANNINGGRAPH;
-          planner.useHeuristic = true;
-        }
-      else if (strcmp (argv[i], "-h") == 0)
-        {
-          cout << " search with heuristic " << endl;
-          planner.m_semantics = PH;
-        }
-      else if (strcmp (argv[i], "-p") == 0)
-        {
-          cout << " search with heuristic " << endl;
-          planner.m_series_kripkes = true;
-        }
-      else if (strcmp (argv[i], "-e") == 0)
-        {
-          planner.m_task = DOPLAN;
-
-          if (i == argc - 1)
-            print_usage (argv[0]);
-
-          i++;
-
-          while (i < argc && argv[i][0] != '-')
-            {
-              planner.m_plan.push_back (string (argv[i++]));
-            }
-        }
-      else if (strcmp (argv[i], "-p") == 0)
-        {
-          planner.m_detect_essential = false;
-        }
-      else if (strcmp (argv[i], "-o") == 0)
-        {
-          planner.m_output_decisive = true;
-        }
-      else
-        print_usage (argv[0]);
-      i++;
-    }
-
-  if (freopen (argv[1], "r", stdin) == NULL)
-    {
-      cerr << argv[0] << ": File " << argv[1] << " cannot be opened.\n";
-      exit (1);
-    }
-
-  timer.start (READ_TIMER);
-  reader.read ();
-  if (planner.debug) reader.print ();
-  timer.end (READ_TIMER);
-  planner.main ();
-
-  exit (0);
+	exit(1);
 }
 
-void
-print_usage (char* prog_name)
-{
-  cout << "USAGE:" << endl;
-  cout << "  " << prog_name << " input_domain [options]" << endl << endl;
-  cout << "OPTIONS:" << endl;
-  cout << "  -e action1 action2 action3 ..." << endl;
-  cout << "     Perform a sequence of actions and print out" << endl;
-  cout << "     results step by step. The planner does not" << endl;
-  cout << "     search for a plan." << endl << endl;
-  cout << "  -p" << endl;
-  cout << "     Force the planner to use the possible world semantics (CPA*)." << endl;
-  cout << "     This option should be used for testing purpose only." << endl;
-  cout << "  -o" << endl;
-  cout << "     Print out decisive sets. Effective only when option -p" << endl;
-  cout << "     is not specified." << endl;
-  cout << "EXAMPLES:" << endl;
-  cout << "  " << prog_name << " blw.al" << endl;
-  cout << "     Find a conformant plan for blw.al. The system will" << endl;
-  cout << "     automatically detect necessary fluents to be considered." << endl;
-  cout << "  " << prog_name << " blw.al -e \"move(2,table)\" \"move(1,2)\" -p" << endl;
-  cout << "     Execute the plan [move(2,table);move(1,2)]." << endl;
-  cout << "     The possible world semantics is used." << endl << endl;
+int main(int argc, char** argv)
+{	
+	bool debug = false;
+	
+	domain domain(&domain_reader);
+	
+	std::cout << "EFP version " << VERSION <<
+		" - Built date: " << BUILT_DATE << std::endl;
 
-  exit (1);
+	if (argc < 2)
+		print_usage(argv[0]);
+
+	int i = 2;
+	while (i < argc) {
+		if (strcmp(argv[i], "-debug") == 0) {
+			std::cout << "Debug is on" << std::endl;
+			debug = true;
+		}/* else if (strcmp(argv[i], "-mpg") == 0) {
+			std::cout << " search with max planning graph heuristic " << std::endl;
+			planner.m_heuristic = PLANNINGGRAPH;
+			planner.useHeuristic = true;
+		} else if (strcmp(argv[i], "-spg") == 0) {
+			std::cout << " search with sum planning graph heuristic " << std::endl;
+			planner.m_heuristic = SUMPLANNINGGRAPH;
+			planner.useHeuristic = true;
+		} else if (strcmp(argv[i], "-e") == 0) {
+			planner.m_task = DOPLAN;
+
+			if (i == argc - 1)
+				print_usage(argv[0]);
+			i++;
+
+			while (i < argc && argv[i][0] != '-') {
+				planner.m_plan.push_back(string(argv[i++]));
+			}
+		} else
+			print_usage(argv[0]);*/
+		i++;
+	}
+	if (freopen(argv[1], "r", stdin) == NULL) {
+		std::cerr << argv[0] << ": File " << argv[1] << " cannot be opened.\n";
+		exit(1);
+	}
+	//timer.start(READ_TIMER);
+	domain_reader.read();
+	if (debug){
+		domain_reader.print();
+	}
+	if(!domain.build(debug))
+	{
+		std::cerr << "Error in building the domain.";
+		exit(1);
+	}
+	//timer.end(READ_TIMER);
+	//planner.main();
+
+	exit(0);
 }

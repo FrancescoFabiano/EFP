@@ -1,31 +1,31 @@
 /* Parser for AL language */
 %{
-#include "../include/reader.h"
+#include "../include/utilities/reader.h"
 
 int yyerror(char *s);
 int yylex(void);
 
-string get_negation(const string*);
-bool is_consistent(StringList,StringList);
-//StringList2 get_negateFluentForm(StringList2);
-StringList2 negate_or(StringList);
-StringList2 negate_form(StringList2);
-StringList2 join_SL2(StringList2, StringList2);
-void printStringList(StringList);
-void printStringList2(StringList2);
+std::string get_negation(const std::string*);
+bool is_consistent(string_list,string_list);
+//string_list_list get_negateFluentForm(string_list_list);
+string_list_list negate_or(string_list);
+string_list_list negate_form(string_list_list);
+string_list_list join_SL2(string_list_list, string_list_list);
+void print_string_list(string_list);
+void print_string_list_list(string_list_list);
 
-extern Reader reader;
+extern reader domain_reader;
 
 %}
 
 %union{
-  string*	str_val;
-  StringList*  str_list; 
-  StringList2* str_list2;
-  Proposition* prop;
-  PropositionList* prop_list;
-  BFNode* bfnode;
-  Nodes* init_nodes;
+  std::string*	str_val;
+  string_list*  str_list; 
+  string_list_list* str_list2;
+  proposition* prop;
+  proposition_list* prop_list;
+  belief_formula* bf;
+  formula_list* init_nodes;
 }
 
 %start	input 
@@ -88,20 +88,20 @@ extern Reader reader;
 
 %type <str_list> if_part
 %type <str_list2> if_part_fluent
-%type <bfnode> if_part_bf
-%type <bfnode> init
+%type <bf> if_part_bf
+%type <bf> init
 %type <init_nodes> init_spec
-%type <bfnode> goal
+%type <bf> goal
 %type <init_nodes> goal_spec
 
 %type <str_list2> formula
-%type <bfnode> belief_formula
+%type <bf> belief_formula
 %type <str_list2> gd_formula
 
-%type <prop> static_law
+//%type <prop> static_law
 %type <prop> dynamic_law
 %type <prop> executability
-%type <prop> impossibility
+//%type <prop> impossibility
 %type <prop> proposition
 %type <prop> determine
 %type <prop> awareness
@@ -119,12 +119,12 @@ domain
 init_spec 
 goal_spec
  { 
-  reader.m_fluents = *$1;
-  reader.m_actions = *$2;
-  reader.m_agents = *$3;
-  reader.m_propositions = *$4;
-  reader.k_init = *$5;
-  reader.m_gd = *$6;
+  domain_reader.m_fluents = *$1;
+  domain_reader.m_actions = *$2;
+  domain_reader.m_agents = *$3;
+  domain_reader.m_propositions = *$4;
+  domain_reader.m_bf_initially = *$5;
+  domain_reader.m_bf_goal = *$6;
 }
 ;
 
@@ -161,7 +161,7 @@ param {
 |
 param_list COMMA param
 {
-  $$ = new string(*$1 + "," + *$3);
+  $$ = new std::string(*$1 + "," + *$3);
 };
 
 /* fluent & fluent list*/
@@ -178,13 +178,13 @@ id LEFT_PAREN param_list RIGHT_PAREN
 
 fluent_det_list:
 fluent {
-  $$ = new StringList;
+  $$ = new string_list;
   $$->insert(*$1);
 };
 
 fluent_list:
 fluent {
-  $$ = new StringList;
+  $$ = new string_list;
   $$->insert(*$1);
 }
 |
@@ -207,7 +207,7 @@ NEGATION fluent
 literal_list:
 literal
 {
-  $$ = new StringList;
+  $$ = new string_list;
   $$->insert(*$1);
 } 
 | 
@@ -218,9 +218,9 @@ literal_list COMMA literal {
 
 formula:
 literal {
-  StringList s1;
+  string_list s1;
 
-  $$ = new StringList2;
+  $$ = new string_list_list;
 
   s1.insert(*$1);
 
@@ -228,11 +228,11 @@ literal {
 }
 | formula COMMA formula
 {
-  StringList2::iterator it1;
-  StringList2::iterator it2;
-  StringList ns;
+  string_list_list::iterator it1;
+  string_list_list::iterator it2;
+  string_list ns;
 
-  $$ = new StringList2;
+  $$ = new string_list_list;
 
   for (it2 = $1->begin(); it2 != $1->end(); it2++) {
     for (it1 = $3->begin(); it1 != $3->end(); it1++){
@@ -262,7 +262,7 @@ FLUENT fluent_list SEMICOLON {
 fluent_decls:
 /* empty */
 {
-  $$ = new StringList;
+  $$ = new string_list;
 }
 |
 fluent_decls fluent_decl
@@ -275,16 +275,16 @@ fluent_decls fluent_decl
 /* action declaration */
 action:
 id {
-  $$ = new string(*$1);
+  $$ = new std::string(*$1);
 }
 |
 id LEFT_PAREN param_list RIGHT_PAREN {
-  $$ = new string(*$1 + "(" + *$3 + ")");
+  $$ = new std::string(*$1 + "(" + *$3 + ")");
 };
 
 action_list:
 action {
-  $$ = new StringList;
+  $$ = new string_list;
   $$->insert(*$1);
 }
 |
@@ -301,7 +301,7 @@ ACTION action_list SEMICOLON {
 action_decls:
 /* empty */
 {
-  $$ = new StringList;
+  $$ = new string_list;
 }
 |
 action_decls action_decl
@@ -313,16 +313,16 @@ action_decls action_decl
 /* agent declaration */
 agent:
 id {
-  $$ = new string(*$1);
+  $$ = new std::string(*$1);
 }
 |
 id LEFT_PAREN param_list RIGHT_PAREN {
-  $$ = new string(*$1 + "(" + *$3 + ")");
+  $$ = new std::string(*$1 + "(" + *$3 + ")");
 };
 
 agent_list:
 agent {
-  $$ = new StringList;
+  $$ = new string_list;
   $$->insert(*$1);
 }
 |
@@ -339,7 +339,7 @@ AGENT agent_list SEMICOLON {
 agent_decls:
 /* empty */
 {
-  $$ = new StringList;
+  $$ = new string_list;
 }
 |
 agent_decls agent_decl
@@ -353,7 +353,7 @@ agent_decls agent_decl
 if_part: 
 /* empty */
 {
-  $$ = new StringList;
+  $$ = new string_list;
 }
 |
 IF literal_list {
@@ -364,8 +364,8 @@ IF literal_list {
 if_part_bf:
 /* empty */
 {
-  $$ = new BFNode;
-  $$->node_type = BFEmpty;
+  $$ = new belief_formula;
+  $$->m_formula_type = EMPTY;
 }
 |
 IF belief_formula {
@@ -376,60 +376,60 @@ IF belief_formula {
 
 belief_formula:
 formula{  
-    $$ = new BFNode;
-    $$->node_type = fluForm;
-    $$->flu_form = *$1;
+    $$ = new belief_formula;
+    $$->m_formula_type = FLUENT_FORMULA;
+    $$->m_string_fluent_formula = *$1;
 }
 |
 B LEFT_PAREN agent COMMA belief_formula RIGHT_PAREN {
-   $$ = new BFNode;
-   $$->node_type = BForm;
-   $$->agentPro = *$3;
-   $$->bfnode1 = $5;
+   $$ = new belief_formula;
+   $$->m_formula_type = BELIEF_FORMULA;
+   $$->m_string_agent_op = *$3;
+   $$->m_bf1 = $5;
 }
 |
 belief_formula COMMA belief_formula {
-   $$ = new BFNode;
-   $$->node_type = propForm;
-   $$->bfnode1 = $1;
-   $$->bfnode2 = $3;
-   $$->bfOperator = BFAND;
+   $$ = new belief_formula;
+   $$->m_formula_type = PROPOSITIONAL_FORMULA;
+   $$->m_bf1 = $1;
+   $$->m_bf2 = $3;
+   $$->m_operator = BF_AND;
 }
 |
 belief_formula OR belief_formula {
-   $$ = new BFNode;
-   $$->node_type = propForm;
-   $$->bfnode1 = $1;
-   $$->bfnode2 = $3;
-   $$->bfOperator = BFOR;
+   $$ = new belief_formula;
+   $$->m_formula_type = PROPOSITIONAL_FORMULA;
+   $$->m_bf1 = $1;
+   $$->m_bf2 = $3;
+   $$->m_operator = BF_OR;
 }
 |
 LEFT_PAREN NEGATION belief_formula RIGHT_PAREN{
-   $$ = new BFNode;
-   $$->node_type = propForm;
-   $$->bfnode1 = $3;
-   $$->bfOperator = BFNOT;
+   $$ = new belief_formula;
+   $$->m_formula_type = PROPOSITIONAL_FORMULA;
+   $$->m_bf1 = $3;
+   $$->m_operator = BF_NOT;
 }
 |
 LEFT_PAREN belief_formula RIGHT_PAREN{
-    $$ = new BFNode;
-    $$->node_type = propForm;
-    $$->bfnode1 = $2;
-    $$->bfOperator = NONE;
+    $$ = new belief_formula;
+    $$->m_formula_type = PROPOSITIONAL_FORMULA;
+    $$->m_bf1 = $2;
+    $$->m_operator = BF_NONE;
 }
 |
 E LEFT_PAREN LEFT_BRAC agent_list RIGHT_BRAC COMMA belief_formula RIGHT_PAREN {
-   $$ = new BFNode;
-   $$->node_type = EForm;
-   $$->groupAgent = *$4;
-   $$->bfnode1 = $7;
+   $$ = new belief_formula;
+   $$->m_formula_type = E_FORMULA;
+   $$->m_string_group_agents = *$4;
+   $$->m_bf1 = $7;
 }
 |
 C LEFT_PAREN LEFT_BRAC agent_list RIGHT_BRAC COMMA belief_formula RIGHT_PAREN {
-   $$ = new BFNode;
-   $$->node_type = CForm;
-   $$->groupAgent = *$4;
-   $$->bfnode1 = $7;
+   $$ = new belief_formula;
+   $$->m_formula_type = C_FORMULA;
+   $$->m_string_group_agents = *$4;
+   $$->m_bf1 = $7;
 };
 
 
@@ -437,7 +437,7 @@ C LEFT_PAREN LEFT_BRAC agent_list RIGHT_BRAC COMMA belief_formula RIGHT_PAREN {
 if_part_fluent: 
 /* empty */
 {
-  $$ = new StringList2;
+  $$ = new string_list_list;
 }
 |
 IF formula {
@@ -450,95 +450,97 @@ IF formula {
 
 
 
-/* static law */
+/* static law
 static_law:
 literal_list if_part SEMICOLON
 {
-  $$ = new Proposition;
-  $$->n_type = STATIC;
-  $$->precond = *$2;
-  $$->effect = *$1;
-};
+  $$ = new proposition;
+  $$->m_type = STATIC;
+  $$->m_action_precondition = *$2;
+  $$->m_action_effect = *$1;
+};*/
 
 /* dynamic law */
 dynamic_law:
 action CAUSES literal_list if_part_bf SEMICOLON 
 {  
-  $$ = new Proposition;
-  $$->n_type = DYNAMIC;
-  $$->act_name = *$1;
-  $$->bel_form = *$4;
-  $$->effect = *$3;
+  $$ = new proposition;
+  $$->m_type = DYNAMIC;
+  $$->m_action_name = *$1;
+  $$->m_executability_conditions = *$4;
+  //@TODO:Effect_Conversion | previously   $$->m_action_effect = *$3;
+  $$->m_action_effect.insert(*$3);
 };
 
 /* executability condition */
 executability:
 EXECUTABLE action if_part_bf SEMICOLON
 {
-  $$ = new Proposition;
-  $$->n_type = EXECUTABILITY;
-  $$->act_name = *$2;
-  $$->bel_form = *$3;
+  $$ = new proposition;
+  $$->m_type = EXECUTABILITY;
+  $$->m_action_name = *$2;
+  $$->m_executability_conditions = *$3;
 };
 
 /* determines condition */
 determine:
 action DETERMINE fluent_det_list SEMICOLON
 {
-  $$ = new Proposition;
-  $$->n_type = DETERMINATION;
-  $$->act_name = *$1;
-  $$->effect = *$3; 
+  $$ = new proposition;
+  $$->m_type = DETERMINATION;
+  $$->m_action_name = *$1;
+  //@TODO:Effect_Conversion | previously   $$->m_action_effect = *$3;
+  $$->m_action_effect.insert(*$3); 
 };
 
 /* announcement condition */
 announcement:
 action ANNOUNCES formula SEMICOLON
 {
-  $$ = new Proposition;
-  $$->n_type = ANNOUNCEMENT;
-  $$->act_name = *$1;
-  $$->flu_form = *$3;
+  $$ = new proposition;
+  $$->m_type = ANNOUNCEMENT;
+  $$->m_action_name = *$1;
+  $$->m_action_effect = *$3;
 };
 
 /* awareness condition */
 awareness:
 agent AWAREOF action if_part_fluent SEMICOLON
 {
-  $$ = new Proposition;
-  $$->n_type = AWARENESS;
-  $$->act_name = *$3;
-  $$->agentPro = *$1;
-  $$->flu_form = *$4;
+  $$ = new proposition;
+  $$->m_type = AWARENESS;
+  $$->m_action_name = *$3;
+  $$->m_agent = *$1;
+  $$->m_observability_conditions = *$4;
 };
 
 /* observance condition */
 observance:
 agent OBSERVES action if_part_fluent SEMICOLON
 {
-  $$ = new Proposition;
-  $$->n_type = OBSERVANCE;
-  $$->act_name = *$3;				
-  $$->agentPro = *$1;
-  $$->flu_form = *$4;
+  $$ = new proposition;
+  $$->m_type = OBSERVANCE;
+  $$->m_action_name = *$3;				
+  $$->m_agent = *$1;
+  $$->m_observability_conditions = *$4;
 };
 
-/* imposibility condition */
+/* imposibility condition 
 impossibility:
 IMPOSSIBLE action if_part SEMICOLON
 {
-  $$ = new Proposition;
-  $$->n_type = IMPOSSIBILITY;
-  $$->act_name = *$2;
-  $$->precond = *$3;
+  $$ = new proposition;
+  $$->m_type = IMPOSSIBILITY;
+  $$->m_action_name = *$2;
+  $$->m_action_precondition = *$3;
 };
-
+*/
 /* proposition */
 proposition:
-static_law {
+/*static_law {
   $$ = $1;
 }
-|
+|*/
 dynamic_law
 {
   $$ = $1;
@@ -549,11 +551,11 @@ executability
   $$ = $1;
 }
 |
-impossibility
+/*impossibility
 {
   $$ = $1;
 }
-|
+|*/
 determine
 {
   $$ = $1;
@@ -579,7 +581,7 @@ awareness
 domain:
 /* empty */
 {
-  $$ = new PropositionList;
+  $$ = new proposition_list;
 }
 | domain proposition
 {
@@ -598,10 +600,10 @@ INIT belief_formula SEMICOLON
 init_spec:
 /* empty */
 {
-  $$ = new Nodes;
-  //$$->insert(bfnode());
-  //$$ = new StringList2;
-  //$$->insert(StringList());
+  $$ = new formula_list;
+  //$$->insert(bf());
+  //$$ = new string_list_list;
+  //$$->insert(string_list());
 }
 | init_spec init
 {
@@ -612,9 +614,9 @@ init_spec:
 /* goal */
 gd_formula:
 literal {
-  StringList s1;
+  string_list s1;
 
-  $$ = new StringList2;
+  $$ = new string_list_list;
 
   s1.insert(*$1);
   $$->insert(s1);
@@ -626,11 +628,11 @@ literal {
 }
 | 
 gd_formula OR gd_formula {
-  StringList2::iterator it1;
-  StringList2::iterator it2;
-  StringList ns;
+  string_list_list::iterator it1;
+  string_list_list::iterator it2;
+  string_list ns;
 
-  $$ = new StringList2;
+  $$ = new string_list_list;
 
   for (it2 = $1->begin(); it2 != $1->end(); it2++) {
     for (it1 = $3->begin(); it1 != $3->end(); it1++){
@@ -656,7 +658,7 @@ GOAL belief_formula SEMICOLON
 goal_spec:
 /* empty */
 {
-  $$ = new Nodes;
+  $$ = new formula_list;
 }
 | goal_spec goal
 {
@@ -665,26 +667,26 @@ goal_spec:
 };
 %%
 
-int yyerror(string s)
+int yyerror(std::string s)
 {
   extern int yylineno;	// defined and maintained in lex.c
   extern char *yytext;	// defined and maintained in lex.c
   
-  cerr << "ERROR: " << s << " at symbol \"" << yytext;
-  cerr << "\" on line " << yylineno << endl;
+  std::cerr << "ERROR: " << s << " at symbol \"" << yytext;
+  std::cerr << "\" on line " << yylineno << std::endl;
   exit(1);
   return 0;
 }
 
 int yyerror(char *s)
 {
-  return yyerror(string(s));
+  return yyerror(std::string(s));
 }
 
-bool is_consistent(StringList sl1, StringList sl2)
+bool is_consistent(string_list sl1, string_list sl2)
 {
-  StringList::const_iterator it;
-  string nl;
+  string_list::const_iterator it;
+  std::string nl;
 
   for (it = sl2.begin(); it != sl2.end(); it++) {
 	nl = get_negation(&(*it));
@@ -695,9 +697,9 @@ bool is_consistent(StringList sl1, StringList sl2)
   return true;
 }
 
-string get_negation(const string* s)
+std::string get_negation(const std::string* s)
 {
-  string ns;
+  std::string ns;
 
   if (s->substr(0,1) == NEGATION_SYMBOL) {
 	return s->substr(1);
@@ -707,15 +709,15 @@ string get_negation(const string* s)
 }
 
 /*
-StringList2 get_negateFluentForm(StringList2 input){
+string_list_list get_negateFluentForm(string_list_list input){
   
-  StringList2 separate;
-  StringList2 join;
-  StringList2::iterator it1;
-  StringList2::iterator it3;
-  StringList2 negation;
-  string temp;
-  StringList::const_iterator it2;
+  string_list_list separate;
+  string_list_list join;
+  string_list_list::iterator it1;
+  string_list_list::iterator it3;
+  string_list_list negation;
+  std::string temp;
+  string_list::const_iterator it2;
 
   for(it1 = input.begin(); it1 != input.end(); it1++){
      if(it1->begin() == it1->end())
@@ -727,7 +729,7 @@ StringList2 get_negateFluentForm(StringList2 input){
   //Separate elements in separate
      for(it1 = separate.begin(); it1 != separate.end(); it1++){
         temp = get_negation(&(*(it1->begin())));    //possible pointer problem
-        StringList tiep;
+        string_list tiep;
 	tiep.insert(temp);
 	negation.insert(tiep);
      }//for loop
@@ -739,7 +741,7 @@ StringList2 get_negateFluentForm(StringList2 input){
         for(it2 = it1->begin(); it2 != it1->end(); it2++)
         {
            temp = get_negation(&(*it2));    //possible pointer problem
-           StringList tiep;
+           string_list tiep;
            tiep.insert(temp);
            negation.insert(tiep);
 	}
@@ -751,41 +753,41 @@ StringList2 get_negateFluentForm(StringList2 input){
 //negate_or: input: String list = list of or. 
 //             output: Stringlist 2 = list of and of negation
 
-StringList2 negate_or(StringList input){
+string_list_list negate_or(string_list input){
    
-   StringList::iterator it;
-   StringList2 output;
-   string element;
+   string_list::iterator it;
+   string_list_list output;
+   std::string element;
    
    for(it = input.begin(); it != input.end(); it++){
-      StringList temp;
+      string_list temp;
       element = get_negation(&(*it));
       temp.insert(element);
       output.insert(temp);
    }
-   //printStringList2(output);
+   //print_string_list_list(output);
    return output;
 }
 
 
 // or_2_stringlist2
 
-//negate_and : input: stringlist2 = list of and of or
-//		negate_or(each member of input) = a stringlist 2
-//                -> n stringlist 2 -> stringlist 3
-//                output = first member stirnglist 3 or second member of stringlist 3
+//negate_and : input: std::stringlist2 = list of and of or
+//		negate_or(each member of input) = a std::stringlist 2
+//                -> n std::stringlist 2 -> std::stringlist 3
+//                output = first member stirnglist 3 or second member of std::stringlist 3
 
-StringList2 join_SL2(StringList2 input1, StringList2 input2){
+string_list_list join_SL2(string_list_list input1, string_list_list input2){
   
   if(input2.size() == 0){
      return input1;
   }
 
-  StringList2::iterator it1;
-  StringList2::iterator it2;
-  StringList ns;
+  string_list_list::iterator it1;
+  string_list_list::iterator it2;
+  string_list ns;
 
-  StringList2 output;
+  string_list_list output;
 
   for (it2 = input1.begin(); it2 != input1.end(); it2++) {
     for (it1 = input2.begin(); it1 != input2.end(); it1++){
@@ -801,19 +803,19 @@ StringList2 join_SL2(StringList2 input1, StringList2 input2){
    
 }
 
-StringList2 negate_form(StringList2 input){
+string_list_list negate_form(string_list_list input){
    
-  typedef set<StringList2> StringList3;
-  StringList3 list3;
-  StringList2::iterator it1;
-  StringList2::iterator it2;
-  StringList3::iterator it3;
-  StringList ns;
-  StringList2 temp;
+  typedef std::set<string_list_list> string_list3;
+  string_list3 list3;
+  string_list_list::iterator it1;
+  string_list_list::iterator it2;
+  string_list3::iterator it3;
+  string_list ns;
+  string_list_list temp;
 
-  StringList2 output;
+  string_list_list output;
 
-  //turn all the “or�? statements to “and�? statements
+  //turn all the “or�? statements to “and�? statements
    for(it1 = input.begin(); it1 != input.end(); it1++){
       temp = negate_or(*it1);
       list3.insert(temp);
@@ -829,24 +831,24 @@ StringList2 negate_form(StringList2 input){
    return output;
 }
 
-void printStringList(StringList in){
-	StringList::iterator it1;
-	cout << "[ " ;
+void print_string_list(string_list in){
+	string_list::iterator it1;
+	std::cout << "[ " ;
         for(it1 = in.begin();it1!=in.end();it1++){
-		cout << *it1 << " , ";   
+		std::cout << *it1 << " , ";   
 	}
-	cout << "] " ;
+	std::cout << "] " ;
 }
 
-void printStringList2(StringList2 in){
-	StringList2::iterator it1;
-	cout << "[ "; 
+void print_string_list_list(string_list_list in){
+	string_list_list::iterator it1;
+	std::cout << "[ "; 
         for(it1 = in.begin();it1!=in.end();it1++){
  		 
-		printStringList(*it1);
-		cout << " , ";   
+		print_string_list(*it1);
+		std::cout << " , ";   
 	}
-	cout << " ] " ;
+	std::cout << " ] " ;
 }
 
 //Planning as Logic

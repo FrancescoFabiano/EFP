@@ -10,11 +10,12 @@ class Planner;
 /***********************************************************************
  class: Action
  ************************************************************************/
-class KAction {
+class KAction
+{
 protected:
     const Planner* m_planner;
     string m_name; // action name
-    PropositionType m_type;
+    propositionType m_type;
     Nodes m_execs; // executability conditions
     Fluents_BF_list m_effects; // effects
     Agent_FF_list m_observes; // sensed fluent
@@ -25,20 +26,20 @@ protected:
 
 public:
     /* constructor & destructor */
-    KAction(const Planner* planner, const string& name, const PropositionType pt);
+    KAction(const Planner* planner, const string& name, const propositionType pt);
     ~KAction();
 
     /* get/set functions */
     string get_name() const;
     void set_name(const string& name);
-    void set_type(const PropositionType);
+    void set_type(const propositionType);
 
 
     const Nodes* get_execs() const;
     const Fluents_BF_list* get_effects() const;
     Agent_FF_list get_m_observes() const;
     Agent_FF_list get_m_awares() const;
-    const PropositionType get_type() const;
+    const propositionType get_type() const;
     const Literals get_sensedFluents() const;
     const list<FluentFormula> get_ann_ff() const;
 
@@ -55,6 +56,6 @@ public:
     void print() const;
 };
 
-typedef vector<KAction> KActionList;
+typedef std::vector<KAction> KActionList;
 
 #endif

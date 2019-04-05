@@ -1,7 +1,9 @@
 /* Scanner for AL language */
 
 %{
-#include "../include/define.h"
+#include "../include/utilities/define.h"
+#include "../include/utilities/proposition.h"
+#include "../include/utilities/belief_formula.h"
 #include "tok.h"
 
 int yyerror(char *s);

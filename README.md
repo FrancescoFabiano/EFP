@@ -7,7 +7,7 @@ Realize an Epistemic Forward Planner that bases its concept on different states 
 - [ ] *OBDDs*
 
 ## The situation:
-- We have PG-EFP, an epistemic forward planner based on Kripke structure that also uses epistemic planning ghraph
+- We have PG-EFP, an epistemic forward planner based on Kripke structure that also uses epistemic planning graph.
   
 ## Future works
 - Encode the concept of possibility;
@@ -26,6 +26,7 @@ Realize an Epistemic Forward Planner that bases its concept on different states 
 - static laws (the same as biased info?);
 - intial state;
 - false beliefs correction.
+
 
 - Lies and biased info;
 - ethic constraints.

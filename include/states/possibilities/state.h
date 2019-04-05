@@ -9,7 +9,8 @@ class Action;
 /***********************************************************************
  Types -- Domain Description
  ************************************************************************/
-class Effect {
+class Effect
+{
 protected:
     Literals m_head;
     Literals m_body;
@@ -31,7 +32,8 @@ typedef list<Literals> ExecList;
 typedef Effect StaticLaw;
 typedef list<StaticLaw> StaticLaws;
 
-class State {
+class State
+{
 public:
     Literals m_literals;
 protected:
@@ -64,21 +66,24 @@ public:
     bool satisfies(const Literals* x);
 };
 
-class StateComp {
+class StateComp
+{
 public:
 
-    int operator()(const State* s1, const State* s2) const {
+    int operator()(const State* s1, const State* s2) const
+    {
         return *s1 < *s2;
     }
 };
 
-typedef set<State*, StateComp> StateTable;
+typedef std::set<State*, StateComp> StateTable;
 
-class CState {
+class CState
+{
     friend class PriotizedCState;
     friend class CStateComp;
 public:
-    set<State*> m_states;
+    std::set<State*> m_states;
 protected:
     int m_hvalue; // heuristic value, -1 if not computed
     int m_plan_length; // length of the plan
@@ -118,25 +123,29 @@ public:
     void print_plan() const;
 };
 
-class CStateComp {
+class CStateComp
+{
 public:
 
-    int operator()(const CState* cs1, const CState* cs2) const {
+    int operator()(const CState* cs1, const CState* cs2) const
+    {
         return *cs1 < *cs2;
     }
 };
 
-typedef set<CState*, CStateComp> CStateTable;
+typedef std::set<CState*, CStateComp> CStateTable;
 
 // Friend class with function object for comparison of cnodes
 
-class PriotizedCState {
+class PriotizedCState
+{
 public:
 
-    int operator()(CState* cs1, CState* cs2) const {
+    int operator()(CState* cs1, CState* cs2) const
+    {
         return cs1->hvalue() < cs2->hvalue();
     }
 };
 
-typedef priority_queue<CState*, vector<CState*>, PriotizedCState> PriorityCStateQueue;
+typedef priority_queue<CState*, std::vector<CState*>, PriotizedCState> PriorityCStateQueue;
 #endif
