@@ -12,6 +12,12 @@
 #include "../interfaces/action.h"
 #include "grounder.h"
 
+enum domain_restriction
+{
+    S5, //Knowledge, S5 finitary
+    K45, //Belief
+    NONE, //sensing action (peek_a)
+};
 
 class domain
 {
@@ -27,21 +33,34 @@ private:
     formula_list m_intial_description;
     formula_list m_goal_description;
     
+    void build_agents(bool);
+    void build_fluents(bool);
+    void build_actions(bool);
+    void build_propositions();
+
+    
+    void build_initially(bool);
+       
 public:
     
-    //fluent_map m_fluents_map;
+    /*All the useful info of the domain are store here:
+     m_fluents -> all the fluents;
+     m_actions -> all the actions (with effects, conditions, obsv etc.);
+     m_agents -> all the agents.
+     */
     fluent_list m_fluents;
-    
-    //action_name_map m_actions_name_map;
     action_set m_actions;
-    
-    //agent_map m_agent_map;
     agent_set m_agents;
 
     
     domain(reader*);
+
     
-    bool build(bool);
+    bool build(bool, domain_restriction);
+    
+
+    
+
    
 
     //@TODO: Check if pointer is the best type

@@ -11,17 +11,23 @@ domain::domain(reader* reader)
 	m_reader = reader;
 }
 
-bool domain::build(bool debug)
+
+bool domain::build(bool debug, domain_restriction ini_restriction)
 {
-	int i;
 
-	fluent_map domain_fluent_map;
+	build_agents(debug);
+	build_fluents(debug);
+	build_actions(debug);
+
+	return true;
+}
+
+void domain::build_agents(bool debug)
+{
 	agent_map domain_agent_map;
-	action_name_map domain_action_name_map;
-
 	std::cout << "\nBuilding agent list..." << std::endl;
 	string_list::const_iterator it_agents;
-	i = 0;
+	int i = 0;
 	for (it_agents = m_reader->m_agents.begin(); it_agents != m_reader->m_agents.end(); it_agents++) {
 		domain_agent_map.insert(agent_map::value_type(*it_agents, i));
 		m_agents.insert(i++);
@@ -29,11 +35,15 @@ bool domain::build(bool debug)
 			std::cout << "Agent " << *it_agents << " is " << (i - 1) << std::endl;
 		}
 	}
+	m_grounder.set_agent_map(domain_agent_map);
+}
+void domain::build_fluents(bool debug)
+{
+	fluent_map domain_fluent_map;
 
-	//build fluent literals;
 	std::cout << "\nBuilding fluent literals..." << std::endl;
 	string_list::const_iterator it_fluents;
-	i = 0;
+	int i = 0;
 	for (it_fluents = m_reader->m_fluents.begin();
 		it_fluents != m_reader->m_fluents.end(); it_fluents++) {
 		domain_fluent_map.insert(fluent_map::value_type(*it_fluents, i));
@@ -46,13 +56,16 @@ bool domain::build(bool debug)
 		if (debug) {
 			std::cout << "Literal not " << *it_fluents << " is " << (i - 1) << std::endl;
 		}
-
 	}
+	m_grounder.set_fluent_map(domain_fluent_map);
+}
+void domain::build_actions(bool debug)
+{
 
-	// build action list literals;
+	action_name_map domain_action_name_map;
 	std::cout << "\nBuilding action list..." << std::endl;
 	string_list::const_iterator it_actions_name;
-	i = 0;
+	int i = 0;
 	for (it_actions_name = m_reader->m_actions.begin();
 		it_actions_name != m_reader->m_actions.end(); it_actions_name++) {
 		action tmp_action(*it_actions_name, i);
@@ -64,9 +77,23 @@ bool domain::build(bool debug)
 		}
 	}
 
-	m_grounder = grounder(domain_fluent_map, domain_agent_map, domain_action_name_map);
+	m_grounder.set_action_name_map(domain_action_name_map);
 
+	build_propositions();
 
+	if (debug) {
+		std::cout << "\nPrinting complete action list..." << std::endl;
+		action_set::const_iterator it_actions;
+		i = 0;
+		for (it_actions = m_actions.begin();
+			it_actions != m_actions.end(); it_actions++) {
+			it_actions->print(m_grounder);
+		}
+	}
+
+}
+void domain::build_propositions()
+{
 	//Adding propositions to actions list
 	std::cout << "\nAdding propositions to actions..." << std::endl;
 	proposition_list::const_iterator it_prop;
@@ -83,18 +110,8 @@ bool domain::build(bool debug)
 			m_actions.insert(tmp);
 		}
 	}
-	if (debug) {
-		std::cout << "\nPrinting complete action list..." << std::endl;
-		action_set::const_iterator it_actions;
-		i = 0;
-		for (it_actions = m_actions.begin();
-			it_actions != m_actions.end(); it_actions++) {
-			it_actions->print(m_grounder);
-		}
-	}
-
-	return true;
 }
+
 
 /*std::string domain::get_name();
 formula_list domain::get_initial_description();

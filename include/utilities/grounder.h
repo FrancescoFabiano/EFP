@@ -33,6 +33,10 @@ private:
     reverse_agent_map r_agent_map;
     reverse_action_name_map r_action_name_map;
     
+    bool m_reversed_fl = false;
+    bool m_reversed_ag = false;
+    bool m_reversed_ac = false;
+    
     void reverse();
     
     void create_reverse_fl(const fluent_map&);

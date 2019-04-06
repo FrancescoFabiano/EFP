@@ -18,7 +18,7 @@ grounder::grounder(fluent_map fluent_map, agent_map agent_map, action_name_map a
 	set_action_name_map(action_name_map);
 
 	//@TODO:Remove for efficency; just for printing reasons (pass debug maybe)
-	reverse();
+	//reverse();
 
 }
 
@@ -34,6 +34,8 @@ void grounder::create_reverse_fl(const fluent_map& to_revert)
 	fluent_map::iterator it;
 	for (it = m_fluent_map.begin(); it != m_fluent_map.end(); it++)
 		r_fluent_map[it->second] = it->first;
+
+	m_reversed_fl = true;
 }
 
 void grounder::create_reverse_ag(const agent_map& to_revert)
@@ -41,6 +43,8 @@ void grounder::create_reverse_ag(const agent_map& to_revert)
 	agent_map::iterator it;
 	for (it = m_agent_map.begin(); it != m_agent_map.end(); it++)
 		r_agent_map[it->second] = it->first;
+
+	m_reversed_ag = true;
 }
 
 void grounder::create_reverse_ac(const action_name_map& to_revert)
@@ -48,21 +52,34 @@ void grounder::create_reverse_ac(const action_name_map& to_revert)
 	action_name_map::iterator it;
 	for (it = m_action_name_map.begin(); it != m_action_name_map.end(); it++)
 		r_action_name_map[it->second] = it->first;
+
+	m_reversed_ac = true;
+
 }
 
 void grounder::set_fluent_map(fluent_map fluent_map)
 {
+
 	m_fluent_map = fluent_map;
+	//@TODO:Remove for efficency; just for printing reasons (pass debug maybe)
+	if (!m_reversed_fl)
+		create_reverse_fl(m_fluent_map);
 }
 
 void grounder::set_agent_map(agent_map agent_map)
 {
 	m_agent_map = agent_map;
+	//@TODO:Remove for efficency; just for printing reasons (pass debug maybe)
+	if (!m_reversed_ag)
+		create_reverse_ag(m_agent_map);
 }
 
 void grounder::set_action_name_map(action_name_map action_name_map)
 {
 	m_action_name_map = action_name_map;
+	//@TODO:Remove for efficency; just for printing reasons (pass debug maybe)
+	if (!m_reversed_ac)
+		create_reverse_ac(m_action_name_map);
 }
 
 fluent grounder::ground_fluent(const std::string& x) const
@@ -140,6 +157,7 @@ std::string grounder::deground_fluent(fluent x) const
 
 string_list grounder::deground_fluent(const fluent_list& x) const
 {
+
 	fluent_list::iterator it;
 	string_list y;
 
