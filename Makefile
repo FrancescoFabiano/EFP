@@ -1,7 +1,7 @@
 # Makefile
 OBJS	=	$(BUILD_DIR)/bison.o $(BUILD_DIR)/lex.o $(BUILD_DIR)/main.o \
 			$(BUILD_DIR)/belief_formula.o $(BUILD_DIR)/proposition.o $(BUILD_DIR)/domain.o \
-			$(BUILD_DIR)/grounder.o \
+			$(BUILD_DIR)/grounder.o $(BUILD_DIR)/printer.o \
 			$(BUILD_DIR)/action.o \
 			$(BUILD_DIR)/reader.o
 
@@ -69,27 +69,33 @@ $(BUILD_DIR)/action.o: $(INCLUDE_DIR)/$(INTERFACES_DIR)/action.cpp $(INCLUDE_DIR
 		
 		
 #-----------------------------------INCLUDE FILES-----------------------------------#
+$(BUILD_DIR)/printer.o: $(INCLUDE_DIR)/$(UTILITIES_DIR)/printer.cpp $(INCLUDE_DIR)/$(UTILITIES_DIR)/printer.h \
+						 $(INCLUDE_DIR)/$(UTILITIES_DIR)/define.h
+		$(dir_guard)
+		$(CC) $(CFLAGS) -c $(INCLUDE_DIR)/$(UTILITIES_DIR)/printer.cpp -o $(BUILD_DIR)/printer.o
+
+
 $(BUILD_DIR)/grounder.o: $(INCLUDE_DIR)/$(UTILITIES_DIR)/grounder.cpp $(INCLUDE_DIR)/$(UTILITIES_DIR)/grounder.h \
 #						 $(INCLUDE_DIR)/$(INTERFACES_DIR)/action.h \
-						 $(INCLUDE_DIR)/$(UTILITIES_DIR)/define.h 
+						 $(INCLUDE_DIR)/$(UTILITIES_DIR)/define.h $(INCLUDE_DIR)/$(UTILITIES_DIR)/printer.h
 		$(dir_guard)
 		$(CC) $(CFLAGS) -c $(INCLUDE_DIR)/$(UTILITIES_DIR)/grounder.cpp -o $(BUILD_DIR)/grounder.o
 
 $(BUILD_DIR)/proposition.o: $(INCLUDE_DIR)/$(UTILITIES_DIR)/proposition.cpp $(INCLUDE_DIR)/$(UTILITIES_DIR)/proposition.h \
 							$(INCLUDE_DIR)/$(UTILITIES_DIR)/belief_formula.h \
-							$(INCLUDE_DIR)/$(UTILITIES_DIR)/define.h
+							$(INCLUDE_DIR)/$(UTILITIES_DIR)/define.h $(INCLUDE_DIR)/$(UTILITIES_DIR)/printer.h
 		$(dir_guard)
 		$(CC) $(CFLAGS) -c $(INCLUDE_DIR)/$(UTILITIES_DIR)/proposition.cpp -o $(BUILD_DIR)/proposition.o
 		
 $(BUILD_DIR)/belief_formula.o: $(INCLUDE_DIR)/$(UTILITIES_DIR)/belief_formula.cpp $(INCLUDE_DIR)/$(UTILITIES_DIR)/belief_formula.h \
 							   $(INCLUDE_DIR)/$(UTILITIES_DIR)/grounder.h \
-							   $(INCLUDE_DIR)/$(UTILITIES_DIR)/define.h
+							   $(INCLUDE_DIR)/$(UTILITIES_DIR)/define.h $(INCLUDE_DIR)/$(UTILITIES_DIR)/printer.h
 		$(dir_guard)
 		$(CC) $(CFLAGS) -c $(INCLUDE_DIR)/$(UTILITIES_DIR)/belief_formula.cpp -o $(BUILD_DIR)/belief_formula.o
 
 $(BUILD_DIR)/reader.o: $(INCLUDE_DIR)/$(UTILITIES_DIR)/reader.cpp $(INCLUDE_DIR)/$(UTILITIES_DIR)/reader.h \
 					   $(INCLUDE_DIR)/$(UTILITIES_DIR)/belief_formula.h  \
-					   $(INCLUDE_DIR)/$(UTILITIES_DIR)/define.h
+					   $(INCLUDE_DIR)/$(UTILITIES_DIR)/define.h $(INCLUDE_DIR)/$(UTILITIES_DIR)/printer.h
 		$(dir_guard)
 		$(CC) $(CFLAGS) -c $(INCLUDE_DIR)/$(UTILITIES_DIR)/reader.cpp -o $(BUILD_DIR)/reader.o
 		

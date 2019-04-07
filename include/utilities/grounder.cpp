@@ -6,6 +6,7 @@
  */
 
 #include "grounder.h"
+#include "printer.h"
 
 grounder::grounder()
 {
@@ -207,41 +208,10 @@ std::string grounder::deground_action(action_id x) const
 
 void grounder::print_ff(const fluent_list& to_print) const
 {
-	print_ff(deground_fluent(to_print));
-}
-
-void grounder::print_ff(const string_list& to_print) const
-{
-
-	bool first_print = true;
-
-	string_list::const_iterator it_sl;
-	for (it_sl = to_print.begin(); it_sl != to_print.end(); it_sl++) {
-		if (!first_print) {
-			std::cout << ",";
-			first_print = false;
-		}
-		std::cout << *it_sl;
-	}
+	printer::print_list(deground_fluent(to_print));
 }
 
 void grounder::print_ff(const fluent_formula& to_print) const
 {
-	print_ff(deground_fluent(to_print));
-}
-
-void grounder::print_ff(const string_list_list& to_print) const
-{
-
-	bool first_print = true;
-	string_list_list::const_iterator it_sll;
-
-	for (it_sll = to_print.begin(); it_sll != to_print.end(); it_sll++) {
-		if (!first_print) {
-			std::cout << "AND";
-			first_print = false;
-		}
-		print_ff(*it_sll);
-
-	}
+	printer::print_list(deground_fluent(to_print));
 }

@@ -133,6 +133,7 @@ void action::add_proposition(const proposition & prop, const grounder& grounder)
 
 	case EXECUTABILITY:
 		set_type(NOTSET);
+		//@TODO:What if there is more than one? Then CNF or DNF
 		add_executability(prop.m_executability_conditions);
 		break;
 	default:
@@ -181,7 +182,7 @@ void action::print(const grounder& grounder) const
 	formula_list::const_iterator it_fl;
 	for (it_fl = m_executability.begin(); it_fl != m_executability.end(); ++it_fl) {
 		std::cout << " | ";
-		it_fl->print(grounder);
+		it_fl->print();
 		//std::cout << std::endl;
 	}
 

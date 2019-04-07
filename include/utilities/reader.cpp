@@ -10,6 +10,7 @@
 #include <algorithm>    // for set_intersection, set_union
 #include <functional>   // for less
 #include "reader.h"
+#include "printer.h"
 
 
 //prototype of bison-generated parser function
@@ -54,24 +55,23 @@ int reader::read()
 
 void reader::print() const
 {
-	string_list::const_iterator it;
-	string_list_list::const_iterator it2;
-	proposition_list::const_iterator it3;
-	bool first;
-	unsigned int i;
+	
+	proposition_list::const_iterator it_porplist;
 
 	std::cout << std::endl;
 	std::cout << std::endl;
 
 	std::cout << "AGENT DECLARATION" << std::endl;
 	std::cout << "---------------------------" << std::endl;
-	first = true;
+	/*first = true;
 	for (it = m_agents.begin(); it != m_agents.end(); it++) {
 		if (!first)
 			std::cout << ",";
 		first = false;
 		std::cout << *it;
-	}
+	}*/
+	printer::print_list(m_agents);
+
 	//std::cout << " DONE PRINTING AGENTS" << std::endl;
 	std::cout << std::endl;
 	std::cout << std::endl;
@@ -79,33 +79,32 @@ void reader::print() const
 
 	std::cout << "FLUENT DECLARATION" << std::endl;
 	std::cout << "----------------------------" << std::endl;
-	first = true;
+	/*first = true;
 	for (it = m_fluents.begin(); it != m_fluents.end(); it++) {
 		if (!first)
 			std::cout << ",";
 		first = false;
 		std::cout << *it;
-	}
+	}*/
+	printer::print_list(m_fluents);
 
 	std::cout << std::endl;
 	std::cout << std::endl;
 
 	std::cout << "PROPOSITIONS" << std::endl;
 	std::cout << "----------------------------" << std::endl;
-	for (it3 = m_propositions.begin(); it3 != m_propositions.end(); it3++) {
-		it3->print();
+	for (it_porplist = m_propositions.begin(); it_porplist != m_propositions.end(); it_porplist++) {
+		it_porplist->print();
 		std::cout << std::endl;
 	}
 
 	// print init cstate
-	formula_list::const_iterator it5;
+	formula_list::const_iterator it_formlist;
 	std::cout << "INIT" << std::endl;
 	std::cout << "----------------------------" << std::endl;
 
-	for (it5 = m_bf_initially.begin(); it5 != m_bf_initially.end(); it5++) {
-		it5->print();
-
-
+	for (it_formlist = m_bf_initially.begin(); it_formlist != m_bf_initially.end(); it_formlist++) {
+		it_formlist->print();
 		std::cout << std::endl;
 	}
 
@@ -114,8 +113,8 @@ void reader::print() const
 	// print goal state
 	std::cout << "GOAL " << std::endl;
 	std::cout << "----------------------------" << std::endl;
-	for (it5 = m_bf_goal.begin(); it5 != m_bf_goal.end(); it5++) {
-		it5->print();
+	for (it_formlist = m_bf_goal.begin(); it_formlist != m_bf_goal.end(); it_formlist++) {
+		it_formlist->print();
 		std::cout << std::endl;
 	}
 
@@ -131,10 +130,12 @@ void reader::print() const
 	//std::cout << "\tAnnouncement actions: " << ann_actions.size() << std::endl;	//Ben
 	std::cout << "Total fluents: " << m_fluents.size() << std::endl;
 	//std::cout << "Unknown fluents: " << std::endl;
-	i = 0;
-	for (it2 = m_initially.begin(); it2 != m_initially.end(); it2++) {
+	unsigned int i = 0;
+	string_list_list::const_iterator it_fll;
+	
+	for (it_fll = m_initially.begin(); it_fll != m_initially.end(); it_fll++) {
 		std::cout << "\tState " << i++ << ": ";
-		std::cout << m_fluents.size() - (*it2).size();
+		std::cout << m_fluents.size() - (*it_fll).size();
 		std::cout << std::endl;
 	}
 	//std::cout << "done" << std::endl;

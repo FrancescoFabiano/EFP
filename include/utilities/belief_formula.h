@@ -57,7 +57,7 @@ public:
     void set_flu(fluent_formula*);
 
     void print() const;
-    void print(const grounder&) const;
+    void print_grounded(const grounder&) const;
 };
 
 typedef std::list<belief_formula> formula_list;

@@ -70,9 +70,6 @@ public:
   
     std::string deground_action(action_id) const;
     
-    void print_ff(const fluent_list&) const;        
-    void print_ff(const string_list&) const;        
-    
+    void print_ff(const fluent_list&) const;            
     void print_ff(const fluent_formula&) const;        
-    void print_ff(const string_list_list&) const;        
 };

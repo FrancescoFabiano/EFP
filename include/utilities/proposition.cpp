@@ -7,6 +7,7 @@
 #include <iostream>
 
 #include "proposition.h"
+#include "printer.h"
 
 /*const string_list* proposition::get_executability_conditions() const
 {
@@ -20,11 +21,6 @@ const string_list* proposition::get_effect() const
 
 void proposition::print() const
 {
-	bool first = true;
-	bool first2 = true;
-	bool if_fluform = false; //to stop from printing too many times
-	string_list::const_iterator it;
-	string_list_list::const_iterator it2;
 
 	switch (m_type) {
 	case DYNAMIC:
@@ -50,22 +46,8 @@ void proposition::print() const
 	}
 
 	std::cout << "\n Effects:\n";
-	/*@TODO:Effect_Conversion | previously
-	 * for (it = m_action_effect.begin(); it != m_action_effect.end(); it++) {
-		if (!first)
-			std::cout << ",";
-		first = false;
-		std::cout << *it;
-	}*/
-	for (it2 = m_action_effect.begin(); it2 != m_action_effect.end(); it2++) {
-		
-		for (it = it2->begin(); it != it2->end(); it++) {
-			if (!first)
-				std::cout << ",";
-			first = false;
-			std::cout << *it;
-		}
-	}
+	printer::print_list(m_action_effect);
+	
 
 	/*std::cout << "\n Conditional Execution for act -> incorporated with Executability conditions:\n";
 	first = true;
@@ -80,7 +62,8 @@ void proposition::print() const
 
 
 	std::cout << "\n Observability conditions:\n";
-	first2 = true;
+	printer::print_list(m_observability_conditions);
+	/*first2 = true;
 	for (it2 = m_observability_conditions.begin(); it2 != m_observability_conditions.end(); it2++) {
 		if ((m_type == AWARENESS || m_type == OBSERVANCE) && !if_fluform) {
 			std::cout << " if ";
@@ -98,7 +81,7 @@ void proposition::print() const
 			std::cout << *it;
 		}
 		std::cout << ")";
-	}
+	}*/
 
 	std::cout << "\n Executability conditions:\n";
 	//@TODO: why this or?
