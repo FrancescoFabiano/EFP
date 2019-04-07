@@ -6,7 +6,6 @@
  */
 
 #include "belief_formula.h"
-#include "printer.h"
 
 //@TODO: Check if there are no side changes -- maybe better to pass another and then dereferenciate it (NULL?)
 

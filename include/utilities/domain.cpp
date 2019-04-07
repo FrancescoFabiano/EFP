@@ -6,18 +6,20 @@
  */
 #include "domain.h"
 
-domain::domain(reader* reader)
+domain::domain(reader* reader, domain_restriction ini_restriction)
 {
 	m_reader = reader;
+	m_intial_description = initially(ini_restriction);
+
 }
 
-
-bool domain::build(bool debug, domain_restriction ini_restriction)
+bool domain::build(bool debug)
 {
 
 	build_agents(debug);
 	build_fluents(debug);
 	build_actions(debug);
+	build_initially(debug);
 
 	return true;
 }
@@ -37,6 +39,7 @@ void domain::build_agents(bool debug)
 	}
 	m_grounder.set_agent_map(domain_agent_map);
 }
+
 void domain::build_fluents(bool debug)
 {
 	fluent_map domain_fluent_map;
@@ -59,6 +62,7 @@ void domain::build_fluents(bool debug)
 	}
 	m_grounder.set_fluent_map(domain_fluent_map);
 }
+
 void domain::build_actions(bool debug)
 {
 
@@ -92,6 +96,7 @@ void domain::build_actions(bool debug)
 	}
 
 }
+
 void domain::build_propositions()
 {
 	//Adding propositions to actions list
@@ -110,6 +115,88 @@ void domain::build_propositions()
 			m_actions.insert(tmp);
 		}
 	}
+}
+
+void domain::build_initially(bool debug)
+{
+		
+	formula_list::iterator it_fl;
+
+	for (it_fl = m_reader->m_bf_initially.begin(); it_fl != m_reader->m_bf_initially.end(); it_fl++) {
+		switch (it_fl->m_formula_type) //initially phi
+		{
+			//S5 -> pointed world
+		case(FLUENT_FORMULA):
+			m_intial_description.add_pointed_condition(m_grounder.ground_fluent(it_fl->m_string_fluent_formula));
+			if (debug) {
+				std::cout << "Added to pointed world condition: ";
+				printer::print_list(it_fl->m_string_fluent_formula);
+				std::cout << std::endl;
+			}
+
+			break;
+
+			//S5 -> Edge
+		case(C_FORMULA):
+			m_intial_description.add_initial_condition(*it_fl);
+			if (debug) {
+				std::cout << "Added to initial conditions: ";
+				it_fl->print();
+				std::cout << std::endl;
+			}
+			break;
+
+			//Possible S5 -> initally [C(phi2), C(phi2)]
+		case(PROPOSITIONAL_FORMULA):
+			m_intial_description.add_initial_condition(*it_fl);
+			if (debug) {
+				std::cout << "Added to initial conditions: ";
+				it_fl->print();
+				std::cout << std::endl;
+			}
+			break;
+
+			//No more S5
+		case(BELIEF_FORMULA):
+			m_intial_description.add_initial_condition(*it_fl);
+			if (debug) {
+				std::cout << "Added to initial conditions: ";
+				it_fl->print();
+				std::cout << std::endl;
+			}
+			break;
+
+			//No more S5
+		case(E_FORMULA):
+			m_intial_description.add_initial_condition(*it_fl);
+			if (debug) {
+				std::cout << "Added to initial conditions: ";
+				it_fl->print();
+				std::cout << std::endl;
+			}
+			break;
+
+		default:
+			std::cerr << "Error in the 'initially' conditions." << std::endl;
+			exit(1);
+			break;
+		}
+
+	}
+	/* Deleted because new version of initial state
+	if(itn->node_type == CForm && itn->bfnode1->node_type == BForm) //initially C(B(i,phi))
+	{
+	if(a_map.find(itn->bfnode1->agentPro) == a_map.end())
+	{
+	cout << "-------ERROR: AGENT NOT DECLARED------- " << endl;
+	exit(1);
+	}
+
+	Agent ag = a_map.find(itn->bfnode1->agentPro)->second;
+	FluentFormula ff = *(convert(itn->bfnode1->bfnode1->flu_form));
+	ini.add_correct(ag,ff);
+	continue;
+	}*/
 }
 
 

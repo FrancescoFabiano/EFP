@@ -21,7 +21,7 @@ b observes right_a;
 
 
 executable left_b if B(b, -at_b_1), (-at_b_1);
-left_b causes -at_b_2 if at_b_2 | at_a_2;
+left_b causes -at_b_2 if at_b_2;
 left_b causes -at_b_3 if at_b_3;
 left_b causes at_b_1 if at_b_2;
 left_b causes at_b_2 if at_b_3;

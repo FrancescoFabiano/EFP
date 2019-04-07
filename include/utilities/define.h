@@ -37,3 +37,12 @@ typedef std::set<agent> agent_set;
 
 typedef std::map<std::string, fluent> fluent_map;
 typedef std::map<std::string, agent> agent_map;
+
+
+enum domain_restriction
+{
+    S5, //Knowledge, S5 finitary
+    K45, //Belief
+    NONE, //sensing action (peek_a)
+    FAIL,
+};

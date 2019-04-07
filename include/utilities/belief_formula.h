@@ -10,6 +10,8 @@
 #include <list>
 #include "define.h"
 #include "grounder.h"
+#include "printer.h"
+
 
 enum bf_type
 {
@@ -60,4 +62,5 @@ public:
     void print_grounded(const grounder&) const;
 };
 
+//This is a CNF form because the OR is taken inside
 typedef std::list<belief_formula> formula_list;

@@ -118,14 +118,14 @@ int main(int argc, char** argv)
 		exit(1);
 	}
 	
-	domain domain(&domain_reader);
+	domain domain(&domain_reader, ini_restriction);
 
 	//timer.start(READ_TIMER);
 	domain_reader.read();
 	if (debug){
 		domain_reader.print();
 	}
-	if(!domain.build(debug, ini_restriction))
+	if(!domain.build(debug))
 	{
 		std::cerr << "Error in building the domain.";
 		exit(1);

@@ -2,7 +2,7 @@
 OBJS	=	$(BUILD_DIR)/bison.o $(BUILD_DIR)/lex.o $(BUILD_DIR)/main.o \
 			$(BUILD_DIR)/belief_formula.o $(BUILD_DIR)/proposition.o $(BUILD_DIR)/domain.o \
 			$(BUILD_DIR)/grounder.o $(BUILD_DIR)/printer.o \
-			$(BUILD_DIR)/action.o \
+			$(BUILD_DIR)/action.o $(BUILD_DIR)/formula_manipulation.o $(BUILD_DIR)/initially.o \
 			$(BUILD_DIR)/reader.o
 
 CC	= g++
@@ -81,9 +81,15 @@ $(BUILD_DIR)/grounder.o: $(INCLUDE_DIR)/$(UTILITIES_DIR)/grounder.cpp $(INCLUDE_
 		$(dir_guard)
 		$(CC) $(CFLAGS) -c $(INCLUDE_DIR)/$(UTILITIES_DIR)/grounder.cpp -o $(BUILD_DIR)/grounder.o
 
+$(BUILD_DIR)/formula_manipulation.o: $(INCLUDE_DIR)/$(UTILITIES_DIR)/formula_manipulation.cpp $(INCLUDE_DIR)/$(UTILITIES_DIR)/formula_manipulation.h \
+									 $(INCLUDE_DIR)/$(UTILITIES_DIR)/belief_formula.h \
+									 $(INCLUDE_DIR)/$(UTILITIES_DIR)/define.h $(INCLUDE_DIR)/$(UTILITIES_DIR)/printer.h
+		$(dir_guard)
+		$(CC) $(CFLAGS) -c $(INCLUDE_DIR)/$(UTILITIES_DIR)/formula_manipulation.cpp -o $(BUILD_DIR)/formula_manipulation.o
+
 $(BUILD_DIR)/proposition.o: $(INCLUDE_DIR)/$(UTILITIES_DIR)/proposition.cpp $(INCLUDE_DIR)/$(UTILITIES_DIR)/proposition.h \
 							$(INCLUDE_DIR)/$(UTILITIES_DIR)/belief_formula.h \
-							$(INCLUDE_DIR)/$(UTILITIES_DIR)/define.h $(INCLUDE_DIR)/$(UTILITIES_DIR)/printer.h
+							$(INCLUDE_DIR)/$(UTILITIES_DIR)/define.h
 		$(dir_guard)
 		$(CC) $(CFLAGS) -c $(INCLUDE_DIR)/$(UTILITIES_DIR)/proposition.cpp -o $(BUILD_DIR)/proposition.o
 		
@@ -93,6 +99,13 @@ $(BUILD_DIR)/belief_formula.o: $(INCLUDE_DIR)/$(UTILITIES_DIR)/belief_formula.cp
 		$(dir_guard)
 		$(CC) $(CFLAGS) -c $(INCLUDE_DIR)/$(UTILITIES_DIR)/belief_formula.cpp -o $(BUILD_DIR)/belief_formula.o
 
+$(BUILD_DIR)/initially.o: $(INCLUDE_DIR)/$(UTILITIES_DIR)/initially.cpp $(INCLUDE_DIR)/$(UTILITIES_DIR)/initially.h \
+					   $(INCLUDE_DIR)/$(UTILITIES_DIR)/belief_formula.h  \
+					   $(INCLUDE_DIR)/$(UTILITIES_DIR)/define.h
+		$(dir_guard)
+		$(CC) $(CFLAGS) -c $(INCLUDE_DIR)/$(UTILITIES_DIR)/initially.cpp -o $(BUILD_DIR)/initially.o
+		
+		
 $(BUILD_DIR)/reader.o: $(INCLUDE_DIR)/$(UTILITIES_DIR)/reader.cpp $(INCLUDE_DIR)/$(UTILITIES_DIR)/reader.h \
 					   $(INCLUDE_DIR)/$(UTILITIES_DIR)/belief_formula.h  \
 					   $(INCLUDE_DIR)/$(UTILITIES_DIR)/define.h $(INCLUDE_DIR)/$(UTILITIES_DIR)/printer.h
@@ -101,7 +114,7 @@ $(BUILD_DIR)/reader.o: $(INCLUDE_DIR)/$(UTILITIES_DIR)/reader.cpp $(INCLUDE_DIR)
 		
 $(BUILD_DIR)/domain.o: $(INCLUDE_DIR)/$(UTILITIES_DIR)/domain.cpp $(INCLUDE_DIR)/$(UTILITIES_DIR)/domain.h \
 					   $(INCLUDE_DIR)/$(UTILITIES_DIR)/reader.h $(INCLUDE_DIR)/$(INTERFACES_DIR)/action.h \
-					   $(INCLUDE_DIR)/$(UTILITIES_DIR)/grounder.h \
+					   $(INCLUDE_DIR)/$(UTILITIES_DIR)/initially.h $(INCLUDE_DIR)/$(UTILITIES_DIR)/grounder.h \
 					   $(INCLUDE_DIR)/$(UTILITIES_DIR)/define.h 
 		$(dir_guard)
 		$(CC) $(CFLAGS) -c $(INCLUDE_DIR)/$(UTILITIES_DIR)/domain.cpp -o $(BUILD_DIR)/domain.o

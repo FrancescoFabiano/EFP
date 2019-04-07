@@ -17,8 +17,8 @@
 	for (it_sl = to_print.begin(); it_sl != to_print.end(); it_sl++) {
 		if (!first_print) {
 			std::cout << ",";
-			first_print = false;
 		}
+		first_print = false;
 		std::cout << *it_sl;
 	}
     }
@@ -30,9 +30,9 @@
 
 	for (it_sll = to_print.begin(); it_sll != to_print.end(); it_sll++) {
 		if (!first_print) {
-			std::cout << "AND";
-			first_print = false;
+			std::cout << "OR";
 		}
+		first_print = false;
 		print_list(*it_sll);
 
 	}

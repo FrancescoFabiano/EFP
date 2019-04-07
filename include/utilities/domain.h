@@ -11,13 +11,7 @@
 #include "define.h"
 #include "../interfaces/action.h"
 #include "grounder.h"
-
-enum domain_restriction
-{
-    S5, //Knowledge, S5 finitary
-    K45, //Belief
-    NONE, //sensing action (peek_a)
-};
+#include "initially.h"
 
 class domain
 {
@@ -30,7 +24,7 @@ private:
     std::vector<std::string> actions;
     std::vector<std::string> agents;
     
-    formula_list m_intial_description;
+    initially m_intial_description;
     formula_list m_goal_description;
     
     void build_agents(bool);
@@ -53,10 +47,10 @@ public:
     agent_set m_agents;
 
     
-    domain(reader*);
+    domain(reader*, domain_restriction);
 
     
-    bool build(bool, domain_restriction);
+    bool build(bool);
     
 
     
