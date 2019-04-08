@@ -14,13 +14,17 @@ BIN_DIR = bin
 
 LIB_DIR = lib
 SRC_DIR = src
-INCLUDE_DIR = include
 
-HEURISTIC_DIR = heuristic
-INTERFACES_DIR = interfaces
-PARSE_DIR = parse
-STATES_DIR = states
-UTILITIES_DIR = utilities
+INCLUDE_DIR = include
+ACTION_DIR = $(INCLUDE_DIR)/actions
+DOMAIN_DIR = $(INCLUDE_DIR)/domain
+FORMULA_DIR = $(INCLUDE_DIR)/formulae
+HEURISTIC_DIR = $(INCLUDE_DIR)/heuristics
+PARSE_DIR = $(INCLUDE_DIR)/parse
+STATES_DIR = $(INCLUDE_DIR)/states
+S_KRIPE_DIR = $(STATES_DIR)/kripke
+S_POSSIBILITY_DIR = $(STATES_DIR)/possibilities
+UTILITIES_DIR = $(INCLUDE_DIR)/utilities
 
 
 #-----------------------------------PARSE FILES-----------------------------------#
@@ -33,9 +37,9 @@ $(BUILD_DIR)/lex.o:		$(BUILD_DIR)/lex.c
 		$(dir_guard)
 		$(CC) $(CFLAGS) -c $(BUILD_DIR)/lex.c -o $(BUILD_DIR)/lex.o
 
-$(BUILD_DIR)/lex.c:		$(INCLUDE_DIR)/$(PARSE_DIR)/lcp.lex
+$(BUILD_DIR)/lex.c:		$(PARSE_DIR)/lcp.lex
 		$(dir_guard)
-		flex $(INCLUDE_DIR)/$(PARSE_DIR)/lcp.lex
+		flex $(PARSE_DIR)/lcp.lex
 		cp lex.yy.c $(BUILD_DIR)/lex.c
 		mv lex.yy.c $(BUILD_DIR)/
 
@@ -43,15 +47,17 @@ $(BUILD_DIR)/bison.o:	$(BUILD_DIR)/bison.c
 		$(dir_guard)
 		$(CC) $(CFLAGS) -c $(BUILD_DIR)/bison.c -o $(BUILD_DIR)/bison.o
 
-$(BUILD_DIR)/bison.c:	$(INCLUDE_DIR)/$(PARSE_DIR)/lcp.y
+$(BUILD_DIR)/bison.c:	$(PARSE_DIR)/lcp.y
 		$(dir_guard)
-		bison -d -v $(INCLUDE_DIR)/$(PARSE_DIR)/lcp.y
+		bison -d -v $(PARSE_DIR)/lcp.y
 		cp lcp.tab.c $(BUILD_DIR)/bison.c
 		cmp -s lcp.tab.h $(BUILD_DIR)/tok.h || cp lcp.tab.h $(BUILD_DIR)/tok.h
 		mv lcp.* $(BUILD_DIR)/
 
 #-----------------------------------MAIN FILE-----------------------------------#
-$(BUILD_DIR)/main.o:	$(SRC_DIR)/main.cpp $(INCLUDE_DIR)/$(UTILITIES_DIR)/reader.h $(INCLUDE_DIR)/$(UTILITIES_DIR)/domain.h
+$(BUILD_DIR)/main.o:	$(SRC_DIR)/main.cpp \
+						$(UTILITIES_DIR)/reader.h \
+						$(DOMAIN_DIR)/domain.h
 		$(dir_guard)
 		echo "#define BUILT_DATE \"`date`\"" > $(BUILD_DIR)/built_date
 		cat $(BUILD_DIR)/built_date $(SRC_DIR)/main.cpp > $(BUILD_DIR)/main.temp.cpp
@@ -60,68 +66,69 @@ $(BUILD_DIR)/main.o:	$(SRC_DIR)/main.cpp $(INCLUDE_DIR)/$(UTILITIES_DIR)/reader.
 		
 		
 #-----------------------------------INTERFACES-----------------------------------#
-$(BUILD_DIR)/action.o: $(INCLUDE_DIR)/$(INTERFACES_DIR)/action.cpp $(INCLUDE_DIR)/$(INTERFACES_DIR)/action.h \
-					   $(INCLUDE_DIR)/$(UTILITIES_DIR)/grounder.h \
-					   $(INCLUDE_DIR)/$(UTILITIES_DIR)/proposition.h $(INCLUDE_DIR)/$(UTILITIES_DIR)/belief_formula.h \
-					   $(INCLUDE_DIR)/$(UTILITIES_DIR)/define.h
+$(BUILD_DIR)/action.o: $(ACTION_DIR)/action.cpp $(ACTION_DIR)/action.h \
+					   $(DOMAIN_DIR)/grounder.h \
+					   $(FORMULA_DIR)/proposition.h $(FORMULA_DIR)/belief_formula.h \
+					   $(UTILITIES_DIR)/define.h
 		$(dir_guard)
-		$(CC) $(CFLAGS) -c $(INCLUDE_DIR)/$(INTERFACES_DIR)/action.cpp -o $(BUILD_DIR)/action.o
+		$(CC) $(CFLAGS) -c $(ACTION_DIR)/action.cpp -o $(BUILD_DIR)/action.o
 		
 		
 #-----------------------------------INCLUDE FILES-----------------------------------#
-$(BUILD_DIR)/printer.o: $(INCLUDE_DIR)/$(UTILITIES_DIR)/printer.cpp $(INCLUDE_DIR)/$(UTILITIES_DIR)/printer.h \
-						 $(INCLUDE_DIR)/$(UTILITIES_DIR)/define.h
+$(BUILD_DIR)/printer.o: $(UTILITIES_DIR)/printer.cpp $(UTILITIES_DIR)/printer.h \
+						 $(UTILITIES_DIR)/define.h
 		$(dir_guard)
-		$(CC) $(CFLAGS) -c $(INCLUDE_DIR)/$(UTILITIES_DIR)/printer.cpp -o $(BUILD_DIR)/printer.o
+		$(CC) $(CFLAGS) -c $(UTILITIES_DIR)/printer.cpp -o $(BUILD_DIR)/printer.o
 
 
-$(BUILD_DIR)/grounder.o: $(INCLUDE_DIR)/$(UTILITIES_DIR)/grounder.cpp $(INCLUDE_DIR)/$(UTILITIES_DIR)/grounder.h \
-#						 $(INCLUDE_DIR)/$(INTERFACES_DIR)/action.h \
-						 $(INCLUDE_DIR)/$(UTILITIES_DIR)/define.h $(INCLUDE_DIR)/$(UTILITIES_DIR)/printer.h
+$(BUILD_DIR)/grounder.o: $(DOMAIN_DIR)/grounder.cpp $(DOMAIN_DIR)/grounder.h \
+#						 $(ACTION_DIR)/action.h \
+						 $(UTILITIES_DIR)/define.h $(UTILITIES_DIR)/printer.h
 		$(dir_guard)
-		$(CC) $(CFLAGS) -c $(INCLUDE_DIR)/$(UTILITIES_DIR)/grounder.cpp -o $(BUILD_DIR)/grounder.o
+		$(CC) $(CFLAGS) -c $(DOMAIN_DIR)/grounder.cpp -o $(BUILD_DIR)/grounder.o
 
-$(BUILD_DIR)/formula_manipulation.o: $(INCLUDE_DIR)/$(UTILITIES_DIR)/formula_manipulation.cpp $(INCLUDE_DIR)/$(UTILITIES_DIR)/formula_manipulation.h \
-									 $(INCLUDE_DIR)/$(UTILITIES_DIR)/belief_formula.h \
-									 $(INCLUDE_DIR)/$(UTILITIES_DIR)/define.h $(INCLUDE_DIR)/$(UTILITIES_DIR)/printer.h
+$(BUILD_DIR)/formula_manipulation.o: $(FORMULA_DIR)/formula_manipulation.cpp $(FORMULA_DIR)/formula_manipulation.h \
+									 $(FORMULA_DIR)/belief_formula.h \
+									 $(UTILITIES_DIR)/define.h $(UTILITIES_DIR)/printer.h
 		$(dir_guard)
-		$(CC) $(CFLAGS) -c $(INCLUDE_DIR)/$(UTILITIES_DIR)/formula_manipulation.cpp -o $(BUILD_DIR)/formula_manipulation.o
+		$(CC) $(CFLAGS) -c $(FORMULA_DIR)/formula_manipulation.cpp -o $(BUILD_DIR)/formula_manipulation.o
 
-$(BUILD_DIR)/proposition.o: $(INCLUDE_DIR)/$(UTILITIES_DIR)/proposition.cpp $(INCLUDE_DIR)/$(UTILITIES_DIR)/proposition.h \
-							$(INCLUDE_DIR)/$(UTILITIES_DIR)/belief_formula.h \
-							$(INCLUDE_DIR)/$(UTILITIES_DIR)/define.h
+$(BUILD_DIR)/proposition.o: $(FORMULA_DIR)/proposition.cpp $(FORMULA_DIR)/proposition.h \
+							$(FORMULA_DIR)/belief_formula.h \
+							$(UTILITIES_DIR)/define.h $(UTILITIES_DIR)/printer.h
+
 		$(dir_guard)
-		$(CC) $(CFLAGS) -c $(INCLUDE_DIR)/$(UTILITIES_DIR)/proposition.cpp -o $(BUILD_DIR)/proposition.o
+		$(CC) $(CFLAGS) -c $(FORMULA_DIR)/proposition.cpp -o $(BUILD_DIR)/proposition.o
 		
-$(BUILD_DIR)/belief_formula.o: $(INCLUDE_DIR)/$(UTILITIES_DIR)/belief_formula.cpp $(INCLUDE_DIR)/$(UTILITIES_DIR)/belief_formula.h \
-							   $(INCLUDE_DIR)/$(UTILITIES_DIR)/grounder.h \
-							   $(INCLUDE_DIR)/$(UTILITIES_DIR)/define.h $(INCLUDE_DIR)/$(UTILITIES_DIR)/printer.h
+$(BUILD_DIR)/belief_formula.o: $(FORMULA_DIR)/belief_formula.cpp $(FORMULA_DIR)/belief_formula.h \
+							   $(DOMAIN_DIR)/grounder.h \
+							   $(UTILITIES_DIR)/define.h $(UTILITIES_DIR)/printer.h
 		$(dir_guard)
-		$(CC) $(CFLAGS) -c $(INCLUDE_DIR)/$(UTILITIES_DIR)/belief_formula.cpp -o $(BUILD_DIR)/belief_formula.o
+		$(CC) $(CFLAGS) -c $(FORMULA_DIR)/belief_formula.cpp -o $(BUILD_DIR)/belief_formula.o
 
-$(BUILD_DIR)/initially.o: $(INCLUDE_DIR)/$(UTILITIES_DIR)/initially.cpp $(INCLUDE_DIR)/$(UTILITIES_DIR)/initially.h \
-					   $(INCLUDE_DIR)/$(UTILITIES_DIR)/belief_formula.h  \
-					   $(INCLUDE_DIR)/$(UTILITIES_DIR)/define.h
+$(BUILD_DIR)/initially.o: $(DOMAIN_DIR)/initially.cpp $(DOMAIN_DIR)/initially.h \
+					      $(FORMULA_DIR)/belief_formula.h  \
+					      $(UTILITIES_DIR)/define.h
 		$(dir_guard)
-		$(CC) $(CFLAGS) -c $(INCLUDE_DIR)/$(UTILITIES_DIR)/initially.cpp -o $(BUILD_DIR)/initially.o
+		$(CC) $(CFLAGS) -c $(DOMAIN_DIR)/initially.cpp -o $(BUILD_DIR)/initially.o
 		
 		
-$(BUILD_DIR)/reader.o: $(INCLUDE_DIR)/$(UTILITIES_DIR)/reader.cpp $(INCLUDE_DIR)/$(UTILITIES_DIR)/reader.h \
-					   $(INCLUDE_DIR)/$(UTILITIES_DIR)/belief_formula.h  \
-					   $(INCLUDE_DIR)/$(UTILITIES_DIR)/define.h $(INCLUDE_DIR)/$(UTILITIES_DIR)/printer.h
+$(BUILD_DIR)/reader.o: $(UTILITIES_DIR)/reader.cpp $(UTILITIES_DIR)/reader.h \
+					   $(FORMULA_DIR)/belief_formula.h  \
+					   $(UTILITIES_DIR)/define.h $(UTILITIES_DIR)/printer.h
 		$(dir_guard)
-		$(CC) $(CFLAGS) -c $(INCLUDE_DIR)/$(UTILITIES_DIR)/reader.cpp -o $(BUILD_DIR)/reader.o
+		$(CC) $(CFLAGS) -c $(UTILITIES_DIR)/reader.cpp -o $(BUILD_DIR)/reader.o
 		
-$(BUILD_DIR)/domain.o: $(INCLUDE_DIR)/$(UTILITIES_DIR)/domain.cpp $(INCLUDE_DIR)/$(UTILITIES_DIR)/domain.h \
-					   $(INCLUDE_DIR)/$(UTILITIES_DIR)/reader.h $(INCLUDE_DIR)/$(INTERFACES_DIR)/action.h \
-					   $(INCLUDE_DIR)/$(UTILITIES_DIR)/initially.h $(INCLUDE_DIR)/$(UTILITIES_DIR)/grounder.h \
-					   $(INCLUDE_DIR)/$(UTILITIES_DIR)/define.h 
+$(BUILD_DIR)/domain.o: $(DOMAIN_DIR)/domain.cpp $(DOMAIN_DIR)/domain.h \
+					   $(UTILITIES_DIR)/reader.h $(UTILITIES_DIR)/define.h \
+					   $(ACTION_DIR)/action.h \
+					   $(DOMAIN_DIR)/initially.h $(DOMAIN_DIR)/grounder.h 	   
 		$(dir_guard)
-		$(CC) $(CFLAGS) -c $(INCLUDE_DIR)/$(UTILITIES_DIR)/domain.cpp -o $(BUILD_DIR)/domain.o
+		$(CC) $(CFLAGS) -c $(DOMAIN_DIR)/domain.cpp -o $(BUILD_DIR)/domain.o
 
 
-lex.o yac.o main.o	: 
-lex.o main.o		: 
+#lex.o yac.o main.o	: 
+#lex.o main.o		: 
 
 clean:
 	rm -f $(BIN_DIR)/*.out \

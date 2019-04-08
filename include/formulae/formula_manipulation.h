@@ -7,8 +7,9 @@
 
 #pragma once
 
-#include "define.h"
 #include "belief_formula.h"
+
+#include "../utilities/define.h"
 
 class formula_manipulation{
     

@@ -8,8 +8,8 @@
 #pragma once
 
 #include "define.h"
-#include "belief_formula.h"
-#include "proposition.h"
+#include "../formulae/belief_formula.h"
+#include "../formulae/proposition.h"
 
 class reader
 {

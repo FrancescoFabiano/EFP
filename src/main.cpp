@@ -11,7 +11,7 @@
 #include <memory>
 
 #include "../include/utilities/reader.h"
-#include "../include/utilities/domain.h"
+#include "../include/domain/domain.h"
 
 #define VERSION "2.0"
 

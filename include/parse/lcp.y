@@ -385,36 +385,36 @@ B LEFT_PAREN agent COMMA belief_formula RIGHT_PAREN {
    $$ = new belief_formula;
    $$->m_formula_type = BELIEF_FORMULA;
    $$->m_string_agent_op = *$3;
-   $$->m_bf1 = $5;
+   $$->m_bf1 = std::shared_ptr<belief_formula>($5);
 }
 |
 belief_formula COMMA belief_formula {
    $$ = new belief_formula;
    $$->m_formula_type = PROPOSITIONAL_FORMULA;
-   $$->m_bf1 = $1;
-   $$->m_bf2 = $3;
+   $$->m_bf1 = std::shared_ptr<belief_formula>($1);
+   $$->m_bf2 = std::shared_ptr<belief_formula>($3);
    $$->m_operator = BF_AND;
 }
 |
 belief_formula OR belief_formula {
    $$ = new belief_formula;
    $$->m_formula_type = PROPOSITIONAL_FORMULA;
-   $$->m_bf1 = $1;
-   $$->m_bf2 = $3;
+   $$->m_bf1 = std::shared_ptr<belief_formula>($1);
+   $$->m_bf2 = std::shared_ptr<belief_formula>($3);
    $$->m_operator = BF_OR;
 }
 |
 LEFT_PAREN NEGATION belief_formula RIGHT_PAREN{
    $$ = new belief_formula;
    $$->m_formula_type = PROPOSITIONAL_FORMULA;
-   $$->m_bf1 = $3;
+   $$->m_bf1 = std::shared_ptr<belief_formula>($3);
    $$->m_operator = BF_NOT;
 }
 |
 LEFT_PAREN belief_formula RIGHT_PAREN{
     $$ = new belief_formula;
     $$->m_formula_type = PROPOSITIONAL_FORMULA;
-    $$->m_bf1 = $2;
+    $$->m_bf1 = std::shared_ptr<belief_formula>($2);
     $$->m_operator = BF_NONE;
 }
 |
@@ -422,14 +422,14 @@ E LEFT_PAREN LEFT_BRAC agent_list RIGHT_BRAC COMMA belief_formula RIGHT_PAREN {
    $$ = new belief_formula;
    $$->m_formula_type = E_FORMULA;
    $$->m_string_group_agents = *$4;
-   $$->m_bf1 = $7;
+   $$->m_bf1 = std::shared_ptr<belief_formula>($7);
 }
 |
 C LEFT_PAREN LEFT_BRAC agent_list RIGHT_BRAC COMMA belief_formula RIGHT_PAREN {
    $$ = new belief_formula;
    $$->m_formula_type = C_FORMULA;
    $$->m_string_group_agents = *$4;
-   $$->m_bf1 = $7;
+   $$->m_bf1 = std::shared_ptr<belief_formula>($7);
 };
 
 

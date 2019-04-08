@@ -28,7 +28,7 @@ public:
     state (action_list, unsigned short);
     state (action_list, unsigned short, int);
     
-    action_list* get_executed_actions();
+    const action_list & get_executed_actions();
     unsigned short get_plan_length();
     int get_heuristic_value();
     

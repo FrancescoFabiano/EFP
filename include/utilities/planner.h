@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "domain.h"
+#include "../domain/domain.h"
 
 class planner
 {
