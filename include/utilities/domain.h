@@ -18,7 +18,7 @@ class domain
 {
 private:
     //@TODO: Check if ref or pointer is better std::unique_ptr<reader>
-    reader* m_reader;  
+    std::shared_ptr<reader> m_reader;  
     grounder m_grounder;
     
     std::vector<std::string> fluents;
@@ -52,7 +52,7 @@ public:
     agent_set m_agents;
 
     
-    domain(reader*, domain_restriction, domain_restriction);
+    domain(std::shared_ptr<reader>, domain_restriction, domain_restriction);
 
     
     bool build(bool);

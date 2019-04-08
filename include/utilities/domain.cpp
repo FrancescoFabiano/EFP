@@ -6,7 +6,7 @@
  */
 #include "domain.h"
 
-domain::domain(reader* d_reader, domain_restriction ini_restriction, domain_restriction goal_restriction)
+domain::domain(std::shared_ptr<reader> d_reader, domain_restriction ini_restriction, domain_restriction goal_restriction)
 {
 	m_reader = d_reader;
 

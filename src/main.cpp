@@ -8,6 +8,8 @@
 #include <iostream>
 #include <stdio.h>
 #include <string.h>
+#include <memory>
+
 #include "../include/utilities/reader.h"
 #include "../include/utilities/domain.h"
 
@@ -133,8 +135,7 @@ int main(int argc, char** argv)
 		std::cerr << argv[0] << ": File " << argv[1] << " cannot be opened.\n";
 		exit(1);
 	}
-
-	domain domain(&domain_reader, ini_restriction, goal_restriction);
+	domain domain(std::shared_ptr<reader>(&domain_reader), ini_restriction, goal_restriction);
 
 	//timer.start(READ_TIMER);
 	domain_reader.read();
