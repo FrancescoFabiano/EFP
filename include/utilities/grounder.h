@@ -67,6 +67,8 @@ public:
     string_list_list deground_fluent(const fluent_formula&) const;
    
     std::string deground_agent(agent) const;
+    agent_set ground_agent(const string_list&) const;
+
   
     std::string deground_action(action_id) const;
     

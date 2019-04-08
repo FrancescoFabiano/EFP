@@ -6,10 +6,12 @@
  */
 #include "domain.h"
 
-domain::domain(reader* reader, domain_restriction ini_restriction)
+domain::domain(reader* d_reader, domain_restriction ini_restriction, domain_restriction goal_restriction)
 {
-	m_reader = reader;
+	m_reader = d_reader;
+
 	m_intial_description = initially(ini_restriction);
+	m_goal_restriction = goal_restriction;
 
 }
 
@@ -20,6 +22,8 @@ bool domain::build(bool debug)
 	build_fluents(debug);
 	build_actions(debug);
 	build_initially(debug);
+	build_goal(debug);
+
 
 	return true;
 }
@@ -119,17 +123,19 @@ void domain::build_propositions()
 
 void domain::build_initially(bool debug)
 {
-		
+	std::cout << "\nAdding to pointed world and initial conditions..." << std::endl;
 	formula_list::iterator it_fl;
 
 	for (it_fl = m_reader->m_bf_initially.begin(); it_fl != m_reader->m_bf_initially.end(); it_fl++) {
+
+		it_fl->ground(m_grounder);
 		switch (it_fl->m_formula_type) //initially phi
 		{
 			//S5 -> pointed world
 		case(FLUENT_FORMULA):
-			m_intial_description.add_pointed_condition(m_grounder.ground_fluent(it_fl->m_string_fluent_formula));
+			m_intial_description.add_pointed_condition(it_fl->m_fluent_formula);
 			if (debug) {
-				std::cout << "Added to pointed world condition: ";
+				std::cout << "	Pointed world: ";
 				printer::print_list(it_fl->m_string_fluent_formula);
 				std::cout << std::endl;
 			}
@@ -140,7 +146,7 @@ void domain::build_initially(bool debug)
 		case(C_FORMULA):
 			m_intial_description.add_initial_condition(*it_fl);
 			if (debug) {
-				std::cout << "Added to initial conditions: ";
+				std::cout << "	Initial conditions: ";
 				it_fl->print();
 				std::cout << std::endl;
 			}
@@ -183,21 +189,75 @@ void domain::build_initially(bool debug)
 		}
 
 	}
-	/* Deleted because new version of initial state
-	if(itn->node_type == CForm && itn->bfnode1->node_type == BForm) //initially C(B(i,phi))
-	{
-	if(a_map.find(itn->bfnode1->agentPro) == a_map.end())
-	{
-	cout << "-------ERROR: AGENT NOT DECLARED------- " << endl;
-	exit(1);
+}
+
+void domain::build_goal(bool debug)
+{
+	std::cout << "\nAdding to Goal..." << std::endl;
+
+
+	formula_list::iterator it_fl;
+
+	for (it_fl = (m_reader->m_bf_goal).begin(); it_fl != (m_reader->m_bf_goal).end(); it_fl++) {
+		if (check_goal_restriction(*it_fl)) {
+			it_fl->ground(m_grounder);
+			m_goal_description.push_back(*it_fl);
+			if (debug) {
+				std::cout << "	";
+				it_fl->print();
+				std::cout << std::endl;
+
+			}
+		} else {
+			std::cerr << "The Goal does not respect the conditions\n";
+			exit(1);
+		}
+	}
+}
+//@TODO: Maybe a separated class?
+
+bool domain::check_goal_restriction(const belief_formula& bf)//Apply the restriction
+{
+	bool ret = false;
+	switch (m_goal_restriction) {
+		//We only admit C(belief)
+	case NONEG:
+		switch (bf.m_formula_type) {
+		case FLUENT_FORMULA:
+			ret = true;
+			break;
+		case BELIEF_FORMULA:
+			ret = true;
+			break;
+		case C_FORMULA:
+			ret = check_goal_restriction(*bf.m_bf1);
+			break;
+		case E_FORMULA:
+			ret = check_goal_restriction(*bf.m_bf1);
+			break;
+		case PROPOSITIONAL_FORMULA:
+			if (bf.m_operator == BF_NOT) {
+				ret = false;
+			} else {
+				ret = check_goal_restriction(*bf.m_bf1) && check_goal_restriction(*bf.m_bf2);
+			}
+			break;
+		default:
+			break;
+		}
+		break;
+	case NONE:
+		ret = true;
+		break;
+	default: /* static */
+		ret = false;
+		break;
 	}
 
-	Agent ag = a_map.find(itn->bfnode1->agentPro)->second;
-	FluentFormula ff = *(convert(itn->bfnode1->bfnode1->flu_form));
-	ini.add_correct(ag,ff);
-	continue;
-	}*/
+	return ret;
+
 }
+
 
 
 /*std::string domain::get_name();

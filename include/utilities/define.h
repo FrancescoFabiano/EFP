@@ -44,5 +44,6 @@ enum domain_restriction
     S5, //Knowledge, S5 finitary
     K45, //Belief
     NONE, //sensing action (peek_a)
+    NONEG, //Goal
     FAIL,
 };

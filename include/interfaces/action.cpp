@@ -171,6 +171,7 @@ bool action::operator=(const action& act)
 	for (it_effmap = act.get_effects().begin(); it_effmap != act.get_effects().end(); it_effmap++) {
 		add_effect(it_effmap->first, it_effmap->second);
 	}
+	return true;
 }
 
 void action::print(const grounder& grounder) const

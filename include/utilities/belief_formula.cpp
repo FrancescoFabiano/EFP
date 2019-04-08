@@ -9,7 +9,7 @@
 
 //@TODO: Check if there are no side changes -- maybe better to pass another and then dereferenciate it (NULL?)
 
-void belief_formula::set_flu(fluent_formula* ff)
+void belief_formula::set_flu(const fluent_formula& ff)
 {
 	m_fluent_formula = ff;
 }
@@ -101,7 +101,7 @@ void belief_formula::print() const
 
 void belief_formula::print_grounded(const grounder& grounder) const
 {
-
+	
 	bool first = true;
 	string_list::const_iterator it;
 	string_list_list::const_iterator it2;
@@ -188,3 +188,83 @@ void belief_formula::print_grounded(const grounder& grounder) const
 
 	} //switch
 }; // print*/
+
+void belief_formula::ground(const grounder & gr)
+{
+	switch (m_formula_type) {
+
+	case FLUENT_FORMULA:
+		m_fluent_formula = gr.ground_fluent(m_string_fluent_formula);
+		break;
+
+	case BELIEF_FORMULA:
+		m_agent_op = gr.ground_agent(m_string_agent_op);
+		m_bf1->ground(gr);
+		break;
+
+	case C_FORMULA:
+		m_group_agents = gr.ground_agent(m_string_group_agents);
+		m_bf1->ground(gr);
+		break;
+
+	case E_FORMULA:
+		m_group_agents = gr.ground_agent(m_string_group_agents);
+		m_bf1->ground(gr);
+		break;
+
+	case PROPOSITIONAL_FORMULA:
+		m_bf1->ground(gr);
+		m_bf2->ground(gr);
+		break;
+
+	case EMPTY: //Static
+		break;
+
+	default: //Static
+		break;
+
+	} //switch
+} // print*/
+
+/*belief_formula::belief_formula()
+{
+	m_string_agent_op = "";
+	m_agent_op = -1;
+	m_formula_type = EMPTY;
+	fluent fail = -1;
+	fluent_list fail_l;
+	fail_l.insert(fail);
+	//m_fluent_formula.insert(fail_l);
+	m_bf1 = nullptr;
+	m_bf2 = nullptr;
+	m_operator = BF_NONE;
+	m_group_agents.insert(fail);
+}
+
+belief_formula::belief_formula(const belief_formula& bf)
+{
+	m_string_agent_op = bf.m_string_agent_op;
+	m_agent_op = bf.m_agent_op;
+	m_formula_type = bf.m_formula_type;
+	m_string_fluent_formula = bf.m_string_fluent_formula;
+	m_fluent_formula = bf.m_fluent_formula;
+	m_bf1 = bf.m_bf1;
+	m_bf2 = bf.m_bf2;
+	m_operator = bf.m_operator;
+	m_string_group_agents = bf.m_string_group_agents;
+	m_group_agents = bf.m_group_agents;
+}
+
+belief_formula::belief_formula(belief_formula* bf)
+{
+	m_string_agent_op = bf->m_string_agent_op;
+	m_agent_op = bf->m_agent_op;
+	m_formula_type = bf->m_formula_type;
+	m_string_fluent_formula = bf->m_string_fluent_formula;
+	m_fluent_formula = bf->m_fluent_formula;
+	m_bf1 = bf->m_bf1;
+	m_bf2 = bf->m_bf2;
+	m_operator = bf->m_operator;
+	m_string_group_agents = bf->m_string_group_agents;
+	m_group_agents = bf->m_group_agents;
+}*/

@@ -17,7 +17,7 @@ private:
     formula_list m_bf_intial_conditions; //The initially belief_formula; for now just Common Knowledge is admissed to respect S5
     domain_restriction m_ini_restriction;
     
-    bool check_restriction(belief_formula); //Apply the restriction
+    bool check_restriction(const belief_formula &); //Apply the restriction
         
 public:
     

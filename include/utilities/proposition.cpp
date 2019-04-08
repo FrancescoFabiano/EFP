@@ -60,36 +60,36 @@ void proposition::print() const
 		std::cout << *it;
 	}*/
 
-
-	std::cout << "\n Observability conditions:\n";
-	printer::print_list(m_observability_conditions);
-	/*first2 = true;
-	for (it2 = m_observability_conditions.begin(); it2 != m_observability_conditions.end(); it2++) {
-		if ((m_type == AWARENESS || m_type == OBSERVANCE) && !if_fluform) {
-			std::cout << " if ";
-			if_fluform = true;
-		}
-		if (!first2)
-			std::cout << " | ";
-		first2 = false;
-		first = true;
-		std::cout << "(";
-		for (it = it2->begin(); it != it2->end(); it++) {
-			if (!first)
-				std::cout << " AND ";
-			first = false;
-			std::cout << *it;
-		}
-		std::cout << ")";
-	}*/
-
-	std::cout << "\n Executability conditions:\n";
-	//@TODO: why this or?
-	if (m_executability_conditions.m_bf1 != NULL || m_type == DYNAMIC) {
-		std::cout << " if ";
-		m_executability_conditions.print();
-	}
-	std::cout << std::endl;
+//For Printing Info
+//	std::cout << "\n Observability conditions:\n";
+//	printer::print_list(m_observability_conditions);
+//	/*first2 = true;
+//	for (it2 = m_observability_conditions.begin(); it2 != m_observability_conditions.end(); it2++) {
+//		if ((m_type == AWARENESS || m_type == OBSERVANCE) && !if_fluform) {
+//			std::cout << " if ";
+//			if_fluform = true;
+//		}
+//		if (!first2)
+//			std::cout << " | ";
+//		first2 = false;
+//		first = true;
+//		std::cout << "(";
+//		for (it = it2->begin(); it != it2->end(); it++) {
+//			if (!first)
+//				std::cout << " AND ";
+//			first = false;
+//			std::cout << *it;
+//		}
+//		std::cout << ")";
+//	}*/
+//
+//	std::cout << "\n Executability conditions:\n";
+//	//@TODO: why this or?
+//	if (m_executability_conditions.m_bf1 != NULL || m_type == DYNAMIC) {
+//		std::cout << " if ";
+//		m_executability_conditions.print();
+//	}
+//	std::cout << std::endl;
 
 };
 

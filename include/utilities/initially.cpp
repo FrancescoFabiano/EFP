@@ -18,9 +18,9 @@ initially::initially(domain_restriction ini_restriction){
  }
 
     
-bool initially::check_restriction(belief_formula bf)//Apply the restriction
+bool initially::check_restriction(const belief_formula & bf)//Apply the restriction
 {
-	bool ret = true;
+	bool ret = false;
 	switch(m_ini_restriction){
 	//We only admit C(belief)
 	case S5:

@@ -132,6 +132,18 @@ agent grounder::ground_agent(const std::string& x) const
 	exit(1);
 }
 
+agent_set grounder::ground_agent(const string_list& x) const
+{
+	string_list::iterator it;
+	agent_set y;
+
+	for (it = x.begin(); it != x.end(); it++) {
+		y.insert(ground_agent(*it));
+	}
+
+	return y;
+}
+
 action_id grounder::ground_action(const std::string& x) const
 {
 	action_name_map::const_iterator p = m_action_name_map.find(x);

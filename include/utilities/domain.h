@@ -6,6 +6,7 @@
  */
 
 #pragma once
+#include <memory>
 
 #include "reader.h"
 #include "define.h"
@@ -25,6 +26,8 @@ private:
     std::vector<std::string> agents;
     
     initially m_intial_description;
+    domain_restriction m_goal_restriction;
+    
     formula_list m_goal_description;
     
     void build_agents(bool);
@@ -34,7 +37,9 @@ private:
 
     
     void build_initially(bool);
-       
+    void build_goal(bool);
+    bool check_goal_restriction(const belief_formula &);
+
 public:
     
     /*All the useful info of the domain are store here:
@@ -47,7 +52,7 @@ public:
     agent_set m_agents;
 
     
-    domain(reader*, domain_restriction);
+    domain(reader*, domain_restriction, domain_restriction);
 
     
     bool build(bool);

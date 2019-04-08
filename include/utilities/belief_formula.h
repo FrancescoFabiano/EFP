@@ -43,7 +43,7 @@ public:
     string_list_list m_string_fluent_formula;
     //Pointer because it may be empty 
     //@TODO: Unique or shared pointers??
-    fluent_formula* m_fluent_formula;
+    fluent_formula m_fluent_formula;
 
     
     //Belief formula -> B(i,\phi) :: Pointers because they may be empty
@@ -53,13 +53,21 @@ public:
     bf_operator m_operator;
     //Agent for group formulae
     string_list m_string_group_agents;
-    agent_list m_group_agents;
+    agent_set m_group_agents;
     
     //@TODO: Check if is the best type of parameters pass. (Also the ones below)    
-    void set_flu(fluent_formula*);
+    void set_flu(const fluent_formula&);
 
+    //belief_formula();
+    //belief_formula(const belief_formula&);
+    //belief_formula(belief_formula*);
+    
     void print() const;
     void print_grounded(const grounder&) const;
+    
+    void ground(const grounder &);
+    
+
 };
 
 //This is a CNF form because the OR is taken inside
