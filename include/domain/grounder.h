@@ -53,7 +53,7 @@ public:
     void set_action_name_map(action_name_map);
 
 
-    //@TODO: Check if is the best type of parameters pass. and return
+    //In case we want to kill the grounder after the having read these should be the return types
     fluent ground_fluent(const std::string&) const;
     fluent_list ground_fluent(const string_list&) const;
     fluent_formula ground_fluent(const string_list_list&) const;
@@ -70,7 +70,6 @@ public:
     std::string deground_agent(agent) const;
     agent_set ground_agent(const string_list&) const;
 
-  
     std::string deground_action(action_id) const;
     
     void print_ff(const fluent_list&) const;            

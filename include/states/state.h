@@ -6,7 +6,7 @@
  */
 #pragma once
 
-#include "action.h"
+#include "../actions/action.h"
 //#include "belief_formulae.h"
 
 /***************************************************************************************
@@ -23,32 +23,37 @@ class state
 {
 public:
     
+    //Implement in each class with a kstate instead of a state
     state (const state &);
     state (const state &, const action &);
-    state (action_list, unsigned short);
-    state (action_list, unsigned short, int);
+    state ( const action_id_list &, unsigned short);
+    state ( const action_id_list &, unsigned short, int);
     
-    const action_list & get_executed_actions();
+    const action_id_list & get_executed_actions();
     unsigned short get_plan_length();
     int get_heuristic_value();
     
     void set_state(state);
     
-    void set_executed_actions(const action_list &);
+    void set_executed_actions(const action_id_list &);
     void set_plan_length(unsigned short);
     void set_heuristic_value(int);
     
-    virtual state compute_succ (action) = 0;
-    virtual bool entails (belief_formaula) = 0;
-    virtual void set_heuristic_value() = 0;
-
+    virtual state compute_succ (const action &) = 0;
+    
+    bool entails (const fluent_list &);
+    bool entails (const fluent_formula &);
+    virtual bool entails (fluent) = 0;
+    
+    bool entails (const formula_list & to_check);
+    virtual bool entails (const belief_formula &) = 0;
+    
     bool is_goal();
     
 protected:
     
-    action_list m_executed_actions;
+    action_id_list m_executed_actions_id;
     unsigned short m_plan_length;
     int m_heuristic_value;
     
-    virtual ~state();
 };

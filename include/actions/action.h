@@ -22,8 +22,6 @@ typedef std::map<agent, fluent_formula> observability_map;
 //Associate each effect the condition
 typedef std::map<fluent_formula, belief_formula> effects_map;
 
-typedef unsigned short action_id;
-
 class action
 {
 private:
@@ -59,18 +57,27 @@ public:
     void set_type(proposition_type);
 
     //@TODO: Check if is the best type of parameters ret. (Also the ones below)
-    //std::unique_ptr<reader>
+
+    //The return type it's fine because actions survive with the domain
     const formula_list& get_executability() const;
+    //The return type it's fine because actions survive with the domain
     const effects_map& get_effects() const;
+    //The return type it's fine because actions survive with the domain
     const observability_map& get_fully_observants() const;
+    //The return type it's fine because actions survive with the domain
     const observability_map& get_partially_observants() const;
 
-    //@TODO: Check if is the best type of parameters pass. (Also the ones below)    
+    //Ok because is push_back and it makes copy
     void add_executability(const belief_formula &);
+    
+    //Ok because is map::value_type and it makes copy
     void add_effect(const fluent_formula&, const belief_formula&);
+    //Ok because is map::value_type and it makes copy
     void add_fully_observant(agent, const fluent_formula&);
+    //Ok because is map::value_type and it makes copy
     void add_partially_observant(agent, const fluent_formula&);
     
+    //Ok because its method all makes copies
     void add_proposition(const proposition &, const grounder&);
 
     void print(const grounder&) const;

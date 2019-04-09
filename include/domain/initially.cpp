@@ -54,12 +54,13 @@ bool initially::check_restriction(const belief_formula & bf)//Apply the restrict
 	return ret;
 
 }
-        
+//This type of parameter is fine because of we add the return value and not ff
 void initially::add_pointed_condition(const fluent_formula & ff)
 {
 	//Is in DNF form so you have to add these to the fluent of before (all of them)
 	 m_pointed_world_conditions = formula_manipulation::and_ff(m_pointed_world_conditions,ff);
 }
+//This type of parameter is fine because of the push back (makes a copy))
 void initially::add_initial_condition(const belief_formula& bf)
 {
 //This is a CNF form because the OR is taken inside

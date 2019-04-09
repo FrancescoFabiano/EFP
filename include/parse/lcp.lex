@@ -2,8 +2,8 @@
 
 %{
 #include "../include/utilities/define.h"
-#include "../include/utilities/proposition.h"
-#include "../include/utilities/belief_formula.h"
+#include "../include/formulae/proposition.h"
+#include "../include/formulae/belief_formula.h"
 #include "tok.h"
 
 int yyerror(char *s);

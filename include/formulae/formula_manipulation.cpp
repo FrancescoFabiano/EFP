@@ -56,7 +56,7 @@ fluent_list formula_manipulation::and_ff(const fluent_list& fl1, const fluent_li
 
 	return ret;
 }
-
+//@TODO: check if the life of this does not depend on the reader
 fluent_formula formula_manipulation::and_ff(const fluent_formula& ff1, const fluent_formula& ff2)
 {
 	fluent_formula::iterator it_ff1;

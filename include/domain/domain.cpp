@@ -23,9 +23,8 @@ bool domain::build(bool debug)
 	build_actions(debug);
 	build_initially(debug);
 	build_goal(debug);
-
-
 	return true;
+
 }
 
 void domain::build_agents(bool debug)

@@ -78,29 +78,27 @@ const observability_map& action::get_partially_observants() const
 {
 	return m_partially_observants;
 }
-
+//Ok because is push_back and it makes copy
 void action::add_executability(const belief_formula& exec)
 {
 	m_executability.push_back(exec);
 }
-
+//Ok because is map::value_type and it makes copy
 void action::add_effect(const fluent_formula& effect, const belief_formula &condition)
 {
 	m_effects.insert(effects_map::value_type(effect, condition));
 }
-
-//@TODO: Check if * or & in the parameters
-
+//Ok because is map::value_type and it makes copy
 void action::add_fully_observant(agent fully, const fluent_formula &condition)
 {
 	m_fully_observants.insert(observability_map::value_type(fully, condition));
 }
-
+//Ok because is map::value_type and it makes copy
 void action::add_partially_observant(agent partial, const fluent_formula &condition)
 {
 	m_partially_observants.insert(observability_map::value_type(partial, condition));
 }
-
+//Ok because its method all makes copies
 void action::add_proposition(const proposition & prop, const grounder& grounder)
 {
 	switch (prop.m_type) {

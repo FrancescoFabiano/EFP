@@ -19,20 +19,20 @@ state::state (const state & prev_state, const action & executed_action)
 {
 	set_state(prev_state.compute_succ(executed_action));
 }
-state::state (const action_list & executed_actions, unsigned short length)
+state::state (const action_id_list & executed_actions, unsigned short length)
 {
 	set_executed_actions(executed_actions);
 	set_plan_length(length);
 	set_heuristic_value();
 }
-state::state (const action_list & executed_actions, unsigned short length, int heuristic_value)
+state::state (const action_id_list & executed_actions, unsigned short length, int heuristic_value)
 {
 	set_executed_actions(executed_actions);
 	set_plan_length(length);
 	set_heuristic_value(heuristic_value);
 }
     
-action_list state::get_executed_actions()
+const action_id_list & state::get_executed_actions()
 {
 	return m_executed_actions;
 }
@@ -51,8 +51,10 @@ void state::set_state (const state & given_state)
 	set_plan_length(given_state.get_plan_length());
 	set_heuristic_value(given_state.get_heuristic_value());
 }
-//@TODO: to Implement
-void state::set_executed_actions(const action_list & executed);
+void state::set_executed_actions(const action_id_list & executed)
+{
+	m_executed_actions_id = executed;
+}
 void state::set_plan_length(unsigned short length)
 {
 	m_plan_length = length;
@@ -63,3 +65,39 @@ void state::set_heuristic_value(int heuristic_value)
 }
 //@TODO: to Implement
 bool state::is_goal();
+
+
+bool state::entails(const fluent_list & to_check)
+{
+	//fluent_list expresses CNF
+	fluent_list::const_iterator it_fl;
+	for (it_fl = to_check.begin(); it_fl != to_check.end(); it_fl++) {
+		if(!entails(*it_fl)){
+			return false;
+		}
+	}
+	return true;
+}
+bool state::entails (const fluent_formula & to_check)
+{
+	//@TODO: Check for the size = 0?
+	//fluent_formula expresses DNF
+	fluent_formula::const_iterator it_fl;
+	for (it_fl = to_check.begin(); it_fl != to_check.end(); it_fl++) {
+		if(entails(*it_fl)){
+			return true;
+		}
+	}
+	return false;
+}
+bool state::entails (const formula_list & to_check)
+{
+	//formula_list expresses CNF
+	formula_list::const_iterator it_fl;
+	for (it_fl = to_check.begin(); it_fl != to_check.end(); it_fl++) {
+		if(!entails(*it_fl)){
+			return false;
+		}
+	}
+	return true;
+}

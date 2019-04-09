@@ -35,6 +35,9 @@ typedef unsigned short agent;
 typedef std::vector<agent> agent_list;
 typedef std::set<agent> agent_set;
 
+typedef unsigned short action_id;
+typedef std::vector<action_id> action_id_list;
+
 typedef std::map<std::string, fluent> fluent_map;
 typedef std::map<std::string, agent> agent_map;
 

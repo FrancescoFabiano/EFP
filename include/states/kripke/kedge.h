@@ -7,35 +7,50 @@
 
 #pragma once
 
-#include "kworld.h"
+#include <string>
+#include <vector>
+#include <memory>
 
-typedef unsigned short kedge_id;
-typedef std::vector<kedge_id> kedge_id_list;
+
+#include "kworld.h"
+#include "kstore.h"
+
+typedef std::string kedge_id;
+typedef std::shared_ptr<kedge> kedge_ptr;
+//@TODO: is maybe better set? Duplicate? if switch add < for pointer
+typedef std::vector<kedge_ptr> kedge_ptr_list;
 
 class kedge
 {
 private:
-    kworld_id m_from;
-    kworld_id m_to;
+    kworld_ptr m_from;
+    kworld_ptr m_to;
     agent m_label;
     kedge_id m_edge_id;
-    bool m_exists;
+
+    kedge_id hash_info_into_id(kworld_ptr from, kworld_ptr to, agent label);
+    kedge_id hash_info_into_id(); //generate an unique id given the state information -> the literal
+    
+    void set_from(const kworld &);
+    void set_to(const kworld &);
+    void set_label(agent);
+    void set_id();
 
 public:
     kedge();
-    kedge(kedge*);
-
-    kworld_id get_from();
-    kworld_id get_to();
+    //@TODO:Also with pointers?
+    kedge(const kworld & from, const kworld & to, agent label);
+    
+    kworld_ptr get_from();
+    kworld_ptr get_to();
     agent get_label();
     kedge_id get_id();
-    bool get_exist();
     
-    void set_from(kworld_id);
-    void set_to(kworld_id);
-    void set_label(agent);
-    void set_id(kedge_id);
-    void set_exists(bool);
+    //For set
+    bool operator<(const kedge&) const;
+    //Not needed because @((a < b) && (b < a))
+    //bool operator==(const kedge&) const;
+
 
     void print();
 };
