@@ -8,7 +8,7 @@
 #pragma once
 
 #include <string>
-#include <vector>
+#include <set>
 #include <memory>
 
 
@@ -18,7 +18,7 @@
 typedef std::string kedge_id;
 typedef std::shared_ptr<kedge> kedge_ptr;
 //@TODO: is maybe better set? Duplicate? if switch add < for pointer
-typedef std::vector<kedge_ptr> kedge_ptr_list;
+typedef std::set<kedge_ptr> kedge_ptr_set;
 
 class kedge
 {

@@ -20,7 +20,6 @@ enum bf_type
 {
     FLUENT_FORMULA,
     BELIEF_FORMULA,
-    //@TODO: change -> this represent composed formulae
     PROPOSITIONAL_FORMULA,
     E_FORMULA,
     C_FORMULA,
