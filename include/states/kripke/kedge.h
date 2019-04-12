@@ -4,21 +4,11 @@
  *
  * Created on March 31, 2019, 1:25 PM
  */
-
 #pragma once
 
-#include <string>
-#include <set>
-#include <memory>
-
-
 #include "kworld.h"
-#include "kstore.h"
 
-typedef std::string kedge_id;
-typedef std::shared_ptr<kedge> kedge_ptr;
-//@TODO: is maybe better set? Duplicate? if switch add < for pointer
-typedef std::set<kedge_ptr> kedge_ptr_set;
+#include "../../utilities/define.h"
 
 class kedge
 {
@@ -41,10 +31,10 @@ public:
     //@TODO:Also with pointers?
     kedge(const kworld & from, const kworld & to, agent label);
     
-    kworld_ptr get_from();
-    kworld_ptr get_to();
-    agent get_label();
-    kedge_id get_id();
+    kworld_ptr get_from() const;
+    kworld_ptr get_to() const;
+    agent get_label() const;
+    kedge_id get_id() const;
     
     //For set
     bool operator<(const kedge&) const;

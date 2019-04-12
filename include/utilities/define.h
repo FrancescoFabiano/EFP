@@ -12,6 +12,8 @@
 #include <vector>
 #include <set>
 #include <map>
+#include <memory>
+
 
 /*****************************************************************
  * Constants
@@ -50,3 +52,23 @@ enum domain_restriction
     NONEG, //Goal
     FAIL,
 };
+
+enum state_type
+{
+    KRIPKE,
+    POSSIBILITIES,
+    OBDD
+};
+/*****************Kripke States*****************/
+class kedge;
+typedef std::string kedge_id;
+typedef std::shared_ptr<const kedge> kedge_ptr;
+//@TODO: is maybe better set? Duplicate? if switch add < for pointer
+typedef std::set<kedge_ptr> kedge_ptr_set;
+
+class kworld;
+//Use a unique key that identifies the world??? The hash of the literal list
+typedef std::string kworld_id;
+typedef std::shared_ptr<const kworld> kworld_ptr;
+//@TODO: is maybe better set? Duplicate? if switch add < for pointer
+typedef std::set<kworld_ptr> kworld_ptr_set;

@@ -10,6 +10,7 @@
  * Implementation of the functions that don't require state specifications to work .
  * These constructors are called before the specific ones.
 ****************************************************************************************/
+state::state(){}
 
 state::state (const state & given_state)
 {
@@ -66,8 +67,8 @@ void state::set_heuristic_value(int heuristic_value)
 //@TODO: to Implement
 bool state::is_goal();
 
-
-bool state::entails(const fluent_list & to_check)
+//@TODO: for now commented because is the same in kworld -> accorpate
+/*bool state::entails(const fluent_list & to_check)
 {
 	//fluent_list expresses CNF
 	fluent_list::const_iterator it_fl;
@@ -89,7 +90,7 @@ bool state::entails (const fluent_formula & to_check)
 		}
 	}
 	return false;
-}
+}*/
 bool state::entails (const formula_list & to_check)
 {
 	//formula_list expresses CNF

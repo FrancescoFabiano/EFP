@@ -6,21 +6,12 @@
  */
 #pragma once
 
-#include <string>
 #include <set>
-#include <memory>
-#include <map>
 
-
-#include "../../utilities/define.h"
 #include "kedge.h"
 
-
-//Use a unique key that identifies the world??? The hash of the literal list
-typedef std::string kworld_id;
-typedef std::shared_ptr<kworld> kworld_ptr;
-//@TODO: is maybe better set? Duplicate? if switch add < for pointer
-typedef std::set<kworld_ptr> kworld_ptr_set;
+#include "../../utilities/define.h"
+#include "../../domain/grounder.h"
 
 class kworld
 {
@@ -40,15 +31,15 @@ public:
     //@TODO: consistency
     kworld(const fluent_list &);
     
-    const fluent_list & get_fluent_list();
-    kworld_id get_id();
-
-    void print_info();
+    const fluent_list & get_fluent_list() const;
+    kworld_id get_id() const;
 
     bool entails(fluent) const;
     bool entails(const fluent_list &) const;
     bool entails(const fluent_formula &) const;
     
     bool operator<(const kworld&) const;
+    void print_info(const grounder& gr);
+
 
 };

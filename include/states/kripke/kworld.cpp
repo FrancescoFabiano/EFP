@@ -7,41 +7,97 @@
 
 #include "kworld.h"
 
+#include "kstore.h"
+
+
 kworld::kworld()
 {
 }
 
 kworld::kworld(const fluent_list & fl)
 {
-	m_fluent_list = fl;
+	set_fluent_list(fl);
+	set_id();
 }
- //generate an unique id given the state information -> the literals
+//generate an unique id given the state information -> the literals
+
 kworld_id kworld::hash_fluents_into_id(const fluent_list& fl)
 {
 	kworld_id ret;
 	fluent_list::const_iterator it_fl;
-	for(it_fl = fl.begin(); it_fl != fl.end(); it_fl++){
+	for (it_fl = fl.begin(); it_fl != fl.end(); it_fl++) {
 		ret.append(std::to_string(*it_fl) + "-");
 	}
 	//Remove last "-" that is useless
 	ret.pop_back();
 	return ret;
 }
+
 kworld_id kworld::hash_fluents_into_id()
 {
-return hash_fluents_into_id(m_fluent_list);
+	return hash_fluents_into_id(m_fluent_list);
 }
 
-void kworld::set_fluent_list(const fluent_list & fl);
-void kworld::set_id();
+void kworld::set_fluent_list(const fluent_list & fl)
+{
+	m_fluent_list = fl;
+}
 
-const fluent_list & kworld::get_fluent_list();
-kworld_id kworld::get_id();
+void kworld::set_id()
+{
+	m_world_id = hash_fluents_into_id();
+}
 
-void kworld::print_info();
+const fluent_list & kworld::get_fluent_list() const
+{
+	return m_fluent_list;
+}
 
-bool kworld::entails(fluent) const;
-bool kworld::entails(const fluent_list &) const;
-bool kworld::entails(const fluent_formula &) const;
+kworld_id kworld::get_id() const
+{
+	return m_world_id;
+}
 
-bool kworld::operator<(const kworld&) const;
+bool kworld::entails(fluent to_check) const
+{
+	return (m_fluent_list.find(to_check) != m_fluent_list.end());
+}
+
+bool kworld::entails(const fluent_list & to_check) const
+{
+	//fluent_list expresses CNF
+	fluent_list::const_iterator it_fl;
+	for (it_fl = to_check.begin(); it_fl != to_check.end(); it_fl++) {
+		if (!entails(*it_fl)) {
+			return false;
+		}
+	}
+	return true;
+}
+
+bool kworld::entails(const fluent_formula & to_check) const
+{
+	//@TODO: Check for the size = 0?
+	//fluent_formula expresses DNF
+	fluent_formula::const_iterator it_fl;
+	for (it_fl = to_check.begin(); it_fl != to_check.end(); it_fl++) {
+		if (entails(*it_fl)) {
+			return true;
+		}
+	}
+	return false;
+}
+
+bool kworld::operator<(const kworld& world) const
+{
+	if (m_world_id.compare(world.get_id()) < 0)
+		return true;
+	return false;
+}
+
+void kworld::print_info(const grounder& gr)
+{
+	std::cout << "World id: " << get_id();
+	std::cout << "\nFluents: " << get_id();
+	gr.print_ff(m_fluent_list);
+}

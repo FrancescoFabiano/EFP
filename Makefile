@@ -3,6 +3,8 @@ OBJS	=	$(BUILD_DIR)/bison.o $(BUILD_DIR)/lex.o $(BUILD_DIR)/main.o \
 			$(BUILD_DIR)/belief_formula.o $(BUILD_DIR)/proposition.o $(BUILD_DIR)/domain.o \
 			$(BUILD_DIR)/grounder.o $(BUILD_DIR)/printer.o \
 			$(BUILD_DIR)/action.o $(BUILD_DIR)/formula_manipulation.o $(BUILD_DIR)/initially.o \
+			$(BUILD_DIR)/kstore.o \
+			$(BUILD_DIR)/kedge.o $(BUILD_DIR)/kworld.o $(BUILD_DIR)/kstate.o \
 			$(BUILD_DIR)/reader.o
 
 CC	= g++
@@ -64,73 +66,104 @@ $(BUILD_DIR)/main.o:	$(SRC_DIR)/main.cpp \
 		$(CC) $(CFLAGS) -c $(BUILD_DIR)/main.temp.cpp -o $(BUILD_DIR)/main.o
 		rm $(BUILD_DIR)/main.temp.cpp
 		
-		
-#-----------------------------------INTERFACES-----------------------------------#
-$(BUILD_DIR)/action.o: $(ACTION_DIR)/action.cpp $(ACTION_DIR)/action.h \
-					   $(DOMAIN_DIR)/grounder.h \
-					   $(FORMULA_DIR)/proposition.h $(FORMULA_DIR)/belief_formula.h \
-					   $(UTILITIES_DIR)/define.h
-		$(dir_guard)
-		$(CC) $(CFLAGS) -c $(ACTION_DIR)/action.cpp -o $(BUILD_DIR)/action.o
-		
-		
 #-----------------------------------INCLUDE FILES-----------------------------------#
+####UTILITIES
 $(BUILD_DIR)/printer.o: $(UTILITIES_DIR)/printer.cpp $(UTILITIES_DIR)/printer.h \
 						 $(UTILITIES_DIR)/define.h
 		$(dir_guard)
 		$(CC) $(CFLAGS) -c $(UTILITIES_DIR)/printer.cpp -o $(BUILD_DIR)/printer.o
-
-
-$(BUILD_DIR)/grounder.o: $(DOMAIN_DIR)/grounder.cpp $(DOMAIN_DIR)/grounder.h \
-#						 $(ACTION_DIR)/action.h \
-						 $(UTILITIES_DIR)/define.h $(UTILITIES_DIR)/printer.h
+		
+$(BUILD_DIR)/reader.o: $(UTILITIES_DIR)/reader.cpp $(UTILITIES_DIR)/reader.h \
+					   $(FORMULA_DIR)/belief_formula.h \
+					   $(UTILITIES_DIR)/define.h $(UTILITIES_DIR)/printer.h
 		$(dir_guard)
-		$(CC) $(CFLAGS) -c $(DOMAIN_DIR)/grounder.cpp -o $(BUILD_DIR)/grounder.o
+		$(CC) $(CFLAGS) -c $(UTILITIES_DIR)/reader.cpp -o $(BUILD_DIR)/reader.o
 
+####FORMULAE
 $(BUILD_DIR)/formula_manipulation.o: $(FORMULA_DIR)/formula_manipulation.cpp $(FORMULA_DIR)/formula_manipulation.h \
-									 $(FORMULA_DIR)/belief_formula.h \
-									 $(UTILITIES_DIR)/define.h $(UTILITIES_DIR)/printer.h
+										 $(FORMULA_DIR)/belief_formula.h \
+										 $(UTILITIES_DIR)/define.h $(UTILITIES_DIR)/printer.h
 		$(dir_guard)
 		$(CC) $(CFLAGS) -c $(FORMULA_DIR)/formula_manipulation.cpp -o $(BUILD_DIR)/formula_manipulation.o
 
 $(BUILD_DIR)/proposition.o: $(FORMULA_DIR)/proposition.cpp $(FORMULA_DIR)/proposition.h \
 							$(FORMULA_DIR)/belief_formula.h \
 							$(UTILITIES_DIR)/define.h $(UTILITIES_DIR)/printer.h
-
 		$(dir_guard)
 		$(CC) $(CFLAGS) -c $(FORMULA_DIR)/proposition.cpp -o $(BUILD_DIR)/proposition.o
-		
+			
 $(BUILD_DIR)/belief_formula.o: $(FORMULA_DIR)/belief_formula.cpp $(FORMULA_DIR)/belief_formula.h \
-							   $(DOMAIN_DIR)/grounder.h \
-							   $(UTILITIES_DIR)/define.h $(UTILITIES_DIR)/printer.h
+								   $(DOMAIN_DIR)/grounder.h \
+								   $(UTILITIES_DIR)/define.h $(UTILITIES_DIR)/printer.h
 		$(dir_guard)
 		$(CC) $(CFLAGS) -c $(FORMULA_DIR)/belief_formula.cpp -o $(BUILD_DIR)/belief_formula.o
 
+####ACTIONS
+$(BUILD_DIR)/action.o: $(ACTION_DIR)/action.cpp $(ACTION_DIR)/action.h \
+					   $(DOMAIN_DIR)/grounder.h \
+					   $(FORMULA_DIR)/proposition.h $(FORMULA_DIR)/belief_formula.h \
+					   $(UTILITIES_DIR)/define.h
+		$(dir_guard)
+		$(CC) $(CFLAGS) -c $(ACTION_DIR)/action.cpp -o $(BUILD_DIR)/action.o
+			
+####STATES
+#$(BUILD_DIR)/state_T.o: $(STATES_DIR)/state_T.cpp $(STATES_DIR)/state_T.h \
+#					    $(ACTION_DIR)/action.h \
+#					    $(DOMAIN_DIR)/initially.h \
+#   					    $(UTILITIES_DIR)/define.h
+#		$(dir_guard)
+#		$(CC) $(CFLAGS) -c $(STATES_DIR)/state_T.cpp -o $(BUILD_DIR)/state_T.o
+		
+##KRIPKE STATES		
+$(BUILD_DIR)/kstate.o: $(S_KRIPE_DIR)/kstate.cpp $(S_KRIPE_DIR)/kstate.h \
+					   $(S_KRIPE_DIR)/kworld.h $(S_KRIPE_DIR)/kedge.h $(S_KRIPE_DIR)/kstore.h \
+					   $(ACTION_DIR)/action.h \
+					   $(DOMAIN_DIR)/initially.h \
+					   $(UTILITIES_DIR)/define.h
+		$(dir_guard)
+		$(CC) $(CFLAGS) -c $(S_KRIPE_DIR)/kstate.cpp -o $(BUILD_DIR)/kstate.o
+
+$(BUILD_DIR)/kworld.o: $(S_KRIPE_DIR)/kworld.cpp $(S_KRIPE_DIR)/kworld.h \
+					   $(S_KRIPE_DIR)/kedge.h \
+					   $(DOMAIN_DIR)/grounder.h \
+					   $(UTILITIES_DIR)/define.h
+		$(dir_guard)
+		$(CC) $(CFLAGS) -c $(S_KRIPE_DIR)/kworld.cpp -o $(BUILD_DIR)/kworld.o
+				
+$(BUILD_DIR)/kedge.o: $(S_KRIPE_DIR)/kedge.cpp $(S_KRIPE_DIR)/kedge.h \
+					  $(S_KRIPE_DIR)/kworld.h \
+					  $(UTILITIES_DIR)/define.h
+		$(dir_guard)
+		$(CC) $(CFLAGS) -c $(S_KRIPE_DIR)/kedge.cpp -o $(BUILD_DIR)/kedge.o
+				
+$(BUILD_DIR)/kstore.o: $(S_KRIPE_DIR)/kstore.cpp $(S_KRIPE_DIR)/kstore.h \
+					   $(S_KRIPE_DIR)/kworld.h $(S_KRIPE_DIR)/kedge.h \
+					   $(UTILITIES_DIR)/define.h
+		$(dir_guard)
+		$(CC) $(CFLAGS) -c $(S_KRIPE_DIR)/kstore.cpp -o $(BUILD_DIR)/kstore.o
+
+####DOMAIN
 $(BUILD_DIR)/initially.o: $(DOMAIN_DIR)/initially.cpp $(DOMAIN_DIR)/initially.h \
-					      $(FORMULA_DIR)/belief_formula.h  \
-					      $(UTILITIES_DIR)/define.h
+						  $(FORMULA_DIR)/belief_formula.h  \
+						  $(UTILITIES_DIR)/define.h
 		$(dir_guard)
 		$(CC) $(CFLAGS) -c $(DOMAIN_DIR)/initially.cpp -o $(BUILD_DIR)/initially.o
-		
-		
-$(BUILD_DIR)/reader.o: $(UTILITIES_DIR)/reader.cpp $(UTILITIES_DIR)/reader.h \
-					   $(FORMULA_DIR)/belief_formula.h  \
-					   $(UTILITIES_DIR)/define.h $(UTILITIES_DIR)/printer.h
+			
+$(BUILD_DIR)/grounder.o: $(DOMAIN_DIR)/grounder.cpp $(DOMAIN_DIR)/grounder.h \
+						 $(UTILITIES_DIR)/define.h $(UTILITIES_DIR)/printer.h
 		$(dir_guard)
-		$(CC) $(CFLAGS) -c $(UTILITIES_DIR)/reader.cpp -o $(BUILD_DIR)/reader.o
-		
+		$(CC) $(CFLAGS) -c $(DOMAIN_DIR)/grounder.cpp -o $(BUILD_DIR)/grounder.o
+			
 $(BUILD_DIR)/domain.o: $(DOMAIN_DIR)/domain.cpp $(DOMAIN_DIR)/domain.h \
+					   $(DOMAIN_DIR)/initially.h $(DOMAIN_DIR)/grounder.h \
 					   $(UTILITIES_DIR)/reader.h $(UTILITIES_DIR)/define.h \
 					   $(ACTION_DIR)/action.h \
-					   $(DOMAIN_DIR)/initially.h $(DOMAIN_DIR)/grounder.h 	   
+					   $(STATES_DIR)/state_T.h $(STATES_DIR)/state_T.icpp
 		$(dir_guard)
 		$(CC) $(CFLAGS) -c $(DOMAIN_DIR)/domain.cpp -o $(BUILD_DIR)/domain.o
 
-
-#lex.o yac.o main.o	: 
-#lex.o main.o		: 
-
 clean:
 	rm -f $(BIN_DIR)/*.out \
-	$(BUILD_DIR)/*.o \
-	*~ $(BUILD_DIR)/lex.c $(BUILD_DIR)/lex.yy.c $(BUILD_DIR)/bison.c $(BUILD_DIR)/tok.h $(BUILD_DIR)/lcp.tab.c $(BUILD_DIR)/lcp.tab.h $(BUILD_DIR)/lcp.efp.output
+	$(BUILD_DIR)/*
+
+#*~ $(BUILD_DIR)/*.*

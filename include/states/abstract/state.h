@@ -7,6 +7,7 @@
 #pragma once
 
 #include "../actions/action.h"
+#include "../domain/initially.h"
 //#include "belief_formulae.h"
 
 /***************************************************************************************
@@ -24,10 +25,11 @@ class state
 public:
     
     //Implement in each class with a kstate instead of a state
+    state();
     state (const state &);
     state (const state &, const action &);
-    state ( const action_id_list &, unsigned short);
-    state ( const action_id_list &, unsigned short, int);
+    state (const action_id_list &, unsigned short);
+    state (const action_id_list &, unsigned short, int);
     
     const action_id_list & get_executed_actions();
     unsigned short get_plan_length();
@@ -39,14 +41,16 @@ public:
     void set_plan_length(unsigned short);
     void set_heuristic_value(int);
     
-    virtual state compute_succ (const action &) = 0;
+    //virtual state compute_succ (const action &) = 0;
     
-    bool entails (const fluent_list &);
-    bool entails (const fluent_formula &);
     virtual bool entails (fluent) = 0;
+    virtual bool entails (const fluent_list &);
+    virtual bool entails (const fluent_formula &);
     
-    bool entails (const formula_list & to_check);
+    bool entails (const formula_list &);
     virtual bool entails (const belief_formula &) = 0;
+    
+    //virtual state build_initial(initally) = 0;
     
     bool is_goal();
     

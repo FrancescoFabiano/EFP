@@ -21,7 +21,7 @@ Realize an Epistemic Forward Planner that bases its concept on different states 
 
 ## Theorical ideas to study
 - Objective vs subjective common knowledge;
-- announcemt/sensing of Belief formulae;
+- announcement/sensing of Belief formulae;
 - ontic that remove uncertanty;
 - static laws (the same as biased info?);
 - intial state;

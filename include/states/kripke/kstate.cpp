@@ -6,8 +6,7 @@
  */
 
 #include "kstate.h"
-state kstate::compute_succ(const action &);
-//@TODO: maybe useless functions?
+
 bool kstate::entails(fluent f)
 {
 	return entails(f, m_pointed);
@@ -17,21 +16,36 @@ bool kstate::entails(fluent f, kworld_ptr world)
 	//@TODO: consistency?
 	return world->entails(f);
 }
-bool kstate::entails(fluent_formula ff)
+bool kstate::entails(const fluent_list & fl)
+{
+	//@TODO: consistency?
+	return entails(fl, m_pointed);
+}
+
+bool kstate::entails(const fluent_list & fl, kworld_ptr world)
+{
+	//@TODO: consistency?
+	return world->entails(fl);
+}
+
+bool kstate::entails(const fluent_formula & ff)
 {
 	//@TODO: consistency?
 	return entails(ff, m_pointed);
 }
-bool kstate::entails(fluent_formula ff, kworld_ptr world)
+
+bool kstate::entails(const fluent_formula & ff, kworld_ptr world)
 {
 	//@TODO: consistency?
-	return world->entails(f);
+	return world->entails(ff);
 }
 
 bool kstate::entails(const belief_formula & bf)
 {
 	return entails(bf, m_pointed);
 }
+
+
 bool kstate::entails(const belief_formula & bf, const kworld_ptr_set & reachable)
 {
 	kworld_ptr_set::const_iterator it_kwl;
@@ -41,6 +55,7 @@ bool kstate::entails(const belief_formula & bf, const kworld_ptr_set & reachable
 	}
 	return false;
 }
+
 bool kstate::entails(const belief_formula & bf, kworld_ptr world)
 {
 	switch (bf.m_formula_type) {
@@ -48,52 +63,51 @@ bool kstate::entails(const belief_formula & bf, kworld_ptr world)
 		//@TODO: Make sure it is grounded
 		return entails(bf.m_fluent_formula, world);
 		break;
-		
+
 	case BELIEF_FORMULA:
 		//@TODO: Make sure it is grounded 
 		//@TODO: The at leat one?
 		return entails(*(bf.m_bf1), get_B_reachable_worlds(bf.m_agent_op, world));
 		break;
-		
+
 	case PROPOSITIONAL_FORMULA:
 		switch (bf.m_operator) {
 		case BF_NOT:
-			return !entail(bf.m_bf1, world);
+			return !entails(*(bf.m_bf1), world);
 			break;
 		case BF_OR:
-			return entail(bf.m_bf1, world) || entail(bf.m_bf2, world);
+			return entails(*(bf.m_bf1), world) || entails(*(bf.m_bf2), world);
 			break;
 		case BF_AND:
-			return entail entail(bf.m_bf1, world) && entail(bf.m_bf2, world);
+			return entails(*(bf.m_bf1), world) && entails(*(bf.m_bf2), world);
 			break;
 		case BF_NONE:
-			return entail(bf.m_bf1, world);
+			return entails(*(bf.m_bf1), world);
 			break;
 		default:
 			std::cerr << "Something went wrong in checking entailment for Propositional formula";
 			exit(1);
 		}
 		break;
-		
+
 	case E_FORMULA:
 		return entails(*(bf.m_bf1), get_E_reachable_worlds(bf.m_group_agents, world));
 		break;
 
-	//Testi tutti i raggiungibili pointed worlds con gli agenti dati (in chiusura transitiva)
+		//Testi tutti i raggiungibili pointed worlds con gli agenti dati (in chiusura transitiva)
 	case C_FORMULA:
 		return entails(*(bf.m_bf1), get_C_reachable_worlds(bf.m_group_agents, world));
 		break;
-		
-	case BFEmpty:
+
+	case EMPTY:
 		return true;
 		break;
-		
+
 	default:
 		std::cerr << "Something went wrong in checking entailment for Belief formula";
 		exit(1);
 	}
 }
-
 
 const kworld_ptr_set kstate::get_B_reachable_worlds(agent ag, kworld_ptr world)
 {
@@ -101,15 +115,15 @@ const kworld_ptr_set kstate::get_B_reachable_worlds(agent ag, kworld_ptr world)
 	get_B_reachable_worlds(ag, world, ret);
 	return ret;
 }
+
 bool kstate::get_B_reachable_worlds(agent ag, kworld_ptr world, kworld_ptr_set& ret)
 {
 	bool is_fixed_point = true;
 	kedge_ptr_set::const_iterator it_kedge;
 	for (it_kedge = m_edges.begin(); it_kedge != m_edges.end(); it_kedge++) {
-
-		if (((*it_kedge)->m_from->m_world_id == world->m_world_id) && ((*it_kedge)->m_label == ag)) {
-			//We use the tuple of insert, if we add a new world (true in the set::insert) then is not a fixed point
-			if (((ret.insert((*it_kedge)->m_to))->second)) {
+		if (((*it_kedge)->get_from()->get_id() == world->get_id()) && ((*it_kedge)->get_label() == ag)) {
+			//We use the pair of insert, if we add a new world (true in the set::insert) then is not a fixed point
+			if (std::get<1>(ret.insert((*it_kedge)->get_to()))) {
 				is_fixed_point = false;
 			}
 		}
@@ -124,10 +138,10 @@ const kworld_ptr_set kstate::get_E_reachable_worlds(const agent_set & ags, kworl
 	get_E_reachable_worlds(ags, world, ret);
 	return ret;
 }
+
 bool kstate::get_E_reachable_worlds(const agent_set & ags, kworld_ptr world, kworld_ptr_set& ret)
 {
 	bool is_fixed_point = true;
-	kworld_ptr_set ret;
 	agent_set::const_iterator it_agset;
 	for (it_agset = ags.begin(); it_agset != ags.end(); it_agset++) {
 		if (!get_B_reachable_worlds(*it_agset, world, ret)) {
@@ -145,4 +159,25 @@ const kworld_ptr_set kstate::get_C_reachable_worlds(const agent_set & ags, kworl
 		is_fixed_point = get_E_reachable_worlds(ags, world, ret);
 	}
 	return ret;
+}
+
+void kstate::add_world(const kworld & world)
+{
+	m_worlds.insert(kstore::get_instance().add_world(world));
+}
+
+/*void kstate::add_world(const fluent_formula & ff)
+{
+	//@TODO: Implement
+	//m_worlds.insert(kstore::get_instance().add_world(ff));
+}*/
+
+void kstate::add_edge(const kedge & edge)
+{
+	m_edges.insert(kstore::get_instance().add_edge(edge));
+}
+
+void kstate::build_initial(const initially & initials_conditions)
+{
+	std::cout << "\nBuilding initial Kripke structure...\n";
 }

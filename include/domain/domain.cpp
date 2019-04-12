@@ -6,10 +6,10 @@
  */
 #include "domain.h"
 
-domain::domain(std::shared_ptr<reader> d_reader, domain_restriction ini_restriction, domain_restriction goal_restriction)
+domain::domain(std::shared_ptr<reader> d_reader, state_type given_state_type, domain_restriction ini_restriction, domain_restriction goal_restriction)
 {
 	m_reader = d_reader;
-
+	m_state_type = given_state_type;
 	m_intial_description = initially(ini_restriction);
 	m_goal_restriction = goal_restriction;
 
@@ -23,6 +23,13 @@ bool domain::build(bool debug)
 	build_actions(debug);
 	build_initially(debug);
 	build_goal(debug);
+	
+	
+	if(m_state_type == KRIPKE){
+		state<kstate> initial;
+		initial.build_initial(m_intial_description);
+	}
+	
 	return true;
 
 }

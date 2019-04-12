@@ -21,34 +21,40 @@ reader domain_reader;
 void print_usage(char* prog_name)
 {
 	std::cout << "USAGE:" << std::endl;
-	std::cout << "  " << prog_name << " input_domain [options]" << std::endl << std::endl;
+	std::cout << prog_name << " input_domain [options]" << std::endl << std::endl;
 	std::cout << "OPTIONS:" << std::endl;
-	std::cout << "  -ir @restriction" << std::endl;
-	std::cout << "     Set the @restriction that the Initial state must encode." << std::endl;
-	std::cout << "     Possible @restriction:" << std::endl;
-	std::cout << "	     S5: The Initial state must encode an S5 model. (Default)" << std::endl;
-	std::cout << "	     K45: The Initial state must encode a K45 model." << std::endl;
-	std::cout << "	     NONE: The Initial state does not have restrictions." << std::endl;
-	std::cout << "  -gr @restriction" << std::endl;
-	std::cout << "     Set the @restriction for the Goal description." << std::endl;
-	std::cout << "     Possible @restriction:" << std::endl;
-	std::cout << "	     NONE: The Goal does not have restrictions. (Default)" << std::endl;
-	std::cout << "	     NONEG: The Goal does not accept negative belief formula (-B(i,phi))." << std::endl;
-	std::cout << " -spg" << std::endl;
-	std::cout << "     Find the plan using the sum planning graph heuristic." << std::endl;
-	std::cout << " -mpg" << std::endl;
-	std::cout << "     Find the plan using the max planning graph heuristic." << std::endl;
-	std::cout << "  -e action1 action2 action3 ..." << std::endl;
-	std::cout << "     Perform a sequence of actions and print out" << std::endl;
-	std::cout << "     results step by step. The planner does not" << std::endl;
-	std::cout << "     search for a plan." << std::endl << std::endl;
+	std::cout << "-st @state_type" << std::endl;
+	std::cout << "	Select the @state_type for the planner." << std::endl;
+	std::cout << "	Possible @state_type:" << std::endl;
+	std::cout << "		KRIPKE: The States are represented with Kripke structures. (Default)" << std::endl;
+	std::cout << "		POSS: The States are represented with Possibilities (NWF-SET)." << std::endl;
+	std::cout << "		OBDD: The States are represented with OBDDs." << std::endl;
+	std::cout << "-ir @restriction" << std::endl;
+	std::cout << "	Set the @restriction that the Initial state must encode." << std::endl;
+	std::cout << "	Possible @restriction:" << std::endl;
+	std::cout << "		S5: The Initial state must encode an S5 model. (Default)" << std::endl;
+	std::cout << "		K45: The Initial state must encode a K45 model." << std::endl;
+	std::cout << "		NONE: The Initial state does not have restrictions." << std::endl;
+	std::cout << "-gr @restriction" << std::endl;
+	std::cout << "	Set the @restriction for the Goal description." << std::endl;
+	std::cout << "	Possible @restriction:" << std::endl;
+	std::cout << "		NONE: The Goal does not have restrictions. (Default)" << std::endl;
+	std::cout << "		NONEG: The Goal does not accept negative belief formula (-B(i,phi))." << std::endl;
+	std::cout << "-spg" << std::endl;
+	std::cout << "	Find the plan using the sum planning graph heuristic." << std::endl;
+	std::cout << "-mpg" << std::endl;
+	std::cout << "	Find the plan using the max planning graph heuristic." << std::endl;
+	std::cout << "-e action1 action2 action3 ..." << std::endl;
+	std::cout << "	Perform a sequence of actions and print out" << std::endl;
+	std::cout << "	results step by step. The planner does not" << std::endl;
+	std::cout << "	search for a plan." << std::endl << std::endl;
 	std::cout << "EXAMPLES:" << std::endl;
-	std::cout << "  " << prog_name << " ex.al" << std::endl;
-	std::cout << "     Find a conformant plan for ex.al. The system will" << std::endl;
-	std::cout << "     automatically detect necessary fluents to be considered." << std::endl;
-	std::cout << "  " << prog_name << " ex.al -e \"move(2,table)\" \"move(1,2)\" -p" << std::endl;
-	std::cout << "     Execute the plan [move(2,table);move(1,2)]." << std::endl;
-	std::cout << "     The possible world semantics is used." << std::endl << std::endl;
+	std::cout << prog_name << " ex.al" << std::endl;
+	std::cout << "	Find a conformant plan for ex.al. The system will" << std::endl;
+	std::cout << "	automatically detect necessary fluents to be considered." << std::endl;
+	std::cout << prog_name << " ex.al -e \"move(2,table)\" \"move(1,2)\" -p" << std::endl;
+	std::cout << "	Execute the plan [move(2,table);move(1,2)]." << std::endl;
+	std::cout << "	The possible world semantics is used." << std::endl << std::endl;
 
 	exit(1);
 }
@@ -56,6 +62,7 @@ void print_usage(char* prog_name)
 int main(int argc, char** argv)
 {
 	bool debug = false;
+	state_type state_struc= KRIPKE; //default
 	domain_restriction ini_restriction = S5; //default
 	domain_restriction goal_restriction = NONE; //default
 
@@ -109,6 +116,25 @@ int main(int argc, char** argv)
 				exit(1);
 			}
 		}
+		if (strcmp(argv[i], "-st") == 0) {
+			i++;
+			if (i >= argc) {
+				std::cerr << "-st needs specification (KRIPKE, POSS, OBDD)." << std::endl;
+				exit(1);
+			} else if (strcmp(argv[i], "KRIPKE") == 0) {
+				std::cout << "The States are represented with Kripke structures. (Default)" << std::endl;
+				state_struc = KRIPKE; //default
+			} else if (strcmp(argv[i], "POSS") == 0) {
+				std::cout << "The States are represented with Possibilities (NWF-SET)." << std::endl;
+				state_struc = POSSIBILITIES;
+			} else if (strcmp(argv[i], "OBDD") == 0) {
+				std::cout << "The States are represented with OBDDs." << std::endl;
+				state_struc = OBDD;
+			} else {
+				std::cerr << "Wrong specification (KRIPKE, POSS, OBDD)." << std::endl;
+				exit(1);
+			}
+		}
 		/* else if (strcmp(argv[i], "-mpg") == 0) {
 			std::cout << " search with max planning graph heuristic " << std::endl;
 			planner.m_heuristic = PLANNINGGRAPH;
@@ -135,7 +161,7 @@ int main(int argc, char** argv)
 		std::cerr << argv[0] << ": File " << argv[1] << " cannot be opened.\n";
 		exit(1);
 	}
-	domain domain(std::shared_ptr<reader>(&domain_reader), ini_restriction, goal_restriction);
+	domain domain(std::shared_ptr<reader>(&domain_reader), state_struc, ini_restriction, goal_restriction);
 
 	//timer.start(READ_TIMER);
 	domain_reader.read();
