@@ -84,7 +84,7 @@ void state<T>::set_heuristic_value(int heuristic_value)
 	m_heuristic_value = heuristic_value;
 }
 template <class T>
-bool state<T>::entails(const fluent_list & to_check)
+bool state<T>::entails(const fluent_set & to_check)
 {
 	return representation.entails(to_check);
 }

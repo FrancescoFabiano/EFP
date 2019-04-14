@@ -158,7 +158,7 @@ $(BUILD_DIR)/domain.o: $(DOMAIN_DIR)/domain.cpp $(DOMAIN_DIR)/domain.h \
 					   $(DOMAIN_DIR)/initially.h $(DOMAIN_DIR)/grounder.h \
 					   $(UTILITIES_DIR)/reader.h $(UTILITIES_DIR)/define.h \
 					   $(ACTION_DIR)/action.h \
-					   $(STATES_DIR)/state_T.h $(STATES_DIR)/state_T.icpp
+					   $(STATES_DIR)/state_T.h $(STATES_DIR)/state_T.ipp
 		$(dir_guard)
 		$(CC) $(CFLAGS) -c $(DOMAIN_DIR)/domain.cpp -o $(BUILD_DIR)/domain.o
 

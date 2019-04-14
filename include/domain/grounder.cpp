@@ -94,10 +94,10 @@ fluent grounder::ground_fluent(const std::string& x) const
 	exit(1);
 }
 
-fluent_list grounder::ground_fluent(const string_list& x) const
+fluent_set grounder::ground_fluent(const string_set& x) const
 {
-	string_list::iterator it;
-	fluent_list y;
+	string_set::iterator it;
+	fluent_set y;
 
 	for (it = x.begin(); it != x.end(); it++) {
 		y.insert(ground_fluent(*it));
@@ -106,9 +106,9 @@ fluent_list grounder::ground_fluent(const string_list& x) const
 	return y;
 }
 
-fluent_formula grounder::ground_fluent(const string_list_list& x) const
+fluent_formula grounder::ground_fluent(const string_set_set& x) const
 {
-	string_list_list::iterator it;
+	string_set_set::iterator it;
 	fluent_formula y;
 
 	for (it = x.begin(); it != x.end(); it++) {
@@ -131,9 +131,9 @@ agent grounder::ground_agent(const std::string& x) const
 	exit(1);
 }
 
-agent_set grounder::ground_agent(const string_list& x) const
+agent_set grounder::ground_agent(const string_set& x) const
 {
-	string_list::iterator it;
+	string_set::iterator it;
 	agent_set y;
 
 	for (it = x.begin(); it != x.end(); it++) {
@@ -167,11 +167,11 @@ std::string grounder::deground_fluent(fluent x) const
 	exit(1);
 }
 
-string_list grounder::deground_fluent(const fluent_list& x) const
+string_set grounder::deground_fluent(const fluent_set& x) const
 {
 
-	fluent_list::iterator it;
-	string_list y;
+	fluent_set::iterator it;
+	string_set y;
 
 	for (it = x.begin(); it != x.end(); it++) {
 		y.insert(deground_fluent(*it));
@@ -180,10 +180,10 @@ string_list grounder::deground_fluent(const fluent_list& x) const
 	return y;
 }
 
-string_list_list grounder::deground_fluent(const fluent_formula& x) const
+string_set_set grounder::deground_fluent(const fluent_formula& x) const
 {
 	fluent_formula::iterator it;
-	string_list_list y;
+	string_set_set y;
 
 	for (it = x.begin(); it != x.end(); it++) {
 		//@TODO: Controlla questo passaggio, schifo! Change all the pointers to ref
@@ -217,7 +217,7 @@ std::string grounder::deground_action(action_id x) const
 	exit(1);
 }
 
-void grounder::print_ff(const fluent_list& to_print) const
+void grounder::print_ff(const fluent_set& to_print) const
 {
 	printer::print_list(deground_fluent(to_print));
 }

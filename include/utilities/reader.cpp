@@ -1,22 +1,23 @@
-/* 
- * File:   reader.cpp
- * Author: Francesco
- *
- * Created on March 31, 2019, 6:41 PM
+/*
+ * \brief Implementation of \ref reader.h. 
+ * 
+ * 
+ * \copyright GNU Public License.
+ * 
+ * \author Francesco Fabiano.
+ * \date 3/31/2019
  */
 
 #include <iostream>
 
-#include <algorithm>    // for set_intersection, set_union
-#include <functional>   // for less
 #include "reader.h"
-#include "printer.h"
+#include "printer.h" //Used in \ref print as a support
 
 
 //prototype of bison-generated parser function
 int yyparse();
 
-string_list reader::name(const fluent_list &x)
+/*string_list reader::name(const fluent_list &x)
 {
 	string_list y;
 	fluent_list::iterator it;
@@ -46,51 +47,37 @@ std::string reader::name(fluent x)
 		return *it;
 
 	return(NEGATION_SYMBOL + (*it));
-}
+}*/
 
 int reader::read()
 {
+	//Call to the parser function.
 	return yyparse();
 }
 
+/**
+ This function print out all the information that are stored as std::string in the
+ * reader object. @see printer, belief_formula::print() const, \ref proposition::print() const
+ */
 void reader::print() const
 {
-	
+
+	//Printing of all the agent with the \ref printer::print functions
 	proposition_list::const_iterator it_porplist;
-
-	std::cout << std::endl;
-	std::cout << std::endl;
-
+	std::cout << std::endl << std::endl;
 	std::cout << "AGENT DECLARATION" << std::endl;
 	std::cout << "---------------------------" << std::endl;
-	/*first = true;
-	for (it = m_agents.begin(); it != m_agents.end(); it++) {
-		if (!first)
-			std::cout << ",";
-		first = false;
-		std::cout << *it;
-	}*/
 	printer::print_list(m_agents);
-
-	//std::cout << " DONE PRINTING AGENTS" << std::endl;
-	std::cout << std::endl;
-	std::cout << std::endl;
+	std::cout << std::endl << std::endl;
 
 
+	//Printing of all the fluents with the \ref printer functions
 	std::cout << "FLUENT DECLARATION" << std::endl;
 	std::cout << "----------------------------" << std::endl;
-	/*first = true;
-	for (it = m_fluents.begin(); it != m_fluents.end(); it++) {
-		if (!first)
-			std::cout << ",";
-		first = false;
-		std::cout << *it;
-	}*/
 	printer::print_list(m_fluents);
+	std::cout << std::endl << std::endl;
 
-	std::cout << std::endl;
-	std::cout << std::endl;
-
+	//Printing of all the proposition with the \ref proposition functions
 	std::cout << "PROPOSITIONS" << std::endl;
 	std::cout << "----------------------------" << std::endl;
 	for (it_porplist = m_propositions.begin(); it_porplist != m_propositions.end(); it_porplist++) {
@@ -98,7 +85,7 @@ void reader::print() const
 		std::cout << std::endl;
 	}
 
-	// print init cstate
+	//Printing of all the proposition with the \ref belief_formula functions
 	formula_list::const_iterator it_formlist;
 	std::cout << "INIT" << std::endl;
 	std::cout << "----------------------------" << std::endl;
@@ -110,7 +97,7 @@ void reader::print() const
 
 	std::cout << std::endl;
 
-	// print goal state
+	//Printing of all the goal with the \ref belief_formula functions
 	std::cout << "GOAL " << std::endl;
 	std::cout << "----------------------------" << std::endl;
 	for (it_formlist = m_bf_goal.begin(); it_formlist != m_bf_goal.end(); it_formlist++) {
@@ -118,10 +105,10 @@ void reader::print() const
 		std::cout << std::endl;
 	}
 
-	std::cout << std::endl;
-	std::cout << std::endl << std::endl;
+	std::cout << std::endl<< std::endl << std::endl;
 
-	// print statistics
+	/*
+	 * // print statistics
 	std::cout << "STATISTICS " << std::endl;
 	std::cout << "----------------------------" << std::endl;
 	//std::cout << "Total actions: " << m_actions.size() << std::endl;
@@ -138,5 +125,5 @@ void reader::print() const
 		std::cout << m_fluents.size() - (*it_fll).size();
 		std::cout << std::endl;
 	}
-	//std::cout << "done" << std::endl;
+	//std::cout << "done" << std::endl;*/
 }

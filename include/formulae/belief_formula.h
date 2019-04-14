@@ -42,7 +42,7 @@ public:
     bf_type m_formula_type; //Which case of belief formula this is
 
     //Fluent formula
-    string_list_list m_string_fluent_formula;
+    string_set_set m_string_fluent_formula;
     //Pointer because it may be empty 
     fluent_formula m_fluent_formula;
 

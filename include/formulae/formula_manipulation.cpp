@@ -17,11 +17,11 @@ fluent formula_manipulation::negate_fluent(const fluent f)
 
 }
 
-bool formula_manipulation::is_consistent(const fluent_list &fl1, const fluent_list& fl2)
+bool formula_manipulation::is_consistent(const fluent_set &fl1, const fluent_set& fl2)
 {
 
 	//@TODO: Add static_laws
-	fluent_list::iterator it_fl;
+	fluent_set::iterator it_fl;
 
 	for (it_fl = fl2.begin(); it_fl != fl2.end(); it_fl++) {
 
@@ -35,9 +35,9 @@ bool formula_manipulation::is_consistent(const fluent_list &fl1, const fluent_li
 
 //@TODO: Check the return value
 
-fluent_list formula_manipulation::and_ff(const fluent_list& fl1, const fluent_list& fl2)
+fluent_set formula_manipulation::and_ff(const fluent_set& fl1, const fluent_set& fl2)
 {
-	fluent_list ret;
+	fluent_set ret;
 	if (!fl1.empty() && !fl2.empty()) {
 
 		if (is_consistent(fl1, fl2)) {

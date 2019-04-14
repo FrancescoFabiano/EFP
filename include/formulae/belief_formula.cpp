@@ -103,8 +103,8 @@ void belief_formula::print_grounded(const grounder& grounder) const
 {
 	
 	bool first = true;
-	string_list::const_iterator it;
-	string_list_list::const_iterator it2;
+	string_set::const_iterator it;
+	string_set_set::const_iterator it2;
 	bool first2 = true;
 	std::cout << "(";
 	switch (m_formula_type) {

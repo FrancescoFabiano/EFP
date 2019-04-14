@@ -16,13 +16,13 @@ bool kstate::entails(fluent f, kworld_ptr world)
 	//@TODO: consistency?
 	return world->entails(f);
 }
-bool kstate::entails(const fluent_list & fl)
+bool kstate::entails(const fluent_set & fl)
 {
 	//@TODO: consistency?
 	return entails(fl, m_pointed);
 }
 
-bool kstate::entails(const fluent_list & fl, kworld_ptr world)
+bool kstate::entails(const fluent_set & fl, kworld_ptr world)
 {
 	//@TODO: consistency?
 	return world->entails(fl);

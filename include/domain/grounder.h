@@ -55,8 +55,8 @@ public:
 
     //In case we want to kill the grounder after the having read these should be the return types
     fluent ground_fluent(const std::string&) const;
-    fluent_list ground_fluent(const string_list&) const;
-    fluent_formula ground_fluent(const string_list_list&) const;
+    fluent_set ground_fluent(const string_set&) const;
+    fluent_formula ground_fluent(const string_set_set&) const;
 
     agent ground_agent(const std::string&) const;
 
@@ -64,14 +64,14 @@ public:
         
     
     std::string deground_fluent(fluent) const;
-    string_list deground_fluent(const fluent_list&) const;
-    string_list_list deground_fluent(const fluent_formula&) const;
+    string_set deground_fluent(const fluent_set&) const;
+    string_set_set deground_fluent(const fluent_formula&) const;
    
     std::string deground_agent(agent) const;
-    agent_set ground_agent(const string_list&) const;
+    agent_set ground_agent(const string_set&) const;
 
     std::string deground_action(action_id) const;
     
-    void print_ff(const fluent_list&) const;            
+    void print_ff(const fluent_set&) const;            
     void print_ff(const fluent_formula&) const;        
 };

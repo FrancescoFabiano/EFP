@@ -35,10 +35,10 @@ public:
      Sensing: string_list -> fluent
      Announcement: string_list_list -> fluent formula
      */
-    string_list_list m_action_effect;
+    string_set_set m_action_effect;
     std::string m_agent;
     //string fluentPro;
-    string_list_list m_observability_conditions;
+    string_set_set m_observability_conditions;
     belief_formula m_executability_conditions;
 
     //const belief_formula* get_executability_conditions() const;

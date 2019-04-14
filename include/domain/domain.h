@@ -15,7 +15,7 @@
 #include "../utilities/reader.h"
 #include "../actions/action.h"
 //THIS IS BECAUSE IS A TEMPLATIC CLASS AND IT IS A DEPENDECY
-#include "../states/state_T.icpp"
+#include "../states/state_T.ipp"
 
 class domain
 {
@@ -52,7 +52,7 @@ public:
      m_actions -> all the actions (with effects, conditions, obsv etc.);
      m_agents -> all the agents.
      */
-    fluent_list m_fluents;
+    fluent_set m_fluents;
     action_set m_actions;
     agent_set m_agents;
 

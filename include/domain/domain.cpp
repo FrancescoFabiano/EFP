@@ -23,13 +23,17 @@ bool domain::build(bool debug)
 	build_actions(debug);
 	build_initially(debug);
 	build_goal(debug);
-	
-	
-	if(m_state_type == KRIPKE){
+
+
+	if (m_state_type == KRIPKE) {
 		state<kstate> initial;
 		initial.build_initial(m_intial_description);
+	} else {
+		std::cerr << "Not implemented yet\n";
+		exit(1);
 	}
-	
+
+
 	return true;
 
 }
@@ -38,7 +42,7 @@ void domain::build_agents(bool debug)
 {
 	agent_map domain_agent_map;
 	std::cout << "\nBuilding agent list..." << std::endl;
-	string_list::const_iterator it_agents;
+	string_set::const_iterator it_agents;
 	int i = 0;
 	for (it_agents = m_reader->m_agents.begin(); it_agents != m_reader->m_agents.end(); it_agents++) {
 		domain_agent_map.insert(agent_map::value_type(*it_agents, i));
@@ -55,7 +59,7 @@ void domain::build_fluents(bool debug)
 	fluent_map domain_fluent_map;
 
 	std::cout << "\nBuilding fluent literals..." << std::endl;
-	string_list::const_iterator it_fluents;
+	string_set::const_iterator it_fluents;
 	int i = 0;
 	for (it_fluents = m_reader->m_fluents.begin();
 		it_fluents != m_reader->m_fluents.end(); it_fluents++) {
@@ -78,7 +82,7 @@ void domain::build_actions(bool debug)
 
 	action_name_map domain_action_name_map;
 	std::cout << "\nBuilding action list..." << std::endl;
-	string_list::const_iterator it_actions_name;
+	string_set::const_iterator it_actions_name;
 	int i = 0;
 	for (it_actions_name = m_reader->m_actions.begin();
 		it_actions_name != m_reader->m_actions.end(); it_actions_name++) {

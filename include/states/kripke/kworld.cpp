@@ -14,17 +14,17 @@ kworld::kworld()
 {
 }
 
-kworld::kworld(const fluent_list & fl)
+kworld::kworld(const fluent_set & fl)
 {
 	set_fluent_list(fl);
 	set_id();
 }
 //generate an unique id given the state information -> the literals
 
-kworld_id kworld::hash_fluents_into_id(const fluent_list& fl)
+kworld_id kworld::hash_fluents_into_id(const fluent_set& fl)
 {
 	kworld_id ret;
-	fluent_list::const_iterator it_fl;
+	fluent_set::const_iterator it_fl;
 	for (it_fl = fl.begin(); it_fl != fl.end(); it_fl++) {
 		ret.append(std::to_string(*it_fl) + "-");
 	}
@@ -38,7 +38,7 @@ kworld_id kworld::hash_fluents_into_id()
 	return hash_fluents_into_id(m_fluent_list);
 }
 
-void kworld::set_fluent_list(const fluent_list & fl)
+void kworld::set_fluent_list(const fluent_set & fl)
 {
 	m_fluent_list = fl;
 }
@@ -48,7 +48,7 @@ void kworld::set_id()
 	m_world_id = hash_fluents_into_id();
 }
 
-const fluent_list & kworld::get_fluent_list() const
+const fluent_set & kworld::get_fluent_list() const
 {
 	return m_fluent_list;
 }
@@ -63,10 +63,10 @@ bool kworld::entails(fluent to_check) const
 	return (m_fluent_list.find(to_check) != m_fluent_list.end());
 }
 
-bool kworld::entails(const fluent_list & to_check) const
+bool kworld::entails(const fluent_set & to_check) const
 {
 	//fluent_list expresses CNF
-	fluent_list::const_iterator it_fl;
+	fluent_set::const_iterator it_fl;
 	for (it_fl = to_check.begin(); it_fl != to_check.end(); it_fl++) {
 		if (!entails(*it_fl)) {
 			return false;

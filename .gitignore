@@ -37,3 +37,6 @@ bin/
 # Project
 nbproject/
 readme_old
+
+# Doxygen
+DoxygenDoc/

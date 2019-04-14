@@ -23,7 +23,7 @@ private:
     kworld_ptr m_pointed;
 
     bool entails(fluent, kworld_ptr);
-    bool entails(const fluent_list &, kworld_ptr);
+    bool entails(const fluent_set &, kworld_ptr);
     bool entails(const fluent_formula &, kworld_ptr);
     
     bool entails(const belief_formula &, kworld_ptr);
@@ -40,7 +40,7 @@ private:
 public:
 
     bool entails(fluent);
-    bool entails(const fluent_list &);
+    bool entails(const fluent_set &);
     bool entails(const fluent_formula &);
     
     bool entails(const belief_formula &);

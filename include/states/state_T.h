@@ -58,7 +58,7 @@ public:
     unsigned short get_plan_length();
     int get_heuristic_value();
 
-    bool entails(const fluent_list &);
+    bool entails(const fluent_set &);
     bool entails(const fluent_formula &);
     bool entails(const formula_list &);
 

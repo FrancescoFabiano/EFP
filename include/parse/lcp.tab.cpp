@@ -70,13 +70,13 @@ int yyerror(char *s);
 int yylex(void);
 
 string get_negation(const std::string*);
-bool is_consistent(string_list, string_list);
+bool is_consistent(string_set, string_set);
 //string_list_list get_negateFluentForm(string_list_list);
-string_list_list negate_or(string_list);
-string_list_list negate_form(string_list_list);
-string_list_list join_SL2(string_list_list, string_list_list);
-void print_string_list(string_list);
-void print_string_list_list(string_list_list);
+string_set_set negate_or(string_set);
+string_set_set negate_form(string_set_set);
+string_set_set join_SL2(string_set_set, string_set_set);
+void print_string_list(string_set);
+void print_string_list_list(string_set_set);
 
 extern reader reader;
 
@@ -152,8 +152,8 @@ union YYSTYPE {
 #line 21 "lcp.y" /* yacc.c:355  */
 
 	std::string* str_val;
-	string_list* str_list;
-	string_list_list* str_list2;
+	string_set* str_list;
+	string_set_set* str_list2;
 	proposition* prop;
 	proposition_list* prop_list;
 	belief_formula* bf;
@@ -1409,7 +1409,7 @@ yyreduce:
 	case 12:
 #line 180 "lcp.y" /* yacc.c:1646  */
 	{
-		(yyval.str_list) = new string_list;
+		(yyval.str_list) = new string_set;
 		(yyval.str_list)->insert(*(yyvsp[0].str_val));
 	}
 #line 1447 "lcp.tab.c" /* yacc.c:1646  */
@@ -1418,7 +1418,7 @@ yyreduce:
 	case 13:
 #line 186 "lcp.y" /* yacc.c:1646  */
 	{
-		(yyval.str_list) = new string_list;
+		(yyval.str_list) = new string_set;
 		(yyval.str_list)->insert(*(yyvsp[0].str_val));
 	}
 #line 1456 "lcp.tab.c" /* yacc.c:1646  */
@@ -1452,7 +1452,7 @@ yyreduce:
 	case 17:
 #line 209 "lcp.y" /* yacc.c:1646  */
 	{
-		(yyval.str_list) = new string_list;
+		(yyval.str_list) = new string_set;
 		(yyval.str_list)->insert(*(yyvsp[0].str_val));
 	}
 #line 1490 "lcp.tab.c" /* yacc.c:1646  */
@@ -1470,9 +1470,9 @@ yyreduce:
 	case 19:
 #line 220 "lcp.y" /* yacc.c:1646  */
 	{
-		string_list s1;
+		string_set s1;
 
-		(yyval.str_list2) = new string_list_list;
+		(yyval.str_list2) = new string_set_set;
 
 		s1.insert(*(yyvsp[0].str_val));
 
@@ -1484,11 +1484,11 @@ yyreduce:
 	case 20:
 #line 230 "lcp.y" /* yacc.c:1646  */
 	{
-		string_list_list::iterator it1;
-		string_list_list::iterator it2;
-		string_list ns;
+		string_set_set::iterator it1;
+		string_set_set::iterator it2;
+		string_set ns;
 
-		(yyval.str_list2) = new string_list_list;
+		(yyval.str_list2) = new string_set_set;
 
 		for (it2 = (yyvsp[-2].str_list2)->begin(); it2 != (yyvsp[-2].str_list2)->end(); it2++) {
 			for (it1 = (yyvsp[0].str_list2)->begin(); it1 != (yyvsp[0].str_list2)->end(); it1++) {
@@ -1531,7 +1531,7 @@ yyreduce:
 	case 24:
 #line 264 "lcp.y" /* yacc.c:1646  */
 	{
-		(yyval.str_list) = new string_list;
+		(yyval.str_list) = new string_set;
 	}
 #line 1568 "lcp.tab.c" /* yacc.c:1646  */
 		break;
@@ -1564,7 +1564,7 @@ yyreduce:
 	case 28:
 #line 286 "lcp.y" /* yacc.c:1646  */
 	{
-		(yyval.str_list) = new string_list;
+		(yyval.str_list) = new string_set;
 		(yyval.str_list)->insert(*(yyvsp[0].str_val));
 	}
 #line 1602 "lcp.tab.c" /* yacc.c:1646  */
@@ -1590,7 +1590,7 @@ yyreduce:
 	case 31:
 #line 303 "lcp.y" /* yacc.c:1646  */
 	{
-		(yyval.str_list) = new string_list;
+		(yyval.str_list) = new string_set;
 	}
 #line 1627 "lcp.tab.c" /* yacc.c:1646  */
 		break;
@@ -1623,7 +1623,7 @@ yyreduce:
 	case 35:
 #line 324 "lcp.y" /* yacc.c:1646  */
 	{
-		(yyval.str_list) = new string_list;
+		(yyval.str_list) = new string_set;
 		(yyval.str_list)->insert(*(yyvsp[0].str_val));
 	}
 #line 1661 "lcp.tab.c" /* yacc.c:1646  */
@@ -1649,7 +1649,7 @@ yyreduce:
 	case 38:
 #line 341 "lcp.y" /* yacc.c:1646  */
 	{
-		(yyval.str_list) = new string_list;
+		(yyval.str_list) = new string_set;
 	}
 #line 1686 "lcp.tab.c" /* yacc.c:1646  */
 		break;
@@ -1666,7 +1666,7 @@ yyreduce:
 	case 40:
 #line 355 "lcp.y" /* yacc.c:1646  */
 	{
-		(yyval.str_list) = new string_list;
+		(yyval.str_list) = new string_set;
 	}
 #line 1703 "lcp.tab.c" /* yacc.c:1646  */
 		break;
@@ -1779,7 +1779,7 @@ yyreduce:
 	case 51:
 #line 432 "lcp.y" /* yacc.c:1646  */
 	{
-		(yyval.str_list2) = new string_list_list;
+		(yyval.str_list2) = new string_set_set;
 	}
 #line 1816 "lcp.tab.c" /* yacc.c:1646  */
 		break;
@@ -2253,9 +2253,9 @@ yyerror(char *s)
 }
 
 bool
-is_consistent(string_list sl1, string_list sl2)
+is_consistent(string_set sl1, string_set sl2)
 {
-	string_list::const_iterator it;
+	string_set::const_iterator it;
 	std::string nl;
 
 	for (it = sl2.begin(); it != sl2.end(); it++) {
@@ -2324,16 +2324,16 @@ string_list_list get_negateFluentForm(string_list_list input){
 //negate_or: input: String list = list of or. 
 //             output: Stringlist 2 = list of and of negation
 
-string_list_list
-negate_or(string_list input)
+string_set_set
+negate_or(string_set input)
 {
 
-	string_list::iterator it;
-	string_list_list output;
+	string_set::iterator it;
+	string_set_set output;
 	std::string element;
 
 	for (it = input.begin(); it != input.end(); it++) {
-		string_list temp;
+		string_set temp;
 		element = get_negation(&(*it));
 		temp.insert(element);
 		output.insert(temp);
@@ -2350,19 +2350,19 @@ negate_or(string_list input)
 //                -> n std::stringlist 2 -> std::stringlist 3
 //                output = first member stirnglist 3 or second member of std::stringlist 3
 
-string_list_list
-join_SL2(string_list_list input1, string_list_list input2)
+string_set_set
+join_SL2(string_set_set input1, string_set_set input2)
 {
 
 	if (input2.size() == 0) {
 		return input1;
 	}
 
-	string_list_list::iterator it1;
-	string_list_list::iterator it2;
-	string_list ns;
+	string_set_set::iterator it1;
+	string_set_set::iterator it2;
+	string_set ns;
 
-	string_list_list output;
+	string_set_set output;
 
 	for (it2 = input1.begin(); it2 != input1.end(); it2++) {
 		for (it1 = input2.begin(); it1 != input2.end(); it1++) {
@@ -2378,19 +2378,19 @@ join_SL2(string_list_list input1, string_list_list input2)
 
 }
 
-string_list_list
-negate_form(string_list_list input)
+string_set_set
+negate_form(string_set_set input)
 {
 
-	typedef std::set<string_list_list> string_list3;
+	typedef std::set<string_set_set> string_list3;
 	string_list3 list3;
-	string_list_list::iterator it1;
-	string_list_list::iterator it2;
+	string_set_set::iterator it1;
+	string_set_set::iterator it2;
 	string_list3::iterator it3;
-	string_list ns;
-	string_list_list temp;
+	string_set ns;
+	string_set_set temp;
 
-	string_list_list output;
+	string_set_set output;
 
 	//turn all the “or” statements to “and” statements
 	for (it1 = input.begin(); it1 != input.end(); it1++) {
@@ -2409,9 +2409,9 @@ negate_form(string_list_list input)
 }
 
 void
-print_string_list(string_list in)
+print_string_list(string_set in)
 {
-	string_list::iterator it1;
+	string_set::iterator it1;
 	std::cout << "[ ";
 	for (it1 = in.begin(); it1 != in.end(); it1++) {
 		std::cout << *it1 << " , ";
@@ -2420,9 +2420,9 @@ print_string_list(string_list in)
 }
 
 void
-print_string_list_list(string_list_list in)
+print_string_list_list(string_set_set in)
 {
-	string_list_list::iterator it1;
+	string_set_set::iterator it1;
 	std::cout << "[ ";
 	for (it1 = in.begin(); it1 != in.end(); it1++) {
 

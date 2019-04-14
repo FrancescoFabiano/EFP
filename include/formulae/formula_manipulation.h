@@ -14,13 +14,13 @@
 class formula_manipulation{
     
 private:
-    static bool is_consistent(const fluent_list &, const fluent_list &);
+    static bool is_consistent(const fluent_set &, const fluent_set &);
     
     static fluent negate_fluent(const fluent);
     
 public:
 
-    static fluent_list and_ff(const fluent_list&, const fluent_list&);
+    static fluent_set and_ff(const fluent_set&, const fluent_set&);
     static fluent_formula and_ff(const fluent_formula&, const fluent_formula&);
 };
 
