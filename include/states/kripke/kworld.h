@@ -57,7 +57,7 @@ private:
      * 
      * @param[in] from: the set of \ref fluent to set as \ref m_fluent_set.
      * 
-     * \warning is the parameter passing the best one? Copy?
+     * \todo is the parameter passing the best one? Copy?
      */
     void set_fluent_set(const fluent_set &);
 
@@ -78,7 +78,7 @@ public:
      * 
      * @param[in] from: the set of \ref fluent to set as \ref m_fluent_set.
      * 
-     * \warning is the parameter passing the best one? Copy?
+     * \todo is the parameter passing the best one? Copy?
      */
     kworld(const fluent_set &);
 
@@ -104,8 +104,8 @@ public:
      * @return true: \p to_check is entailed;
      * @return false: \p -to_check is entailed.
      * 
-     * \warning To implement also whit \ref kworld_ptr to the \ref kworld?
-     * \warning check consistency on constructor?
+     * \todo To implement also whit \ref kworld_ptr to the \ref kworld?
+     * \todo check consistency on constructor?
      */
     bool entails(fluent to_check) const;
     /**

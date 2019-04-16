@@ -70,7 +70,7 @@ private:
      *
      * @param[in] from: the edge to set as \ref m_from.
      * 
-     * \warning is the parameter passing the best one?
+     * \todo is the parameter passing the best one?
      */
     void set_from(const kworld & from);
     /**
@@ -81,7 +81,7 @@ private:
      *
      * @param[in] from: the edge to set as \ref m_to.
      * 
-     * \warning is the parameter passing the best one?
+     * \todo is the parameter passing the best one?
      */
     void set_to(const kworld & to);
     /**
@@ -112,7 +112,7 @@ public:
      * @param[in] to: the world where *this* is going to.
      * @param[in] label: the \ref agent that is the label of *this*.
      * 
-     * \warning To implement also whit \ref kworld_ptr to the \ref kworld?
+     * \todo To implement also whit \ref kworld_ptr to the \ref kworld?
      */
     kedge(const kworld & from, const kworld & to, agent label);
 

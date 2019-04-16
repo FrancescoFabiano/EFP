@@ -29,7 +29,7 @@ kedge::kedge(const kworld & from, const kworld & to, agent label)
 }
 
 /**
- * \warning the hash function is maybe to simple.
+ * \todo the hash function is maybe to simple.
  */
 kedge_id kedge::hash_info_into_id(kworld_ptr from, kworld_ptr to, agent label)
 {

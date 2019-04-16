@@ -8,12 +8,12 @@
  * @see kedge and kworld.
  *
  *
- * \warning It is better to create a new world each time or to search for the key and in case
+ * \todo It is better to create a new world each time or to search for the key and in case
  * they don't exist create the world and add the world (double insert basically) or the function
  * const kworld& add_world(const fluent_formula &)?
  * Use function in case building world is way more expensive than searching the set.
  * 
- * \warning Implement the hash here statically.
+ * \todo Implement the hash here statically.
  * 
  * \copyright GNU Public License.
  *
@@ -37,13 +37,13 @@ private:
     /**
      * \brief All the created \ref kedge, all the other class only have pointers to elements of this set.
      * 
-     * \warning should it be static?
+     * \todo should it be static?
      */
     kedge_set m_created_edges;
     /**
      * \brief All the created \ref kworld, all the other class only have pointers to elements of this set.
      * 
-     * \warning should it be static?
+     * \todo should it be static?
      */
     kworld_set m_created_worlds;
 
@@ -67,7 +67,7 @@ public:
      * 
      * @return the \ref kedge_ptr to \p to_add.
      * 
-     * \warning Param ok because set makes copy?
+     * \todo Param ok because set makes copy?
      */
     kedge_ptr add_edge(const kedge & to_add);
     /**
@@ -80,7 +80,7 @@ public:
      * 
      * @return the \ref kworld_ptr to \p to_add.
      * 
-     * \warning Param ok because set makes copy?
+     * \todo Param ok because set makes copy?
      */
     kworld_ptr add_world(const kworld &);
 

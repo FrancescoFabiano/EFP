@@ -96,7 +96,7 @@ private:
      * @return true: \p to_check is entailed starting from \p world;
      * @return false: \p -to_check is entailed starting from \p world.
      * 
-     * \warning self-loop?
+     * \todo self-loop?
      */
     bool entails(const belief_formula & to_check, kworld_ptr world) const;
     /**
@@ -113,7 +113,7 @@ private:
      * @return true: \p to_check is entailed starting from all the \ref kworld in \p worlds;
      * @return false: \p -to_check is entailed starting from all the \ref kworld in \p worlds.
      * 
-     * \warning self-loop?
+     * \todo self-loop?
      */
     bool entails(const belief_formula & to_check, const kworld_ptr_set & worlds) const;
 
@@ -132,7 +132,7 @@ private:
      * @return a set of pointers to all the reachable worlds.
      *
      * 
-     * \warning self-loop?
+     * \todo self-loop?
      */
     const kworld_ptr_set get_B_reachable_worlds(agent ag, kworld_ptr world);
 
@@ -150,7 +150,7 @@ private:
      * @param[out] reached: the set of pointers to all the reachable worlds.
      *
      * 
-     * \warning self-loop?
+     * \todo self-loop?
      */
     bool get_B_reachable_worlds(agent ag, kworld_ptr world, kworld_ptr_set& reached);
 
@@ -169,7 +169,7 @@ private:
      * @return a set of pointers to all the reachable worlds.
      *
      * 
-     * \warning self-loop?
+     * \todo self-loop?
      */
     const kworld_ptr_set get_E_reachable_worlds(const agent_set & ags, kworld_ptr world);
 
@@ -187,15 +187,15 @@ private:
      * @param[out] reached: the set of pointers to all the reachable worlds.
      *
      * 
-     * \warning self-loop?
+     * \todo self-loop?
      */
     bool get_E_reachable_worlds(const agent_set &ags, kworld_ptr world, kworld_ptr_set& reached);
 
-        /**
+    /**
      *\brief Function that return all the reachable \ref kworld (in the *Common Knowledge* sense) given a \ref agent and the staring \ref kworld.
      * 
-    * This function applies get_E_reachable_worlds(const agent_set &, kworld_ptr) on its on result until a fixed point is found.
-        * It returns all the worlds where is necessary to check if*phi* is entailed in order to verify C(\p ags, *phi*) and \p world is the starting point.
+     * This function applies get_E_reachable_worlds(const agent_set &, kworld_ptr) on its on result until a fixed point is found.
+     * It returns all the worlds where is necessary to check if*phi* is entailed in order to verify C(\p ags, *phi*) and \p world is the starting point.
      * 
      * @see \ref belief_formula, and get_E_reachable_worlds(const agent_set &, kworld_ptr world).
      * 
@@ -204,22 +204,132 @@ private:
      *
      * @return a set of pointers to all the reachable worlds.
      * 
-     * \warning self-loop?
+     * \todo self-loop?
      */
     const kworld_ptr_set get_C_reachable_worlds(const agent_set &, kworld_ptr world);
 
 public:
 
-    bool entails(fluent) const;
-    bool entails(const fluent_set &) const;
-    bool entails(const fluent_formula &) const;
+    /**
+     *\brief Function that check the entailment of a \ref fluent in *this*.
+     *
+     * The entailment of a \ref fluent in a kstate is true if the \ref fluent
+     * is entailed by its pointed world (\ref m_pointed).
+     * 
+     * @see \ref entails(fluent, kworld_ptr) const.
+     *  
+     * @param[in] to_check: the \ref fluent that has to be checked if entailed in *this*.
+     *
+     * @return true: \p to_check is entailed in *this*;
+     * @return false: \p -to_check is entailed in *this*.*/
+    bool entails(fluent to_check) const;
+    /**
+     *\brief Function that check the entailment of a conjunctive set of \ref fluent in *this*.
+     *
+     * The entailment of a conjunctive set of \ref fluent in a kstate is true if the conjunctive set of \ref fluent
+     * is entailed by its pointed world (\ref m_pointed).
+     * 
+     * @see \ref entails(fluent_set, kworld_ptr) const.
+     *  
+     * @param[in] to_check: the conjunctive set of \ref fluent that has to be checked if entailed in *this*.
+     *
+     * @return true: \p to_check is entailed in *this*;
+     * @return false: \p -to_check is entailed in *this*.*/
+    bool entails(const fluent_set & to_check) const;
+    /**
+     *\brief Function that check the entailment of a DNF \ref fluent_formula in *this*.
+     *
+     * The entailment of a DNF \ref fluent_formula in a kstate is true if the DNF \ref fluent_formula
+     * is entailed by its pointed world (\ref m_pointed).
+     * 
+     * @see \ref entails(fluent_formula, kworld_ptr) const.
+     *  
+     * @param[in] to_check: the DNF \ref fluent_formula that has to be checked if entailed in *this*.
+     *
+     * @return true: \p to_check is entailed in *this*;
+     * @return false: \p -to_check is entailed in *this*.*/
+    bool entails(const fluent_formula & to_check) const;
 
-    bool entails(const belief_formula &) const;
+    /**
+     *\brief Function that check the entailment of a \ref belief_formula in *this*.
+     *
+     * The entailment of a \ref belief_formula in a kstate is true if the \ref belief_formula
+     * is entailed by its pointed world (\ref m_pointed).
+     * 
+     * @see \ref entails(belief_formula, kworld_ptr) const.
+     *  
+     * @param[in] to_check: the \ref belief_formula that has to be checked if entailed in *this*.
+     *
+     * @return true: \p to_check is entailed in *this*;
+     * @return false: \p -to_check is entailed in *this*.*/
+    bool entails(const belief_formula & to_check) const;
 
-    void add_world(const kworld &);
-    void add_edge(const kedge &);
+    /**
+     *\brief Function that add a \ref kworld to the Kripke structure represented by *this*.
+     *
+     * The \ref kworld is added. The structure only stores the pointer to the \ref kworld so
+     * it is necessary to store the \ref kworld in \ref kstore.
+     * 
+     * @see kworld and kstore.
+     *  
+     * @param[in] to_add: the \ref kworld that has to be added to *this*.*/
+    void add_world(const kworld & to_add);
+    /**
+     *\brief Function that add a \ref kedge to the Kripke structure represented by *this*.
+     *
+     * The \ref kedge is added. The structure only stores the pointer to the \ref kedge so
+     * it is necessary to store the \ref kedge in \ref kstore.
+     * 
+     * @see kedge and kstore.
+     *  
+     * @param[in] to_add: the \ref kedge that has to be added to *this*.*/
+    void add_edge(const kedge & to_add);
 
-    void build_initial(const initially &);
-    const kstate& compute_succ(const action &);
+    /**
+     *\brief Function that build the initial Kripke structure given the initial conditions.
+     *
+     * The building of the initial Kripke structure can be done in two different ways:
+     *    - We build the complete Kripke structure and then we remove all the \ref kedge
+     *      and \ref kworld that are not entailed by the initial conditions.
+     *        -# If this method is the one is implemented the add functions in \ref kstore
+     *           must be changed to not create the object every time but just to retrieve
+     *           the object since all of them are already created.
+     *    - A structural build:
+     *         -# Compute the set of *phi* not know by \ref agent ag for each \ref agent;
+     *         -# for each set compute the all the consintent \ref kworld where *phi* varies;
+     *         -# create a \ref kedge between all this \ref kworld (transitively closed) labelled with ag;
+     *         -# link all the classes of \ref kworld with an ongoing \ref kedge labelled with the ag of the reaching class.
+     * 
+     * @see kworld, kedge and initially.
+     *  
+     * @param[in] ini_conditions: the conditions on the pointed world and on the belief of the \ref agent in the initial state.
+     *
+     * \todo if first method is implemented If this method is the one is implemented the add functions in \ref kstore
+     *          must be changed to not create the object every time but just to retrieve the object
+     *           since all of them are already created.*/
+    void build_initial(const initially & ini_conditions);
+
+    /**
+     *\brief Function that check if a given action is executable in *this*.
+     *      *  
+     * @see action.
+     *  
+     * @param[in] act: The action to be checked on *this*.
+     * @return true: \p act is executable in *this*;
+     * @return false: \p act is not executable in *this*.*/
+    bool is_executable(const action & act) const;
+
+    /**
+     *\brief Function that apply the transition function on *this* given an action.
+     *
+     * The transition function is applied accordingly to mA*. Check the paper for more information.
+     *  
+     * @see action.
+     *  
+     * @param[in] act: The action to be applied on *this*.
+     * @return the \ref kstate that results after the execution.
+     * 
+     * \todo The action must be executable on *this* otherwise it will return a null_ptr.*/
+    const kstate& compute_succ(const action & act);
 };
 

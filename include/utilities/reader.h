@@ -5,7 +5,7 @@
  *            i.e., the complete description of the domain (as std::string) is found here.
  *            All the domain information stored are yet to ground (\ref grounder).
  * 
- * \warning   The fields of the class are public but should be private and accessed through getters and setters.
+ * \todo   The fields of the class are public but should be private and accessed through getters and setters.
  * 
  * \copyright GNU Public License.
  * 

@@ -63,7 +63,7 @@ bool kworld::entails(fluent to_check) const
 }
 
 /**
- * \warning Check for the size = 0?
+ * \todo Check for the size = 0?
  */
 bool kworld::entails(const fluent_set & to_check) const
 {
@@ -78,7 +78,7 @@ bool kworld::entails(const fluent_set & to_check) const
 }
 
 /**
- * \warning Check for the size = 0?
+ * \todo Check for the size = 0?
  */
 bool kworld::entails(const fluent_formula & to_check) const
 {

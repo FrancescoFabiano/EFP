@@ -26,7 +26,7 @@ public:
      *
      * @param[in] to_print: the \ref string_set to be printed.
      *
-     * \warning   Is the const reference the best type of parameter passing?
+     * \todo   Is the const reference the best type of parameter passing?
      */
     static void print_list(const string_set& to_print);
 
@@ -37,7 +37,7 @@ public:
      *
      * @param[in] to_print: the \ref string_set_set to be printed.
      *
-     *  \warning   Is the const reference the best type of parameter passing?
+     *  \todo   Is the const reference the best type of parameter passing?
      */
     static void print_list(const string_set_set& to_print);
 

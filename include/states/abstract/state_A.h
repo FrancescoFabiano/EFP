@@ -20,22 +20,22 @@ as black box from @planner: its implementation will depend on the initial choice
 This class should be used to check entailment and to produce successors
 ****************************************************************************************/
 
-class state
+class state_A
 {
 public:
     
     //Implement in each class with a kstate instead of a state
-    state();
-    state (const state &);
-    state (const state &, const action &);
-    state (const action_id_list &, unsigned short);
-    state (const action_id_list &, unsigned short, int);
+    state_A();
+    state_A (const state_A &);
+    state_A (const state_A &, const action &);
+    state_A (const action_id_list &, unsigned short);
+    state_A (const action_id_list &, unsigned short, int);
     
     const action_id_list & get_executed_actions();
     unsigned short get_plan_length();
     int get_heuristic_value();
     
-    void set_state(state);
+    void set_state(state_A);
     
     void set_executed_actions(const action_id_list &);
     void set_plan_length(unsigned short);

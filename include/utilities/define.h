@@ -117,7 +117,7 @@ enum domain_restriction
  * 
  * This type is used to allocate the class \ref state with the chosen representation.
  * 
- * \warning
+ * \todo
  * \ref OBBD has yet to be studied
  *
  */
@@ -152,7 +152,7 @@ typedef std::set<kedge_ptr> kedge_ptr_set; /**< \brief A set of \ref kedge_ptr.
                                             * 
                                             * Mainly used to store all the \ref kedge of a \ref kstate without wasting memory.
                                             *
-                                            * \warning The operator < for std::shared_ptr must be implemented
+                                            * \todo The operator < for std::shared_ptr must be implemented
                                                                               * @see kedge and kstate*/
 
 class kworld;
@@ -170,5 +170,5 @@ typedef std::set<kworld_ptr> kworld_ptr_set; /**< \brief A set of \ref kworld_pt
                                             * 
                                             * Mainly used to store all the \ref kworld of a \ref kstate without wasting memory.
                                             *
-                                            * \warning The operator < for std::shared_ptr must be implemented.
+                                            * \todo The operator < for std::shared_ptr must be implemented.
                                                                               * @see kworld and kstate*/

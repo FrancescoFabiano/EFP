@@ -1,8 +1,10 @@
-/* 
- * File:   kstate.cpp
- * Author: Francesco
+/*
+ * \brief Implementation of \ref kstate.h
  *
- * Created on April 9, 2019, 10:43 AM
+ * \copyright GNU Public License.
+ *
+ * \author Francesco Fabiano.
+ * \date April 9, 2019
  */
 
 #include "kstate.h"
@@ -11,32 +13,29 @@ bool kstate::entails(fluent f) const
 {
 	return entails(f, m_pointed);
 }
+
 bool kstate::entails(fluent f, kworld_ptr world) const
 {
-	//@TODO: consistency?
 	return world->entails(f);
 }
+
 bool kstate::entails(const fluent_set & fl) const
 {
-	//@TODO: consistency?
 	return entails(fl, m_pointed);
 }
 
 bool kstate::entails(const fluent_set & fl, kworld_ptr world) const
 {
-	//@TODO: consistency?
 	return world->entails(fl);
 }
 
 bool kstate::entails(const fluent_formula & ff) const
 {
-	//@TODO: consistency?
 	return entails(ff, m_pointed);
 }
 
 bool kstate::entails(const fluent_formula & ff, kworld_ptr world) const
 {
-	//@TODO: consistency?
 	return world->entails(ff);
 }
 
@@ -44,7 +43,6 @@ bool kstate::entails(const belief_formula & bf) const
 {
 	return entails(bf, m_pointed);
 }
-
 
 bool kstate::entails(const belief_formula & bf, const kworld_ptr_set & reachable) const
 {
@@ -58,15 +56,27 @@ bool kstate::entails(const belief_formula & bf, const kworld_ptr_set & reachable
 
 bool kstate::entails(const belief_formula & bf, kworld_ptr world) const
 {
+	/*
+	 The entailment of a \ref beleif_formula just call recursively the entailment on all the reachable world with that formula.
+	 */
 	switch (bf.m_formula_type) {
 	case FLUENT_FORMULA:
-		//@TODO: Make sure it is grounded
+		/** \todo Make sure its grounded. Maybe add to beleif_formula a bool that store if grounded or not or maybe ground
+		 * when \ref domain created.
+		 * @see belief_formula::ground(const grounder &)
+		 */
 		return entails(bf.m_fluent_formula, world);
 		break;
 
 	case BELIEF_FORMULA:
-		//@TODO: Make sure it is grounded 
-		//@TODO: The at leat one?
+		/** \todo Make sure its grounded. Maybe add to beleif_formula a bool that store if grounded or not or maybe ground
+		 * when \ref domain created.
+		 * @see belief_formula::ground(const grounder &)
+		 * 
+		 * \todo what was the at_lest_one of the previous version?
+		 * 
+		 * \todo self-loop?
+		 */
 		return entails(*(bf.m_bf1), get_B_reachable_worlds(bf.m_agent_op, world));
 		break;
 
@@ -91,10 +101,11 @@ bool kstate::entails(const belief_formula & bf, kworld_ptr world) const
 		break;
 
 	case E_FORMULA:
+		//Check the entails on the E-reachable worlds
 		return entails(*(bf.m_bf1), get_E_reachable_worlds(bf.m_group_agents, world));
 		break;
 
-		//Testi tutti i raggiungibili pointed worlds con gli agenti dati (in chiusura transitiva)
+		//Check the entails on the C-reachable worlds
 	case C_FORMULA:
 		return entails(*(bf.m_bf1), get_C_reachable_worlds(bf.m_group_agents, world));
 		break;
@@ -153,6 +164,7 @@ bool kstate::get_E_reachable_worlds(const agent_set & ags, kworld_ptr world, kwo
 
 const kworld_ptr_set kstate::get_C_reachable_worlds(const agent_set & ags, kworld_ptr world)
 {
+	//Use of fixed point to stop.
 	bool is_fixed_point = false;
 	kworld_ptr_set ret;
 	while (!is_fixed_point) {
@@ -166,12 +178,6 @@ void kstate::add_world(const kworld & world)
 	m_worlds.insert(kstore::get_instance().add_world(world));
 }
 
-/*void kstate::add_world(const fluent_formula & ff)
-{
-	//@TODO: Implement
-	//m_worlds.insert(kstore::get_instance().add_world(ff));
-}*/
-
 void kstate::add_edge(const kedge & edge)
 {
 	m_edges.insert(kstore::get_instance().add_edge(edge));
@@ -179,5 +185,15 @@ void kstate::add_edge(const kedge & edge)
 
 void kstate::build_initial(const initially & initials_conditions)
 {
+	/**
+	 * \todo yet to implement.
+	*/
 	std::cout << "\nBuilding initial Kripke structure...\n";
+}
+
+ bool kstate::is_executable(const action & act)const
+ {
+	/**
+	 * \todo yet to implement.
+	*/
 }

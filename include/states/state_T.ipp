@@ -1,9 +1,12 @@
-/* 
- * File:   state.icpp
- * Author: Francesco
+/**
+ * \brief Implementation of \ref state_T.h
  *
- * Created on April 4, 2019, 7:48 AM
+ * \copyright GNU Public License.
+ *
+ * \author Francesco Fabiano.
+ * \date April 11, 2019
  */
+
 #include "state_T.h"
 
 template <class T>
@@ -24,7 +27,7 @@ state<T>::state(const state<T> & prev_state, const action & executed_action)
 	set_state(prev_state.compute_succ(executed_action));
 }
 
-template <class T>
+/*template <class T>
 state<T>::state(const action_id_list & executed_actions, unsigned short length)
 {
 	set_executed_actions(executed_actions);
@@ -38,7 +41,7 @@ state<T>::state(const action_id_list & executed_actions, unsigned short length, 
 	set_executed_actions(executed_actions);
 	set_plan_length(length);
 	set_heuristic_value(heuristic_value);
-}
+}*/
 
 template <class T>
 const action_id_list & state<T>::get_executed_actions()
@@ -98,7 +101,7 @@ bool state<T>::entails(const fluent_formula & to_check)
 template <class T>
 bool state<T>::entails(const formula_list & to_check)
 {
-	//formula_list expresses CNF
+	//formula_list expresses CNF formula
 	formula_list::const_iterator it_fl;
 	for (it_fl = to_check.begin(); it_fl != to_check.end(); it_fl++) {
 		if (!representation.entails(to_check)) {
