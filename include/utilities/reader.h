@@ -1,5 +1,5 @@
 /**
- * \brief Used to store the domain information read by the parsing process. 
+ * \brief Class used to store the domain information read by the parsing process. 
  * 
  * \details   This class is used during the parsing process to store all the read information,
  *            i.e., the complete description of the domain (as std::string) is found here.
@@ -10,7 +10,7 @@
  * \copyright GNU Public License.
  * 
  * \author Francesco Fabiano.
- * \date 3/31/2019
+ * \date March 31, 2019
  */
 
 #pragma once

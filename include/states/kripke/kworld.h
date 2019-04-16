@@ -1,8 +1,16 @@
-/* 
- * File:   kworld.h
- * Author: Francesco
+/**
+ * \brief Class that describes a world (node) of a Kripke structure (\ref kstate).
  *
- * Created on March 31, 2019, 1:00 PM
+ * \details   A world in a \ref kstate represent a consistent set of \ref fluent (AKA a \ref fluent_set);
+ *            that is a possible configuration of the real world (only based on the \ref fluent).
+ * 
+ * @see kstate, kedge, and kstore.
+ *
+ *
+ * \copyright GNU Public License.
+ *
+ * \author Francesco Fabiano.
+ * \date March 31, 2019
  */
 #pragma once
 
@@ -16,29 +24,131 @@
 class kworld
 {
 private:
-    fluent_set m_fluent_list;
-    kworld_id m_world_id;
-  
+    /**
+     * \brief The set of  \ref fluent that describes how these are interpreted in *this*.
+     */
+    fluent_set m_fluent_set;
+    /**
+     * \brief The unique id of *this* computed with \ref hash_fluents_into_id().
+     */
+    kworld_id m_id;
+
+    /**
+     * \brief Function used to hash the the info of an edge in a unique id.
+     *
+     *
+     *
+     * @param[in] from: the interpretation of the \ref fluent in the world.
+     * @return the unique id of the world.
+     * 
+     * @warning Useless if not moved to \ref kstore.
+     */
     kworld_id hash_fluents_into_id(const fluent_set&);
-    kworld_id hash_fluents_into_id(); //generate an unique id given the state information -> the literal
-    
-    //@TODO: Is reference correct????? In theory we refer to element of the kstore
-    void set_fluent_list(const fluent_set &);
+
+    /**
+     * \brief Function used to hash the the info of *this* in a unique id.
+     *
+     * @return the unique id of *this*.
+     */
+    kworld_id hash_fluents_into_id();
+
+    /**
+     * \brief Setter for the field \ref m_fluent_set.
+     * 
+     * @param[in] from: the set of \ref fluent to set as \ref m_fluent_set.
+     * 
+     * \warning is the parameter passing the best one? Copy?
+     */
+    void set_fluent_set(const fluent_set &);
+
+    /**
+     * \brief Function that uses the info of  *this* to set its  \ref m_id.
+     */
     void set_id();
-    
+
 public:
+    /**
+     * \brief Empty constructor, call the default constructor of all the fields.
+     */
     kworld();
-    //@TODO: consistency
+    /**
+     *\brief Constructor with parameters.
+     *Construct an object with the given info and then set the unique id.
+     * the set of \ref fluent to set as \ref m_fluent_set.
+     * 
+     * @param[in] from: the set of \ref fluent to set as \ref m_fluent_set.
+     * 
+     * \warning is the parameter passing the best one? Copy?
+     */
     kworld(const fluent_set &);
-    
-    const fluent_set & get_fluent_list() const;
+
+    /**
+     *\brief Getter of \ref m_fluent_set.
+     *     
+     * @return the \ref kworld_ptr to the world where *this* is from.*/
+    const fluent_set & get_fluent_set() const;
+    /**
+     *\brief Getter of \ref m_id.
+     *     
+     * @return the int that is the unique id of *this*.*/
     kworld_id get_id() const;
 
-    bool entails(fluent) const;
-    bool entails(const fluent_set &) const;
-    bool entails(const fluent_formula &) const;
-    
-    bool operator<(const kworld&) const;
+    /**
+     *\brief Function that check the entailment of a single \ref fluent in *this*.
+     * 
+     * A single \ref fluent is entailed if is present in *this*. Given that the each kworld
+     * should only admit consistent set of \ref fluent if the \ref fluent itself is presented in *this*.
+     * 
+     * @param[in] to_check: the \ref fluent that has to be checked if entailed by *this* (if is present in *this*).
+     *
+     * @return true: \p to_check is entailed;
+     * @return false: \p -to_check is entailed.
+     * 
+     * \warning To implement also whit \ref kworld_ptr to the \ref kworld?
+     * \warning check consistency on constructor?
+     */
+    bool entails(fluent to_check) const;
+    /**
+     *\brief Function that check the entailment of a conjunctive set of \ref fluent in *this*.
+     * 
+     * This is checked by calling recursively \ref entails(fluent) const on all the element
+     * of \p to_check and returning true only if all the elements are entailed (conjunctive set of \ref fluent).
+     *  
+     * @param[in] to_check: the conjunctive set of \ref fluent that has to be checked if entailed by *this*.
+     * 
+     *
+     * @return true: \p to_check is entailed;
+     * @return false: \p -to_check is entailed.*/
+    bool entails(const fluent_set to_check) const;
+    /**
+     *\brief Function that check the entailment of a DNF \ref fluent_formula in *this*.
+     * 
+     * This is checked by calling recursively \ref entails(fluent_set) const on all the element
+     * of \p to_check and returning true only if at least one element is entailed (DNF).
+     *  
+     * @param[in] to_check: the DNF formula that has to be checked if entailed by *this*.
+     * 
+     *
+     * @return true: \p to_check is entailed;
+     * @return false: \p -to_check is entailed.*/
+    bool entails(const fluent_formula & to_check) const;
+
+    /**
+     *\brief The < operator based on the field \ref m_id.
+     * Implemented to allow the ordering on set of \ref kworld (used in \kstore).
+     * 
+     * @see kstore.
+     *     
+     * @param [in] to_compare: the \ref kworld to compare with *this*.
+     * @return true: if \p to_compare is smaller than *this*
+     * @return false: otherwise.*/
+    bool operator<(const kworld& to_compare) const;
+
+    /**
+     * \brief Function used to print all the information of *this*.
+     * 
+     * @param [in] gr: the \ref grounder to retrive the std::string associated with the \ref fluent.
+     */
     void print_info(const grounder& gr);
 
 

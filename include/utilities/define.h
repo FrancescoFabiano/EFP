@@ -6,7 +6,7 @@
  * \copyright GNU Public License.
  *
  * \author Francesco Fabiano.
- * \date 3/31/2019
+ * \date March 31, 2019
  */
 
 #pragma once
@@ -27,7 +27,7 @@
 /****************************************************************
  *Non class specific
  ****************************************************************/
-typedef std::set<std::string> string_set; /**< \brief A representation of a formula in CNF formula.
+typedef std::set<std::string> string_set; /**< \brief A representation of a conjunctive set of \ref fluent.
                                             *
                                             * Each element of the formula is a std::string (not grounded) */
 typedef std::set<string_set> string_set_set; /**< \brief A representation of a formula in DNF formula.
@@ -44,7 +44,7 @@ typedef unsigned short fluent; /**< \brief A representation of a fluent through 
                                 *
                                 * The unique id of the readed fluent is always an odd number while to
                                 * obtain the negated version is necessary to add 1.*/
-typedef std::set<fluent> fluent_set; /**< \brief A representation of a fluent formula in CNF.
+typedef std::set<fluent> fluent_set; /**< \brief A representation of a conjunctive set of \ref fluent.
                                       * 
                                       * This representation is used, for example, to represent
                                       * a world \ref kworld in a Kripke structure (\ref kstate).
@@ -166,7 +166,6 @@ typedef std::string kworld_id; /**< \brief The id of a \ref kworld in a \ref kst
 typedef std::shared_ptr<const kworld> kworld_ptr; /**< \brief A std::shared_pointer to a \ref kworld usually stored in \ref kstore.
                                                    * 
                                                    * @see kworld and kstore*/
-
 typedef std::set<kworld_ptr> kworld_ptr_set; /**< \brief A set of \ref kworld_ptr.
                                             * 
                                             * Mainly used to store all the \ref kworld of a \ref kstate without wasting memory.

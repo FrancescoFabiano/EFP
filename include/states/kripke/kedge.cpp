@@ -1,8 +1,12 @@
-/* 
- * File:   kedge.h
- * Author: Francesco
+
+/*
+ * \brief Class that implements kedge.h.
  *
- * Created on March 31, 2019, 3:18 PM
+ *
+ * \copyright GNU Public License.
+ *
+ * \author Francesco Fabiano.
+ * \date March 31, 2019
  */
 #include "kedge.h"
 
@@ -24,6 +28,9 @@ kedge::kedge(const kworld & from, const kworld & to, agent label)
 	set_id();
 }
 
+/**
+ * \warning the hash function is maybe to simple.
+ */
 kedge_id kedge::hash_info_into_id(kworld_ptr from, kworld_ptr to, agent label)
 {
 	return(from->get_id() + "-" + to->get_id() + "-" + std::to_string(label));
@@ -56,13 +63,21 @@ kedge_id kedge::get_id() const
 
 void kedge::set_from(const kworld & from)
 {
-	//Get the reference of the world from the static class kstore
+	/*Get the reference of the world from the static class kstore
+	 *
+	 * If the world doesn't exists it create a new one in kstore and get its address
+	 * otherwise it get the already existing one's address.
+	 */
 	m_from = kstore::get_instance().add_world(from);
 }
 
 void kedge::set_to(const kworld & to)
 {
-	//Get the reference of the world from the static class kstore
+	/*Get the reference of the world from the static class kstore
+	 *
+	 * If the world doesn't exists it create a new one in kstore and get its address
+	 * otherwise it get the already existing one's address.
+	 */
 	m_to = kstore::get_instance().add_world(to);
 }
 
@@ -78,16 +93,10 @@ void kedge::set_id()
 
 bool kedge::operator<(const kedge& edge) const
 {
-	if(m_edge_id.compare(edge.get_id()) < 0)
+	if (m_edge_id.compare(edge.get_id()) < 0)
 		return true;
 	return false;
 }
-
-/*bool kedge::operator==(const kedge&) const
-{
-	if(m_edge_id.compare(edge.get_id()) == 0)
-		return true;
-	return false;}*/
 
 void kedge::print()
 {

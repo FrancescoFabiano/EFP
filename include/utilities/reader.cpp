@@ -5,7 +5,7 @@
  * \copyright GNU Public License.
  * 
  * \author Francesco Fabiano.
- * \date 3/31/2019
+ * \date March 31, 2019
  */
 
 #include <iostream>

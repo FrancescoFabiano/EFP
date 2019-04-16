@@ -10,7 +10,7 @@
  * \copyright GNU Public License.
  *
  * \author Francesco Fabiano.
- * \date 4/7/2019
+ * \date April 7, 2019
  */
 
 #pragma once
@@ -22,9 +22,9 @@ public:
     /**
      * \brief Function used to print all the std::string inside \p to_print.
      *
-     * A \ref string_set represents a formula in CNF format so the printing is executed accordingly.
+     * A \ref string_set represents a conjunctive set of \ref fluent format so the printing is executed accordingly.
      *
-     * @param[in] to_print the \ref string_set to be printed.
+     * @param[in] to_print: the \ref string_set to be printed.
      *
      * \warning   Is the const reference the best type of parameter passing?
      */
@@ -35,7 +35,7 @@ public:
      *
      * A \ref string_set_set represents a formula in DNF format so the printing is executed accordingly.
      *
-     * @param[in] to_print the \ref string_set_set to be printed.
+     * @param[in] to_print: the \ref string_set_set to be printed.
      *
      *  \warning   Is the const reference the best type of parameter passing?
      */

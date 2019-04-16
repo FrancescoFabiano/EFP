@@ -7,46 +7,46 @@
 
 #include "kstate.h"
 
-bool kstate::entails(fluent f)
+bool kstate::entails(fluent f) const
 {
 	return entails(f, m_pointed);
 }
-bool kstate::entails(fluent f, kworld_ptr world)
+bool kstate::entails(fluent f, kworld_ptr world) const
 {
 	//@TODO: consistency?
 	return world->entails(f);
 }
-bool kstate::entails(const fluent_set & fl)
+bool kstate::entails(const fluent_set & fl) const
 {
 	//@TODO: consistency?
 	return entails(fl, m_pointed);
 }
 
-bool kstate::entails(const fluent_set & fl, kworld_ptr world)
+bool kstate::entails(const fluent_set & fl, kworld_ptr world) const
 {
 	//@TODO: consistency?
 	return world->entails(fl);
 }
 
-bool kstate::entails(const fluent_formula & ff)
+bool kstate::entails(const fluent_formula & ff) const
 {
 	//@TODO: consistency?
 	return entails(ff, m_pointed);
 }
 
-bool kstate::entails(const fluent_formula & ff, kworld_ptr world)
+bool kstate::entails(const fluent_formula & ff, kworld_ptr world) const
 {
 	//@TODO: consistency?
 	return world->entails(ff);
 }
 
-bool kstate::entails(const belief_formula & bf)
+bool kstate::entails(const belief_formula & bf) const
 {
 	return entails(bf, m_pointed);
 }
 
 
-bool kstate::entails(const belief_formula & bf, const kworld_ptr_set & reachable)
+bool kstate::entails(const belief_formula & bf, const kworld_ptr_set & reachable) const
 {
 	kworld_ptr_set::const_iterator it_kwl;
 	for (it_kwl = reachable.begin(); it_kwl != reachable.end(); it_kwl++) {
@@ -56,7 +56,7 @@ bool kstate::entails(const belief_formula & bf, const kworld_ptr_set & reachable
 	return false;
 }
 
-bool kstate::entails(const belief_formula & bf, kworld_ptr world)
+bool kstate::entails(const belief_formula & bf, kworld_ptr world) const
 {
 	switch (bf.m_formula_type) {
 	case FLUENT_FORMULA:

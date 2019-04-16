@@ -3,7 +3,7 @@
  * \copyright GNU Public License.
  *
  * \author Francesco Fabiano.
- * \date 4/7/2019
+ * \date April 7, 2019
  */
 
 #include <iostream>
@@ -13,7 +13,7 @@ void printer::print_list(const string_set& to_print)
 {
 	bool first_print = true;
 
-	//Iterate on the \p to_print and print its content separated by a comma to represent a CNF.
+	//Iterate on the \p to_print and print its content separated by a comma to represent a conjunctive set of \ref fluent.
 	string_set::const_iterator it_sl;
 	for (it_sl = to_print.begin(); it_sl != to_print.end(); it_sl++) {
 		if (!first_print) {
