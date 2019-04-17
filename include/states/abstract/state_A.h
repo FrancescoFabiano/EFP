@@ -44,7 +44,7 @@ public:
     //virtual state compute_succ (const action &) = 0;
     
     virtual bool entails (fluent) = 0;
-    virtual bool entails (const fluent_list &);
+    virtual bool entails (const fluent_set &);
     virtual bool entails (const fluent_formula &);
     
     bool entails (const formula_list &);

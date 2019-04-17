@@ -6,13 +6,13 @@ int yyerror(char *s);
 int yylex(void);
 
 std::string get_negation(const std::string*);
-bool is_consistent(string_list,string_list);
-//string_list_list get_negateFluentForm(string_list_list);
-string_list_list negate_or(string_list);
-string_list_list negate_form(string_list_list);
-string_list_list join_SL2(string_list_list, string_list_list);
-void print_string_list(string_list);
-void print_string_list_list(string_list_list);
+bool is_consistent(string_set,string_set);
+//string_set_set get_negateFluentForm(string_set_set);
+string_set_set negate_or(string_set);
+string_set_set negate_form(string_set_set);
+string_set_set join_SL2(string_set_set, string_set_set);
+void print_string_set(string_set);
+void print_string_set_set(string_set_set);
 
 extern reader domain_reader;
 
@@ -20,8 +20,8 @@ extern reader domain_reader;
 
 %union{
   std::string*	str_val;
-  string_list*  str_list; 
-  string_list_list* str_list2;
+  string_set*  str_list; 
+  string_set_set* str_list2;
   proposition* prop;
   proposition_list* prop_list;
   belief_formula* bf;
@@ -68,7 +68,7 @@ extern reader domain_reader;
 %type <str_val> param_list
 
 %type <str_val> fluent
-%type <str_list> fluent_list
+%type <str_list> fluent_set
 %type <str_list> fluent_det_list
 
 %type <str_val> literal
@@ -178,17 +178,17 @@ id LEFT_PAREN param_list RIGHT_PAREN
 
 fluent_det_list:
 fluent {
-  $$ = new string_list;
+  $$ = new string_set;
   $$->insert(*$1);
 };
 
-fluent_list:
+fluent_set:
 fluent {
-  $$ = new string_list;
+  $$ = new string_set;
   $$->insert(*$1);
 }
 |
-fluent_list COMMA fluent {
+fluent_set COMMA fluent {
   $$ = $1;
   $$->insert(*$3);
 };
@@ -207,7 +207,7 @@ NEGATION fluent
 literal_list:
 literal
 {
-  $$ = new string_list;
+  $$ = new string_set;
   $$->insert(*$1);
 } 
 | 
@@ -218,9 +218,9 @@ literal_list COMMA literal {
 
 formula:
 literal {
-  string_list s1;
+  string_set s1;
 
-  $$ = new string_list_list;
+  $$ = new string_set_set;
 
   s1.insert(*$1);
 
@@ -228,11 +228,11 @@ literal {
 }
 | formula COMMA formula
 {
-  string_list_list::iterator it1;
-  string_list_list::iterator it2;
-  string_list ns;
+  string_set_set::iterator it1;
+  string_set_set::iterator it2;
+  string_set ns;
 
-  $$ = new string_list_list;
+  $$ = new string_set_set;
 
   for (it2 = $1->begin(); it2 != $1->end(); it2++) {
     for (it1 = $3->begin(); it1 != $3->end(); it1++){
@@ -255,14 +255,14 @@ literal {
 
 /* fluent declaration */
 fluent_decl: 
-FLUENT fluent_list SEMICOLON {
+FLUENT fluent_set SEMICOLON {
   $$ = $2;
 };
 
 fluent_decls:
 /* empty */
 {
-  $$ = new string_list;
+  $$ = new string_set;
 }
 |
 fluent_decls fluent_decl
@@ -284,7 +284,7 @@ id LEFT_PAREN param_list RIGHT_PAREN {
 
 action_list:
 action {
-  $$ = new string_list;
+  $$ = new string_set;
   $$->insert(*$1);
 }
 |
@@ -301,7 +301,7 @@ ACTION action_list SEMICOLON {
 action_decls:
 /* empty */
 {
-  $$ = new string_list;
+  $$ = new string_set;
 }
 |
 action_decls action_decl
@@ -322,7 +322,7 @@ id LEFT_PAREN param_list RIGHT_PAREN {
 
 agent_list:
 agent {
-  $$ = new string_list;
+  $$ = new string_set;
   $$->insert(*$1);
 }
 |
@@ -339,7 +339,7 @@ AGENT agent_list SEMICOLON {
 agent_decls:
 /* empty */
 {
-  $$ = new string_list;
+  $$ = new string_set;
 }
 |
 agent_decls agent_decl
@@ -353,7 +353,7 @@ agent_decls agent_decl
 if_part: 
 /* empty */
 {
-  $$ = new string_list;
+  $$ = new string_set;
 }
 |
 IF literal_list {
@@ -437,7 +437,7 @@ C LEFT_PAREN LEFT_BRAC agent_list RIGHT_BRAC COMMA belief_formula RIGHT_PAREN {
 if_part_fluent: 
 /* empty */
 {
-  $$ = new string_list_list;
+  $$ = new string_set_set;
 }
 |
 IF formula {
@@ -602,8 +602,8 @@ init_spec:
 {
   $$ = new formula_list;
   //$$->insert(bf());
-  //$$ = new string_list_list;
-  //$$->insert(string_list());
+  //$$ = new string_set_set;
+  //$$->insert(string_set());
 }
 | init_spec init
 {
@@ -614,9 +614,9 @@ init_spec:
 /* goal */
 gd_formula:
 literal {
-  string_list s1;
+  string_set s1;
 
-  $$ = new string_list_list;
+  $$ = new string_set_set;
 
   s1.insert(*$1);
   $$->insert(s1);
@@ -628,11 +628,11 @@ literal {
 }
 | 
 gd_formula OR gd_formula {
-  string_list_list::iterator it1;
-  string_list_list::iterator it2;
-  string_list ns;
+  string_set_set::iterator it1;
+  string_set_set::iterator it2;
+  string_set ns;
 
-  $$ = new string_list_list;
+  $$ = new string_set_set;
 
   for (it2 = $1->begin(); it2 != $1->end(); it2++) {
     for (it1 = $3->begin(); it1 != $3->end(); it1++){
@@ -683,9 +683,9 @@ int yyerror(char *s)
   return yyerror(std::string(s));
 }
 
-bool is_consistent(string_list sl1, string_list sl2)
+bool is_consistent(string_set sl1, string_set sl2)
 {
-  string_list::const_iterator it;
+  string_set::const_iterator it;
   std::string nl;
 
   for (it = sl2.begin(); it != sl2.end(); it++) {
@@ -709,15 +709,15 @@ std::string get_negation(const std::string* s)
 }
 
 /*
-string_list_list get_negateFluentForm(string_list_list input){
+string_set_set get_negateFluentForm(string_set_set input){
   
-  string_list_list separate;
-  string_list_list join;
-  string_list_list::iterator it1;
-  string_list_list::iterator it3;
-  string_list_list negation;
+  string_set_set separate;
+  string_set_set join;
+  string_set_set::iterator it1;
+  string_set_set::iterator it3;
+  string_set_set negation;
   std::string temp;
-  string_list::const_iterator it2;
+  string_set::const_iterator it2;
 
   for(it1 = input.begin(); it1 != input.end(); it1++){
      if(it1->begin() == it1->end())
@@ -729,7 +729,7 @@ string_list_list get_negateFluentForm(string_list_list input){
   //Separate elements in separate
      for(it1 = separate.begin(); it1 != separate.end(); it1++){
         temp = get_negation(&(*(it1->begin())));    //possible pointer problem
-        string_list tiep;
+        string_set tiep;
 	tiep.insert(temp);
 	negation.insert(tiep);
      }//for loop
@@ -741,7 +741,7 @@ string_list_list get_negateFluentForm(string_list_list input){
         for(it2 = it1->begin(); it2 != it1->end(); it2++)
         {
            temp = get_negation(&(*it2));    //possible pointer problem
-           string_list tiep;
+           string_set tiep;
            tiep.insert(temp);
            negation.insert(tiep);
 	}
@@ -753,19 +753,19 @@ string_list_list get_negateFluentForm(string_list_list input){
 //negate_or: input: String list = list of or. 
 //             output: Stringlist 2 = list of and of negation
 
-string_list_list negate_or(string_list input){
+string_set_set negate_or(string_set input){
    
-   string_list::iterator it;
-   string_list_list output;
+   string_set::iterator it;
+   string_set_set output;
    std::string element;
    
    for(it = input.begin(); it != input.end(); it++){
-      string_list temp;
+      string_set temp;
       element = get_negation(&(*it));
       temp.insert(element);
       output.insert(temp);
    }
-   //print_string_list_list(output);
+   //print_string_set_set(output);
    return output;
 }
 
@@ -777,17 +777,17 @@ string_list_list negate_or(string_list input){
 //                -> n std::stringlist 2 -> std::stringlist 3
 //                output = first member stirnglist 3 or second member of std::stringlist 3
 
-string_list_list join_SL2(string_list_list input1, string_list_list input2){
+string_set_set join_SL2(string_set_set input1, string_set_set input2){
   
   if(input2.size() == 0){
      return input1;
   }
 
-  string_list_list::iterator it1;
-  string_list_list::iterator it2;
-  string_list ns;
+  string_set_set::iterator it1;
+  string_set_set::iterator it2;
+  string_set ns;
 
-  string_list_list output;
+  string_set_set output;
 
   for (it2 = input1.begin(); it2 != input1.end(); it2++) {
     for (it1 = input2.begin(); it1 != input2.end(); it1++){
@@ -803,17 +803,17 @@ string_list_list join_SL2(string_list_list input1, string_list_list input2){
    
 }
 
-string_list_list negate_form(string_list_list input){
+string_set_set negate_form(string_set_set input){
    
-  typedef std::set<string_list_list> string_list3;
-  string_list3 list3;
-  string_list_list::iterator it1;
-  string_list_list::iterator it2;
-  string_list3::iterator it3;
-  string_list ns;
-  string_list_list temp;
+  typedef std::set<string_set_set> string_set3;
+  string_set3 list3;
+  string_set_set::iterator it1;
+  string_set_set::iterator it2;
+  string_set3::iterator it3;
+  string_set ns;
+  string_set_set temp;
 
-  string_list_list output;
+  string_set_set output;
 
   //turn all the “or�? statements to “and�? statements
    for(it1 = input.begin(); it1 != input.end(); it1++){
@@ -831,8 +831,8 @@ string_list_list negate_form(string_list_list input){
    return output;
 }
 
-void print_string_list(string_list in){
-	string_list::iterator it1;
+void print_string_set(string_set in){
+	string_set::iterator it1;
 	std::cout << "[ " ;
         for(it1 = in.begin();it1!=in.end();it1++){
 		std::cout << *it1 << " , ";   
@@ -840,12 +840,12 @@ void print_string_list(string_list in){
 	std::cout << "] " ;
 }
 
-void print_string_list_list(string_list_list in){
-	string_list_list::iterator it1;
+void print_string_set_set(string_set_set in){
+	string_set_set::iterator it1;
 	std::cout << "[ "; 
         for(it1 = in.begin();it1!=in.end();it1++){
  		 
-		print_string_list(*it1);
+		print_string_set(*it1);
 		std::cout << " , ";   
 	}
 	std::cout << " ] " ;

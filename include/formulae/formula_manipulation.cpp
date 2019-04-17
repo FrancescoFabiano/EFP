@@ -1,8 +1,9 @@
-/* 
- * File:   formula_manipulation.cpp
- * Author: Francesco
+/* \brief Implementation of formula_manipulation.h
+ * 
+ * \copyright GNU Public License.
  *
- * Created on April 7, 2019, 4:40 PM
+ * \author Francesco Fabiano.
+ * \date April 7, 2019
  */
 
 #include "formula_manipulation.h"
@@ -32,9 +33,6 @@ bool formula_manipulation::is_consistent(const fluent_set &fl1, const fluent_set
 	return true;
 }
 
-
-//@TODO: Check the return value
-
 fluent_set formula_manipulation::and_ff(const fluent_set& fl1, const fluent_set& fl2)
 {
 	fluent_set ret;
@@ -44,7 +42,7 @@ fluent_set formula_manipulation::and_ff(const fluent_set& fl1, const fluent_set&
 			ret = fl1;
 			ret.insert(fl2.begin(), fl2.end());
 		}
-
+		
 	} else if (fl1.empty()) {
 		return fl2;
 	} else if (fl2.empty()) {
@@ -56,7 +54,7 @@ fluent_set formula_manipulation::and_ff(const fluent_set& fl1, const fluent_set&
 
 	return ret;
 }
-//@TODO: check if the life of this does not depend on the reader
+
 fluent_formula formula_manipulation::and_ff(const fluent_formula& ff1, const fluent_formula& ff2)
 {
 	fluent_formula::iterator it_ff1;

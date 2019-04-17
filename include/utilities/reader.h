@@ -79,5 +79,5 @@ public:
 
     //std::string name(fluent x);
     //@TODO: Check if is the best type of parameters pass.
-    //string_list name(const fluent_list&);
+    //string_set name(const fluent_set&);
 };

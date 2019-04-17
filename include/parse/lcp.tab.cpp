@@ -71,12 +71,12 @@ int yylex(void);
 
 string get_negation(const std::string*);
 bool is_consistent(string_set, string_set);
-//string_list_list get_negateFluentForm(string_list_list);
+//string_set_set get_negateFluentForm(string_set_set);
 string_set_set negate_or(string_set);
 string_set_set negate_form(string_set_set);
 string_set_set join_SL2(string_set_set, string_set_set);
-void print_string_list(string_set);
-void print_string_list_list(string_set_set);
+void print_string_set(string_set);
+void print_string_set_set(string_set_set);
 
 extern reader reader;
 
@@ -494,7 +494,7 @@ static const char *const yytname[] = {
 	"FLUENT", "ACTION", "IF", "CAUSES", "EXECUTABLE", "IMPOSSIBLE",
 	"DETERMINE", "AWAREOF", "OBSERVES", "ANNOUNCES", "INIT", "GOAL", "AGENT",
 	"B", "C", "E", "$accept", "input", "id", "constant", "param",
-	"param_list", "fluent", "fluent_det_list", "fluent_list", "literal",
+	"param_list", "fluent", "fluent_det_list", "fluent_set", "literal",
 	"literal_list", "formula", "fluent_decl", "fluent_decls", "action",
 	"action_list", "action_decl", "action_decls", "agent", "agent_list",
 	"agent_decl", "agent_decls", "if_part", "if_part_bf", "belief_formula",
@@ -1977,8 +1977,8 @@ yyreduce:
 	{
 		(yyval.init_nodes) = new formula_list;
 		//$$->insert(bf());
-		//$$ = new string_list_list;
-		//$$->insert(string_list());
+		//$$ = new string_set_set;
+		//$$->insert(string_set());
 	}
 #line 2015 "lcp.tab.c" /* yacc.c:1646  */
 		break;
@@ -2280,15 +2280,15 @@ get_negation(const std::string* s)
 }
 
 /*
-string_list_list get_negateFluentForm(string_list_list input){
+string_set_set get_negateFluentForm(string_set_set input){
   
-  string_list_list separate;
-  string_list_list join;
-  string_list_list::iterator it1;
-  string_list_list::iterator it3;
-  string_list_list negation;
+  string_set_set separate;
+  string_set_set join;
+  string_set_set::iterator it1;
+  string_set_set::iterator it3;
+  string_set_set negation;
   std::string temp;
-  string_list::const_iterator it2;
+  string_set::const_iterator it2;
 
   for(it1 = input.begin(); it1 != input.end(); it1++){
      if(it1->begin() == it1->end())
@@ -2300,7 +2300,7 @@ string_list_list get_negateFluentForm(string_list_list input){
   //Separate elements in separate
      for(it1 = separate.begin(); it1 != separate.end(); it1++){
 	temp = get_negation(&(*(it1->begin())));    //possible pointer problem
-	string_list tiep;
+	string_set tiep;
 	tiep.insert(temp);
 	negation.insert(tiep);
      }//for loop
@@ -2312,7 +2312,7 @@ string_list_list get_negateFluentForm(string_list_list input){
 	for(it2 = it1->begin(); it2 != it1->end(); it2++)
 	{
 	   temp = get_negation(&(*it2));    //possible pointer problem
-	   string_list tiep;
+	   string_set tiep;
 	   tiep.insert(temp);
 	   negation.insert(tiep);
 	}
@@ -2338,7 +2338,7 @@ negate_or(string_set input)
 		temp.insert(element);
 		output.insert(temp);
 	}
-	//print_string_list_list(output);
+	//print_string_set_set(output);
 	return output;
 }
 
@@ -2382,11 +2382,11 @@ string_set_set
 negate_form(string_set_set input)
 {
 
-	typedef std::set<string_set_set> string_list3;
-	string_list3 list3;
+	typedef std::set<string_set_set> string_set3;
+	string_set3 list3;
 	string_set_set::iterator it1;
 	string_set_set::iterator it2;
-	string_list3::iterator it3;
+	string_set3::iterator it3;
 	string_set ns;
 	string_set_set temp;
 
@@ -2409,7 +2409,7 @@ negate_form(string_set_set input)
 }
 
 void
-print_string_list(string_set in)
+print_string_set(string_set in)
 {
 	string_set::iterator it1;
 	std::cout << "[ ";
@@ -2420,13 +2420,13 @@ print_string_list(string_set in)
 }
 
 void
-print_string_list_list(string_set_set in)
+print_string_set_set(string_set_set in)
 {
 	string_set_set::iterator it1;
 	std::cout << "[ ";
 	for (it1 = in.begin(); it1 != in.end(); it1++) {
 
-		print_string_list(*it1);
+		print_string_set(*it1);
 		std::cout << " , ";
 	}
 	std::cout << " ] ";

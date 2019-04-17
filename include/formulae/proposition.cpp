@@ -1,20 +1,21 @@
-/* 
- * File:   proposition.cpp
- * Author: Francesco
+/*
+ * \brief Implementation of \ref proposition.h.
+ * 
+ * \copyright GNU Public License.
  *
- * Created on April 1, 2019, 10:20 PM
+ * \author Francesco Fabiano.
+ * \date April 1, 2019
  */
 #include <iostream>
 
 #include "proposition.h"
 
-
-/*const string_list* proposition::get_executability_conditions() const
+/*const string_set* proposition::get_executability_conditions() const
 {
 	return &m_action_precondition;
 };
 
-const string_list* proposition::get_effect() const
+const string_set* proposition::get_effect() const
 {
 	return &m_action_effect;
 };*/
@@ -45,9 +46,13 @@ void proposition::print() const
 		break;
 	}
 
+	/**
+	 * \todo check implementation, the print should be moved inside the switch.
+	 */
+
 	std::cout << "\n Effects:\n";
 	printer::print_list(m_action_effect);
-	
+
 
 	/*std::cout << "\n Conditional Execution for act -> incorporated with Executability conditions:\n";
 	first = true;
@@ -60,36 +65,36 @@ void proposition::print() const
 		std::cout << *it;
 	}*/
 
-//For Printing Info
-//	std::cout << "\n Observability conditions:\n";
-//	printer::print_list(m_observability_conditions);
-//	/*first2 = true;
-//	for (it2 = m_observability_conditions.begin(); it2 != m_observability_conditions.end(); it2++) {
-//		if ((m_type == AWARENESS || m_type == OBSERVANCE) && !if_fluform) {
-//			std::cout << " if ";
-//			if_fluform = true;
-//		}
-//		if (!first2)
-//			std::cout << " | ";
-//		first2 = false;
-//		first = true;
-//		std::cout << "(";
-//		for (it = it2->begin(); it != it2->end(); it++) {
-//			if (!first)
-//				std::cout << " AND ";
-//			first = false;
-//			std::cout << *it;
-//		}
-//		std::cout << ")";
-//	}*/
-//
-//	std::cout << "\n Executability conditions:\n";
-//	//@TODO: why this or?
-//	if (m_executability_conditions.m_bf1 != nullptr || m_type == DYNAMIC) {
-//		std::cout << " if ";
-//		m_executability_conditions.print();
-//	}
-//	std::cout << std::endl;
+	//For Printing Info
+	//	std::cout << "\n Observability conditions:\n";
+	//	printer::print_list(m_observability_conditions);
+	//	/*first2 = true;
+	//	for (it2 = m_observability_conditions.begin(); it2 != m_observability_conditions.end(); it2++) {
+	//		if ((m_type == AWARENESS || m_type == OBSERVANCE) && !if_fluform) {
+	//			std::cout << " if ";
+	//			if_fluform = true;
+	//		}
+	//		if (!first2)
+	//			std::cout << " | ";
+	//		first2 = false;
+	//		first = true;
+	//		std::cout << "(";
+	//		for (it = it2->begin(); it != it2->end(); it++) {
+	//			if (!first)
+	//				std::cout << " AND ";
+	//			first = false;
+	//			std::cout << *it;
+	//		}
+	//		std::cout << ")";
+	//	}*/
+	//
+	//	std::cout << "\n Executability conditions:\n";
+	//	//@TODO: why this or?
+	//	if (m_executability_conditions.m_bf1 != nullptr || m_type == DYNAMIC) {
+	//		std::cout << " if ";
+	//		m_executability_conditions.print();
+	//	}
+	//	std::cout << std::endl;
 
 };
 

@@ -17,10 +17,10 @@
 //prototype of bison-generated parser function
 int yyparse();
 
-/*string_list reader::name(const fluent_list &x)
+/*string_set reader::name(const fluent_set &x)
 {
-	string_list y;
-	fluent_list::iterator it;
+	string_set y;
+	fluent_set::iterator it;
 
 	for (it = x.begin(); it != x.end(); it++) {
 		y.insert(name(*it));
@@ -32,7 +32,7 @@ int yyparse();
 std::string reader::name(fluent x)
 {
 	unsigned short i = x / 2;
-	string_list::iterator it;
+	string_set::iterator it;
 
 	if (i >= m_fluents.size())
 		return NULL;
@@ -118,7 +118,7 @@ void reader::print() const
 	std::cout << "Total fluents: " << m_fluents.size() << std::endl;
 	//std::cout << "Unknown fluents: " << std::endl;
 	unsigned int i = 0;
-	string_list_list::const_iterator it_fll;
+	string_set_set::const_iterator it_fll;
 	
 	for (it_fll = m_initially.begin(); it_fll != m_initially.end(); it_fll++) {
 		std::cout << "\tState " << i++ << ": ";

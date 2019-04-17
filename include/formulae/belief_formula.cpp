@@ -1,54 +1,36 @@
-/* 
- * File:   belief_formula.cpp
- * Author: Francesco
+/**
+ * \brief Class that implements a \ref belief_formula.h.
  *
- * Created on March 31, 2019, 7:43 PM
+ * \author Francesco Fabiano.
+ * \date March 31, 2019
  */
-
 #include "belief_formula.h"
 
-//@TODO: Check if there are no side changes -- maybe better to pass another and then dereferenciate it (nullptr?)
-
+/**
+ * \todo Check if there are no side changes with the pointer passing -- maybe better to use the copy operator.
+ * \todo check nullptr
+ */
 void belief_formula::set_flu(const fluent_formula& ff)
 {
 	m_fluent_formula = ff;
 }
 
-//@TODO: MErge in an unique function with the one below or remove this
-
 void belief_formula::print() const
 {
 	/*bool first = true;
-	string_list::const_iterator it;
-	string_list_list::const_iterator it2;
+	string_set::const_iterator it;
+	string_set_set::const_iterator it2;
 	bool first2 = true;
 	std::cout << "(";*/
 	switch (m_formula_type) {
 
 	case FLUENT_FORMULA:
-		/*for (it2 = m_string_fluent_formula.begin(); it2 != m_string_fluent_formula.end(); it2++) {
-		    if (!first2)
-			std::cout << " | ";
-		    first2 = false;
-		    first = true;
-		    std::cout << "(";
-		    for (it = it2->begin(); it != it2->end(); it++) {
-			if (!first)
-			    std::cout << " AND ";
-			first = false;
-			    std::cout << *it;
-		    
-		    }
-		    std::cout << ")";
-		}
-		std::cout << ")";*/
 		printer::print_list(m_string_fluent_formula);
 		break;
 	case BELIEF_FORMULA:
 		std::cout << "B(" << m_string_agent_op << ",(";
 		m_bf1->print();
 		std::cout << "))";
-		//std::cout << ")";
 		break;
 
 	case C_FORMULA:
@@ -57,7 +39,6 @@ void belief_formula::print() const
 		std::cout << "],";
 		m_bf1->print();
 		std::cout << ")";
-		// std::cout << ")";
 		break;
 
 	case E_FORMULA:
@@ -73,7 +54,7 @@ void belief_formula::print() const
 		if (m_operator == BF_NOT)
 			std::cout << "NOT(";
 		//else if (m_operator == BF_NONE)
-			//std::cout << "(";
+		//std::cout << "(";
 		m_bf1->print();
 		if (m_operator == BF_NOT)
 			std::cout << ")";
@@ -83,7 +64,7 @@ void belief_formula::print() const
 			std::cout << " AND ";
 		else if (m_operator == BF_OR)
 			std::cout << " OR ";
-		if (m_bf2 != nullptr){
+		if (m_bf2 != nullptr) {
 			//std::cout << "(";
 			m_bf2->print();
 		}
@@ -101,7 +82,7 @@ void belief_formula::print() const
 
 void belief_formula::print_grounded(const grounder& grounder) const
 {
-	
+
 	bool first = true;
 	string_set::const_iterator it;
 	string_set_set::const_iterator it2;
@@ -232,7 +213,7 @@ void belief_formula::ground(const grounder & gr)
 	m_agent_op = -1;
 	m_formula_type = EMPTY;
 	fluent fail = -1;
-	fluent_list fail_l;
+	fluent_set fail_l;
 	fail_l.insert(fail);
 	//m_fluent_formula.insert(fail_l);
 	m_bf1 = nullptr;

@@ -68,10 +68,10 @@ void state_A::set_heuristic_value(int heuristic_value)
 bool state_A::is_goal();
 
 //@TODO: for now commented because is the same in kworld -> accorpate
-/*bool state_A::entails(const fluent_list & to_check)
+/*bool state_A::entails(const fluent_set & to_check)
 {
-	//fluent_list expresses CNF
-	fluent_list::const_iterator it_fl;
+	//fluent_set expresses CNF
+	fluent_set::const_iterator it_fl;
 	for (it_fl = to_check.begin(); it_fl != to_check.end(); it_fl++) {
 		if(!entails(*it_fl)){
 			return false;

@@ -1,5 +1,5 @@
 /**
- * \file define.h
+ * \class define.h
  * \brief Class containing most of the custom types and symbols defined for the planner.
  *
  *
@@ -116,9 +116,6 @@ enum domain_restriction
  * Different state representation imply different advantages.
  * 
  * This type is used to allocate the class \ref state with the chosen representation.
- * 
- * \todo
- * \ref OBBD has yet to be studied
  *
  */
 enum state_type
@@ -133,7 +130,7 @@ enum state_type
             * on possibilities. @see poss_state. */
     OBDD /**< \brief State representation based on OBDD.
             * 
-            * Yet to study.*/
+            *\todo Yet to study.*/
 };
 
 /*****************Kripke States*****************/
@@ -146,14 +143,13 @@ typedef std::string kedge_id; /**< \brief The id of an \ref kedge in a \ref ksta
                                 * but to access the already created ones.
                                 * @see kedge and kstore*/
 typedef std::shared_ptr<const kedge> kedge_ptr; /**< \brief A std::shared_pointer to a \ref kedge usually stored in \ref kstore.
-                                                *
-                                                 * @see kedge and kstore*/
+                                                * @see kedge and kstore*/
 typedef std::set<kedge_ptr> kedge_ptr_set; /**< \brief A set of \ref kedge_ptr.
                                             * 
                                             * Mainly used to store all the \ref kedge of a \ref kstate without wasting memory.
                                             *
                                             * \todo The operator < for std::shared_ptr must be implemented
-                                                                              * @see kedge and kstate*/
+                                            * @see kedge and kstate*/
 
 class kworld;
 typedef std::string kworld_id; /**< \brief The id of a \ref kworld in a \ref kstate.
@@ -171,4 +167,4 @@ typedef std::set<kworld_ptr> kworld_ptr_set; /**< \brief A set of \ref kworld_pt
                                             * Mainly used to store all the \ref kworld of a \ref kstate without wasting memory.
                                             *
                                             * \todo The operator < for std::shared_ptr must be implemented.
-                                                                              * @see kworld and kstate*/
+                                            * @see kworld and kstate.*/
