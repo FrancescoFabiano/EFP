@@ -187,13 +187,13 @@ void kstate::build_initial(const initially & initials_conditions)
 {
 	/**
 	 * \todo yet to implement.
-	*/
+	 */
 	std::cout << "\nBuilding initial Kripke structure...\n";
 }
 
- bool kstate::is_executable(const action & act)const
- {
+bool kstate::is_executable(const action & act)const
+{
 	/**
 	 * \todo yet to implement.
-	*/
+	 */
 }

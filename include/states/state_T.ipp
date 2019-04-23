@@ -86,6 +86,7 @@ void state<T>::set_heuristic_value(int heuristic_value)
 {
 	m_heuristic_value = heuristic_value;
 }
+
 template <class T>
 bool state<T>::entails(const fluent_set & to_check)
 {
@@ -112,11 +113,13 @@ bool state<T>::entails(const formula_list & to_check)
 }
 
 template <class T>
-void state<T>::build_initial(const initially & init){
+void state<T>::build_initial(const initially & init)
+{
 	//To implement constructor
 	//representation = T(init);
 	representation.build_initial(init);
 }
+
 template <class T>
 T state<T>::compute_succ(const action & act)
 {

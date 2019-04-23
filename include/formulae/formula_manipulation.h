@@ -50,7 +50,7 @@ public:
      * 
      * @return the union of all the \ref fluent in \p to_merge_1\2 if is consistent (exit otherwise).*/
     static fluent_set and_ff(const fluent_set& to_merge_1, const fluent_set& to_merge_2);
-    
+
     /**
      * \brief Function that merge two \ref fluent_formula(e) into one.
      * 

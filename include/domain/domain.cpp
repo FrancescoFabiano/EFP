@@ -1,8 +1,10 @@
-/* 
- * File:   domain.cpp
- * Author: Francesco
+/**
+ * \brief Implementation of \ref domain.h.
+ * 
+ * \copyright GNU Public License.
  *
- * Created on April 1, 2019, 10:41 AM
+ * \author Francesco Fabiano.
+ * \date April 1, 2019
  */
 #include "domain.h"
 
@@ -25,13 +27,16 @@ bool domain::build(bool debug)
 	build_goal(debug);
 
 
-	if (m_state_type == KRIPKE) {
+	//The \ref state is a template and change implementation according to the user choice.
+	switch (m_state_type) {
+	case KRIPKE:
 		state<kstate> initial;
-		initial.build_initial(m_intial_description);
-	} else {
+	default:
 		std::cerr << "Not implemented yet\n";
 		exit(1);
 	}
+	initial.build_initial(m_intial_description);
+
 
 
 	return true;
@@ -40,6 +45,9 @@ bool domain::build(bool debug)
 
 void domain::build_agents(bool debug)
 {
+	/*
+	 * This function set the grounder agent map with the correct values. 
+	 */
 	agent_map domain_agent_map;
 	std::cout << "\nBuilding agent list..." << std::endl;
 	string_set::const_iterator it_agents;
@@ -56,8 +64,10 @@ void domain::build_agents(bool debug)
 
 void domain::build_fluents(bool debug)
 {
+	/*
+	 * This function set the grounder fluent map with the correct values. 
+	 */
 	fluent_map domain_fluent_map;
-
 	std::cout << "\nBuilding fluent literals..." << std::endl;
 	string_set::const_iterator it_fluents;
 	int i = 0;
@@ -80,6 +90,9 @@ void domain::build_fluents(bool debug)
 void domain::build_actions(bool debug)
 {
 
+	/*
+	 * This function set the grounder action map with the correct values. 
+	 */
 	action_name_map domain_action_name_map;
 	std::cout << "\nBuilding action list..." << std::endl;
 	string_set::const_iterator it_actions_name;

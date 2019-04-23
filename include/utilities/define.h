@@ -1,5 +1,5 @@
 /**
- * \class define.h
+ * \class define
  * \brief Class containing most of the custom types and symbols defined for the planner.
  *
  *
@@ -70,8 +70,26 @@ typedef unsigned short action_id; /**< \brief The unique id (short) associated w
                                       * to the element of \ref reader::m_actions.*/
 typedef std::vector<action_id> action_id_list; /**< \brief A list of \ref action_id.*/
 
-typedef std::map<std::string, fluent> fluent_map; /**< \brief The map that associates to each \ref fluent name its grounded value.*/
-typedef std::map<std::string, agent> agent_map; /**< \brief The map that associates to each \ref agent name its grounded value.*/
+/*****************Grounder*****************/
+typedef std::map<std::string, fluent> fluent_map; /**< \brief The map that associates to each \ref fluent name its grounded value.
+                                                           * 
+                                                           * @see grounder.*/
+typedef std::map<std::string, agent> agent_map; /**< \brief The map that associates to each \ref agent name its grounded value.
+                                                           * 
+                                                           * @see grounder.*/
+typedef std::map<std::string, action_id> action_name_map; /**< \brief The map that associates to each \ref agent name its grounded value.
+                                                           * 
+                                                           * @see grounder.*/
+
+typedef std::map<fluent, std::string> reverse_fluent_map; /**< \brief The map that associates to each \ref fluent its name (for speed).
+                                                           * 
+                                                           * @see grounder.*/
+typedef std::map<agent, std::string> reverse_agent_map; /**< \brief The map that associates to each \ref agent its name (for speed).
+                                                           * 
+                                                           * @see grounder.*/
+typedef std::map<action_id, std::string> reverse_action_name_map; /**< \brief The map that associates to each \ref agent_id its name (for speed).
+                                                           * 
+                                                           * @see grounder.*/
 
 /** \brief The possible restriction applicable to the domain.
  *
@@ -106,6 +124,20 @@ enum domain_restriction
     FAIL, /**< \brief The default case to guarantee consistency.
          */
 };
+
+
+/****************************************************************
+ * Actions Related
+ ****************************************************************/
+typedef std::map<agent, fluent_formula> observability_map; /**< \brief Used to express the obsverbability conditions.
+                                * 
+                                * Each element associates an \ref agent to the observability conditions for an \ref action.*/
+//Associate each effect the condition
+typedef std::map<fluent_formula, belief_formula> effects_map; /**< \brief Used to express the conditions of an action effects.
+                                * 
+                                * Each element associates an \ref action effect to its conditions.*/
+
+
 
 /****************************************************************
  * States Related

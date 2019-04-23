@@ -97,7 +97,7 @@ public:
     /**
      *\brief Constructor without parameters.
      * 
-     * It create \ref representation calling its \p T constructor
+     * It creates \ref representation calling its **T** constructor.
      */
     state<T>();
     /**
@@ -125,9 +125,9 @@ public:
     state<T>(const action_id_list &, unsigned short, int);*/
 
     /**
-     *\brief Getter of \ref m_executed_actions_id.
+     * \brief Getter of \ref m_executed_actions_id.
      *     
-     * @return the \ref action_id_list that represent all the executed \ref action before to obtain *this*.*/
+     * @return the \ref action_id_list that represents all the executed \ref action before to obtain *this*.*/
     const action_id_list & get_executed_actions();
     /**
      *\brief Getter of \ref m_plan_length.
@@ -149,11 +149,14 @@ public:
      * 
      * @param to_check: the conjunctive set of \ref fluent to check if is entailed by *this*.
      * 
+     * @return true if \p to_check is entailed by *this*.
+     * @return false if \p -to_check is entailed by *this*.
+     * 
      * \todo add in see also the other state representations.
      * 
      * \bug Is not supposed to override the method but it does.
      */
-    bool entails(const fluent_set & to _check);
+    bool entails(const fluent_set & to_check);
     /**
      *\brief Function that checks if *this* entails a DNF \ref fluent_formula.
      * 
@@ -162,6 +165,9 @@ public:
      * @see kstate
      *
      * @param to_check: the DNF \ref fluent_formula to check if is entailed by *this*.
+     * 
+     * @return true if \p to_check is entailed by *this*.
+     * @return false if \p -to_check is entailed by *this*.
      * 
      * \todo add in see also the other state representations.
      * 
@@ -176,6 +182,10 @@ public:
      * @see kstate
      *
      * @param to_check: the CNF \ref formula_list to check if is entailed by *this*.
+     *
+     *       
+     * @return true if \p to_check is entailed by *this*.
+     * @return false if \p -to_check is entailed by *this*.
      * 
      * \todo add in see also the other state representations.
      *

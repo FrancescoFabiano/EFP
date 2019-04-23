@@ -22,12 +22,12 @@ grounder::grounder(fluent_map fluent_map, agent_map agent_map, action_name_map a
 
 }
 
-void grounder::reverse()
+/*void grounder::reverse()
 {
 	create_reverse_fl(m_fluent_map);
 	create_reverse_ag(m_agent_map);
 	create_reverse_ac(m_action_name_map);
-}
+}*/
 
 void grounder::create_reverse_fl(const fluent_map& to_revert)
 {
@@ -61,7 +61,7 @@ void grounder::set_fluent_map(fluent_map fluent_map)
 {
 
 	m_fluent_map = fluent_map;
-	//@TODO:Remove for efficency; just for printing reasons (pass debug maybe)
+
 	if (!m_reversed_fl)
 		create_reverse_fl(m_fluent_map);
 }
@@ -69,7 +69,7 @@ void grounder::set_fluent_map(fluent_map fluent_map)
 void grounder::set_agent_map(agent_map agent_map)
 {
 	m_agent_map = agent_map;
-	//@TODO:Remove for efficency; just for printing reasons (pass debug maybe)
+
 	if (!m_reversed_ag)
 		create_reverse_ag(m_agent_map);
 }
@@ -77,7 +77,7 @@ void grounder::set_agent_map(agent_map agent_map)
 void grounder::set_action_name_map(action_name_map action_name_map)
 {
 	m_action_name_map = action_name_map;
-	//@TODO:Remove for efficency; just for printing reasons (pass debug maybe)
+
 	if (!m_reversed_ac)
 		create_reverse_ac(m_action_name_map);
 }
@@ -112,7 +112,6 @@ fluent_formula grounder::ground_fluent(const string_set_set& x) const
 	fluent_formula y;
 
 	for (it = x.begin(); it != x.end(); it++) {
-		//@TODO: Controlla questo passaggio, schifo! Change all the pointers to ref
 		y.insert(ground_fluent(*it));
 	}
 
@@ -186,7 +185,6 @@ string_set_set grounder::deground_fluent(const fluent_formula& x) const
 	string_set_set y;
 
 	for (it = x.begin(); it != x.end(); it++) {
-		//@TODO: Controlla questo passaggio, schifo! Change all the pointers to ref
 		y.insert(deground_fluent(*it));
 	}
 

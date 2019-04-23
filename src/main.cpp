@@ -62,7 +62,7 @@ void print_usage(char* prog_name)
 int main(int argc, char** argv)
 {
 	bool debug = false;
-	state_type state_struc= KRIPKE; //default
+	state_type state_struc = KRIPKE; //default
 	domain_restriction ini_restriction = S5; //default
 	domain_restriction goal_restriction = NONE; //default
 

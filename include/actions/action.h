@@ -1,94 +1,154 @@
 /**
- * File:   action.h
- * Author: Francesco
+ * \brief Class used to store an action and all its information.
+ * 
+ * \copyright GNU Public License.
  *
- * Created on April 3, 2019, 11:56 AM
+ * \author Francesco Fabiano.
+ * \date April 3, 2019
  */
 #pragma once
 
 #include <set>
 #include <vector>
-#include <map>
-
 
 #include "../utilities/define.h"
 #include "../formulae/belief_formula.h"
 #include "../formulae/proposition.h"
 #include "../domain/grounder.h"
 
-
-//Associate each agent to the observability conditions for each action
-typedef std::map<agent, fluent_formula> observability_map;
-//Associate each effect the condition
-typedef std::map<fluent_formula, belief_formula> effects_map;
-
 class action
 {
 private:
-    std::string m_name; // action name
+    /**
+     * \brief The name of *this*.
+     */
+    std::string m_name;
+    /**
+     * \brief The unique id of *this*.
+     * 
+     * This is calculated with \ref grounder.
+     */
     action_id m_id;
+    /**
+     * \brief The \ref proposition_type of the of *this*.
+     * 
+     * The type is initially NOTSET and then it's updated during the reading of the input file.
+     */
     proposition_type m_type = NOTSET;
-    
-    //@BeliefFormula
+
+    /**\brief The executability conditions of *this*.*/
     formula_list m_executability;
+    /**\brief The fully_observant frame (each obsv is related to a condition that's why  map) of *this*.*/
     observability_map m_fully_observants;
+    /**\brief The partially_observant frame (each obsv is related to a condition that's why  map) of *this*.*/
     observability_map m_partially_observants;
-    
-    /*********************************
-     * If ontic then <@FluentFormula, conditions(@list<BeliefFormula>)>
-     * If sensing then <@Fluent, conditions(@list<BeliefFormula>)>
-     * If announcement <then @Literal, conditions(@list<BeliefFormula>)>
-     *********************************/
+
+    /**\brief The effects of *this* with the respective conditions.
+     *
+     * If \ref DYNAMIC then <\ref fluent_formula,  \ref belief_formula>
+     * If \ref DETERMINATION then <\ref fluent, \ref belief_formula>
+     * If \ref ANNOUNCEMENT then <\ref fluent (lieteral), \ref belief_formula>.*/
     effects_map m_effects;
 
+
+    /* \brief Function that adds an executability condition to *this*.
+     *
+     * @param[in] to_add: The \ref belief_formula that represents the executability condition to add.
+     */
+    void add_executability(const belief_formula & to_add);
+
+    /* \brief Function that adds an effect (with its conditions) to *this*.
+     *
+     * @param[in] to_add: The \ref fluent_formula that represents the effect to add.
+     * @param[in] condition: The condition of \p to_add.
+     */
+    void add_effect(const fluent_formula& to_add, const belief_formula& condition);
+    /* \brief Function that adds a fully_observant \ref agent (with its conditions) to *this*.
+     *
+     * @param[in] ag: The \ref agent that its fully observant of this if \p condition.
+     * @param[in] condition: The condition for \p ag to be fully_observant of *this*.*/
+    void add_fully_observant(agent ag, const fluent_formula& condition);
+    /* \brief Function that adds a fully_observant \ref agent (with its conditions) to *this*.
+     *
+     * @param[in] ag: The \ref agent that its fully observant of this if \p condition.
+     * @param[in] condition: The condition for \p ag to be fully_observant of *this*.*/
+    void add_partially_observant(agent ag, const fluent_formula& condition);
+
 public:
-    /* constructor & destructor */
+    /**\brief Constructor without parameters.*/
     action();
-    action(const std::string &, action_id);
+    /**\brief Constructor with a given name and id.
+     *
+     * @param[in] name: the value to assign to \ref m_name.
+     * @param[in] name: the value to assign to \ref m_id.*/
+    action(const std::string & name, action_id id);
 
-    /* get/set functions */
+    /* \brief Getter of the field \ref m_name.*/
     std::string get_name() const;
-    void set_name(const std::string &);
-    
+    /* \brief Setter of the field \ref m_name.
+     *
+     * @param[in] name: the value to assign to \ref m_name.*/
+    void set_name(const std::string & name);
+    /* \brief Getter of the field \ref m_id.*/
+
     action_id get_id() const;
-    void set_id(action_id);
-    
+    /* \brief Setter of the field \ref m_id.
+     *
+     * @param[in] id: the value to assign to \ref m_id.*/
+    void set_id(action_id id);
+
+    /* \brief Getter of the field \ref m_type.*/
     const proposition_type get_type() const;
-    void set_type(proposition_type);
+    /* \brief Setter of the field \ref m_type.
+     *
+     * @param[in] type: the value to assign to \ref m_type.*/
+    void set_type(proposition_type type);
 
-    //@TODO: Check if is the best type of parameters ret. (Also the ones below)
 
-    //The return type it's fine because actions survive with the domain
+    /* \brief Getter of the field \ref m_executability.
+     *
+     * The return type it's fine because actions survive with the domain.
+     */
     const formula_list& get_executability() const;
-    //The return type it's fine because actions survive with the domain
+    /* \brief Getter of the field \ref m_effects.
+     *
+     * The return type it's fine because actions survive with the domain.
+     */
     const effects_map& get_effects() const;
-    //The return type it's fine because actions survive with the domain
+    /* \brief Getter of the field \ref m_fully_observants.
+     *
+     * The return type it's fine because actions survive with the domain.
+     */
     const observability_map& get_fully_observants() const;
-    //The return type it's fine because actions survive with the domain
+    /* \brief Getter of the field \ref m_partially_observants.
+     *
+     * The return type it's fine because actions survive with the domain.
+     */
     const observability_map& get_partially_observants() const;
 
-    //Ok because is push_back and it makes copy
-    void add_executability(const belief_formula &);
-    
-    //Ok because is map::value_type and it makes copy
-    void add_effect(const fluent_formula&, const belief_formula&);
-    //Ok because is map::value_type and it makes copy
-    void add_fully_observant(agent, const fluent_formula&);
-    //Ok because is map::value_type and it makes copy
-    void add_partially_observant(agent, const fluent_formula&);
-    
-    //Ok because its method all makes copies
-    void add_proposition(const proposition &, const grounder&);
 
-    void print(const grounder&) const;
-    
-    //For set insertion
+
+    /* \brief Function that parse a \ref proposition and adds its information to *this*.
+     * 
+     * This function uses \ref add_executability(const belief_formula &), \ref  add_effect(const fluent_formula&, const belief_formula&),
+     * \ref add_fully_observant(agent, const fluent_formula&) and add_partially_observant(agent, const fluent_formula&) to add
+     * the appropriate behavior to the *this*.
+     *
+     * @param[in] to_add: The \ref proposition to add to *this*.
+     * @param[in] gr: The \ref grounder object used to ground the info inside *this*.*/
+    void add_proposition(const proposition & to_add, const grounder& gr);
+
+    /* \brief Function that  prints *this*.
+     * 
+     * @param[in] gr: The \ref grounder object used to ground the info inside the *this*.*/
+    void print(const grounder& gr) const;
+
+    /* \brief Operator < implmented to use \ref action in std::set.*/
     bool operator<(const action&) const;
+    /* \brief Operator =.*/
     bool operator=(const action&);
-
 };
 
-typedef std::set<action> action_set;
-typedef std::vector<action> action_list;
+typedef std::set<action> action_set; /**< \brief A representation a set of \ref action.*/
 
-typedef std::map<std::string, action_id> action_name_map;
+typedef std::vector<action> action_list; /**< \brief A representation of a sequential executution of \ref action*/

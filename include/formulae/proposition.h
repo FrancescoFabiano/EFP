@@ -33,8 +33,14 @@
 enum proposition_type
 {
     EXECUTABILITY, /**< \brief Used when the proposition specifies an action executability condition -- *act* **exec if** *phi* */
-    DYNAMIC, /**< \brief Used when the proposition specifies the effects of an ontic action -- *act* **causes** *f* */
-    DETERMINATION, /**< \brief Used when the proposition specifies the effects of a sensing action -- *act* **sensed** *f* */
+    DYNAMIC, /**< \brief Used when the proposition specifies the effects of an ontic action -- *act* **causes** *f* 
+              *
+              * \todo change with ONTIC.
+              */
+    DETERMINATION, /**< \brief Used when the proposition specifies the effects of a sensing action -- *act* **sensed** *f* 
+                    *
+                    * \todo change with SENSING.
+                    */
     ANNOUNCEMENT, /**< \brief Used when the proposition specifies the effects of a announcement action -- *act* **annaunces** *ff* */
     OBSERVANCE, /**< \brief Used when the proposition specifies the full observability conditions of an action -- *ag* **observes** *act* */
     AWARENESS, /**< \brief Used when the proposition specifies the partial observability conditions of an action -- *ag* **aware** *act* */

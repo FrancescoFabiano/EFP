@@ -78,29 +78,36 @@ const observability_map& action::get_partially_observants() const
 {
 	return m_partially_observants;
 }
-//Ok because is push_back and it makes copy
+
 void action::add_executability(const belief_formula& exec)
 {
+	///Parameter Passing ok because push_back makes copy.
 	m_executability.push_back(exec);
 }
-//Ok because is map::value_type and it makes copy
+
 void action::add_effect(const fluent_formula& effect, const belief_formula &condition)
 {
+	///Parameter Passing ok because is map::value_type and it makes copy
+
 	m_effects.insert(effects_map::value_type(effect, condition));
 }
-//Ok because is map::value_type and it makes copy
+
 void action::add_fully_observant(agent fully, const fluent_formula &condition)
 {
+	////Parameter Passing ok because is map::value_type and it makes copy
+
 	m_fully_observants.insert(observability_map::value_type(fully, condition));
 }
-//Ok because is map::value_type and it makes copy
+
 void action::add_partially_observant(agent partial, const fluent_formula &condition)
 {
 	m_partially_observants.insert(observability_map::value_type(partial, condition));
 }
-//Ok because its method all makes copies
+
 void action::add_proposition(const proposition & prop, const grounder& grounder)
 {
+	///Parameter Passing ok because its method all makes copies
+
 	switch (prop.m_type) {
 
 		//Add action to the the list (name as identifier, then set id) then update the conditions and the awareness of the action so it's complete)
@@ -193,7 +200,7 @@ void action::print(const grounder& grounder) const
 		std::cout << " if ";
 		it_effmap->second.print();
 	}
-	
+
 
 	std::cout << "\n	Fully Observant:";
 	observability_map::const_iterator it_obsmap;
@@ -201,7 +208,7 @@ void action::print(const grounder& grounder) const
 		std::cout << " | " << grounder.deground_agent(it_obsmap->first) << " if ";
 		grounder.print_ff(it_obsmap->second);
 	}
-	
+
 	std::cout << "\n	Partially Observant:";
 	for (it_obsmap = m_partially_observants.begin(); it_obsmap != m_partially_observants.end(); ++it_obsmap) {
 		std::cout << " | " << grounder.deground_agent(it_obsmap->first) << " if ";

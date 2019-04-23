@@ -42,13 +42,12 @@ fluent_set formula_manipulation::and_ff(const fluent_set& fl1, const fluent_set&
 			ret = fl1;
 			ret.insert(fl2.begin(), fl2.end());
 		}
-		
+
 	} else if (fl1.empty()) {
 		return fl2;
 	} else if (fl2.empty()) {
 		return fl1;
-	}
-	else{
+	} else {
 		std::cerr << "Bad formula declaration." << std::endl;
 	}
 
@@ -70,8 +69,7 @@ fluent_formula formula_manipulation::and_ff(const fluent_formula& ff1, const flu
 		return ff2;
 	} else if (ff2.empty()) {
 		return ff1;
-	}
-	else{
+	} else {
 		std::cerr << "Bad formula declaration." << std::endl;
 	}
 	return ret;
