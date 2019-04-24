@@ -120,14 +120,14 @@ bool kstate::entails(const belief_formula & bf, kworld_ptr world) const
 	}
 }
 
-const kworld_ptr_set kstate::get_B_reachable_worlds(agent ag, kworld_ptr world)
+const kworld_ptr_set kstate::get_B_reachable_worlds(agent ag, kworld_ptr world) const
 {
 	kworld_ptr_set ret;
 	get_B_reachable_worlds(ag, world, ret);
 	return ret;
 }
 
-bool kstate::get_B_reachable_worlds(agent ag, kworld_ptr world, kworld_ptr_set& ret)
+bool kstate::get_B_reachable_worlds(agent ag, kworld_ptr world, kworld_ptr_set& ret) const
 {
 	bool is_fixed_point = true;
 	kedge_ptr_set::const_iterator it_kedge;
@@ -143,14 +143,14 @@ bool kstate::get_B_reachable_worlds(agent ag, kworld_ptr world, kworld_ptr_set& 
 	return is_fixed_point;
 }
 
-const kworld_ptr_set kstate::get_E_reachable_worlds(const agent_set & ags, kworld_ptr world)
+const kworld_ptr_set kstate::get_E_reachable_worlds(const agent_set & ags, kworld_ptr world) const
 {
 	kworld_ptr_set ret;
 	get_E_reachable_worlds(ags, world, ret);
 	return ret;
 }
 
-bool kstate::get_E_reachable_worlds(const agent_set & ags, kworld_ptr world, kworld_ptr_set& ret)
+bool kstate::get_E_reachable_worlds(const agent_set & ags, kworld_ptr world, kworld_ptr_set& ret) const
 {
 	bool is_fixed_point = true;
 	agent_set::const_iterator it_agset;
@@ -162,7 +162,7 @@ bool kstate::get_E_reachable_worlds(const agent_set & ags, kworld_ptr world, kwo
 	return is_fixed_point;
 }
 
-const kworld_ptr_set kstate::get_C_reachable_worlds(const agent_set & ags, kworld_ptr world)
+const kworld_ptr_set kstate::get_C_reachable_worlds(const agent_set & ags, kworld_ptr world) const
 {
 	//Use of fixed point to stop.
 	bool is_fixed_point = false;

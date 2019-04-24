@@ -52,7 +52,7 @@ public:
     static fluent_set and_ff(const fluent_set& to_merge_1, const fluent_set& to_merge_2);
 
     /**
-     * \brief Function that merge two \ref fluent_formula(e) into one.
+     * \brief Function that merge two \ref fluent_formula into one.
      * 
      * 
      * @param[in]  to_merge_1: the first \ref fluent_formula to merge.

@@ -38,12 +38,12 @@ private:
      *
      *
      *
-     * @param[in] from: the interpretation of the \ref fluent in the world.
+     * @param[in] description: the interpretation of the \ref fluent in the world.
      * @return the unique id of the world.
      * 
      * @warning Useless if not moved to \ref kstore.
      */
-    kworld_id hash_fluents_into_id(const fluent_set&);
+    kworld_id hash_fluents_into_id(const fluent_set& description);
 
     /**
      * \brief Function used to hash the the info of *this* in a unique id.
@@ -55,11 +55,11 @@ private:
     /**
      * \brief Setter for the field \ref m_fluent_set.
      * 
-     * @param[in] from: the set of \ref fluent to set as \ref m_fluent_set.
+     * @param[in] description: the set of \ref fluent to set as \ref m_fluent_set.
      * 
      * \todo is the parameter passing the best one? Copy?
      */
-    void set_fluent_set(const fluent_set &);
+    void set_fluent_set(const fluent_set & description);
 
     /**
      * \brief Function that uses the info of  *this* to set its  \ref m_id.
@@ -76,11 +76,11 @@ public:
      *Construct an object with the given info and then set the unique id.
      * the set of \ref fluent to set as \ref m_fluent_set.
      * 
-     * @param[in] from: the set of \ref fluent to set as \ref m_fluent_set.
+     * @param[in] description: the set of \ref fluent to set as \ref m_fluent_set.
      * 
      * \todo is the parameter passing the best one? Copy?
      */
-    kworld(const fluent_set &);
+    kworld(const fluent_set & description);
 
     /**
      *\brief Getter of \ref m_fluent_set.
@@ -119,11 +119,11 @@ public:
      *
      * @return true: \p to_check is entailed;
      * @return false: \p -to_check is entailed.*/
-    bool entails(const fluent_set to_check) const;
+    bool entails(const fluent_set& to_check) const;
     /**
      *\brief Function that check the entailment of a DNF \ref fluent_formula in *this*.
      * 
-     * This is checked by calling recursively \ref entails(fluent_set) const on all the element
+     * This is checked by calling recursively \ref entails(const fluent_set &) const on all the element
      * of \p to_check and returning true only if at least one element is entailed (DNF).
      *  
      * @param[in] to_check: the DNF formula that has to be checked if entailed by *this*.
@@ -135,7 +135,7 @@ public:
 
     /**
      *\brief The < operator based on the field \ref m_id.
-     * Implemented to allow the ordering on set of \ref kworld (used in \kstore).
+     * Implemented to allow the ordering on set of \ref kworld (used in \ref kstore).
      * 
      * @see kstore.
      *     

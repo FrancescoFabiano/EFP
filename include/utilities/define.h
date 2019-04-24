@@ -87,7 +87,7 @@ typedef std::map<fluent, std::string> reverse_fluent_map; /**< \brief The map th
 typedef std::map<agent, std::string> reverse_agent_map; /**< \brief The map that associates to each \ref agent its name (for speed).
                                                            * 
                                                            * @see grounder.*/
-typedef std::map<action_id, std::string> reverse_action_name_map; /**< \brief The map that associates to each \ref agent_id its name (for speed).
+typedef std::map<action_id, std::string> reverse_action_name_map; /**< \brief The map that associates to each \ref action_id its name (for speed).
                                                            * 
                                                            * @see grounder.*/
 
@@ -129,6 +129,7 @@ enum domain_restriction
 /****************************************************************
  * Actions Related
  ****************************************************************/
+class belief_formula;
 typedef std::map<agent, fluent_formula> observability_map; /**< \brief Used to express the obsverbability conditions.
                                 * 
                                 * Each element associates an \ref agent to the observability conditions for an \ref action.*/

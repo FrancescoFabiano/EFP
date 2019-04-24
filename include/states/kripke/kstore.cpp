@@ -19,7 +19,7 @@ kstore& kstore::get_instance()
 	return instance;
 }
 
-kedge_ptr kstore::add_edge(const kedge & edge)
+kedge_ptr kstore::add_edge(const kedge & to_add)
 {
 	/*      kedge_set::iterator it_edset;
 	      it_edset = m_created_edges.find(edge);
@@ -32,10 +32,10 @@ kedge_ptr kstore::add_edge(const kedge & edge)
 	//return std::get<0>(m_created_edges.insert(edge));
 
 	/// \bug wrong implementaion.
-	return std::shared_ptr<const kedge>(&edge);
+	return std::shared_ptr<const kedge>(&to_add);
 }
 
-kworld_ptr kstore::add_world(const kworld & world)
+kworld_ptr kstore::add_world(const kworld & to_add)
 {
 	//It returns the pointer to the newly inserted element if it doesn't exit (The old one otherwise)
 	//The pair is <iterator,bool>
@@ -45,7 +45,7 @@ kworld_ptr kstore::add_world(const kworld & world)
 	/// \bug No need to create the kworld kk or the iterator.
 
 	kworld_set::iterator it_kwset;
-	it_kwset = std::get<0>(m_created_worlds.insert(world));
+	it_kwset = std::get<0>(m_created_worlds.insert(to_add));
 	kworld kk = *it_kwset;
 	return std::shared_ptr<const kworld>(&kk);
 	//return &(*()));

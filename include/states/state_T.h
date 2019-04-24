@@ -55,7 +55,7 @@ private:
     /**
      * \brief The length of the plan up to this point.
      * 
-     * \todo we can retrieve it from \ref m_executed_actions_list.
+     * \todo we can retrieve it from \ref m_executed_actions_id.
      *          */
     unsigned short m_plan_length;
     /**
@@ -109,7 +109,7 @@ public:
     /**
      *\brief Constructor with a given state-representation object (**T**).
      * 
-     * @param given_state: the **T** object state to copy into \ref representation.
+     * @param given_representation: the **T** object state to copy into \ref representation.
      */
     state<T>(const T & given_representation);
     /**

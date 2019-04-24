@@ -2,7 +2,7 @@
  * \class grounder
  * \brief Class that grounds all the string of the domain in their numerical id.
  * 
- *  - \ref actions are associated to an \ref action_id;
+ *  - \ref action are associated to an \ref action_id;
  *  - agents (string) are associated to a \ref agent;
  *  - fluents (string) are associated to a \ref fluent;
  *
@@ -98,14 +98,14 @@ public:
      * \todo Is parameter passing the best one? Is maybe better to use const reference?
      */
     void set_fluent_map(fluent_map given_fluent_map);
-    /** \brief Setter for the parameter \ref given_agent_map.
+    /** \brief Setter for the parameter \ref m_agent_map.
      *
      * @param[in] given_agent_map: the map to copy into \ref m_agent_map.
      * 
      * \todo Is parameter passing the best one? Is maybe better to use const reference?
      */
     void set_agent_map(agent_map given_agent_map);
-    /** \brief Setter for the parameter \ref given_action_name_map.
+    /** \brief Setter for the parameter \ref m_action_name_map.
      *
      * @param[in] given_action_name_map: the map to copy into \ref m_action_name_map.
      * 
@@ -124,16 +124,16 @@ public:
      *
      * This function calls recursively \ref ground_fluent(const std::string&) const.
      * 
-     * @param[in] to_ground: the set of \fluent name to ground.
+     * @param[in] to_ground: the set of \ref fluent name to ground.
      * @return: \p to_ground grounded.
      * 
      * \todo Is the return type the best one? Is maybe better to use const reference?*/
     fluent_set ground_fluent(const string_set& to_ground) const;
     /** \brief Function that given a \ref string_set_set returns its grounded value.
      *
-     * This function calls recursively \ref ground_fluent(const std::string_set&) const.
+     * This function calls recursively \ref ground_fluent(const string_set&) const.
      * 
-     * @param[in] to_ground: the set of set of \fluent name to ground.
+     * @param[in] to_ground: the set of set of \ref fluent name to ground.
      * @return: \p to_ground grounded.
      * 
      * \todo Is the return type the best one? Is maybe better to use const reference?*/
@@ -179,10 +179,10 @@ public:
     string_set deground_fluent(const fluent_set& to_deground) const;
     /** \brief Function that given a grounded \ref fluent_formula returns the same formula in string format. 
      * 
-     * The function uses \ref deground_fluent(fluent_set) const.
+     * The function uses \ref deground_fluent(const fluent_set &) const.
      *
      * @param[in] to_deground: the \ref fluent_formula to deground.
-     * @return: the \ref fluent_formulain string format.*/
+     * @return: the \ref fluent_formula in string format.*/
     string_set_set deground_fluent(const fluent_formula& to_deground) const;
 
     /** \brief Function that given an \ref agent grounded value returns its name. 

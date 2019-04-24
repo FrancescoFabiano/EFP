@@ -80,7 +80,7 @@ public:
     /**\brief Constructor with a given name and id.
      *
      * @param[in] name: the value to assign to \ref m_name.
-     * @param[in] name: the value to assign to \ref m_id.*/
+     * @param[in] id: the value to assign to \ref m_id.*/
     action(const std::string & name, action_id id);
 
     /* \brief Getter of the field \ref m_name.*/

@@ -73,7 +73,7 @@ public:
     /**
      * \brief Function that return the pointer to the given edge.
      * 
-     * If the \ref kworld didn't exist then it is inserted to \ref m_created_world and then the pointer is returned;
+     * If the \ref kworld didn't exist then it is inserted to \ref m_created_worlds and then the pointer is returned;
      * if it existed a pointer to the already existing version is returned.
      * 
      * @param[in] to_add: the \ref kworld to add to the collection of created edges.
@@ -82,7 +82,7 @@ public:
      * 
      * \todo Param ok because set makes copy?
      */
-    kworld_ptr add_world(const kworld &);
+    kworld_ptr add_world(const kworld & to_add);
 
 
 

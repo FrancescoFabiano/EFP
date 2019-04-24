@@ -6,13 +6,13 @@
  */
 #include "belief_formula.h"
 
-/**
- * \todo Check if there are no side changes with the pointer passing -- maybe better to use the copy operator.
- * \todo check nullptr
- */
-void belief_formula::set_flu(const fluent_formula& ff)
+void belief_formula::set_flu(const fluent_formula& to_set)
 {
-	m_fluent_formula = ff;
+	/**
+	 * \todo Check if there are no side changes with the pointer passing -- maybe better to use the copy operator.
+	 * \todo check nullptr.
+	 */
+	m_fluent_formula = to_set;
 }
 
 void belief_formula::print() const

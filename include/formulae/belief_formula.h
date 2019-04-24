@@ -117,19 +117,19 @@ public:
     /**
      * \brief In this field is contained the operator if *this* is \ref PROPOSITIONAL_FORMULA.
      *
-     * - Given the \ref PROPOSITIONAL FORMULA *phi_1* **op** *phi_2* \ref m_operator contains **op**.
+     * - Given the \ref PROPOSITIONAL_FORMULA *phi_1* **op** *phi_2* \ref m_operator contains **op**.
      */
     bf_operator m_operator;
 
     /**
-     * \brief If this is a \ref E_FORMULA or a \ref C_FORMULA here is contained the relative set of \agent.
+     * \brief If this is a \ref E_FORMULA or a \ref C_FORMULA here is contained the relative set of \ref agent.
      *
      * - If *this* is \ref E_FORMULA, i.e., E(**ags**, *phi*), \ref m_group_agents contains **ags**;
      * - if *this* is \ref C_FORMULA, i.e., C(**ags**, *phi*), \ref m_group_agents contains **ags**.
      */
     agent_set m_group_agents;
     /**
-     * \brief If this is a \ref E_FORMULA or a \ref C_FORMULA here is contained the string description of the relative set of \agent.
+     * \brief If this is a \ref E_FORMULA or a \ref C_FORMULA here is contained the string description of the relative set of \ref agent.
      *
      * \todo remove and ground at its creation.*/
     string_set m_string_group_agents;

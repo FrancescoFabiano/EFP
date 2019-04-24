@@ -79,7 +79,7 @@ private:
      * It takes a world and set its \ref kworld_ptr, it is private
      * because we want to do it only in the constructor.
      *
-     * @param[in] from: the edge to set as \ref m_to.
+     * @param[in] to: the edge to set as \ref m_to.
      * 
      * \todo is the parameter passing the best one?
      */
@@ -95,7 +95,7 @@ private:
     void set_label(agent ag);
 
     /**
-     * \brief Function that uses the info of  *this* to set its  \ref m_id.
+     * \brief Function that uses the info of  *this* to set its  \ref m_edge_id.
      */
     void set_id();
 
@@ -132,13 +132,13 @@ public:
      * @return the \ref agent that is the label of the *this*.*/
     agent get_label() const;
     /**
-     *\brief Getter of \ref m_id.
+     *\brief Getter of \ref m_edge_id.
      *     
      * @return the int that is the unique id of *this*.*/
     kedge_id get_id() const;
     /**
-     *\brief The < operator based on the field \ref m_id.
-     * Implemented to allow the ordering on set of \ref kedge (used in \kstore).
+     *\brief The < operator based on the field \ref m_edge_id.
+     * Implemented to allow the ordering on set of \ref kedge (used in \ref kstore).
      * 
      * @see kstore.
      *     

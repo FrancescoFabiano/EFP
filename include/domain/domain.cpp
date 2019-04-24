@@ -8,12 +8,12 @@
  */
 #include "domain.h"
 
-domain::domain(std::shared_ptr<reader> d_reader, state_type given_state_type, domain_restriction ini_restriction, domain_restriction goal_restriction)
+domain::domain(std::shared_ptr<reader> reader, state_type state_repr, domain_restriction ini_res, domain_restriction goal_res)
 {
-	m_reader = d_reader;
-	m_state_type = given_state_type;
-	m_intial_description = initially(ini_restriction);
-	m_goal_restriction = goal_restriction;
+	m_reader = reader;
+	m_state_type = state_repr;
+	m_intial_description = initially(ini_res);
+	m_goal_restriction = goal_res;
 
 }
 
@@ -28,16 +28,15 @@ bool domain::build(bool debug)
 
 
 	//The \ref state is a template and change implementation according to the user choice.
+	state<kstate> initial;
+
 	switch (m_state_type) {
 	case KRIPKE:
-		state<kstate> initial;
+		initial.build_initial(m_intial_description);
 	default:
 		std::cerr << "Not implemented yet\n";
 		exit(1);
 	}
-	initial.build_initial(m_intial_description);
-
-
 
 	return true;
 

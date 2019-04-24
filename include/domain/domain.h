@@ -103,9 +103,9 @@ private:
      * \todo move to the goal class.
      */
     void build_goal(bool debug);
-    /** \brief Function that checks if \ref belief formula respects \ref m_goal_restriction.
+    /** \brief Function that checks if \ref belief_formula respects \ref m_goal_restriction.
      *
-     * @param[in] to_check: the \ref belief formula to check.
+     * @param[in] to_check: the \ref belief_formula to check.
      * 
      * @return true: if \p to_check respects \ref m_goal_restriction.
      * @return false: if \p to_check doesn't respect \ref m_goal_restriction.
