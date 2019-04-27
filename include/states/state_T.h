@@ -201,12 +201,14 @@ public:
      * @see kstate, initially
      *
      * @param ini_conditions: the conditions that the initial state must respect.
+     * @param fluent_number: the number of fluent in the domain, used for the prune construction.
+     * @param[in] agent_number: the number of \ref agent in the \ref domain, used for the prune construction.
      * 
      * \todo add in see also the other state representations.
      *
      * \bug Is not supposed to override the method but it does.
      */
-    void build_initial(const initially & ini_conditions);
+    void build_initial(const initially & ini_conditions, int fluent_number, int agent_number);
     /**
      *\brief Function that compute the successor of *this* given an \ref action.
      * 

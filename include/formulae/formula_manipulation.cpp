@@ -1,5 +1,5 @@
 /* \brief Implementation of formula_manipulation.h
- * 
+ *
  * \copyright GNU Public License.
  *
  * \author Francesco Fabiano.
@@ -71,6 +71,74 @@ fluent_formula formula_manipulation::and_ff(const fluent_formula& ff1, const flu
 		return ff1;
 	} else {
 		std::cerr << "Bad formula declaration." << std::endl;
+		exit(1);
 	}
 	return ret;
 }
+
+bool formula_manipulation::check_Bff_Bnotff(const belief_formula& to_check_1, const belief_formula& to_check_2, std::shared_ptr<fluent_formula> ret)
+{
+	/*GENERIC, to much
+	if (to_check_1.m_operator == BF_NOT) {
+		std::cout << "\nVado 1NOT check\n";
+		return *(to_check_1.m_bf1) == to_check_2;
+	} else if (to_check_2.m_operator == BF_NOT) {
+		std::cout << "\nVado 2NOT check\n";
+		return *(to_check_2.m_bf1) == to_check_1;
+	}*/
+	/**\todo For now just fluent check. Maybe add some kind of formula normalization and then with \ref fluent_formula.
+	 * \todo we assume that the fluent_formula has just one element (the fluent).
+	 */
+
+	if (to_check_1.m_formula_type == BELIEF_FORMULA && to_check_2.m_formula_type == BELIEF_FORMULA) {
+		belief_formula to_check_nested_1 = *to_check_1.m_bf1;
+		belief_formula to_check_nested_2 = *to_check_2.m_bf1;
+		if (to_check_nested_1.m_formula_type == FLUENT_FORMULA && to_check_nested_2.m_formula_type == FLUENT_FORMULA) {
+
+			fluent_set tmp = *((to_check_nested_1.m_fluent_formula).begin());
+			fluent f_to_check_1 = *(tmp.begin());
+			tmp = *((to_check_nested_2.m_fluent_formula).begin());
+			fluent f_to_check_2 = *(tmp.begin());
+			if (f_to_check_1 == negate_fluent(f_to_check_2)) {
+
+				if (ret != nullptr) {
+					ret->insert(tmp);
+				}
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+/* Using the std::set == operator
+static bool formula_manipulation::is_the_same_ff(const fluent_set& to_check_1, const fluent_set& to_check_2)
+{
+	//If the size is the same we just need to check all the element in to_check_1 because they are sets
+	//and there aren't repetitions on the elements.
+	if (to_check_1.size() == to_check_2.size()) {
+		fluent_set::conts_iterator it_fs;
+		for (it_fs = to_check_1.begin(); it_fs != to_check_1.end(); it_fs++) {
+			if (to_check_2.find(*it_fs) == to_check_2.end()) {
+				return false;
+			}
+		}
+		return true;
+	}
+	return false;
+}
+
+static bool formula_manipulation::is_the_same_ff(const fluent_formula& to_check_1, const fluent_formula& to_check_2)
+{
+	//If the size is the same we just need to check all the element in to_check_1 because they are sets
+	//and there aren't repetitions on the elements.
+	if (to_check_1.size() == to_check_2.size()) {
+		fluent_formula::conts_iterator it_ff;
+		for (it_ff = to_check_1.begin(); it_ff != to_check_1.end(); it_ff++) {
+		}
+		return true;
+	}
+	return false;
+}*/
+
+

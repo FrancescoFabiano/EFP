@@ -3,7 +3,7 @@
  * 
  * 
  * \copyright GNU Public License.
- * 
+ *
  * \author Francesco Fabiano.
  * \date March 31, 2019
  */

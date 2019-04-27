@@ -113,11 +113,11 @@ bool state<T>::entails(const formula_list & to_check)
 }
 
 template <class T>
-void state<T>::build_initial(const initially & init)
+void state<T>::build_initial(const initially & init, int fluent_number, int agent_number)
 {
 	//To implement constructor
 	//representation = T(init);
-	representation.build_initial(init);
+	representation.build_initial(init, fluent_number, agent_number);
 }
 
 template <class T>

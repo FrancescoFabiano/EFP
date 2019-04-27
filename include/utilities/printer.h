@@ -41,4 +41,24 @@ public:
      */
     static void print_list(const string_set_set& to_print);
 
+    /**
+     * \brief Function used to print all the \ref fluent inside \p to_print.
+     *
+     * A \ref fluent_set represents a conjunctive set of \ref fluent format so the printing is executed accordingly.
+     *
+     * @param[in] to_print: the \ref fluent_set to be printed.
+     *
+     * \todo   Is the const reference the best type of parameter passing?
+     */
+    static void print_list(const fluent_set& to_print);
+
+    /**
+     * \brief Function used to print all the \ref fluent inside \p to_print.
+     *
+     * A \ref fluent_formula represents a formula in DNF format so the printing is executed accordingly.
+     *
+     * @param[in] to_print: the \ref fluent_formula to be printed.
+     *
+     */
+    static void print_list(const fluent_formula& to_print);
 };

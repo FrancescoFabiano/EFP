@@ -20,7 +20,7 @@ private:
     /** \brief Formula containing all the \ref fluent that are required by the possible initial pointed \ref state.*/
     fluent_formula m_pointed_world_conditions;
 
-    /** \brief \ref belief_formula list containing all the \ref belief_formula(e) that describe the initial beliefs conditions.*/
+    /** \brief \ref belief_formula list containing all the \ref belief_formula that describe the initial beliefs conditions.*/
     formula_list m_bf_intial_conditions;
 
     /** \brief The restriction to apply to the initial state
@@ -28,6 +28,11 @@ private:
      * @see domain_restriction.*/
     domain_restriction m_ini_restriction;
 
+    /**
+     * \brief The \ref fluent_formula representation of \ref m_bf_intial_conditions if finitary-S5 is required.
+     */
+    fluent_formula m_ff_forS5;
+    
     /** \brief Function that check if a \ref belief_formula respects \ref m_ini_restriction.
      * 
      * @param[in] to_check: the \ref belief_formula that should respect \ref m_ini_restriction.
@@ -47,6 +52,12 @@ public:
      *
      * @param[in] ini_restriction: the restriction that *this* should entail.*/
     initially(domain_restriction ini_restriction);
+
+    /** \brief  Getter for the field \ref m_ini_restriction.
+     *
+     * @return: the value of \ref m_ini_restriction.*/
+    domain_restriction get_ini_restriction() const;
+
 
     /** \brief  Function that adds a condition for the initial pointed \ref state.
      *
@@ -68,7 +79,7 @@ public:
      * @return the field m_pointed_world_conditions.
      * 
      * \todo is return type ok?*/
-    const fluent_formula& get_pointed_wordl_conditions();
+    const fluent_formula& get_pointed_world_conditions() const;
 
     /**
      * \brief getter for the field m_bf_intial_conditions.
@@ -76,6 +87,33 @@ public:
      * @return the field m_bf_intial_conditions.
      * 
      * \todo is return type ok?*/
-    const formula_list& get_initial_conditions();
+    const formula_list& get_initial_conditions() const;
+
+    /** \brief Setter for the field \ref m_ff_forS5.
+     * 
+     * This function is used to perform a check on the possible worlds for the initial state.
+     * In particular given the finitary-S5 restriction it returns the \ref fluent_formula that
+     * should be entailed by all the world of the initial state.
+     * The possible cases are:
+     * - *phi* -> all worlds must entail *phi*.
+     * - C(B(i,*phi*)) -> all worlds must entail *phi*.
+     * - C(B(i,*phi*) \ref BF_OR B(i,-*phi*)) -> only edges conditions.
+     * - C(-B(i,*phi*) \ref BF_AND -B(i,-*phi*)) -> only edges conditions.*/
+    void set_ff_forS5();
+
+    /**\brief  Getter of the field \ref m_ff_forS5.
+     * 
+     * This function is used to perform a check on the possible worlds for the initial state.
+     * In particular given the finitary-S5 restriction it returns the \ref fluent_formula that
+     * should be entailed by all the world of the initial state.
+     * The possible cases are:
+     * - *phi* -> all worlds must entail *phi*.
+     * - C(B(i,*phi*)) -> all worlds must entail *phi*.
+     * - C(B(i,*phi*) \ref BF_OR B(i,-*phi*)) -> only edges conditions.
+     * - C(-B(i,*phi*) \ref BF_AND -B(i,-*phi*)) -> only edges conditions.
+     * 
+     * @return the \ref fluent_formula that all the initial worlds must entail if S5(\ref m_ff_forS5).*/
+    const fluent_formula & get_ff_forS5() const;
+
 };
 

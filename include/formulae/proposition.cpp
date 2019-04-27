@@ -23,7 +23,7 @@ const string_set* proposition::get_effect() const
 void proposition::print() const
 {
 
-	switch (m_type) {
+	switch ( m_type ) {
 	case DYNAMIC:
 		std::cout << m_action_name << " causes ";
 		break;

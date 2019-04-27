@@ -7,6 +7,10 @@
  * 
  * \todo   The fields of the class are public but should be private and accessed through getters and setters.
  * 
+ * \bug the () extra causes weird errors
+ * \bug the - before B is not accepted
+ * \bug the - before fluent_formula is not accepted
+ * 
  * \copyright GNU Public License.
  * 
  * \author Francesco Fabiano.

@@ -43,7 +43,10 @@ typedef unsigned short fluent; /**< \brief A representation of a fluent through 
                                 * to the elements of \ref reader::m_fluents.
                                 *
                                 * The unique id of the readed fluent is always an odd number while to
-                                * obtain the negated version is necessary to add 1.*/
+                                * obtain the negated version is necessary to add 1.
+                                *
+                                * \todo is maybe better to store only the positive?
+                                */
 typedef std::set<fluent> fluent_set; /**< \brief A representation of a conjunctive set of \ref fluent.
                                       * 
                                       * This representation is used, for example, to represent
@@ -52,21 +55,22 @@ typedef std::set<fluent> fluent_set; /**< \brief A representation of a conjuncti
                                       * Each element of the set is a \ref fluent*/
 typedef std::set<fluent_set> fluent_formula; /**< \brief A representation of a fluent formula in DNF.
                                       *
-                                              *  This representation is used, for example, to represent
+                                      * This representation is used, for example, to represent
                                       * a set of world (\ref kworld) of a Kripke structure (\ref kstate).
                                       *
+                                      * \todo How the set of fluent has < implemented?
                                       * Each element of the set is a \ref fluent_set*/
 
 typedef unsigned short agent; /**< \brief A representation of an agent through an unique id (short).
                                       *
-                               *  This representation is derived by applying \ref grounder::ground_agent(const std::string&) const
+                                      *  This representation is derived by applying \ref grounder::ground_agent(const std::string&) const
                                       * to the element of \ref reader::m_agents.*/
 typedef std::set<agent> agent_set; /**< \brief A set of \ref agent.*/
 typedef std::vector<agent> agent_list; /**< \brief A list of \ref agent.*/
 
 typedef unsigned short action_id; /**< \brief The unique id (short) associated with each action.
                                       *
-                                   *  This id is derived by applying \ref grounder::ground_action(const std::string&) const
+                                      *  This id is derived by applying \ref grounder::ground_action(const std::string&) const
                                       * to the element of \ref reader::m_actions.*/
 typedef std::vector<action_id> action_id_list; /**< \brief A list of \ref action_id.*/
 
@@ -105,24 +109,25 @@ enum domain_restriction
          *
          * This is the default Initial description (\ref initially).
          * When this flag is on only C(phi) are accepted and they must cover all the fluents.
+         * The possible cases are:
+         * - *phi* -> all worlds must entail *phi*.
+         * - C(B(i,*phi*)) -> all worlds must entail *phi*.
+         * - C(B(i,*phi*) \ref BF_OR B(i,-*phi*)) -> only edges conditions.
+         * - C(-B(i,*phi*) \ref BF_AND -B(i,-*phi*)) -> only edges conditions.
          *
          * With this type of model is associate the concept of *Knowledge* given
-         * that the model gurantee the relations to be equivalent.
-         */
+         * that the model gurantee the relations to be equivalent.*/
     K45, /**< \brief Restricts only to K45 models.
          *
-         * With this type of model is associate the concept of *Belief*.
-         */
+         * With this type of model is associate the concept of *Belief*.*/
     NONE, /**< \brief No restrictions applied.
          */
     NONEG, /**< \brief No negative belief_formula are accepted.
             *
             * This is used when the planning graph heuristic is involved
             * because it cannot deal with negative \ref belief_formula
-            * in the goal (no mutex yet).
-         */
-    FAIL, /**< \brief The default case to guarantee consistency.
-         */
+            * in the goal (no mutex yet).*/
+    FAIL, /**< \brief The default case to guarantee consistency.*/
 };
 
 

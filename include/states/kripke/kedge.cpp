@@ -28,6 +28,14 @@ kedge::kedge(const kworld & from, const kworld & to, agent label)
 	set_id();
 }
 
+kedge::kedge(kworld_ptr from, kworld_ptr to, agent label)
+{
+	set_from(from);
+	set_to(to);
+	set_label(label);
+	set_id();
+}
+
 /**
  * \todo the hash function is maybe to simple.
  */
@@ -63,22 +71,30 @@ kedge_id kedge::get_id() const
 
 void kedge::set_from(const kworld & from)
 {
-	/*Get the reference of the world from the static class kstore
+	/*Get the reference of the world from the static class \ref kstore
 	 *
-	 * If the world doesn't exists it create a new one in kstore and get its address
-	 * otherwise it get the already existing one's address.
-	 */
+	 * If the world doesn't exists it create a new one in \ref kstore and get its address
+	 * otherwise it get the already existing one's address.*/
 	m_from = kstore::get_instance().add_world(from);
 }
 
 void kedge::set_to(const kworld & to)
 {
-	/*Get the reference of the world from the static class kstore
+	/*Get the reference of the world from the static class \ref kstore
 	 *
-	 * If the world doesn't exists it create a new one in kstore and get its address
-	 * otherwise it get the already existing one's address.
-	 */
+	 * If the world doesn't exists it create a new one in \ref kstore and get its address
+	 * otherwise it get the already existing one's address.*/
 	m_to = kstore::get_instance().add_world(to);
+}
+
+void kedge::set_from(kworld_ptr from)
+{
+	m_from = from;
+}
+
+void kedge::set_to(kworld_ptr & to)
+{
+	m_to = to;
 }
 
 void kedge::set_label(agent label)

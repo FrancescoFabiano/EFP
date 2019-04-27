@@ -62,28 +62,39 @@ private:
      */
     kedge_id hash_info_into_id();
 
-    /**
-     * \brief Setter for the field \ref m_from.
+    /** \brief Setter for the field \ref m_from.
      * 
      * It takes a world and set its \ref kworld_ptr, it is private
      * because we want to do it only in the constructor.
      *
-     * @param[in] from: the edge to set as \ref m_from.
+     * @param[in] from: the \ref kworld to set as \ref m_from.
      * 
-     * \todo is the parameter passing the best one?
-     */
+     * \todo is the parameter passing the best one?*/
     void set_from(const kworld & from);
-    /**
-     * \brief Setter for the field \ref m_to.
+    /** \brief Setter for the field \ref m_to.
      * 
      * It takes a world and set its \ref kworld_ptr, it is private
      * because we want to do it only in the constructor.
      *
-     * @param[in] to: the edge to set as \ref m_to.
+     * @param[in] to: the \ref kworld to set as \ref m_to.
      * 
-     * \todo is the parameter passing the best one?
-     */
+     * \todo is the parameter passing the best one?*/
     void set_to(const kworld & to);
+
+
+    /** \brief Setter for the field \ref m_from.
+     * 
+     * It is private because we want to do it only in the constructor.
+     *
+     * @param[in] from: the \ref kworld_ptr to set as \ref m_from.*/
+    void set_from(kworld_ptr from);
+    /** \brief Setter for the field \ref m_to.
+     * 
+     * It is private because we want to do it only in the constructor.
+     *
+     * @param[in] to: the \ref kworld_ptr to set as \ref m_to.*/
+    void set_to(kworld_ptr & to);
+
     /**
      * \brief Setter for the field \ref m_label.
      * 
@@ -104,17 +115,22 @@ public:
      * \brief Empty constructor, call the default constructor of all the fields.
      */
     kedge();
-    /**
-     *\brief Constructor with parameters.
+    /** \brief Constructor with parameters.
      * 
      * Construct an object with the given info and then set the unique id.
      * @param[in] from: the world where *this* is coming from.
      * @param[in] to: the world where *this* is going to.
-     * @param[in] label: the \ref agent that is the label of *this*.
-     * 
-     * \todo To implement also whit \ref kworld_ptr to the \ref kworld?
-     */
+     * @param[in] label: the \ref agent that is the label of *this*.*/
     kedge(const kworld & from, const kworld & to, agent label);
+
+
+    /** \brief Constructor with parameters.
+     * 
+     * Construct an object with the given info and then set the unique id.
+     * @param[in] from: the pointer to the world where *this* is coming from.
+     * @param[in] to: the pointer to the world where *this* is going to.
+     * @param[in] label: the \ref agent that is the label of *this*.*/
+    kedge(kworld_ptr from, kworld_ptr to, agent label);
 
     /**
      *\brief Getter of \ref m_from.

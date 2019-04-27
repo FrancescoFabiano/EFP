@@ -40,6 +40,8 @@ void print_usage(char* prog_name)
 	std::cout << "	Possible @restriction:" << std::endl;
 	std::cout << "		NONE: The Goal does not have restrictions. (Default)" << std::endl;
 	std::cout << "		NONEG: The Goal does not accept negative belief formula (-B(i,phi))." << std::endl;
+	std::cout << "-ini_build @building_tech" << std::endl;
+	std::cout << "	Set the @building_tech that describes how the initial state will be build." << std::endl;
 	std::cout << "-spg" << std::endl;
 	std::cout << "	Find the plan using the sum planning graph heuristic." << std::endl;
 	std::cout << "-mpg" << std::endl;

@@ -171,6 +171,13 @@ public:
      */
     void ground(const grounder & gr);
 
+    /** \brief The equal operator for\ref belief_formula.
+     * 
+     * @param[in]  to_compare: the \ref belief_formula to compare with *this*.
+     * 
+     * @return true: if the given \ref belief_formula is syntacticly equal to *this*.
+     * @return false: otherwise.*/
+    bool operator==(const belief_formula& to_compare) const;
 
 };
 

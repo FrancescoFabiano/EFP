@@ -55,11 +55,26 @@ private:
     /**
      * \brief Setter for the field \ref m_fluent_set.
      * 
+     * This function also guarantees consistency.
+     * 
      * @param[in] description: the set of \ref fluent to set as \ref m_fluent_set.
      * 
      * \todo is the parameter passing the best one? Copy?
+     * \todo is the consistency useless?
      */
     void set_fluent_set(const fluent_set & description);
+
+    /**
+     * \brief Function that checks if the given \ref fluent_set is consistent.
+     * 
+     * @param[in] to_check: the set of \ref fluent to check.
+     * 
+     * @return true if \p to_check is consistent.
+     * @return false if \p to_check is not consistent.
+     * 
+     * \todo Add \ref static_law as static class and use it to check.
+     */
+    bool consistent(const fluent_set & to_check);
 
     /**
      * \brief Function that uses the info of  *this* to set its  \ref m_id.
@@ -71,8 +86,8 @@ public:
      * \brief Empty constructor, call the default constructor of all the fields.
      */
     kworld();
-    /**
-     *\brief Constructor with parameters.
+
+    /** \brief Constructor with parameters.
      *Construct an object with the given info and then set the unique id.
      * the set of \ref fluent to set as \ref m_fluent_set.
      * 

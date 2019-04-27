@@ -788,7 +788,7 @@ yy_find_action:
 
 do_action: /* This label is used only to access EOF actions. */
 
-			switch (yy_act) { /* beginning of action switch */
+			switch ( yy_act ) { /* beginning of action switch */
 			case 0: /* must back up */
 				/* undo the m_action_effects of YY_DO_BEFORE_ACTION */
 				*yy_cp = (yy_hold_char);
@@ -1081,7 +1081,7 @@ do_action: /* This label is used only to access EOF actions. */
 						yy_cp = (yy_c_buf_p);
 						goto yy_find_action;
 					}
-				} else switch (yy_get_next_buffer()) {
+				} else switch ( yy_get_next_buffer() ) {
 					case EOB_ACT_END_OF_FILE:
 					{
 						(yy_did_buffer_switch_on_eof) = 0;
@@ -1384,7 +1384,7 @@ input(void)
 			yy_size_t offset = (yy_c_buf_p) - (yytext_ptr);
 			++(yy_c_buf_p);
 
-			switch (yy_get_next_buffer()) {
+			switch ( yy_get_next_buffer() ) {
 			case EOB_ACT_LAST_MATCH:
 				/* This happens because yy_g_n_b()
 				 * sees that we've accumulated a

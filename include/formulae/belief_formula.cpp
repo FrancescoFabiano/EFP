@@ -22,7 +22,7 @@ void belief_formula::print() const
 	string_set_set::const_iterator it2;
 	bool first2 = true;
 	std::cout << "(";*/
-	switch (m_formula_type) {
+	switch ( m_formula_type ) {
 
 	case FLUENT_FORMULA:
 		printer::print_list(m_string_fluent_formula);
@@ -72,9 +72,13 @@ void belief_formula::print() const
 		break;
 
 	case EMPTY: /* static */
+		std::cerr << "\n Unknown belief_formula type.";
+		exit(1);
 		break;
 
 	default: /* static */
+		std::cerr << "\n Unknown belief_formula type.";
+		exit(1);
 		break;
 
 	}
@@ -88,7 +92,7 @@ void belief_formula::print_grounded(const grounder& grounder) const
 	string_set_set::const_iterator it2;
 	bool first2 = true;
 	std::cout << "(";
-	switch (m_formula_type) {
+	switch ( m_formula_type ) {
 
 	case FLUENT_FORMULA:
 		for (it2 = m_string_fluent_formula.begin(); it2 != m_string_fluent_formula.end(); it2++) {
@@ -162,9 +166,13 @@ void belief_formula::print_grounded(const grounder& grounder) const
 		break;
 
 	case EMPTY: //Static
+		std::cerr << "\n Unknown belief_formula type.";
+		exit(1);
 		break;
 
-	default: //Static
+	default:
+		std::cerr << "\n Unknown belief_formula type.";
+		exit(1);
 		break;
 
 	} //switch
@@ -172,7 +180,7 @@ void belief_formula::print_grounded(const grounder& grounder) const
 
 void belief_formula::ground(const grounder & gr)
 {
-	switch (m_formula_type) {
+	switch ( m_formula_type ) {
 
 	case FLUENT_FORMULA:
 		m_fluent_formula = gr.ground_fluent(m_string_fluent_formula);
@@ -199,13 +207,90 @@ void belief_formula::ground(const grounder & gr)
 		break;
 
 	case EMPTY: //Static
+		std::cerr << "\n Unknown belief_formula type.";
+		exit(1);
 		break;
 
 	default: //Static
+		std::cerr << "\n Unknown belief_formula type.";
+		exit(1);
 		break;
-
 	} //switch
-} // print*/
+}
+
+bool belief_formula::operator==(const belief_formula& to_compare) const
+{
+
+	if (m_formula_type == to_compare.m_formula_type) {
+
+		switch ( m_formula_type ) {
+
+		case FLUENT_FORMULA:
+		{
+			return(m_fluent_formula == to_compare.m_fluent_formula);
+			break;
+		}
+
+		case BELIEF_FORMULA:
+		{
+			if (m_agent_op == to_compare.m_agent_op) {
+				return *m_bf1 == *(to_compare.m_bf1);
+			} else {
+				return false;
+			}
+			break;
+		}
+
+		case PROPOSITIONAL_FORMULA:
+		{
+			if (m_operator == to_compare.m_operator) {
+				switch ( m_operator ) {
+				case BF_NOT:
+				{
+					return *m_bf1 == *(to_compare.m_bf1);
+					break;
+				}
+				case BF_AND:
+				case BF_OR:
+				{
+					if (*m_bf1 == *(to_compare.m_bf1)) {
+						return *m_bf2 == *(to_compare.m_bf2);
+					} else if (*m_bf1 == *(to_compare.m_bf2)) {
+						return *m_bf2 == *(to_compare.m_bf1);
+					} else {
+						return false;
+					}
+					break;
+				}
+				default:
+					return false;
+					break;
+				}
+			} else {
+				return false;
+			}
+			break;
+		}
+		case E_FORMULA:
+		case C_FORMULA:
+		{
+			if (m_group_agents == to_compare.m_group_agents) {
+				return *m_bf1 == *(to_compare.m_bf1);
+			}
+			break;
+		}
+		default:
+		{
+			std::cerr << "\n Unknown belief_formula type.";
+			exit(1);
+			break;
+		}
+		}
+	}
+	return false;
+}
+
+// print*/
 
 /*belief_formula::belief_formula()
 {

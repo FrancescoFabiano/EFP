@@ -1,22 +1,34 @@
-/* 
- * File:   kworld.h
- * Author: Francesco
+/**
+ * \brief Implementation of \ref kworld.h.
  *
- * Created on April 4, 2019, 11:39 AM
+ * \copyright GNU Public License.
+ *
+ * \author Francesco Fabiano.
+ * \date March 31, 2019
  */
 
 #include "kworld.h"
 
 #include "kstore.h"
 
+#include <stdexcept>
+
 kworld::kworld()
 {
 }
 
-kworld::kworld(const fluent_set & fl)
+kworld::kworld(const fluent_set & description)
 {
-	set_fluent_set(fl);
+	/*
+	 * No need because consistent for construction
+	 * \throw std::invalid_argument whenever \p description is not consistent. 
+	 *
+	 *try {*/
+	set_fluent_set(description);
 	set_id();
+	/*} catch (const std::invalid_argument& ia) {
+	 *	throw ia;
+	 *} */
 }
 //generate an unique id given the state information -> the literals
 
@@ -37,9 +49,41 @@ kworld_id kworld::hash_fluents_into_id()
 	return hash_fluents_into_id(m_fluent_set);
 }
 
-void kworld::set_fluent_set(const fluent_set & fl)
+void kworld::set_fluent_set(const fluent_set & description)
 {
-	m_fluent_set = fl;
+	/*
+	 * \throw std::invalid_argument whenever \p description is not consistent. 
+	 *
+	if (consistent(description))*/
+	m_fluent_set = description;
+	/*else
+		throw std::invalid_argument("Non consistent set of fluent");*/
+}
+
+bool kworld::consistent(const fluent_set & to_check)
+{
+	fluent_set::const_iterator it_flset;
+	fluent_set::const_iterator it_flset_tmp;
+
+	for (it_flset = to_check.begin(); it_flset != to_check.end(); it_flset++) {
+		/* If the pointed fluent is in modulo 2 it means is the positive and if 
+		 * its successor (the negative version) is in the set then is not consistent.*/
+		if ((*it_flset) % 2 == 0) {
+			//The std::set has is elements ordered so we can just check its successor.
+			it_flset_tmp = it_flset;
+			it_flset_tmp++;
+		}
+		if (it_flset_tmp != to_check.end()) {
+			if (*it_flset_tmp == ((*it_flset) + 1)) {
+				std::cout << "\nCheck: " << *it_flset_tmp << " and " << (*it_flset) + 1 << std::endl;
+				return false;
+			}
+		}
+		/**\todo check that all the possible \ref fluent are there.
+		 * \bug change and use find.
+		 */
+	}
+	return true;
 }
 
 void kworld::set_id()

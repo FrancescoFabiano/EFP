@@ -908,7 +908,7 @@ yytnamerr(char *yyres, const char *yystr)
 		char const *yyp = yystr;
 
 		for (;;)
-			switch (*++yyp) {
+			switch ( *++yyp ) {
 			case '\'':
 			case ',':
 				goto do_not_strip_quotes;
@@ -1021,7 +1021,7 @@ yysyntax_error(YYSIZE_T *yymsg_alloc, char **yymsg,
 		}
 	}
 
-	switch (yycount) {
+	switch ( yycount ) {
 #define YYCASE_(N, S)                      \
       case N:                               \
         yyformat = S;                       \
@@ -1328,7 +1328,7 @@ yyreduce:
 
 
 	YY_REDUCE_PRINT(yyn);
-	switch (yyn) {
+	switch ( yyn ) {
 	case 3:
 #line 121 "lcp.y" /* yacc.c:1646  */
 	{

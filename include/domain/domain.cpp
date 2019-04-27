@@ -1,6 +1,6 @@
 /**
  * \brief Implementation of \ref domain.h.
- * 
+ *
  * \copyright GNU Public License.
  *
  * \author Francesco Fabiano.
@@ -28,13 +28,18 @@ bool domain::build(bool debug)
 
 
 	//The \ref state is a template and change implementation according to the user choice.
+	/** \todo If we want to add conformant just find all the fluent not defined
+	 * and call the build initial state for all their possible configuration
+	 * and then go with conformant planning, so here check if \ref m_intial_description has a complete
+	 * pointed world description and if doesn't create several of them and use to create
+	 * all the varius initial states; Maybe use an array of \ref initially.*/
 	state<kstate> initial;
 
-	switch (m_state_type) {
+	switch ( m_state_type ) {
 	case KRIPKE:
-		initial.build_initial(m_intial_description);
+		initial.build_initial(m_intial_description, m_fluents.size() / 2, m_agents.size());
 	default:
-		std::cerr << "Not implemented yet\n";
+		std::cerr << "\nNot implemented yet\n";
 		exit(1);
 	}
 
@@ -45,7 +50,7 @@ bool domain::build(bool debug)
 void domain::build_agents(bool debug)
 {
 	/*
-	 * This function set the grounder agent map with the correct values. 
+	 * This function set the grounder agent map with the correct values.
 	 */
 	agent_map domain_agent_map;
 	std::cout << "\nBuilding agent list..." << std::endl;
@@ -64,7 +69,7 @@ void domain::build_agents(bool debug)
 void domain::build_fluents(bool debug)
 {
 	/*
-	 * This function set the grounder fluent map with the correct values. 
+	 * This function set the grounder fluent map with the correct values.
 	 */
 	fluent_map domain_fluent_map;
 	std::cout << "\nBuilding fluent literals..." << std::endl;
@@ -90,7 +95,7 @@ void domain::build_actions(bool debug)
 {
 
 	/*
-	 * This function set the grounder action map with the correct values. 
+	 * This function set the grounder action map with the correct values.
 	 */
 	action_name_map domain_action_name_map;
 	std::cout << "\nBuilding action list..." << std::endl;
@@ -151,7 +156,8 @@ void domain::build_initially(bool debug)
 	for (it_fl = m_reader->m_bf_initially.begin(); it_fl != m_reader->m_bf_initially.end(); it_fl++) {
 
 		it_fl->ground(m_grounder);
-		switch (it_fl->m_formula_type) //initially phi
+
+		switch ( it_fl->m_formula_type ) //initially phi
 		{
 			//S5 -> pointed world
 		case(FLUENT_FORMULA):
@@ -166,6 +172,7 @@ void domain::build_initially(bool debug)
 
 			//S5 -> Edge
 		case(C_FORMULA):
+
 			m_intial_description.add_initial_condition(*it_fl);
 			if (debug) {
 				std::cout << "	Initial conditions: ";
@@ -176,6 +183,7 @@ void domain::build_initially(bool debug)
 
 			//Possible S5 -> initally [C(phi2), C(phi2)]
 		case(PROPOSITIONAL_FORMULA):
+
 			m_intial_description.add_initial_condition(*it_fl);
 			if (debug) {
 				std::cout << "Added to initial conditions: ";
@@ -186,6 +194,7 @@ void domain::build_initially(bool debug)
 
 			//No more S5
 		case(BELIEF_FORMULA):
+
 			m_intial_description.add_initial_condition(*it_fl);
 			if (debug) {
 				std::cout << "Added to initial conditions: ";
@@ -209,7 +218,29 @@ void domain::build_initially(bool debug)
 			exit(1);
 			break;
 		}
+	}
 
+
+
+	//Given the initial restriction the initial state might needs different function
+	switch ( m_intial_description.get_ini_restriction() ) {
+	case S5:
+	{
+		m_intial_description.set_ff_forS5();
+		break;
+	}
+	case K45:
+	{
+		break;
+	}
+	case NONE:
+	{
+		break;
+	}
+	default:
+	{
+		break;
+	}
 	}
 }
 
@@ -241,10 +272,10 @@ void domain::build_goal(bool debug)
 bool domain::check_goal_restriction(const belief_formula& bf)//Apply the restriction
 {
 	bool ret = false;
-	switch (m_goal_restriction) {
+	switch ( m_goal_restriction ) {
 		//We only admit C(belief)
 	case NONEG:
-		switch (bf.m_formula_type) {
+		switch ( bf.m_formula_type ) {
 		case FLUENT_FORMULA:
 			ret = true;
 			break;
@@ -285,7 +316,7 @@ bool domain::check_goal_restriction(const belief_formula& bf)//Apply the restric
 /*std::string domain::get_name();
 formula_list domain::get_initial_description();
 formula_list domain::get_goal_description();
-    
+
 void domain::set_name(std::string domain_name);
 //@TODO: setter properly and constructors
 void domain::set_initial_description();

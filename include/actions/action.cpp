@@ -108,7 +108,7 @@ void action::add_proposition(const proposition & prop, const grounder& grounder)
 {
 	///Parameter Passing ok because its method all makes copies
 
-	switch (prop.m_type) {
+	switch ( prop.m_type ) {
 
 		//Add action to the the list (name as identifier, then set id) then update the conditions and the awareness of the action so it's complete)
 	case DYNAMIC:

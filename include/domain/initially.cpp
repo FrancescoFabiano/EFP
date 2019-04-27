@@ -1,6 +1,6 @@
 /**
  * \brief Implementation of \ref initially.h
- * 
+ *
  * \copyright GNU Public License.
  *
  * \author Francesco Fabiano.
@@ -20,37 +20,127 @@ initially::initially(domain_restriction ini_restriction)
 	m_ini_restriction = ini_restriction;
 }
 
-bool initially::check_restriction(const belief_formula & bf)//Apply the restriction
+domain_restriction initially::get_ini_restriction() const
+{
+	return m_ini_restriction;
+}
+
+bool initially::check_restriction(const belief_formula & bf) //Apply the restriction
 {
 	bool ret = false;
-	switch (m_ini_restriction) {
+	switch ( m_ini_restriction ) {
 		//We only admit C(belief)
-		//@TODO: Check if all the agents have to be in the C
+		/**\todo Check if all the agents have to be in the C.*/
+		/* The possible cases are:
+		 * - *phi* -> all worlds must entail *phi*.
+		 * - C(B(i,*phi*)) -> all worlds must entail *phi*.
+		 * - C(B(i,*phi*) \ref BF_OR B(i,-*phi*)) -> only edges conditions.
+		 * - C(-B(i,*phi*) \ref BF_AND -B(i,-*phi*)) -> only edges conditions.*/
 	case S5:
-		if (bf.m_formula_type == C_FORMULA) {
-			ret = true;
-		} else if (bf.m_formula_type == PROPOSITIONAL_FORMULA) {
+	{
+		switch ( bf.m_formula_type ) {
+			//To admit initially [S5_ok AND S5_ok AND ...]  (Also taken care of in the add_initial_condition)
+		case PROPOSITIONAL_FORMULA:
+		{
 			if (bf.m_operator != BF_AND) {
 				ret = false;
 			} else {
-				//To admit initially [C(phi2), C(phi2)]
 				ret = check_restriction(*bf.m_bf1) && check_restriction(*bf.m_bf2);
 			}
+			break;
+		}
+
+			//*phi*
+		case FLUENT_FORMULA:
+		{
+			ret = true;
+			break;
+		}
+
+			//C(..)
+		case C_FORMULA:
+		{
+			//C(B(i, *phi*))
+			belief_formula tmp = *bf.m_bf1;
+			switch ( tmp.m_formula_type ) {
+
+				//C(*phi*)
+			case FLUENT_FORMULA:
+			{
+				ret = true;
+				break;
+			}
+				//C(B(i,*phi*)
+			case BELIEF_FORMULA:
+			{
+				if (tmp.m_bf1->m_formula_type == FLUENT_FORMULA) {
+					ret = true;
+				} else {
+					ret = false;
+				}
+				break;
+			}
+			case PROPOSITIONAL_FORMULA:
+			{
+				//C(B(i,*phi*) \ref BF_OR B(i,-*phi*))
+				//Check if C ( x1 **OR** x2 )
+				if (tmp.m_operator == BF_OR) {
+
+					//Check if **x1** and **x2** are B(i,phi) and B(i,-phi)
+					ret = formula_manipulation::check_Bff_Bnotff(*tmp.m_bf1, *tmp.m_bf2, nullptr);
+				} else if (tmp.m_operator == BF_AND) { //C(-B(i,*phi*) \ref BF_AND -B(i,-*phi*))
+					//Check if C ( x1 **AND** x2 )
+					//Check if **x1** and **x2** are **NOT**(...)
+					belief_formula tmp_nested1 = *tmp.m_bf1;
+					belief_formula tmp_nested2 = *tmp.m_bf2;
+					if (tmp_nested1.m_formula_type == PROPOSITIONAL_FORMULA && tmp_nested2.m_formula_type == PROPOSITIONAL_FORMULA) {
+						if (tmp_nested1.m_operator == BF_NOT && tmp_nested2.m_operator == BF_NOT) {
+							//Check tmp_nested1 and tmp_nested2 are B(i,phi) and B(i,-phi)
+							ret = formula_manipulation::check_Bff_Bnotff(*tmp_nested1.m_bf1, *tmp_nested2.m_bf1, nullptr);
+						}
+					}
+				} else {
+					ret = false;
+				}
+				break;
+			}
+			default:
+			{
+				ret = false;
+				break;
+			}
+			}
+			/**\todo Check all the agents are present in C.
+			 * \todo Check that all the fluent are considered.*/
+
+			break;
+		}
+		default:
+		{
+			ret = false;
+			break;
+		}
 		}
 		break;
+	}
 	case K45:
-		ret = false;
-		break;
-	case NONE:
-		ret = true;
-		break;
-	default: /* static */
+	{
 		ret = false;
 		break;
 	}
+	case NONE:
+	{
+		ret = true;
+		break;
+	}
+	default:
+	{
+		ret = false;
+		break;
+	}
+	}
 
 	return ret;
-
 }
 //This type of parameter is fine because of we add the return value and not ff
 
@@ -59,25 +149,100 @@ void initially::add_pointed_condition(const fluent_formula & ff)
 	//Is in DNF form so you have to add these to the fluent of before (all of them)
 	m_pointed_world_conditions = formula_manipulation::and_ff(m_pointed_world_conditions, ff);
 }
+
 //This type of parameter is fine because of the push back (makes a copy))
 
-void initially::add_initial_condition(const belief_formula& bf)
+void initially::add_initial_condition(const belief_formula & bf)
 {
-	//This is a CNF form because the OR is taken inside
-	if (check_restriction(bf)) {
+
+	//Normalize the and and keep only bf_1, bf_2 and not (bf_1 AND bf_2)
+	if (bf.m_formula_type == PROPOSITIONAL_FORMULA && bf.m_operator == BF_AND) {
+		add_initial_condition(*bf.m_bf1);
+		add_initial_condition(*bf.m_bf2);
+	} else if (check_restriction(bf)) {
 		m_bf_intial_conditions.push_back(bf);
 	} else {
 		std::cerr << "The initial state does not respect the conditions\n";
 		exit(1);
 	}
+
 }
 
-const fluent_formula& initially::get_pointed_wordl_conditions()
+const fluent_formula & initially::get_pointed_world_conditions() const
 {
 	return m_pointed_world_conditions;
 }
 
-const formula_list& initially::get_initial_conditions()
+const formula_list & initially::get_initial_conditions() const
 {
 	return m_bf_intial_conditions;
+}
+
+const fluent_formula & initially::get_ff_forS5() const
+{
+	return m_ff_forS5;
+}
+
+void initially::set_ff_forS5()
+{
+	if (m_ini_restriction == S5) {
+		//The consistency with S5 is already checked
+		fluent_formula ret;
+		formula_list::const_iterator it_fl;
+		for (it_fl = m_bf_intial_conditions.begin(); it_fl != m_bf_intial_conditions.end(); it_fl++) {
+			switch ( (*it_fl).m_formula_type ) {
+				//*phi*
+			case FLUENT_FORMULA:
+			{
+				ret = formula_manipulation::and_ff(ret, (*it_fl).m_fluent_formula);
+				break;
+			}
+				//C(...)
+			case C_FORMULA:
+			{
+				belief_formula tmp = *((*it_fl).m_bf1);
+				switch ( tmp.m_formula_type ) {
+					//C(*phi*)
+				case FLUENT_FORMULA:
+				{
+					ret = formula_manipulation::and_ff(ret, tmp.m_fluent_formula);
+					break;
+				}
+					//C(B(i,*phi*))
+				case BELIEF_FORMULA:
+				{
+					if (tmp.m_bf1->m_formula_type == FLUENT_FORMULA) {
+						ret = formula_manipulation::and_ff(ret, tmp.m_bf1->m_fluent_formula);
+					} else {
+						std::cerr << "\nError in the type of initial formulae (FIRST).\n";
+						exit(1);
+					}
+					break;
+				}
+					//Only for edges -- expresses that someone is ignorant - just edges.
+				case PROPOSITIONAL_FORMULA:
+				{
+					break;
+				}
+				default:
+				{
+					/*The S5_OK and S5_OK is taken care of so no need for PROP_FORM*/
+					std::cerr << "\nError in the type of initial formulae (SECOND).\n";
+					exit(1);
+					break;
+				}
+				}
+				break;
+			}
+			default:
+			{
+				std::cerr << "\nError in the type of initial formulae (THIRD).\n";
+				exit(1);
+				break;
+			}
+			}
+		}
+		//So if called twice is still correct
+		m_ff_forS5 = ret;
+	}
 }

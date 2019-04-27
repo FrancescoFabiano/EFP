@@ -31,8 +31,8 @@ kedge_ptr kstore::add_edge(const kedge & to_add)
 	//The pair is <iterator,bool>
 	//return std::get<0>(m_created_edges.insert(edge));
 
-	/// \bug wrong implementaion.
-	return std::shared_ptr<const kedge>(&to_add);
+
+	return std::shared_ptr<const kedge>(&(*(std::get<0>(m_created_edges.insert(to_add)))));
 }
 
 kworld_ptr kstore::add_world(const kworld & to_add)
@@ -42,13 +42,20 @@ kworld_ptr kstore::add_world(const kworld & to_add)
 	//@TODO: Make sure is a shared_ptr
 	//return *((m_created_worlds.insert(world))->first);
 
-	/// \bug No need to create the kworld kk or the iterator.
 
-	kworld_set::iterator it_kwset;
-	it_kwset = std::get<0>(m_created_worlds.insert(to_add));
-	kworld kk = *it_kwset;
-	return std::shared_ptr<const kworld>(&kk);
-	//return &(*()));
+
+	/*// \bug No need to create the kworld kk or the iterator.
+	 * kworld_set::iterator it_kwset;
+	 * it_kwset = std::get<0>(m_created_worlds.insert(to_add));
+	 * kworld kk = *it_kwset;
+	 * return std::shared_ptr<const kworld>(&kk);*/
+
+	return std::shared_ptr<const kworld>(&(*(std::get<0>(m_created_worlds.insert(to_add)))));
+}
+
+void kstore::add_world_no_ret(const kworld & to_add)
+{
+	m_created_worlds.insert(to_add);
 }
 
 //Implement in case the list double checking is cheaper than building a world....
