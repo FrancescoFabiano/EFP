@@ -53,7 +53,7 @@ private:
      * 
      * @warning Useless if not moved to \ref kstore.
      */
-    kedge_id hash_info_into_id(kworld_ptr from, kworld_ptr to, agent label);
+    kedge_id hash_info_into_id(const kworld_ptr & from, const kworld_ptr & to, agent label);
 
     /**
      * \brief Function used to hash the the info of *this* in a unique id.
@@ -87,13 +87,13 @@ private:
      * It is private because we want to do it only in the constructor.
      *
      * @param[in] from: the \ref kworld_ptr to set as \ref m_from.*/
-    void set_from(kworld_ptr from);
+    void set_from(const kworld_ptr & from);
     /** \brief Setter for the field \ref m_to.
      * 
      * It is private because we want to do it only in the constructor.
      *
      * @param[in] to: the \ref kworld_ptr to set as \ref m_to.*/
-    void set_to(kworld_ptr & to);
+    void set_to(const kworld_ptr & to);
 
     /**
      * \brief Setter for the field \ref m_label.
@@ -130,18 +130,18 @@ public:
      * @param[in] from: the pointer to the world where *this* is coming from.
      * @param[in] to: the pointer to the world where *this* is going to.
      * @param[in] label: the \ref agent that is the label of *this*.*/
-    kedge(kworld_ptr from, kworld_ptr to, agent label);
+    kedge(const kworld_ptr & from, const kworld_ptr & to, agent label);
 
     /**
      *\brief Getter of \ref m_from.
      *     
      * @return the \ref kworld_ptr to the world where *this* is from.*/
-    kworld_ptr get_from() const;
+    const kworld_ptr & get_from() const;
     /**
      *\brief Getter of \ref m_to.
      *     
      * @return the \ref kworld_ptr to the world where *this* is directed.*/
-    kworld_ptr get_to() const;
+    const kworld_ptr & get_to() const;
     /**
      *\brief Getter of \ref m_label.
      *     
@@ -152,8 +152,7 @@ public:
      *     
      * @return the int that is the unique id of *this*.*/
     kedge_id get_id() const;
-    /**
-     *\brief The < operator based on the field \ref m_edge_id.
+    /** \brief The < operator based on the field \ref m_edge_id.
      * Implemented to allow the ordering on set of \ref kedge (used in \ref kstore).
      * 
      * @see kstore.
@@ -163,9 +162,87 @@ public:
      * @return false: otherwise.*/
     bool operator<(const kedge& to_compare) const;
 
+    /** \brief The = operator.
+     *      *     
+     * @param [in] to_assign: the \ref kedge to assign to *this*.
+     * @return true: if \p the assignment went ok.
+     * @return false: otherwise.*/
+    bool operator=(const kedge& to_assign);
 
     /**
      * \brief Function used to print all the information of *this*.
      */
     void print();
+};
+
+/**
+ * \class kedge_ptr
+ * 
+ * \brief A wrapper class for a std::shared_pointer to a \ref kedge usually stored in \ref kstore.
+ * 
+ * This class is necessary so we can use the < operator in the set of \ref kedge_ptr.
+ * If we dom't use the wrapper pointers to the same elements are different.
+ *
+ *
+ * \copyright GNU Public License.
+ *
+ * \author Francesco Fabiano.
+ * \date April 29, 2019
+ */
+
+class kedge_ptr
+{
+private:
+    /**\brief the pointer that is wrapped by *this*.*/
+    std::shared_ptr<const kedge> m_ptr;
+public:
+    /**\brief Constructor without parameters.*/
+    kedge_ptr();
+    /**\brief Constructor with parameters.
+     *
+     * This constructor uses const parameter, this means that the pointer is copied
+     * and the counter of the shared pointer is increased (std implementation).
+     * 
+     * @param[in] ptr: the pointer to assign to \ref m_ptr.*/
+    kedge_ptr(const std::shared_ptr<const kedge> & ptr);
+    /**\brief Constructor with parameters.
+     *
+     * This constructor uses non-const parameter, this means that the pointer is copied
+     * in \ref m_ptr and \p ptr becomes empty (std implementation).
+     *  
+     * @param[in] ptr: the pointer to assign to \ref m_ptr.*/
+    kedge_ptr(std::shared_ptr<const kedge>&& ptr);
+
+    /**\brief Setter for the field \ref m_ptr.
+     *
+     * This setter uses const parameter, this means that the pointer is copied
+     * and the counter of the shared pointer is increased (std implementation).
+     * 
+     * @param[in] ptr: the pointer to assign to \ref m_ptr.*/
+    void set_ptr(const std::shared_ptr<const kedge> & ptr);
+    /**\brief Setter for the field \ref m_ptr (move constructor).
+     * 
+     * This setter uses non-const parameter, this means that the pointer is copied
+     * in \ref m_ptr and \p ptr becomes empty (std implementation).
+     *  
+     * @param[in] ptr: the pointer to assign to \ref m_ptr.*/
+    void set_ptr(std::shared_ptr<const kedge>&& ptr);
+    /**\brief Getter for the field \ref m_ptr.
+     *  
+     * @return a copy of the pointer \ref m_ptr.*/
+    std::shared_ptr<const kedge> get_ptr() const;
+
+    /**\brief The operator =.
+     *
+     * This operator assign the parameter without destroying \p ptr.
+     * 
+     * @param[in] kptr: the \ref kedge_ptr to assign to *this*.*/
+    bool operator=(const kedge_ptr & kptr);
+    /**\brief The operator < for set operation.
+     *
+     * The ordering is based on the pointed object and not on the pointer itself so we have one
+     * copy of each pointed object.
+     * 
+     * @param[in] kptr: the \ref kedge_ptr to check for odering.*/
+    bool operator<(const kedge_ptr & kptr) const;
 };

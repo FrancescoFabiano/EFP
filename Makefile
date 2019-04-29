@@ -124,7 +124,6 @@ $(BUILD_DIR)/kstate.o: $(S_KRIPE_DIR)/kstate.cpp $(S_KRIPE_DIR)/kstate.h \
 		$(CC) $(CFLAGS) -c $(S_KRIPE_DIR)/kstate.cpp -o $(BUILD_DIR)/kstate.o
 
 $(BUILD_DIR)/kworld.o: $(S_KRIPE_DIR)/kworld.cpp $(S_KRIPE_DIR)/kworld.h \
-					   $(S_KRIPE_DIR)/kedge.h \
 					   $(DOMAIN_DIR)/grounder.h \
 					   $(UTILITIES_DIR)/define.h
 		$(dir_guard)

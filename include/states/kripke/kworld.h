@@ -1,4 +1,6 @@
 /**
+ * \class kworld
+ * 
  * \brief Class that describes a world (node) of a Kripke structure (\ref kstate).
  *
  * \details   A world in a \ref kstate represent a consistent set of \ref fluent (AKA a \ref fluent_set);
@@ -15,8 +17,6 @@
 #pragma once
 
 #include <set>
-
-#include "kedge.h"
 
 #include "../../utilities/define.h"
 #include "../../domain/grounder.h"
@@ -165,6 +165,77 @@ public:
      * @param [in] gr: the \ref grounder to retrive the std::string associated with the \ref fluent.
      */
     void print_info(const grounder& gr);
-
-
 };
+
+/**
+ * \class kworld_ptr
+ * 
+ * \brief A wrapper class for a std::shared_pointer to a \ref kworld usually stored in \ref kstore.
+ * 
+ * This class is necessary so we can use the < operator in the set of \ref kworld_ptr.
+ * If we dom't use the wrapper pointers to the same elements are different.
+ *
+ *
+ * \copyright GNU Public License.
+ *
+ * \author Francesco Fabiano.
+ * \date April 29, 2019
+ */
+
+class kworld_ptr
+{
+private:
+    /**\brief the pointer that is wrapped by *this*.*/
+    std::shared_ptr<const kworld> m_ptr;
+public:
+    /**\brief Constructor without parameters.*/
+    kworld_ptr();
+    /**\brief Constructor with parameters.
+     *
+     * This constructor uses const parameter, this means that the pointer is copied
+     * and the counter of the shared pointer is increased (std implementation).
+     * 
+     * @param[in] ptr: the pointer to assign to \ref m_ptr.*/
+    kworld_ptr(const std::shared_ptr<const kworld> & ptr);
+    /**\brief Constructor with parameters.
+     *
+     * This constructor uses non-const parameter, this means that the pointer is copied
+     * in \ref m_ptr and \p ptr becomes empty (std implementation).
+     *  
+     * @param[in] ptr: the pointer to assign to \ref m_ptr.*/
+    kworld_ptr(std::shared_ptr<const kworld>&& ptr);
+
+    /**\brief Setter for the field \ref m_ptr.
+     *
+     * This setter uses const parameter, this means that the pointer is copied
+     * and the counter of the shared pointer is increased (std implementation).
+     * 
+     * @param[in] ptr: the pointer to assign to \ref m_ptr.*/
+    void set_ptr(const std::shared_ptr<const kworld> & ptr);
+    /**\brief Setter for the field \ref m_ptr (move constructor).
+     * 
+     * This setter uses non-const parameter, this means that the pointer is copied
+     * in \ref m_ptr and \p ptr becomes empty (std implementation).
+     *  
+     * @param[in] ptr: the pointer to assign to \ref m_ptr.*/
+    void set_ptr(std::shared_ptr<const kworld>&& ptr);
+    /**\brief Getter for the field \ref m_ptr.
+     *  
+     * @return a copy of the pointer \ref m_ptr.*/
+    std::shared_ptr<const kworld> get_ptr() const;
+
+    /**\brief The operator =.
+     *
+     * This operator assign the parameter without destroying \p ptr.
+     * 
+     * @param[in] kptr: the \ref kworld_ptr to assign to *this*.*/
+    bool operator=(const kworld_ptr & kptr);
+    /**\brief The operator < for set operation.
+     *
+     * The ordering is based on the pointed object and not on the pointer itself so we have one
+     * copy of each pointed object.
+     * 
+     * @param[in] kptr: the \ref kworld_ptr to check for odering.*/
+    bool operator<(const kworld_ptr & kptr) const;
+};
+

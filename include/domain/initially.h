@@ -32,7 +32,7 @@ private:
      * \brief The \ref fluent_formula representation of \ref m_bf_intial_conditions if finitary-S5 is required.
      */
     fluent_formula m_ff_forS5;
-    
+
     /** \brief Function that check if a \ref belief_formula respects \ref m_ini_restriction.
      * 
      * @param[in] to_check: the \ref belief_formula that should respect \ref m_ini_restriction.

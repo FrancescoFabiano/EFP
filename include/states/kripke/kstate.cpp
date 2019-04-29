@@ -7,6 +7,8 @@
  * \date April 9, 2019
  */
 
+int count = 0;
+
 #include "kstate.h"
 
 bool kstate::entails(fluent f) const
@@ -16,7 +18,7 @@ bool kstate::entails(fluent f) const
 
 bool kstate::entails(fluent f, kworld_ptr world) const
 {
-	return world->entails(f);
+	return world.get_ptr()->entails(f);
 }
 
 bool kstate::entails(const fluent_set & fl) const
@@ -26,7 +28,7 @@ bool kstate::entails(const fluent_set & fl) const
 
 bool kstate::entails(const fluent_set & fl, kworld_ptr world) const
 {
-	return world->entails(fl);
+	return world.get_ptr()->entails(fl);
 }
 
 bool kstate::entails(const fluent_formula & ff) const
@@ -36,7 +38,7 @@ bool kstate::entails(const fluent_formula & ff) const
 
 bool kstate::entails(const fluent_formula & ff, kworld_ptr world) const
 {
-	return world->entails(ff);
+	return world.get_ptr()->entails(ff);
 }
 
 bool kstate::entails(const belief_formula & bf) const
@@ -130,14 +132,13 @@ bool kstate::get_B_reachable_worlds(agent ag, kworld_ptr world, kworld_ptr_set& 
 	bool is_fixed_point = true;
 	kedge_ptr_set::const_iterator it_kedge;
 	for (it_kedge = m_edges.begin(); it_kedge != m_edges.end(); it_kedge++) {
-		if (((*it_kedge)->get_from()->get_id() == world->get_id()) && ((*it_kedge)->get_label() == ag)) {
+		if (((*it_kedge).get_ptr()->get_from().get_ptr()->get_id() == world.get_ptr()->get_id()) && ((*it_kedge).get_ptr()->get_label() == ag)) {
 			//We use the pair of insert, if we add a new world (true in the set::insert) then is not a fixed point
-			if (std::get<1>(ret.insert((*it_kedge)->get_to()))) {
+			if (std::get<1>(ret.insert((*it_kedge).get_ptr()->get_to()))) {
 				is_fixed_point = false;
 			}
 		}
 	}
-
 	return is_fixed_point;
 }
 
@@ -206,6 +207,7 @@ void kstate::build_initial_prune(const initially & ini_conditions, int fluent_nu
 	/*Building of all the consistent \ref kedge.*/
 	generate_initial_kedges(ini_conditions, agent_number);
 
+
 	/* Setting the pointed Kripke Structure
 	 * \todo if not all the fluent have been specified then return an error
 	 * (should be taken care of in \ref domain).
@@ -223,7 +225,6 @@ void kstate::generate_initial_kworlds(int fluent_number, fluent_set& permutation
 		}*/
 		return;
 	}
-
 	fluent_set permutation_2 = permutation;
 	//Add the \ref fluent in positive version
 	permutation.insert(index);
@@ -270,8 +271,9 @@ void kstate::add_initial_kworld(const kworld & possible_add, const initially & i
 
 void kstate::generate_initial_kedges(const initially & ini_conditions, int agent_number)
 {
-	kworld_ptr_set::const_iterator it_kwps_1;
-	kworld_ptr_set::const_iterator it_kwps_2;
+	kworld_ptr_set::const_iterator it_kwps_1, it_kwps_2;
+
+	kworld_ptr kwptr_tmp1, kwptr_tmp2;
 
 	/*This for add to *this* all the possible edges.*/
 	for (it_kwps_1 = m_worlds.begin(); it_kwps_1 != m_worlds.end(); it_kwps_1++) {
@@ -280,33 +282,34 @@ void kstate::generate_initial_kedges(const initially & ini_conditions, int agent
 				/** \todo maybe don't loop twice on the world but exploit using it_kwps_2 = it_kwps_1:
 				 * - add (_1, _2).
 				 * - add (_2, _1).*/
-				add_edge(kedge(*it_kwps_1, *it_kwps_2, i));
+				kwptr_tmp1 = *it_kwps_1;
+				kwptr_tmp2 = *it_kwps_2;
+
+				add_edge(kedge(kwptr_tmp1, kwptr_tmp2, i));
+				add_edge(kedge(kwptr_tmp2, kwptr_tmp1, i));
 				/** \bug when the line is added problem with the pointers:
 				 * add_edge(kedge(*it_kwps_2, *it_kwps_1, i));*/
 
 			}
 		}
 	}
-
 	formula_list::const_iterator it_fl;
 	for (it_fl = ini_conditions.get_initial_conditions().begin(); it_fl != ini_conditions.get_initial_conditions().end(); it_fl++) {
 		remove_initial_kedge_bf(*it_fl, ini_conditions.get_ini_restriction());
 	}
-
 }
 
 void kstate::remove_kedge(const kedge & to_remove)
 {
-	std::cout << "\nRemoved " << to_remove.get_id();
-	/** \bug when the line is added problem with the pointers:
-	 * m_edges.erase(kstore::get_instance().add_edge(to_remove));*/
+	/** \bug when the line is added problem with the pointers:*/
+	if (m_edges.erase(kstore::get_instance().add_edge(to_remove)) > 0)
+		count++;
 }
 
 void kstate::remove_initial_kedge(const fluent_formula & known_ff, agent ag)
 {
 
-	kworld_ptr_set::const_iterator it_kwps_1;
-	kworld_ptr_set::const_iterator it_kwps_2;
+	kworld_ptr_set::const_iterator it_kwps_1, it_kwps_2;
 
 	kworld_ptr kwptr_tmp1, kwptr_tmp2;
 
@@ -318,12 +321,12 @@ void kstate::remove_initial_kedge(const fluent_formula & known_ff, agent ag)
 			/** \todo or entails(-known_ff)?*/
 			kwptr_tmp1 = *it_kwps_1;
 			kwptr_tmp2 = *it_kwps_2;
-			if (kwptr_tmp1->entails(known_ff) && !kwptr_tmp2->entails(known_ff)) {
+			if (kwptr_tmp1.get_ptr()->entails(known_ff) && !kwptr_tmp2.get_ptr()->entails(known_ff)) {
 				remove_kedge(kedge(kwptr_tmp1, kwptr_tmp2, ag));
-				remove_kedge(kedge(*it_kwps_2, *it_kwps_1, ag));
-			} else if (kwptr_tmp2->entails(known_ff) && !kwptr_tmp1->entails(known_ff)) {
-				remove_kedge(kedge(*it_kwps_2, *it_kwps_1, ag));
-				remove_kedge(kedge(*it_kwps_1, *it_kwps_2, ag));
+				remove_kedge(kedge(kwptr_tmp2, kwptr_tmp1, ag));
+			} else if (kwptr_tmp2.get_ptr()->entails(known_ff) && !kwptr_tmp1.get_ptr()->entails(known_ff)) {
+				remove_kedge(kedge(kwptr_tmp2, kwptr_tmp1, ag));
+				remove_kedge(kedge(kwptr_tmp1, kwptr_tmp2, ag));
 			}
 		}
 	}

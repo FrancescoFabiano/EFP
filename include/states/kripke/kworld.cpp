@@ -1,5 +1,5 @@
-/**
- * \brief Implementation of \ref kworld.h.
+/*
+ * \brief Implementation of \ref kworld.h and \ref kworld_ptr.h.
  *
  * \copyright GNU Public License.
  *
@@ -21,7 +21,7 @@ kworld::kworld(const fluent_set & description)
 {
 	/*
 	 * No need because consistent for construction
-	 * \throw std::invalid_argument whenever \p description is not consistent. 
+	 * \throw std::invalid_argument whenever \p description is not consistent.
 	 *
 	 *try {*/
 	set_fluent_set(description);
@@ -52,7 +52,7 @@ kworld_id kworld::hash_fluents_into_id()
 void kworld::set_fluent_set(const fluent_set & description)
 {
 	/*
-	 * \throw std::invalid_argument whenever \p description is not consistent. 
+	 * \throw std::invalid_argument whenever \p description is not consistent.
 	 *
 	if (consistent(description))*/
 	m_fluent_set = description;
@@ -66,7 +66,7 @@ bool kworld::consistent(const fluent_set & to_check)
 	fluent_set::const_iterator it_flset_tmp;
 
 	for (it_flset = to_check.begin(); it_flset != to_check.end(); it_flset++) {
-		/* If the pointed fluent is in modulo 2 it means is the positive and if 
+		/* If the pointed fluent is in modulo 2 it means is the positive and if
 		 * its successor (the negative version) is in the set then is not consistent.*/
 		if ((*it_flset) % 2 == 0) {
 			//The std::set has is elements ordered so we can just check its successor.
@@ -147,4 +147,49 @@ void kworld::print_info(const grounder& gr)
 	std::cout << "World id: " << get_id();
 	std::cout << "\nFluents: " << get_id();
 	gr.print_ff(m_fluent_set);
+}
+
+/*-***************************************************************************************************************-*/
+
+kworld_ptr::kworld_ptr()
+{
+}
+
+kworld_ptr::kworld_ptr(const std::shared_ptr<const kworld> & ptr)
+{
+	set_ptr(ptr);
+}
+
+kworld_ptr::kworld_ptr(std::shared_ptr<const kworld>&& ptr)
+{
+	set_ptr(ptr);
+}
+
+void kworld_ptr::set_ptr(const std::shared_ptr<const kworld> & ptr)
+{
+	m_ptr = ptr;
+}
+
+void kworld_ptr::set_ptr(std::shared_ptr<const kworld>&& ptr)
+{
+	m_ptr = ptr;
+}
+
+std::shared_ptr<const kworld> kworld_ptr::get_ptr() const
+{
+	return m_ptr;
+}
+
+bool kworld_ptr::operator=(const kworld_ptr & kptr)
+{
+	set_ptr(kptr.get_ptr());
+	return true;
+}
+
+bool kworld_ptr::operator<(const kworld_ptr & kptr) const
+{
+	if ((*m_ptr)<(*(kptr.get_ptr()))) {
+		return true;
+	}
+	return false;
 }

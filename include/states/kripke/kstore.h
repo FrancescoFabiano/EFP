@@ -69,7 +69,7 @@ public:
      * 
      * \todo Param ok because set makes copy?
      */
-    kedge_ptr add_edge(const kedge & to_add);
+    const kedge_ptr add_edge(const kedge & to_add);
     /**
      * \brief Function that return the pointer to the given \ref kworld.
      * 
@@ -82,7 +82,7 @@ public:
      * 
      * \todo Param ok because set makes copy?
      */
-    kworld_ptr add_world(const kworld & to_add);
+    const kworld_ptr add_world(const kworld & to_add);
 
     /**\brief Function that add a created \ref kworld without returning its pointer.
      * 

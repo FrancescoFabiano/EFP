@@ -28,7 +28,7 @@ kedge::kedge(const kworld & from, const kworld & to, agent label)
 	set_id();
 }
 
-kedge::kedge(kworld_ptr from, kworld_ptr to, agent label)
+kedge::kedge(const kworld_ptr & from, const kworld_ptr & to, agent label)
 {
 	set_from(from);
 	set_to(to);
@@ -39,9 +39,9 @@ kedge::kedge(kworld_ptr from, kworld_ptr to, agent label)
 /**
  * \todo the hash function is maybe to simple.
  */
-kedge_id kedge::hash_info_into_id(kworld_ptr from, kworld_ptr to, agent label)
+kedge_id kedge::hash_info_into_id(const kworld_ptr & from, const kworld_ptr & to, agent label)
 {
-	return(from->get_id() + "-" + to->get_id() + "-" + std::to_string(label));
+	return(from.get_ptr()->get_id() + "-" + to.get_ptr()->get_id() + "-" + std::to_string(label));
 }
 
 kedge_id kedge::hash_info_into_id()
@@ -49,12 +49,12 @@ kedge_id kedge::hash_info_into_id()
 	return(hash_info_into_id(m_from, m_to, m_label));
 }
 
-kworld_ptr kedge::get_from() const
+const kworld_ptr & kedge::get_from() const
 {
 	return m_from;
 }
 
-kworld_ptr kedge::get_to() const
+const kworld_ptr & kedge::get_to() const
 {
 	return m_to;
 }
@@ -87,12 +87,12 @@ void kedge::set_to(const kworld & to)
 	m_to = kstore::get_instance().add_world(to);
 }
 
-void kedge::set_from(kworld_ptr from)
+void kedge::set_from(const kworld_ptr & from)
 {
 	m_from = from;
 }
 
-void kedge::set_to(kworld_ptr & to)
+void kedge::set_to(const kworld_ptr & to)
 {
 	m_to = to;
 }
@@ -114,7 +114,61 @@ bool kedge::operator<(const kedge& edge) const
 	return false;
 }
 
+bool kedge::operator=(const kedge& to_assign)
+{
+	set_from(to_assign.get_from());
+	set_to(to_assign.get_to());
+	set_label(to_assign.get_label());
+	set_id();
+	return true;
+}
+
 void kedge::print()
 {
-	std::cout << "edge id " << get_id() << " label: " << get_label() << " from: " << get_from()->get_id() << " to " << get_to()->get_id() << std::endl;
+	std::cout << "edge id " << get_id() << " label: " << get_label() << " from: " << get_from().get_ptr()->get_id() << " to " << get_to().get_ptr()->get_id() << std::endl;
+}
+
+/*-***************************************************************************************************************-*/
+
+kedge_ptr::kedge_ptr()
+{
+}
+
+kedge_ptr::kedge_ptr(const std::shared_ptr<const kedge> & ptr)
+{
+	set_ptr(ptr);
+}
+
+kedge_ptr::kedge_ptr(std::shared_ptr<const kedge>&& ptr)
+{
+	set_ptr(ptr);
+}
+
+void kedge_ptr::set_ptr(const std::shared_ptr<const kedge> & ptr)
+{
+	m_ptr = ptr;
+}
+
+void kedge_ptr::set_ptr(std::shared_ptr<const kedge>&& ptr)
+{
+	m_ptr = ptr;
+}
+
+std::shared_ptr<const kedge> kedge_ptr::get_ptr() const
+{
+	return m_ptr;
+}
+
+bool kedge_ptr::operator=(const kedge_ptr & kptr)
+{
+	set_ptr(kptr.get_ptr());
+	return true;
+}
+
+bool kedge_ptr::operator<(const kedge_ptr & kptr) const
+{
+	if ((*m_ptr)<(*(kptr.get_ptr()))) {
+		return true;
+	}
+	return false;
 }

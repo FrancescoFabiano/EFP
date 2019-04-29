@@ -180,8 +180,10 @@ typedef std::string kedge_id; /**< \brief The id of an \ref kedge in a \ref ksta
                                 * This id is used to extract the \ref kedge from the \ref kstore to not create a new every time
                                 * but to access the already created ones.
                                 * @see kedge and kstore*/
-typedef std::shared_ptr<const kedge> kedge_ptr; /**< \brief A std::shared_pointer to a \ref kedge usually stored in \ref kstore.
-                                                * @see kedge and kstore*/
+/*typedef std::shared_ptr<const kedge> kedge_ptr;*/ /*< \brief A std::shared_pointer to a \ref kedge usually stored in \ref kstore.
+                                                * @see kedge and kstore.
+                                                * \todo transform into class for < into set, also add = and empty constructor, operator*,operator ->, = with string.*/
+class kedge_ptr;
 typedef std::set<kedge_ptr> kedge_ptr_set; /**< \brief A set of \ref kedge_ptr.
                                             * 
                                             * Mainly used to store all the \ref kedge of a \ref kstate without wasting memory.
@@ -197,9 +199,11 @@ typedef std::string kworld_id; /**< \brief The id of a \ref kworld in a \ref kst
                                 * This id is used to extract the \ref kworld from the \ref kstore to not create a new every time
                                 * but to access the already created ones.
                                 * @see kworld and kstore*/
-typedef std::shared_ptr<const kworld> kworld_ptr; /**< \brief A std::shared_pointer to a \ref kworld usually stored in \ref kstore.
+/*typedef std::shared_ptr<const kworld> kworld_ptr;*/ /*< \brief A std::shared_pointer to a \ref kworld usually stored in \ref kstore.
                                                    * 
-                                                   * @see kworld and kstore*/
+                                                   * @see kworld and kstore.
+                                                   * \todo transform into class for < into set.*/
+class kworld_ptr;
 typedef std::set<kworld_ptr> kworld_ptr_set; /**< \brief A set of \ref kworld_ptr.
                                             * 
                                             * Mainly used to store all the \ref kworld of a \ref kstate without wasting memory.
