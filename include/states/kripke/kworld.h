@@ -19,7 +19,7 @@
 #include <set>
 
 #include "../../utilities/define.h"
-#include "../../domain/grounder.h"
+#include "../../utilities/printer.h"
 
 class kworld
 {
@@ -52,16 +52,14 @@ private:
      */
     kworld_id hash_fluents_into_id();
 
-    /**
-     * \brief Setter for the field \ref m_fluent_set.
+    /** \brief Setter for the field \ref m_fluent_set.
      * 
      * This function also guarantees consistency.
      * 
      * @param[in] description: the set of \ref fluent to set as \ref m_fluent_set.
      * 
      * \todo is the parameter passing the best one? Copy?
-     * \todo is the consistency useless?
-     */
+     * \todo is the consistency useless?*/
     void set_fluent_set(const fluent_set & description);
 
     /**
@@ -76,9 +74,7 @@ private:
      */
     bool consistent(const fluent_set & to_check);
 
-    /**
-     * \brief Function that uses the info of  *this* to set its  \ref m_id.
-     */
+    /** \brief Function that uses the info of *this* to set its \ref m_id.*/
     void set_id();
 
 public:
@@ -96,6 +92,11 @@ public:
      * \todo is the parameter passing the best one? Copy?
      */
     kworld(const fluent_set & description);
+
+    /** \brief Copy constructor.
+     * 
+     * @param[in] world: the \ref kworld to copy into *this**/
+    kworld(const kworld & world);
 
     /**
      *\brief Getter of \ref m_fluent_set.
@@ -159,12 +160,22 @@ public:
      * @return false: otherwise.*/
     bool operator<(const kworld& to_compare) const;
 
-    /**
-     * \brief Function used to print all the information of *this*.
-     * 
-     * @param [in] gr: the \ref grounder to retrive the std::string associated with the \ref fluent.
-     */
-    void print_info(const grounder& gr);
+    /** \brief The == operator based on the field \ref m_id.
+     *     
+     * @param [in] to_compare: the \ref kworld to compare with *this*.
+     * @return true: if \p to_compare is equal to *this*
+     * @return false: otherwise.*/
+    bool operator==(const kworld& to_compare) const;
+
+    /** \brief The = operator.
+     *   
+     * @param [in] to_assign: the \ref kworld to assign to *this*.
+     * @return true: if \p the assignment went ok.
+     * @return false: otherwise.*/
+    bool operator=(const kworld& to_assign);
+
+    /** \brief Function used to print all the information of *this*.*/
+    void print_info();
 };
 
 /**
@@ -181,29 +192,41 @@ public:
  * \author Francesco Fabiano.
  * \date April 29, 2019
  */
-
 class kworld_ptr
 {
 private:
     /**\brief the pointer that is wrapped by *this*.*/
     std::shared_ptr<const kworld> m_ptr;
+
 public:
     /**\brief Constructor without parameters.*/
     kworld_ptr();
     /**\brief Constructor with parameters.
      *
-     * This constructor uses const parameter, this means that the pointer is copied
+     * This constructor uses const pointer, this means that the pointer is copied
      * and the counter of the shared pointer is increased (std implementation).
      * 
      * @param[in] ptr: the pointer to assign to \ref m_ptr.*/
     kworld_ptr(const std::shared_ptr<const kworld> & ptr);
     /**\brief Constructor with parameters.
      *
-     * This constructor uses non-const parameter, this means that the pointer is copied
+     * This constructor uses non-const pointer, this means that the pointer is copied
      * in \ref m_ptr and \p ptr becomes empty (std implementation).
      *  
      * @param[in] ptr: the pointer to assign to \ref m_ptr.*/
     kworld_ptr(std::shared_ptr<const kworld>&& ptr);
+
+    /** \brief Constructor with parameters.
+     *
+     * This constructor build a pointer to the given parameter.
+     *  
+     * @param[in] world: the \ref kworld that *this* (\ref m_ptr) should point.*/
+    kworld_ptr(const kworld & world);
+
+    /**\brief Getter for the field \ref m_ptr.
+     *  
+     * @return a copy of the pointer \ref m_ptr.*/
+    std::shared_ptr<const kworld> get_ptr() const;
 
     /**\brief Setter for the field \ref m_ptr.
      *
@@ -219,23 +242,39 @@ public:
      *  
      * @param[in] ptr: the pointer to assign to \ref m_ptr.*/
     void set_ptr(std::shared_ptr<const kworld>&& ptr);
-    /**\brief Getter for the field \ref m_ptr.
-     *  
-     * @return a copy of the pointer \ref m_ptr.*/
-    std::shared_ptr<const kworld> get_ptr() const;
+
+    /** \brief Function that return the field m_fluent_set of the pointed \ref kworld.
+     *     
+     * @return the \ref fluent_set that is the description of the \ref kworld pointed by \ref m_ptr.*/
+    const fluent_set & get_fluent_set() const;
+    /** \brief Function that return the field m_id of the pointed \ref kworld.
+     *     
+     * @return the \ref kworld_id that is the id of the \ref kworld pointed by \ref m_ptr.*/
+    kworld_id get_id() const;
 
     /**\brief The operator =.
      *
      * This operator assign the parameter without destroying \p ptr.
      * 
-     * @param[in] kptr: the \ref kworld_ptr to assign to *this*.*/
+     * @param[in] kptr: the \ref kworld_ptr to assign to *this*.
+     * @return true: if the assignment went through.
+     * @return false: otherwise.*/
     bool operator=(const kworld_ptr & kptr);
+    /**\brief The operator ==.
+     * 
+     * @param[in] kptr: the \ref kworld_ptr to confront with *this*.
+     * @return true: if *this* is equal to \p kptr.
+     * @return false: otherwise.*/
+    bool operator==(const kworld_ptr & kptr) const;
     /**\brief The operator < for set operation.
      *
      * The ordering is based on the pointed object and not on the pointer itself so we have one
      * copy of each pointed object.
      * 
-     * @param[in] kptr: the \ref kworld_ptr to check for odering.*/
+     * @param[in] kptr: the \ref kworld_ptr to check for odering.
+     * 
+     * @return true: if *this* is smaller than \p kptr.
+     * @return false: otherwise.*/
     bool operator<(const kworld_ptr & kptr) const;
 };
 

@@ -25,7 +25,7 @@ void belief_formula::print() const
 	switch ( m_formula_type ) {
 
 	case FLUENT_FORMULA:
-		printer::print_list(m_string_fluent_formula);
+		printer::get_instance().print_list(m_string_fluent_formula);
 		break;
 	case BELIEF_FORMULA:
 		std::cout << "B(" << m_string_agent_op << ",(";
@@ -35,7 +35,7 @@ void belief_formula::print() const
 
 	case C_FORMULA:
 		std::cout << "C([";
-		printer::print_list(m_string_group_agents);
+		printer::get_instance().print_list(m_string_group_agents);
 		std::cout << "],";
 		m_bf1->print();
 		std::cout << ")";
@@ -43,7 +43,7 @@ void belief_formula::print() const
 
 	case E_FORMULA:
 		std::cout << "E([";
-		printer::print_list(m_string_group_agents);
+		printer::get_instance().print_list(m_string_group_agents);
 		std::cout << "],";
 		m_bf1->print();
 		std::cout << ")";

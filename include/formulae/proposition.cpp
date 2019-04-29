@@ -1,6 +1,6 @@
 /*
  * \brief Implementation of \ref proposition.h.
- * 
+ *
  * \copyright GNU Public License.
  *
  * \author Francesco Fabiano.
@@ -51,7 +51,7 @@ void proposition::print() const
 	 */
 
 	std::cout << "\n Effects:\n";
-	printer::print_list(m_action_effect);
+	printer::get_instance().print_list(m_action_effect);
 
 
 	/*std::cout << "\n Conditional Execution for act -> incorporated with Executability conditions:\n";
@@ -67,7 +67,7 @@ void proposition::print() const
 
 	//For Printing Info
 	//	std::cout << "\n Observability conditions:\n";
-	//	printer::print_list(m_observability_conditions);
+	//	printer::get_instance().print_list(m_observability_conditions);
 	//	/*first2 = true;
 	//	for (it2 = m_observability_conditions.begin(); it2 != m_observability_conditions.end(); it2++) {
 	//		if ((m_type == AWARENESS || m_type == OBSERVANCE) && !if_fluform) {

@@ -59,10 +59,10 @@ const kworld_ptr kstore::add_world(const kworld & to_add)
 	return tmp_ptr;
 }
 
-void kstore::add_world_no_ret(const kworld & to_add)
+/*void kstore::add_world_no_ret(const kworld & to_add)
 {
 	m_created_worlds.insert(to_add);
-}
+}*/
 
 //Implement in case the list double checking is cheaper than building a world....
 /*const kworld& kstore::add_world(const fluent_formula &ff)

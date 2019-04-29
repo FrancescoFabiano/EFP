@@ -145,7 +145,7 @@ public:
     /**
      *\brief Getter of \ref m_label.
      *     
-     * @return the \ref agent that is the label of the *this*.*/
+     * @return the \ref agent that is the label of *this*.*/
     agent get_label() const;
     /**
      *\brief Getter of \ref m_edge_id.
@@ -162,8 +162,16 @@ public:
      * @return false: otherwise.*/
     bool operator<(const kedge& to_compare) const;
 
+        /** \brief The == operator based on the field \ref m_edge_id.
+     *     
+     * @param [in] to_compare: the \ref kedge to compare with *this*.
+     * @return true: if \p to_compare is equal to *this*
+     * @return false: otherwise.*/
+    bool operator==(const kedge& to_compare) const;
+
+    
     /** \brief The = operator.
-     *      *     
+     *   
      * @param [in] to_assign: the \ref kedge to assign to *this*.
      * @return true: if \p the assignment went ok.
      * @return false: otherwise.*/
@@ -195,6 +203,12 @@ class kedge_ptr
 private:
     /**\brief the pointer that is wrapped by *this*.*/
     std::shared_ptr<const kedge> m_ptr;
+
+    /**\brief Getter for the field \ref m_ptr.
+     *  
+     * @return a copy of the pointer \ref m_ptr.*/
+    std::shared_ptr<const kedge> get_ptr() const;
+
 public:
     /**\brief Constructor without parameters.*/
     kedge_ptr();
@@ -215,34 +229,59 @@ public:
 
     /**\brief Setter for the field \ref m_ptr.
      *
-     * This setter uses const parameter, this means that the pointer is copied
+     * This setter uses const pointer, this means that the pointer is copied
      * and the counter of the shared pointer is increased (std implementation).
      * 
      * @param[in] ptr: the pointer to assign to \ref m_ptr.*/
     void set_ptr(const std::shared_ptr<const kedge> & ptr);
     /**\brief Setter for the field \ref m_ptr (move constructor).
      * 
-     * This setter uses non-const parameter, this means that the pointer is copied
+     * This setter uses non-const pointer, this means that the pointer is copied
      * in \ref m_ptr and \p ptr becomes empty (std implementation).
      *  
      * @param[in] ptr: the pointer to assign to \ref m_ptr.*/
     void set_ptr(std::shared_ptr<const kedge>&& ptr);
-    /**\brief Getter for the field \ref m_ptr.
-     *  
-     * @return a copy of the pointer \ref m_ptr.*/
-    std::shared_ptr<const kedge> get_ptr() const;
+
+    /** \brief Function that return the field m_from of the pointed \ref kworld. 
+     *     
+     * @return the \ref kworld_ptr to the world where the \ref kworld pointed by \ref m_ptr is from.*/
+    const kworld_ptr & get_from() const;
+    /** \brief Function that return the field m_to of the pointed \ref kworld. 
+     *      
+     * @return the \ref kworld_ptr to the world where the \ref kworld pointed by \ref m_ptr is directed.*/
+    const kworld_ptr & get_to() const;
+    /** \brief Function that return the field m_label of the pointed \ref kworld.
+     *     
+     * @return the \ref agent that is the label of the \ref kworld pointed by \ref m_ptr.*/
+    agent get_label() const;
+
+    /** \brief Function that return the field m_id of the pointed \ref kedge.
+     *     
+     * @return the \ref kedge_id that is the id of the \ref kedge pointed by \ref m_ptr.*/
+    kedge_id get_id() const;
 
     /**\brief The operator =.
      *
      * This operator assign the parameter without destroying \p ptr.
      * 
-     * @param[in] kptr: the \ref kedge_ptr to assign to *this*.*/
+     * @param[in] kptr: the \ref kedge_ptr to assign to *this*.
+     * @return true: if the assignment went through.
+     * @return false: otherwise.*/
     bool operator=(const kedge_ptr & kptr);
+    /**\brief The operator ==.
+     * 
+     * @param[in] kptr: the \ref kedge_ptr to confront with *this*.
+     * @return true: if *this* is equal to \p kptr.
+     * @return false: otherwise.*/
+    bool operator==(const kedge_ptr & kptr) const;
     /**\brief The operator < for set operation.
      *
      * The ordering is based on the pointed object and not on the pointer itself so we have one
      * copy of each pointed object.
      * 
-     * @param[in] kptr: the \ref kedge_ptr to check for odering.*/
+     * @param[in] kptr: the \ref kedge_ptr to check for odering.
+     * 
+     * @return true: if *this* is smaller than \p kptr.
+     * @return false: otherwise.*/
     bool operator<(const kedge_ptr & kptr) const;
 };

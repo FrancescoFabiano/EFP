@@ -23,6 +23,7 @@ bool domain::build(bool debug)
 	build_agents(debug);
 	build_fluents(debug);
 	build_actions(debug);
+	printer::get_instance().set_grounder(m_grounder);
 	build_initially(debug);
 	build_goal(debug);
 
@@ -38,6 +39,7 @@ bool domain::build(bool debug)
 	switch ( m_state_type ) {
 	case KRIPKE:
 		initial.build_initial(m_intial_description, m_fluents.size() / 2, m_agents.size());
+		break;
 	default:
 		std::cerr << "\nNot implemented yet\n";
 		exit(1);
@@ -164,7 +166,7 @@ void domain::build_initially(bool debug)
 			m_intial_description.add_pointed_condition(it_fl->m_fluent_formula);
 			if (debug) {
 				std::cout << "	Pointed world: ";
-				printer::print_list(it_fl->m_string_fluent_formula);
+				printer::get_instance().print_list(it_fl->m_string_fluent_formula);
 				std::cout << std::endl;
 			}
 

@@ -69,7 +69,9 @@ $(BUILD_DIR)/main.o:	$(SRC_DIR)/main.cpp \
 #-----------------------------------INCLUDE FILES-----------------------------------#
 ####UTILITIES
 $(BUILD_DIR)/printer.o: $(UTILITIES_DIR)/printer.cpp $(UTILITIES_DIR)/printer.h \
-						 $(UTILITIES_DIR)/define.h
+						$(UTILITIES_DIR)/define.h \
+						$(DOMAIN_DIR)/grounder.h
+
 		$(dir_guard)
 		$(CC) $(CFLAGS) -c $(UTILITIES_DIR)/printer.cpp -o $(BUILD_DIR)/printer.o
 		
@@ -124,8 +126,7 @@ $(BUILD_DIR)/kstate.o: $(S_KRIPE_DIR)/kstate.cpp $(S_KRIPE_DIR)/kstate.h \
 		$(CC) $(CFLAGS) -c $(S_KRIPE_DIR)/kstate.cpp -o $(BUILD_DIR)/kstate.o
 
 $(BUILD_DIR)/kworld.o: $(S_KRIPE_DIR)/kworld.cpp $(S_KRIPE_DIR)/kworld.h \
-					   $(DOMAIN_DIR)/grounder.h \
-					   $(UTILITIES_DIR)/define.h
+					   $(UTILITIES_DIR)/printer.h $(UTILITIES_DIR)/define.h
 		$(dir_guard)
 		$(CC) $(CFLAGS) -c $(S_KRIPE_DIR)/kworld.cpp -o $(BUILD_DIR)/kworld.o
 				

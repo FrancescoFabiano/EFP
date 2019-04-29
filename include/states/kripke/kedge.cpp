@@ -41,7 +41,7 @@ kedge::kedge(const kworld_ptr & from, const kworld_ptr & to, agent label)
  */
 kedge_id kedge::hash_info_into_id(const kworld_ptr & from, const kworld_ptr & to, agent label)
 {
-	return(from.get_ptr()->get_id() + "-" + to.get_ptr()->get_id() + "-" + std::to_string(label));
+	return(from.get_id() + "-" + to.get_id() + "-" + std::to_string(label));
 }
 
 kedge_id kedge::hash_info_into_id()
@@ -107,9 +107,16 @@ void kedge::set_id()
 	m_edge_id = hash_info_into_id();
 }
 
-bool kedge::operator<(const kedge& edge) const
+bool kedge::operator<(const kedge& to_compare) const
 {
-	if (m_edge_id.compare(edge.get_id()) < 0)
+	if (m_edge_id.compare(to_compare.get_id()) < 0)
+		return true;
+	return false;
+}
+
+bool kedge::operator==(const kedge& to_compare) const
+{
+	if (m_edge_id.compare(to_compare.get_id()) == 0)
 		return true;
 	return false;
 }
@@ -125,7 +132,7 @@ bool kedge::operator=(const kedge& to_assign)
 
 void kedge::print()
 {
-	std::cout << "edge id " << get_id() << " label: " << get_label() << " from: " << get_from().get_ptr()->get_id() << " to " << get_to().get_ptr()->get_id() << std::endl;
+	std::cout << "edge id " << get_id() << " label: " << get_label() << " from: " << get_from().get_id() << " to " << get_to().get_id() << std::endl;
 }
 
 /*-***************************************************************************************************************-*/
@@ -159,10 +166,54 @@ std::shared_ptr<const kedge> kedge_ptr::get_ptr() const
 	return m_ptr;
 }
 
+const kworld_ptr & kedge_ptr::get_from() const
+{
+	if (m_ptr != nullptr) {
+		return get_ptr()->get_from();
+	}
+	std::cerr << "Error in creating a kedge_ptr\n";
+	exit(1);
+}
+
+const kworld_ptr & kedge_ptr::get_to() const
+{
+	if (m_ptr != nullptr) {
+		return get_ptr()->get_to();
+	}
+	std::cerr << "Error in creating a kedge_ptr\n";
+	exit(1);
+}
+
+agent kedge_ptr::get_label() const
+{
+	if (m_ptr != nullptr) {
+		return get_ptr()->get_label();
+	}
+	std::cerr << "Error in creating a kedge_ptr\n";
+	exit(1);
+}
+
+kedge_id kedge_ptr::get_id() const
+{
+	if (m_ptr != nullptr) {
+		return get_ptr()->get_id();
+	}
+	std::cerr << "Error in creating a kedge_ptr\n";
+	exit(1);
+}
+
 bool kedge_ptr::operator=(const kedge_ptr & kptr)
 {
 	set_ptr(kptr.get_ptr());
 	return true;
+}
+
+bool kedge_ptr::operator==(const kedge_ptr & kptr) const
+{
+	if ((*m_ptr) == (*(kptr.get_ptr()))) {
+		return true;
+	}
+	return false;
 }
 
 bool kedge_ptr::operator<(const kedge_ptr & kptr) const

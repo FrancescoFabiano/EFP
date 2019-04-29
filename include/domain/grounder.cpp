@@ -1,4 +1,4 @@
-/* 
+/*
  * File:   grounder.h
  * Author: Francesco
  *
@@ -11,7 +11,7 @@ grounder::grounder()
 {
 }
 
-grounder::grounder(fluent_map fluent_map, agent_map agent_map, action_name_map action_name_map)
+grounder::grounder(const fluent_map & fluent_map, const agent_map & agent_map, const action_name_map & action_name_map)
 {
 	set_fluent_map(fluent_map);
 	set_agent_map(agent_map);
@@ -29,57 +29,58 @@ grounder::grounder(fluent_map fluent_map, agent_map agent_map, action_name_map a
 	create_reverse_ac(m_action_name_map);
 }*/
 
-void grounder::create_reverse_fl(const fluent_map& to_revert)
+void grounder::create_reverse_fl()
 {
 	fluent_map::iterator it;
 	for (it = m_fluent_map.begin(); it != m_fluent_map.end(); it++)
 		r_fluent_map[it->second] = it->first;
-
-	m_reversed_fl = true;
 }
 
-void grounder::create_reverse_ag(const agent_map& to_revert)
+void grounder::create_reverse_ag()
 {
 	agent_map::iterator it;
 	for (it = m_agent_map.begin(); it != m_agent_map.end(); it++)
 		r_agent_map[it->second] = it->first;
-
-	m_reversed_ag = true;
 }
 
-void grounder::create_reverse_ac(const action_name_map& to_revert)
+void grounder::create_reverse_ac()
 {
 	action_name_map::iterator it;
 	for (it = m_action_name_map.begin(); it != m_action_name_map.end(); it++)
 		r_action_name_map[it->second] = it->first;
-
-	m_reversed_ac = true;
-
 }
 
-void grounder::set_fluent_map(fluent_map fluent_map)
+void grounder::set_fluent_map(const fluent_map & fluent_map)
 {
-
 	m_fluent_map = fluent_map;
-
-	if (!m_reversed_fl)
-		create_reverse_fl(m_fluent_map);
+	create_reverse_fl();
 }
 
-void grounder::set_agent_map(agent_map agent_map)
+void grounder::set_agent_map(const agent_map & agent_map)
 {
 	m_agent_map = agent_map;
-
-	if (!m_reversed_ag)
-		create_reverse_ag(m_agent_map);
+	create_reverse_ag();
 }
 
-void grounder::set_action_name_map(action_name_map action_name_map)
+void grounder::set_action_name_map(const action_name_map & action_name_map)
 {
 	m_action_name_map = action_name_map;
+	create_reverse_ac();
+}
 
-	if (!m_reversed_ac)
-		create_reverse_ac(m_action_name_map);
+const fluent_map & grounder::get_fluent_map() const
+{
+	return m_fluent_map;
+}
+
+const agent_map & grounder::get_agent_map() const
+{
+	return m_agent_map;
+}
+
+const action_name_map & grounder::get_action_name_map() const
+{
+	return m_action_name_map;
 }
 
 fluent grounder::ground_fluent(const std::string& x) const
@@ -215,12 +216,20 @@ std::string grounder::deground_action(action_id x) const
 	exit(1);
 }
 
-void grounder::print_ff(const fluent_set& to_print) const
+/*void grounder::print_ff(const fluent_set& to_print) const
 {
-	printer::print_list(deground_fluent(to_print));
+	printer::get_instance().print_list(deground_fluent(to_print));
 }
 
 void grounder::print_ff(const fluent_formula& to_print) const
 {
-	printer::print_list(deground_fluent(to_print));
+	printer::get_instance().print_list(deground_fluent(to_print));
+}*/
+
+bool grounder::operator=(const grounder& to_assign)
+{
+	set_fluent_map(to_assign.get_fluent_map());
+	set_agent_map(to_assign.get_agent_map());
+	set_action_name_map(to_assign.get_action_name_map());
+	return true;
 }

@@ -1,4 +1,4 @@
-/* 
+/*
  * File:   action.cpp
  * Author: Francesco
  *
@@ -196,7 +196,7 @@ void action::print(const grounder& grounder) const
 	effects_map::const_iterator it_effmap;
 	for (it_effmap = m_effects.begin(); it_effmap != m_effects.end(); ++it_effmap) {
 		std::cout << " | ";
-		grounder.print_ff(it_effmap->first);
+		printer::get_instance().print_list(it_effmap->first);
 		std::cout << " if ";
 		it_effmap->second.print();
 	}
@@ -206,13 +206,13 @@ void action::print(const grounder& grounder) const
 	observability_map::const_iterator it_obsmap;
 	for (it_obsmap = m_fully_observants.begin(); it_obsmap != m_fully_observants.end(); ++it_obsmap) {
 		std::cout << " | " << grounder.deground_agent(it_obsmap->first) << " if ";
-		grounder.print_ff(it_obsmap->second);
+		printer::get_instance().print_list(it_obsmap->second);
 	}
 
 	std::cout << "\n	Partially Observant:";
 	for (it_obsmap = m_partially_observants.begin(); it_obsmap != m_partially_observants.end(); ++it_obsmap) {
 		std::cout << " | " << grounder.deground_agent(it_obsmap->first) << " if ";
-		grounder.print_ff(it_obsmap->second);
+		printer::get_instance().print_list(it_obsmap->second);
 	}
 	std::cout << std::endl;
 
@@ -220,7 +220,7 @@ void action::print(const grounder& grounder) const
 }
 //
 //  cout << "    Imposibility:\n";
-//  for (it1 = get_imposs()->begin(); 
+//  for (it1 = get_imposs()->begin();
 //       it1 != get_imposs()->end(); ++it1) {
 //    cout << "\t";
 //    m_planner->print(*it1);
@@ -228,14 +228,14 @@ void action::print(const grounder& grounder) const
 //  }
 //
 //  // print conditional effects
-//  cout << "    Conditional Effects\n";	
-//  for (it2 = get_effects()->begin(); 
+//  cout << "    Conditional Effects\n";
+//  for (it2 = get_effects()->begin();
 //       it2 != get_effects()->end(); ++it2) {
 //    cout << "\t";
 //    m_planner->print(*it2->get_head());
 //    cout << " <- ";
 //    m_planner->print(*it2->get_body());
-//    cout << endl;	  
+//    cout << endl;
 //  }
 //}
 

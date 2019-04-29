@@ -7,7 +7,7 @@
  * \date April 9, 2019
  */
 
-int count = 0;
+//int count = 0;
 
 #include "kstate.h"
 
@@ -131,10 +131,11 @@ bool kstate::get_B_reachable_worlds(agent ag, kworld_ptr world, kworld_ptr_set& 
 {
 	bool is_fixed_point = true;
 	kedge_ptr_set::const_iterator it_kedge;
+	//Implement == for world and kedges and change this
 	for (it_kedge = m_edges.begin(); it_kedge != m_edges.end(); it_kedge++) {
-		if (((*it_kedge).get_ptr()->get_from().get_ptr()->get_id() == world.get_ptr()->get_id()) && ((*it_kedge).get_ptr()->get_label() == ag)) {
+		if (((*it_kedge).get_from() == world) && ((*it_kedge).get_label() == ag)) {
 			//We use the pair of insert, if we add a new world (true in the set::insert) then is not a fixed point
-			if (std::get<1>(ret.insert((*it_kedge).get_ptr()->get_to()))) {
+			if (std::get<1>(ret.insert((*it_kedge).get_to()))) {
 				is_fixed_point = false;
 			}
 		}
@@ -199,19 +200,14 @@ void kstate::build_initial_structural(const initially & ini_conditions)
 
 void kstate::build_initial_prune(const initially & ini_conditions, int fluent_number, int agent_number)
 {
-	/*Building of all the possible consistent \ref kworld.*/
+	/*Building of all the possible consistent \ref kworld and setting the pointed world.
+	 */
 	//Creation of all the \ref fluent combinations. All the consistent ones are added to \ref kstore.
 	fluent_set permutation;
 	generate_initial_kworlds(fluent_number, permutation, 0, ini_conditions);
 
 	/*Building of all the consistent \ref kedge.*/
 	generate_initial_kedges(ini_conditions, agent_number);
-
-
-	/* Setting the pointed Kripke Structure
-	 * \todo if not all the fluent have been specified then return an error
-	 * (should be taken care of in \ref domain).
-	 */
 }
 
 /*From https://www.geeksforgeeks.org/generate-all-the-binary-strings-of-n-bits/ since is like generating all the binary number.*/
@@ -220,9 +216,6 @@ void kstate::generate_initial_kworlds(int fluent_number, fluent_set& permutation
 	if (index / 2 == fluent_number) {
 		kworld to_add(permutation);
 		add_initial_kworld(to_add, ini_conditions);
-		/*} catch (const std::invalid_argument& ia) {
-			std::cout << "\nNot consistent world";
-		}*/
 		return;
 	}
 	fluent_set permutation_2 = permutation;
@@ -248,22 +241,34 @@ void kstate::add_initial_kworld(const kworld & possible_add, const initially & i
 		//Already setted in \ref domain::build_initially(bool).
 		if (possible_add.entails(ini_conditions.get_ff_forS5())) {
 			add_world(possible_add);
+			if (possible_add.entails(ini_conditions.get_pointed_world_conditions())) {
+				m_pointed = kworld_ptr(possible_add);
+				/*std::cout << "pointed world: ";
+				printer::get_instance().print_list(possible_add.get_fluent_set());
+				std::cout << std::endl;*/
+			}
 		} else {
 			//Already generated so we save it on kstore
-			kstore::get_instance().add_world_no_ret(possible_add);
+			kstore::get_instance().add_world(possible_add);
 		}
 		break;
 	}
 	case K45:
 	{
+		std::cerr << "\nNot implemented yet\n";
+		exit(1);
 		break;
 	}
 	case NONE:
 	{
+		std::cerr << "\nNot implemented yet\n";
+		exit(1);
 		break;
 	}
 	default:
 	{
+		std::cerr << "\nNot implemented yet\n";
+		exit(1);
 		break;
 	}
 	}
@@ -279,31 +284,32 @@ void kstate::generate_initial_kedges(const initially & ini_conditions, int agent
 	for (it_kwps_1 = m_worlds.begin(); it_kwps_1 != m_worlds.end(); it_kwps_1++) {
 		for (it_kwps_2 = it_kwps_1; it_kwps_2 != m_worlds.end(); it_kwps_2++) {
 			for (int i = 0; i < agent_number; i++) {
-				/** \todo maybe don't loop twice on the world but exploit using it_kwps_2 = it_kwps_1:
-				 * - add (_1, _2).
-				 * - add (_2, _1).*/
 				kwptr_tmp1 = *it_kwps_1;
 				kwptr_tmp2 = *it_kwps_2;
 
 				add_edge(kedge(kwptr_tmp1, kwptr_tmp2, i));
 				add_edge(kedge(kwptr_tmp2, kwptr_tmp1, i));
-				/** \bug when the line is added problem with the pointers:
-				 * add_edge(kedge(*it_kwps_2, *it_kwps_1, i));*/
 
 			}
 		}
 	}
+
+	//std::cout << "Tot edges: " << m_edges.size() << std::endl;
+
 	formula_list::const_iterator it_fl;
 	for (it_fl = ini_conditions.get_initial_conditions().begin(); it_fl != ini_conditions.get_initial_conditions().end(); it_fl++) {
 		remove_initial_kedge_bf(*it_fl, ini_conditions.get_ini_restriction());
 	}
+	//	std::cout << "Removed edges: " << count << std::endl;
+
+	//std::cout << "Final edges: " << m_edges.size() << std::endl;
+
 }
 
 void kstate::remove_kedge(const kedge & to_remove)
 {
-	/** \bug when the line is added problem with the pointers:*/
-	if (m_edges.erase(kstore::get_instance().add_edge(to_remove)) > 0)
-		count++;
+	m_edges.erase(kstore::get_instance().add_edge(to_remove));
+	//if(above > 0)count++;
 }
 
 void kstate::remove_initial_kedge(const fluent_formula & known_ff, agent ag)
@@ -355,7 +361,7 @@ void kstate::remove_initial_kedge_bf(const belief_formula & to_check, domain_res
 					auto known_ff_ptr = std::make_shared<fluent_formula>();
 					formula_manipulation::check_Bff_Bnotff(*tmp.m_bf1, *tmp.m_bf2, known_ff_ptr);
 					if (known_ff_ptr != nullptr) {
-						//printer::print_list(*known_ff_ptr);
+						//printer::get_instance().print_list(*known_ff_ptr);
 						remove_initial_kedge(*known_ff_ptr, tmp.m_bf2->m_agent_op);
 					}
 					return;
@@ -396,14 +402,20 @@ void kstate::remove_initial_kedge_bf(const belief_formula & to_check, domain_res
 
 	case K45:
 	{
+		std::cerr << "\nNot implemented yet\n";
+		exit(1);
 		break;
 	}
 	case NONE:
 	{
+		std::cerr << "\nNot implemented yet\n";
+		exit(1);
 		break;
 	}
 	default:
 	{
+		std::cerr << "\nNot implemented yet\n";
+		exit(1);
 		break;
 	}
 	}

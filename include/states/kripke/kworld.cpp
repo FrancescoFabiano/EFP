@@ -32,6 +32,12 @@ kworld::kworld(const fluent_set & description)
 }
 //generate an unique id given the state information -> the literals
 
+kworld::kworld(const kworld & world)
+{
+	set_fluent_set(world.get_fluent_set());
+	set_id();
+}
+
 kworld_id kworld::hash_fluents_into_id(const fluent_set& fl)
 {
 	kworld_id ret;
@@ -135,18 +141,32 @@ bool kworld::entails(const fluent_formula & to_check) const
 	return false;
 }
 
-bool kworld::operator<(const kworld& world) const
+bool kworld::operator<(const kworld& to_compare) const
 {
-	if (m_id.compare(world.get_id()) < 0)
+	if (m_id.compare(to_compare.get_id()) < 0)
 		return true;
 	return false;
 }
 
-void kworld::print_info(const grounder& gr)
+bool kworld::operator==(const kworld& to_compare) const
+{
+	if (m_id.compare(to_compare.get_id()) == 0)
+		return true;
+	return false;
+}
+
+bool kworld::operator=(const kworld& to_assign)
+{
+	set_fluent_set(to_assign.get_fluent_set());
+	set_id();
+	return true;
+}
+
+void kworld::print_info()
 {
 	std::cout << "World id: " << get_id();
 	std::cout << "\nFluents: " << get_id();
-	gr.print_ff(m_fluent_set);
+	printer::get_instance().print_list(m_fluent_set);
 }
 
 /*-***************************************************************************************************************-*/
@@ -163,6 +183,11 @@ kworld_ptr::kworld_ptr(const std::shared_ptr<const kworld> & ptr)
 kworld_ptr::kworld_ptr(std::shared_ptr<const kworld>&& ptr)
 {
 	set_ptr(ptr);
+}
+
+kworld_ptr::kworld_ptr(const kworld & world)
+{
+	m_ptr = std::make_shared<kworld>(world);
 }
 
 void kworld_ptr::set_ptr(const std::shared_ptr<const kworld> & ptr)
@@ -184,6 +209,32 @@ bool kworld_ptr::operator=(const kworld_ptr & kptr)
 {
 	set_ptr(kptr.get_ptr());
 	return true;
+}
+
+const fluent_set & kworld_ptr::get_fluent_set() const
+{
+	if (m_ptr != nullptr) {
+		return get_ptr()->get_fluent_set();
+	}
+	std::cerr << "Error in creating a kworld_ptr\n";
+	exit(1);
+}
+
+kworld_id kworld_ptr::get_id() const
+{
+	if (m_ptr != nullptr) {
+		return get_ptr()->get_id();
+	}
+	std::cerr << "Error in creating a kworld_ptr\n";
+	exit(1);
+}
+
+bool kworld_ptr::operator==(const kworld_ptr & kptr) const
+{
+	if ((*m_ptr) == (*(kptr.get_ptr()))) {
+		return true;
+	}
+	return false;
 }
 
 bool kworld_ptr::operator<(const kworld_ptr & kptr) const

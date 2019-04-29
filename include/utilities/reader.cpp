@@ -1,7 +1,7 @@
 /*
- * \brief Implementation of \ref reader.h. 
- * 
- * 
+ * \brief Implementation of \ref reader.h.
+ *
+ *
  * \copyright GNU Public License.
  *
  * \author Francesco Fabiano.
@@ -62,19 +62,19 @@ int reader::read()
 void reader::print() const
 {
 
-	//Printing of all the agent with the \ref printer::print functions
+	//Printing of all the agent with the \ref kstore::get_instance().print functions
 	proposition_list::const_iterator it_porplist;
 	std::cout << std::endl << std::endl;
 	std::cout << "AGENT DECLARATION" << std::endl;
 	std::cout << "---------------------------" << std::endl;
-	printer::print_list(m_agents);
+	printer::get_instance().print_list(m_agents);
 	std::cout << std::endl << std::endl;
 
 
 	//Printing of all the fluents with the \ref printer functions
 	std::cout << "FLUENT DECLARATION" << std::endl;
 	std::cout << "----------------------------" << std::endl;
-	printer::print_list(m_fluents);
+	printer::get_instance().print_list(m_fluents);
 	std::cout << std::endl << std::endl;
 
 	//Printing of all the proposition with the \ref proposition functions
@@ -119,7 +119,7 @@ void reader::print() const
 	//std::cout << "Unknown fluents: " << std::endl;
 	unsigned int i = 0;
 	string_set_set::const_iterator it_fll;
-	
+
 	for (it_fll = m_initially.begin(); it_fll != m_initially.end(); it_fll++) {
 		std::cout << "\tState " << i++ << ": ";
 		std::cout << m_fluents.size() - (*it_fll).size();
