@@ -12,7 +12,7 @@
 
 initially::initially()
 {
-	m_ini_restriction = FAIL;
+	m_ini_restriction = RESTRICTION_FAIL;
 }
 
 initially::initially(domain_restriction ini_restriction)
@@ -38,14 +38,14 @@ bool initially::check_restriction(const belief_formula & bf) //Apply the restric
 		 * - C(-B(i,*phi*) \ref BF_AND -B(i,-*phi*)) -> only edges conditions.*/
 	case S5:
 	{
-		switch ( bf.m_formula_type ) {
+		switch ( bf.get_formula_type() ) {
 			//To admit initially [S5_ok AND S5_ok AND ...]  (Also taken care of in the add_initial_condition)
 		case PROPOSITIONAL_FORMULA:
 		{
-			if (bf.m_operator != BF_AND) {
+			if (bf.get_operator() != BF_AND) {
 				ret = false;
 			} else {
-				ret = check_restriction(*bf.m_bf1) && check_restriction(*bf.m_bf2);
+				ret = check_restriction(bf.get_bf1()) && check_restriction(bf.get_bf2());
 			}
 			break;
 		}
@@ -61,8 +61,8 @@ bool initially::check_restriction(const belief_formula & bf) //Apply the restric
 		case C_FORMULA:
 		{
 			//C(B(i, *phi*))
-			belief_formula tmp = *bf.m_bf1;
-			switch ( tmp.m_formula_type ) {
+			belief_formula tmp = bf.get_bf1();
+			switch ( tmp.get_formula_type() ) {
 
 				//C(*phi*)
 			case FLUENT_FORMULA:
@@ -73,7 +73,7 @@ bool initially::check_restriction(const belief_formula & bf) //Apply the restric
 				//C(B(i,*phi*)
 			case BELIEF_FORMULA:
 			{
-				if (tmp.m_bf1->m_formula_type == FLUENT_FORMULA) {
+				if (tmp.get_bf1().get_formula_type() == FLUENT_FORMULA) {
 					ret = true;
 				} else {
 					ret = false;
@@ -84,19 +84,19 @@ bool initially::check_restriction(const belief_formula & bf) //Apply the restric
 			{
 				//C(B(i,*phi*) \ref BF_OR B(i,-*phi*))
 				//Check if C ( x1 **OR** x2 )
-				if (tmp.m_operator == BF_OR) {
+				if (tmp.get_operator() == BF_OR) {
 
 					//Check if **x1** and **x2** are B(i,phi) and B(i,-phi)
-					ret = formula_manipulation::check_Bff_Bnotff(*tmp.m_bf1, *tmp.m_bf2, nullptr);
-				} else if (tmp.m_operator == BF_AND) { //C(-B(i,*phi*) \ref BF_AND -B(i,-*phi*))
+					ret = formula_manipulation::check_Bff_Bnotff(tmp.get_bf1(), tmp.get_bf2(), nullptr);
+				} else if (tmp.get_operator() == BF_AND) { //C(-B(i,*phi*) \ref BF_AND -B(i,-*phi*))
 					//Check if C ( x1 **AND** x2 )
 					//Check if **x1** and **x2** are **NOT**(...)
-					belief_formula tmp_nested1 = *tmp.m_bf1;
-					belief_formula tmp_nested2 = *tmp.m_bf2;
-					if (tmp_nested1.m_formula_type == PROPOSITIONAL_FORMULA && tmp_nested2.m_formula_type == PROPOSITIONAL_FORMULA) {
-						if (tmp_nested1.m_operator == BF_NOT && tmp_nested2.m_operator == BF_NOT) {
+					belief_formula tmp_nested1 = tmp.get_bf1();
+					belief_formula tmp_nested2 = tmp.get_bf2();
+					if (tmp_nested1.get_formula_type() == PROPOSITIONAL_FORMULA && tmp_nested2.get_formula_type() == PROPOSITIONAL_FORMULA) {
+						if (tmp_nested1.get_operator() == BF_NOT && tmp_nested2.get_operator() == BF_NOT) {
 							//Check tmp_nested1 and tmp_nested2 are B(i,phi) and B(i,-phi)
-							ret = formula_manipulation::check_Bff_Bnotff(*tmp_nested1.m_bf1, *tmp_nested2.m_bf1, nullptr);
+							ret = formula_manipulation::check_Bff_Bnotff(tmp_nested1.get_bf1(), tmp_nested2.get_bf1(), nullptr);
 						}
 					}
 				} else {
@@ -154,11 +154,10 @@ void initially::add_pointed_condition(const fluent_formula & ff)
 
 void initially::add_initial_condition(const belief_formula & bf)
 {
-
 	//Normalize the and and keep only bf_1, bf_2 and not (bf_1 AND bf_2)
-	if (bf.m_formula_type == PROPOSITIONAL_FORMULA && bf.m_operator == BF_AND) {
-		add_initial_condition(*bf.m_bf1);
-		add_initial_condition(*bf.m_bf2);
+	if (bf.get_formula_type() == PROPOSITIONAL_FORMULA && bf.get_operator() == BF_AND) {
+		add_initial_condition(bf.get_bf1());
+		add_initial_condition(bf.get_bf2());
 	} else if (check_restriction(bf)) {
 		m_bf_intial_conditions.push_back(bf);
 	} else {
@@ -190,29 +189,29 @@ void initially::set_ff_forS5()
 		fluent_formula ret;
 		formula_list::const_iterator it_fl;
 		for (it_fl = m_bf_intial_conditions.begin(); it_fl != m_bf_intial_conditions.end(); it_fl++) {
-			switch ( (*it_fl).m_formula_type ) {
+			switch ( (*it_fl).get_formula_type() ) {
 				//*phi*
 			case FLUENT_FORMULA:
 			{
-				ret = formula_manipulation::and_ff(ret, (*it_fl).m_fluent_formula);
+				ret = formula_manipulation::and_ff(ret, (*it_fl).get_fluent_formula());
 				break;
 			}
 				//C(...)
 			case C_FORMULA:
 			{
-				belief_formula tmp = *((*it_fl).m_bf1);
-				switch ( tmp.m_formula_type ) {
+				belief_formula tmp = (*it_fl).get_bf1();
+				switch ( tmp.get_formula_type() ) {
 					//C(*phi*)
 				case FLUENT_FORMULA:
 				{
-					ret = formula_manipulation::and_ff(ret, tmp.m_fluent_formula);
+					ret = formula_manipulation::and_ff(ret, tmp.get_fluent_formula());
 					break;
 				}
 					//C(B(i,*phi*))
 				case BELIEF_FORMULA:
 				{
-					if (tmp.m_bf1->m_formula_type == FLUENT_FORMULA) {
-						ret = formula_manipulation::and_ff(ret, tmp.m_bf1->m_fluent_formula);
+					if (tmp.get_bf1().get_formula_type() == FLUENT_FORMULA) {
+						ret = formula_manipulation::and_ff(ret, tmp.get_bf1().get_fluent_formula());
 					} else {
 						std::cerr << "\nError in the type of initial formulae (FIRST).\n";
 						exit(1);

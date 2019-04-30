@@ -59,14 +59,14 @@ bool kstate::entails(const belief_formula & bf, const kworld_ptr_set & reachable
 bool kstate::entails(const belief_formula & bf, kworld_ptr world) const
 {
 	/*
-	 The entailment of a \ref beleif_formula just call recursively the entailment on all the reachable world with that formula.
+	 The entailment of a \ref belief_formula just call recursively the entailment on all the reachable world with that formula.
 	 */
-	switch ( bf.m_formula_type ) {
+	switch ( bf.get_formula_type() ) {
 	case FLUENT_FORMULA:
 		/** \todo Make sure its grounded. Maybe add to \ref belief_formula a bool that store if grounded or not or maybe ground
 		 * when \ref domain created.
 		 * @see belief_formula::ground(const grounder &).*/
-		return entails(bf.m_fluent_formula, world);
+		return entails(bf.get_fluent_formula(), world);
 		break;
 
 	case BELIEF_FORMULA:
@@ -77,22 +77,22 @@ bool kstate::entails(const belief_formula & bf, kworld_ptr world) const
 		 * \todo what was the at_lest_one of the previous version?
 		 *
 		 * \todo self-loop?*/
-		return entails(*(bf.m_bf1), get_B_reachable_worlds(bf.m_agent_op, world));
+		return entails(bf.get_bf1(), get_B_reachable_worlds(bf.get_agent(), world));
 		break;
 
 	case PROPOSITIONAL_FORMULA:
-		switch ( bf.m_operator ) {
+		switch ( bf.get_operator() ) {
 		case BF_NOT:
-			return !entails(*(bf.m_bf1), world);
+			return !entails(bf.get_bf1(), world);
 			break;
 		case BF_OR:
-			return entails(*(bf.m_bf1), world) || entails(*(bf.m_bf2), world);
+			return entails(bf.get_bf1(), world) || entails(bf.get_bf2(), world);
 			break;
 		case BF_AND:
-			return entails(*(bf.m_bf1), world) && entails(*(bf.m_bf2), world);
+			return entails(bf.get_bf1(), world) && entails(bf.get_bf2(), world);
 			break;
-		case BF_NONE:
-			return entails(*(bf.m_bf1), world);
+		case BF_FAIL:
+			return entails(bf.get_bf1(), world);
 			break;
 		default:
 			std::cerr << "Something went wrong in checking entailment for Propositional formula";
@@ -102,18 +102,15 @@ bool kstate::entails(const belief_formula & bf, kworld_ptr world) const
 
 	case E_FORMULA:
 		//Check the entails on the E-reachable worlds
-		return entails(*(bf.m_bf1), get_E_reachable_worlds(bf.m_group_agents, world));
+		return entails(bf.get_bf1(), get_E_reachable_worlds(bf.get_group_agents(), world));
 		break;
 
 		//Check the entails on the C-reachable worlds
 	case C_FORMULA:
-		return entails(*(bf.m_bf1), get_C_reachable_worlds(bf.m_group_agents, world));
+		return entails(bf.get_bf1(), get_C_reachable_worlds(bf.get_group_agents(), world));
 		break;
 
-	case EMPTY:
-		return true;
-		break;
-
+	case BF_TYPE_FAIL:
 	default:
 		std::cerr << "Something went wrong in checking entailment for Belief formula";
 		exit(1);
@@ -185,9 +182,7 @@ void kstate::add_edge(const kedge & edge)
 
 void kstate::build_initial(const initially & initials_conditions, int fluent_number, int agent_number)
 {
-	/**\todo yet to implement.
-	 * \todo for now prune building.
-	 */
+	/** \todo for now prune building.*/
 	std::cout << "\nBuilding initial Kripke structure...\n";
 	build_initial_prune(initials_conditions, fluent_number, agent_number);
 
@@ -201,8 +196,7 @@ void kstate::build_initial_structural(const initially & ini_conditions)
 void kstate::build_initial_prune(const initially & ini_conditions, int fluent_number, int agent_number)
 {
 	/*Building of all the possible consistent \ref kworld and setting the pointed world.
-	 */
-	//Creation of all the \ref fluent combinations. All the consistent ones are added to \ref kstore.
+	 * Creation of all the \ref fluent combinations. All the consistent ones are added to \ref kstore.*/
 	fluent_set permutation;
 	generate_initial_kworlds(fluent_number, permutation, 0, ini_conditions);
 
@@ -210,7 +204,7 @@ void kstate::build_initial_prune(const initially & ini_conditions, int fluent_nu
 	generate_initial_kedges(ini_conditions, agent_number);
 }
 
-/*From https://www.geeksforgeeks.org/generate-all-the-binary-strings-of-n-bits/ since is like generating all the binary number.*/
+/*From https://www.geeksforgeeks.org/generate-all-the-binary-strings-of-n-bits/ since is like generating all the binary numbers.*/
 void kstate::generate_initial_kworlds(int fluent_number, fluent_set& permutation, int index, const initially & ini_conditions)
 {
 	if (index / 2 == fluent_number) {
@@ -226,8 +220,6 @@ void kstate::generate_initial_kworlds(int fluent_number, fluent_set& permutation
 	//Add the \ref fluent in negative version
 	permutation_2.insert(index + 1);
 	generate_initial_kworlds(fluent_number, permutation_2, index + 2, ini_conditions);
-
-
 }
 
 void kstate::add_initial_kworld(const kworld & possible_add, const initially & ini_conditions)
@@ -300,7 +292,7 @@ void kstate::generate_initial_kedges(const initially & ini_conditions, int agent
 	for (it_fl = ini_conditions.get_initial_conditions().begin(); it_fl != ini_conditions.get_initial_conditions().end(); it_fl++) {
 		remove_initial_kedge_bf(*it_fl, ini_conditions.get_ini_restriction());
 	}
-	//	std::cout << "Removed edges: " << count << std::endl;
+	//std::cout << "Removed edges: " << count << std::endl;
 
 	//std::cout << "Final edges: " << m_edges.size() << std::endl;
 
@@ -309,7 +301,7 @@ void kstate::generate_initial_kedges(const initially & ini_conditions, int agent
 void kstate::remove_kedge(const kedge & to_remove)
 {
 	m_edges.erase(kstore::get_instance().add_edge(to_remove));
-	//if(above > 0)count++;
+	//if(m_edges.erase(kstore::get_instance().add_edge(to_remove)) > 0)count++;
 }
 
 void kstate::remove_initial_kedge(const fluent_formula & known_ff, agent ag)
@@ -345,28 +337,28 @@ void kstate::remove_initial_kedge_bf(const belief_formula & to_check, domain_res
 	case S5:
 	{
 		/* Just check whenever is B(--) \/ B(--) and remove that edge*/
-		if (to_check.m_formula_type == C_FORMULA) {
+		if (to_check.get_formula_type() == C_FORMULA) {
 
-			belief_formula tmp = *to_check.m_bf1;
+			belief_formula tmp = to_check.get_bf1();
 
-			switch ( tmp.m_formula_type ) {
+			switch ( tmp.get_formula_type() ) {
 
 				//Only one for edges -- expresses that someone is ignorant.
 			case PROPOSITIONAL_FORMULA:
 			{
 				//We remove all the check on the formula since they have already been controlled when ini_conditions has been created
-				if (tmp.m_operator == BF_OR) {
+				if (tmp.get_operator() == BF_OR) {
 
 					//fluent_formula known_ff;
 					auto known_ff_ptr = std::make_shared<fluent_formula>();
-					formula_manipulation::check_Bff_Bnotff(*tmp.m_bf1, *tmp.m_bf2, known_ff_ptr);
+					formula_manipulation::check_Bff_Bnotff(tmp.get_bf1(), tmp.get_bf2(), known_ff_ptr);
 					if (known_ff_ptr != nullptr) {
 						//printer::get_instance().print_list(*known_ff_ptr);
-						remove_initial_kedge(*known_ff_ptr, tmp.m_bf2->m_agent_op);
+						remove_initial_kedge(*known_ff_ptr, tmp.get_bf2().get_agent());
 					}
 					return;
 
-				} else if (tmp.m_operator == BF_AND) {
+				} else if (tmp.get_operator() == BF_AND) {
 					//This case doesn't add knowledge.
 					return;
 

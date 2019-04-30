@@ -2281,7 +2281,7 @@ get_negation(const std::string* s)
 
 /*
 string_set_set get_negateFluentForm(string_set_set input){
-  
+
   string_set_set separate;
   string_set_set join;
   string_set_set::iterator it1;
@@ -2304,7 +2304,7 @@ string_set_set get_negateFluentForm(string_set_set input){
 	tiep.insert(temp);
 	negation.insert(tiep);
      }//for loop
-  
+
 
   //Join elements in join with all elements in separate
   for(it3 = negation.begin(); it3 != negation.end(); it3++)
@@ -2316,12 +2316,12 @@ string_set_set get_negateFluentForm(string_set_set input){
 	   tiep.insert(temp);
 	   negation.insert(tiep);
 	}
-  
+
   return negation;
 }
  */
 
-//negate_or: input: String list = list of or. 
+//negate_or: input: String list = list of or.
 //             output: Stringlist 2 = list of and of negation
 
 string_set_set

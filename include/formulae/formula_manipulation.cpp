@@ -90,14 +90,14 @@ bool formula_manipulation::check_Bff_Bnotff(const belief_formula& to_check_1, co
 	 * \todo we assume that the fluent_formula has just one element (the fluent).
 	 */
 
-	if (to_check_1.m_formula_type == BELIEF_FORMULA && to_check_2.m_formula_type == BELIEF_FORMULA) {
-		belief_formula to_check_nested_1 = *to_check_1.m_bf1;
-		belief_formula to_check_nested_2 = *to_check_2.m_bf1;
-		if (to_check_nested_1.m_formula_type == FLUENT_FORMULA && to_check_nested_2.m_formula_type == FLUENT_FORMULA) {
+	if (to_check_1.get_formula_type() == BELIEF_FORMULA && to_check_2.get_formula_type() == BELIEF_FORMULA) {
+		belief_formula to_check_nested_1 = to_check_1.get_bf1();
+		belief_formula to_check_nested_2 = to_check_2.get_bf1();
+		if (to_check_nested_1.get_formula_type() == FLUENT_FORMULA && to_check_nested_2.get_formula_type() == FLUENT_FORMULA) {
 
-			fluent_set tmp = *((to_check_nested_1.m_fluent_formula).begin());
+			fluent_set tmp = *((to_check_nested_1.get_fluent_formula()).begin());
 			fluent f_to_check_1 = *(tmp.begin());
-			tmp = *((to_check_nested_2.m_fluent_formula).begin());
+			tmp = *((to_check_nested_2.get_fluent_formula()).begin());
 			fluent f_to_check_2 = *(tmp.begin());
 			if (f_to_check_1 == negate_fluent(f_to_check_2)) {
 

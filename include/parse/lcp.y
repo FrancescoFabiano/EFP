@@ -362,10 +362,10 @@ IF literal_list {
 
 /* if part for belief_formula */
 if_part_bf:
-/* empty */
+/* fail */
 {
   $$ = new belief_formula;
-  $$->m_formula_type = EMPTY;
+  $$->set_formula_type(BF_TYPE_FAIL);
 }
 |
 IF belief_formula {
@@ -377,59 +377,59 @@ IF belief_formula {
 belief_formula:
 formula{  
     $$ = new belief_formula;
-    $$->m_formula_type = FLUENT_FORMULA;
-    $$->m_string_fluent_formula = *$1;
+    $$->set_formula_type(FLUENT_FORMULA);
+    $$->set_string_fluent_formula(*$1);
 }
 |
 B LEFT_PAREN agent COMMA belief_formula RIGHT_PAREN {
    $$ = new belief_formula;
-   $$->m_formula_type = BELIEF_FORMULA;
-   $$->m_string_agent_op = *$3;
-   $$->m_bf1 = std::shared_ptr<belief_formula>($5);
+   $$->set_formula_type(BELIEF_FORMULA);
+   $$->set_string_agent(*$3);
+   $$->set_bf1(*$5);
 }
 |
 belief_formula COMMA belief_formula {
    $$ = new belief_formula;
-   $$->m_formula_type = PROPOSITIONAL_FORMULA;
-   $$->m_bf1 = std::shared_ptr<belief_formula>($1);
-   $$->m_bf2 = std::shared_ptr<belief_formula>($3);
-   $$->m_operator = BF_AND;
+   $$->set_formula_type(PROPOSITIONAL_FORMULA);
+   $$->set_operator(BF_AND);
+   $$->set_bf1(*$1);
+   $$->set_bf2(*$3);
 }
 |
 belief_formula OR belief_formula {
    $$ = new belief_formula;
-   $$->m_formula_type = PROPOSITIONAL_FORMULA;
-   $$->m_bf1 = std::shared_ptr<belief_formula>($1);
-   $$->m_bf2 = std::shared_ptr<belief_formula>($3);
-   $$->m_operator = BF_OR;
+   $$->set_formula_type(PROPOSITIONAL_FORMULA);
+   $$->set_operator(BF_OR);
+   $$->set_bf1(*$1);
+   $$->set_bf2(*$3);
 }
 |
 LEFT_PAREN NEGATION belief_formula RIGHT_PAREN{
    $$ = new belief_formula;
-   $$->m_formula_type = PROPOSITIONAL_FORMULA;
-   $$->m_bf1 = std::shared_ptr<belief_formula>($3);
-   $$->m_operator = BF_NOT;
+   $$->set_formula_type(PROPOSITIONAL_FORMULA);
+   $$->set_operator(BF_NOT);
+   $$->set_bf1(*$3);
 }
 |
 LEFT_PAREN belief_formula RIGHT_PAREN{
     $$ = new belief_formula;
-    $$->m_formula_type = PROPOSITIONAL_FORMULA;
-    $$->m_bf1 = std::shared_ptr<belief_formula>($2);
-    $$->m_operator = BF_NONE;
+    $$->set_formula_type(PROPOSITIONAL_FORMULA);
+    $$->set_operator(BF_FAIL);
+    $$->set_bf1(*$2);
 }
 |
 E LEFT_PAREN LEFT_BRAC agent_list RIGHT_BRAC COMMA belief_formula RIGHT_PAREN {
    $$ = new belief_formula;
-   $$->m_formula_type = E_FORMULA;
-   $$->m_string_group_agents = *$4;
-   $$->m_bf1 = std::shared_ptr<belief_formula>($7);
+   $$->set_formula_type(E_FORMULA);
+   $$->set_string_group_agents(*$4);
+   $$->set_bf1(*$7);
 }
 |
 C LEFT_PAREN LEFT_BRAC agent_list RIGHT_BRAC COMMA belief_formula RIGHT_PAREN {
    $$ = new belief_formula;
-   $$->m_formula_type = C_FORMULA;
-   $$->m_string_group_agents = *$4;
-   $$->m_bf1 = std::shared_ptr<belief_formula>($7);
+   $$->set_formula_type(C_FORMULA);
+   $$->set_string_group_agents(*$4);
+   $$->set_bf1(*$7);
 };
 
 

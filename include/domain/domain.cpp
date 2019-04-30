@@ -19,7 +19,6 @@ domain::domain(std::shared_ptr<reader> reader, state_type state_repr, domain_res
 
 bool domain::build(bool debug)
 {
-
 	build_agents(debug);
 	build_fluents(debug);
 	build_actions(debug);
@@ -159,54 +158,30 @@ void domain::build_initially(bool debug)
 
 		it_fl->ground(m_grounder);
 
-		switch ( it_fl->m_formula_type ) //initially phi
+		switch ( it_fl->get_formula_type() ) //initially phi
 		{
 			//S5 -> pointed world
-		case(FLUENT_FORMULA):
-			m_intial_description.add_pointed_condition(it_fl->m_fluent_formula);
+		case FLUENT_FORMULA:
+		{
+			m_intial_description.add_pointed_condition(it_fl->get_fluent_formula());
+
 			if (debug) {
 				std::cout << "	Pointed world: ";
-				printer::get_instance().print_list(it_fl->m_string_fluent_formula);
+				printer::get_instance().print_list(it_fl->get_fluent_formula());
 				std::cout << std::endl;
 			}
 
 			break;
-
+		}
 			//S5 -> Edge
-		case(C_FORMULA):
-
-			m_intial_description.add_initial_condition(*it_fl);
-			if (debug) {
-				std::cout << "	Initial conditions: ";
-				it_fl->print();
-				std::cout << std::endl;
-			}
-			break;
-
+		case C_FORMULA:
 			//Possible S5 -> initally [C(phi2), C(phi2)]
-		case(PROPOSITIONAL_FORMULA):
-
-			m_intial_description.add_initial_condition(*it_fl);
-			if (debug) {
-				std::cout << "Added to initial conditions: ";
-				it_fl->print();
-				std::cout << std::endl;
-			}
-			break;
-
+		case PROPOSITIONAL_FORMULA:
 			//No more S5
-		case(BELIEF_FORMULA):
-
-			m_intial_description.add_initial_condition(*it_fl);
-			if (debug) {
-				std::cout << "Added to initial conditions: ";
-				it_fl->print();
-				std::cout << std::endl;
-			}
-			break;
-
+		case BELIEF_FORMULA:
 			//No more S5
-		case(E_FORMULA):
+		case E_FORMULA:
+		{
 			m_intial_description.add_initial_condition(*it_fl);
 			if (debug) {
 				std::cout << "Added to initial conditions: ";
@@ -214,14 +189,13 @@ void domain::build_initially(bool debug)
 				std::cout << std::endl;
 			}
 			break;
-
+		}
 		default:
 			std::cerr << "Error in the 'initially' conditions." << std::endl;
 			exit(1);
 			break;
 		}
 	}
-
 
 
 	//Given the initial restriction the initial state might needs different function
@@ -244,6 +218,7 @@ void domain::build_initially(bool debug)
 		break;
 	}
 	}
+
 }
 
 void domain::build_goal(bool debug)
@@ -277,7 +252,7 @@ bool domain::check_goal_restriction(const belief_formula& bf)//Apply the restric
 	switch ( m_goal_restriction ) {
 		//We only admit C(belief)
 	case NONEG:
-		switch ( bf.m_formula_type ) {
+		switch ( bf.get_formula_type() ) {
 		case FLUENT_FORMULA:
 			ret = true;
 			break;
@@ -285,16 +260,16 @@ bool domain::check_goal_restriction(const belief_formula& bf)//Apply the restric
 			ret = true;
 			break;
 		case C_FORMULA:
-			ret = check_goal_restriction(*bf.m_bf1);
+			ret = check_goal_restriction(bf.get_bf1());
 			break;
 		case E_FORMULA:
-			ret = check_goal_restriction(*bf.m_bf1);
+			ret = check_goal_restriction(bf.get_bf1());
 			break;
 		case PROPOSITIONAL_FORMULA:
-			if (bf.m_operator == BF_NOT) {
+			if (bf.get_operator() == BF_NOT) {
 				ret = false;
 			} else {
-				ret = check_goal_restriction(*bf.m_bf1) && check_goal_restriction(*bf.m_bf2);
+				ret = check_goal_restriction(bf.get_bf1()) && check_goal_restriction(bf.get_bf2());
 			}
 			break;
 		default:

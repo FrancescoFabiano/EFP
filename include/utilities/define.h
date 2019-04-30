@@ -127,7 +127,7 @@ enum domain_restriction
             * This is used when the planning graph heuristic is involved
             * because it cannot deal with negative \ref belief_formula
             * in the goal (no mutex yet).*/
-    FAIL, /**< \brief The default case to guarantee consistency.*/
+    RESTRICTION_FAIL, /**< \brief The default case to guarantee consistency.*/
 };
 
 

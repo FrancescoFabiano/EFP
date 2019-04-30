@@ -26,64 +26,39 @@
 #include "../formulae/proposition.h"
 
 class reader
-{
+{    
 public:
-    /**
-     * \brief Name of all the fluents (only positive) in the domain.
-     */
+    /** \brief Name of all the fluents (only positive) in the domain.*/
     string_set m_fluents;
-    /**
-     * \brief Name of all the actions in the domain.
-     */
+    /** \brief Name of all the actions in the domain.*/
     string_set m_actions;
-    /**
-     * \brief String description of all the agents in the domain.
-     */
+    /** \brief String description of all the agents in the domain.*/
     string_set m_agents;
 
-    /**
-     * \brief String description of all the initial conditions (initially in the domain).
-     */
+    /** \brief String description of all the initial conditions (initially in the domain).*/
     string_set_set m_initially;
 
-    /**
-     * \brief String description of all the goal conditions.
-     */
+    /** \brief String description of all the goal conditions.*/
     string_set m_goal;
 
-    /**
-     * \brief \ref m_initially conditions described as \ref belief_formula (yet to ground).
-     */
+    /** \brief \ref m_initially conditions described as \ref belief_formula (yet to ground).*/
     formula_list m_bf_initially;
 
-    /**
-     * \brief \ref m_goal conditions described as \ref belief_formula (yet to ground).
-     */
+    /** \brief \ref m_goal conditions described as \ref belief_formula (yet to ground).*/
     formula_list m_bf_goal;
 
-    /**
-     * \brief String description of propositions, each one of these specifies an action conditions.
-     */
+    /** \brief String description of propositions, each one of these specifies an action conditions (yet to ground).*/
     proposition_list m_propositions;
 
 
-    /**
-     * \brief Function that reads the info from the domain file.
+    /** \brief Function that reads the info from the domain file.
      * 
      * Function called to parse the file containing the domain
      * and store the information into the fields of the \ref reader class. 
-     * @return The same int value returned from the parsing process.
-     */
+     * @return The same int value returned from the parsing process.*/
     int read();
 
 
-    /**
-     * \brief Function used to print all the information stored inside the reader object.
-     */
+    /** \brief Function used to print all the information stored inside the reader object.*/
     void print() const;
-
-
-    //std::string name(fluent x);
-    //@TODO: Check if is the best type of parameters pass.
-    //string_set name(const fluent_set&);
 };

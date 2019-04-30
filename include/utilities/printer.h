@@ -1,5 +1,5 @@
 /**
- * \brief ingleton class used to facilitate the printing.
+ * \brief Singleton class used to facilitate the printing.
  *
  * \details   Class used to print \ref string_set and \ref string_set_set.
  *            Only std::string are printed because are more informative than their grounded counterpart,

@@ -12,7 +12,7 @@
  * 
  * @see reader, domain
  * 
- * \todo Change all the public fields into private and implement getters and setters.
+ * \todo Maybe implement the "move" so the reader actually move the object instead of copying them.
  *
  * \copyright GNU Public License.
  * 
@@ -29,11 +29,7 @@
 
 #include "../domain/grounder.h"
 
-/** 
- * \brief The possible types of \ref belief_formula.
- *
- * \todo remove \ref EMPTY and set faiulure.
- */
+/** \brief The possible types of \ref belief_formula.*/
 enum bf_type
 {
     FLUENT_FORMULA, /**< \brief A \ref belief_formula is also a \ref fluent_formula.
@@ -53,122 +49,222 @@ enum bf_type
     C_FORMULA, /**< \brief A \ref belief_formula of the form C([set of \ref agent], *phi*).
                      * 
                      *  This represent the Common Knowledge of a set of \ref agent of a \ref belief_formula *phi*.*/
-    EMPTY /**< \brief The default case.
-                     * 
-                     *  * \todo to remove and set faiulure.*/
+    BF_TYPE_FAIL /**< \brief The failure case.*/
 };
 
-/** 
- * \brief The logical operator for \ref belief_formula(e).
+/** \brief The logical operator for \ref belief_formula(e).
  *
- * These are used in the case that the \ref bf_type of a \ref belief_formula is \ref PROPOSITIONAL_FORMULA.
- */
+ * These are used in the case that the \ref bf_type of a \ref belief_formula is \ref PROPOSITIONAL_FORMULA.*/
 enum bf_operator
 {
     BF_AND, /**< \brief The AND between \ref belief_formula(e).*/
     BF_OR, /**< \brief The OR between \ref belief_formula(e).*/
     BF_NOT, /**< \brief The NOT of a \ref belief_formula.*/
-    BF_NONE /**< \brief When the \ref belief_formula is not \ref PROPOSITIONAL_FORMULA.*/
+    BF_FAIL /**< \brief When the \ref belief_formula is not set PROPERLY (shouldn't be accessed if not \ref PROPOSITIONAL_FORMULA).*/
 };
 
 class belief_formula
 {
-public:
-    /**\brief The \ref bf_type of *this*.*/
-    bf_type m_formula_type; //Which case of belief formula this is
-
-    /**\brief If *this* is a \ref FLUENT_FORMULA in this field is contained the actual \ref fluent_formula.*/
-    fluent_formula m_fluent_formula;
-    /**
-     * \brief If *this* is a \ref FLUENT_FORMULA in this field is contained the string description of the actual \ref fluent_formula.
-     *
-     * \todo remove and ground at its creation.*/
+private:
+    
+    /**A boolean value that tells if *this* has been grounded*/
+    bool m_is_grounded = false;
+    
+    /*-******STRING FIELDs (private GETTER (for the grounding) and SETTER public for the reading)*************-*/
+    /** \brief If *this* is a \ref FLUENT_FORMULA in this field is contained the 
+     * string description of the actual \ref fluent_formula.*/
     string_set_set m_string_fluent_formula;
 
-    /**
-     * \brief If *this* is a \ref BELIEF_FORMULA in this field is contained the \ref agent of the formula.
-     *
-     * Given the \ref belief_formula B(**ag**, *phi*) this field contains **ag**.
-     */
-    agent m_agent_op;
-    /**
-     * \brief If *this* is a \ref BELIEF_FORMULA in this field is contained the string description of the \ref agent of the formula.
-     *
-     * \todo remove and ground at its creation.*/
-    std::string m_string_agent_op;
+    /** \brief If *this* is a \ref BELIEF_FORMULA in this field is contained the
+     *  string description of the \ref agent of the formula.*/
+    std::string m_string_agent;
 
-    /**
-     * \brief In this field is contained the first nested \ref belief_formula of *this*.
+    /** \brief If this is a \ref E_FORMULA or a \ref C_FORMULA here is contained the
+     *  string description of the relative set of \ref agent.*/
+    string_set m_string_group_agents;
+
+    /** \brief Getter of the field \ref m_string_fluent_formula.
+     * 
+     * Only used inside *this* for the grounding process, so it's private.
+     * 
+     * @return the value of \ref m_string_fluent_formula.*/
+    const string_set_set & get_string_fluent_formula() const;
+    /** \brief Getter of the field \ref m_string_agent.
+     * 
+     * Only used inside *this* for the grounding process, so it's private.
+     * 
+     * @return the value of \ref m_string_agent.*/
+    const std::string & get_string_agent() const;
+    /** \brief Getter of the field \ref m_string_group_agents.
+     * 
+     * Only used inside *this* for the grounding process, so it's private.
+     * 
+     * @return the value of \ref m_string_group_agents.*/
+    const string_set & get_string_group_agents() const;
+
+    /*-******GROUNDED FIELDs (private SETTER (for the grounding/reading part) and GETTER public)*************-*/
+    /**\brief The \ref bf_type of *this*.*/
+    bf_type m_formula_type;// = BF_TYPE_FAIL; //Which case of belief formula this is
+    /**\brief If *this* is a \ref FLUENT_FORMULA in this field is contained the actual \ref fluent_formula.*/
+    fluent_formula m_fluent_formula;
+    /** \brief If *this* is a \ref BELIEF_FORMULA in this field is contained the \ref agent of the formula.
+     *
+     * Given the \ref belief_formula B(**ag**, *phi*) this field contains **ag**.*/
+    agent m_agent;
+    /** \brief In this field is contained the operator if *this* is \ref PROPOSITIONAL_FORMULA.
+     *
+     * - Given the \ref PROPOSITIONAL_FORMULA *phi_1* **op** *phi_2* \ref m_operator contains **op**.*/
+    bf_operator m_operator;
+    /** \brief If this is a \ref E_FORMULA or a \ref C_FORMULA here is contained the relative set of \ref agent.
+     *
+     * - If *this* is \ref E_FORMULA, i.e., E(**ags**, *phi*), \ref m_group_agents contains **ags**;
+     * - if *this* is \ref C_FORMULA, i.e., C(**ags**, *phi*), \ref m_group_agents contains **ags**.*/
+    agent_set m_group_agents;
+
+    /** \brief Setter for the field \ref m_fluent_formula.
+     *
+     * @param[in] to_set: the \ref fluent_formula object to copy in \ref m_fluent_formula.*/
+    void set_fluent_formula(const fluent_formula& to_set);
+    /** \brief Setter for the field \ref m_agent.
+     *
+     * @param[in] to_set: the \ref agent object to copy in \ref m_agent.*/
+    void set_agent(agent to_set);
+    /** \brief Setter for the field \ref m_group_agents.
+     *
+     * @param[in] to_set: the \ref agent_set object to copy in \ref m_group_agents.*/
+    void set_group_agents(const agent_set& to_set);
+
+
+    /*-******RECOURSIVE FIELDs (private SETTER (for the reading part) and GETTER public)*************-*/
+    /** \brief In this field is contained the first nested \ref belief_formula of *this*.
      *
      * - If *this* is \ref BELIEF_FORMULA, i.e., B(ag, *phi*), \ref m_bf1 contains *phi*;
      * - if *this* is \ref PROPOSITIONAL_FORMULA, i.e. *phi_1* **op** *phi_2*, \ref m_bf1 contains *phi_1*;
      * - if *this* is \ref E_FORMULA, i.e., E(ags, *phi*), \ref m_bf1 contains *phi*;
      * - if *this* is \ref C_FORMULA, i.e., C(ags, *phi*), \ref m_bf1 contains *phi*;
-     * - null_ptr otherwise.
-     */
+     * - null_ptr otherwise.*/
     std::shared_ptr<belief_formula> m_bf1;
-    /**
-     * \brief In this field is contained the second nested \ref belief_formula of *this*.
+    /** \brief In this field is contained the second nested \ref belief_formula of *this*.
      *
      * - If *this* is \ref PROPOSITIONAL_FORMULA, i.e. *phi_1* **op** *phi_2*, \ref m_bf2 contains *phi_2*;
-     * - null_ptr otherwise.
-     */
+     * - null_ptr otherwise.*/
     std::shared_ptr<belief_formula> m_bf2;
-    /**
-     * \brief In this field is contained the operator if *this* is \ref PROPOSITIONAL_FORMULA.
-     *
-     * - Given the \ref PROPOSITIONAL_FORMULA *phi_1* **op** *phi_2* \ref m_operator contains **op**.
-     */
-    bf_operator m_operator;
 
-    /**
-     * \brief If this is a \ref E_FORMULA or a \ref C_FORMULA here is contained the relative set of \ref agent.
-     *
-     * - If *this* is \ref E_FORMULA, i.e., E(**ags**, *phi*), \ref m_group_agents contains **ags**;
-     * - if *this* is \ref C_FORMULA, i.e., C(**ags**, *phi*), \ref m_group_agents contains **ags**.
-     */
-    agent_set m_group_agents;
-    /**
-     * \brief If this is a \ref E_FORMULA or a \ref C_FORMULA here is contained the string description of the relative set of \ref agent.
-     *
-     * \todo remove and ground at its creation.*/
-    string_set m_string_group_agents;
 
-    /**
-     * \brief Setter for the field \ref m_fluent_formula.
-     *
-     * @param[in] to_set: the \ref fluent_formula object to copy in \ref m_fluent_formula.
-     *
-     * \todo Check if is the best type of parameters passing.
-     */
-    void set_flu(const fluent_formula& to_set);
 
-    //belief_formula();
-    //belief_formula(const belief_formula&);
-    //belief_formula(belief_formula*);
+public:
 
-    /**
-     * \brief Function that print *this* (std::string parameters representation).
+    /**Empty Constructor*/
+    belief_formula();
+
+    /**Copy Constructor
+     *
+     * @param[in] to_copy: the \ref belief_formula to copy in *this*.*/
+    belief_formula(const belief_formula & to_copy);
+    
+    /** \brief Getter for the field \ref m_is_grounded.
+     *
+     * @return true: if *this* has been already grounded
+     * @return false: otherwise.*/
+    bool get_is_grounded() const;
+
+
+    /** \brief Setter of the field \ref m_string_fluent_formula.
+     * 
+     * public so the \ref reader can access and modify the string
+     * fields of *this*. We don't have public getters because we want to able to retrieve only the grounded values.
+     * 
+     * @param[in] to_set: the \ref string_set_set to set as *this* \ref fluent_formula in string description.*/
+    void set_string_fluent_formula(const string_set_set & to_set);
+
+    /** \brief Setter of the field \ref m_string_agent.
+     * 
+     * public so the \ref reader can access and modify the string
+     * fields of *this*. We don't have public getters because we want to able to retrieve only the grounded values.
+     * 
+     * @param[in] to_set: the string to set as *this* \ref agent in string description.*/
+    void set_string_agent(std::string to_set);
+
+    /** \brief Setter of the field \ref m_string_group_agents.
+     * 
+     * public so the \ref reader can access and modify the string
+     * fields of *this*. We don't have public getters because we want to able to retrieve only the grounded values.
+     * 
+     * @param[in] to_set: the \ref string_set to set as *this* \ref agent_set in string description.*/
+    void set_string_group_agents(const string_set & to_set);
+
+
+    /** \brief Setter of the field \ref m_bf1.
+     * 
+     * This setter takes a \ref belief_formula and set \ref m_bf1 to be its pointer.
+     * 
+     * @param[in] to_set: the \ref belief_formula to be pointed by \ref m_bf1.*/
+    void set_bf1(const belief_formula & to_set);
+
+    /** \brief Setter of the field \ref m_bf2.
+     * 
+     * This setter takes a \ref belief_formula and set \ref m_bf2 to be its pointer.
+     * 
+     * @param[in] to_set: the \ref belief_formula to be pointed by \ref m_bf2.*/
+    void set_bf2(const belief_formula & to_set);
+
+
+    /** \brief Setter for the field \ref m_formula_type.
+     *
+     * @param[in] to_set: the \ref bf_type object to copy in \ref m_formula_type.*/
+    void set_formula_type(bf_type to_set);
+    /** \brief Setter for the field \ref m_operator.
+     *
+     * @param[in] to_set: the \ref bf_operator object to copy in \ref m_operator.*/
+    void set_operator(bf_operator to_set);
+
+
+    /** \brief Getter for the field \ref m_formula_type.
+     *
+     * @return the value of the field \ref m_formula_type.*/
+    bf_type get_formula_type() const;
+    /** \brief Getter for the field \ref m_fluent_formula.
+     *
+     * @return the value of the field \ref m_fluent_formula.*/
+    const fluent_formula& get_fluent_formula() const;
+    /** \brief Getter for the field \ref m_agent.
+     *
+     * @return the value of the field \ref m_agent.*/
+    agent get_agent() const;
+    /** \brief Getter of the \ref belief_formula pointed by \ref m_bf1.
+     *
+     * @return the \ref belief_formula pointed by \ref m_bf1.*/
+    const belief_formula & get_bf1() const;
+    /** \brief Getter of the \ref belief_formula pointed by \ref m_bf2.
+     *
+     * @return the \ref belief_formula pointed by \ref m_bf2.*/
+    const belief_formula & get_bf2() const;
+    /** \brief Getter for the field \ref m_operator.
+     *
+     * @return the value of the field \ref m_operator.*/
+    bf_operator get_operator() const;
+    /** \brief Getter for the field \ref m_group_agents.
+     *
+     * @return the value of the field \ref m_group_agents.*/
+    const agent_set& get_group_agents() const;
+
+    /** \brief Function that print *this* (std::string parameters representation).
      *
      * \todo Since the string parameter should be removed print thanks to a \ref grounder.*/
     void print() const;
 
-    /**
-     * \brief Function that print *this* where *this* is grounded.
+    /* \brief Function that print *this* where *this* is grounded.
      *
      * @param[in] gr: the \ref grounder obj used to ground the fields of *this*.
      * 
      * \todo Make sure it's grounded at construction and remove the parameter.
-     */
-    void print_grounded(const grounder& gr) const;
+    void print_grounded(const grounder& gr) const;*/
 
-    /**  
-     * \brief Function that grounds the fields of *this*.
+    /** \brief Function that grounds the fields of *this*.
      * 
      * @param[in] gr: the \ref grounder obj used to ground the fields of *this*.
      * 
-     * \todo Call on costruction from outside, maybe a static function in \ref grounder.
-     */
+     * \todo Call on costruction from outside, maybe a static function in \ref grounder.*/
     void ground(const grounder & gr);
 
     /** \brief The equal operator for\ref belief_formula.
@@ -178,7 +274,13 @@ public:
      * @return true: if the given \ref belief_formula is syntacticly equal to *this*.
      * @return false: otherwise.*/
     bool operator==(const belief_formula& to_compare) const;
-
+    
+    /** \brief The = operator.
+     *   
+     * @param [in] to_copy: the \ref belief_formula to assign to *this*.
+     * @return true: if \p the assignment went ok.
+     * @return false: otherwise.*/
+    bool operator=(const belief_formula& to_copy);
 };
 
 typedef std::list<belief_formula> formula_list; /**< \brief A CNF formula of \ref belief_formula.
