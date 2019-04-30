@@ -11,9 +11,10 @@
 #include <set>
 #include <vector>
 
+#include "proposition.h"
+
 #include "../utilities/define.h"
 #include "../formulae/belief_formula.h"
-#include "../formulae/proposition.h"
 #include "../domain/grounder.h"
 
 class action
@@ -45,9 +46,9 @@ private:
 
     /**\brief The effects of *this* with the respective conditions.
      *
-     * If \ref DYNAMIC then <\ref fluent_formula,  \ref belief_formula>
-     * If \ref DETERMINATION then <\ref fluent, \ref belief_formula>
-     * If \ref ANNOUNCEMENT then <\ref fluent (lieteral), \ref belief_formula>.*/
+     * If \ref ONTIC then <\ref fluent_set (deterministic not or),  \ref belief_formula>
+     * If \ref SENSING then <\ref fluent, \ref belief_formula>
+     * If \ref ANNOUNCEMENT then <\ref fluent (literal), \ref belief_formula>.*/
     effects_map m_effects;
 
 

@@ -175,6 +175,17 @@ void kstate::add_world(const kworld & world)
 	m_worlds.insert(kstore::get_instance().add_world(world));
 }
 
+void kstate::add_copy_world(const kworld & world, unsigned short repetition)
+{
+	kworld_ptr tmp = kstore::get_instance().add_world(world);
+	tmp.set_repetition(repetition);
+
+	if (!(std::get<1>(m_worlds.insert(tmp)))) {
+		///arg = 0 in kworld constructor by default but when put to x it set the extra id to x
+		add_copy_world(world, repetition + 1);
+	}
+}
+
 void kstate::add_edge(const kedge & edge)
 {
 	m_edges.insert(kstore::get_instance().add_edge(edge));
@@ -413,8 +424,155 @@ void kstate::remove_initial_kedge_bf(const belief_formula & to_check, domain_res
 	}
 }
 
-bool kstate::is_executable(const action & act)const
+/** \warning executability should be check in \ref state (or \ref planner).*/
+const kstate& kstate::compute_succ(const action & act) const
 {
-	/** \todo yet to implement.*/
-	return false;
+
+
+	switch ( act.get_type() ) {
+	case ONTIC:
+	{
+		break;
+	}
+	case SENSING:
+	{
+		break;
+	}
+	case ANNOUNCEMENT:
+	{
+		break;
+	}
+	default:
+	{
+		std::cerr << "Error in executing an action: ";
+		std::cerr << " the type of the action is not defined correctly";
+		std::cerr << std::endl;
+		exit(1);
+		break;
+	}
+	}
+}
+
+const kstate& kstate::execute_ontic(const action & act) const
+{
+
+	kstate ret;
+
+	effects_map::const_iterator it_efmap;
+	effects_map effects = act.get_effects();
+
+	for (it_efmap = effects.begin(); it_efmap != effects.end(); it_efmap++) {
+		//If the condition of the action is entailed by this then execute this effect
+		if (entails(it_efmap->second)) {
+			kworld_ptr_set::const_iterator it_kwptr;
+
+			//Worlds computation, just apply the effect to the already existing world and then add them.
+			for (it_kwptr = m_worlds.begin(); it_kwptr != m_worlds.end(); it_kwptr++) {
+				ret.add_world(kworld(formula_manipulation::ontic_exec(it_efmap->first, it_kwptr->get_fluent_set())));
+			}
+		}
+	}
+	/** \bug Add a function add_oblivious_world that copies the already existing world increasing their counter
+	 * in kstore. It creates a new one only if already exist the same world in *this*. Also put an end into the kworld_id so it keeps the lexicographical order. Create two ids and an extra
+	 *field unique-id (integer) that allow to distinguish between different copies of the same world.
+	 *Move all this to the ptr and make the get id from kworld only accessible to the pointer (friend) and store repetition inside the pointer.
+	 */
+
+
+	/*int oldpId = k.get_id();
+
+	if (!is_executable(k, a)) {
+		return NULL;
+	}
+
+	//cout << "begin computing fd, pd, od" << endl;
+	AgentSet fd = get_fd(a, k);
+	AgentSet pd = get_pd(a, k);
+	AgentSet od = get_od(a, k);
+
+	Kripke* m = new Kripke(&k);
+
+	//compute Res(a,M,s)
+	Kripke res;
+
+	//compute Res(a,M,s)[S] and Res(a,M,s)[pi]
+	States resS;
+
+	States sl = m->get_stateslist();
+	States::iterator it;
+	//cout << "begin computing Res(a,M,s)[S] and Res(a,M,s)[pi]" << endl;
+	set<int> inRes;
+	Literals lits = compute_effect(&a, &k);
+	//int tiep = 0;
+	//int exe = 0;
+	for (it = sl.begin(); it != sl.end(); it++) {
+		//cout << "states " << tiep++ << endl;
+		Kstate u = *it;
+		k.set_pId(u.get_id());
+		if (is_executable(k, a)) //if a is executable in (k,u)
+		{
+			//cout << "state exe " << exe++ << endl;
+			Kstate* ns = comp_nextstate(u, lits);
+			resS.push_back(*ns);
+			inRes.insert(ns->get_id());
+		}
+	}
+	res.set_stateslist(resS);
+	//compute Res(a,M,s)[i]
+	Edges resI;
+
+	//cout << "begin computing compute Res(a,M,s)[i]" << endl;
+
+	Edges eds = m->get_edgeslist();
+	Edges::iterator it1;
+	for (it1 = eds.begin(); it1 != eds.end(); it1++) {
+		if (fd.find(it1->get_label()) == fd.end()) //label not in Fd(a,M,s)
+		{
+			continue;
+		}
+		Kedge temp = *it1;
+		Kedge* e = new Kedge(&temp);
+		int from = e->get_from();
+		int to = e->get_to();
+		if (inRes.find(from) != inRes.end() && inRes.find(to) != inRes.end()) {
+			resI.push_back(*e);
+		}
+	}
+	res.set_edgeslist(resI);
+	res.set_pId(oldpId);
+
+	//cout << "begin computing compute final Kripke" << endl;
+	map<int, int>* savedResS = new map<int, int>;
+	merge_kripkes(m, &res, savedResS);
+	Edges edgek = k.get_edgeslist();
+	int start = m->get_edgeslist().size();
+	for (it1 = edgek.begin(); it1 != edgek.end(); it1++) {
+		int idek = it1->get_label();
+
+		if (od.find(idek) == od.end()) {
+			//cout << "id edege " << idek << endl;
+			continue;
+		}
+		Kedge* newEd = new Kedge();
+
+		if (savedResS->find(it1->get_from()) == savedResS->end()) {
+			continue;
+		}
+		int fromnew = savedResS->find(it1->get_from())->second;
+		newEd->set_from(fromnew);
+		int tonew = it1->get_to();
+		newEd->set_to(tonew);
+		newEd->set_id(start);
+		newEd->set_label(it1->get_label());
+
+		m->add_edge2state(fromnew, start, true);
+		m->add_edge2state(tonew, start, false);
+		m->add_to_edges_list(*newEd);
+
+		start = start + 1;
+	}
+	//Literals changed =
+	//cout << "begin computing update_kripke" << endl;
+	Kripke* m1 = update_kripke(*m);
+	return m1;*/
 }

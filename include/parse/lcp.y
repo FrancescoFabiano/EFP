@@ -465,7 +465,7 @@ dynamic_law:
 action CAUSES literal_list if_part_bf SEMICOLON 
 {  
   $$ = new proposition;
-  $$->m_type = DYNAMIC;
+  $$->m_type = ONTIC;
   $$->m_action_name = *$1;
   $$->m_executability_conditions = *$4;
   //@TODO:Effect_Conversion | previously   $$->m_action_effect = *$3;
@@ -487,7 +487,7 @@ determine:
 action DETERMINE fluent_det_list SEMICOLON
 {
   $$ = new proposition;
-  $$->m_type = DETERMINATION;
+  $$->m_type = SENSING;
   $$->m_action_name = *$1;
   //@TODO:Effect_Conversion | previously   $$->m_action_effect = *$3;
   $$->m_action_effect.insert(*$3); 

@@ -35,6 +35,8 @@ bool formula_manipulation::is_consistent(const fluent_set &fl1, const fluent_set
 
 fluent_set formula_manipulation::and_ff(const fluent_set& fl1, const fluent_set& fl2)
 {
+	///\todo The return should be const fluent_set & for efficency? Or move?
+
 	fluent_set ret;
 	if (!fl1.empty() && !fl2.empty()) {
 
@@ -56,6 +58,8 @@ fluent_set formula_manipulation::and_ff(const fluent_set& fl1, const fluent_set&
 
 fluent_formula formula_manipulation::and_ff(const fluent_formula& ff1, const fluent_formula& ff2)
 {
+	///\todo The return should be const fluent_formula & for efficency? Or move?
+
 	fluent_formula::iterator it_ff1;
 	fluent_formula::iterator it_ff2;
 	fluent_formula ret;
@@ -110,6 +114,33 @@ bool formula_manipulation::check_Bff_Bnotff(const belief_formula& to_check_1, co
 	}
 	return false;
 }
+
+fluent_set formula_manipulation::ontic_exec(const fluent_set& effect, const fluent_set& world_description)
+{ ///\todo The return should be const fluent_set & for efficency? Or move?
+	fluent_set ret = world_description;
+	fluent_set::const_iterator it_fs;
+	for (it_fs = effect.begin(); it_fs != effect.end(); it_fs++) {
+		ret.erase(negate_fluent(*it_fs));
+		ret.insert(*it_fs);
+	}
+	return ret;
+}
+
+fluent_set formula_manipulation::ontic_exec(const fluent_formula& effect, const fluent_set& world_description)
+{ ///\todo The return should be const fluent_set & for efficency? Or move?
+	if (effect.size() != 1) {
+		return ontic_exec(*(effect.begin()), world_description);
+
+	} else {
+		if (effect.size() > 1) {
+			std::cerr << "\nNon determinism in action effect is not supported.\n";
+			exit(1);
+		}
+		std::cerr << "\nEmpty action effect.\n";
+		exit(1);
+	}
+}
+
 
 /* Using the std::set == operator
 static bool formula_manipulation::is_the_same_ff(const fluent_set& to_check_1, const fluent_set& to_check_2)

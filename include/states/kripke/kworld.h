@@ -23,33 +23,25 @@
 
 class kworld
 {
+    friend class kworld_ptr;
+
 private:
-    /**
-     * \brief The set of  \ref fluent that describes how these are interpreted in *this*.
-     */
+    /** \brief The set of  \ref fluent that describes how these are interpreted in *this*.*/
     fluent_set m_fluent_set;
-    /**
-     * \brief The unique id of *this* computed with \ref hash_fluents_into_id().
-     */
+    /** \brief The unique id of *this* computed with \ref hash_fluents_into_id().*/
     kworld_id m_id;
 
-    /**
-     * \brief Function used to hash the the info of an edge in a unique id.
-     *
-     *
-     *
+    /** \brief Function used to hash the the info of an edge in a unique id.
+     * 
      * @param[in] description: the interpretation of the \ref fluent in the world.
      * @return the unique id of the world.
      * 
-     * @warning Useless if not moved to \ref kstore.
-     */
+     * @warning Useless if not moved to \ref kstore.*/
     kworld_id hash_fluents_into_id(const fluent_set& description);
 
-    /**
-     * \brief Function used to hash the the info of *this* in a unique id.
+    /** \brief Function used to hash the the info of *this* in a unique id.
      *
-     * @return the unique id of *this*.
-     */
+     * @return the unique id of *this*. */
     kworld_id hash_fluents_into_id();
 
     /** \brief Setter for the field \ref m_fluent_set.
@@ -77,10 +69,23 @@ private:
     /** \brief Function that uses the info of *this* to set its \ref m_id.*/
     void set_id();
 
+
+    /** \brief Getter of \ref m_fluent_set.
+     * 
+     * Only accessible by the \ref kworld_ptr.
+     *     
+     * @return the \ref kworld_ptr to the world where *this* is from.*/
+    const fluent_set & get_fluent_set() const;
+
+    /** \brief Getter of \ref m_id.
+     *     
+     * Only accessible by the \ref kworld_ptr.
+     * 
+     * @return the int that is the unique id of *this*.*/
+    kworld_id get_id() const;
+
 public:
-    /**
-     * \brief Empty constructor, call the default constructor of all the fields.
-     */
+    /** \brief Empty constructor, call the default constructor of all the fields.*/
     kworld();
 
     /** \brief Constructor with parameters.
@@ -89,28 +94,15 @@ public:
      * 
      * @param[in] description: the set of \ref fluent to set as \ref m_fluent_set.
      * 
-     * \todo is the parameter passing the best one? Copy?
-     */
+     * \todo is the parameter passing the best one? Copy?*/
     kworld(const fluent_set & description);
 
     /** \brief Copy constructor.
      * 
-     * @param[in] world: the \ref kworld to copy into *this**/
+     * @param[in] world: the \ref kworld to copy into *this*.*/
     kworld(const kworld & world);
 
-    /**
-     *\brief Getter of \ref m_fluent_set.
-     *     
-     * @return the \ref kworld_ptr to the world where *this* is from.*/
-    const fluent_set & get_fluent_set() const;
-    /**
-     *\brief Getter of \ref m_id.
-     *     
-     * @return the int that is the unique id of *this*.*/
-    kworld_id get_id() const;
-
-    /**
-     *\brief Function that check the entailment of a single \ref fluent in *this*.
+    /** \brief Function that check the entailment of a single \ref fluent in *this*.
      * 
      * A single \ref fluent is entailed if is present in *this*. Given that the each kworld
      * should only admit consistent set of \ref fluent if the \ref fluent itself is presented in *this*.
@@ -121,8 +113,7 @@ public:
      * @return false: \p -to_check is entailed.
      * 
      * \todo To implement also whit \ref kworld_ptr to the \ref kworld?
-     * \todo check consistency on constructor?
-     */
+     * \todo check consistency on constructor?*/
     bool entails(fluent to_check) const;
     /**
      *\brief Function that check the entailment of a conjunctive set of \ref fluent in *this*.
@@ -198,6 +189,9 @@ private:
     /**\brief the pointer that is wrapped by *this*.*/
     std::shared_ptr<const kworld> m_ptr;
 
+    /** \brief The number of repetition of *this* in a \ref kstate due to oblivious obsv.*/
+    unsigned short m_repetition = 0;
+
 public:
     /**\brief Constructor without parameters.*/
     kworld_ptr();
@@ -206,22 +200,27 @@ public:
      * This constructor uses const pointer, this means that the pointer is copied
      * and the counter of the shared pointer is increased (std implementation).
      * 
-     * @param[in] ptr: the pointer to assign to \ref m_ptr.*/
-    kworld_ptr(const std::shared_ptr<const kworld> & ptr);
+     * @param[in] ptr: the pointer to assign to \ref m_ptr.
+     * @param[in] repetition: the value to give to \ref m_repetition, default to 0.
+     */
+    kworld_ptr(const std::shared_ptr<const kworld> & ptr, unsigned short repetition = 0);
     /**\brief Constructor with parameters.
      *
      * This constructor uses non-const pointer, this means that the pointer is copied
      * in \ref m_ptr and \p ptr becomes empty (std implementation).
      *  
-     * @param[in] ptr: the pointer to assign to \ref m_ptr.*/
-    kworld_ptr(std::shared_ptr<const kworld>&& ptr);
+     * @param[in] ptr: the pointer to assign to \ref m_ptr.
+     * @param[in] repetition: the value to give to \ref m_repetition, default to 0.
+     */
+    kworld_ptr(std::shared_ptr<const kworld>&& ptr, unsigned short repetition = 0);
 
     /** \brief Constructor with parameters.
      *
      * This constructor build a pointer to the given parameter.
      *  
-     * @param[in] world: the \ref kworld that *this* (\ref m_ptr) should point.*/
-    kworld_ptr(const kworld & world);
+     * @param[in] world: the \ref kworld that *this* (\ref m_ptr) should point.
+     * @param[in] repetition: the value to give to \ref m_repetition, default to 0.*/
+    kworld_ptr(const kworld & world, unsigned short repetition = 0);
 
     /**\brief Getter for the field \ref m_ptr.
      *  
@@ -243,13 +242,23 @@ public:
      * @param[in] ptr: the pointer to assign to \ref m_ptr.*/
     void set_ptr(std::shared_ptr<const kworld>&& ptr);
 
+    /** \brief Setter for the field \ref m_repetition.
+     * 
+     * @param[in] repetition: the value to give to \ref m_repetition.*/
+    void set_repetition(unsigned short repetition);
+
+    /** \brief Getter of the field \ref m_repetition.
+     * 
+     * @return the value to of \ref m_repetition.*/
+    unsigned short get_repetition() const;
+
     /** \brief Function that return the field m_fluent_set of the pointed \ref kworld.
      *     
      * @return the \ref fluent_set that is the description of the \ref kworld pointed by \ref m_ptr.*/
     const fluent_set & get_fluent_set() const;
-    /** \brief Function that return the field m_id of the pointed \ref kworld.
+    /** \brief Function that return the field m_id of the pointed \ref kworld + \ref m_repetition.
      *     
-     * @return the \ref kworld_id that is the id of the \ref kworld pointed by \ref m_ptr.*/
+     * @return the \ref kworld_id that is the id of the \ref kworld pointed by \ref m_ptr + \ref m_repetition.*/
     kworld_id get_id() const;
 
     /**\brief The operator =.

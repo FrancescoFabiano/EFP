@@ -12,7 +12,7 @@
 template <class T>
 state<T>::state()
 {
-	T representation;
+	//T representation;
 }
 
 template <class T>
@@ -121,7 +121,17 @@ void state<T>::build_initial(const initially & init, int fluent_number, int agen
 }
 
 template <class T>
-T state<T>::compute_succ(const action & act)
+T state<T>::compute_succ(const action & act) const
 {
-	return representation.compute_succ(act);
+	/**\todo Myabe is better if used in \ref planner or \ref domain (myabe a bool as **param[out]**.*/
+	if (is_executable(act)) {
+		return representation.compute_succ(act);
+	} else
+		return nullptr;
+}
+
+template <class T>
+bool state<T>::is_executable(const action & act) const
+{
+	return entails(act.get_executability());
 }

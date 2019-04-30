@@ -71,28 +71,28 @@ $(BUILD_DIR)/main.o:	$(SRC_DIR)/main.cpp \
 $(BUILD_DIR)/printer.o: $(UTILITIES_DIR)/printer.cpp $(UTILITIES_DIR)/printer.h \
 						$(UTILITIES_DIR)/define.h \
 						$(DOMAIN_DIR)/grounder.h
-
 		$(dir_guard)
 		$(CC) $(CFLAGS) -c $(UTILITIES_DIR)/printer.cpp -o $(BUILD_DIR)/printer.o
 		
 $(BUILD_DIR)/reader.o: $(UTILITIES_DIR)/reader.cpp $(UTILITIES_DIR)/reader.h \
 					   $(FORMULA_DIR)/belief_formula.h \
-					   $(UTILITIES_DIR)/define.h $(UTILITIES_DIR)/printer.h
+					   $(UTILITIES_DIR)/define.h $(UTILITIES_DIR)/printer.h \
+					   $(ACTION_DIR)/proposition.h
 		$(dir_guard)
 		$(CC) $(CFLAGS) -c $(UTILITIES_DIR)/reader.cpp -o $(BUILD_DIR)/reader.o
 
 ####FORMULAE
 $(BUILD_DIR)/formula_manipulation.o: $(FORMULA_DIR)/formula_manipulation.cpp $(FORMULA_DIR)/formula_manipulation.h \
-										 $(FORMULA_DIR)/belief_formula.h \
-										 $(UTILITIES_DIR)/define.h $(UTILITIES_DIR)/printer.h
+									 $(FORMULA_DIR)/belief_formula.h \
+									 $(UTILITIES_DIR)/define.h $(UTILITIES_DIR)/printer.h
 		$(dir_guard)
 		$(CC) $(CFLAGS) -c $(FORMULA_DIR)/formula_manipulation.cpp -o $(BUILD_DIR)/formula_manipulation.o
 
-$(BUILD_DIR)/proposition.o: $(FORMULA_DIR)/proposition.cpp $(FORMULA_DIR)/proposition.h \
+$(BUILD_DIR)/proposition.o: $(ACTION_DIR)/proposition.cpp $(ACTION_DIR)/proposition.h \
 							$(FORMULA_DIR)/belief_formula.h \
 							$(UTILITIES_DIR)/define.h $(UTILITIES_DIR)/printer.h
 		$(dir_guard)
-		$(CC) $(CFLAGS) -c $(FORMULA_DIR)/proposition.cpp -o $(BUILD_DIR)/proposition.o
+		$(CC) $(CFLAGS) -c $(ACTION_DIR)/proposition.cpp -o $(BUILD_DIR)/proposition.o
 			
 $(BUILD_DIR)/belief_formula.o: $(FORMULA_DIR)/belief_formula.cpp $(FORMULA_DIR)/belief_formula.h \
 								   $(DOMAIN_DIR)/grounder.h \
@@ -103,7 +103,8 @@ $(BUILD_DIR)/belief_formula.o: $(FORMULA_DIR)/belief_formula.cpp $(FORMULA_DIR)/
 ####ACTIONS
 $(BUILD_DIR)/action.o: $(ACTION_DIR)/action.cpp $(ACTION_DIR)/action.h \
 					   $(DOMAIN_DIR)/grounder.h \
-					   $(FORMULA_DIR)/proposition.h $(FORMULA_DIR)/belief_formula.h \
+					   $(ACTION_DIR)/proposition.h \
+					   $(FORMULA_DIR)/belief_formula.h \
 					   $(UTILITIES_DIR)/define.h
 		$(dir_guard)
 		$(CC) $(CFLAGS) -c $(ACTION_DIR)/action.cpp -o $(BUILD_DIR)/action.o

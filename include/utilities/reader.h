@@ -23,7 +23,7 @@
 
 #include "define.h"
 #include "../formulae/belief_formula.h"
-#include "../formulae/proposition.h"
+#include "../actions/proposition.h"
 
 class reader
 {    

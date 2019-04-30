@@ -1807,7 +1807,7 @@ yyreduce:
 #line 459 "lcp.y" /* yacc.c:1646  */
 	{
 		(yyval.prop) = new proposition;
-		(yyval.prop)->m_type = DYNAMIC;
+		(yyval.prop)->m_type = ONTIC;
 		(yyval.prop)->m_action_name = *(yyvsp[-4].str_val);
 		(yyval.prop)->m_executability_conditions = *(yyvsp[-1].bf);
 		(yyval.prop)->m_action_m_action_effect = *(yyvsp[-2].str_list);
@@ -1830,7 +1830,7 @@ yyreduce:
 #line 480 "lcp.y" /* yacc.c:1646  */
 	{
 		(yyval.prop) = new proposition;
-		(yyval.prop)->m_type = DETERMINATION;
+		(yyval.prop)->m_type = SENSING;
 		(yyval.prop)->m_action_name = *(yyvsp[-3].str_val);
 		(yyval.prop)->m_action_m_action_effect = *(yyvsp[-1].str_list);
 	}

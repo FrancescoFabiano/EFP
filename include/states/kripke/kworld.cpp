@@ -46,7 +46,7 @@ kworld_id kworld::hash_fluents_into_id(const fluent_set& fl)
 		ret.append(std::to_string(*it_fl) + "-");
 	}
 	//Remove last "-" that is useless
-	ret.pop_back();
+	//ret.pop_back();
 	return ret;
 }
 
@@ -175,19 +175,24 @@ kworld_ptr::kworld_ptr()
 {
 }
 
-kworld_ptr::kworld_ptr(const std::shared_ptr<const kworld> & ptr)
+kworld_ptr::kworld_ptr(const std::shared_ptr<const kworld> & ptr, unsigned short repetition)
 {
 	set_ptr(ptr);
+	set_repetition(repetition);
 }
 
-kworld_ptr::kworld_ptr(std::shared_ptr<const kworld>&& ptr)
+kworld_ptr::kworld_ptr(std::shared_ptr<const kworld>&& ptr, unsigned short repetition)
 {
 	set_ptr(ptr);
+	set_repetition(repetition);
+
 }
 
-kworld_ptr::kworld_ptr(const kworld & world)
+kworld_ptr::kworld_ptr(const kworld & world, unsigned short repetition)
 {
 	m_ptr = std::make_shared<kworld>(world);
+	set_repetition(repetition);
+
 }
 
 void kworld_ptr::set_ptr(const std::shared_ptr<const kworld> & ptr)
@@ -208,6 +213,7 @@ std::shared_ptr<const kworld> kworld_ptr::get_ptr() const
 bool kworld_ptr::operator=(const kworld_ptr & kptr)
 {
 	set_ptr(kptr.get_ptr());
+	set_repetition(kptr.get_repetition());
 	return true;
 }
 
@@ -223,10 +229,21 @@ const fluent_set & kworld_ptr::get_fluent_set() const
 kworld_id kworld_ptr::get_id() const
 {
 	if (m_ptr != nullptr) {
-		return get_ptr()->get_id();
+		return(get_ptr()->get_id()).append(std::to_string(get_repetition()));
 	}
 	std::cerr << "Error in creating a kworld_ptr\n";
 	exit(1);
+}
+
+void kworld_ptr::set_repetition(unsigned short repetition)
+{
+	m_repetition = repetition;
+}
+
+unsigned short kworld_ptr::get_repetition() const
+{
+	return m_repetition;
+
 }
 
 bool kworld_ptr::operator==(const kworld_ptr & kptr) const

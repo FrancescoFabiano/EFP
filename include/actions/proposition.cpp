@@ -24,13 +24,13 @@ void proposition::print() const
 {
 
 	switch ( m_type ) {
-	case DYNAMIC:
+	case ONTIC:
 		std::cout << m_action_name << " causes ";
 		break;
 	case EXECUTABILITY:
 		std::cout << m_action_name << " executable ";
 		break;
-	case DETERMINATION:
+	case SENSING:
 		std::cout << m_action_name << " determines ";
 		break;
 	case ANNOUNCEMENT:
@@ -90,7 +90,7 @@ void proposition::print() const
 	//
 	//	std::cout << "\n Executability conditions:\n";
 	//	//@TODO: why this or?
-	//	if (m_executability_conditions.m_bf1 != nullptr || m_type == DYNAMIC) {
+	//	if (m_executability_conditions.m_bf1 != nullptr || m_type == ONTIC) {
 	//		std::cout << " if ";
 	//		m_executability_conditions.print();
 	//	}

@@ -35,6 +35,17 @@ private:
      * @return the negation of \p to_negate.*/
     static fluent negate_fluent(const fluent to_negate);
 
+     /** \brief Function to merge the results of an \ref ONTIC \ref action with a world description.
+     *   
+     * @param[in] effect: part of the effect of an \ref ONTIC \ref action in CNF form.
+     * @param[in] world_description: the \ref fluent_set contained inside a single world.
+     * 
+     * @return the description of the world after \p effect has been applied to \p world_description.*/
+    static fluent_set ontic_exec(const fluent_set& effect, const fluent_set& world_description);
+    
+    
+    
+    
     /* Set has == operator
      * \brief Function that checks if two \ref fluent_set are the same.
      * 
@@ -67,8 +78,8 @@ public:
 
     /** \brief Function that merges two \ref fluent_formula into one.
      * 
-     * @param[in]  to_merge_1: the first \ref fluent_formula to merge.
-     * @param[in]  to_merge_2: the second \ref fluent_formula to merge.
+     * @param[in] to_merge_1: the first \ref fluent_formula to merge.
+     * @param[in] to_merge_2: the second \ref fluent_formula to merge.
      * 
      * @return the union of all the \ref fluent_set in \p to_merge_1\2 if is consistent (exit otherwise).*/
     static fluent_formula and_ff(const fluent_formula& to_merge_1, const fluent_formula& to_merge_2);
@@ -78,13 +89,24 @@ public:
      * This function is useful to identify when an agent \p i knows the true value of *phi*. 
      * Is one of the accepted formulae in \ref S5.
      * 
-     * @param[in]  to_check_1: the first \ref belief_formula to check.
-     * @param[in]  to_check_2: the second \ref belief_formula to check.
+     * @param[in] to_check_1: the first \ref belief_formula to check.
+     * @param[in] to_check_2: the second \ref belief_formula to check.
      * @param[out] ret: the \ref fluent_formula containing *phi*.
      * 
      * @return true: if the two \ref belief_formula contain \ref fluent_formula that are the negation of each other.
      * @return false: otherwise.*/
     static bool check_Bff_Bnotff(const belief_formula& to_check_1, const belief_formula& to_check_2, std::shared_ptr<fluent_formula> ret);
+
+
+    /** \brief Function that check that the \ref ONTIC effect doesn't have uncertainty (OR).
+     * 
+     * The it calls ontic_exec(const fluent_set&, const fluent_set&);
+     *   
+     * @param[in] effect: the effect of an \ref ONTIC \ref action.
+     * @param[out] world_description: the description of the world after \p effect has been applied to \p world_description.
+     * 
+     * @return the description of the world after \p effect has been applied to \p world_description.*/
+    static fluent_set ontic_exec(const fluent_formula& effect, const fluent_set& world_description);
 };
 
 

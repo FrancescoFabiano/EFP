@@ -23,6 +23,7 @@
 
 class kedge
 {
+    friend class kedge_ptr;
 private:
     /**
      * \brief The \ref kworld_ptr to the world where *this* is from.
@@ -110,6 +111,31 @@ private:
      */
     void set_id();
 
+    /** \brief Getter of \ref m_from.
+     * 
+     * Only accessible by the \ref kedge_ptr.
+     *  
+     * @return the \ref kworld_ptr to the world where *this* is from.*/
+    const kworld_ptr & get_from() const;
+    /** \brief Getter of \ref m_to.
+     * 
+     * Only accessible by the \ref kedge_ptr.
+     *     
+     * @return the \ref kworld_ptr to the world where *this* is directed.*/
+    const kworld_ptr & get_to() const;
+    /** \brief Getter of \ref m_label.
+     * 
+     * Only accessible by the \ref kedge_ptr.
+     *  
+     * @return the \ref agent that is the label of *this*.*/
+    agent get_label() const;
+    /**\brief Getter of \ref m_edge_id.
+     * 
+     * Only accessible by the \ref kedge_ptr.
+     *      
+     * @return the int that is the unique id of *this*.*/
+    kedge_id get_id() const;
+
 public:
     /**
      * \brief Empty constructor, call the default constructor of all the fields.
@@ -132,26 +158,7 @@ public:
      * @param[in] label: the \ref agent that is the label of *this*.*/
     kedge(const kworld_ptr & from, const kworld_ptr & to, agent label);
 
-    /**
-     *\brief Getter of \ref m_from.
-     *     
-     * @return the \ref kworld_ptr to the world where *this* is from.*/
-    const kworld_ptr & get_from() const;
-    /**
-     *\brief Getter of \ref m_to.
-     *     
-     * @return the \ref kworld_ptr to the world where *this* is directed.*/
-    const kworld_ptr & get_to() const;
-    /**
-     *\brief Getter of \ref m_label.
-     *     
-     * @return the \ref agent that is the label of *this*.*/
-    agent get_label() const;
-    /**
-     *\brief Getter of \ref m_edge_id.
-     *     
-     * @return the int that is the unique id of *this*.*/
-    kedge_id get_id() const;
+    
     /** \brief The < operator based on the field \ref m_edge_id.
      * Implemented to allow the ordering on set of \ref kedge (used in \ref kstore).
      * 
@@ -162,14 +169,14 @@ public:
      * @return false: otherwise.*/
     bool operator<(const kedge& to_compare) const;
 
-        /** \brief The == operator based on the field \ref m_edge_id.
+    /** \brief The == operator based on the field \ref m_edge_id.
      *     
      * @param [in] to_compare: the \ref kedge to compare with *this*.
      * @return true: if \p to_compare is equal to *this*
      * @return false: otherwise.*/
     bool operator==(const kedge& to_compare) const;
 
-    
+
     /** \brief The = operator.
      *   
      * @param [in] to_assign: the \ref kedge to assign to *this*.

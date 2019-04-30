@@ -23,7 +23,7 @@
 
 #include <list>
 
-#include "belief_formula.h"
+#include "../formulae/belief_formula.h"
 #include "../utilities/define.h"
 #include "../utilities/printer.h"
 
@@ -33,14 +33,8 @@
 enum proposition_type
 {
     EXECUTABILITY, /**< \brief Used when the proposition specifies an action executability condition -- *act* **exec if** *phi* */
-    DYNAMIC, /**< \brief Used when the proposition specifies the effects of an ontic action -- *act* **causes** *f* 
-              *
-              * \todo change with ONTIC.
-              */
-    DETERMINATION, /**< \brief Used when the proposition specifies the effects of a sensing action -- *act* **sensed** *f* 
-                    *
-                    * \todo change with SENSING.
-                    */
+    ONTIC, /**< \brief Used when the proposition specifies the effects of an ontic action -- *act* **causes** *f*.*/
+    SENSING, /**< \brief Used when the proposition specifies the effects of a sensing action -- *act* **sensed** *f*.*/
     ANNOUNCEMENT, /**< \brief Used when the proposition specifies the effects of a announcement action -- *act* **annaunces** *ff* */
     OBSERVANCE, /**< \brief Used when the proposition specifies the full observability conditions of an action -- *ag* **observes** *act* */
     AWARENESS, /**< \brief Used when the proposition specifies the partial observability conditions of an action -- *ag* **aware** *act* */
@@ -66,7 +60,7 @@ public:
      */
 
     /**
-     * If *this* is \ref DYNAMIC, \ref DETERMINATION or \ref ANNOUNCEMENT the effects are stored here.
+     * If *this* is \ref ONTIC, \ref SENSING or \ref ANNOUNCEMENT the effects are stored here.
      */
     string_set_set m_action_effect;
 
@@ -81,7 +75,7 @@ public:
     string_set_set m_observability_conditions;
 
     /**
-     * If *this* is \ref DYNAMIC, \ref DETERMINATION or \ref ANNOUNCEMENT the \ref belief_formula condition for the act is stored here.
+     * If *this* is \ref ONTIC, \ref SENSING or \ref ANNOUNCEMENT the \ref belief_formula condition for the act is stored here.
      */
     belief_formula m_executability_conditions;
 

@@ -111,13 +111,13 @@ void action::add_proposition(const proposition & prop, const grounder& grounder)
 	switch ( prop.m_type ) {
 
 		//Add action to the the list (name as identifier, then set id) then update the conditions and the awareness of the action so it's complete)
-	case DYNAMIC:
-		set_type(DYNAMIC);
+	case ONTIC:
+		set_type(ONTIC);
 		add_effect(grounder.ground_fluent(prop.m_action_effect), prop.m_executability_conditions);
 		break;
 
-	case DETERMINATION:
-		set_type(DETERMINATION);
+	case SENSING:
+		set_type(SENSING);
 		add_effect(grounder.ground_fluent(prop.m_action_effect), prop.m_executability_conditions);
 		break;
 

@@ -174,8 +174,7 @@ public:
      * \bug Is not supposed to override the method but it does.
      */
     bool entails(const fluent_formula & to_check);
-    /**
-     *\brief Function that checks if *this* entails a CNF \ref formula_list.
+    /** \brief Function that checks if *this* entails a CNF \ref formula_list.
      * 
      * The actual entailment is left to the specific state-representation (\ref representation).
      * 
@@ -189,8 +188,7 @@ public:
      * 
      * \todo add in see also the other state representations.
      *
-     * \bug Is not supposed to override the method but it does.
-     */
+     * \bug Is not supposed to override the method but it does.*/
     bool entails(const formula_list & to_check);
 
     /**
@@ -209,6 +207,18 @@ public:
      * \bug Is not supposed to override the method but it does.
      */
     void build_initial(const initially & ini_conditions, int fluent_number, int agent_number);
+    
+    
+        /**
+     *\brief Function that checks if a given action is executable in *this*.
+     *  
+     * @see action.
+     *  
+     * @param[in] act: The action to be checked on *this*.
+     * @return true: \p act is executable in *this*;
+     * @return false: \p act is not executable in *this**/
+    bool is_executable(const action & act) const;
+    
     /**
      *\brief Function that compute the successor of *this* given an \ref action.
      * 
@@ -223,7 +233,7 @@ public:
      *
      * \bug Is not supposed to override the method but it does.
      */
-    T compute_succ(const action & act);
+    T compute_succ(const action & act) const;
 
 };
 

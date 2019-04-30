@@ -9,6 +9,7 @@
  * 
  * @see kworld, kedge, and kstore.
  *
+ * \todo general: the && parameter in set (move) and in other places, is it better?
  *
  * \copyright GNU Public License.
  *
@@ -285,6 +286,49 @@ private:
     void remove_initial_kedge_bf(const belief_formula & to_check, domain_restriction ini_restriction);
 
 
+    /** \brief Function that applies the transition function for a \ref ONTIC \ref action effect on *this*.
+     *
+     * The transition function is applied accordingly to mA*. Check the paper for more information.
+     *  
+     * @see action.
+     *  
+     * @param[in] act: The \ref ONTIC action to be applied on *this*.
+     * @return the \ref kstate that results after the execution.*/
+    const kstate& execute_ontic(const action & act) const;
+
+
+
+    /** \brief Function that adds a \ref kworld to the Kripke structure represented by *this*.
+     *
+     * The \ref kworld is added. The structure only stores the pointer to the \ref kworld so
+     * it is necessary to store the \ref kworld in \ref kstore.
+     * 
+     * @see kworld and kstore.
+     *  
+     * @param[in] to_add: the \ref kworld that has to be added to *this*.*/
+    void add_world(const kworld & to_add);
+
+    /** \brief Function that adds a \ref kworld with possible copies because of oblivious to *this*.
+     *
+     * The \ref kworld is added. The structure only stores the pointer to the \ref kworld so
+     * it is necessary to store the \ref kworld in \ref kstore.
+     * 
+     * @see kworld and kstore.
+     *  
+     * @param[in] to_add: the \ref kworld that has to be added to *this*.
+     * @param[in] repetition: the number of copy -1 that are certainly already in *this*, maybe there are more.*/
+    void add_copy_world(const kworld & to_add, unsigned short repetition);
+
+    /** \brief Function that adds a \ref kedge to the Kripke structure represented by *this*.
+     *
+     * The \ref kedge is added. The structure only stores the pointer to the \ref kedge so
+     * it is necessary to store the \ref kedge in \ref kstore.
+     * 
+     * @see kedge and kstore.
+     *  
+     * @param[in] to_add: the \ref kedge that has to be added to *this*.*/
+    void add_edge(const kedge & to_add);
+
 public:
 
     /**
@@ -343,28 +387,6 @@ public:
 
 
     /**
-     *\brief Function that adds a \ref kworld to the Kripke structure represented by *this*.
-     *
-     * The \ref kworld is added. The structure only stores the pointer to the \ref kworld so
-     * it is necessary to store the \ref kworld in \ref kstore.
-     * 
-     * @see kworld and kstore.
-     *  
-     * @param[in] to_add: the \ref kworld that has to be added to *this*.*/
-    void add_world(const kworld & to_add);
-    /**
-     *\brief Function that adds a \ref kedge to the Kripke structure represented by *this*.
-     *
-     * The \ref kedge is added. The structure only stores the pointer to the \ref kedge so
-     * it is necessary to store the \ref kedge in \ref kstore.
-     * 
-     * @see kedge and kstore.
-     *  
-     * @param[in] to_add: the \ref kedge that has to be added to *this*.*/
-    void add_edge(const kedge & to_add);
-
-
-    /**
      *\brief Function that builds the initial Kripke structure given the initial conditions.
      *
      * The building of the initial Kripke structure can be done in two different ways:
@@ -381,18 +403,7 @@ public:
      *       the object every time but just to retrieve the object since all of them are already created.*/
     void build_initial(const initially & ini_conditions, int fluent_number, int agent_number);
 
-    /**
-     *\brief Function that checks if a given action is executable in *this*.
-     *  
-     * @see action.
-     *  
-     * @param[in] act: The action to be checked on *this*.
-     * @return true: \p act is executable in *this*;
-     * @return false: \p act is not executable in *this*.*/
-    bool is_executable(const action & act) const;
-
-    /**
-     *\brief Function that applies the transition function on *this* given an action.
+    /** \brief Function that applies the transition function on *this* given an action.
      *
      * The transition function is applied accordingly to mA*. Check the paper for more information.
      *  
@@ -402,6 +413,6 @@ public:
      * @return the \ref kstate that results after the execution.
      * 
      * \todo The action must be executable on *this* otherwise it will return a null_ptr.*/
-    const kstate& compute_succ(const action & act);
+    const kstate& compute_succ(const action & act) const;
 };
 
