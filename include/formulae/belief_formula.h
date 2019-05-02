@@ -262,10 +262,8 @@ public:
 
     /** \brief Function that grounds the fields of *this*.
      * 
-     * @param[in] gr: the \ref grounder obj used to ground the fields of *this*.
-     * 
      * \todo Call on costruction from outside, maybe a static function in \ref grounder.*/
-    void ground(const grounder & gr);
+    void ground();
 
     /** \brief The equal operator for\ref belief_formula.
      * 

@@ -5,6 +5,7 @@
  * \date March 31, 2019
  */
 #include "belief_formula.h"
+#include "../domain/domain.h"
 
 belief_formula::belief_formula()
 {
@@ -346,8 +347,9 @@ void belief_formula::print() const
 	} //switch
 }; print*/
 
-void belief_formula::ground(const grounder & gr)
+void belief_formula::ground()
 {
+	grounder gr = domain::get_instance().get_grounder();
 	if (!m_is_grounded) {
 		switch ( m_formula_type ) {
 
@@ -359,19 +361,19 @@ void belief_formula::ground(const grounder & gr)
 		case BELIEF_FORMULA:
 			set_agent(gr.ground_agent(get_string_agent()));
 			//m_agent = gr.ground_agent(m_string_agent_op);
-			m_bf1->ground(gr);
+			m_bf1->ground();
 			break;
 
 		case E_FORMULA:
 		case C_FORMULA:
 			set_group_agents(gr.ground_agent(get_string_group_agents()));
 			//m_group_agents = gr.ground_agent(m_string_group_agents);
-			m_bf1->ground(gr);
+			m_bf1->ground();
 			break;
 
 		case PROPOSITIONAL_FORMULA:
-			m_bf1->ground(gr);
-			m_bf2->ground(gr);
+			m_bf1->ground();
+			m_bf2->ground();
 			break;
 
 		case BF_TYPE_FAIL:

@@ -8,6 +8,12 @@ Realize an Epistemic Forward Planner that bases its concept on different states 
 
 ## The situation:
 - We have PG-EFP, an epistemic forward planner based on Kripke structure that also uses epistemic planning graph.
+
+## Problems:
+- Transition function is ok? Do we need to check the executability on every word?
+- What happen if an action is not executable accordingly to one of the fully observant agent but it is for others
+- Ontic generates duplicates?
+- Is announcement with false beliefs an ontic? It creates the world if it didn't exist. old semantic + ontic update for fully observant (sensing the same)
   
 ## Future works
 - Encode the concept of possibility;

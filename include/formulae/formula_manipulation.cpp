@@ -128,6 +128,7 @@ fluent_set formula_manipulation::ontic_exec(const fluent_set& effect, const flue
 
 fluent_set formula_manipulation::ontic_exec(const fluent_formula& effect, const fluent_set& world_description)
 { ///\todo The return should be const fluent_set & for efficency? Or move?
+	//Because of non_determinism
 	if (effect.size() != 1) {
 		return ontic_exec(*(effect.begin()), world_description);
 

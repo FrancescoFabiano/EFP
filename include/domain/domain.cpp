@@ -8,13 +8,67 @@
  */
 #include "domain.h"
 
-domain::domain(std::shared_ptr<reader> reader, state_type state_repr, domain_restriction ini_res, domain_restriction goal_res)
+domain::domain()
+{
+}
+
+domain& domain::get_instance()
+{
+	static domain instance;
+	return instance;
+}
+
+void domain::set_domain(std::shared_ptr<reader> reader, state_type state_repr, domain_restriction ini_res, domain_restriction goal_res)
 {
 	m_reader = reader;
 	m_state_type = state_repr;
 	m_intial_description = initially(ini_res);
 	m_goal_restriction = goal_res;
+}
 
+const grounder & domain::get_grounder()
+{
+	return m_grounder;
+}
+
+const fluent_set & domain::get_fluents()
+{
+	return m_fluents;
+}
+
+unsigned int domain::get_fluent_number()
+{
+	return(m_fluents.size() / 2);
+}
+
+const action_set & domain::get_actions()
+{
+	return m_actions;
+}
+
+const agent_set & domain::get_agents()
+{
+	return m_agents;
+}
+
+state_type domain::get_state_type()
+{
+	return m_state_type;
+}
+
+const initially & domain::get_initial_description()
+{
+	return m_intial_description;
+}
+
+domain_restriction domain::get_goal_restriction()
+{
+	return m_goal_restriction;
+}
+
+const formula_list & domain::get_goal_description()
+{
+	return m_goal_description;
 }
 
 bool domain::build(bool debug)
@@ -37,7 +91,8 @@ bool domain::build(bool debug)
 
 	switch ( m_state_type ) {
 	case KRIPKE:
-		initial.build_initial(m_intial_description, m_fluents.size() / 2, m_agents.size());
+		initial.build_initial();
+		std::cout << "\nInitial Done...\n";
 		break;
 	default:
 		std::cerr << "\nNot implemented yet\n";
@@ -156,7 +211,7 @@ void domain::build_initially(bool debug)
 
 	for (it_fl = m_reader->m_bf_initially.begin(); it_fl != m_reader->m_bf_initially.end(); it_fl++) {
 
-		it_fl->ground(m_grounder);
+		it_fl->ground();
 
 		switch ( it_fl->get_formula_type() ) //initially phi
 		{
@@ -230,7 +285,7 @@ void domain::build_goal(bool debug)
 
 	for (it_fl = (m_reader->m_bf_goal).begin(); it_fl != (m_reader->m_bf_goal).end(); it_fl++) {
 		if (check_goal_restriction(*it_fl)) {
-			it_fl->ground(m_grounder);
+			it_fl->ground();
 			m_goal_description.push_back(*it_fl);
 			if (debug) {
 				std::cout << "	";

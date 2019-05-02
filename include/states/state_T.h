@@ -94,54 +94,42 @@ private:
     void set_heuristic_value(int h_value);
 
 public:
-    /**
-     *\brief Constructor without parameters.
+    /** \brief Constructor without parameters.
      * 
-     * It creates \ref representation calling its **T** constructor.
-     */
+     * It creates \ref representation calling its **T** constructor.*/
     state<T>();
-    /**
-     *\brief Constructor with a given \ref state.
+    /** \brief Constructor with a given \ref state.
      * 
-     * @param given_state: the \ref state to copy into *this*.
-     */
+     * @param given_state: the \ref state to copy into *this*.*/
     state<T>(const state<T> & given_state);
-    /**
-     *\brief Constructor with a given state-representation object (**T**).
+    /** \brief Constructor with a given state-representation object (**T**).
      * 
-     * @param given_representation: the **T** object state to copy into \ref representation.
-     */
+     * @param given_representation: the **T** object state to copy into \ref representation.*/
     state<T>(const T & given_representation);
-    /**
-     *\brief Constructor with that set *this* as successor of the given one.
+    /** \brief Constructor with that set *this* as successor of the given one.
      * 
      * @param prev_state: the \ref state that is the predecessor of *this*.
      *  @param act: the \ref action applied to \p prev_state.
      *
-     * \todo what if the action is not executable?
-     */
+     * \todo what if the action is not executable?*/
     state<T>(const state<T> & prev_state, const action & act);
     /*state<T>(const action_id_list &, unsigned short);
     state<T>(const action_id_list &, unsigned short, int);*/
 
-    /**
-     * \brief Getter of \ref m_executed_actions_id.
+    /** \brief Getter of \ref m_executed_actions_id.
      *     
      * @return the \ref action_id_list that represents all the executed \ref action before to obtain *this*.*/
     const action_id_list & get_executed_actions();
-    /**
-     *\brief Getter of \ref m_plan_length.
+    /** \brief Getter of \ref m_plan_length.
      *     
      * @return the length of the plan up to *this*.*/
     unsigned short get_plan_length();
-    /**
-     *\brief Getter of \ref m_heuristic_value.
+    /** \brief Getter of \ref m_heuristic_value.
      *     
      * @return the heuristic value *this*.*/
     int get_heuristic_value();
 
-    /**
-     *\brief Function that checks if *this* entails a conjunctive set of \ref fluent.
+    /** \brief Function that checks if *this* entails a conjunctive set of \ref fluent.
      * 
      * The actual entailment is left to the specific state-representation (\ref representation).
      * 
@@ -154,11 +142,9 @@ public:
      * 
      * \todo add in see also the other state representations.
      * 
-     * \bug Is not supposed to override the method but it does.
-     */
+     * \bug Is not supposed to override the method but it does.*/
     bool entails(const fluent_set & to_check);
-    /**
-     *\brief Function that checks if *this* entails a DNF \ref fluent_formula.
+    /** \brief Function that checks if *this* entails a DNF \ref fluent_formula.
      * 
      * The actual entailment is left to the specific state-representation (\ref representation).
      * 
@@ -171,8 +157,7 @@ public:
      * 
      * \todo add in see also the other state representations.
      * 
-     * \bug Is not supposed to override the method but it does.
-     */
+     * \bug Is not supposed to override the method but it does.*/
     bool entails(const fluent_formula & to_check);
     /** \brief Function that checks if *this* entails a CNF \ref formula_list.
      * 
@@ -191,26 +176,22 @@ public:
      * \bug Is not supposed to override the method but it does.*/
     bool entails(const formula_list & to_check);
 
-    /**
-     *\brief Function that builds the initial \ref state and set *this* with it.
+    /** \brief Function that builds the initial \ref state and set *this* with it.
      * 
      * The actual construction of the \ref state is left to the specific state-representation (\ref representation).
      * 
      * @see kstate, initially
-     *
-     * @param ini_conditions: the conditions that the initial state must respect.
-     * @param fluent_number: the number of fluent in the domain, used for the prune construction.
-     * @param[in] agent_number: the number of \ref agent in the \ref domain, used for the prune construction.
      * 
      * \todo add in see also the other state representations.
      *
-     * \bug Is not supposed to override the method but it does.
-     */
-    void build_initial(const initially & ini_conditions, int fluent_number, int agent_number);
-    
-    
-        /**
-     *\brief Function that checks if a given action is executable in *this*.
+     * \bug Is not supposed to override the method but it does.*/
+    /* @param ini_conditions: the conditions that the initial state must respect.
+     * @param fluent_number: the number of fluent in the domain, used for the prune construction.
+     * @param[in] agent_number: the number of \ref agent in the \ref domain, used for the prune construction.*/
+    void build_initial();
+
+
+    /** \brief Function that checks if a given action is executable in *this*.
      *  
      * @see action.
      *  
@@ -218,9 +199,8 @@ public:
      * @return true: \p act is executable in *this*;
      * @return false: \p act is not executable in *this**/
     bool is_executable(const action & act) const;
-    
-    /**
-     *\brief Function that compute the successor of *this* given an \ref action.
+
+    /** \brief Function that compute the successor of *this* given an \ref action.
      * 
      * The actual implementation is left to the specific state-representation (\ref representation).
      * 
@@ -231,8 +211,7 @@ public:
      * 
      * \todo add in see also the other state representations.
      *
-     * \bug Is not supposed to override the method but it does.
-     */
+     * \bug Is not supposed to override the method but it does.*/
     T compute_succ(const action & act) const;
 
 };

@@ -116,8 +116,10 @@ bool kedge::operator<(const kedge& to_compare) const
 
 bool kedge::operator==(const kedge& to_compare) const
 {
-	if (m_edge_id.compare(to_compare.get_id()) == 0)
+	/**std way*/
+	if (((*this) < to_compare) && (to_compare < (*this))) {
 		return true;
+	}
 	return false;
 }
 
@@ -202,23 +204,24 @@ kedge_id kedge_ptr::get_id() const
 	exit(1);
 }
 
-bool kedge_ptr::operator=(const kedge_ptr & kptr)
+bool kedge_ptr::operator=(const kedge_ptr & to_copy)
 {
-	set_ptr(kptr.get_ptr());
+	set_ptr(to_copy.get_ptr());
 	return true;
 }
 
-bool kedge_ptr::operator==(const kedge_ptr & kptr) const
+bool kedge_ptr::operator<(const kedge_ptr & to_compare) const
 {
-	if ((*m_ptr) == (*(kptr.get_ptr()))) {
+	if (get_id().compare(to_compare.get_id()) < 0) {
 		return true;
 	}
 	return false;
 }
 
-bool kedge_ptr::operator<(const kedge_ptr & kptr) const
+bool kedge_ptr::operator==(const kedge_ptr & to_compare) const
 {
-	if ((*m_ptr)<(*(kptr.get_ptr()))) {
+	/**std way*/
+	if (((*this) < to_compare) && (to_compare < (*this))) {
 		return true;
 	}
 	return false;

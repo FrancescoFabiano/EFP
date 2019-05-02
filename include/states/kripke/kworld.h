@@ -158,7 +158,7 @@ public:
      * @return false: otherwise.*/
     bool operator==(const kworld& to_compare) const;
 
-    /** \brief The = operator.
+    /** \brief The copy operator.
      *   
      * @param [in] to_assign: the \ref kworld to assign to *this*.
      * @return true: if \p the assignment went ok.
@@ -263,27 +263,27 @@ public:
 
     /**\brief The operator =.
      *
-     * This operator assign the parameter without destroying \p ptr.
+     * This operator assign the parameter without destroying \p to_copy.
      * 
-     * @param[in] kptr: the \ref kworld_ptr to assign to *this*.
+     * @param[in] to_copy: the \ref kworld_ptr to assign to *this*.
      * @return true: if the assignment went through.
      * @return false: otherwise.*/
-    bool operator=(const kworld_ptr & kptr);
-    /**\brief The operator ==.
-     * 
-     * @param[in] kptr: the \ref kworld_ptr to confront with *this*.
-     * @return true: if *this* is equal to \p kptr.
-     * @return false: otherwise.*/
-    bool operator==(const kworld_ptr & kptr) const;
+    bool operator=(const kworld_ptr & to_copy);
     /**\brief The operator < for set operation.
      *
      * The ordering is based on the pointed object and not on the pointer itself so we have one
      * copy of each pointed object.
      * 
-     * @param[in] kptr: the \ref kworld_ptr to check for odering.
+     * @param[in] to_compare: the \ref kworld_ptr to check for odering.
      * 
-     * @return true: if *this* is smaller than \p kptr.
+     * @return true: if *this* is smaller than \p to_compare.
      * @return false: otherwise.*/
-    bool operator<(const kworld_ptr & kptr) const;
+    bool operator<(const kworld_ptr & to_compare) const;
+      /**\brief The operator ==.
+     * 
+     * @param[in] to_compare: the \ref kworld_ptr to confront with *this*.
+     * @return true: if *this* is equal to \p to_compare.
+     * @return false: otherwise.*/
+    bool operator==(const kworld_ptr & to_compare) const;
 };
 

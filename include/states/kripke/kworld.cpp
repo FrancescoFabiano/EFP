@@ -150,12 +150,14 @@ bool kworld::operator<(const kworld& to_compare) const
 
 bool kworld::operator==(const kworld& to_compare) const
 {
-	if (m_id.compare(to_compare.get_id()) == 0)
+	/**std way*/
+	if (((*this) < to_compare) && (to_compare < (*this))) {
 		return true;
+	}
 	return false;
 }
 
-bool kworld::operator=(const kworld& to_assign)
+bool kworld::operator=(const kworld & to_assign)
 {
 	set_fluent_set(to_assign.get_fluent_set());
 	set_id();
@@ -210,13 +212,6 @@ std::shared_ptr<const kworld> kworld_ptr::get_ptr() const
 	return m_ptr;
 }
 
-bool kworld_ptr::operator=(const kworld_ptr & kptr)
-{
-	set_ptr(kptr.get_ptr());
-	set_repetition(kptr.get_repetition());
-	return true;
-}
-
 const fluent_set & kworld_ptr::get_fluent_set() const
 {
 	if (m_ptr != nullptr) {
@@ -246,18 +241,26 @@ unsigned short kworld_ptr::get_repetition() const
 
 }
 
-bool kworld_ptr::operator==(const kworld_ptr & kptr) const
+bool kworld_ptr::operator<(const kworld_ptr & to_compare) const
 {
-	if ((*m_ptr) == (*(kptr.get_ptr()))) {
+	if (get_id().compare(to_compare.get_id()) < 0) {
 		return true;
 	}
 	return false;
 }
 
-bool kworld_ptr::operator<(const kworld_ptr & kptr) const
+bool kworld_ptr::operator==(const kworld_ptr & to_compare) const
 {
-	if ((*m_ptr)<(*(kptr.get_ptr()))) {
+	/**std way*/
+	if (((*this) < to_compare) && (to_compare < (*this))) {
 		return true;
 	}
 	return false;
+}
+
+bool kworld_ptr::operator=(const kworld_ptr & to_copy)
+{
+	set_ptr(to_copy.get_ptr());
+	set_repetition(to_copy.get_repetition());
+	return true;
 }

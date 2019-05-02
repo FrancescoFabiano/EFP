@@ -108,23 +108,19 @@ public:
 
     /* \brief Getter of the field \ref m_executability.
      *
-     * The return type it's fine because actions survive with the domain.
-     */
+     * The return type it's fine because actions survive with the domain.*/
     const formula_list& get_executability() const;
     /* \brief Getter of the field \ref m_effects.
      *
-     * The return type it's fine because actions survive with the domain.
-     */
+     * The return type it's fine because actions survive with the domain.*/
     const effects_map& get_effects() const;
     /* \brief Getter of the field \ref m_fully_observants.
      *
-     * The return type it's fine because actions survive with the domain.
-     */
+     * The return type it's fine because actions survive with the domain.*/
     const observability_map& get_fully_observants() const;
     /* \brief Getter of the field \ref m_partially_observants.
      *
-     * The return type it's fine because actions survive with the domain.
-     */
+     * The return type it's fine because actions survive with the domain.*/
     const observability_map& get_partially_observants() const;
 
 

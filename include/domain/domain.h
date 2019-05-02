@@ -1,9 +1,11 @@
 /**
- * \brief Class that stores all the domain information and creates the initial state.
+ * \brief Singleton class that stores all the domain information.
  * 
  * All the information are read from the file given in input and are then processed into 
  * appropriate data structures.
  * 
+ * \todo for planner and creates the initial state.
+ *
  * \copyright GNU Public License.
  *
  * \author Francesco Fabiano.
@@ -24,17 +26,15 @@
 class domain
 {
 private:
-    /**
-     * \brief The pointer to a \ref reader object.
+
+    /** \brief The pointer to a \ref reader object.
      * 
      * This is used to read the information from the the input file.
      * The same object is used in the **main** class.
      * 
-     * \todo Check if ref or pointer is better std::unique_ptr<reader>
-     */
+     * \todo Can be std::unique_ptr<reader>.*/
     std::shared_ptr<reader> m_reader;
-    /**
-     * \brief A \ref grounder object used to store the name of the information.
+    /** \brief A \ref grounder object used to store the name of the information.
      * 
      * This is the \ref grounder obj used across the solver to ground and
      * deground the information.*/
@@ -45,35 +45,21 @@ private:
      m_actions -> all the actions 
      m_agents -> all the agents.
      */
-    /**
-     * \brief Set containing all the (grounded) \ref fluent of the domain. 
-     */
+    /** \brief Set containing all the (grounded) \ref fluent of the domain.*/
     fluent_set m_fluents;
-    /**
-     * \brief Set containing all the \ref action (with effects, conditions, obsv etc.) of the domain. 
-     */
+    /** \brief Set containing all the \ref action (with effects, conditions, obsv etc.) of the domain.*/
     action_set m_actions;
-    /**
-     * \brief Set containing all the (grounded) \ref agent of the domain. 
-     */
+    /** \brief Set containing all the (grounded) \ref agent of the domain.*/
     agent_set m_agents;
 
-    /**
-     * \brief The \ref state_type. 
-     */
+    /** \brief The \ref state_type.*/
     state_type m_state_type;
 
-    /**
-     * \brief The description of the initial state. 
-     */
+    /** \brief The description of the initial state.*/
     initially m_intial_description;
-    /**
-     * \brief The restriction to apply to the goal description.
-     */
+    /** \brief The restriction to apply to the goal description.*/
     domain_restriction m_goal_restriction;
-    /**
-     * \brief The formula that describes the goal.
-     */
+    /** \brief The formula that describes the goal.*/
     formula_list m_goal_description;
 
     /** \brief Function that from the file stores the \ref agent information.
@@ -113,15 +99,25 @@ private:
      */
     bool check_goal_restriction(const belief_formula & to_check);
 
+    /** \brief Private constructor since it is a Singleton class.*/
+    domain();
+
+
+
 public:
-    /** \brief Constructor with parameters.
+
+    /** \brief To get always (the same instance of) *this* and the same instantiated fields.
+     * \warning the \ref set_domain has to called in the main file only.*/
+    static domain& get_instance();
+
+
+    /** \brief Setter for the domains parameters.
      *
      * @param[in] reader: the \ref reader pointer to assign to \ref m_reader.
      * @param[in] state_repr: the \ref state_type to assign to \ref m_state_type.
      * @param[in] ini_res: the restriction to apply to \ref m_intial_description.
      * @param[in] goal_res: the \ref domain_restriction to assign to \ref m_goal_restriction.*/
-    domain(std::shared_ptr<reader> reader, state_type state_repr, domain_restriction ini_res, domain_restriction goal_res);
-
+    void set_domain(std::shared_ptr<reader> reader, state_type state_repr, domain_restriction ini_res, domain_restriction goal_res);
 
     /** \brief Function that builds all the domain information.
      *
@@ -129,6 +125,50 @@ public:
      *
      * @param[in] debug: if true makes the function verbose.*/
     bool build(bool debug);
+
+    /** \brief Getter of the field \ref m_grounder.
+     *
+     * @return the ref to \ref m_grounder.*/
+    const grounder & get_grounder();
+    /** \brief Getter of the field \ref m_fluents.
+     *
+     * @return the ref to \ref m_fluents.*/
+    const fluent_set & get_fluents();
+        /** \brief Function that return the number of \ref fluent in the domain.
+     *
+     * @return the number of \ref fluent.*/
+    unsigned int get_fluent_number();
+    /** \brief Getter of the field \ref m_actions.
+     *
+     * @return the ref to \ref m_actions.*/
+    const action_set & get_actions();
+    /** \brief Getter of the field \ref m_agents.
+     *
+     * @return the ref to \ref m_agents.*/
+    const agent_set & get_agents();
+    /** \brief Getter of the field \ref m_state_type.
+     *
+     * @return the field \ref m_state_type.*/
+    state_type get_state_type();
+    /** \brief Getter of the field \ref m_intial_description.
+     *
+     * @return the ref to \ref m_intial_description.*/
+    const initially & get_initial_description();
+    /** \brief Getter of the field \ref m_goal_restriction.
+     *
+     * @return the field \ref m_goal_restriction.*/
+    domain_restriction get_goal_restriction();
+    /** \brief Getter of the field \ref m_goal_description.
+     *
+     * @return the ref to \ref m_goal_description.*/
+    const formula_list & get_goal_description();
+
+
+
+    /** \brief Copy constructor removed since is Singleton class. */
+    domain(domain const&) = delete;
+    /** \brief Copy operator removed since Singleton class. */
+    void operator=(domain const&) = delete;
 
     /*formula_list get_initial_description();
     formula_list get_goal_description();

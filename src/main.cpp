@@ -15,7 +15,7 @@
 
 #define VERSION "2.0"
 
-//@TODO: Understand this, why out of main?
+/**\todo: Understand this, why out of main?*/
 reader domain_reader;
 
 void print_usage(char* prog_name)
@@ -163,14 +163,16 @@ int main(int argc, char** argv)
 		std::cerr << argv[0] << ": File " << argv[1] << " cannot be opened.\n";
 		exit(1);
 	}
-	domain domain(std::shared_ptr<reader>(&domain_reader), state_struc, ini_restriction, goal_restriction);
 
 	//timer.start(READ_TIMER);
 	domain_reader.read();
 	if (debug) {
 		domain_reader.print();
 	}
-	if (!domain.build(debug)) {
+
+	domain::get_instance().set_domain(std::unique_ptr<reader>(&domain_reader), state_struc, ini_restriction, goal_restriction);
+
+	if (!domain::get_instance().build(debug)) {
 		std::cerr << "Error in building the domain.";
 		exit(1);
 	}

@@ -21,7 +21,7 @@
 
 class formula_manipulation
 {
-private:
+public:
 
     /** \brief Function that checks if two \ref fluent_set are consistent.
      * 
@@ -43,9 +43,6 @@ private:
      * @return the description of the world after \p effect has been applied to \p world_description.*/
     static fluent_set ontic_exec(const fluent_set& effect, const fluent_set& world_description);
     
-    
-    
-    
     /* Set has == operator
      * \brief Function that checks if two \ref fluent_set are the same.
      * 
@@ -65,8 +62,6 @@ private:
      * @return true: if each \ref fluent_set in \p to_check_1 exists in \p to_check_2 and vice-versa.
      * @return false: otherwise.*/
     /* static bool is_the_same_ff(const fluent_formula& to_check_1, const fluent_formula& to_check_2);*/
-
-public:
 
     /** \brief Function that merges two conjunctive set of \ref fluent into one.
      *   
