@@ -1,4 +1,4 @@
-/* \brief Implementation of formula_manipulation.h
+/* \brief Implementation of helper.h
  *
  * \copyright GNU Public License.
  *
@@ -6,9 +6,9 @@
  * \date April 7, 2019
  */
 
-#include "formula_manipulation.h"
+#include "helper.h"
 
-fluent formula_manipulation::negate_fluent(const fluent f)
+fluent helper::negate_fluent(const fluent f)
 {
 	if (f % 2 == 0) {
 		return(f + 1);
@@ -18,7 +18,7 @@ fluent formula_manipulation::negate_fluent(const fluent f)
 
 }
 
-bool formula_manipulation::is_consistent(const fluent_set &fl1, const fluent_set& fl2)
+bool helper::is_consistent(const fluent_set &fl1, const fluent_set& fl2)
 {
 
 	//@TODO: Add static_laws
@@ -33,7 +33,7 @@ bool formula_manipulation::is_consistent(const fluent_set &fl1, const fluent_set
 	return true;
 }
 
-fluent_set formula_manipulation::and_ff(const fluent_set& fl1, const fluent_set& fl2)
+fluent_set helper::and_ff(const fluent_set& fl1, const fluent_set& fl2)
 {
 	///\todo The return should be const fluent_set & for efficency? Or move?
 
@@ -56,7 +56,7 @@ fluent_set formula_manipulation::and_ff(const fluent_set& fl1, const fluent_set&
 	return ret;
 }
 
-fluent_formula formula_manipulation::and_ff(const fluent_formula& ff1, const fluent_formula& ff2)
+fluent_formula helper::and_ff(const fluent_formula& ff1, const fluent_formula& ff2)
 {
 	///\todo The return should be const fluent_formula & for efficency? Or move?
 
@@ -80,7 +80,7 @@ fluent_formula formula_manipulation::and_ff(const fluent_formula& ff1, const flu
 	return ret;
 }
 
-bool formula_manipulation::check_Bff_Bnotff(const belief_formula& to_check_1, const belief_formula& to_check_2, std::shared_ptr<fluent_formula> ret)
+bool helper::check_Bff_Bnotff(const belief_formula& to_check_1, const belief_formula& to_check_2, std::shared_ptr<fluent_formula> ret)
 {
 	/*GENERIC, to much
 	if (to_check_1.m_operator == BF_NOT) {
@@ -115,7 +115,7 @@ bool formula_manipulation::check_Bff_Bnotff(const belief_formula& to_check_1, co
 	return false;
 }
 
-fluent_set formula_manipulation::ontic_exec(const fluent_set& effect, const fluent_set& world_description)
+fluent_set helper::ontic_exec(const fluent_set& effect, const fluent_set& world_description)
 { ///\todo The return should be const fluent_set & for efficency? Or move?
 	fluent_set ret = world_description;
 	fluent_set::const_iterator it_fs;
@@ -126,7 +126,7 @@ fluent_set formula_manipulation::ontic_exec(const fluent_set& effect, const flue
 	return ret;
 }
 
-fluent_set formula_manipulation::ontic_exec(const fluent_formula& effect, const fluent_set& world_description)
+fluent_set helper::ontic_exec(const fluent_formula& effect, const fluent_set& world_description)
 { ///\todo The return should be const fluent_set & for efficency? Or move?
 	//Because of non_determinism
 	if (effect.size() != 1) {
@@ -142,9 +142,8 @@ fluent_set formula_manipulation::ontic_exec(const fluent_formula& effect, const 
 	}
 }
 
-
 /* Using the std::set == operator
-static bool formula_manipulation::is_the_same_ff(const fluent_set& to_check_1, const fluent_set& to_check_2)
+static bool helper::is_the_same_ff(const fluent_set& to_check_1, const fluent_set& to_check_2)
 {
 	//If the size is the same we just need to check all the element in to_check_1 because they are sets
 	//and there aren't repetitions on the elements.
@@ -160,7 +159,7 @@ static bool formula_manipulation::is_the_same_ff(const fluent_set& to_check_1, c
 	return false;
 }
 
-static bool formula_manipulation::is_the_same_ff(const fluent_formula& to_check_1, const fluent_formula& to_check_2)
+static bool helper::is_the_same_ff(const fluent_formula& to_check_1, const fluent_formula& to_check_2)
 {
 	//If the size is the same we just need to check all the element in to_check_1 because they are sets
 	//and there aren't repetitions on the elements.
@@ -172,5 +171,3 @@ static bool formula_manipulation::is_the_same_ff(const fluent_formula& to_check_
 	}
 	return false;
 }*/
-
-

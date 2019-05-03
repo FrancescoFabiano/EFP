@@ -9,20 +9,76 @@
 #include <iostream>
 
 #include "proposition.h"
+#include "../domain/domain.h"
 
-/*const string_set* proposition::get_executability_conditions() const
+proposition_type proposition::get_type() const
 {
-	return &m_action_precondition;
-};
+	return m_type;
+}
 
-const string_set* proposition::get_effect() const
+std::string proposition::get_action_name() const
 {
-	return &m_action_effect;
-};*/
+	return m_action_name;
+}
+
+fluent_formula proposition::get_action_effect()
+{
+	return domain::get_instance().get_grounder().ground_fluent(m_action_effect);
+}
+
+agent proposition::get_agent()
+{
+	return domain::get_instance().get_grounder().ground_agent(m_agent);
+}
+
+fluent_formula proposition::get_observability_conditions()
+{
+	return domain::get_instance().get_grounder().ground_fluent(m_observability_conditions);
+}
+
+belief_formula proposition::get_executability_conditions()
+{
+	m_executability_conditions.ground();
+	return m_executability_conditions;
+}
+
+void proposition::set_type(proposition_type to_set)
+{
+	m_type = to_set;
+}
+
+void proposition::set_action_name(std::string to_set)
+{
+	m_action_name = to_set;
+}
+
+void proposition::add_action_effect(const string_set & to_add)
+{
+	m_action_effect.insert(to_add);
+}
+
+void proposition::set_action_effect(const string_set_set & to_set)
+{
+	m_action_effect = to_set;
+}
+
+void proposition::set_agent(std::string to_set)
+{
+	m_agent = to_set;
+}
+
+void proposition::set_observability_conditions(const string_set_set & to_set)
+{
+	m_observability_conditions = to_set;
+}
+
+void proposition::set_executability_conditions(const belief_formula & to_set)
+{
+	m_executability_conditions = to_set;
+}
 
 void proposition::print() const
 {
-
 	switch ( m_type ) {
 	case ONTIC:
 		std::cout << m_action_name << " causes ";

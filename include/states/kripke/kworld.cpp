@@ -118,6 +118,9 @@ bool kworld::entails(fluent to_check) const
 bool kworld::entails(const fluent_set & to_check) const
 {
 	//fluent_set expresses conjunctive set of \ref fluent
+	if (to_check.size() == 0) {
+		return true;
+	}
 	fluent_set::const_iterator it_fl;
 	for (it_fl = to_check.begin(); it_fl != to_check.end(); it_fl++) {
 		if (!entails(*it_fl)) {
@@ -132,6 +135,9 @@ bool kworld::entails(const fluent_set & to_check) const
  */
 bool kworld::entails(const fluent_formula & to_check) const
 {
+	if (to_check.size() == 0) {
+		return true;
+	}
 	fluent_formula::const_iterator it_fl;
 	for (it_fl = to_check.begin(); it_fl != to_check.end(); it_fl++) {
 		if (entails(*it_fl)) {
@@ -151,7 +157,7 @@ bool kworld::operator<(const kworld& to_compare) const
 bool kworld::operator==(const kworld& to_compare) const
 {
 	/**std way*/
-	if (((*this) < to_compare) && (to_compare < (*this))) {
+	if (!((*this) < to_compare) && !(to_compare < (*this))) {
 		return true;
 	}
 	return false;
@@ -226,13 +232,13 @@ kworld_id kworld_ptr::get_id() const
 	if (m_ptr != nullptr) {
 		return(get_ptr()->get_id()).append(std::to_string(get_repetition()));
 	}
-	std::cerr << "Error in creating a kworld_ptr\n";
+	std::cerr << "\nError in creating a kworld_ptr\n";
 	exit(1);
 }
 
-void kworld_ptr::set_repetition(unsigned short repetition)
+void kworld_ptr::set_repetition(unsigned short to_set)
 {
-	m_repetition = repetition;
+	m_repetition = to_set;
 }
 
 unsigned short kworld_ptr::get_repetition() const
@@ -252,7 +258,7 @@ bool kworld_ptr::operator<(const kworld_ptr & to_compare) const
 bool kworld_ptr::operator==(const kworld_ptr & to_compare) const
 {
 	/**std way*/
-	if (((*this) < to_compare) && (to_compare < (*this))) {
+	if (!((*this) < to_compare) && !(to_compare < (*this))) {
 		return true;
 	}
 	return false;

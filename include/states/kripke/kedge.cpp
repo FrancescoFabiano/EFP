@@ -117,7 +117,7 @@ bool kedge::operator<(const kedge& to_compare) const
 bool kedge::operator==(const kedge& to_compare) const
 {
 	/**std way*/
-	if (((*this) < to_compare) && (to_compare < (*this))) {
+	if (!((*this) < to_compare) && !(to_compare < (*this))) {
 		return true;
 	}
 	return false;
@@ -221,7 +221,7 @@ bool kedge_ptr::operator<(const kedge_ptr & to_compare) const
 bool kedge_ptr::operator==(const kedge_ptr & to_compare) const
 {
 	/**std way*/
-	if (((*this) < to_compare) && (to_compare < (*this))) {
+	if (!((*this) < to_compare) && !(to_compare < (*this))) {
 		return true;
 	}
 	return false;

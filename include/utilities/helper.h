@@ -2,7 +2,7 @@
  * \brief Class used to check properties of formulae and modify them.
  * 
  *  The class implements static methods to facilitate
- *  the modification of the formulae.
+ *  the modification of the formulae and other.
  *
  * \see fluent_formula, belief_formula.
  * 
@@ -15,11 +15,10 @@
  */
 #pragma once
 
-#include "belief_formula.h"
+#include "define.h"
+#include "../formulae/belief_formula.h"
 
-#include "../utilities/define.h"
-
-class formula_manipulation
+class helper
 {
 public:
 
@@ -35,14 +34,14 @@ public:
      * @return the negation of \p to_negate.*/
     static fluent negate_fluent(const fluent to_negate);
 
-     /** \brief Function to merge the results of an \ref ONTIC \ref action with a world description.
+    /** \brief Function to merge the results of an \ref ONTIC \ref action with a world description.
      *   
      * @param[in] effect: part of the effect of an \ref ONTIC \ref action in CNF form.
      * @param[in] world_description: the \ref fluent_set contained inside a single world.
      * 
      * @return the description of the world after \p effect has been applied to \p world_description.*/
     static fluent_set ontic_exec(const fluent_set& effect, const fluent_set& world_description);
-    
+
     /* Set has == operator
      * \brief Function that checks if two \ref fluent_set are the same.
      * 
@@ -102,6 +101,7 @@ public:
      * 
      * @return the description of the world after \p effect has been applied to \p world_description.*/
     static fluent_set ontic_exec(const fluent_formula& effect, const fluent_set& world_description);
+
 };
 
 

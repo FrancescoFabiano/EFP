@@ -455,9 +455,9 @@ static_law:
 literal_list if_part SEMICOLON
 {
   $$ = new proposition;
-  $$->m_type = STATIC;
-  $$->m_action_precondition = *$2;
-  $$->m_action_effect = *$1;
+  $$->set_type(STATIC);
+  $$->set_action_precondition(*$2);
+  $$->set_action_effect(*$1);
 };*/
 
 /* dynamic law */
@@ -465,11 +465,11 @@ dynamic_law:
 action CAUSES literal_list if_part_bf SEMICOLON 
 {  
   $$ = new proposition;
-  $$->m_type = ONTIC;
-  $$->m_action_name = *$1;
-  $$->m_executability_conditions = *$4;
+  $$->set_type(ONTIC);
+  $$->set_action_name(*$1);
+  $$->set_executability_conditions(*$4);
   //@TODO:Effect_Conversion | previously   $$->m_action_effect = *$3;
-  $$->m_action_effect.insert(*$3);
+  $$->add_action_effect(*$3);
 };
 
 /* executability condition */
@@ -477,9 +477,9 @@ executability:
 EXECUTABLE action if_part_bf SEMICOLON
 {
   $$ = new proposition;
-  $$->m_type = EXECUTABILITY;
-  $$->m_action_name = *$2;
-  $$->m_executability_conditions = *$3;
+  $$->set_type(EXECUTABILITY);
+  $$->set_action_name(*$2);
+  $$->set_executability_conditions(*$3);
 };
 
 /* determines condition */
@@ -487,10 +487,10 @@ determine:
 action DETERMINE fluent_det_list SEMICOLON
 {
   $$ = new proposition;
-  $$->m_type = SENSING;
-  $$->m_action_name = *$1;
+  $$->set_type(SENSING);
+  $$->set_action_name(*$1);
   //@TODO:Effect_Conversion | previously   $$->m_action_effect = *$3;
-  $$->m_action_effect.insert(*$3); 
+  $$->add_action_effect(*$3);
 };
 
 /* announcement condition */
@@ -498,9 +498,9 @@ announcement:
 action ANNOUNCES formula SEMICOLON
 {
   $$ = new proposition;
-  $$->m_type = ANNOUNCEMENT;
-  $$->m_action_name = *$1;
-  $$->m_action_effect = *$3;
+  $$->set_type(ANNOUNCEMENT);
+  $$->set_action_name(*$1);
+  $$->set_action_effect(*$3);
 };
 
 /* awareness condition */
@@ -508,10 +508,10 @@ awareness:
 agent AWAREOF action if_part_fluent SEMICOLON
 {
   $$ = new proposition;
-  $$->m_type = AWARENESS;
-  $$->m_action_name = *$3;
-  $$->m_agent = *$1;
-  $$->m_observability_conditions = *$4;
+  $$->set_type(AWARENESS);
+  $$->set_action_name(*$3);
+  $$->set_agent(*$1);
+  $$->set_observability_conditions(*$4);
 };
 
 /* observance condition */
@@ -519,10 +519,10 @@ observance:
 agent OBSERVES action if_part_fluent SEMICOLON
 {
   $$ = new proposition;
-  $$->m_type = OBSERVANCE;
-  $$->m_action_name = *$3;				
-  $$->m_agent = *$1;
-  $$->m_observability_conditions = *$4;
+  $$->set_type(OBSERVANCE);
+  $$->set_action_name(*$3);				
+  $$->set_agent(*$1);
+  $$->set_observability_conditions(*$4);
 };
 
 /* imposibility condition 
@@ -530,9 +530,9 @@ impossibility:
 IMPOSSIBLE action if_part SEMICOLON
 {
   $$ = new proposition;
-  $$->m_type = IMPOSSIBILITY;
-  $$->m_action_name = *$2;
-  $$->m_action_precondition = *$3;
+  $$->set_type(IMPOSSIBILITY);
+  $$->set_action_name(*$2);
+  $$->set_action_precondition(*$3);
 };
 */
 /* proposition */

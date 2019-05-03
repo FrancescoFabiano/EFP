@@ -3,7 +3,7 @@ action right_a, left_a, right_b, left_b, a_check_1, a_check_3, b_check_1, b_chec
 
 agent a,b;
 
-executable left_a if (-at_a_1), B(a, -at_a_1);
+executable left_a if B(a, -at_a_1), (-at_a_1);
 left_a causes -at_a_2 if at_a_2;
 left_a causes -at_a_3 if at_a_3;
 left_a causes at_a_1 if at_a_2;

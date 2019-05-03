@@ -87,7 +87,7 @@ bool initially::check_restriction(const belief_formula & bf) //Apply the restric
 				if (tmp.get_operator() == BF_OR) {
 
 					//Check if **x1** and **x2** are B(i,phi) and B(i,-phi)
-					ret = formula_manipulation::check_Bff_Bnotff(tmp.get_bf1(), tmp.get_bf2(), nullptr);
+					ret = helper::check_Bff_Bnotff(tmp.get_bf1(), tmp.get_bf2(), nullptr);
 				} else if (tmp.get_operator() == BF_AND) { //C(-B(i,*phi*) \ref BF_AND -B(i,-*phi*))
 					//Check if C ( x1 **AND** x2 )
 					//Check if **x1** and **x2** are **NOT**(...)
@@ -96,12 +96,17 @@ bool initially::check_restriction(const belief_formula & bf) //Apply the restric
 					if (tmp_nested1.get_formula_type() == PROPOSITIONAL_FORMULA && tmp_nested2.get_formula_type() == PROPOSITIONAL_FORMULA) {
 						if (tmp_nested1.get_operator() == BF_NOT && tmp_nested2.get_operator() == BF_NOT) {
 							//Check tmp_nested1 and tmp_nested2 are B(i,phi) and B(i,-phi)
-							ret = formula_manipulation::check_Bff_Bnotff(tmp_nested1.get_bf1(), tmp_nested2.get_bf1(), nullptr);
+							ret = helper::check_Bff_Bnotff(tmp_nested1.get_bf1(), tmp_nested2.get_bf1(), nullptr);
 						}
 					}
 				} else {
 					ret = false;
 				}
+				break;
+			}
+			case BF_EMPTY:
+			{
+				ret = true;
 				break;
 			}
 			default:
@@ -113,6 +118,11 @@ bool initially::check_restriction(const belief_formula & bf) //Apply the restric
 			/**\todo Check all the agents are present in C.
 			 * \todo Check that all the fluent are considered.*/
 
+			break;
+		}
+		case BF_EMPTY:
+		{
+			ret = true;
 			break;
 		}
 		default:
@@ -147,7 +157,7 @@ bool initially::check_restriction(const belief_formula & bf) //Apply the restric
 void initially::add_pointed_condition(const fluent_formula & ff)
 {
 	//Is in DNF form so you have to add these to the fluent of before (all of them)
-	m_pointed_world_conditions = formula_manipulation::and_ff(m_pointed_world_conditions, ff);
+	m_pointed_world_conditions = helper::and_ff(m_pointed_world_conditions, ff);
 }
 
 //This type of parameter is fine because of the push back (makes a copy))
@@ -193,7 +203,7 @@ void initially::set_ff_forS5()
 				//*phi*
 			case FLUENT_FORMULA:
 			{
-				ret = formula_manipulation::and_ff(ret, (*it_fl).get_fluent_formula());
+				ret = helper::and_ff(ret, (*it_fl).get_fluent_formula());
 				break;
 			}
 				//C(...)
@@ -204,14 +214,14 @@ void initially::set_ff_forS5()
 					//C(*phi*)
 				case FLUENT_FORMULA:
 				{
-					ret = formula_manipulation::and_ff(ret, tmp.get_fluent_formula());
+					ret = helper::and_ff(ret, tmp.get_fluent_formula());
 					break;
 				}
 					//C(B(i,*phi*))
 				case BELIEF_FORMULA:
 				{
 					if (tmp.get_bf1().get_formula_type() == FLUENT_FORMULA) {
-						ret = formula_manipulation::and_ff(ret, tmp.get_bf1().get_fluent_formula());
+						ret = helper::and_ff(ret, tmp.get_bf1().get_fluent_formula());
 					} else {
 						std::cerr << "\nError in the type of initial formulae (FIRST).\n";
 						exit(1);

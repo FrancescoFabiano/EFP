@@ -11,6 +11,7 @@
 
 #include "kstate.h"
 #include "../../domain/domain.h"
+#include "../../utilities/helper.h"
 
 void kstate::set_worlds(const kworld_ptr_set & to_set)
 {
@@ -93,6 +94,7 @@ bool kstate::operator=(const kstate & to_copy)
 	set_worlds(to_copy.get_worlds());
 	set_max_depth(to_copy.get_max_depth());
 	set_pointed(to_copy.get_pointed());
+	return true;
 }
 
 bool kstate::entails(const belief_formula & bf, const kworld_ptr_set & reachable) const
@@ -111,14 +113,18 @@ bool kstate::entails(const belief_formula & bf, kworld_ptr world) const
 	 The entailment of a \ref belief_formula just call recursively the entailment on all the reachable world with that formula.
 	 */
 	switch ( bf.get_formula_type() ) {
+
 	case FLUENT_FORMULA:
+	{
 		/** \todo Make sure its grounded. Maybe add to \ref belief_formula a bool that store if grounded or not or maybe ground
 		 * when \ref domain created.
 		 * @see belief_formula::ground(const grounder &).*/
 		return entails(bf.get_fluent_formula(), world);
 		break;
+	}
 
 	case BELIEF_FORMULA:
+
 		/** \todo Make sure its grounded. Maybe add to \ref belief_formula a bool that store if grounded or not or maybe ground
 		 * when \ref domain created.
 		 * @see belief_formula::ground(const grounder &).
@@ -141,8 +147,6 @@ bool kstate::entails(const belief_formula & bf, kworld_ptr world) const
 			return entails(bf.get_bf1(), world) && entails(bf.get_bf2(), world);
 			break;
 		case BF_FAIL:
-			return entails(bf.get_bf1(), world);
-			break;
 		default:
 			std::cerr << "Something went wrong in checking entailment for Propositional formula";
 			exit(1);
@@ -158,7 +162,12 @@ bool kstate::entails(const belief_formula & bf, kworld_ptr world) const
 	case C_FORMULA:
 		return entails(bf.get_bf1(), get_C_reachable_worlds(bf.get_group_agents(), world));
 		break;
+	case BF_EMPTY:
+	{
 
+		return true;
+		break;
+	}
 	case BF_TYPE_FAIL:
 	default:
 		std::cerr << "Something went wrong in checking entailment for Belief formula";
@@ -170,6 +179,7 @@ const kworld_ptr_set kstate::get_B_reachable_worlds(agent ag, kworld_ptr world) 
 {
 	kworld_ptr_set ret;
 	get_B_reachable_worlds(ag, world, ret);
+
 	return ret;
 }
 
@@ -182,6 +192,7 @@ bool kstate::get_B_reachable_worlds(agent ag, kworld_ptr world, kworld_ptr_set& 
 		if (((*it_kedge).get_from() == world) && ((*it_kedge).get_label() == ag)) {
 			//We use the pair of insert, if we add a new world (true in the set::insert) then is not a fixed point
 			if (std::get<1>(ret.insert((*it_kedge).get_to()))) {
+
 				is_fixed_point = false;
 			}
 		}
@@ -193,6 +204,7 @@ const kworld_ptr_set kstate::get_E_reachable_worlds(const agent_set & ags, kworl
 {
 	kworld_ptr_set ret;
 	get_E_reachable_worlds(ags, world, ret);
+
 	return ret;
 }
 
@@ -202,6 +214,7 @@ bool kstate::get_E_reachable_worlds(const agent_set & ags, kworld_ptr world, kwo
 	agent_set::const_iterator it_agset;
 	for (it_agset = ags.begin(); it_agset != ags.end(); it_agset++) {
 		if (!get_B_reachable_worlds(*it_agset, world, ret)) {
+
 			is_fixed_point = false;
 		}
 	}
@@ -214,6 +227,7 @@ const kworld_ptr_set kstate::get_C_reachable_worlds(const agent_set & ags, kworl
 	bool is_fixed_point = false;
 	kworld_ptr_set ret;
 	while (!is_fixed_point) {
+
 		is_fixed_point = get_E_reachable_worlds(ags, world, ret);
 	}
 	return ret;
@@ -221,11 +235,13 @@ const kworld_ptr_set kstate::get_C_reachable_worlds(const agent_set & ags, kworl
 
 void kstate::add_world(const kworld & world)
 {
+
 	m_worlds.insert(kstore::get_instance().add_world(world));
 }
 
 void kstate::add_rep_world(const kworld & world)
 {
+
 	kworld_ptr tmp = kstore::get_instance().add_world(world);
 	tmp.set_repetition(get_max_depth());
 	m_worlds.insert(tmp);
@@ -245,6 +261,7 @@ void kstate::add_rep_world(const kworld & world)
 
 void kstate::add_edge(const kedge & edge)
 {
+
 	m_edges.insert(kstore::get_instance().add_edge(edge));
 }
 
@@ -253,8 +270,6 @@ void kstate::build_initial()
 	/** \todo for now prune building.*/
 	std::cout << "\nBuilding initial Kripke structure...\n";
 	build_initial_prune();
-
-
 }
 
 void kstate::build_initial_structural()
@@ -264,6 +279,7 @@ void kstate::build_initial_structural()
 
 void kstate::build_initial_prune()
 {
+
 	/*Building of all the possible consistent \ref kworld and setting the pointed world.
 	 * Creation of all the \ref fluent combinations. All the consistent ones are added to \ref kstore.*/
 	fluent_set permutation;
@@ -281,6 +297,7 @@ void kstate::generate_initial_kworlds(fluent_set& permutation, int index)
 	if (index / 2 == fluent_number) {
 		kworld to_add(permutation);
 		add_initial_kworld(to_add);
+
 		return;
 	}
 	fluent_set permutation_2 = permutation;
@@ -334,6 +351,7 @@ void kstate::add_initial_kworld(const kworld & possible_add)
 	{
 		std::cerr << "\nNot implemented yet\n";
 		exit(1);
+
 		break;
 	}
 	}
@@ -365,6 +383,7 @@ void kstate::generate_initial_kedges()
 
 	formula_list::const_iterator it_fl;
 	for (it_fl = ini_conditions.get_initial_conditions().begin(); it_fl != ini_conditions.get_initial_conditions().end(); it_fl++) {
+
 		remove_initial_kedge_bf(*it_fl);
 	}
 	//std::cout << "Removed edges: " << count << std::endl;
@@ -375,6 +394,7 @@ void kstate::generate_initial_kedges()
 
 void kstate::remove_kedge(const kedge & to_remove)
 {
+
 	m_edges.erase(kstore::get_instance().add_edge(to_remove));
 	//if(m_edges.erase(kstore::get_instance().add_edge(to_remove)) > 0)count++;
 }
@@ -398,6 +418,7 @@ void kstate::remove_initial_kedge(const fluent_formula & known_ff, agent ag)
 				remove_kedge(kedge(kwptr_tmp1, kwptr_tmp2, ag));
 				remove_kedge(kedge(kwptr_tmp2, kwptr_tmp1, ag));
 			} else if (kwptr_tmp2.get_ptr()->entails(known_ff) && !kwptr_tmp1.get_ptr()->entails(known_ff)) {
+
 				remove_kedge(kedge(kwptr_tmp2, kwptr_tmp1, ag));
 				remove_kedge(kedge(kwptr_tmp1, kwptr_tmp2, ag));
 			}
@@ -426,7 +447,7 @@ void kstate::remove_initial_kedge_bf(const belief_formula & to_check)
 
 					//fluent_formula known_ff;
 					auto known_ff_ptr = std::make_shared<fluent_formula>();
-					formula_manipulation::check_Bff_Bnotff(tmp.get_bf1(), tmp.get_bf2(), known_ff_ptr);
+					helper::check_Bff_Bnotff(tmp.get_bf1(), tmp.get_bf2(), known_ff_ptr);
 					if (known_ff_ptr != nullptr) {
 						//printer::get_instance().print_list(*known_ff_ptr);
 						remove_initial_kedge(*known_ff_ptr, tmp.get_bf2().get_agent());
@@ -446,6 +467,11 @@ void kstate::remove_initial_kedge_bf(const belief_formula & to_check)
 			}
 			case FLUENT_FORMULA:
 			case BELIEF_FORMULA:
+			{
+				return;
+				break;
+			}
+			case BF_EMPTY:
 			{
 				return;
 				break;
@@ -483,6 +509,7 @@ void kstate::remove_initial_kedge_bf(const belief_formula & to_check)
 	{
 		std::cerr << "\nNot implemented yet\n";
 		exit(1);
+
 		break;
 	}
 	}
@@ -491,11 +518,17 @@ void kstate::remove_initial_kedge_bf(const belief_formula & to_check)
 /** \warning executability should be check in \ref state (or \ref planner).*/
 const kstate& kstate::compute_succ(const action & act) const
 {
-
-
 	switch ( act.get_type() ) {
 	case ONTIC:
 	{
+		std::cout << "Debug in Exe ONTIC\n";
+		kstate tmp = execute_ontic(act);
+		std::cout << "\nDebug pointed before: ";
+		printer::get_instance().print_list(get_worlds().begin()->get_fluent_set());
+		std::cout << "\nDebug pointed inside: ";
+		printer::get_instance().print_list(tmp.get_worlds().begin()->get_fluent_set());
+		std::cout << std::endl << std::endl;
+		return execute_ontic(act);
 		break;
 	}
 	case SENSING:
@@ -512,65 +545,22 @@ const kstate& kstate::compute_succ(const action & act) const
 		std::cerr << " the type of the action is not defined correctly";
 		std::cerr << std::endl;
 		exit(1);
+
 		break;
 	}
 	}
 }
 
-agent_set kstate::get_agents_if_entailed(const observability_map& map) const
-{
-	agent_set ret;
-	observability_map::const_iterator it_map;
-	for (it_map = map.begin(); it_map != map.end(); it_map++) {
-		if (entails(it_map->second)) {
-			ret.insert(it_map->first);
-		}
-	}
-	return ret;
-}
-
-fluent_formula kstate::get_effects_if_entailed(const effects_map & map) const
-{
-	fluent_formula ret;
-	effects_map::const_iterator it_map;
-	for (it_map = map.begin(); it_map != map.end(); it_map++) {
-		if (entails(it_map->second)) {
-			ret = formula_manipulation::and_ff(ret, it_map->first);
-		}
-	}
-	if (ret.size() > 1) {
-		std::cerr << "\nNon determinism in action effect is not supported.\n";
-		exit(1);
-	}
-	return ret;
-
-}
-
-void kstate::sum_kworld_ptr_set(kworld_ptr_set & to_modify, const kworld_ptr_set & factor2) const
-{
-	kworld_ptr_set::const_iterator it_kwset;
-	for (it_kwset = factor2.begin(); it_kwset != factor2.end(); it_kwset++) {
-		to_modify.insert(*it_kwset);
-	}
-}
-
-void kstate::minus_kworld_ptr_set(kworld_ptr_set & to_modify, const kworld_ptr_set & factor2) const
-{
-	kworld_ptr_set::const_iterator it_kwset;
-	for (it_kwset = factor2.begin(); it_kwset != factor2.end(); it_kwset++) {
-		to_modify.erase(*it_kwset);
-	}
-}
-//add action
-
 void kstate::add_ret_ontic_worlds(agent ag, kworld_ptr start, kworld_ptr_set &reached, const agent_set & fully_obs_agents, kstate& ret, const action & act) const
 {
+	/**\bug the depth is increased also by agents, introduce a variable extra.*/
+	std::cout << "\nDebug - Depth: " << ret.get_max_depth() << std::endl;
 
 	/**\bug fully_obs = get_value_if_entailed(act.get_fully())---Is the observability actually related to the state?*/
 	kworld_ptr_set reachable_by_ag = get_B_reachable_worlds(ag, start);
 
 	/** - Generate all the reachable world from \p ag with \p start as pointed world.*/
-	minus_kworld_ptr_set(reachable_by_ag, reached);
+	minus_set(reachable_by_ag, reached);
 	if (reachable_by_ag.size() != 0) {
 		unsigned int tmp_depth = ret.get_max_depth() + 1;
 		ret.set_max_depth(tmp_depth);
@@ -600,8 +590,7 @@ void kstate::add_ret_ontic_worlds(agent ag, kworld_ptr start, kworld_ptr_set &re
 			 * - use \p depth to distinguish the various worlds generated from oblivious and partial observers*/
 
 			for (it_eff = effects.begin(); it_eff != effects.end(); it_eff++) {
-				ret.add_rep_world(kworld(formula_manipulation::ontic_exec(*it_eff, tmp_kworld_ptr.get_fluent_set())));
-
+				ret.add_rep_world(kworld(helper::ontic_exec(*it_eff, tmp_kworld_ptr.get_fluent_set())));
 			}
 		}
 
@@ -616,22 +605,23 @@ void kstate::add_ret_ontic_worlds(agent ag, kworld_ptr start, kworld_ptr_set &re
 		for (it_agset = fully_obs_agents.begin(); it_agset != fully_obs_agents.end(); it_agset++) {
 			tmp_ag = *it_agset;
 			for (it_kwset = reachable_by_ag.begin(); it_kwset != reachable_by_ag.end(); it_kwset++) {
-				sum_kworld_ptr_set(reachable_by_tmp, get_B_reachable_worlds(tmp_ag, *it_kwset));
+				sum_set(reachable_by_tmp, get_B_reachable_worlds(tmp_ag, *it_kwset));
 			}
 			/** - repeat the function for nested \ref kworld (respect the Kripke configuration).*/
-			minus_kworld_ptr_set(reachable_by_tmp, reached);
+			minus_set(reachable_by_tmp, reached);
 			while (!reachable_by_tmp.empty()) {
+
 				tmp_start = *(reachable_by_tmp.begin());
 				add_ret_ontic_worlds(tmp_ag, tmp_start, reached, fully_obs_agents, ret, act);
 				reachable_by_tmp.erase(tmp_start);
-				minus_kworld_ptr_set(reachable_by_tmp, reached);
+				minus_set(reachable_by_tmp, reached);
 			}
 		}
 	}
 
 }
 
-const kstate & kstate::execute_ontic(const action & act) const
+kstate kstate::execute_ontic(const action & act) const
 {
 
 	kstate ret;
@@ -644,13 +634,16 @@ const kstate & kstate::execute_ontic(const action & act) const
 	//This finds all the worlds that are reachbale from the initial state following
 	//the edges labeled with fully observant agents.
 	agent_set fully_obs_agents = get_agents_if_entailed(act.get_fully_observants());
-	agent_set oblivious_obs_agents;
+	agent_set oblivious_obs_agents = domain::get_instance().get_agents();
+	minus_set(oblivious_obs_agents, fully_obs_agents);
 
 	agent_set::const_iterator it_ags;
-	for (it_ags = domain::get_instance().get_agents().begin(); it_ags != domain::get_instance().get_agents().end(); it_ags++) {
-		if (fully_obs_agents.find(*it_ags) != fully_obs_agents.end()) {
-			oblivious_obs_agents.insert(*it_ags);
-		}
+	for (it_ags = fully_obs_agents.begin(); it_ags != fully_obs_agents.end(); it_ags++) {
+		std::cout << "Fully Obs ag: " << *it_ags << std::endl;
+	}
+
+	for (it_ags = oblivious_obs_agents.begin(); it_ags != oblivious_obs_agents.end(); it_ags++) {
+		std::cout << "Debug Oblivious ag: " << *it_ags << std::endl;
 	}
 
 	if (oblivious_obs_agents.size() > 0) {
@@ -659,6 +652,7 @@ const kstate & kstate::execute_ontic(const action & act) const
 
 	//pas tmp for entailment
 	kworld_ptr_set reached;
+
 	for (it_ags = fully_obs_agents.begin(); it_ags != fully_obs_agents.end(); it_ags++) {
 		//Maybe pointed useless as parameter
 		add_ret_ontic_worlds(*it_ags, get_pointed(), reached, fully_obs_agents, ret, act);
@@ -673,10 +667,14 @@ const kstate & kstate::execute_ontic(const action & act) const
 		to_add.set_repetition(to_add.get_repetition() + ret.get_max_depth() + 1);
 		if (ret.get_worlds().find(from_add) != ret.get_worlds().end() && ret.get_worlds().find(to_add) != ret.get_worlds().end()) {
 			ret.add_edge(kedge(from_add, to_add, it_kedptr->get_label()));
+			std::cout << "\n*******Debug: added an edge*********\n";
 		}
 	}
+	/** Se non considerei ontic che tolgono mondi allora aggiungi senza mai fare il merge...... quindi la C dei fully e poi esegui l'azione e il risultato sono i mondi nuovi*/
 
-	/** \todo add oblivious edges*/
+	/** \todo add oblivious edges and pointed*/
+	return ret;
+
 
 	//This finds all the worlds that are reachable from the initial state following
 	//the edges labeled with fully observant agents.
@@ -697,7 +695,7 @@ const kstate & kstate::execute_ontic(const action & act) const
 	 * from {these} with Fully_Observant minus {these} reapply function?.
 	 *
 	 * What if the action does nothing?*/
-	/*	ret.add_copy_world(kworld(formula_manipulation::ontic_exec(*it_eff, it_kwptr->get_fluent_set())), 0);
+	/*	ret.add_copy_world(kworld(helper::ontic_exec(*it_eff, it_kwptr->get_fluent_set())), 0);
 	}
 }*/
 	/** \bug Add a function add_oblivious_world that copies the already existing world increasing their counter
@@ -770,4 +768,59 @@ const kstate & kstate::execute_ontic(const action & act) const
 	//cout << "begin computing update_kripke" << endl;
 	Kripke* m1 = update_kripke(*m);
 	return m1;*/
+}
+
+/******************************MOVE TO HELPER*********************************/
+
+template <class T>
+void kstate::sum_set(std::set<T> & to_modify, const std::set<T> & factor2)
+{
+	/**\todo move to helper*/
+	typename std::set<T>::const_iterator it_kwset;
+	for (it_kwset = factor2.begin(); it_kwset != factor2.end(); it_kwset++) {
+		to_modify.insert(*it_kwset);
+	}
+}
+
+template <class T>
+void kstate::minus_set(std::set<T> & to_modify, const std::set<T> & factor2)
+{ /**\todo move to helper*/
+
+	typename std::set<T>::const_iterator it_kwset;
+	for (it_kwset = factor2.begin(); it_kwset != factor2.end(); it_kwset++) {
+		to_modify.erase(*it_kwset);
+	}
+}
+
+agent_set kstate::get_agents_if_entailed(const observability_map& map) const
+{ /**\todo move to helper*/
+
+	agent_set ret;
+	observability_map::const_iterator it_map;
+	for (it_map = map.begin(); it_map != map.end(); it_map++) {
+		if (entails(it_map->second)) {
+
+			ret.insert(it_map->first);
+		}
+	}
+	return ret;
+}
+
+fluent_formula kstate::get_effects_if_entailed(const effects_map & map) const
+{ /**\todo move to helper*/
+
+	fluent_formula ret;
+	effects_map::const_iterator it_map;
+	for (it_map = map.begin(); it_map != map.end(); it_map++) {
+		if (entails(it_map->second)) {
+			ret = helper::and_ff(ret, it_map->first);
+		}
+	}
+	if (ret.size() > 1) {
+
+		std::cerr << "\nNon determinism in action effect is not supported.\n";
+		exit(1);
+	}
+	return ret;
+
 }

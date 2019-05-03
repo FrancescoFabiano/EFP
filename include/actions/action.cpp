@@ -5,6 +5,7 @@
  * Created on April 4, 2019, 2:58 PM
  */
 #include "action.h"
+#include "../domain/domain.h"
 
 /*********************************************************************
  Action implementation
@@ -104,42 +105,42 @@ void action::add_partially_observant(agent partial, const fluent_formula &condit
 	m_partially_observants.insert(observability_map::value_type(partial, condition));
 }
 
-void action::add_proposition(const proposition & prop, const grounder& grounder)
+void action::add_proposition(proposition & prop)
 {
-	///Parameter Passing ok because its method all makes copies
+	///Parameter Passing ok because its methods all make copies
 
-	switch ( prop.m_type ) {
+	switch ( prop.get_type() ) {
 
 		//Add action to the the list (name as identifier, then set id) then update the conditions and the awareness of the action so it's complete)
 	case ONTIC:
 		set_type(ONTIC);
-		add_effect(grounder.ground_fluent(prop.m_action_effect), prop.m_executability_conditions);
+		add_effect(prop.get_action_effect(), prop.get_executability_conditions());
 		break;
 
 	case SENSING:
 		set_type(SENSING);
-		add_effect(grounder.ground_fluent(prop.m_action_effect), prop.m_executability_conditions);
+		add_effect(prop.get_action_effect(), prop.get_executability_conditions());
 		break;
 
 	case ANNOUNCEMENT:
 		set_type(ANNOUNCEMENT);
-		add_effect(grounder.ground_fluent(prop.m_action_effect), prop.m_executability_conditions);
+		add_effect(prop.get_action_effect(), prop.get_executability_conditions());
 		break;
 
 	case OBSERVANCE:
 		set_type(NOTSET);
-		add_fully_observant(grounder.ground_agent(prop.m_agent), grounder.ground_fluent(prop.m_observability_conditions));
+		add_fully_observant(prop.get_agent(), prop.get_observability_conditions());
 		break;
 
 	case AWARENESS:
 		set_type(NOTSET);
-		add_partially_observant(grounder.ground_agent(prop.m_agent), grounder.ground_fluent(prop.m_observability_conditions));
+		add_partially_observant(prop.get_agent(), prop.get_observability_conditions());
 		break;
 
 	case EXECUTABILITY:
 		set_type(NOTSET);
 		//@TODO:What if there is more than one? Then CNF or DNF
-		add_executability(prop.m_executability_conditions);
+		add_executability(prop.get_executability_conditions());
 		break;
 	default:
 		break;
@@ -179,8 +180,9 @@ bool action::operator=(const action& act)
 	return true;
 }
 
-void action::print(const grounder& grounder) const
+void action::print() const
 {
+	grounder grounder = domain::get_instance().get_grounder();
 	std::cout << "\nAction " << get_name() << ":" << std::endl;
 	// print executability condition
 	std::cout << "	Type: " << get_type() << std::endl;

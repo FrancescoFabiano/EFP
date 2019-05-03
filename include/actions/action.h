@@ -131,14 +131,11 @@ public:
      * \ref add_fully_observant(agent, const fluent_formula&) and add_partially_observant(agent, const fluent_formula&) to add
      * the appropriate behavior to the *this*.
      *
-     * @param[in] to_add: The \ref proposition to add to *this*.
-     * @param[in] gr: The \ref grounder object used to ground the info inside *this*.*/
-    void add_proposition(const proposition & to_add, const grounder& gr);
+     * @param[in] to_add: The \ref proposition to add to *this*.*/
+    void add_proposition(proposition & to_add);
 
-    /* \brief Function that  prints *this*.
-     * 
-     * @param[in] gr: The \ref grounder object used to ground the info inside the *this*.*/
-    void print(const grounder& gr) const;
+    /* \brief Function that  prints *this*.*/
+    void print() const;
 
     /* \brief Operator < implmented to use \ref action in std::set.*/
     bool operator<(const action&) const;

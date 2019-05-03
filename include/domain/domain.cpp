@@ -76,7 +76,6 @@ bool domain::build(bool debug)
 	build_agents(debug);
 	build_fluents(debug);
 	build_actions(debug);
-	printer::get_instance().set_grounder(m_grounder);
 	build_initially(debug);
 	build_goal(debug);
 
@@ -91,9 +90,18 @@ bool domain::build(bool debug)
 
 	switch ( m_state_type ) {
 	case KRIPKE:
+	{
 		initial.build_initial();
 		std::cout << "\nInitial Done...\n";
+		action_set::const_iterator it_acset;
+		for (it_acset = m_actions.begin(); it_acset != m_actions.end(); it_acset++) {
+			if ((*it_acset).get_name().compare("left_a") == 0) {
+				state<kstate> tmp = initial.compute_succ(*it_acset);
+				std::cout << "\nOntic Done...\n";
+			}
+		}
 		break;
+	}
 	default:
 		std::cerr << "\nNot implemented yet\n";
 		exit(1);
@@ -169,6 +177,7 @@ void domain::build_actions(bool debug)
 	}
 
 	m_grounder.set_action_name_map(domain_action_name_map);
+	printer::get_instance().set_grounder(m_grounder);
 
 	build_propositions();
 
@@ -178,7 +187,7 @@ void domain::build_actions(bool debug)
 		i = 0;
 		for (it_actions = m_actions.begin();
 			it_actions != m_actions.end(); it_actions++) {
-			it_actions->print(m_grounder);
+			it_actions->print();
 		}
 	}
 
@@ -188,16 +197,17 @@ void domain::build_propositions()
 {
 	//Adding propositions to actions list
 	std::cout << "\nAdding propositions to actions..." << std::endl;
-	proposition_list::const_iterator it_prop;
+	proposition_list::iterator it_prop;
 	action_id action_to_modify;
 	for (it_prop = m_reader->m_propositions.begin();
 		it_prop != m_reader->m_propositions.end(); it_prop++) {
-		action_to_modify = m_grounder.ground_action(it_prop->m_action_name);
+
+		action_to_modify = m_grounder.ground_action(it_prop->get_action_name());
 		if (m_actions.size() > action_to_modify) {
 			//To change remove and add the updated --> @TODO: find better like queue
 			action_set::iterator it_action_set = std::next(m_actions.begin(), action_to_modify);
 			action tmp = *it_action_set;
-			tmp.add_proposition(*it_prop, m_grounder);
+			tmp.add_proposition(*it_prop);
 			m_actions.erase(it_action_set);
 			m_actions.insert(tmp);
 		}
@@ -245,6 +255,8 @@ void domain::build_initially(bool debug)
 			}
 			break;
 		}
+		case BF_EMPTY:
+			break;
 		default:
 			std::cerr << "Error in the 'initially' conditions." << std::endl;
 			exit(1);

@@ -24,7 +24,6 @@
 #include <list>
 #include <memory>
 
-#include "../utilities/printer.h"
 #include "../utilities/define.h"
 
 #include "../domain/grounder.h"
@@ -49,6 +48,7 @@ enum bf_type
     C_FORMULA, /**< \brief A \ref belief_formula of the form C([set of \ref agent], *phi*).
                      * 
                      *  This represent the Common Knowledge of a set of \ref agent of a \ref belief_formula *phi*.*/
+    BF_EMPTY, /**< \brief When the belief formula is empty.*/
     BF_TYPE_FAIL /**< \brief The failure case.*/
 };
 
@@ -104,7 +104,7 @@ private:
 
     /*-******GROUNDED FIELDs (private SETTER (for the grounding/reading part) and GETTER public)*************-*/
     /**\brief The \ref bf_type of *this*.*/
-    bf_type m_formula_type;// = BF_TYPE_FAIL; //Which case of belief formula this is
+    bf_type m_formula_type = BF_EMPTY;// = BF_TYPE_FAIL; //Which case of belief formula this is
     /**\brief If *this* is a \ref FLUENT_FORMULA in this field is contained the actual \ref fluent_formula.*/
     fluent_formula m_fluent_formula;
     /** \brief If *this* is a \ref BELIEF_FORMULA in this field is contained the \ref agent of the formula.

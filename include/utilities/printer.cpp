@@ -94,3 +94,18 @@ void printer::print_list(const fluent_formula& to_print)
 		}
 	}
 }
+
+void printer::print_list(const formula_list& to_print)
+{
+	bool first_print = true;
+	formula_list::const_iterator it_sll;
+	//Iterate on the \p to_print and print its content using ::to_print(const string_set&) seprated by a OR to represent a DNF.
+
+	for (it_sll = to_print.begin(); it_sll != to_print.end(); it_sll++) {
+		if (!first_print) {
+			std::cout << "AND";
+		}
+		first_print = false;
+		it_sll->print();
+	}
+}

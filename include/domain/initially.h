@@ -12,7 +12,7 @@
 
 #include "../utilities/define.h"
 #include "../formulae/belief_formula.h"
-#include "../formulae/formula_manipulation.h"
+#include "../utilities/helper.h"
 
 class initially
 {

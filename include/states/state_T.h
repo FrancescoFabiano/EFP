@@ -36,77 +36,60 @@ template <class T>
 class state
 {
 private:
-    /**
-     * \brief The type of state representation.
+    /** \brief The type of state m_representation.
      * 
      * One of:
      *    - \ref KRIPKE
      *    - \ref POSSIBILITIES
      *    - \ref OBDD*/
-    T representation;
-
-    /**
-     * \brief The list of executed \ref action to get from the initial state to *this*.
+    T m_representation;
+ 
+    /** \brief The list of executed \ref action to get from the initial state to *this*.
      * 
      * Is a std::vector because we can repeat the same action.
-     * @see action and action::m_id.
-     */
+     * @see action and action::m_id.*/
     action_id_list m_executed_actions_id;
-    /**
-     * \brief The length of the plan up to this point.
+    /** \brief The length of the plan up to this point.
      * 
-     * \todo we can retrieve it from \ref m_executed_actions_id.
-     *          */
+     * \todo we can retrieve it from \ref m_executed_actions_id.*/
     unsigned short m_plan_length;
-    /**
-     * \brief The heuristic value of the *this*.
+    /** \brief The heuristic value of the *this*.
      *
      * This value is given by the chosen implementation of \ref heuristic.*/
     int m_heuristic_value;
 
-    /**
-     * \brief Setter that behaves like the assignment operator.
+    /** \brief Setter for the field \ref m_executed_actions_id.
      *
-     * @param[in] given: the \ref state to copy in *this*.*/
-    void set_state(const state<T> & given);
-    /**
-     * \brief Setter for the field \ref representation.
+     * @param[in] to_set: the list of \ref action_id object to copy in \ref m_executed_actions_id.*/
+    void set_executed_actions(const action_id_list & to_set);
+    /** \brief Setter for the field \ref m_plan_length.
      *
-     * @param[in] given: the **T** object to copy in \ref representation.
-     * 
-     * \todo implement the operator = in all the representations **T**.*/
-    void set_state(const T & given);
+     * @param[in] to_set: the length of the plan to copy in \ref m_plan_length.*/
+    void set_plan_length(unsigned short to_set);
+    /** \brief Setter for the field \ref m_heuristic_value.
+     *
+     * @param[in] to_set: the int to copy in \ref m_heuristic_value.*/
+    void set_heuristic_value(int to_set);
 
-    /**
-     * \brief Setter for the field \ref m_executed_actions_id.
-     *
-     * @param[in] act_lis: the list of \ref action_id object to copy in \ref m_executed_actions_id.*/
-    void set_executed_actions(const action_id_list & act_lis);
-    /**
-     * \brief Setter for the field \ref m_plan_length.
-     *
-     * @param[in] length: the length of the plan to copy in \ref m_plan_length.*/
-    void set_plan_length(unsigned short length);
-    /**
-     * \brief Setter for the field \ref m_heuristic_value.
-     *
-     * @param[in] h_value: the int to copy in \ref m_heuristic_value.*/
-    void set_heuristic_value(int h_value);
+    /** \brief Setter of \ref m_representation.
+     *     
+     * @param[in] to_set: the m_representation to assign to \ref m_representation.*/
+    void set_representation(const T & to_set);
 
 public:
     /** \brief Constructor without parameters.
      * 
-     * It creates \ref representation calling its **T** constructor.*/
+     * It creates \ref m_representation calling its **T** constructor.*/
     state<T>();
-    /** \brief Constructor with a given \ref state.
+    /* \brief Constructor with a given \ref state.
      * 
      * @param given_state: the \ref state to copy into *this*.*/
-    state<T>(const state<T> & given_state);
-    /** \brief Constructor with a given state-representation object (**T**).
+    /*state<T>(const state<T> & given_state);
+     \brief Constructor with a given state-representation object (**T**).
      * 
-     * @param given_representation: the **T** object state to copy into \ref representation.*/
-    state<T>(const T & given_representation);
-    /** \brief Constructor with that set *this* as successor of the given one.
+     * @param given_representation: the **T** object state to copy into \ref m_representation.*/
+    /*state<T>(const T & given_representation);
+     * \brief Constructor with that set *this* as successor of the given one.
      * 
      * @param prev_state: the \ref state that is the predecessor of *this*.
      *  @param act: the \ref action applied to \p prev_state.
@@ -119,19 +102,23 @@ public:
     /** \brief Getter of \ref m_executed_actions_id.
      *     
      * @return the \ref action_id_list that represents all the executed \ref action before to obtain *this*.*/
-    const action_id_list & get_executed_actions();
+    const action_id_list & get_executed_actions() const;
     /** \brief Getter of \ref m_plan_length.
      *     
      * @return the length of the plan up to *this*.*/
-    unsigned short get_plan_length();
+    unsigned short get_plan_length() const;
     /** \brief Getter of \ref m_heuristic_value.
      *     
      * @return the heuristic value *this*.*/
-    int get_heuristic_value();
+    int get_heuristic_value() const;
+    /** \brief Getter of \ref m_representation.
+     *     
+     * @return the m_representation of *this*.*/
+    const T & get_representation() const;
 
     /** \brief Function that checks if *this* entails a conjunctive set of \ref fluent.
      * 
-     * The actual entailment is left to the specific state-representation (\ref representation).
+     * The actual entailment is left to the specific state-representation (\ref m_representation).
      * 
      * @see kstate
      * 
@@ -140,13 +127,13 @@ public:
      * @return true if \p to_check is entailed by *this*.
      * @return false if \p -to_check is entailed by *this*.
      * 
-     * \todo add in see also the other state representations.
+     * \todo add in see also the other state m_representations.
      * 
      * \bug Is not supposed to override the method but it does.*/
-    bool entails(const fluent_set & to_check);
+    bool entails(const fluent_set & to_check) const;
     /** \brief Function that checks if *this* entails a DNF \ref fluent_formula.
      * 
-     * The actual entailment is left to the specific state-representation (\ref representation).
+     * The actual entailment is left to the specific state-representation (\ref m_representation).
      * 
      * @see kstate
      *
@@ -155,13 +142,13 @@ public:
      * @return true if \p to_check is entailed by *this*.
      * @return false if \p -to_check is entailed by *this*.
      * 
-     * \todo add in see also the other state representations.
+     * \todo add in see also the other state m_representations.
      * 
      * \bug Is not supposed to override the method but it does.*/
-    bool entails(const fluent_formula & to_check);
+    bool entails(const fluent_formula & to_check) const;
     /** \brief Function that checks if *this* entails a CNF \ref formula_list.
      * 
-     * The actual entailment is left to the specific state-representation (\ref representation).
+     * The actual entailment is left to the specific state-representation (\ref m_representation).
      * 
      * @see kstate
      *
@@ -171,18 +158,18 @@ public:
      * @return true if \p to_check is entailed by *this*.
      * @return false if \p -to_check is entailed by *this*.
      * 
-     * \todo add in see also the other state representations.
+     * \todo add in see also the other state m_representations.
      *
      * \bug Is not supposed to override the method but it does.*/
-    bool entails(const formula_list & to_check);
+    bool entails(const formula_list & to_check) const;
 
     /** \brief Function that builds the initial \ref state and set *this* with it.
      * 
-     * The actual construction of the \ref state is left to the specific state-representation (\ref representation).
+     * The actual construction of the \ref state is left to the specific state-representation (\ref m_representation).
      * 
      * @see kstate, initially
      * 
-     * \todo add in see also the other state representations.
+     * \todo add in see also the other state m_representations.
      *
      * \bug Is not supposed to override the method but it does.*/
     /* @param ini_conditions: the conditions that the initial state must respect.
@@ -202,17 +189,24 @@ public:
 
     /** \brief Function that compute the successor of *this* given an \ref action.
      * 
-     * The actual implementation is left to the specific state-representation (\ref representation).
+     * The actual implementation is left to the specific state-representation (\ref m_representation).
      * 
      * @see kstate, action
      *
      * @param act: the \ref action to execute on *this*.
-     * @return The state-representation that encodes the successor.
+     * @return The statethat encodes the successor.
      * 
-     * \todo add in see also the other state representations.
+     * \todo add in see also the other state m_representations.
      *
      * \bug Is not supposed to override the method but it does.*/
-    T compute_succ(const action & act) const;
+    state<T> compute_succ(const action & act) const;
+
+    /** \brief The copy operator.
+     *   
+     * @param [in] to_copy: the \ref state to assign to *this*.
+     * @return true: if \p the assignment went ok.
+     * @return false: otherwise.*/
+    bool operator=(const state<T> & to_copy);
 
 };
 

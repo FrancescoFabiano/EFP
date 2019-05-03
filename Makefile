@@ -2,7 +2,7 @@
 OBJS	=	$(BUILD_DIR)/bison.o $(BUILD_DIR)/lex.o $(BUILD_DIR)/main.o \
 			$(BUILD_DIR)/belief_formula.o $(BUILD_DIR)/proposition.o $(BUILD_DIR)/domain.o \
 			$(BUILD_DIR)/grounder.o $(BUILD_DIR)/printer.o \
-			$(BUILD_DIR)/action.o $(BUILD_DIR)/formula_manipulation.o $(BUILD_DIR)/initially.o \
+			$(BUILD_DIR)/action.o $(BUILD_DIR)/helper.o $(BUILD_DIR)/initially.o \
 			$(BUILD_DIR)/kstore.o \
 			$(BUILD_DIR)/kedge.o $(BUILD_DIR)/kworld.o $(BUILD_DIR)/kstate.o \
 			$(BUILD_DIR)/reader.o
@@ -70,33 +70,31 @@ $(BUILD_DIR)/main.o:	$(SRC_DIR)/main.cpp \
 ####UTILITIES
 $(BUILD_DIR)/printer.o: $(UTILITIES_DIR)/printer.cpp $(UTILITIES_DIR)/printer.h \
 						$(UTILITIES_DIR)/define.h \
+						$(FORMULA_DIR)/belief_formula.h \
 						$(DOMAIN_DIR)/grounder.h
 		$(dir_guard)
 		$(CC) $(CFLAGS) -c $(UTILITIES_DIR)/printer.cpp -o $(BUILD_DIR)/printer.o
 		
 $(BUILD_DIR)/reader.o: $(UTILITIES_DIR)/reader.cpp $(UTILITIES_DIR)/reader.h \
-					   $(FORMULA_DIR)/belief_formula.h \
 					   $(UTILITIES_DIR)/define.h $(UTILITIES_DIR)/printer.h \
+					   $(FORMULA_DIR)/belief_formula.h \
 					   $(ACTION_DIR)/proposition.h
 		$(dir_guard)
 		$(CC) $(CFLAGS) -c $(UTILITIES_DIR)/reader.cpp -o $(BUILD_DIR)/reader.o
 
-####FORMULAE
-$(BUILD_DIR)/formula_manipulation.o: $(FORMULA_DIR)/formula_manipulation.cpp $(FORMULA_DIR)/formula_manipulation.h \
-									 $(FORMULA_DIR)/belief_formula.h \
-									 $(UTILITIES_DIR)/define.h $(UTILITIES_DIR)/printer.h
+$(BUILD_DIR)/helper.o: $(UTILITIES_DIR)/helper.cpp $(UTILITIES_DIR)/helper.h \
+					   $(UTILITIES_DIR)/define.h $(UTILITIES_DIR)/printer.h \
+					   $(FORMULA_DIR)/belief_formula.h 
 		$(dir_guard)
-		$(CC) $(CFLAGS) -c $(FORMULA_DIR)/formula_manipulation.cpp -o $(BUILD_DIR)/formula_manipulation.o
+		$(CC) $(CFLAGS) -c $(UTILITIES_DIR)/helper.cpp -o $(BUILD_DIR)/helper.o
 
-$(BUILD_DIR)/proposition.o: $(ACTION_DIR)/proposition.cpp $(ACTION_DIR)/proposition.h \
-							$(FORMULA_DIR)/belief_formula.h \
-							$(UTILITIES_DIR)/define.h $(UTILITIES_DIR)/printer.h
-		$(dir_guard)
-		$(CC) $(CFLAGS) -c $(ACTION_DIR)/proposition.cpp -o $(BUILD_DIR)/proposition.o
+####FORMULAE
+
+
 			
 $(BUILD_DIR)/belief_formula.o: $(FORMULA_DIR)/belief_formula.cpp $(FORMULA_DIR)/belief_formula.h \
-								   $(DOMAIN_DIR)/grounder.h \
-								   $(UTILITIES_DIR)/define.h $(UTILITIES_DIR)/printer.h
+							   $(DOMAIN_DIR)/grounder.h \
+							   $(UTILITIES_DIR)/define.h
 		$(dir_guard)
 		$(CC) $(CFLAGS) -c $(FORMULA_DIR)/belief_formula.cpp -o $(BUILD_DIR)/belief_formula.o
 
@@ -108,6 +106,12 @@ $(BUILD_DIR)/action.o: $(ACTION_DIR)/action.cpp $(ACTION_DIR)/action.h \
 					   $(UTILITIES_DIR)/define.h
 		$(dir_guard)
 		$(CC) $(CFLAGS) -c $(ACTION_DIR)/action.cpp -o $(BUILD_DIR)/action.o
+		
+$(BUILD_DIR)/proposition.o: $(ACTION_DIR)/proposition.cpp $(ACTION_DIR)/proposition.h \
+							$(FORMULA_DIR)/belief_formula.h \
+							$(UTILITIES_DIR)/define.h $(UTILITIES_DIR)/printer.h
+		$(dir_guard)
+		$(CC) $(CFLAGS) -c $(ACTION_DIR)/proposition.cpp -o $(BUILD_DIR)/proposition.o
 			
 ####STATES
 #$(BUILD_DIR)/state_T.o: $(STATES_DIR)/state_T.cpp $(STATES_DIR)/state_T.h \
@@ -122,6 +126,7 @@ $(BUILD_DIR)/kstate.o: $(S_KRIPE_DIR)/kstate.cpp $(S_KRIPE_DIR)/kstate.h \
 					   $(S_KRIPE_DIR)/kworld.h $(S_KRIPE_DIR)/kedge.h $(S_KRIPE_DIR)/kstore.h \
 					   $(ACTION_DIR)/action.h \
 					   $(DOMAIN_DIR)/initially.h \
+					   $(UTILITIES_DIR)/helper.h \
 					   $(UTILITIES_DIR)/define.h
 		$(dir_guard)
 		$(CC) $(CFLAGS) -c $(S_KRIPE_DIR)/kstate.cpp -o $(BUILD_DIR)/kstate.o

@@ -213,11 +213,11 @@ public:
      * @param[in] to_print: the \ref fluent_formula to print.
     void print_ff(const fluent_formula& to_print) const; */
 
-    /**\brief The assignment operator =.
+    /**\brief The copy operator =.
      * 
-     * @param[in] to_assign: the \ref grounder to assign to *this*.
+     * @param[in] to_copy: the \ref grounder to assign to *this*.
      * @return true: if the assignment went through.
      * @return false: otherwise.*/
-    bool operator=(const grounder& to_assign);
+    bool operator=(const grounder& to_copy);
 
 };

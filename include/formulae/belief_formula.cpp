@@ -6,6 +6,7 @@
  */
 #include "belief_formula.h"
 #include "../domain/domain.h"
+#include "../utilities/printer.h"
 
 belief_formula::belief_formula()
 {
@@ -243,7 +244,9 @@ void belief_formula::print() const
 		}
 		//std::cout << ")";
 		break;
-
+	case BF_EMPTY:
+		std::cout << "Empty\n";
+		break;
 	case BF_TYPE_FAIL:
 	default:
 		std::cerr << "\n Unknown belief_formula type.";
@@ -349,16 +352,21 @@ void belief_formula::print() const
 
 void belief_formula::ground()
 {
+
+	//std::cout << "\nDEBUG: ground bf..." << std::endl;
+
 	grounder gr = domain::get_instance().get_grounder();
 	if (!m_is_grounded) {
 		switch ( m_formula_type ) {
 
 		case FLUENT_FORMULA:
+
 			set_fluent_formula(gr.ground_fluent(get_string_fluent_formula()));
 			//m_fluent_formula = gr.ground_fluent(m_string_fluent_formula);
 			break;
 
 		case BELIEF_FORMULA:
+
 			set_agent(gr.ground_agent(get_string_agent()));
 			//m_agent = gr.ground_agent(m_string_agent_op);
 			m_bf1->ground();
@@ -373,9 +381,12 @@ void belief_formula::ground()
 
 		case PROPOSITIONAL_FORMULA:
 			m_bf1->ground();
-			m_bf2->ground();
+			if (m_operator == BF_AND || m_operator == BF_OR) {
+				m_bf2->ground();
+			}
 			break;
-
+		case BF_EMPTY:
+			break;
 		case BF_TYPE_FAIL:
 		default:
 			std::cerr << "\n Unknown belief_formula type.";
@@ -447,6 +458,10 @@ bool belief_formula::operator==(const belief_formula & to_compare) const
 				if (m_group_agents == to_compare.get_group_agents()) {
 					return get_bf1() == to_compare.get_bf1();
 				}
+				break;
+			}
+			case BF_EMPTY:
+			{
 				break;
 			}
 			default:
@@ -525,6 +540,10 @@ bool belief_formula::operator=(const belief_formula & to_copy)
 		set_bf1(to_copy.get_bf1());
 		break;
 	}
+
+	case BF_EMPTY:
+		break;
+
 	case BF_TYPE_FAIL:
 	default:
 	{
