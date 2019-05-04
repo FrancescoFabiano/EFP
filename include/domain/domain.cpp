@@ -18,12 +18,14 @@ domain& domain::get_instance()
 	return instance;
 }
 
-void domain::set_domain(std::shared_ptr<reader> reader, state_type state_repr, domain_restriction ini_res, domain_restriction goal_res)
+void domain::set_domain(std::shared_ptr<reader> reader, state_type state_repr, domain_restriction ini_res, domain_restriction goal_res, bool is_global_obsv, action_check act_check)
 {
 	m_reader = reader;
 	m_state_type = state_repr;
 	m_intial_description = initially(ini_res);
 	m_goal_restriction = goal_res;
+	m_is_global_obsv = is_global_obsv;
+	m_act_check = act_check;
 }
 
 const grounder & domain::get_grounder()
@@ -54,6 +56,16 @@ const agent_set & domain::get_agents()
 state_type domain::get_state_type()
 {
 	return m_state_type;
+}
+
+bool domain::get_is_global_obsv()
+{
+	return m_is_global_obsv;
+}
+
+action_check domain::get_act_check()
+{
+	return m_act_check;
 }
 
 const initially & domain::get_initial_description()

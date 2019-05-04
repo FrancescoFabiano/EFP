@@ -117,7 +117,6 @@ bool state<T>::entails(const fluent_formula & to_check) const
 template <class T>
 bool state<T>::entails(const formula_list & to_check) const
 {
-	std::cout << std::endl;
 	//formula_list expresses CNF formula
 	formula_list::const_iterator it_fl;
 	for (it_fl = to_check.begin(); it_fl != to_check.end(); it_fl++) {

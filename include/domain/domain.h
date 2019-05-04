@@ -62,6 +62,11 @@ private:
     /** \brief The formula that describes the goal.*/
     formula_list m_goal_description;
 
+    /** \brief If the \ref action consider a global visibility frame for their execution.*/
+    bool m_is_global_obsv;
+    /** \brief The \ref action_check used in *this*.*/
+    action_check m_act_check;
+
     /** \brief Function that from the file stores the \ref agent information.
      * 
      * @param[in] debug: if true makes the function verbose.*/
@@ -116,8 +121,10 @@ public:
      * @param[in] reader: the \ref reader pointer to assign to \ref m_reader.
      * @param[in] state_repr: the \ref state_type to assign to \ref m_state_type.
      * @param[in] ini_res: the restriction to apply to \ref m_intial_description.
-     * @param[in] goal_res: the \ref domain_restriction to assign to \ref m_goal_restriction.*/
-    void set_domain(std::shared_ptr<reader> reader, state_type state_repr, domain_restriction ini_res, domain_restriction goal_res);
+     * @param[in] goal_res: the \ref domain_restriction to assign to \ref m_goal_restriction.
+     * @param[in] is_global_obsv: the \ref domain_restriction to assign to \ref m_is_global_obsv.
+     * @param[in] act_check: the \ref action_check to assign to \ref m_act_check.*/
+    void set_domain(std::shared_ptr<reader> reader, state_type state_repr, domain_restriction ini_res, domain_restriction goal_res, bool is_global_obsv, action_check act_check);
 
     /** \brief Function that builds all the domain information.
      *
@@ -134,7 +141,7 @@ public:
      *
      * @return the ref to \ref m_fluents.*/
     const fluent_set & get_fluents();
-        /** \brief Function that return the number of \ref fluent in the domain.
+    /** \brief Function that return the number of \ref fluent in the domain.
      *
      * @return the number of \ref fluent.*/
     unsigned int get_fluent_number();
@@ -150,6 +157,15 @@ public:
      *
      * @return the field \ref m_state_type.*/
     state_type get_state_type();
+    /** \brief Getter of the field \ref m_is_global_obsv.
+     *
+     * @return the field \ref m_is_global_obsv.*/
+    bool get_is_global_obsv();
+    /** \brief Getter of the field \ref m_act_check.
+     *
+     * @return the field \ref m_act_check.*/
+    action_check get_act_check();
+
     /** \brief Getter of the field \ref m_intial_description.
      *
      * @return the ref to \ref m_intial_description.*/

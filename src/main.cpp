@@ -23,33 +23,53 @@ void print_usage(char* prog_name)
 	std::cout << "USAGE:" << std::endl;
 	std::cout << prog_name << " input_domain [options]" << std::endl << std::endl;
 	std::cout << "OPTIONS:" << std::endl;
+
 	std::cout << "-st @state_type" << std::endl;
 	std::cout << "	Select the @state_type for the planner." << std::endl;
 	std::cout << "	Possible @state_type:" << std::endl;
 	std::cout << "		KRIPKE: The States are represented with Kripke structures. (Default)" << std::endl;
 	std::cout << "		POSS: The States are represented with Possibilities (NWF-SET)." << std::endl;
 	std::cout << "		OBDD: The States are represented with OBDDs." << std::endl;
+
 	std::cout << "-ir @restriction" << std::endl;
 	std::cout << "	Set the @restriction that the Initial state must encode." << std::endl;
 	std::cout << "	Possible @restriction:" << std::endl;
 	std::cout << "		S5: The Initial state must encode an S5 model. (Default)" << std::endl;
 	std::cout << "		K45: The Initial state must encode a K45 model." << std::endl;
 	std::cout << "		NONE: The Initial state does not have restrictions." << std::endl;
+
 	std::cout << "-gr @restriction" << std::endl;
 	std::cout << "	Set the @restriction for the Goal description." << std::endl;
 	std::cout << "	Possible @restriction:" << std::endl;
 	std::cout << "		NONE: The Goal does not have restrictions. (Default)" << std::endl;
 	std::cout << "		NONEG: The Goal does not accept negative belief formula (-B(i,phi))." << std::endl;
+
+	std::cout << "-act_obsv @action_observability" << std::endl;
+	std::cout << "	Set the type of @action_observability for the action execution." << std::endl;
+	std::cout << "	Possible @action_observability:" << std::endl;
+	std::cout << "		GLOBAL: The observability frame is globally defined for each state (Default)." << std::endl;
+	std::cout << "		RELATIVE: The observability frame is defined for each world of the state." << std::endl;
+
+	std::cout << "-act_check @action_check" << std::endl;
+	std::cout << "	Set the type of @action_check for the action execution." << std::endl;
+	std::cout << "	Possible @action_check:" << std::endl;
+	std::cout << "		PW: The executability is checked only on the state but the conditonal effects are cheched in every worlds (Default)." << std::endl;
+	std::cout << "		PP: Both the executability and the conditonal effects are cheched only on the state." << std::endl;
+	std::cout << "		WW: Both the executability and the conditonal effects are cheched in every world." << std::endl;
+
 	std::cout << "-ini_build @building_tech" << std::endl;
 	std::cout << "	Set the @building_tech that describes how the initial state will be build." << std::endl;
+
 	std::cout << "-spg" << std::endl;
 	std::cout << "	Find the plan using the sum planning graph heuristic." << std::endl;
 	std::cout << "-mpg" << std::endl;
 	std::cout << "	Find the plan using the max planning graph heuristic." << std::endl;
+
 	std::cout << "-e action1 action2 action3 ..." << std::endl;
 	std::cout << "	Perform a sequence of actions and print out" << std::endl;
 	std::cout << "	results step by step. The planner does not" << std::endl;
 	std::cout << "	search for a plan." << std::endl << std::endl;
+
 	std::cout << "EXAMPLES:" << std::endl;
 	std::cout << prog_name << " ex.al" << std::endl;
 	std::cout << "	Find a conformant plan for ex.al. The system will" << std::endl;
@@ -64,9 +84,11 @@ void print_usage(char* prog_name)
 int main(int argc, char** argv)
 {
 	bool debug = false;
+	bool is_global_obsv = true;
 	state_type state_struc = KRIPKE; //default
 	domain_restriction ini_restriction = S5; //default
 	domain_restriction goal_restriction = NONE; //default
+	action_check act_check = EXE_POINTED__COND_WORLD; //default
 
 
 	std::cout << "EFP version " << VERSION <<
@@ -81,9 +103,8 @@ int main(int argc, char** argv)
 		if (strcmp(argv[i], "-debug") == 0) {
 			std::cout << "Debug is on." << std::endl;
 			debug = true;
-		}
-		//No case sensitivity
-		if (strcmp(argv[i], "-ir") == 0) {
+		}//No case sensitivity
+		else if (strcmp(argv[i], "-ir") == 0) {
 			i++;
 			if (i >= argc) {
 				std::cerr << "-ir needs specification (S5, K45, NONE)." << std::endl;
@@ -98,11 +119,10 @@ int main(int argc, char** argv)
 				std::cout << "Initial state does not have restrictions." << std::endl;
 				ini_restriction = NONE;
 			} else {
-				std::cerr << "Wrong specification (S5, K45, NONE)." << std::endl;
+				std::cerr << "Wrong specification for '-ir'; use 'S5' or 'K45' or 'NONE'." << std::endl;
 				exit(1);
 			}
-		}
-		if (strcmp(argv[i], "-gr") == 0) {
+		} else if (strcmp(argv[i], "-gr") == 0) {
 			i++;
 			if (i >= argc) {
 				std::cerr << "-gr needs specification (NONE, NONEG)." << std::endl;
@@ -114,11 +134,10 @@ int main(int argc, char** argv)
 				std::cout << "The Goal does not accept negative belief formula (-B(i,phi))." << std::endl;
 				goal_restriction = NONEG;
 			} else {
-				std::cerr << "Wrong specification (S5, K45, NONE)." << std::endl;
+				std::cerr << "Wrong specification for '-gr'; use 'S5' or 'K45' or 'NONE'." << std::endl;
 				exit(1);
 			}
-		}
-		if (strcmp(argv[i], "-st") == 0) {
+		} else if (strcmp(argv[i], "-st") == 0) {
 			i++;
 			if (i >= argc) {
 				std::cerr << "-st needs specification (KRIPKE, POSS, OBDD)." << std::endl;
@@ -133,10 +152,45 @@ int main(int argc, char** argv)
 				std::cout << "The States are represented with OBDDs." << std::endl;
 				state_struc = OBDD;
 			} else {
-				std::cerr << "Wrong specification (KRIPKE, POSS, OBDD)." << std::endl;
+				std::cerr << "Wrong specification for '-st'; use 'KRIPKE' or 'POSS' or 'OBDD'." << std::endl;
+				exit(1);
+			}
+		} else if (strcmp(argv[i], "-act_obsv") == 0) {
+			i++;
+			if (i >= argc) {
+				std::cerr << "-act_obsv needs specification (GLOBAL, RELATIVE)." << std::endl;
+				exit(1);
+			} else if (strcmp(argv[i], "GLOBAL") == 0) {
+				std::cout << "The observability frame is globally defined for each state. (Default)" << std::endl;
+				is_global_obsv = true; //default
+			} else if (strcmp(argv[i], "RELATIVE") == 0) {
+				std::cout << "The observability frame is defined for each world of the state." << std::endl;
+				is_global_obsv = false;
+			} else {
+				std::cerr << "Wrong specification for '-act_obsv'; use 'GLOBAL' or 'RELATIVE'." << std::endl;
+				exit(1);
+			}
+		} else if (strcmp(argv[i], "-act_check") == 0) {
+			i++;
+			if (i >= argc) {
+				std::cerr << "-act_check needs specification (PP, PW, WW)." << std::endl;
+				exit(1);
+			} else if (strcmp(argv[i], "PP") == 0) {
+				std::cout << "Both the executability and the conditonal effects are cheched only on the state." << std::endl;
+				act_check = EXE_POINTED__COND_POINTED; //default
+			} else if (strcmp(argv[i], "PW") == 0) {
+				std::cout << "The executability is checked only on the state but the conditonal effects are cheched in every worlds. (Default)" << std::endl;
+				act_check = EXE_POINTED__COND_WORLD;
+			} else if (strcmp(argv[i], "WW") == 0) {
+				std::cout << "Both the executability and the conditonal effects are cheched in every world." << std::endl;
+				act_check = EXE_WORLD__COND_WORLD;
+			} else {
+				std::cerr << "Wrong specification for '-act_obsv'; use 'PP' or 'PW' or 'WW'." << std::endl;
 				exit(1);
 			}
 		}
+
+
 		/* else if (strcmp(argv[i], "-mpg") == 0) {
 			std::cout << " search with max planning graph heuristic " << std::endl;
 			planner.m_heuristic = PLANNINGGRAPH;
@@ -170,7 +224,7 @@ int main(int argc, char** argv)
 		domain_reader.print();
 	}
 
-	domain::get_instance().set_domain(std::unique_ptr<reader>(&domain_reader), state_struc, ini_restriction, goal_restriction);
+	domain::get_instance().set_domain(std::unique_ptr<reader>(&domain_reader), state_struc, ini_restriction, goal_restriction, is_global_obsv, act_check);
 
 	if (!domain::get_instance().build(debug)) {
 		std::cerr << "Error in building the domain.";

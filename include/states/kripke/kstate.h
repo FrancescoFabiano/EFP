@@ -74,8 +74,7 @@ private:
      * @return false: \p -to_check is entailed in \p world.*/
     bool entails(const fluent_formula & to_check, kworld_ptr world) const;
 
-    /**
-     *\brief Function that checks the entailment of a \ref belief_formula.
+    /** \brief Function that checks the entailment of a \ref belief_formula.
      * 
      * The concept of entailment of a \ref belief_formula is related to reachability
      * and so an initial state is required, the given \ref kworld \p world is the starting point
@@ -93,14 +92,12 @@ private:
      * @return true: \p to_check is entailed starting from \p world;
      * @return false: \p -to_check is entailed starting from \p world.
      * 
-     * \todo self-loop?
-     */
+     * \todo self-loop?*/
     bool entails(const belief_formula & to_check, kworld_ptr world) const;
-    /**
-     *\brief Function that checks the entailment of a \ref belief_formula on several possible starting points.
+    /** \brief Function that checks the entailment of a \ref belief_formula on several possible starting points.
      * 
      * This function eases the task to check the entailment from several starting \ref kworld simultaneously.
-     * This happens when we want to check the transitive closure of the \ref agent ag and to test the formula B(ag, phi).
+     * This happens when we want to check the transitive closure of the \ref agent ag  to test the formula B(ag, phi).
      * 
      * @see belief_formula.
      * 
@@ -110,12 +107,23 @@ private:
      * @return true: \p to_check is entailed starting from all the \ref kworld in \p worlds;
      * @return false: \p -to_check is entailed starting from all the \ref kworld in \p worlds.
      * 
-     * \todo self-loop?
-     */
+     * \todo self-loop?*/
     bool entails(const belief_formula & to_check, const kworld_ptr_set & worlds) const;
-
-    /**
-     *\brief Function that returns all the reachable \ref kworld given the \ref agent and the staring \ref kworld.
+    
+    
+     /** \brief Function that checks the entailment of a \ref formula_list (CNF of \ref belief_formula).
+     * 
+     * 
+     * @param[in] to_check: the \ref formula_list that has to be checked if entailed starting from from \p world.
+     * @param[in] world: the pointer to the \ref kworld where to start to check the entailment.
+     *
+     * @return true: \p to_check is entailed starting from \p world;
+     * @return false: \p -to_check is entailed starting from \p world.
+     * 
+     * \todo self-loop?*/
+    bool entails(const formula_list & to_check, kworld_ptr world) const;
+    
+    /** \brief Function that returns all the reachable \ref kworld given the \ref agent and the staring \ref kworld.
      * 
      * This function finds all the world that are transitively reachable from the starting world following
      * the edges labelled with the given \ref agent. It returns all the worlds where is necessary to check if
@@ -129,12 +137,10 @@ private:
      * @return a set of pointers to all the reachable worlds.
      *
      * 
-     * \todo self-loop?
-     */
+     * \todo self-loop?*/
     const kworld_ptr_set get_B_reachable_worlds(agent ag, kworld_ptr world) const;
 
-    /**
-     *\brief Function that returns all the reachable \ref kworld given the \ref agent and the staring \ref kworld.
+    /** \brief Function that returns all the reachable \ref kworld given the \ref agent and the staring \ref kworld.
      * 
      * This function modify the parameter so it's easy to check if a fixed point is reached.
      * This is useful for the operator C. Otherwise its better to use \ref get_B_reachable_worlds(agent, kworld_ptr) const.
@@ -147,12 +153,10 @@ private:
      * @param[out] reached: the set of pointers to all the reachable worlds.
      *
      * 
-     * \todo self-loop?
-     */
+     * \todo self-loop?*/
     bool get_B_reachable_worlds(agent ag, kworld_ptr world, kworld_ptr_set& reached) const;
 
-    /**
-     *\brief Function that returns all the reachable \ref kworld given a set of \ref agent and the staring \ref kworld.
+    /** \brief Function that returns all the reachable \ref kworld given a set of \ref agent and the staring \ref kworld.
      * 
      * This function applies get_E_reachable_worlds(agent , kworld_ptr) with all the agents inside the
      * given set and return the union of the reached \ref kworld. It returns all the worlds where is necessary to check if
@@ -166,12 +170,10 @@ private:
      * @return a set of pointers to all the reachable worlds.
      *
      * 
-     * \todo self-loop?
-     */
+     * \todo self-loop?*/
     const kworld_ptr_set get_E_reachable_worlds(const agent_set & ags, kworld_ptr world) const;
 
-    /**
-     *\brief Function that returns all the reachable \ref kworld given a set of \ref agent and the staring \ref kworld.
+    /** \brief Function that returns all the reachable \ref kworld given a set of \ref agent and the staring \ref kworld.
      * 
      * This function modify the parameter so it's easy to check if a fixed point is reached.
      * This is useful for the operator C. Otherwise its better to use \ref get_E_reachable_worlds(const agent_set &, kworld_ptr) const.
@@ -184,12 +186,10 @@ private:
      * @param[out] reached: the set of pointers to all the reachable worlds.
      *
      * 
-     * \todo self-loop?
-     */
+     * \todo self-loop?*/
     bool get_E_reachable_worlds(const agent_set &ags, kworld_ptr world, kworld_ptr_set& reached) const;
 
-    /**
-     *\brief Function that returns all the reachable \ref kworld (in the *Common Knowledge* sense) given a \ref agent and the staring \ref kworld.
+    /** \brief Function that returns all the reachable \ref kworld (in the *Common Knowledge* sense) given a \ref agent and the staring \ref kworld.
      * 
      * This function applies get_E_reachable_worlds(const agent_set &, kworld_ptr) on its on result until a fixed point is found.
      * It returns all the worlds where is necessary to check if *phi* is entailed in order to verify C(\p ags, *phi*) and \p world is the starting point.
@@ -201,8 +201,7 @@ private:
      *
      * @return a set of pointers to all the reachable worlds.
      * 
-     * \todo self-loop?
-     */
+     * \todo self-loop?*/
     const kworld_ptr_set get_C_reachable_worlds(const agent_set &, kworld_ptr world) const;
 
     /** \brief Function that builds the initial Kripke structure given the initial conditions in a structural way.
@@ -291,18 +290,18 @@ private:
 
     /** \brief Function that return the set of \ref agent that entails the obs condition.
      *
-     *  
      * @param[in] map: the map that contains the tuples to check for entailment.
-     * @return the set of \ref agent that are obs in *this**.*/
-    agent_set get_agents_if_entailed(const observability_map & map) const;
+     * @param[in] start: the world to set as pointed to check the entailment.
+     * @return the effects that are feasible in *this* with \p start as pointed world*.*/
+    agent_set get_agents_if_entailed(const observability_map & map, const kworld_ptr & start) const;
 
     /** \brief Function that return the \ref fluent_formula (effect) that entails the exe condition.
-     *
      *  
      * @param[in] map: the map that contains the tuples to check for entailment.
-     * @return the effects that are feasible in *this**.*/
-    fluent_formula get_effects_if_entailed(const effects_map & map) const;
-    
+     * @param[in] start: the world to set as pointed to check the entailment.
+     * @return the effects that are feasible in *this* with \p start as pointed world*.*/
+    fluent_formula get_effects_if_entailed(const effects_map & map, const kworld_ptr & start) const;
+
     /** \brief Function that applies the transition function for a \ref ONTIC \ref action effect on *this*.
      *
      * The transition function is applied accordingly to mA*. Check the paper for more information.
@@ -314,13 +313,24 @@ private:
     kstate execute_ontic(const action & act) const;
     /** \brief Recursive function that create and add the worlds generated by the execution of an \ref ONTIC \ref action.
      *
-     * @param[in] ag: the agent of who's reachable worlds has to be modify.
      * @param[in] start: the pointer to the pointed \ref kworld to use to check for reachability and exe conditions.
      * @param[out] reached: the set of already reached and therefore modified \ref kworld.
-     * @param[in] fully_obs_agents: the set of fully_obs \ref agent in relation to \p act (check if useful or not because global visibility).
      * @param[out] ret: the kripke structure (\ref kstate) where to add the worlds.
-     * @param[in] act: the \ref ONTIC \ref action that modifies *this*.*/
-    void add_ret_ontic_worlds(agent ag, kworld_ptr start, kworld_ptr_set &reached, const agent_set & fully_obs_agents, kstate& ret, const action & act) const;
+     * @param[in] fully_obs_agents: the set of fully_obs \ref agent in relation to \p act (used to optimize for global visibility).
+     * @param[in] effects: the effects of \p act executable in *this* (used to optimize for global checking).
+     * @param[in] act: the \ref ONTIC \ref action that modifies *this*
+     * @param[in] act_check: the type of checking to do on \p act 's effects.*/
+    void add_ret_ontic_worlds_internal(const kworld_ptr & start, kworld_ptr_set &reached, kstate& ret, const fluent_formula & effects, agent_set & fully_obs_agents, const action & act, action_check act_check) const;
+
+    /** \brief Recursive function that create and add the worlds generated by the execution of an \ref ONTIC \ref action.
+     *
+     * @param[in] start: the pointer to the pointed \ref kworld to use to check for reachability and exe conditions.
+     * @param[out] reached: the set of already reached and therefore modified \ref kworld.
+     * @param[out] ret: the kripke structure (\ref kstate) where to add the worlds.
+     * @param[in] fully_obs_agents: the set of fully_obs \ref agent in relation to \p act (used to optimize for global visibility).
+     * @param[in] act: the \ref ONTIC \ref action that modifies *this*.
+     * @param[in] act_check: the type of checking to do on \p act 's effects.*/
+    void add_ret_ontic_worlds(const kworld_ptr & start,kworld_ptr_set& reached, kstate& ret, agent_set & fully_obs_agents, const action & act, action_check act_check) const;
 public:
 
     /** \brief Setter of the field \ref m_worlds.
@@ -445,16 +455,16 @@ public:
      * @return the \ref kstate that results after the execution.
      * 
      * \todo The action must be executable on *this* otherwise it will return a null_ptr.*/
-    const kstate& compute_succ(const action & act) const;
-    
+    kstate compute_succ(const action & act) const;
+
     /** \brief The copy operator.
      *   
      * @param [in] to_copy: the \ref kstate to assign to *this*.
      * @return true: if \p the assignment went ok.
      * @return false: otherwise.*/
     bool operator=(const kstate & to_copy);
-    
-     /** \brief Function that return the sum_set of the two parameters by modifying the first one.
+
+    /** \brief Function that return the sum_set of the two parameters by modifying the first one.
      *
      *  
      * @param[out] to_modify: the set in which is added \p factor2.

@@ -76,13 +76,18 @@ public:
      *
      * @param[in] to_print: the \ref fluent_formula to be printed.*/
     void print_list(const fluent_formula& to_print);
-    
-        /** \brief Function used to print all the \ref belief_formula inside \p to_print.
+
+    /** \brief Function used to print all the \ref belief_formula inside \p to_print.
      *
      * A \ref formula_list represents a formula in CNF format so the printing is executed accordingly.
      *
      * @param[in] to_print: the \ref formula_list to be printed.*/
     void print_list(const formula_list& to_print);
+
+    /** \brief Function used to print all the \ref kworld_ptr inside \p to_print.
+     * 
+     * @param[in] to_print: the \ref kworld_ptr_set to be printed.*/
+    void print_list(const kworld_ptr_set& to_print);
 
     /** \brief Copy constructor removed since is Singleton class. */
     printer(printer const&) = delete;

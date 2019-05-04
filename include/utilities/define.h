@@ -25,7 +25,7 @@
 #define NEGATION_SYMBOL "-" /**< \brief The negation symbol to negate the \ref fluent */
 
 /****************************************************************
- *Non class specific
+ * Non class specific
  ****************************************************************/
 typedef std::set<std::string> string_set; /**< \brief A representation of a conjunctive set of \ref fluent.
                                             *
@@ -100,9 +100,7 @@ typedef std::map<action_id, std::string> reverse_action_name_map; /**< \brief Th
  * These restrictions have mostly to do with the Kripke representation and
  * with the type of inference that you could do on them.
  *
- * It has been introduced because it helps with the computation of the initial state (Finitary S5).
- *
- */
+ * It has been introduced because it helps with the computation of the initial state (Finitary S5).*/
 enum domain_restriction
 {
     S5, /**< \brief Restricts only to S5 models.
@@ -130,6 +128,13 @@ enum domain_restriction
     RESTRICTION_FAIL, /**< \brief The default case to guarantee consistency.*/
 };
 
+/** \brief The possible way of checking an action effects executability.*/
+enum action_check
+{
+    EXE_POINTED__COND_POINTED,/**< \brief Both the executability and the conditonal effects are cheched only on the state.*/
+    EXE_POINTED__COND_WORLD,/**< \brief The executability is checked only on the state but the conditonal effects are cheched in every worlds.*/
+    EXE_WORLD__COND_WORLD/**< \brief Both the executability and the conditonal effects are cheched in every world.*/
+};
 
 /****************************************************************
  * Actions Related
