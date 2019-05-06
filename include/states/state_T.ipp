@@ -141,7 +141,6 @@ state<T> state<T>::compute_succ(const action & act) const
 	/**\todo Myabe is better if used in \ref planner or \ref domain (myabe a bool as **param[out]**.*/
 	state<T> ret;
 	if (is_executable(act)) {
-		std::cout << "Debug in Exec\n";
 		get_representation().compute_succ(act);
 		//ret.set_representation(get_representation().compute_succ(act));
 		//ret.set_executed_actions(get_executed_actions().add(act.get_id()));
