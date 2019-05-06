@@ -141,7 +141,7 @@ state<T> state<T>::compute_succ(const action & act) const
 	/**\todo Myabe is better if used in \ref planner or \ref domain (myabe a bool as **param[out]**.*/
 	state<T> ret;
 	if (is_executable(act)) {
-		get_representation().compute_succ(act);
+		ret.set_representation(get_representation().compute_succ(act));
 		//ret.set_representation(get_representation().compute_succ(act));
 		//ret.set_executed_actions(get_executed_actions().add(act.get_id()));
 		//ret.set_plan_length(get_plan_length() + 1);
@@ -157,4 +157,15 @@ template <class T>
 bool state<T>::is_executable(const action & act) const
 {
 	return entails(act.get_executability());
+}
+
+template <class T>
+void state<T>::print() const
+{
+	std::cout << "\n**************************\n";
+	m_representation.print();
+	//ret.set_representation(get_representation().compute_succ(act));
+	//ret.set_executed_actions(get_executed_actions().add(act.get_id()));
+	//ret.set_plan_length(get_plan_length() + 1);
+	//set_heuristic_value(get_representation().compute_heuristic_value());
 }

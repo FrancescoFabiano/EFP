@@ -106,11 +106,29 @@ bool domain::build(bool debug)
 		initial.build_initial();
 		std::cout << "\nInitial Done...\n";
 		action_set::const_iterator it_acset;
+		state<kstate> tmp;
 		for (it_acset = m_actions.begin(); it_acset != m_actions.end(); it_acset++) {
-			if ((*it_acset).get_name().compare("left_a") == 0) {
-				state<kstate> tmp = initial.compute_succ(*it_acset);
-				std::cout << "\nOntic Done...\n";
+			if ((*it_acset).get_name().compare("right_a") == 0) {
+				tmp = initial.compute_succ(*it_acset);
+				std::cout << "\n1 Done...\n";
 			}
+		}
+		for (it_acset = m_actions.begin(); it_acset != m_actions.end(); it_acset++) {
+			if ((*it_acset).get_name().compare("a_check_3") == 0) {
+				tmp = tmp.compute_succ(*it_acset);
+				std::cout << "\n2 Done...\n";
+			}
+		}
+		for (it_acset = m_actions.begin(); it_acset != m_actions.end(); it_acset++) {
+			if ((*it_acset).get_name().compare("tell_a_b2_3") == 0) {
+				tmp = tmp.compute_succ(*it_acset);
+				std::cout << "\n3 Done...\n";
+			}
+		}
+		if (tmp.entails(m_goal_description)) {
+			std::cout << "\nENATAILED...\n";
+		} else {
+			std::cout << "\nNOPE...\n";
 		}
 		break;
 	}
@@ -323,10 +341,10 @@ void domain::build_goal(bool debug)
 		}
 	}
 }
-//@TODO: Maybe a separated class?
 
 bool domain::check_goal_restriction(const belief_formula& bf)//Apply the restriction
 {
+	/** \todo: Maybe a separated class?*/
 	bool ret = false;
 	switch ( m_goal_restriction ) {
 		//We only admit C(belief)

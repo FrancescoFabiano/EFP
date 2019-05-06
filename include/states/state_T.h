@@ -208,5 +208,7 @@ public:
      * @return false: otherwise.*/
     bool operator=(const state<T> & to_copy);
 
+        /** \brief Function that prints the information of *this*.*/
+    void print() const;
 };
 

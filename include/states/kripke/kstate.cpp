@@ -246,12 +246,18 @@ void kstate::add_world(const kworld & world)
 	m_worlds.insert(kstore::get_instance().add_world(world));
 }
 
-kworld_ptr kstate::add_rep_world(const kworld & world)
+kworld_ptr kstate::add_rep_world(const kworld & world, unsigned short repetition, bool& is_new)
 {
 	kworld_ptr tmp = kstore::get_instance().add_world(world);
-	tmp.set_repetition(get_max_depth());
-	m_worlds.insert(tmp);
+	tmp.set_repetition(repetition);
+	is_new = std::get<1>(m_worlds.insert(tmp));
 	return tmp;
+}
+
+kworld_ptr kstate::add_rep_world(const kworld & world)
+{
+	bool tmp;
+	return add_rep_world(world, get_max_depth(), tmp);
 }
 
 /*void kstate::add_copy_world(const kworld & world, unsigned short repetition)
@@ -538,12 +544,12 @@ kstate kstate::compute_succ(const action & act) const
 	}
 	case SENSING:
 	{
-		return(*this);
+		return execute_sensing(act);
 		break;
 	}
 	case ANNOUNCEMENT:
 	{
-		return(*this);
+		return execute_announcement(act);
 		break;
 	}
 	default:
@@ -592,6 +598,8 @@ void kstate::add_ret_ontic_worlds_internal(const kworld_ptr & start, kworld_ptr_
 				//Find the new fully observant if visibility is relative
 				if (!domain::get_instance().get_is_global_obsv()) {
 					fully_obs_agents = get_agents_if_entailed(act.get_fully_observants(), tmp_kworld_ptr);
+					std::cerr << "\nRELATIVE_OBSERVABILITY - Not fully implemented yet.\n";
+					exit(1);
 				}
 
 				if (act_check == EXE_POINTED__COND_POINTED) {
@@ -641,33 +649,19 @@ void kstate::add_ret_ontic_worlds(const kworld_ptr & start, kworld_ptr_set &reac
 	add_ret_ontic_worlds_internal(start, reached, ret, effects, fully_obs_agents, act, act_check, map_for_edges);
 }
 
-kstate kstate::execute_ontic(const action & act) const
+kstate kstate::execute(const action& act) const
 {
-	/** \bug What happen if ontic removes ignorance?
-	 * for example:
-	 * - act-> i,g then (i,g,h),(-i,g,h),(i,-g,h),(-i,-g,-h) are all equal to (i,g,h) in this case is \ref add_world
-	 * - act-> i,g then (-i,g,h) in a "different" k (i,-g,h) then two different states -- ontic shouldn't duplicate worlds
-	 * because there are not partial but can inherit the duplicates so
-	 *
-	 * What if the action does nothing?*/
+	//The execution are all the same if we consider that false beliefs don't count.
 	kstate ret;
 
 	//This finds all the worlds that are reachable from the initial state following
 	//the edges labeled with fully observant agents.
 	agent_set fully_obs_agents = get_agents_if_entailed(act.get_fully_observants(), get_pointed());
+	agent_set partially_obs_agents = get_agents_if_entailed(act.get_partially_observants(), get_pointed());
 	agent_set oblivious_obs_agents = domain::get_instance().get_agents();
 	minus_set(oblivious_obs_agents, fully_obs_agents);
+	minus_set(oblivious_obs_agents, partially_obs_agents);
 
-	/*agent_set::const_iterator it_ags;
-	for (it_ags = fully_obs_agents.begin(); it_ags != fully_obs_agents.end(); it_ags++) {
-		std::cout << "Debug Fully Obs ag: " << *it_ags << std::endl;
-	}
-
-	for (it_ags = oblivious_obs_agents.begin(); it_ags != oblivious_obs_agents.end(); it_ags++) {
-		std::cout << "Debug Oblivious ag: " << *it_ags << std::endl;
-	}*/
-
-	//If at least on oblivious agent is present we maintain a copy of the old Kripke structure.
 	if (oblivious_obs_agents.size() > 0) {
 		ret = (*this);
 		ret.set_max_depth(ret.get_max_depth() + 1);
@@ -682,10 +676,13 @@ kstate kstate::execute_ontic(const action & act) const
 	kedge_ptr_set::const_iterator it_kedptr;
 	std::map<kworld_ptr, kworld_ptr>::const_iterator it_kwmap;
 
-	//The updated eges
+	//The updated edges
 	kworld_ptr from_old, to_old;
 	kworld_ptr from_new, to_new;
 	agent label;
+	bool is_new;
+	agent_set::const_iterator it_agset;
+
 	for (it_kedptr = get_edges().begin(); it_kedptr != get_edges().end(); it_kedptr++) {
 
 		from_old = it_kedptr->get_from();
@@ -700,18 +697,22 @@ kstate kstate::execute_ontic(const action & act) const
 				label = it_kedptr->get_label();
 				if (fully_obs_agents.find(label) != fully_obs_agents.end()) {
 					ret.add_edge(kedge(from_new, to_new, label));
-				} else {//The edges that connects the update partial Kripke structure to the old one.
+				} else if (partially_obs_agents.find(label) != fully_obs_agents.end()) {
+					//Add the uncertainty for the partial observers
+					is_new = false;
+					to_new = ret.add_rep_world(*(to_old.get_ptr()), from_new.get_repetition(), is_new);
+					ret.add_edge(kedge(from_new, to_new, label));
+					if (is_new) {
+						for (it_agset = fully_obs_agents.begin(); it_agset != fully_obs_agents.end(); it_agset++) {
+							ret.add_edge(kedge(from_new, to_new, *it_agset));
+						}
+					}
+				} else {
+					//The edges that connects the update partial Kripke structure to the old one.
 					ret.add_edge(kedge(from_new, to_old, label));
-					ret.add_edge(kedge(to_new, to_old, label));
-
 				}
 			}
 		}
-	}
-
-	//The edges that connects the update partial Kripke structure to the old one.
-	if (oblivious_obs_agents.size() > 0) {
-
 	}
 
 	it_kwmap = map_for_edges.find(get_pointed());
@@ -723,6 +724,40 @@ kstate kstate::execute_ontic(const action & act) const
 	}
 
 	return ret;
+}
+
+kstate kstate::execute_ontic(const action & act) const
+{
+	/** \bug What happen if ontic removes ignorance?
+	 * for example:
+	 * - act-> i,g then (i,g,h),(-i,g,h),(i,-g,h),(-i,-g,-h) are all equal to (i,g,h) in this case is \ref add_world
+	 * - act-> i,g then (-i,g,h) in a "different" k (i,-g,h) then two different states -- ontic shouldn't duplicate worlds
+	 * because there are not partial but can inherit the duplicates so
+	 *
+	 * What if the action does nothing?*/
+	return execute(act);
+
+}
+
+kstate kstate::execute_sensing(const action & act) const
+{
+	/** We assume that if you sense something that is in contrast with your belief the sensing wins.
+	 * Executing a sensing then is just:
+	 * - execute an ontic for the fully observants.
+	 * - link the new worlds (derived from the ontic) with copies of old (replica of the old) state for the partially.
+	 * - Link this copies with themselves for fully and partially.
+	 * - Link the old state for oblivious.*/
+	return execute(act);
+}
+
+kstate kstate::execute_announcement(const action & act) const
+{
+	/** We assume that if you announce something everyone believes at it, so:
+	 * - execute an ontic for the fully observants.
+	 * - link the new worlds (derived from the ontic) with copies of old (replica of the old) state for the partially.
+	 * - Link this copies with themselves for fully and partially.
+	 * - Link the old state for oblivious.*/
+	return execute(act);
 }
 
 void kstate::print() const
@@ -750,6 +785,7 @@ void kstate::print() const
 	kedge_ptr_set::const_iterator it_keset;
 	std::cout << "Edge List:" << std::endl;
 	for (it_keset = get_edges().begin(); it_keset != get_edges().end(); it_keset++) {
+
 		std::cout << "E-" << counter << ": " << it_keset->get_id();
 		std::cout << std::endl;
 		counter++;
@@ -767,6 +803,7 @@ void kstate::sum_set(std::set<T> & to_modify, const std::set<T> & factor2) const
 	/**\todo move to helper*/
 	typename std::set<T>::const_iterator it_kwset;
 	for (it_kwset = factor2.begin(); it_kwset != factor2.end(); it_kwset++) {
+
 		to_modify.insert(*it_kwset);
 	}
 }
@@ -777,6 +814,7 @@ void kstate::minus_set(std::set<T> & to_modify, const std::set<T> & factor2) con
 
 	typename std::set<T>::const_iterator it_kwset;
 	for (it_kwset = factor2.begin(); it_kwset != factor2.end(); it_kwset++) {
+
 		to_modify.erase(*it_kwset);
 	}
 }

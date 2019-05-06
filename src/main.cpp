@@ -57,8 +57,8 @@ void print_usage(char* prog_name)
 	std::cout << "		PP: Both the executability and the conditonal effects are cheched only on the state." << std::endl;
 	std::cout << "		WW: Both the executability and the conditonal effects are cheched in every world." << std::endl;
 
-	std::cout << "-ini_build @building_tech" << std::endl;
-	std::cout << "	Set the @building_tech that describes how the initial state will be build." << std::endl;
+	/*std::cout << "-ini_build @building_tech" << std::endl;
+	std::cout << "	Set the @building_tech that describes how the initial state will be build." << std::endl;*/
 
 	std::cout << "-spg" << std::endl;
 	std::cout << "	Find the plan using the sum planning graph heuristic." << std::endl;
