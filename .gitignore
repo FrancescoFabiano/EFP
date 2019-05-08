@@ -40,3 +40,6 @@ readme_old
 
 # Doxygen
 DoxygenDoc/
+
+# Dot files
+dot/

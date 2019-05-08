@@ -115,4 +115,4 @@ initially C([a,b], -at_b_3);
 %goal B(b,at_b1_1);
 %goal B(a,at_b2_3);
 %goal C([a,b], at_b1_1);
-goal C([a,b], at_b2_3);
+goal B(b, at_b2_3);

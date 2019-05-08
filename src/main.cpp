@@ -9,14 +9,19 @@
 #include <stdio.h>
 #include <string.h>
 #include <memory>
+#include <vector>
 
+
+
+#include "../include/search/planner.ipp"
 #include "../include/utilities/reader.h"
 #include "../include/domain/domain.h"
 
 #define VERSION "2.0"
 
+
 /**\todo: Understand this, why out of main?*/
-reader domain_reader;
+auto domain_reader = std::make_shared<reader>();
 
 void print_usage(char* prog_name)
 {
@@ -83,12 +88,17 @@ void print_usage(char* prog_name)
 
 int main(int argc, char** argv)
 {
+
 	bool debug = false;
 	bool is_global_obsv = true;
 	state_type state_struc = KRIPKE; //default
 	domain_restriction ini_restriction = S5; //default
 	domain_restriction goal_restriction = NONE; //default
 	action_check act_check = EXE_POINTED__COND_WORLD; //default
+
+	bool execute_given_actions = false;
+	std::vector<std::string> given_actions;
+
 
 
 	std::cout << "EFP version " << VERSION <<
@@ -188,6 +198,18 @@ int main(int argc, char** argv)
 				std::cerr << "Wrong specification for '-act_obsv'; use 'PP' or 'PW' or 'WW'." << std::endl;
 				exit(1);
 			}
+		} else if (strcmp(argv[i], "-e") == 0) {
+			execute_given_actions = true;
+
+			if (i == argc - 1)
+				print_usage(argv[0]);
+			i++;
+
+			while (i < argc && argv[i][0] != '-') {
+				given_actions.push_back(std::string(argv[i++]));
+			}
+		} else {
+			print_usage(argv[0]);
 		}
 
 
@@ -219,16 +241,41 @@ int main(int argc, char** argv)
 	}
 
 	//timer.start(READ_TIMER);
-	domain_reader.read();
+	domain_reader->read();
 	if (debug) {
-		domain_reader.print();
+		domain_reader->print();
 	}
 
-	domain::get_instance().set_domain(std::unique_ptr<reader>(&domain_reader), state_struc, ini_restriction, goal_restriction, is_global_obsv, act_check);
+	//Domain building
+	domain::get_instance().set_domain(debug, domain_reader, ini_restriction, goal_restriction, is_global_obsv, act_check);
+	domain::get_instance().build();
 
-	if (!domain::get_instance().build(debug)) {
-		std::cerr << "Error in building the domain.";
+
+	bool founded_goal = false;
+	switch ( state_struc ) {
+	case KRIPKE:
+	{
+		planner< state<kstate> > m_planner;
+		if (execute_given_actions)
+			m_planner.execute_given_actions(given_actions);
+		else
+			founded_goal = m_planner.search_BFS();
+		break;
+	}
+	case POSSIBILITIES:
+	case OBDD:
+	default:
+		std::cerr << "\nNot implemented yet\n";
 		exit(1);
+	}
+
+	//planner< state<kstate> > m_planner;
+
+
+	if (founded_goal) {
+		std::cout << "\n*****THE END*****\n";
+	} else {
+		std::cout << "\n*****THE SAD END*****\n";
 	}
 	//timer.end(READ_TIMER);
 	//planner.main();

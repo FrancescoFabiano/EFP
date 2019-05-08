@@ -1,8 +1,8 @@
 /**
  * \class state
- * \brief Templatic Class that encodes a state of the *planner*.
+ * \brief Templatic Class that encodes a state of planner.h.
  *
- * \details  This is the *TEMPLATE* and will be used as black box from \ref planner:
+ * \details  This is the *TEMPLATE* and will be used as black box from planner.h:
  * its implementation will depend on the initial choices.
  *
  * This class should be used to check entailment and to produce successors.
@@ -20,6 +20,7 @@
  */
 
 #pragma once
+#include <fstream>
 
 #include "kripke/kstate.h"
 
@@ -43,7 +44,7 @@ private:
      *    - \ref POSSIBILITIES
      *    - \ref OBDD*/
     T m_representation;
- 
+
     /** \brief The list of executed \ref action to get from the initial state to *this*.
      * 
      * Is a std::vector because we can repeat the same action.
@@ -62,6 +63,12 @@ private:
      *
      * @param[in] to_set: the list of \ref action_id object to copy in \ref m_executed_actions_id.*/
     void set_executed_actions(const action_id_list & to_set);
+
+    /** \brief Function that add and \ref action_id to \ref m_executed_actions_id.
+     *
+     * @param[in] to_add: the \ref action_id to ad to \ref m_executed_actions_id.*/
+    void add_executed_action(const action & to_add);
+
     /** \brief Setter for the field \ref m_plan_length.
      *
      * @param[in] to_set: the length of the plan to copy in \ref m_plan_length.*/
@@ -177,15 +184,21 @@ public:
      * @param[in] agent_number: the number of \ref agent in the \ref domain, used for the prune construction.*/
     void build_initial();
 
-
     /** \brief Function that checks if a given action is executable in *this*.
      *  
      * @see action.
      *  
      * @param[in] act: The action to be checked on *this*.
-     * @return true: \p act is executable in *this*;
-     * @return false: \p act is not executable in *this**/
+     * @return true: \p act is executable in *this*.
+     * @return false: \p act is not executable in *this*.*/
     bool is_executable(const action & act) const;
+
+    /** \brief Function that checks if *this* is a goal state.
+     *
+     * @return true: if *this* is a goal state.
+     * @return false: otherwise.*/
+    bool is_goal() const;
+
 
     /** \brief Function that compute the successor of *this* given an \ref action.
      * 
@@ -208,7 +221,10 @@ public:
      * @return false: otherwise.*/
     bool operator=(const state<T> & to_copy);
 
-        /** \brief Function that prints the information of *this*.*/
+    /** \brief Function that prints the information of *this*.*/
     void print() const;
+
+    /** \brief Function that prints the information of *this* in a Graphviz file.*/
+    void print_graphviz() const;
 };
 

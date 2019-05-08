@@ -7,6 +7,10 @@
  * \date April 9, 2019
  */
 
+#include <iostream>
+#include <tuple>
+
+
 //int count = 0;
 
 #include "kstate.h"
@@ -577,9 +581,14 @@ void kstate::add_ret_ontic_worlds_internal(const kworld_ptr & start, kworld_ptr_
 
 	fluent_set world_description = start.get_fluent_set();
 	//Execute the all the effects
+	//std::cout << "\n\n*************************" << act.get_name() << "*************************\n";
 	for (it_eff = effects.begin(); it_eff != effects.end(); it_eff++) {
 		world_description = helper::ontic_exec(*it_eff, world_description);
+		//printer::get_instance().print_list(*it_eff);
 	}
+	//std::cout << "\n*************************" << act.get_name() << "*************************\n";
+
+
 	//Insert into a map the pair <old_world, new_world>.
 	map_for_edges.insert(std::pair<kworld_ptr, kworld_ptr>(start, ret.add_rep_world(kworld(world_description))));
 	for (it_agset = fully_obs_agents.begin(); it_agset != fully_obs_agents.end(); it_agset++) {
@@ -602,7 +611,7 @@ void kstate::add_ret_ontic_worlds_internal(const kworld_ptr & start, kworld_ptr_
 					exit(1);
 				}
 
-				if (act_check == EXE_POINTED__COND_POINTED) {
+				if (act_check == EXE_POINTED__COND_POINTED /*|| act.get_type() != ONTIC*/) {
 					add_ret_ontic_worlds_internal(tmp_kworld_ptr, reached, ret, effects, fully_obs_agents, act, act_check, map_for_edges);
 				} else {
 					add_ret_ontic_worlds(tmp_kworld_ptr, reached, ret, fully_obs_agents, act, act_check, map_for_edges);
@@ -621,13 +630,19 @@ void kstate::add_ret_ontic_worlds(const kworld_ptr & start, kworld_ptr_set &reac
 	case (EXE_POINTED__COND_POINTED):
 	{
 		//The action executability is already be checked in state_T
+		//if (act.get_type() == ONTIC)
 		effects = get_effects_if_entailed(act.get_effects(), get_pointed());
+		//else
+		//	effects = get_sensing_effects_if_entailed(act.get_effects(), get_pointed());
 		break;
 	}
 	case (EXE_POINTED__COND_WORLD):
 	{
 		//The action executability is already be checked in state_T
+		//if (act.get_type() == ONTIC)
 		effects = get_effects_if_entailed(act.get_effects(), start);
+		//else
+		//	effects = get_sensing_effects_if_entailed(act.get_effects(), get_pointed());
 		break;
 	}
 	case (EXE_WORLD__COND_WORLD):
@@ -651,6 +666,7 @@ void kstate::add_ret_ontic_worlds(const kworld_ptr & start, kworld_ptr_set &reac
 
 kstate kstate::execute(const action& act) const
 {
+
 	//The execution are all the same if we consider that false beliefs don't count.
 	kstate ret;
 
@@ -661,6 +677,16 @@ kstate kstate::execute(const action& act) const
 	agent_set oblivious_obs_agents = domain::get_instance().get_agents();
 	minus_set(oblivious_obs_agents, fully_obs_agents);
 	minus_set(oblivious_obs_agents, partially_obs_agents);
+
+	//DEBUG PRINT
+	/*if (act.get_name().compare("b_check_1") == 0) {
+		std::cout << "\nFully observant: ";
+		printer::get_instance().print_list_ag(fully_obs_agents);
+		std::cout << "\nPartially observant: ";
+		printer::get_instance().print_list_ag(partially_obs_agents);
+		std::cout << "\nOblivious observant: ";
+		printer::get_instance().print_list_ag(oblivious_obs_agents);
+	}*/
 
 	if (oblivious_obs_agents.size() > 0) {
 		ret = (*this);
@@ -697,14 +723,14 @@ kstate kstate::execute(const action& act) const
 				label = it_kedptr->get_label();
 				if (fully_obs_agents.find(label) != fully_obs_agents.end()) {
 					ret.add_edge(kedge(from_new, to_new, label));
-				} else if (partially_obs_agents.find(label) != fully_obs_agents.end()) {
+				} else if (partially_obs_agents.find(label) != partially_obs_agents.end()) {
 					//Add the uncertainty for the partial observers
 					is_new = false;
 					to_new = ret.add_rep_world(*(to_old.get_ptr()), from_new.get_repetition(), is_new);
 					ret.add_edge(kedge(from_new, to_new, label));
 					if (is_new) {
 						for (it_agset = fully_obs_agents.begin(); it_agset != fully_obs_agents.end(); it_agset++) {
-							ret.add_edge(kedge(from_new, to_new, *it_agset));
+							ret.add_edge(kedge(to_new, to_new, *it_agset));
 						}
 					}
 				} else {
@@ -747,6 +773,8 @@ kstate kstate::execute_sensing(const action & act) const
 	 * - link the new worlds (derived from the ontic) with copies of old (replica of the old) state for the partially.
 	 * - Link this copies with themselves for fully and partially.
 	 * - Link the old state for oblivious.*/
+	/**\bug Wrong because the fluent changes accordingly to the pointed world*/
+
 	return execute(act);
 }
 
@@ -757,6 +785,8 @@ kstate kstate::execute_announcement(const action & act) const
 	 * - link the new worlds (derived from the ontic) with copies of old (replica of the old) state for the partially.
 	 * - Link this copies with themselves for fully and partially.
 	 * - Link the old state for oblivious.*/
+	/**\bug Wrong because the fluent changes accordingly to the pointed world*/
+
 	return execute(act);
 }
 
@@ -786,14 +816,306 @@ void kstate::print() const
 	std::cout << "Edge List:" << std::endl;
 	for (it_keset = get_edges().begin(); it_keset != get_edges().end(); it_keset++) {
 
-		std::cout << "E-" << counter << ": " << it_keset->get_id();
+		std::cout << "E-" << counter << ": (";
+		printer::get_instance().print_list(it_keset->get_from().get_fluent_set());
+		std::cout << "," << it_keset->get_from().get_repetition();
+		std::cout << ") - (";
+		printer::get_instance().print_list(it_keset->get_to().get_fluent_set());
+		std::cout << "," << it_keset->get_to().get_repetition();
+		std::cout << ") ag:" << domain::get_instance().get_grounder().deground_agent(it_keset->get_label());
 		std::cout << std::endl;
 		counter++;
 
 	}
 	std::cout << "*******************************************************************" << std::endl;
-
 }
+
+void kstate::print_graphviz(std::ostream& graphviz) const
+{
+	fluent_set::const_iterator it_fl;
+
+	graphviz << "//WORLDS List:" << std::endl;
+	graphviz << "	node [shape = circle];\n";
+	kworld_ptr_set::const_iterator it_kwset;
+	for (it_kwset = get_worlds().begin(); it_kwset != get_worlds().end(); it_kwset++) {
+
+		graphviz << "	\"";
+		for (it_fl = it_kwset->get_fluent_set().begin(); it_fl != it_kwset->get_fluent_set().end(); it_fl++) {
+			graphviz << domain::get_instance().get_grounder().deground_fluent(*it_fl);
+			graphviz << "_";
+		}
+		graphviz << it_kwset->get_repetition() << "\";\n";
+	}
+
+
+	graphviz << "	node [shape = doublecircle]; \"";
+	for (it_fl = get_pointed().get_fluent_set().begin(); it_fl != get_pointed().get_fluent_set().end(); it_fl++) {
+		graphviz << domain::get_instance().get_grounder().deground_fluent(*it_fl);
+		graphviz << "_";
+	}
+	graphviz << get_pointed().get_repetition() << "\";\n";
+
+	graphviz << "\n\n";
+	graphviz << "//RANKS List:" << std::endl;
+	for (unsigned int rank = 0; rank <= get_max_depth(); rank++) {
+		graphviz << "	{rank = same; ";
+		for (it_kwset = get_worlds().begin(); it_kwset != get_worlds().end(); it_kwset++) {
+
+			if (rank == it_kwset->get_repetition()) {
+				graphviz << "\"";
+				for (it_fl = it_kwset->get_fluent_set().begin(); it_fl != it_kwset->get_fluent_set().end(); it_fl++) {
+					graphviz << domain::get_instance().get_grounder().deground_fluent(*it_fl);
+					graphviz << "_";
+				}
+				graphviz << it_kwset->get_repetition() << "\"; ";
+			}
+
+		}
+		graphviz << "}\n";
+	}
+
+	graphviz << "\n\n";
+	graphviz << "//EDGES List:" << std::endl;
+
+	std::map < std::tuple<std::string, std::string>, std::set<std::string> > edges;
+
+	kedge_ptr_set::const_iterator it_keset;
+	std::tuple<std::string, std::string> tmp_tuple;
+	std::string tmp_string = "";
+	for (it_keset = get_edges().begin(); it_keset != get_edges().end(); it_keset++) {
+		tmp_string = "";
+		for (it_fl = it_keset->get_from().get_fluent_set().begin(); it_fl != it_keset->get_from().get_fluent_set().end(); it_fl++) {
+			tmp_string += domain::get_instance().get_grounder().deground_fluent(*it_fl);
+			tmp_string += "_";
+		}
+		tmp_string += std::to_string(it_keset->get_from().get_repetition());
+		std::get<0>(tmp_tuple) = tmp_string;
+
+		tmp_string = "";
+		for (it_fl = it_keset->get_to().get_fluent_set().begin(); it_fl != it_keset->get_to().get_fluent_set().end(); it_fl++) {
+			tmp_string += domain::get_instance().get_grounder().deground_fluent(*it_fl);
+			tmp_string += "_";
+		}
+		tmp_string += std::to_string(it_keset->get_to().get_repetition());
+		std::get<1>(tmp_tuple) = tmp_string;
+
+		edges[tmp_tuple].insert(domain::get_instance().get_grounder().deground_agent(it_keset->get_label()));
+	}
+
+
+	std::map < std::tuple<std::string, std::string>, std::set < std::string>>::iterator it_map;
+	std::map < std::tuple<std::string, std::string>, std::set < std::string>>::const_iterator it_map_2;
+
+	std::map < std::tuple<std::string, std::string>, std::set < std::string>> to_print_double;
+	for (it_map = edges.begin(); it_map != edges.end(); it_map++) {
+		for (it_map_2 = it_map; it_map_2 != edges.end(); it_map_2++) {
+			if (std::get<0>(it_map->first).compare(std::get<1>(it_map_2->first)) == 0) {
+				if (std::get<1>(it_map->first).compare(std::get<0>(it_map_2->first)) == 0) {
+					if (it_map->second == it_map_2->second) {
+						if (std::get<0>(it_map->first).compare(std::get<1>(it_map->first)) != 0) {
+							to_print_double[it_map->first] = it_map->second;
+							edges.erase(it_map_2);
+							it_map = edges.erase(it_map);
+						}
+					}
+				}
+			}
+		}
+	}
+
+
+
+	std::set<std::string>::const_iterator it_stset;
+	for (it_map = edges.begin(); it_map != edges.end(); it_map++) {
+		graphviz << "	\"";
+		graphviz << std::get<0>(it_map->first);
+		graphviz << "\" -> \"";
+		graphviz << std::get<1>(it_map->first);
+		graphviz << "\" ";
+		graphviz << "[ label = \"";
+		tmp_string = "";
+		for (it_stset = it_map->second.begin(); it_stset != it_map->second.end(); it_stset++) {
+			tmp_string += *it_stset;
+			tmp_string += ",";
+		}
+		tmp_string.pop_back();
+		graphviz << tmp_string;
+		graphviz << "\" ];\n";
+	}
+
+	for (it_map = to_print_double.begin(); it_map != to_print_double.end(); it_map++) {
+		graphviz << "	\"";
+		graphviz << std::get<0>(it_map->first);
+		graphviz << "\" -> \"";
+		graphviz << std::get<1>(it_map->first);
+		graphviz << "\" ";
+		graphviz << "[ dir=both label = \"";
+		tmp_string = "";
+		for (it_stset = it_map->second.begin(); it_stset != it_map->second.end(); it_stset++) {
+			tmp_string += *it_stset;
+			tmp_string += ",";
+		}
+		tmp_string.pop_back();
+		graphviz << tmp_string;
+		graphviz << "\" ];\n";
+	}
+}
+/*for (it_keset = get_edges().begin(); it_keset != get_edges().end(); it_keset++) {
+	graphviz << "	\"";
+	for (it_fl = it_keset->get_from().get_fluent_set().begin(); it_fl != it_keset->get_from().get_fluent_set().end(); it_fl++) {
+		graphviz << domain::get_instance().get_grounder().deground_fluent(*it_fl);
+		graphviz << "_";
+	}
+	graphviz << it_keset->get_from().get_repetition() << "\" -> \"";
+
+	for (it_fl = it_keset->get_to().get_fluent_set().begin(); it_fl != it_keset->get_to().get_fluent_set().end(); it_fl++) {
+		graphviz << domain::get_instance().get_grounder().deground_fluent(*it_fl);
+		graphviz << "_";
+	}
+	graphviz << it_keset->get_to().get_repetition() << "\" ";
+
+	graphviz << "[ label = \"" << domain::get_instance().get_grounder().deground_agent(it_keset->get_label()) << "\" ];\n";
+}
+}
+
+void kstate::print_graphviz(std::ostream& graphviz) const
+{
+fluent_set::const_iterator it_fl;
+
+graphviz << "//WORLDS List:" << std::endl;
+graphviz << "	node [shape = circle];\n\n";
+kworld_ptr_set::const_iterator it_kwset;
+char first_state = 'Q';
+std::map <std::string, std::string> names;
+std::string description = "";
+for (it_kwset = get_worlds().begin(); it_kwset != get_worlds().end(); it_kwset++) {
+	description = "";
+	for (it_fl = it_kwset->get_fluent_set().begin(); it_fl != it_kwset->get_fluent_set().end(); it_fl++) {
+		description += domain::get_instance().get_grounder().deground_fluent(*it_fl);
+		description += ",";
+	}
+	description.pop_back();
+	names[description] = description;
+	names[description].append("_");
+	graphviz << "	\"" << names[description] << it_kwset->get_repetition() << "\";\n";
+}
+
+
+graphviz << "	node [shape = doublecircle]";
+description = "";
+for (it_fl = get_pointed().get_fluent_set().begin(); it_fl != get_pointed().get_fluent_set().end(); it_fl++) {
+	description += domain::get_instance().get_grounder().deground_fluent(*it_fl);
+	description += ",";
+}
+description.pop_back();
+graphviz << " \"" << names[description] << get_pointed().get_repetition() << "\";\n";
+
+graphviz << "\n\n";
+graphviz << "//RANKS List:" << std::endl;
+for (unsigned int rank = 0; rank <= get_max_depth(); rank++) {
+	graphviz << "	{rank = same; ";
+	for (it_kwset = get_worlds().begin(); it_kwset != get_worlds().end(); it_kwset++) {
+
+		if (rank == it_kwset->get_repetition()) {
+			description = "";
+			for (it_fl = get_pointed().get_fluent_set().begin(); it_fl != get_pointed().get_fluent_set().end(); it_fl++) {
+				description += domain::get_instance().get_grounder().deground_fluent(*it_fl);
+				description += ",";
+			}
+			description.pop_back();
+			graphviz << " \"" << names[description] << rank << "\";";
+		}
+
+	}
+	graphviz << "}\n";
+}
+
+graphviz << "\n\n";
+graphviz << "//EDGES List:" << std::endl;
+
+std::map < std::tuple<std::string, std::string>, std::set<std::string> > edges;
+
+kedge_ptr_set::const_iterator it_keset;
+std::tuple<std::string, std::string> tmp_tuple;
+for (it_keset = get_edges().begin(); it_keset != get_edges().end(); it_keset++) {
+	description = "";
+	for (it_fl = it_keset->get_from().get_fluent_set().begin(); it_fl != it_keset->get_from().get_fluent_set().end(); it_fl++) {
+		description += domain::get_instance().get_grounder().deground_fluent(*it_fl);
+		description += ",";
+	}
+	description.pop_back();
+	std::get<0>(tmp_tuple) = names[description] + std::to_string(it_keset->get_from().get_repetition());
+
+	description = "";
+	for (it_fl = it_keset->get_to().get_fluent_set().begin(); it_fl != it_keset->get_to().get_fluent_set().end(); it_fl++) {
+		description += domain::get_instance().get_grounder().deground_fluent(*it_fl);
+		description += ",";
+	}
+	description.pop_back();
+	std::get<1>(tmp_tuple) = names[description] + std::to_string(it_keset->get_to().get_repetition());
+
+	edges[tmp_tuple].insert(domain::get_instance().get_grounder().deground_agent(it_keset->get_label()));
+}
+
+
+std::map < std::tuple<std::string, std::string>, std::set < std::string>>::iterator it_map;
+std::map < std::tuple<std::string, std::string>, std::set < std::string>>::const_iterator it_map_2;
+
+std::map < std::tuple<std::string, std::string>, std::set < std::string>> to_print_double;
+for (it_map = edges.begin(); it_map != edges.end(); it_map++) {
+	for (it_map_2 = it_map; it_map_2 != edges.end(); it_map_2++) {
+		if (std::get<0>(it_map->first).compare(std::get<1>(it_map_2->first)) == 0) {
+			if (std::get<1>(it_map->first).compare(std::get<0>(it_map_2->first)) == 0) {
+				if (it_map->second == it_map_2->second) {
+					if (std::get<0>(it_map->first).compare(std::get<1>(it_map->first)) != 0) {
+						to_print_double[it_map->first] = it_map->second;
+						edges.erase(it_map_2);
+						it_map = edges.erase(it_map);
+					}
+				}
+			}
+		}
+	}
+}
+
+
+
+std::set<std::string>::const_iterator it_stset;
+for (it_map = edges.begin(); it_map != edges.end(); it_map++) {
+	graphviz << "	\"";
+	graphviz << std::get<0>(it_map->first);
+	graphviz << "\" -> \"";
+	graphviz << std::get<1>(it_map->first);
+	graphviz << "\" ";
+	graphviz << "[ label = \"";
+	description = "";
+	for (it_stset = it_map->second.begin(); it_stset != it_map->second.end(); it_stset++) {
+		description += *it_stset;
+		description += ",";
+	}
+	description.pop_back();
+	graphviz << description;
+	graphviz << "\" ];\n";
+}
+
+for (it_map = to_print_double.begin(); it_map != to_print_double.end(); it_map++) {
+	graphviz << "	\"";
+	graphviz << std::get<0>(it_map->first);
+	graphviz << "\" -> \"";
+	graphviz << std::get<1>(it_map->first);
+	graphviz << "\" ";
+	graphviz << "[ dir=both label = \"";
+	description = "";
+	for (it_stset = it_map->second.begin(); it_stset != it_map->second.end(); it_stset++) {
+		description += *it_stset;
+		description += ",";
+	}
+	description.pop_back();
+	graphviz << description;
+	graphviz << "\" ];\n";
+}
+
+}*/
 
 /******************************MOVE TO HELPER*********************************/
 
@@ -845,9 +1167,55 @@ fluent_formula kstate::get_effects_if_entailed(const effects_map & map, const kw
 	}
 	if (ret.size() > 1) {
 
-		std::cerr << "\nNon determinism in action effect is not supported.\n";
+		std::cerr << "\nNon determinism in action effect is not supported-1.\n";
 		exit(1);
 	}
 	return ret;
-
 }
+
+/*fluent_formula kstate::get_sensing_effects_if_entailed(const effects_map & map, const kworld_ptr & start) const
+{ 	fluent_formula ret;
+	fluent_formula retret;
+	fluent_set ret_tmp;
+
+	effects_map::const_iterator it_map;
+	for (it_map = map.begin(); it_map != map.end(); it_map++) {
+		if (entails(it_map->second, start)) {
+			if (start.get_ptr()->entails(it_map->first))
+				ret = helper::and_ff(ret, it_map->first);
+			else {
+				fluent_formula tmpp = it_map->first;
+				if (tmpp.size() == 1) {
+					fluent_set tmp = *(tmpp.begin());
+					if (tmp.size() == 1) {
+						fluent temp = *(tmp.begin());
+						if (temp % 2 == 0) {
+							temp = temp + 1;
+						} else {
+							temp = temp - 1;
+						}
+						ret_tmp.insert(temp);
+						retret.insert(ret_tmp);
+
+					} else {
+						std::cerr << "DEBUG--ERROR in sensing;";
+						exit(1);
+					}
+				} else {
+					std::cerr << "DEBUG--ERROR in sensing;";
+					exit(1);
+				}
+				ret = helper::and_ff(ret, retret);
+				retret.erase(ret_tmp);
+			}
+
+		}
+
+	}
+	if (ret.size() > 1) {
+
+		std::cerr << "\nNon determinism in action effect is not supported-2.\n";
+		exit(1);
+	}
+	return ret;
+}*/

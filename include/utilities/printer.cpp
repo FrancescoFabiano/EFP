@@ -49,7 +49,7 @@ void printer::print_list(const string_set_set& to_print)
 
 	for (it_sll = to_print.begin(); it_sll != to_print.end(); it_sll++) {
 		if (!first_print) {
-			std::cout << "OR";
+			std::cout << " OR ";
 		}
 		first_print = false;
 		print_list(*it_sll);
@@ -87,7 +87,7 @@ void printer::print_list(const fluent_formula& to_print)
 
 		for (it_sll = to_print.begin(); it_sll != to_print.end(); it_sll++) {
 			if (!first_print) {
-				std::cout << "OR";
+				std::cout << " OR ";
 			}
 			first_print = false;
 			print_list(*it_sll);
@@ -104,7 +104,7 @@ void printer::print_list(const formula_list& to_print)
 
 	for (it_sll = to_print.begin(); it_sll != to_print.end(); it_sll++) {
 		if (!first_print) {
-			std::cout << "AND";
+			std::cout << " AND ";
 		}
 		first_print = false;
 		it_sll->print();
@@ -123,5 +123,45 @@ void printer::print_list(const kworld_ptr_set& to_print)
 		}
 		first_print = false;
 		std::cout << it_sll->get_id();
+	}
+}
+
+void printer::print_list(const action_id_list& to_print)
+{
+	bool first_print = true;
+	action_id_list::const_iterator it_sll;
+	//Iterate on the \p to_print and print its content using ::to_print(const string_set&) seprated by a OR to represent a DNF.
+
+	for (it_sll = to_print.begin(); it_sll != to_print.end(); it_sll++) {
+		if (!first_print) {
+			std::cout << ", ";
+		}
+		first_print = false;
+
+		if (setted_grounder) {
+			std::cout << (m_grounder.deground_action(*it_sll));
+		} else {
+			std::cout << *it_sll;
+		}
+	}
+}
+
+void printer::print_list_ag(const agent_set& to_print)
+{
+	bool first_print = true;
+	agent_set::const_iterator it_sll;
+	//Iterate on the \p to_print and print its content using ::to_print(const string_set&) seprated by a OR to represent a DNF.
+
+	for (it_sll = to_print.begin(); it_sll != to_print.end(); it_sll++) {
+		if (!first_print) {
+			std::cout << ", ";
+		}
+		first_print = false;
+
+		if (setted_grounder) {
+			std::cout << (m_grounder.deground_agent(*it_sll));
+		} else {
+			std::cout << *it_sll;
+		}
 	}
 }

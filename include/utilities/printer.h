@@ -14,6 +14,8 @@
  */
 
 #pragma once
+#include <fstream>
+
 #include "define.h"
 
 #include "../domain/grounder.h"
@@ -89,6 +91,17 @@ public:
      * @param[in] to_print: the \ref kworld_ptr_set to be printed.*/
     void print_list(const kworld_ptr_set& to_print);
 
+
+    /** \brief Function used to print all the \ref action name inside \p to_print.
+     * 
+     * @param[in] to_print: the \ref action_id_list to be printed.*/
+    void print_list(const action_id_list& to_print);
+
+    /** \brief Function used to print all the \ref agent name inside \p to_print.
+     * 
+     * @param[in] to_print: the \ref agent_set to be printed.*/
+    void print_list_ag(const agent_set& to_print);
+    
     /** \brief Copy constructor removed since is Singleton class. */
     printer(printer const&) = delete;
     /** \brief Copy operator removed since Singleton class. */

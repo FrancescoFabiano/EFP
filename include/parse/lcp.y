@@ -14,7 +14,7 @@ string_set_set join_SL2(string_set_set, string_set_set);
 void print_string_set(string_set);
 void print_string_set_set(string_set_set);
 
-extern reader domain_reader;
+extern std::shared_ptr<reader> domain_reader;
 
 %}
 
@@ -119,12 +119,12 @@ domain
 init_spec 
 goal_spec
  { 
-  domain_reader.m_fluents = *$1;
-  domain_reader.m_actions = *$2;
-  domain_reader.m_agents = *$3;
-  domain_reader.m_propositions = *$4;
-  domain_reader.m_bf_initially = *$5;
-  domain_reader.m_bf_goal = *$6;
+  domain_reader->m_fluents = *$1;
+  domain_reader->m_actions = *$2;
+  domain_reader->m_agents = *$3;
+  domain_reader->m_propositions = *$4;
+  domain_reader->m_bf_initially = *$5;
+  domain_reader->m_bf_goal = *$6;
 }
 ;
 
@@ -365,7 +365,7 @@ if_part_bf:
 /* fail */
 {
   $$ = new belief_formula;
-  $$->set_formula_type(BF_TYPE_FAIL);
+  $$->set_formula_type(BF_EMPTY);
 }
 |
 IF belief_formula {

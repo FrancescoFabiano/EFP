@@ -6,7 +6,6 @@ OBJS	=	$(BUILD_DIR)/bison.o $(BUILD_DIR)/lex.o $(BUILD_DIR)/main.o \
 			$(BUILD_DIR)/kstore.o \
 			$(BUILD_DIR)/kedge.o $(BUILD_DIR)/kworld.o $(BUILD_DIR)/kstate.o \
 			$(BUILD_DIR)/reader.o
-
 CC	= g++
 CFLAGS	= -g -Wall -ansi -std=c++14
 
@@ -27,6 +26,7 @@ STATES_DIR = $(INCLUDE_DIR)/states
 S_KRIPE_DIR = $(STATES_DIR)/kripke
 S_POSSIBILITY_DIR = $(STATES_DIR)/possibilities
 UTILITIES_DIR = $(INCLUDE_DIR)/utilities
+SEARCH_DIR = $(INCLUDE_DIR)/search
 
 
 #-----------------------------------PARSE FILES-----------------------------------#
@@ -59,7 +59,9 @@ $(BUILD_DIR)/bison.c:	$(PARSE_DIR)/lcp.y
 #-----------------------------------MAIN FILE-----------------------------------#
 $(BUILD_DIR)/main.o:	$(SRC_DIR)/main.cpp \
 						$(UTILITIES_DIR)/reader.h \
-						$(DOMAIN_DIR)/domain.h
+						$(DOMAIN_DIR)/domain.h \
+						$(SEARCH_DIR)/planner.h $(SEARCH_DIR)/planner.ipp \
+						$(STATES_DIR)/state_T.h $(STATES_DIR)/state_T.ipp
 		$(dir_guard)
 		echo "#define BUILT_DATE \"`date`\"" > $(BUILD_DIR)/built_date
 		cat $(BUILD_DIR)/built_date $(SRC_DIR)/main.cpp > $(BUILD_DIR)/main.temp.cpp
@@ -88,15 +90,19 @@ $(BUILD_DIR)/helper.o: $(UTILITIES_DIR)/helper.cpp $(UTILITIES_DIR)/helper.h \
 		$(dir_guard)
 		$(CC) $(CFLAGS) -c $(UTILITIES_DIR)/helper.cpp -o $(BUILD_DIR)/helper.o
 
-####FORMULAE
-
-
-			
+####FORMULAE			
 $(BUILD_DIR)/belief_formula.o: $(FORMULA_DIR)/belief_formula.cpp $(FORMULA_DIR)/belief_formula.h \
 							   $(DOMAIN_DIR)/grounder.h \
 							   $(UTILITIES_DIR)/define.h
 		$(dir_guard)
 		$(CC) $(CFLAGS) -c $(FORMULA_DIR)/belief_formula.cpp -o $(BUILD_DIR)/belief_formula.o
+
+####SEARCH		
+#$(BUILD_DIR)/planner.o: $(SEARCH_DIR)/planner.cpp $(SEARCH_DIR)/planner.h \
+#					    $(STATES_DIR)/state_T.h $(STATES_DIR)/state_T.ipp \
+#						$(DOMAIN_DIR)/domain.h
+#		$(dir_guard)
+#		$(CC) $(CFLAGS) -c $(SEARCH_DIR)/planner.cpp -o $(BUILD_DIR)/planner.o
 
 ####ACTIONS
 $(BUILD_DIR)/action.o: $(ACTION_DIR)/action.cpp $(ACTION_DIR)/action.h \
@@ -163,8 +169,7 @@ $(BUILD_DIR)/grounder.o: $(DOMAIN_DIR)/grounder.cpp $(DOMAIN_DIR)/grounder.h \
 $(BUILD_DIR)/domain.o: $(DOMAIN_DIR)/domain.cpp $(DOMAIN_DIR)/domain.h \
 					   $(DOMAIN_DIR)/initially.h $(DOMAIN_DIR)/grounder.h \
 					   $(UTILITIES_DIR)/reader.h $(UTILITIES_DIR)/define.h \
-					   $(ACTION_DIR)/action.h \
-					   $(STATES_DIR)/state_T.h $(STATES_DIR)/state_T.ipp
+					   $(ACTION_DIR)/action.h
 		$(dir_guard)
 		$(CC) $(CFLAGS) -c $(DOMAIN_DIR)/domain.cpp -o $(BUILD_DIR)/domain.o
 

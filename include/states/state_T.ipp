@@ -6,8 +6,10 @@
  * \author Francesco Fabiano.
  * \date April 11, 2019
  */
+#include <fstream>
 
 #include "state_T.h"
+#include "../domain/domain.h"
 
 template <class T>
 state<T>::state()
@@ -85,6 +87,12 @@ void state<T>::set_executed_actions(const action_id_list & executed)
 }
 
 template <class T>
+void state<T>::add_executed_action(const action & executed)
+{
+	m_executed_actions_id.push_back(executed.get_id());
+}
+
+template <class T>
 void state<T>::set_plan_length(unsigned short length)
 {
 	m_plan_length = length;
@@ -133,6 +141,8 @@ void state<T>::build_initial()
 	//To implement constructor
 	//representation = T(init);
 	m_representation.build_initial();
+	set_plan_length(0);
+	//set_heuristic_value(get_representation().compute_heuristic_value());
 }
 
 template <class T>
@@ -140,17 +150,17 @@ state<T> state<T>::compute_succ(const action & act) const
 {
 	/**\todo Myabe is better if used in \ref planner or \ref domain (myabe a bool as **param[out]**.*/
 	state<T> ret;
-	if (is_executable(act)) {
-		ret.set_representation(get_representation().compute_succ(act));
-		//ret.set_representation(get_representation().compute_succ(act));
-		//ret.set_executed_actions(get_executed_actions().add(act.get_id()));
-		//ret.set_plan_length(get_plan_length() + 1);
-		//set_heuristic_value(get_representation().compute_heuristic_value());
-		return ret;
-	} else {
+	//if (is_executable(act)) {
+	ret.set_representation(get_representation().compute_succ(act));
+	ret.set_executed_actions(get_executed_actions());
+	ret.add_executed_action(act);
+	ret.set_plan_length(get_plan_length() + 1);
+	//set_heuristic_value(get_representation().compute_heuristic_value());
+	return ret;
+	/*} else {
 		ret = (*this);
 	}
-	return ret;
+	return ret;*/
 }
 
 template <class T>
@@ -160,12 +170,47 @@ bool state<T>::is_executable(const action & act) const
 }
 
 template <class T>
+bool state<T>::is_goal() const
+{
+	return entails(domain::get_instance().get_goal_description());
+}
+
+template <class T>
 void state<T>::print() const
 {
-	std::cout << "\n**************************\n";
-	m_representation.print();
+	std::cout << "\n****************************************************\n";
+	if (domain::get_instance().get_debug()) {
+		m_representation.print();
+	}
 	//ret.set_representation(get_representation().compute_succ(act));
-	//ret.set_executed_actions(get_executed_actions().add(act.get_id()));
-	//ret.set_plan_length(get_plan_length() + 1);
-	//set_heuristic_value(get_representation().compute_heuristic_value());
+	std::cout << "Executed actions: ";
+	printer::get_instance().print_list(get_executed_actions());
+	std::cout << "\nPlan Length: " << get_plan_length();
+	//std::cout << "\nHeuristic Value Length: " << get_heuristic_value();
+}
+
+template <class T>
+void state<T>::print_graphviz() const
+{
+
+	std::string exec_act_names;
+	action_id_list::const_iterator it_act;
+	if (get_executed_actions().size() == 0) {
+		exec_act_names = "ini";
+	} else {
+		for (it_act = get_executed_actions().begin(); it_act != get_executed_actions().end(); it_act++) {
+			exec_act_names += domain::get_instance().get_grounder().deground_action(*it_act);
+			exec_act_names += "_";
+		}
+		exec_act_names.pop_back();
+	}
+
+	std::ofstream graphviz;
+	graphviz.open("dot/" + exec_act_names + ".dot");
+	graphviz << "digraph K_structure{\n";
+	graphviz << "	rankdir=BT;\n";
+	graphviz << "	size=\"8,5\"\n";
+	m_representation.print_graphviz(graphviz);
+	graphviz << "}";
+	graphviz.close();
 }

@@ -20,13 +20,12 @@
 #include "../utilities/define.h"
 #include "../utilities/reader.h"
 #include "../actions/action.h"
-//THIS IS BECAUSE IS A TEMPLATIC CLASS AND IT IS A DEPENDECY
-#include "../states/state_T.ipp"
 
 class domain
 {
 private:
-
+    /**\brief If this parameter is setted to true makes the functions verbose.*/
+    bool m_debug;
     /** \brief The pointer to a \ref reader object.
      * 
      * This is used to read the information from the the input file.
@@ -52,9 +51,6 @@ private:
     /** \brief Set containing all the (grounded) \ref agent of the domain.*/
     agent_set m_agents;
 
-    /** \brief The \ref state_type.*/
-    state_type m_state_type;
-
     /** \brief The description of the initial state.*/
     initially m_intial_description;
     /** \brief The restriction to apply to the goal description.*/
@@ -67,41 +63,29 @@ private:
     /** \brief The \ref action_check used in *this*.*/
     action_check m_act_check;
 
-    /** \brief Function that from the file stores the \ref agent information.
-     * 
-     * @param[in] debug: if true makes the function verbose.*/
-    void build_agents(bool debug);
-    /** \brief Function that from the file stores the \ref fluent information.
-     *
-     * @param[in] debug: if true makes the function verbose.*/
-    void build_fluents(bool debug);
+    /** \brief Function that from the file stores the \ref agent information.*/
+    void build_agents();
+    /** \brief Function that from the file stores the \ref fluent information.*/
+    void build_fluents();
 
-    /** \brief Function that from the file stores the \ref action information.
-     *
-     * @param[in] debug: if true makes the function verbose.*/
-    void build_actions(bool debug);
+    /** \brief Function that from the file stores the \ref action information.*/
+    void build_actions();
     /** \brief Function that adds to the right \ref action each \ref proposition.*/
     void build_propositions();
 
-    /** \brief Function that builds \ref m_intial_description.
-     *
-     * @param[in] debug: if true makes the function verbose.*/
-    void build_initially(bool debug);
+    /** \brief Function that builds \ref m_intial_description.*/
+    void build_initially();
 
     /** \brief Function that builds \ref m_goal_description.
-     *
-     * @param[in] debug: if true makes the function verbose.
-     * \todo move to the goal class.
-     */
-    void build_goal(bool debug);
+     * \todo move to the goal class.*/
+    void build_goal();
     /** \brief Function that checks if \ref belief_formula respects \ref m_goal_restriction.
      *
      * @param[in] to_check: the \ref belief_formula to check.
      * 
      * @return true: if \p to_check respects \ref m_goal_restriction.
      * @return false: if \p to_check doesn't respect \ref m_goal_restriction.
-     * \todo move to the goal class.
-     */
+     * \todo move to the goal class.*/
     bool check_goal_restriction(const belief_formula & to_check);
 
     /** \brief Private constructor since it is a Singleton class.*/
@@ -118,20 +102,18 @@ public:
 
     /** \brief Setter for the domains parameters.
      *
+     * @param[in] debug: the value to assign to \ref m_debug.
      * @param[in] reader: the \ref reader pointer to assign to \ref m_reader.
-     * @param[in] state_repr: the \ref state_type to assign to \ref m_state_type.
      * @param[in] ini_res: the restriction to apply to \ref m_intial_description.
      * @param[in] goal_res: the \ref domain_restriction to assign to \ref m_goal_restriction.
      * @param[in] is_global_obsv: the \ref domain_restriction to assign to \ref m_is_global_obsv.
      * @param[in] act_check: the \ref action_check to assign to \ref m_act_check.*/
-    void set_domain(std::shared_ptr<reader> reader, state_type state_repr, domain_restriction ini_res, domain_restriction goal_res, bool is_global_obsv, action_check act_check);
+    void set_domain(bool debug, std::shared_ptr<reader> reader, domain_restriction ini_res, domain_restriction goal_res, bool is_global_obsv, action_check act_check);
 
     /** \brief Function that builds all the domain information.
      *
-     * This function calls \ref build_fluents, \ref build_agents and \ref build_actions.
-     *
-     * @param[in] debug: if true makes the function verbose.*/
-    bool build(bool debug);
+     * This function calls \ref build_fluents, \ref build_agents and \ref build_actions.*/
+    void build();
 
     /** \brief Getter of the field \ref m_grounder.
      *
@@ -153,14 +135,15 @@ public:
      *
      * @return the ref to \ref m_agents.*/
     const agent_set & get_agents();
-    /** \brief Getter of the field \ref m_state_type.
-     *
-     * @return the field \ref m_state_type.*/
-    state_type get_state_type();
     /** \brief Getter of the field \ref m_is_global_obsv.
      *
      * @return the field \ref m_is_global_obsv.*/
     bool get_is_global_obsv();
+
+    /** \brief Getter of the field \ref m_debug.
+     *
+     * @return the field \ref m_debug.*/
+    bool get_debug();
     /** \brief Getter of the field \ref m_act_check.
      *
      * @return the field \ref m_act_check.*/

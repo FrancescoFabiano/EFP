@@ -514,6 +514,12 @@ public:
 
     /** \brief Function that prints the information of *this*.*/
     void print() const;
+    
+        /** \brief Function that prints the information of *this* in a Graphviz file.
+         *
+         * @param[in] graphviz: the ostream where to print the info of *this*.*/
+    void print_graphviz(std::ostream& graphviz) const;
+
 
     /** \brief Function that return the sum_set of the two parameters by modifying the first one.
      *
@@ -529,5 +535,8 @@ public:
      * @param[in] factor2: the set to remove from \p to_modify.*/
     template <class T>
     void minus_set(std::set<T> & to_modify, const std::set<T> & factor2) const;
+    
+    
+    fluent_formula get_sensing_effects_if_entailed(const effects_map & map, const kworld_ptr & start) const;
 };
 

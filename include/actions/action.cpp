@@ -158,25 +158,11 @@ bool action::operator=(const action& act)
 	set_id(act.get_id());
 	set_type(act.get_type());
 
-	//@BeliefFormula
-	formula_list::const_iterator it_fl;
-	for (it_fl = act.get_executability().begin(); it_fl != act.get_executability().end(); it_fl++) {
-		add_executability(*it_fl);
-	}
+	m_executability = act.get_executability();
+	m_fully_observants = act.get_fully_observants();
+	m_partially_observants = act.get_partially_observants();
+	m_effects = act.get_effects();
 
-	observability_map::const_iterator it_obsmap;
-	for (it_obsmap = act.get_fully_observants().begin(); it_obsmap != act.get_fully_observants().end(); it_obsmap++) {
-		add_fully_observant(it_obsmap->first, it_obsmap->second);
-	}
-
-	for (it_obsmap = act.get_partially_observants().begin(); it_obsmap != act.get_partially_observants().end(); it_obsmap++) {
-		add_partially_observant(it_obsmap->first, it_obsmap->second);
-	}
-
-	effects_map::const_iterator it_effmap;
-	for (it_effmap = act.get_effects().begin(); it_effmap != act.get_effects().end(); it_effmap++) {
-		add_effect(it_effmap->first, it_effmap->second);
-	}
 	return true;
 }
 

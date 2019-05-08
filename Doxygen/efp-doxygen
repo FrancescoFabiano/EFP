@@ -792,7 +792,7 @@ WARN_LOGFILE           =
 
 INPUT                  = ../include/actions ../include/domain ../include/formulae \
 						 ../include/heuristics ../include/states ../include/actions \
-						 ../include/utilities ../src/
+						 ../include/utilities ../include/search ../src/
 
 INPUT 				   += ../README.md
 						 

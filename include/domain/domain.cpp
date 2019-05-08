@@ -18,10 +18,10 @@ domain& domain::get_instance()
 	return instance;
 }
 
-void domain::set_domain(std::shared_ptr<reader> reader, state_type state_repr, domain_restriction ini_res, domain_restriction goal_res, bool is_global_obsv, action_check act_check)
+void domain::set_domain(bool debug, std::shared_ptr<reader> reader, domain_restriction ini_res, domain_restriction goal_res, bool is_global_obsv, action_check act_check)
 {
+	m_debug = debug;
 	m_reader = reader;
-	m_state_type = state_repr;
 	m_intial_description = initially(ini_res);
 	m_goal_restriction = goal_res;
 	m_is_global_obsv = is_global_obsv;
@@ -53,14 +53,14 @@ const agent_set & domain::get_agents()
 	return m_agents;
 }
 
-state_type domain::get_state_type()
-{
-	return m_state_type;
-}
-
 bool domain::get_is_global_obsv()
 {
 	return m_is_global_obsv;
+}
+
+bool domain::get_debug()
+{
+	return m_debug;
 }
 
 action_check domain::get_act_check()
@@ -83,65 +83,16 @@ const formula_list & domain::get_goal_description()
 	return m_goal_description;
 }
 
-bool domain::build(bool debug)
+void domain::build()
 {
-	build_agents(debug);
-	build_fluents(debug);
-	build_actions(debug);
-	build_initially(debug);
-	build_goal(debug);
-
-
-	//The \ref state is a template and change implementation according to the user choice.
-	/** \todo If we want to add conformant just find all the fluent not defined
-	 * and call the build initial state for all their possible configuration
-	 * and then go with conformant planning, so here check if \ref m_intial_description has a complete
-	 * pointed world description and if doesn't create several of them and use to create
-	 * all the varius initial states; Maybe use an array of \ref initially.*/
-	state<kstate> initial;
-
-	switch ( m_state_type ) {
-	case KRIPKE:
-	{
-		initial.build_initial();
-		std::cout << "\nInitial Done...\n";
-		action_set::const_iterator it_acset;
-		state<kstate> tmp;
-		for (it_acset = m_actions.begin(); it_acset != m_actions.end(); it_acset++) {
-			if ((*it_acset).get_name().compare("right_a") == 0) {
-				tmp = initial.compute_succ(*it_acset);
-				std::cout << "\n1 Done...\n";
-			}
-		}
-		for (it_acset = m_actions.begin(); it_acset != m_actions.end(); it_acset++) {
-			if ((*it_acset).get_name().compare("a_check_3") == 0) {
-				tmp = tmp.compute_succ(*it_acset);
-				std::cout << "\n2 Done...\n";
-			}
-		}
-		for (it_acset = m_actions.begin(); it_acset != m_actions.end(); it_acset++) {
-			if ((*it_acset).get_name().compare("tell_a_b2_3") == 0) {
-				tmp = tmp.compute_succ(*it_acset);
-				std::cout << "\n3 Done...\n";
-			}
-		}
-		if (tmp.entails(m_goal_description)) {
-			std::cout << "\nENATAILED...\n";
-		} else {
-			std::cout << "\nNOPE...\n";
-		}
-		break;
-	}
-	default:
-		std::cerr << "\nNot implemented yet\n";
-		exit(1);
-	}
-
-	return true;
-
+	build_agents();
+	build_fluents();
+	build_actions();
+	build_initially();
+	build_goal();
 }
 
-void domain::build_agents(bool debug)
+void domain::build_agents()
 {
 	/*
 	 * This function set the grounder agent map with the correct values.
@@ -153,14 +104,14 @@ void domain::build_agents(bool debug)
 	for (it_agents = m_reader->m_agents.begin(); it_agents != m_reader->m_agents.end(); it_agents++) {
 		domain_agent_map.insert(agent_map::value_type(*it_agents, i));
 		m_agents.insert(i++);
-		if (debug) {
+		if (m_debug) {
 			std::cout << "Agent " << *it_agents << " is " << (i - 1) << std::endl;
 		}
 	}
 	m_grounder.set_agent_map(domain_agent_map);
 }
 
-void domain::build_fluents(bool debug)
+void domain::build_fluents()
 {
 	/*
 	 * This function set the grounder fluent map with the correct values.
@@ -173,19 +124,19 @@ void domain::build_fluents(bool debug)
 		it_fluents != m_reader->m_fluents.end(); it_fluents++) {
 		domain_fluent_map.insert(fluent_map::value_type(*it_fluents, i));
 		m_fluents.insert(i++);
-		if (debug) {
+		if (m_debug) {
 			std::cout << "Literal " << *it_fluents << " is " << (i - 1) << std::endl;
 		}
 		domain_fluent_map.insert(fluent_map::value_type(NEGATION_SYMBOL + *it_fluents, i));
 		m_fluents.insert(i++);
-		if (debug) {
+		if (m_debug) {
 			std::cout << "Literal not " << *it_fluents << " is " << (i - 1) << std::endl;
 		}
 	}
 	m_grounder.set_fluent_map(domain_fluent_map);
 }
 
-void domain::build_actions(bool debug)
+void domain::build_actions()
 {
 
 	/*
@@ -201,7 +152,7 @@ void domain::build_actions(bool debug)
 		domain_action_name_map.insert(action_name_map::value_type(*it_actions_name, i));
 		i++;
 		m_actions.insert(tmp_action);
-		if (debug) {
+		if (m_debug) {
 			std::cout << "Action " << tmp_action.get_name() << " is " << tmp_action.get_id() << std::endl;
 		}
 	}
@@ -211,7 +162,7 @@ void domain::build_actions(bool debug)
 
 	build_propositions();
 
-	if (debug) {
+	if (m_debug) {
 		std::cout << "\nPrinting complete action list..." << std::endl;
 		action_set::const_iterator it_actions;
 		i = 0;
@@ -244,7 +195,7 @@ void domain::build_propositions()
 	}
 }
 
-void domain::build_initially(bool debug)
+void domain::build_initially()
 {
 	std::cout << "\nAdding to pointed world and initial conditions..." << std::endl;
 	formula_list::iterator it_fl;
@@ -260,7 +211,7 @@ void domain::build_initially(bool debug)
 		{
 			m_intial_description.add_pointed_condition(it_fl->get_fluent_formula());
 
-			if (debug) {
+			if (m_debug) {
 				std::cout << "	Pointed world: ";
 				printer::get_instance().print_list(it_fl->get_fluent_formula());
 				std::cout << std::endl;
@@ -278,7 +229,7 @@ void domain::build_initially(bool debug)
 		case E_FORMULA:
 		{
 			m_intial_description.add_initial_condition(*it_fl);
-			if (debug) {
+			if (m_debug) {
 				std::cout << "Added to initial conditions: ";
 				it_fl->print();
 				std::cout << std::endl;
@@ -318,7 +269,7 @@ void domain::build_initially(bool debug)
 
 }
 
-void domain::build_goal(bool debug)
+void domain::build_goal()
 {
 	std::cout << "\nAdding to Goal..." << std::endl;
 
@@ -329,7 +280,7 @@ void domain::build_goal(bool debug)
 		if (check_goal_restriction(*it_fl)) {
 			it_fl->ground();
 			m_goal_description.push_back(*it_fl);
-			if (debug) {
+			if (m_debug) {
 				std::cout << "	";
 				it_fl->print();
 				std::cout << std::endl;

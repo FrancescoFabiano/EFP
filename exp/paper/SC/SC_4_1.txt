@@ -16,8 +16,6 @@ a observes right;
 b observes right;
 c observes right;
 
-
-
 executable left if -at_1;
 left causes at_3 if at_4;
 left causes -at_4 if at_4;

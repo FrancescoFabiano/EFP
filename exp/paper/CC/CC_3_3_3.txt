@@ -138,6 +138,6 @@ initially C([a,b,c], -at_a_3);
 initially C([a,b,c], -at_b_3);
 initially C([a,b,c], -at_c_3);
 
-goal B(a,b1);
-goal B(b,b2);
-goal B(c,b3);
+%goal B(c,b3);
+%goal B(b,b2);
+goal C([a,b,c], b3);
