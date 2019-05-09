@@ -618,7 +618,6 @@ void kstate::add_ret_ontic_worlds_internal(const kworld_ptr & start, kworld_ptr_
 				}
 			}
 			ret.set_max_depth(ret.get_max_depth() + 1);
-
 		}
 	}
 }
@@ -708,7 +707,8 @@ kstate kstate::execute(const action& act) const
 	agent label;
 	bool is_new;
 	agent_set::const_iterator it_agset;
-
+	kworld_ptr_set for_oblivious_in_partial;
+	kworld_ptr_set::const_iterator it_agset_obpa;
 	for (it_kedptr = get_edges().begin(); it_kedptr != get_edges().end(); it_kedptr++) {
 
 		from_old = it_kedptr->get_from();
@@ -732,9 +732,28 @@ kstate kstate::execute(const action& act) const
 						for (it_agset = fully_obs_agents.begin(); it_agset != fully_obs_agents.end(); it_agset++) {
 							ret.add_edge(kedge(to_new, to_new, *it_agset));
 						}
+						for (it_agset = partially_obs_agents.begin(); it_agset != partially_obs_agents.end(); it_agset++) {
+							label = *it_agset;
+							ret.add_edge(kedge(to_new, to_new, label));
+							ret.add_edge(kedge(to_new, from_new, label));
+						}
+						for (it_agset = oblivious_obs_agents.begin(); it_agset != oblivious_obs_agents.end(); it_agset++) {
+							label = *it_agset;
+							for_oblivious_in_partial = get_B_reachable_worlds(label, to_old);
+							for (it_agset_obpa = for_oblivious_in_partial.begin(); it_agset_obpa != for_oblivious_in_partial.end(); it_agset_obpa++) {
+								ret.add_edge(kedge(to_new, *it_agset_obpa, label));
+							}
+							//ret.add_edge(kedge(to_new, from_old, *it_agset));
+
+						}
 					}
 				} else {
 					//The edges that connects the update partial Kripke structure to the old one.
+					ret.add_edge(kedge(from_new, to_old, label));
+				}
+			} else {
+				label = it_kedptr->get_label();
+				if (oblivious_obs_agents.find(label) != oblivious_obs_agents.end()) {
 					ret.add_edge(kedge(from_new, to_old, label));
 				}
 			}
@@ -775,7 +794,110 @@ kstate kstate::execute_sensing(const action & act) const
 	 * - Link the old state for oblivious.*/
 	/**\bug Wrong because the fluent changes accordingly to the pointed world*/
 
-	return execute(act);
+
+	//The execution are all the same if we consider that false beliefs don't count.
+	kstate ret;
+
+	//This finds all the worlds that are reachable from the initial state following
+	//the edges labeled with fully observant agents.
+	agent_set fully_obs_agents = get_agents_if_entailed(act.get_fully_observants(), get_pointed());
+	agent_set partially_obs_agents = get_agents_if_entailed(act.get_partially_observants(), get_pointed());
+	agent_set oblivious_obs_agents = domain::get_instance().get_agents();
+	minus_set(oblivious_obs_agents, fully_obs_agents);
+	minus_set(oblivious_obs_agents, partially_obs_agents);
+
+	//DEBUG PRINT
+	/*if (act.get_name().compare("b_check_1") == 0) {
+		std::cout << "\nFully observant: ";
+		printer::get_instance().print_list_ag(fully_obs_agents);
+		std::cout << "\nPartially observant: ";
+		printer::get_instance().print_list_ag(partially_obs_agents);
+		std::cout << "\nOblivious observant: ";
+		printer::get_instance().print_list_ag(oblivious_obs_agents);
+	}*/
+
+	if (oblivious_obs_agents.size() > 0) {
+		ret = (*this);
+		ret.set_max_depth(ret.get_max_depth() + 1);
+	}
+
+	//pas tmp for entailment
+	kworld_ptr_set reached;
+	reached.insert(get_pointed());
+	std::map<kworld_ptr, kworld_ptr> map_for_edges;
+	add_ret_ontic_worlds(get_pointed(), reached, ret, fully_obs_agents, act, domain::get_instance().get_act_check(), map_for_edges);
+
+	kedge_ptr_set::const_iterator it_kedptr;
+	std::map<kworld_ptr, kworld_ptr>::const_iterator it_kwmap;
+
+	//The updated edges
+	kworld_ptr from_old, to_old;
+	kworld_ptr from_new, to_new;
+	agent label;
+	bool is_new;
+	agent_set::const_iterator it_agset;
+	kworld_ptr_set for_oblivious_in_partial;
+	kworld_ptr_set::const_iterator it_agset_obpa;
+	for (it_kedptr = get_edges().begin(); it_kedptr != get_edges().end(); it_kedptr++) {
+
+		from_old = it_kedptr->get_from();
+		it_kwmap = map_for_edges.find(from_old);
+		if (it_kwmap != map_for_edges.end()) {
+			from_new = it_kwmap->second;
+
+			to_old = it_kedptr->get_to();
+			it_kwmap = map_for_edges.find(to_old);
+			if (it_kwmap != map_for_edges.end()) {
+				to_new = it_kwmap->second;
+				label = it_kedptr->get_label();
+				if (fully_obs_agents.find(label) != fully_obs_agents.end()) {
+					ret.add_edge(kedge(from_new, to_new, label));
+				} else if (partially_obs_agents.find(label) != partially_obs_agents.end()) {
+					//Add the uncertainty for the partial observers
+					is_new = false;
+					to_new = ret.add_rep_world(*(to_old.get_ptr()), from_new.get_repetition(), is_new);
+					ret.add_edge(kedge(from_new, to_new, label));
+					if (is_new) {
+						for (it_agset = fully_obs_agents.begin(); it_agset != fully_obs_agents.end(); it_agset++) {
+							ret.add_edge(kedge(to_new, to_new, *it_agset));
+						}
+						for (it_agset = partially_obs_agents.begin(); it_agset != partially_obs_agents.end(); it_agset++) {
+							label = *it_agset;
+							ret.add_edge(kedge(to_new, to_new, label));
+							ret.add_edge(kedge(to_new, from_new, label));
+						}
+						for (it_agset = oblivious_obs_agents.begin(); it_agset != oblivious_obs_agents.end(); it_agset++) {
+							label = *it_agset;
+							for_oblivious_in_partial = get_B_reachable_worlds(label, to_old);
+							for (it_agset_obpa = for_oblivious_in_partial.begin(); it_agset_obpa != for_oblivious_in_partial.end(); it_agset_obpa++) {
+								ret.add_edge(kedge(to_new, *it_agset_obpa, label));
+							}
+							//ret.add_edge(kedge(to_new, from_old, *it_agset));
+
+						}
+					}
+				} else {
+					//The edges that connects the update partial Kripke structure to the old one.
+					ret.add_edge(kedge(from_new, to_old, label));
+				}
+			} else {
+				label = it_kedptr->get_label();
+				if (oblivious_obs_agents.find(label) != oblivious_obs_agents.end()) {
+					ret.add_edge(kedge(from_new, to_old, label));
+				}
+			}
+		}
+	}
+
+	it_kwmap = map_for_edges.find(get_pointed());
+	if (it_kwmap != map_for_edges.end()) {
+		ret.set_pointed(it_kwmap->second);
+	} else {
+		std::cerr << "\nInvestigate the case when pointed is not update\n";
+		exit(1);
+	}
+
+	return ret;
 }
 
 kstate kstate::execute_announcement(const action & act) const
@@ -834,6 +956,17 @@ void kstate::print_graphviz(std::ostream& graphviz) const
 {
 	fluent_set::const_iterator it_fl;
 
+	std::map<std::string, std::string> map_name;
+
+	graphviz << "	node [shape = doublecircle]; \"";
+	for (it_fl = get_pointed().get_fluent_set().begin(); it_fl != get_pointed().get_fluent_set().end(); it_fl++) {
+		graphviz << domain::get_instance().get_grounder().deground_fluent(*it_fl);
+		graphviz << "_";
+	}
+	graphviz << get_pointed().get_repetition() << "\";\n";
+
+
+
 	graphviz << "//WORLDS List:" << std::endl;
 	graphviz << "	node [shape = circle];\n";
 	kworld_ptr_set::const_iterator it_kwset;
@@ -846,14 +979,6 @@ void kstate::print_graphviz(std::ostream& graphviz) const
 		}
 		graphviz << it_kwset->get_repetition() << "\";\n";
 	}
-
-
-	graphviz << "	node [shape = doublecircle]; \"";
-	for (it_fl = get_pointed().get_fluent_set().begin(); it_fl != get_pointed().get_fluent_set().end(); it_fl++) {
-		graphviz << domain::get_instance().get_grounder().deground_fluent(*it_fl);
-		graphviz << "_";
-	}
-	graphviz << get_pointed().get_repetition() << "\";\n";
 
 	graphviz << "\n\n";
 	graphviz << "//RANKS List:" << std::endl;
