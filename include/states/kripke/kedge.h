@@ -211,11 +211,6 @@ private:
     /**\brief the pointer that is wrapped by *this*.*/
     std::shared_ptr<const kedge> m_ptr;
 
-    /**\brief Getter for the field \ref m_ptr.
-     *  
-     * @return a copy of the pointer \ref m_ptr.*/
-    std::shared_ptr<const kedge> get_ptr() const;
-
 public:
     /**\brief Constructor without parameters.*/
     kedge_ptr();
@@ -248,6 +243,11 @@ public:
      *  
      * @param[in] ptr: the pointer to assign to \ref m_ptr.*/
     void set_ptr(std::shared_ptr<const kedge>&& ptr);
+    
+    /**\brief Getter for the field \ref m_ptr.
+     *  
+     * @return a copy of the pointer \ref m_ptr.*/
+    std::shared_ptr<const kedge> get_ptr() const;
 
     /** \brief Function that return the field m_from of the pointed \ref kworld. 
      *     
