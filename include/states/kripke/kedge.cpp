@@ -132,7 +132,7 @@ bool kedge::operator=(const kedge& to_assign)
 	return true;
 }
 
-void kedge::print()
+void kedge::print() const
 {
 	std::cout << "edge id " << get_id() << " label: " << get_label() << " from: " << get_from().get_id() << " to " << get_to().get_id() << std::endl;
 }
@@ -225,4 +225,10 @@ bool kedge_ptr::operator==(const kedge_ptr & to_compare) const
 		return true;
 	}
 	return false;
+}
+
+/** \brief Function used to print all the information of \ref m_ptr.*/
+void kedge_ptr::print() const
+{
+	m_ptr->print();
 }

@@ -192,7 +192,8 @@ void state<T>::print() const
 template <class T>
 void state<T>::print_graphviz() const
 {
-
+	std::cout << "\nStarted Graphviz-Printing ";
+	printer::get_instance().print_list(get_executed_actions());
 	std::string exec_act_names;
 	action_id_list::const_iterator it_act;
 	if (get_executed_actions().size() == 0) {
@@ -213,4 +214,6 @@ void state<T>::print_graphviz() const
 	m_representation.print_graphviz(graphviz);
 	graphviz << "}";
 	graphviz.close();
+	std::cout << " Done.";
+
 }

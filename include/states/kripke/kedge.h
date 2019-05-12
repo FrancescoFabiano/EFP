@@ -184,10 +184,8 @@ public:
      * @return false: otherwise.*/
     bool operator=(const kedge& to_assign);
 
-    /**
-     * \brief Function used to print all the information of *this*.
-     */
-    void print();
+    /** \brief Function used to print all the information of *this*.*/
+    void print() const;
 };
 
 /**
@@ -291,4 +289,7 @@ public:
      * @return true: if *this* is equal to \p to_compare.
      * @return false: otherwise.*/
     bool operator==(const kedge_ptr & to_compare) const;
+    
+        /** \brief Function used to print all the information of \ref m_ptr.*/
+    void print() const;
 };

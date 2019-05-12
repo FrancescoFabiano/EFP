@@ -247,6 +247,21 @@ unsigned short kworld_ptr::get_repetition() const
 
 }
 
+bool kworld_ptr::entails(fluent to_check) const
+{
+	return m_ptr->entails(to_check);
+}
+
+bool kworld_ptr::entails(const fluent_set& to_check) const
+{
+	return m_ptr->entails(to_check);
+}
+
+bool kworld_ptr::entails(const fluent_formula & to_check) const
+{
+	return m_ptr->entails(to_check);
+}
+
 bool kworld_ptr::operator<(const kworld_ptr & to_compare) const
 {
 	if (get_id().compare(to_compare.get_id()) < 0) {
