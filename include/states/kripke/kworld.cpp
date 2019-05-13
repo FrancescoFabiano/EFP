@@ -170,9 +170,8 @@ bool kworld::operator=(const kworld & to_assign)
 	return true;
 }
 
-void kworld::print_info()
+void kworld::print() const
 {
-	std::cout << "World id: " << get_id();
 	std::cout << "\nFluents: " << get_id();
 	printer::get_instance().print_list(m_fluent_set);
 }

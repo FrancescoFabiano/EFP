@@ -79,7 +79,7 @@ void planner<T>::execute_given_actions(const std::vector<std::string> act_name)
 		std::cout << "\n\n";
 	}
 
-	state.print_graphviz();
+	if (domain::get_instance().get_debug()) state.print_graphviz();
 
 
 	std::vector<std::string>::const_iterator it_stset;
@@ -91,9 +91,8 @@ void planner<T>::execute_given_actions(const std::vector<std::string> act_name)
 			if ((*it_acset).get_name().compare(*it_stset) == 0) {
 				//std::cout << "\n\nTrying action " << (*it_acset).get_name() << "\n";
 				if (state.is_executable(*it_acset)) {
-					std::cout << "\nExecuted action " << (*it_acset).get_name() << "\n";
 					state = state.compute_succ(*it_acset);
-					state.print_graphviz();
+					if (domain::get_instance().get_debug()) state.print_graphviz();
 					if (state.is_goal()) {
 
 						std::cout << "\n\nWell Done, Goal found after the execution of ";

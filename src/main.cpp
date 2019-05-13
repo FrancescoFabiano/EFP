@@ -251,15 +251,20 @@ int main(int argc, char** argv)
 	domain::get_instance().build();
 
 
-	bool founded_goal = false;
 	switch ( state_struc ) {
 	case KRIPKE:
 	{
 		planner< state<kstate> > m_planner;
-		if (execute_given_actions)
+		if (execute_given_actions) {
 			m_planner.execute_given_actions(given_actions);
-		else
-			founded_goal = m_planner.search_BFS();
+			std::cout << "\n*****THE END*****\n";
+		} else {
+			if (m_planner.search_BFS()) {
+				std::cout << "\n*****THE END*****\n";
+			} else {
+				std::cout << "\n*****THE SAD END*****\n";
+			}
+		}
 		break;
 	}
 	case POSSIBILITIES:
@@ -269,14 +274,6 @@ int main(int argc, char** argv)
 		exit(1);
 	}
 
-	//planner< state<kstate> > m_planner;
-
-
-	if (founded_goal) {
-		std::cout << "\n*****THE END*****\n";
-	} else {
-		std::cout << "\n*****THE SAD END*****\n";
-	}
 	//timer.end(READ_TIMER);
 	//planner.main();
 

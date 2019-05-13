@@ -302,16 +302,6 @@ private:
      * @return the effects that are feasible in *this* with \p start as pointed world*.*/
     fluent_formula get_effects_if_entailed(const effects_map & map, const kworld_ptr & start) const;
 
-     /** \brief Function that applies the transition function non considering false belief.
-     *
-     * The transition function is applied accordingly to mA*. Check the paper for more information.
-     *  
-     * @see action.
-     *  
-     * @param[in] act: The \ref ONTIC action to be applied on *this*.
-     * @return the \ref kstate that results after the execution.*/
-    kstate execute(const action& act) const;
-
     
     /** \brief Function that applies the transition function for a \ref ONTIC \ref action effect on *this*.
      *

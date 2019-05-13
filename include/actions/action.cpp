@@ -156,7 +156,7 @@ bool action::operator=(const action& act)
 {
 	set_name(act.get_name());
 	set_id(act.get_id());
-	set_type(act.get_type());
+	m_type = act.get_type();
 
 	m_executability = act.get_executability();
 	m_fully_observants = act.get_fully_observants();
@@ -170,7 +170,7 @@ void action::print() const
 {
 	grounder grounder = domain::get_instance().get_grounder();
 	std::cout << "\nAction " << get_name() << ":" << std::endl;
-	// print executability condition
+	std::cout << "	ID: " << get_id() << ":" << std::endl;
 	std::cout << "	Type: " << get_type() << std::endl;
 	std::cout << "	Executability:";
 	formula_list::const_iterator it_fl;

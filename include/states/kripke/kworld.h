@@ -166,7 +166,7 @@ public:
     bool operator=(const kworld& to_assign);
 
     /** \brief Function used to print all the information of *this*.*/
-    void print_info();
+    void print() const;
 };
 
 /**
