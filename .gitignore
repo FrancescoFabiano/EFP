@@ -39,7 +39,7 @@ nbproject/
 readme_old
 
 # Doxygen
-DoxygenDoc/
+Doxygen/Docs/
 
-# Dot files
-dot/
+# Out files
+out/

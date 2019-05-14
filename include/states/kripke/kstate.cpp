@@ -403,7 +403,6 @@ void kstate::generate_initial_kedges()
 
 	formula_list::const_iterator it_fl;
 	for (it_fl = ini_conditions.get_initial_conditions().begin(); it_fl != ini_conditions.get_initial_conditions().end(); it_fl++) {
-
 		remove_initial_kedge_bf(*it_fl);
 	}
 	//std::cout << "Removed edges: " << count << std::endl;
@@ -956,6 +955,7 @@ void kstate::print() const
 void kstate::print_graphviz(std::ostream & graphviz) const
 {
 	string_set::const_iterator it_st_set;
+	fluent_set::const_iterator it_fs;
 
 
 	graphviz << "//WORLDS List:" << std::endl;
@@ -1093,7 +1093,25 @@ void kstate::print_graphviz(std::ostream & graphviz) const
 		graphviz << "\" ];\n";
 	}
 
-
+	graphviz << "\n\n//WORLDS description Table:" << std::endl;
+	graphviz << "	node [shape = plain]\n\n";
+	graphviz << "	description[label=<\n";
+	graphviz << "	<table border = \"0\" cellborder = \"1\" cellspacing = \"0\" >\n";
+	for (it_kwset = get_worlds().begin(); it_kwset != get_worlds().end(); it_kwset++) {
+		tmp_fs = it_kwset->get_fluent_set();
+		print_first = false;
+		graphviz << "		<tr><td>" << map_rep_to_name[it_kwset->get_repetition()] << "_" << map_world_to_index[tmp_fs] << "</td> <td>";
+		for (it_fs = tmp_fs.begin(); it_fs != tmp_fs.end(); it_fs++) {
+			if (print_first) {
+				graphviz << ", ";
+			}
+			print_first = true;
+			graphviz << domain::get_instance().get_grounder().deground_fluent(*it_fs);
+		}
+		graphviz << "</td></tr>\n";
+	}
+	graphviz << "	</table>>]\n";
+	graphviz << "	{rank = max; description};\n";
 
 }
 

@@ -7,6 +7,7 @@
  * \date April 11, 2019
  */
 #include <fstream>
+#include <stdlib.h>
 
 #include "state_T.h"
 #include "../domain/domain.h"
@@ -207,7 +208,10 @@ void state<T>::print_graphviz() const
 	}
 
 	std::ofstream graphviz;
-	graphviz.open("dot/" + exec_act_names + ".dot");
+	std::string folder = "out/state/";
+	folder += domain::get_instance().get_name();
+	system(("mkdir -p " + folder).c_str());
+	graphviz.open(folder + "/" + exec_act_names + ".dot");
 	graphviz << "digraph K_structure{\n";
 	graphviz << "	rankdir=BT;\n";
 	graphviz << "	size=\"8,5\"\n";

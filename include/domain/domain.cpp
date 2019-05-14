@@ -18,8 +18,9 @@ domain& domain::get_instance()
 	return instance;
 }
 
-void domain::set_domain(bool debug, std::shared_ptr<reader> reader, domain_restriction ini_res, domain_restriction goal_res, bool is_global_obsv, action_check act_check)
+void domain::set_domain(std::string name, bool debug, std::shared_ptr<reader> reader, domain_restriction ini_res, domain_restriction goal_res, bool is_global_obsv, action_check act_check)
 {
+	m_name = name;
 	m_debug = debug;
 	m_reader = reader;
 	m_intial_description = initially(ini_res);
@@ -61,6 +62,11 @@ bool domain::get_is_global_obsv()
 bool domain::get_debug()
 {
 	return m_debug;
+}
+
+std::string domain::get_name()
+{
+	return m_name;
 }
 
 action_check domain::get_act_check()

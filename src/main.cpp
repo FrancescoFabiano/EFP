@@ -29,6 +29,9 @@ void print_usage(char* prog_name)
 	std::cout << prog_name << " input_domain [options]" << std::endl << std::endl;
 	std::cout << "OPTIONS:" << std::endl;
 
+	std::cout << "-debug" << std::endl;
+	std::cout << "	Makes the solving process verbose." << std::endl;
+
 	std::cout << "-st @state_type" << std::endl;
 	std::cout << "	Select the @state_type for the planner." << std::endl;
 	std::cout << "	Possible @state_type:" << std::endl;
@@ -235,10 +238,15 @@ int main(int argc, char** argv)
 			print_usage(argv[0]);*/
 		i++;
 	}
+	std::string domain_name = argv[1];
 	if (freopen(argv[1], "r", stdin) == NULL) {
-		std::cerr << argv[0] << ": File " << argv[1] << " cannot be opened.\n";
+
+		std::cerr << argv[0] << ": File " << domain_name << " cannot be opened.\n";
 		exit(1);
 	}
+
+	domain_name = domain_name.substr(domain_name.find_last_of("\\/") + 1);
+	domain_name = domain_name.substr(0, domain_name.find_last_of("."));
 
 	//timer.start(READ_TIMER);
 	domain_reader->read();
@@ -247,7 +255,7 @@ int main(int argc, char** argv)
 	}
 
 	//Domain building
-	domain::get_instance().set_domain(debug, domain_reader, ini_restriction, goal_restriction, is_global_obsv, act_check);
+	domain::get_instance().set_domain(domain_name, debug, domain_reader, ini_restriction, goal_restriction, is_global_obsv, act_check);
 	domain::get_instance().build();
 
 

@@ -6,6 +6,8 @@
  * \author Francesco Fabiano.
  * \date May 6, 2019
  */
+#include <stdlib.h>
+
 #include "planner.h"
 #include "../domain/domain.h"
 
@@ -108,5 +110,11 @@ void planner<T>::execute_given_actions(const std::vector<std::string> act_name)
 			}
 		}
 	}
+
+	if (domain::get_instance().get_debug()) {
+		std::cout << "\nGenerating the graphical representation of the states ...\n";
+		system(("sh scripts/generate_pdf.sh out/state/" + domain::get_instance().get_name()).c_str());
+	}
+
 	return;
 }

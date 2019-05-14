@@ -28,6 +28,9 @@ S_POSSIBILITY_DIR = $(STATES_DIR)/possibilities
 UTILITIES_DIR = $(INCLUDE_DIR)/utilities
 SEARCH_DIR = $(INCLUDE_DIR)/search
 
+DOXYGEN_DIR = doxygen
+OUT_DIR = out
+
 
 #-----------------------------------PARSE FILES-----------------------------------#
 
@@ -173,8 +176,27 @@ $(BUILD_DIR)/domain.o: $(DOMAIN_DIR)/domain.cpp $(DOMAIN_DIR)/domain.h \
 		$(dir_guard)
 		$(CC) $(CFLAGS) -c $(DOMAIN_DIR)/domain.cpp -o $(BUILD_DIR)/domain.o
 
-clean:
-	rm -f $(BIN_DIR)/*.out \
-	$(BUILD_DIR)/*
 
-#*~ $(BUILD_DIR)/*.*
+.PHONY: clean_build clean_out doxygen doc
+
+doxygen:
+	$(MAKE)
+	mkdir -p $(DOXYGEN_DIR)/Docs
+	cd $(DOXYGEN_DIR)/ && doxygen efp-doxygen
+	
+doc:
+	$(MAKE) doxygen
+
+clean_build:
+	rm -f -r $(BIN_DIR) $(BUILD_DIR)
+	
+clean_out:
+	rm -f -r $(OUT_DIR)
+
+clear:
+	$(MAKE) clean_build
+	$(MAKE) clean_ou
+
+fresh:
+	$(MAKE) clear
+	rm -f -r $(DOXYGEN_DIR)/Docs

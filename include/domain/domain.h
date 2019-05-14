@@ -24,6 +24,10 @@
 class domain
 {
 private:
+    
+    /**\brief The given to the *this*. (The name of the file that contains the description of *this*)*/
+    std::string m_name;
+    
     /**\brief If this parameter is setted to true makes the functions verbose.*/
     bool m_debug;
     /** \brief The pointer to a \ref reader object.
@@ -102,13 +106,14 @@ public:
 
     /** \brief Setter for the domains parameters.
      *
+* @param[in] name: the value to assign to \ref m_name.
      * @param[in] debug: the value to assign to \ref m_debug.
      * @param[in] reader: the \ref reader pointer to assign to \ref m_reader.
      * @param[in] ini_res: the restriction to apply to \ref m_intial_description.
      * @param[in] goal_res: the \ref domain_restriction to assign to \ref m_goal_restriction.
      * @param[in] is_global_obsv: the \ref domain_restriction to assign to \ref m_is_global_obsv.
      * @param[in] act_check: the \ref action_check to assign to \ref m_act_check.*/
-    void set_domain(bool debug, std::shared_ptr<reader> reader, domain_restriction ini_res, domain_restriction goal_res, bool is_global_obsv, action_check act_check);
+    void set_domain(std::string name, bool debug, std::shared_ptr<reader> reader, domain_restriction ini_res, domain_restriction goal_res, bool is_global_obsv, action_check act_check);
 
     /** \brief Function that builds all the domain information.
      *
@@ -144,6 +149,10 @@ public:
      *
      * @return the field \ref m_debug.*/
     bool get_debug();
+    /** \brief Getter of the field \ref m_name.
+     *
+     * @return the field \ref m_name.*/
+    std::string get_name();
     /** \brief Getter of the field \ref m_act_check.
      *
      * @return the field \ref m_act_check.*/
