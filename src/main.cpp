@@ -1,8 +1,10 @@
 /*
- * File:   main.cpp
- * Author: Francesco
+ * \brief The main file.
  *
- * Created on April 1, 2019, 1:18 PM
+ * \copyright GNU Public License.
+ *
+ * \author Francesco Fabiano.
+ * \date Aprile 1, 2019
  */
 
 #include <iostream>
@@ -77,10 +79,16 @@ void print_usage(char* prog_name)
 	std::cout << "	Perform a sequence of actions and print out" << std::endl;
 	std::cout << "	results step by step. The planner does not" << std::endl;
 	std::cout << "	search for a plan." << std::endl << std::endl;
+	std::cout << "	If the @debug option is on the states are printed as pdf in out/states/@domain_name/." << std::endl << std::endl;
+
+
+	std::cout << "-old_check" << std::endl;
+	std::cout << "	Print the plan time in a file to easy the confrontation with the old version." << std::endl << std::endl;
+
 
 	std::cout << "EXAMPLES:" << std::endl;
 	std::cout << prog_name << " ex.al" << std::endl;
-	std::cout << "	Find a conformant plan for ex.al. The system will" << std::endl;
+	std::cout << "	Find a plan for ex.al. The system will" << std::endl;
 	std::cout << "	automatically detect necessary fluents to be considered." << std::endl;
 	std::cout << prog_name << " ex.al -e \"move(2,table)\" \"move(1,2)\" -p" << std::endl;
 	std::cout << "	Execute the plan [move(2,table);move(1,2)]." << std::endl;
@@ -93,6 +101,7 @@ int main(int argc, char** argv)
 {
 
 	bool debug = false;
+	bool old_check = false;
 	bool is_global_obsv = true;
 	state_type state_struc = KRIPKE; //default
 	domain_restriction ini_restriction = S5; //default
@@ -116,6 +125,8 @@ int main(int argc, char** argv)
 		if (strcmp(argv[i], "-debug") == 0) {
 			std::cout << "Debug is on." << std::endl;
 			debug = true;
+		} else if (strcmp(argv[i], "-old_check") == 0) {
+			old_check = true;
 		}//No case sensitivity
 		else if (strcmp(argv[i], "-ir") == 0) {
 			i++;
@@ -189,13 +200,13 @@ int main(int argc, char** argv)
 				std::cerr << "-act_check needs specification (PP, PW, WW)." << std::endl;
 				exit(1);
 			} else if (strcmp(argv[i], "PP") == 0) {
-				std::cout << "Both the executability and the conditonal effects are cheched only on the state." << std::endl;
+				std::cout << "Both the executability and the conditonal effects are checked only on the state." << std::endl;
 				act_check = EXE_POINTED__COND_POINTED; //default
 			} else if (strcmp(argv[i], "PW") == 0) {
-				std::cout << "The executability is checked only on the state but the conditonal effects are cheched in every worlds. (Default)" << std::endl;
+				std::cout << "The executability is checked only on the state but the conditonal effects are checked in every worlds. (Default)" << std::endl;
 				act_check = EXE_POINTED__COND_WORLD;
 			} else if (strcmp(argv[i], "WW") == 0) {
-				std::cout << "Both the executability and the conditonal effects are cheched in every world." << std::endl;
+				std::cout << "Both the executability and the conditonal effects are checked in every world." << std::endl;
 				act_check = EXE_WORLD__COND_WORLD;
 			} else {
 				std::cerr << "Wrong specification for '-act_obsv'; use 'PP' or 'PW' or 'WW'." << std::endl;
@@ -264,13 +275,17 @@ int main(int argc, char** argv)
 	{
 		planner< state<kstate> > m_planner;
 		if (execute_given_actions) {
-			m_planner.execute_given_actions(given_actions);
-			std::cout << "\n*****THE END*****\n";
-		} else {
-			if (m_planner.search_BFS()) {
-				std::cout << "\n*****THE END*****\n";
+			if (old_check) {
+				m_planner.execute_given_actions_timed(given_actions);
 			} else {
-				std::cout << "\n*****THE SAD END*****\n";
+				m_planner.execute_given_actions(given_actions);
+			}
+			std::cout << "\n\n\n*****THE END*****\n";
+		} else {
+			if (m_planner.search_BFS(old_check)) {
+				std::cout << "\n\n\n*****THE END*****\n";
+			} else {
+				std::cout << "\n\n\n*****THE SAD END*****\n";
 			}
 		}
 		break;

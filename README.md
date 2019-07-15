@@ -3,7 +3,7 @@
 ## Goal
 Realize an Epistemic Forward Planner that bases its concept on different states representations such as:
 - [x] *Kripke structure*
-- [ ] *possibilities* and exploits *dynamic programming*.
+- [ ] *possibilities*
 - [ ] *OBDDs*
 
 ## The situation:
@@ -26,6 +26,10 @@ Realize an Epistemic Forward Planner that bases its concept on different states 
 - Heuristics.
 
 ## Theorical ideas to study
+- If **ag_i** sees as partial **ag_y** announcing **phi** and **ag_i** thought that **ag_y** did not know **phi** how should **ag_i** react?
+- If **ag_i** sees as partial **ag_y** announcing **f** and **ag_i** knows **f** then
+	- **ag_i** believes that **ag_y** knows **f**; or
+	- **ag_i** believes that **ag_y** knows (**f OR -f**).
 - Objective vs subjective common knowledge;
 - announcement/sensing of Belief formulae;
 - ontic that remove uncertanty;
@@ -36,3 +40,20 @@ Realize an Epistemic Forward Planner that bases its concept on different states 
 
 - Lies and biased info;
 - ethic constraints.
+
+###Reqiurements
+- flex
+- bison
+- texlive-font-utils
+- graphviz
+
+###Usage
+- **make**: to compile the planner.
+- **make doxygen**: to compile the planner and the documentation (to check it open doxygen/Docs/html/index.html).
+- **make clean_build**: removes all compiletion-generated files.
+- **make clean_out**: removes all the file in out/ (the pdf visualization of the states).
+- **make clear**: executes both **clean_build** and **clean_out**.
+- **make fresh**: executes **clear** and also removes doxygen documentation.
+- **make old**: cleans and compile the old version (1.0) of EFP.
+- **make all**: executes **make doxygen** and **make_old**.
+	

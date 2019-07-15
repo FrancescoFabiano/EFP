@@ -56,7 +56,6 @@ b observes b_check_3;
 
 executable tell_a_b1_1 if B(a, at_b1_1);
 tell_a_b1_1 announces at_b1_1;
-a observes tell_a_b1_1;
 b observes tell_a_b1_1;
 
 executable tell_a_b1_3 if B(a, at_b1_3);
@@ -105,10 +104,15 @@ initially C([a,b], -at_a_1);
 initially C([a,b], -at_b_1);
 initially C([a,b], -at_a_3);
 initially C([a,b], -at_b_3);
+initially C([a,b], (at_b1_1, -at_b1_3) | (-at_b1_1, at_b1_3));
+initially C([a,b], (at_b2_1, -at_b2_3) | (-at_b2_1, at_b2_3));
+
 
 %goal B(a,at_b1_1);
 %goal B(b,at_b2_3);
 %goal B(b,at_b1_1);
 %goal B(a,at_b2_3);
-%goal B(a, at_b2_3);
-goal B(b, at_b2_3);
+goal C([a,b], at_b2_3);
+%goal at_a_2;
+%goal at_b_2;
+goal C([a,b], at_b1_1);

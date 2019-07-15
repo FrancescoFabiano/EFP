@@ -177,7 +177,7 @@ $(BUILD_DIR)/domain.o: $(DOMAIN_DIR)/domain.cpp $(DOMAIN_DIR)/domain.h \
 		$(CC) $(CFLAGS) -c $(DOMAIN_DIR)/domain.cpp -o $(BUILD_DIR)/domain.o
 
 
-.PHONY: clean_build clean_out doxygen doc
+.PHONY: clean_build clean_out doxygen doc old all fresh clear
 
 doxygen:
 	$(MAKE)
@@ -195,8 +195,24 @@ clean_out:
 
 clear:
 	$(MAKE) clean_build
-	$(MAKE) clean_ou
+	$(MAKE) clean_out
 
 fresh:
 	$(MAKE) clear
 	rm -f -r $(DOXYGEN_DIR)/Docs
+	
+old:
+	cd EFP_ICAPS_old/ && $(MAKE) clean
+	cd EFP_ICAPS_old/ && $(MAKE)
+	
+all:
+	$(MAKE) doxygen
+	$(MAKE) old
+	
+clean:
+	@echo make clean is not supported instead you can use:
+	@echo \ \ \ \ \ \ make clean_build: removes all compiletion-generated files.
+	@echo \ \ \ \ \ \ make clean_out: removes all the file in out/ '('the pdf visualization of the states')'.
+	@echo \ \ \ \ \ \ make clear: executes both clean_build and clean_out.
+	@echo \ \ \ \ \ \ make fresh: executes clear and also remove doxygen documentation.
+	@echo \ \ \ \ \ \ make old: cleans and compile the old version (1.0) of EFP.

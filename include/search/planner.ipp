@@ -6,8 +6,6 @@
  * \author Francesco Fabiano.
  * \date May 6, 2019
  */
-#include <stdlib.h>
-
 #include "planner.h"
 #include "../domain/domain.h"
 
@@ -30,25 +28,53 @@
 }*/
 
 template <class T>
-bool planner<T>::search_BFS()
+void planner<T>::print_results(std::chrono::duration<double> elapsed_seconds, T goal, bool old_check, bool givenplan)
+{
+	std::cout << "\n\n\nWell Done, Goal found in " << elapsed_seconds.count() << " :)\n";
+	goal.print();
+	if (old_check) {
+		std::ofstream result;
+		std::string folder = "out/EFP_comparison/";
+		if (givenplan) {
+			folder = folder + "givenplan/";
+		} else {
+			folder = folder + "findingplan/";
+		}
+		system(("mkdir -p " + folder).c_str());
+		result.open(folder + domain::get_instance().get_name() + ".txt");
+		result << "EFP V 2.0 completed the search in " << elapsed_seconds.count() << "\n";
+		result.close();
+	}
+}
+
+template <class T>
+bool planner<T>::search_BFS(bool old_check)
 {
 	T initial;
+	auto start_timing = std::chrono::system_clock::now();
 	initial.build_initial();
+	auto end_timing = std::chrono::system_clock::now();
+	std::chrono::duration<double> elapsed_seconds = end_timing - start_timing;
 
-	if (initial.is_goal()) {
-		std::cout << "\nWell Done, Goal found:)\n";
-		initial.print();
-		return true;
-	}
-
-	m_search_space.push(initial);
-	std::cout << "\nInitial Done...\n";
+	std::cout << "\nInitial Built in " << elapsed_seconds.count() << " seconds\n";
 
 	action_set actions = domain::get_instance().get_actions();
 	action_set::const_iterator it_acset;
 	T popped_state;
 	T tmp_state;
 	action tmp_action;
+
+	start_timing = std::chrono::system_clock::now();
+	if (initial.is_goal()) {
+		end_timing = std::chrono::system_clock::now();
+		elapsed_seconds = end_timing - start_timing;
+		print_results(elapsed_seconds, initial, old_check, false);
+		return true;
+	}
+
+	m_search_space.push(initial);
+
+
 	while (!m_search_space.empty()) {
 		popped_state = m_search_space.front();
 		m_search_space.pop();
@@ -57,8 +83,9 @@ bool planner<T>::search_BFS()
 			if (popped_state.is_executable(tmp_action)) {
 				tmp_state = popped_state.compute_succ(tmp_action);
 				if (tmp_state.is_goal()) {
-					tmp_state.print();
-					std::cout << "\nWell Done, Goal found:)\n";
+					end_timing = std::chrono::system_clock::now();
+					elapsed_seconds = end_timing - start_timing;
+					print_results(elapsed_seconds, tmp_state, old_check, false);
 					return true;
 				}
 				m_search_space.push(tmp_state);
@@ -115,6 +142,37 @@ void planner<T>::execute_given_actions(const std::vector<std::string> act_name)
 		std::cout << "\nGenerating the graphical representation of the states ...\n";
 		system(("sh scripts/generate_pdf.sh out/state/" + domain::get_instance().get_name()).c_str());
 	}
+
+	return;
+}
+
+template <class T>
+/**\todo just for confrantation with old*/
+void planner<T>::execute_given_actions_timed(const std::vector<std::string> act_name)
+{
+	T state;
+	state.build_initial();
+
+	std::vector<std::string>::const_iterator it_stset;
+	action_set::const_iterator it_acset;
+
+	auto start_timing = std::chrono::system_clock::now();
+
+	for (it_stset = act_name.begin(); it_stset != act_name.end(); it_stset++) {
+		for (it_acset = domain::get_instance().get_actions().begin(); it_acset != domain::get_instance().get_actions().end(); it_acset++) {
+			if ((*it_acset).get_name().compare(*it_stset) == 0) {
+				//std::cout << "\n\nTrying action " << (*it_acset).get_name() << "\n";
+				if (state.is_executable(*it_acset)) {
+					state = state.compute_succ(*it_acset);
+				}
+			}
+		}
+	}
+
+	auto end_timing = std::chrono::system_clock::now();
+	std::chrono::duration<double> elapsed_seconds = end_timing - start_timing;
+
+	print_results(elapsed_seconds, state, true, true);
 
 	return;
 }

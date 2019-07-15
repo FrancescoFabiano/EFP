@@ -807,12 +807,30 @@ kstate kstate::execute_sensing(const action & act) const
 
 
 
-	///\todo CHECK IF NEG
+	///\todo Correct if more than one effects
 	fluent_formula effects = get_effects_if_entailed(act.get_effects(), get_pointed());
 
+	/** \todo add multiple fluents sensing
+	 * fluent_set tmp_fs;
+	 * fluent_set sensed_effects;
+	 * fluent tmp_fluent;
+	 *
+	 * for (it_ff = effects.begin(); it_ff != effects.end(); it_ff++) {
+	 *	tmp_fs = *it_ff;
+	 *	for (it_fs = tmp_ff.begin(); it_fs != tmp_ff.end(); it_fs++) {
+	 *		tmp_fluent = *it_fs;
+	 *		if (get_pointed().entails(tmp_fluent)) {
+	 *			sensed_effects.insert(tmp_fluent);
+	 *		} else {
+	 *			sensed_effects.insert(helper::negate_fluent(tmp_fluent));
+	 *		}
+	 *	}
+	 *}*/
+
 	kworld_ptr_set entailing_set = get_C_reachable_worlds(fully_and_partial_ag, get_pointed());
+	entailing_set.insert(get_pointed());
+
 	kworld_ptr_set to_duplicate = entailing_set;
-	to_duplicate.insert(get_pointed());
 	kworld_ptr_set not_entailing_set;
 	bool true_sensed = get_pointed().entails(effects);
 
@@ -835,6 +853,7 @@ kstate kstate::execute_sensing(const action & act) const
 		to_old = it_kedptr->get_to();
 		label = it_kedptr->get_label();
 
+		///\todo problem with false beliefs
 		if (world_oblivious.find(from_old) != world_oblivious.end()) {
 			/**\todo maybe add the check on to_old? if it doesn't exist return error*/
 			ret.add_edge(*(it_kedptr->get_ptr()));
@@ -843,19 +862,30 @@ kstate kstate::execute_sensing(const action & act) const
 		if (fully_obs_agents.find(label) != fully_obs_agents.end()) {
 			/**\todo maybe faster to check the entailment directly*/
 			if ((entailing_set.find(from_old) != entailing_set.end() && not_entailing_set.find(to_old) != not_entailing_set.end())
-				&& (entailing_set.find(to_old) != entailing_set.end() && not_entailing_set.find(from_old) != not_entailing_set.end())) {
+				|| (entailing_set.find(to_old) != entailing_set.end() && not_entailing_set.find(from_old) != not_entailing_set.end())) {
 				///\todo ottimiza
-				//if (oblivious_obs_agents.size() > 1) {
-				from_new = ret.add_rep_world(*(from_old.get_ptr()), from_old.get_repetition());
-				to_new = ret.add_rep_world(*(to_old.get_ptr()), to_old.get_repetition());
-				ret.add_edge(kedge(from_new, to_new, label));
-				//}
-			} else {
+				if (partially_obs_agents.size() > 1) {
+					//from_new = ret.add_rep_world(*(from_old.get_ptr()), from_old.get_repetition());
+					to_new = ret.add_rep_world(*(to_old.get_ptr()), to_old.get_repetition());
+					//ret.add_edge(kedge(from_new, from_new, label));
+					ret.add_edge(kedge(to_new, to_new, label));
+				}
+			} else if (entailing_set.find(from_old) != entailing_set.end() && entailing_set.find(to_old) != entailing_set.end()) {
 				///\todo ottimiza
-				//if (oblivious_obs_agents.size() > 1) {
-				if ((to_duplicate.find(from_old) != to_duplicate.end()) || (to_duplicate.find(to_old) != to_duplicate.end())) {
+				if ((to_duplicate.find(from_old) != to_duplicate.end())) {
 					from_new = ret.add_rep_world(*(from_old.get_ptr()), from_old.get_repetition());
-					ret.add_edge(kedge(from_new, from_new, label));
+					to_new = ret.add_rep_world(*(to_old.get_ptr()), to_old.get_repetition());
+					/**\todo add also (from,from)?(to,to)?*/
+					ret.add_edge(kedge(from_new, to_new, label));
+				}
+			} else if (not_entailing_set.find(from_old) != not_entailing_set.end() && not_entailing_set.find(to_old) != not_entailing_set.end()) {
+				if (partially_obs_agents.size() > 1) {
+					if ((to_duplicate.find(from_old) != to_duplicate.end())) {
+						from_new = ret.add_rep_world(*(from_old.get_ptr()), from_old.get_repetition());
+						to_new = ret.add_rep_world(*(to_old.get_ptr()), to_old.get_repetition());
+						/**\todo add also (from,from)?(to,to)?*/
+						ret.add_edge(kedge(from_new, to_new, label));
+					}
 				}
 			}
 		} else if (partially_obs_agents.find(label) != partially_obs_agents.end()) {
@@ -906,8 +936,7 @@ kstate kstate::execute_announcement(const action & act) const
 	 * - Link the old state for oblivious.*/
 	/**\bug Wrong because the fluent changes accordingly to the pointed world*/
 
-	//set = get_C_reachable_worlds(fully+partial,pointed);
-	//for all edge if E exist that label = fully and links -p and p remove.
+	///Check who execute the action what believes bot what is true in pointed
 
 	return execute_sensing(act);
 }

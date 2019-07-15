@@ -48,9 +48,9 @@ tell_a_b2_3 announces at_b2_3;
 a observes tell_a_b2_3;
 b observes tell_a_b2_3;
 
-initially at_a_2, -at_a_1, -at_a_3, at_b1_1, -at_b1_3, -at_b2_1, at_b2_3;
-initially C([a,b], at_a_2);
-initially C([a,b], -at_a_1);
+initially -at_a_2, at_a_1, -at_a_3, at_b1_1, -at_b1_3, -at_b2_1, at_b2_3;
+initially C([a,b], -at_a_2);
+initially C([a,b], at_a_1);
 initially C([a,b], -at_a_3);
 
 
