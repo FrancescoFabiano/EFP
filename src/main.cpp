@@ -291,6 +291,24 @@ int main(int argc, char** argv)
 		break;
 	}
 	case POSSIBILITIES:
+//    {
+//        planner< state<kstate> > m_planner;
+//        if (execute_given_actions) {
+//            if (old_check) {
+//                m_planner.execute_given_actions_timed(given_actions);
+//            } else {
+//                m_planner.execute_given_actions(given_actions);
+//            }
+//            std::cout << "\n\n\n*****THE END*****\n";
+//        } else {
+//            if (m_planner.search_BFS(old_check)) {
+//                std::cout << "\n\n\n*****THE END*****\n";
+//            } else {
+//                std::cout << "\n\n\n*****THE SAD END*****\n";
+//            }
+//        }
+//        break;
+//    } TODO: ADAPT
 	case OBDD:
 	default:
 		std::cerr << "\nNot implemented yet\n";

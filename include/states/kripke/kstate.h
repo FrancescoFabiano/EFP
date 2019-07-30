@@ -312,6 +312,12 @@ private:
      * @param[in] act: The \ref ONTIC action to be applied on *this*.
      * @return the \ref kstate that results after the execution.*/
     kstate execute_ontic(const action & act) const;
+    /** \brief Function that applies either the transition function for a \ref SENSING or for an \ref ANNOUNCEMENT \ref action effect on *this*.
+     *
+     * @param[in] act: The \ref SENSING or \ref ANNOUNCEMENT action to be applied on *this*.
+     * @param[in] sensing: A boolean flag that is true iff act is a \ref SENSING action.
+     * @return the \ref kstate that results after the execution.*/
+    kstate execute_sensing_or_announcement(const action & act, bool sensing) const;
     /** \brief Function that applies the transition function for a \ref SENSING \ref action effect on *this*.
      *
      * The transition function is applied accordingly to mA*. Check the paper for more information.
