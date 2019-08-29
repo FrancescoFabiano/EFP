@@ -705,42 +705,50 @@ kstate kstate::execute_action_um(const action& act, const event_type_set& events
     }
 
     // (ii) Updating the edges of ret
-
     kedge_ptr_set::const_iterator it_kedptr;
     event_type_relation::const_iterator it_etr;
     auto get_kws = [sigma_kws, tau_kws, epsilon_kws](event_type e) { return e == SIGMA ? sigma_kws : e == TAU ? tau_kws : epsilon_kws; };
 
     for (it_kedptr = get_edges().begin(); it_kedptr != get_edges().end(); it_kedptr++) {
-        kworld_ptr from = it_kedptr->get_from(), to = it_kedptr->get_to();
         agent label = it_kedptr->get_label();
-
         event_type_relation ag_set = fully_obs_agents.find(label) != fully_obs_agents.end() ? fully_obs_r : partially_obs_agents.find(label) != partially_obs_agents.end() ? partially_obs_r : oblivious_obs_r;
 
-        for (it_etr = ag_set.begin(); it_etr == ag_set.end(); it_etr++) {
+        for (it_etr = ag_set.begin(); it_etr != ag_set.end(); it_etr++) {
             const kworld_ptr_set kws1 = get_kws((*it_etr).first), kws2 = get_kws((*it_etr).second);
             add_edge_um(ret, (*it_kedptr), kws1, kws2);
         }
-
     }
-    // (iii) Updating the interpretations (pi) of the new worlds
-    // TODO: helper::ontic_exec(...) ???
-    // fluent_set world_description = (*it_kwset1).get_fluent_set();
-
     return ret;
 }
 
 kstate kstate::execute_ontic_um(const action& act) const {
     event_type_set events = {SIGMA, EPSILON};
-    event_type_relation fully_obs_r = {{SIGMA, SIGMA}, {EPSILON, EPSILON}};
+    event_type_relation fully_obs_r     = {{SIGMA, SIGMA}, {EPSILON, EPSILON}};
     event_type_relation partially_obs_r = {};
     event_type_relation oblivious_obs_r = {{SIGMA, EPSILON}, {EPSILON, EPSILON}};
 
-    return execute_action_um(act, events, fully_obs_r, partially_obs_r, oblivious_obs_r);
+    kstate ret = execute_action_um(act, events, fully_obs_r, partially_obs_r, oblivious_obs_r);
+
+    // (iii) Updating the interpretations of the worlds
+    kworld_ptr_set::const_iterator it_kwptr;
+    fluent_formula::const_iterator it_eff;
+    fluent_set world_description;
+
+    for (it_kwptr = ret.get_worlds().begin(); it_kwptr != ret.get_worlds().end(); it_kwptr++) {
+        fluent_formula effects = get_effects_if_entailed(act.get_effects(), (*it_kwptr));
+        world_description = (*it_kwptr).get_fluent_set();
+
+        for (it_eff = effects.begin(); it_eff != effects.end(); it_eff++) {
+            world_description = helper::ontic_exec(*it_eff, world_description);
+        }
+    }
+
+    return ret;
 }
 
 kstate kstate::execute_sensing_um(const action& act) const {
     event_type_set events = {SIGMA, TAU, EPSILON};
-    event_type_relation fully_obs_r = {{SIGMA, SIGMA}, {TAU, TAU}, {EPSILON, EPSILON}};
+    event_type_relation fully_obs_r     = {{SIGMA, SIGMA}, {TAU, TAU}, {EPSILON, EPSILON}};
     event_type_relation partially_obs_r = {{SIGMA, SIGMA}, {TAU, TAU}, {EPSILON, EPSILON}, {SIGMA, TAU}, {TAU, SIGMA}};
     event_type_relation oblivious_obs_r = {{SIGMA, EPSILON}, {TAU, EPSILON}, {EPSILON, EPSILON}};
 
@@ -749,7 +757,7 @@ kstate kstate::execute_sensing_um(const action& act) const {
 
 kstate kstate::execute_announcement_um(const action &act) const {
     event_type_set events = {SIGMA, TAU, EPSILON};
-    event_type_relation fully_obs_r = {{SIGMA, SIGMA}, {TAU, TAU}, {EPSILON, EPSILON}};
+    event_type_relation fully_obs_r     = {{SIGMA, SIGMA}, {TAU, TAU}, {EPSILON, EPSILON}};
     event_type_relation partially_obs_r = {{SIGMA, SIGMA}, {TAU, TAU}, {EPSILON, EPSILON}, {SIGMA, TAU}, {TAU, SIGMA}};
     event_type_relation oblivious_obs_r = {{SIGMA, EPSILON}, {TAU, EPSILON}, {EPSILON, EPSILON}};
 
