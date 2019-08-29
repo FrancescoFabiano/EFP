@@ -654,7 +654,27 @@ void kstate::add_ret_ontic_worlds(const kworld_ptr & start, kworld_ptr_set &reac
 	add_ret_ontic_worlds_internal(start, reached, ret, effects, fully_obs_agents, act, act_check, map_for_edges);
 }
 
-kstate kstate::execute_ontic_um(const action& act) const {
+void kstate::add_sigma_tau_worlds(const action& act, kstate& ret, const kworld_ptr& kw, kworld_ptr_set& kws, bool sigma) const {
+    fluent_formula effects = get_effects_if_entailed(act.get_effects(), kw);
+
+    if (sigma == kw.entails(effects)) {
+        ret.add_rep_world(*(kw.get_ptr()));
+        kws.insert(kw);
+    }
+}
+
+void kstate::add_epsilon_worlds(kstate& ret, const kworld_ptr& kw, kworld_ptr_set& kws) const {
+    ret.add_rep_world(*(kw.get_ptr()));
+    kws.insert(kw);
+}
+
+void kstate::add_edge_um(kstate& ret, const kedge_ptr& ke, const kworld_ptr_set& kws1, const kworld_ptr_set& kws2) const {
+    if (kws1.find(ke.get_from()) != kws1.end() && kws2.find(ke.get_to()) != kws2.end()) {
+        ret.add_edge(*(ke.get_ptr()));
+    }
+}
+
+kstate kstate::execute_action_um(const action& act, const event_type_set& events, const event_type_relation& fully_obs_r, const event_type_relation& partially_obs_r, const event_type_relation& oblivious_obs_r) const {
     //The execution are all the same if we consider that false beliefs don't count.
     kstate ret;
 
@@ -662,67 +682,78 @@ kstate kstate::execute_ontic_um(const action& act) const {
     //the edges labeled with fully observant agents.
     agent_set agents = domain::get_instance().get_agents();
     agent_set fully_obs_agents = get_agents_if_entailed(act.get_fully_observants(), get_pointed());
+    agent_set partially_obs_agents = get_agents_if_entailed(act.get_partially_observants(), get_pointed());
 
     agent_set oblivious_obs_agents = agents;
     minus_set(oblivious_obs_agents, fully_obs_agents);
+    minus_set(oblivious_obs_agents, partially_obs_agents);
 
     agent_set::const_iterator it_agset;
 
     // (i) Creating the new worlds for the kstate ret
     kworld_ptr_set sigma_kws;
+    kworld_ptr_set tau_kws;
     kworld_ptr_set epsilon_kws;
 
     kworld_ptr_set::const_iterator it_kwset1;
     kworld_ptr_set::const_iterator it_kwset2;
 
     for (it_kwset1 = get_worlds().begin(); it_kwset1 != get_worlds().end(); it_kwset1++) {
-        // Sigma
-        fluent_formula effects = get_effects_if_entailed(act.get_effects(), (*it_kwset1));
-
-        if (it_kwset1->entails(effects)) {
-            ret.add_rep_world(*(it_kwset1->get_ptr()));
-            sigma_kws.insert(*it_kwset1);
-        }
-
-        // Epsilon
-        ret.add_rep_world(*(it_kwset1->get_ptr()));
-        epsilon_kws.insert(*it_kwset1);
+        if (events.find(SIGMA)   != events.end()) add_sigma_tau_worlds(act, ret, (*it_kwset1), sigma_kws  , true );
+        if (events.find(TAU)     != events.end()) add_sigma_tau_worlds(act, ret, (*it_kwset1), tau_kws    , false);
+        if (events.find(EPSILON) != events.end()) add_epsilon_worlds  (     ret, (*it_kwset1), epsilon_kws       );
     }
 
     // (ii) Updating the edges of ret
 
     kedge_ptr_set::const_iterator it_kedptr;
+    event_type_relation::const_iterator it_etr;
+    auto get_kws = [sigma_kws, tau_kws, epsilon_kws](event_type e) { return e == SIGMA ? sigma_kws : e == TAU ? tau_kws : epsilon_kws; };
 
     for (it_kedptr = get_edges().begin(); it_kedptr != get_edges().end(); it_kedptr++) {
         kworld_ptr from = it_kedptr->get_from(), to = it_kedptr->get_to();
         agent label = it_kedptr->get_label();
 
-        if (fully_obs_agents.find(label) != fully_obs_agents.end()) {                                           // Fully observant agents
-            // Sigma - Sigma
-            if (sigma_kws.find(from) != sigma_kws.end() && sigma_kws.find(to) != sigma_kws.end()) {
-                ret.add_edge(*(it_kedptr->get_ptr()));
-            }
-            // Epsilon - Epsilon
-            if (epsilon_kws.find(from) != epsilon_kws.end() && epsilon_kws.find(to) != epsilon_kws.end()) {
-                ret.add_edge(*(it_kedptr->get_ptr()));
-            }
-        } else {                                                                                                // Oblivious agents
-            // Sigma - Sigma
-            if (sigma_kws.find(from) != sigma_kws.end() && epsilon_kws.find(to) != epsilon_kws.end()) {
-                ret.add_edge(*(it_kedptr->get_ptr()));
-            }
-            // Epsilon - Epsilon
-            if (epsilon_kws.find(from) != epsilon_kws.end() && epsilon_kws.find(to) != epsilon_kws.end()) {
-                ret.add_edge(*(it_kedptr->get_ptr()));
-            }
-        }
-    }
+        event_type_relation ag_set = fully_obs_agents.find(label) != fully_obs_agents.end() ? fully_obs_r : partially_obs_agents.find(label) != partially_obs_agents.end() ? partially_obs_r : oblivious_obs_r;
 
+        for (it_etr = ag_set.begin(); it_etr == ag_set.end(); it_etr++) {
+            const kworld_ptr_set kws1 = get_kws((*it_etr).first), kws2 = get_kws((*it_etr).second);
+            add_edge_um(ret, (*it_kedptr), kws1, kws2);
+        }
+
+    }
     // (iii) Updating the interpretations (pi) of the new worlds
     // TODO: helper::ontic_exec(...) ???
     // fluent_set world_description = (*it_kwset1).get_fluent_set();
 
     return ret;
+}
+
+kstate kstate::execute_ontic_um(const action& act) const {
+    event_type_set events = {SIGMA, EPSILON};
+    event_type_relation fully_obs_r = {{SIGMA, SIGMA}, {EPSILON, EPSILON}};
+    event_type_relation partially_obs_r = {};
+    event_type_relation oblivious_obs_r = {{SIGMA, EPSILON}, {EPSILON, EPSILON}};
+
+    return execute_action_um(act, events, fully_obs_r, partially_obs_r, oblivious_obs_r);
+}
+
+kstate kstate::execute_sensing_um(const action& act) const {
+    event_type_set events = {SIGMA, TAU, EPSILON};
+    event_type_relation fully_obs_r = {{SIGMA, SIGMA}, {TAU, TAU}, {EPSILON, EPSILON}};
+    event_type_relation partially_obs_r = {{SIGMA, SIGMA}, {TAU, TAU}, {EPSILON, EPSILON}, {SIGMA, TAU}, {TAU, SIGMA}};
+    event_type_relation oblivious_obs_r = {{SIGMA, EPSILON}, {TAU, EPSILON}, {EPSILON, EPSILON}};
+
+    return execute_action_um(act, events, fully_obs_r, partially_obs_r, oblivious_obs_r);
+}
+
+kstate kstate::execute_announcement_um(const action &act) const {
+    event_type_set events = {SIGMA, TAU, EPSILON};
+    event_type_relation fully_obs_r = {{SIGMA, SIGMA}, {TAU, TAU}, {EPSILON, EPSILON}};
+    event_type_relation partially_obs_r = {{SIGMA, SIGMA}, {TAU, TAU}, {EPSILON, EPSILON}, {SIGMA, TAU}, {TAU, SIGMA}};
+    event_type_relation oblivious_obs_r = {{SIGMA, EPSILON}, {TAU, EPSILON}, {EPSILON, EPSILON}};
+
+    return execute_action_um(act, events, fully_obs_r, partially_obs_r, oblivious_obs_r);
 }
 
 kstate kstate::execute_ontic(const action& act) const

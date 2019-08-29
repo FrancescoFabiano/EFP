@@ -131,9 +131,9 @@ enum domain_restriction
 /** \brief The possible way of checking an action effects executability.*/
 enum action_check
 {
-    EXE_POINTED__COND_POINTED,/**< \brief Both the executability and the conditonal effects are cheched only on the state.*/
-    EXE_POINTED__COND_WORLD,/**< \brief The executability is checked only on the state but the conditonal effects are cheched in every worlds.*/
-    EXE_WORLD__COND_WORLD/**< \brief Both the executability and the conditonal effects are cheched in every world.*/
+    EXE_POINTED__COND_POINTED,/**< \brief Both the executability and the conditional effects are checked only on the state.*/
+    EXE_POINTED__COND_WORLD,/**< \brief The executionability is checked only on the state but the conditional effects are checked in every worlds.*/
+    EXE_WORLD__COND_WORLD/**< \brief Both the executability and the conditional effects are checked in every world.*/
 };
 
 /****************************************************************
@@ -148,7 +148,15 @@ typedef std::map<fluent_formula, belief_formula> effects_map; /**< \brief Used t
                                 * 
                                 * Each element associates an \ref action effect to its conditions.*/
 
+enum event_type
+{
+    SIGMA,/**< \brief Event corresponding to ... */
+    TAU,/**< \brief  Event corresponding to ... */
+    EPSILON/**< \brief The null event.*/
+};
 
+typedef std::set<event_type> event_type_set;
+typedef std::set<std::pair<event_type, event_type>> event_type_relation;
 
 /****************************************************************
  * States Related
