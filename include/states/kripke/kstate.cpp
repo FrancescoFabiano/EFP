@@ -654,6 +654,77 @@ void kstate::add_ret_ontic_worlds(const kworld_ptr & start, kworld_ptr_set &reac
 	add_ret_ontic_worlds_internal(start, reached, ret, effects, fully_obs_agents, act, act_check, map_for_edges);
 }
 
+kstate kstate::execute_ontic_um(const action& act) const {
+    //The execution are all the same if we consider that false beliefs don't count.
+    kstate ret;
+
+    //This finds all the worlds that are reachable from the initial state following
+    //the edges labeled with fully observant agents.
+    agent_set agents = domain::get_instance().get_agents();
+    agent_set fully_obs_agents = get_agents_if_entailed(act.get_fully_observants(), get_pointed());
+
+    agent_set oblivious_obs_agents = agents;
+    minus_set(oblivious_obs_agents, fully_obs_agents);
+
+    agent_set::const_iterator it_agset;
+
+    // (i) Creating the new worlds for the kstate ret
+    kworld_ptr_set sigma_kws;
+    kworld_ptr_set epsilon_kws;
+
+    kworld_ptr_set::const_iterator it_kwset1;
+    kworld_ptr_set::const_iterator it_kwset2;
+
+    for (it_kwset1 = get_worlds().begin(); it_kwset1 != get_worlds().end(); it_kwset1++) {
+        // Sigma
+        fluent_formula effects = get_effects_if_entailed(act.get_effects(), (*it_kwset1));
+
+        if (it_kwset1->entails(effects)) {
+            ret.add_rep_world(*(it_kwset1->get_ptr()));
+            sigma_kws.insert(*it_kwset1);
+        }
+
+        // Epsilon
+        ret.add_rep_world(*(it_kwset1->get_ptr()));
+        epsilon_kws.insert(*it_kwset1);
+    }
+
+    // (ii) Updating the edges of ret
+
+    kedge_ptr_set::const_iterator it_kedptr;
+
+    for (it_kedptr = get_edges().begin(); it_kedptr != get_edges().end(); it_kedptr++) {
+        kworld_ptr from = it_kedptr->get_from(), to = it_kedptr->get_to();
+        agent label = it_kedptr->get_label();
+
+        if (fully_obs_agents.find(label) != fully_obs_agents.end()) {                                           // Fully observant agents
+            // Sigma - Sigma
+            if (sigma_kws.find(from) != sigma_kws.end() && sigma_kws.find(to) != sigma_kws.end()) {
+                ret.add_edge(*(it_kedptr->get_ptr()));
+            }
+            // Epsilon - Epsilon
+            if (epsilon_kws.find(from) != epsilon_kws.end() && epsilon_kws.find(to) != epsilon_kws.end()) {
+                ret.add_edge(*(it_kedptr->get_ptr()));
+            }
+        } else {                                                                                                // Oblivious agents
+            // Sigma - Sigma
+            if (sigma_kws.find(from) != sigma_kws.end() && epsilon_kws.find(to) != epsilon_kws.end()) {
+                ret.add_edge(*(it_kedptr->get_ptr()));
+            }
+            // Epsilon - Epsilon
+            if (epsilon_kws.find(from) != epsilon_kws.end() && epsilon_kws.find(to) != epsilon_kws.end()) {
+                ret.add_edge(*(it_kedptr->get_ptr()));
+            }
+        }
+    }
+
+    // (iii) Updating the interpretations (pi) of the new worlds
+    // TODO: helper::ontic_exec(...) ???
+    // fluent_set world_description = (*it_kwset1).get_fluent_set();
+
+    return ret;
+}
+
 kstate kstate::execute_ontic(const action& act) const
 {
 	/** \bug What happen if ontic removes ignorance?

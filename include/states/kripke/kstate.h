@@ -302,7 +302,35 @@ private:
      * @return the effects that are feasible in *this* with \p start as pointed world*.*/
     fluent_formula get_effects_if_entailed(const effects_map & map, const kworld_ptr & start) const;
 
-    
+    /** \brief Function that applies the transition function for a \ref ONTIC \ref action effect on *this* implementing the Update Models semantic.
+     *
+     * The transition function is applied accordingly to mA*. Check the paper for more information.
+     *
+     * @see action.
+     *
+     * @param[in] act: The \ref ONTIC action to be applied on *this*.
+     * @return the \ref kstate that results after the execution.*/
+    kstate execute_ontic_um(const action & act) const;
+    /** \brief Function that applies the transition function for a \ref SENSING \ref action effect on *this* implementing the Update Models semantic.
+     *
+     * The transition function is applied accordingly to mA*. Check the paper for more information.
+     *
+     * @see action.
+     *
+     * @param[in] act: The \ref SENSING action to be applied on *this*.
+     * @return the \ref kstate that results after the execution.*/
+    kstate execute_sensing_um(const action & act) const;
+    /** \brief Function that applies the transition function for a \ref ANNOUNCEMENT \ref action effect on *this* implementing the Update Models semantic.
+     *
+     * The transition function is applied accordingly to mA*. Check the paper for more information.
+     *
+     * @see action.
+     *
+     * @param[in] act: The \ref ANNOUNCEMENT action to be applied on *this*.
+     * @return the \ref kstate that results after the execution.*/
+    kstate execute_announcement_um(const action & act) const;
+
+
     /** \brief Function that applies the transition function for a \ref ONTIC \ref action effect on *this*.
      *
      * The transition function is applied accordingly to mA*. Check the paper for more information.
