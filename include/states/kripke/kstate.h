@@ -308,10 +308,11 @@ private:
      *
      * @param[in] act: the \ref action being applied to *this*.
      * @param[in] ret: the Kripke structure obtained after performing act.
+     * @param[in] effects: the effects of the action being performed to *this*  .
      * @param[in] kw: the current \ref kworld of *this* being considered.
      * @param[in] kws: the set of \ref SIGMA or \ref TAU kworlds of the new Kripke structure.
      * @param[in] sigma: true iff a \ref SIGMA event is occurring.*/
-    void add_sigma_tau_worlds(const action& act, kstate& ret, const kworld_ptr& kw, kworld_ptr_set& kws, bool sigma) const;
+    void add_sigma_tau_worlds(const action& act, kstate& ret, const fluent_formula& effects, const kworld_ptr& kw, kworld_ptr_set& kws, bool sigma) const;
     /** \brief Function that adds the \ref kworld (kw, \ref EPSILON) to the Kripke structure ret.
      *
      * The Kripke structure is updated according to mA*. Check the paper for more information.

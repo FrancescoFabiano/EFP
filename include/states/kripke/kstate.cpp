@@ -545,17 +545,17 @@ kstate kstate::compute_succ(const action & act) const
 		print();
 		std::cout << "\n*********************Printing tmp*********************\n";
 		tmp.print();*/
-		return execute_ontic(act);
+		return execute_ontic_um(act);
 		break;
 	}
 	case SENSING:
 	{
-		return execute_sensing(act);
+		return execute_sensing_um(act);
 		break;
 	}
 	case ANNOUNCEMENT:
 	{
-		return execute_announcement(act);
+		return execute_announcement_um(act);
 		break;
 	}
 	default:
@@ -654,17 +654,16 @@ void kstate::add_ret_ontic_worlds(const kworld_ptr & start, kworld_ptr_set &reac
 	add_ret_ontic_worlds_internal(start, reached, ret, effects, fully_obs_agents, act, act_check, map_for_edges);
 }
 
-void kstate::add_sigma_tau_worlds(const action& act, kstate& ret, const kworld_ptr& kw, kworld_ptr_set& kws, bool sigma) const {
-    fluent_formula effects = get_effects_if_entailed(act.get_effects(), kw);
-
+void kstate::add_sigma_tau_worlds(const action& act, kstate& ret, const fluent_formula& effects, const kworld_ptr& kw, kworld_ptr_set& kws, bool sigma) const {
     if (sigma == kw.entails(effects)) {
-        ret.add_rep_world(*(kw.get_ptr()));
+        int offset = sigma ? 1 : 2;
+        ret.add_rep_world(*(kw.get_ptr()), kw.get_repetition() + offset);
         kws.insert(kw);
     }
 }
 
 void kstate::add_epsilon_worlds(kstate& ret, const kworld_ptr& kw, kworld_ptr_set& kws) const {
-    ret.add_rep_world(*(kw.get_ptr()));
+    ret.add_rep_world(*(kw.get_ptr()), kw.get_repetition());
     kws.insert(kw);
 }
 
@@ -699,9 +698,10 @@ kstate kstate::execute_action_um(const action& act, const event_type_set& events
     kworld_ptr_set::const_iterator it_kwset2;
 
     for (it_kwset1 = get_worlds().begin(); it_kwset1 != get_worlds().end(); it_kwset1++) {
-        if (events.find(SIGMA)   != events.end()) add_sigma_tau_worlds(act, ret, (*it_kwset1), sigma_kws  , true );
-        if (events.find(TAU)     != events.end()) add_sigma_tau_worlds(act, ret, (*it_kwset1), tau_kws    , false);
-        if (events.find(EPSILON) != events.end()) add_epsilon_worlds  (     ret, (*it_kwset1), epsilon_kws       );
+        fluent_formula effects = get_effects_if_entailed(act.get_effects(), *it_kwset1);
+        if (events.find(SIGMA)   != events.end()) add_sigma_tau_worlds(act, ret, effects, *it_kwset1, sigma_kws  , true );
+        if (events.find(TAU)     != events.end()) add_sigma_tau_worlds(act, ret, effects, *it_kwset1, tau_kws    , false);
+        if (events.find(EPSILON) != events.end()) add_epsilon_worlds  (     ret,          *it_kwset1, epsilon_kws       );
     }
 
     // (ii) Updating the edges of ret
