@@ -23,6 +23,7 @@
 #include <fstream>
 
 #include "kripke/kstate.h"
+//#include "possibilities/pstate.h"
 
 #include "../utilities/define.h"
 #include "../actions/action.h"

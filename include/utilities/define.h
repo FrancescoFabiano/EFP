@@ -223,3 +223,24 @@ typedef std::set<kworld_ptr> kworld_ptr_set; /**< \brief A set of \ref kworld_pt
                                             *
                                             * \todo The operator < for std::shared_ptr must be implemented.
                                             * @see kworld and kstate.*/
+
+/*****************Possibilities*****************/
+class pworld;
+typedef std::string pworld_id; /**< \brief The id of a \ref pworld in a \ref pstate.
+                                *
+                                * The id is calculated through an hash (pworld::hash_fluents_into_id()) of the info of the \ref pworld.
+                                *
+                                * This id is used to extract the \ref pworld from the \ref pstore to not create a new every time
+                                * but to access the already created ones.
+                                * @see pworld and pstore*/
+/*typedef std::shared_ptr<const pworld> pworld_ptr;*/ /*< \brief A std::shared_pointer to a \ref pworld usually stored in \ref pstore.
+                                                   *
+                                                   * @see pworld and pstore.
+                                                   * \todo transform into class for < into set.*/
+class pworld_ptr;
+typedef std::set<pworld_ptr> pworld_ptr_set; /**< \brief A set of \ref pworld_ptr.
+                                            *
+                                            * Mainly used to store all the \ref pworld of a \ref pstate without wasting memory.
+                                            *
+                                            * \todo The operator < for std::shared_ptr must be implemented.
+                                            * @see pworld and pstate.*/
