@@ -108,11 +108,27 @@ initially C([a,b], (at_b1_1, -at_b1_3) | (-at_b1_1, at_b1_3));
 initially C([a,b], (at_b2_1, -at_b2_3) | (-at_b2_1, at_b2_3));
 
 
-%goal B(a,at_b1_1);
-%goal B(b,at_b2_3);
+
+%Three Actions
 %goal B(b,at_b1_1);
-%goal B(a,at_b2_3);
-goal C([a,b], at_b2_3);
-%goal at_a_2;
-%goal at_b_2;
-goal C([a,b], at_b1_1);
+
+%Five Actions
+%goal B(b,at_b2_3);
+
+%Six Actions
+%goal C([a,b], at_b2_3);
+
+%Seven Actions
+%goal B(a,at_a_2);
+
+%Eight Actions
+%goal B(b,at_a_2);
+
+%Nine Actions (Comment Seven)
+%goal B(a,at_a_3);
+
+%Ten Actions (Comment Eight)
+%goal B(a,at_a_3);
+
+%Two Actions (The basic one as last otherwise syntax error)
+goal B(a,at_b1_1);
