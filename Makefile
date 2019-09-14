@@ -5,7 +5,8 @@ OBJS	=	$(BUILD_DIR)/bison.o $(BUILD_DIR)/lex.o $(BUILD_DIR)/main.o \
 			$(BUILD_DIR)/action.o $(BUILD_DIR)/helper.o $(BUILD_DIR)/initially.o \
 			$(BUILD_DIR)/kstore.o \
 			$(BUILD_DIR)/kedge.o $(BUILD_DIR)/kworld.o $(BUILD_DIR)/kstate.o \
-			$(BUILD_DIR)/pworld.o $(BUILD_DIR)/reader.o
+			$(BUILD_DIR)/pstore.o $(BUILD_DIR)/pworld.o \
+			$(BUILD_DIR)/reader.o
 CC	= g++
 CFLAGS	= -g -Wall -ansi -std=c++14
 
@@ -172,11 +173,11 @@ $(BUILD_DIR)/pworld.o: $(S_POSSIBILITY_DIR)/pworld.cpp $(S_POSSIBILITY_DIR)/pwor
 		$(dir_guard)
 		$(CC) $(CFLAGS) -c $(S_POSSIBILITY_DIR)/pworld.cpp -o $(BUILD_DIR)/pworld.o
 
-#$(BUILD_DIR)/pstore.o: $(S_POSSIBILITY_DIR)/pstore.cpp $(S_POSSIBILITY_DIR)/pstore.h \
-#					   $(S_POSSIBILITY_DIR)/pworld.h $(S_POSSIBILITY_DIR)/pedge.h \
-#					   $(UTILITIES_DIR)/define.h
-#		$(dir_guard)
-#		$(CC) $(CFLAGS) -c $(S_POSSIBILITY_DIR)/pstore.cpp -o $(BUILD_DIR)/pstore.o
+$(BUILD_DIR)/pstore.o: $(S_POSSIBILITY_DIR)/pstore.cpp $(S_POSSIBILITY_DIR)/pstore.h \
+					   $(S_POSSIBILITY_DIR)/pworld.h \
+					   $(UTILITIES_DIR)/define.h
+		$(dir_guard)
+		$(CC) $(CFLAGS) -c $(S_POSSIBILITY_DIR)/pstore.cpp -o $(BUILD_DIR)/pstore.o
 
 ####DOMAIN
 $(BUILD_DIR)/initially.o: $(DOMAIN_DIR)/initially.cpp $(DOMAIN_DIR)/initially.h \
