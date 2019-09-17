@@ -302,35 +302,15 @@ private:
      * @return the effects that are feasible in *this* with \p start as pointed world*.*/
     fluent_formula get_effects_if_entailed(const effects_map & map, const kworld_ptr & start) const;
 
-    /** \brief Function that adds the \ref kworld (kw, \ref SIGMA) or (kw, \ref TAU) to the Kripke structure ret.
-     *
-     * The Kripke structure is updated according to mA*. Check the paper for more information.
-     *
-     * @param[in] act: the \ref action being applied to *this*.
-     * @param[in] ret: the Kripke structure obtained after performing act.
-     * @param[in] effects: the effects of the action being performed to *this*  .
-     * @param[in] kw: the current \ref kworld of *this* being considered.
-     * @param[in] kws: the set of \ref SIGMA or \ref TAU kworlds of the new Kripke structure.
-     * @param[in] sigma: true iff a \ref SIGMA event is occurring.*/
-    void add_sigma_tau_worlds(const action& act, kstate& ret, const fluent_formula& effects, const kworld_ptr& kw, kworld_ptr_set& kws, bool sigma) const;
-    /** \brief Function that adds the \ref kworld (kw, \ref EPSILON) to the Kripke structure ret.
+    /** \brief Function that adds the \ref kworld (kw, \ref SIGMA), (kw, \ref TAU) or (kw, \ref EPSILON) to the Kripke structure ret.
      *
      * The Kripke structure is updated according to mA*. Check the paper for more information.
      *
      * @param[in] ret: the Kripke structure obtained after performing act.
      * @param[in] kw: the current \ref kworld of *this* being considered.
-     * @param[in] kws: the set of \ref EPSILON kworlds of the new Kripke structure.*/
-    void add_epsilon_worlds(kstate& ret, const kworld_ptr& kw, kworld_ptr_set& kws) const;
-    /** \brief Function that adds the \ref kedge ke to the Kripke structure ret.
-     *
-     * The Kripke structure is updated according to mA*. Check the paper for more information.
-     *
-     * @param[in] ret: the Kripke structure obtained after performing act.
-     * @param[in] ke: the current \ref kedge of *this* being considered.
-     * @param[in] kws1: a set of kworlds of the new Kripke structure.
-     * @param[in] kws2: a set of kworlds of the new Kripke structure.
-     * */
-    void add_edge_um(kstate& ret, const kedge_ptr& ke, const kworld_ptr_set& kws1, const kworld_ptr_set& kws2) const;
+     * @param[in] kmap: the map between the kworlds of the old Kripke structure and the ones of the new structure.
+     * @param[in] e: the event type being considered.*/
+    void add_ste_worlds(kstate &ret, const kworld_ptr &kw, kstate_map &kmap, const event_type e) const;
 
     /** \brief Function that applies the transition function for an \ref action effect on *this* implementing the Update Models semantic.
      *

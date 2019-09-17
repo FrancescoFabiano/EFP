@@ -150,9 +150,9 @@ typedef std::map<fluent_formula, belief_formula> effects_map; /**< \brief Used t
 
 enum event_type
 {
+    EPSILON,/**< \brief The null event.*/
     SIGMA,/**< \brief Event corresponding to ... */
-    TAU,/**< \brief  Event corresponding to ... */
-    EPSILON/**< \brief The null event.*/
+    TAU/**< \brief  Event corresponding to ... */
 };
 
 typedef std::set<event_type> event_type_set;
@@ -223,6 +223,8 @@ typedef std::set<kworld_ptr> kworld_ptr_set; /**< \brief A set of \ref kworld_pt
                                             *
                                             * \todo The operator < for std::shared_ptr must be implemented.
                                             * @see kworld and kstate.*/
+
+typedef std::map<std::pair<kworld_ptr, event_type>, kworld_ptr> kstate_map;
 
 /*****************Possibilities*****************/
 class pworld;

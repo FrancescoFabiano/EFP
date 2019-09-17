@@ -654,23 +654,18 @@ void kstate::add_ret_ontic_worlds(const kworld_ptr & start, kworld_ptr_set &reac
 	add_ret_ontic_worlds_internal(start, reached, ret, effects, fully_obs_agents, act, act_check, map_for_edges);
 }
 
-void kstate::add_sigma_tau_worlds(const action& act, kstate& ret, const fluent_formula& effects, const kworld_ptr& kw, kworld_ptr_set& kws, bool sigma) const {
-    if (sigma == kw.entails(effects)) {
-        int offset = sigma ? 1 : 2;
-        ret.add_rep_world(*(kw.get_ptr()), kw.get_repetition() + offset);
-        kws.insert(kw);
-    }
-}
+void kstate::add_ste_worlds(kstate &ret, const kworld_ptr &kw, kstate_map &kmap, const event_type e) const {
+//    int offset = sigma ? 1 : 2;
+    bool tmp = false;
 
-void kstate::add_epsilon_worlds(kstate& ret, const kworld_ptr& kw, kworld_ptr_set& kws) const {
-    ret.add_rep_world(*(kw.get_ptr()), kw.get_repetition());
-    kws.insert(kw);
-}
+    kmap.insert(kstate_map::value_type(
+            std::make_pair(kw, e), // sigma ? SIGMA : TAU
+            ret.add_rep_world(*(kw.get_ptr()), kw.get_repetition() + e, tmp)));
 
-void kstate::add_edge_um(kstate& ret, const kedge_ptr& ke, const kworld_ptr_set& kws1, const kworld_ptr_set& kws2) const {
-    if (kws1.find(ke.get_from()) != kws1.end() && kws2.find(ke.get_to()) != kws2.end()) {
-        ret.add_edge(*(ke.get_ptr()));
-    }
+//    kws.insert(kw);
+    if (e == SIGMA && kw == get_pointed()) ret.set_pointed(ret.add_rep_world(*(kw.get_ptr()), kw.get_repetition() + e, tmp));
+    /** \todo Change repetition in other rep world */
+    /** \todo Improve new pointed world */
 }
 
 kstate kstate::execute_action_um(const action& act, const event_type_set& events, const event_type_relation& fully_obs_r, const event_type_relation& partially_obs_r, const event_type_relation& oblivious_obs_r) const {
@@ -689,35 +684,73 @@ kstate kstate::execute_action_um(const action& act, const event_type_set& events
 
     agent_set::const_iterator it_agset;
 
-    // (i) Creating the new worlds for the kstate ret
-    kworld_ptr_set sigma_kws;
-    kworld_ptr_set tau_kws;
-    kworld_ptr_set epsilon_kws;
+    // Creating the new worlds for the kstate ret
+    kstate_map kmap;
 
+    kstate_map::const_iterator     it_kmap;
     kworld_ptr_set::const_iterator it_kwset1;
     kworld_ptr_set::const_iterator it_kwset2;
 
     for (it_kwset1 = get_worlds().begin(); it_kwset1 != get_worlds().end(); it_kwset1++) {
-        fluent_formula effects = get_effects_if_entailed(act.get_effects(), *it_kwset1);
-        if (events.find(SIGMA)   != events.end()) add_sigma_tau_worlds(act, ret, effects, *it_kwset1, sigma_kws  , true );
-        if (events.find(TAU)     != events.end()) add_sigma_tau_worlds(act, ret, effects, *it_kwset1, tau_kws    , false);
-        if (events.find(EPSILON) != events.end()) add_epsilon_worlds  (     ret,          *it_kwset1, epsilon_kws       );
+        for (event_type e : events) {
+            add_ste_worlds(ret, *it_kwset1, kmap, e);
+        }
     }
 
-    // (ii) Updating the edges of ret
+    // Updating the interpretations of the worlds
+    if (act.get_type() == ONTIC) {
+        fluent_set                     world_description;
+        fluent_formula::const_iterator it_eff;
+
+        for (it_kmap = kmap.begin(); it_kmap != kmap.end(); it_kmap++) {
+            kworld_ptr kw = (*it_kmap).second;
+            event_type e  = (*it_kmap).first.second;
+
+            if (e == SIGMA) {
+                fluent_formula effects = get_effects_if_entailed(act.get_effects(), kw);
+                world_description = kw.get_fluent_set();
+
+                for (it_eff = effects.begin(); it_eff != effects.end(); it_eff++) {
+                    world_description = helper::ontic_exec(*it_eff, world_description);
+                }
+            }
+        }
+    }
+
+    // Removing worlds that do not satisfy the precondition
+//    for (it_kwset1 = ret.get_worlds().begin(); it_kwset1 != ret.get_worlds().end(); it_kwset1++) {
+//        fluent_formula effects = get_effects_if_entailed(act.get_effects(), *it_kwset1);
+//
+//        if (!it_kwset1->entails(effects)) {
+//            ret.get_worlds().erase(it_kwset1);
+//        }
+//    }
+
+    // Updating the edges of ret
     kedge_ptr_set::const_iterator it_kedptr;
     event_type_relation::const_iterator it_etr;
-    auto get_kws = [sigma_kws, tau_kws, epsilon_kws](event_type e) { return e == SIGMA ? sigma_kws : e == TAU ? tau_kws : epsilon_kws; };
+    int count = 0;
 
     for (it_kedptr = get_edges().begin(); it_kedptr != get_edges().end(); it_kedptr++) {
         agent label = it_kedptr->get_label();
         event_type_relation ag_set = fully_obs_agents.find(label) != fully_obs_agents.end() ? fully_obs_r : partially_obs_agents.find(label) != partially_obs_agents.end() ? partially_obs_r : oblivious_obs_r;
 
         for (it_etr = ag_set.begin(); it_etr != ag_set.end(); it_etr++) {
-            const kworld_ptr_set kws1 = get_kws((*it_etr).first), kws2 = get_kws((*it_etr).second);
-            add_edge_um(ret, (*it_kedptr), kws1, kws2);
+            event_type e1 = (*it_etr).first, e2 = (*it_etr).second;
+            auto kw1 = kmap.find({it_kedptr->get_from(), e1}), kw2 = kmap.find({it_kedptr->get_to(), e2});
+
+            if (kw1 != kmap.end() && kw2 != kmap.end()) {
+                ret.add_edge(kedge(kw1->second, kw2->second, label));
+                std::cout << "printing new edge number " << (++count) << ": ";
+                kedge(kw1->second, kw2->second, label).print();
+                std::cout << std::endl;
+            }
         }
     }
+
+    std::cout << std::endl << "printing post-execution" << std::endl;
+    std::cout << "printing ret edges: ";
+    ret.print();
     return ret;
 }
 
@@ -727,21 +760,9 @@ kstate kstate::execute_ontic_um(const action& act) const {
     event_type_relation partially_obs_r = {};
     event_type_relation oblivious_obs_r = {{SIGMA, EPSILON}, {EPSILON, EPSILON}};
 
+    std::cout << "executing ontic" << std::endl;
     kstate ret = execute_action_um(act, events, fully_obs_r, partially_obs_r, oblivious_obs_r);
-
-    // (iii) Updating the interpretations of the worlds
-    kworld_ptr_set::const_iterator it_kwptr;
-    fluent_formula::const_iterator it_eff;
-    fluent_set world_description;
-
-    for (it_kwptr = ret.get_worlds().begin(); it_kwptr != ret.get_worlds().end(); it_kwptr++) {
-        fluent_formula effects = get_effects_if_entailed(act.get_effects(), (*it_kwptr));
-        world_description = (*it_kwptr).get_fluent_set();
-
-        for (it_eff = effects.begin(); it_eff != effects.end(); it_eff++) {
-            world_description = helper::ontic_exec(*it_eff, world_description);
-        }
-    }
+    std::cout << "executed ontic" << std::endl;
 
     return ret;
 }

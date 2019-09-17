@@ -9,7 +9,7 @@ left_a causes -at_a_3 if at_a_3;
 left_a causes at_a_1 if at_a_2;
 left_a causes at_a_2 if at_a_3;
 a observes left_a;
-b observes left_a;
+% b observes left_a;
 
 executable right_a if B(a, -at_a_3), (-at_a_3);
 right_a causes -at_a_1 if at_a_1;
