@@ -66,8 +66,8 @@ void pworld::set_fluent_set(const fluent_set & description)
 		throw std::invalid_argument("Non consistent set of fluent");*/
 }
 
-void pworld::set_pworld_set(const pworld_ptr_set & beliefs) {
-    m_pworld_set = beliefs;
+void pworld::set_pworld_set(const pworld_map & beliefs) {
+    m_pworld_map = beliefs;
 }
 
 bool pworld::consistent(const fluent_set & to_check)
@@ -104,6 +104,11 @@ void pworld::set_id()
 const fluent_set & pworld::get_fluent_set() const
 {
 	return m_fluent_set;
+}
+
+const pworld_map & pworld::get_pworld_map() const
+{
+    return m_pworld_map;
 }
 
 pworld_id pworld::get_id() const
@@ -228,6 +233,15 @@ const fluent_set & pworld_ptr::get_fluent_set() const
 	}
 	std::cerr << "Error in creating a pworld_ptr\n";
 	exit(1);
+}
+
+const pworld_map & pworld_ptr::get_pworld_map() const
+{
+    if (m_ptr != nullptr) {
+        return get_ptr()->get_pworld_map();
+    }
+    std::cerr << "Error in creating a pworld_ptr\n";
+    exit(1);
 }
 
 pworld_id pworld_ptr::get_id() const

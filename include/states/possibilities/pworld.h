@@ -29,7 +29,7 @@ private:
     /** \brief The set of  \ref fluent that describes how these are interpreted in *this*.*/
     fluent_set m_fluent_set;
     /** \brief The set of \ref pworld that describes the agents' beliefs.*/
-    pworld_ptr_set m_pworld_set;
+    pworld_map m_pworld_map;
     /** \brief The unique id of *this* computed with \ref hash_fluents_into_id().*/
     pworld_id m_id;
 
@@ -61,7 +61,7 @@ private:
      * @param[in] beliefs: the set of \ref fluent to set as \ref m_pworld_set.
      *
      * \todo is the parameter passing the best one? Copy?*/
-    void set_pworld_set(const pworld_ptr_set & beliefs);
+    void set_pworld_set(const pworld_map & beliefs);
 
     /**
      * \brief Function that checks if the given \ref fluent_set is consistent.
@@ -85,6 +85,13 @@ private:
      *     
      * @return the \ref pworld_ptr to the pworld where *this* is from.*/
     const fluent_set & get_fluent_set() const;
+
+    /** \brief Getter of \ref m_pworld_map.
+     *
+     * Only accessible by the \ref pworld_ptr.
+     *
+     * @return the \ref pworld_ptr to the pworld where *this* is from.*/
+    const pworld_map & get_pworld_map() const;
 
     /** \brief Getter of \ref m_id.
      *     
@@ -265,6 +272,11 @@ public:
      *     
      * @return the \ref fluent_set that is the description of the \ref pworld pointed by \ref m_ptr.*/
     const fluent_set & get_fluent_set() const;
+    /** \brief Function that return the field m_pworld_map of the pointed \ref pworld.
+     *
+     * @return the \ref pworld_map that is the description of the agents' beliefs of the \ref pworld pointed by \ref m_ptr.*/
+    const pworld_map & get_pworld_map() const;
+
     /** \brief Function that return the field m_id of the pointed \ref pworld + \ref m_repetition.
      *     
      * @return the \ref pworld_id that is the id of the \ref pworld pointed by \ref m_ptr + \ref m_repetition.*/

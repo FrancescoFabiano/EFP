@@ -246,3 +246,10 @@ typedef std::set<pworld_ptr> pworld_ptr_set; /**< \brief A set of \ref pworld_pt
                                             *
                                             * \todo The operator < for std::shared_ptr must be implemented.
                                             * @see pworld and pstate.*/
+
+typedef std::map<agent, pworld_ptr_set> pworld_map; /**< \brief A map between agents and set of \ref pworld_ptr.
+                                                    *
+                                                    * Mainly used to store all the \ref pworld of a \ref pstate without wasting memory,
+                                                    * while keeping information about the agents' beliefs.
+                                                    *
+                                                    * @see pworld and pstate.*/
