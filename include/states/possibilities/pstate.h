@@ -239,23 +239,23 @@ private:
      *  
      * The function creates all the edges and adds to *this* only the ones that respect \p ini_conditions.
      * All the other ones are stored in \ref pstore for future usees.*/
-    void generate_initial_kedges();
+    void generate_initial_pedges();
     /** \brief Function that removes the a \ref kedge_ptr from \ref m_edges.
      * 
      * @param[in] to_remove: the \ref kedge which pointer has to be removed.*/
-    void remove_kedge(const kedge & to_remove);
+    void remove_edge(pworld_ptr & pw1, const pworld & pw2, const agent ag);
     /** \brief Function that removes the \ref kedge(s) that imply that \p ag is ignorant about \p known_ff from *this*.
      *  
      * @param[in] known_ff: the \ref fluent_formula known by \p ag.
      * @param[in] ag: the \ref agent that knows \p known_ff.*/
-    void remove_initial_kedge(const fluent_formula & known_ff, agent ag);
+    void remove_initial_pedge(const fluent_formula &known_ff, agent ag);
     /** \brief Function check if a belief_formula removes some edges from the initial state.
      *  
      * For example whenever is B(i, *phi*) \/ B(i, -*phi*) is necessary to remove the edges
      * labeled with i that link \ref pworld that entails *phi* and \ref pworld -*phi*.
      * 
      * @param[in] to_check: the \ref belief_formula to check.*/
-    void remove_initial_kedge_bf(const belief_formula & to_check);
+    void remove_initial_pedge_bf(const belief_formula &to_check);
 
     void add_world(const pworld & to_add);
 
@@ -278,7 +278,7 @@ private:
      * @see kedge and pstore.
      *  
      * @param[in] to_add: the \ref kedge that has to be added to *this*.*/
-    void add_edge(const kedge & to_add);
+    void add_edge(pworld_ptr & pw1, const pworld & pw2, const agent ag);
 
     /** \brief Function that return the set of \ref agent that entails the obs condition.
      *
@@ -430,10 +430,6 @@ public:
      *
      * @param[in] to_set: the \ref pworld_ptr_set to assign to \ref m_worlds.*/
     void set_worlds(const pworld_ptr_set & to_set);
-    /** \brief Setter of the field \ref m_edges.
-     *
-     * @param[in] to_set: the \ref kedge_ptr_set to assign to \ref m_edges.*/
-    void set_edges(const kedge_ptr_set & to_set);
     /** \brief Setter of the field \ref m_pointed.
      *
      * @param[in] to_set: the \ref pworld_ptr to assign to \ref m_pointed.*/

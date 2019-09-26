@@ -20,11 +20,6 @@ void pstate::set_worlds(const pworld_ptr_set & to_set)
 	m_worlds = to_set;
 }
 
-void pstate::set_edges(const kedge_ptr_set & to_set)
-{
-//	m_edges = to_set;
-}
-
 void pstate::set_pointed(const pworld_ptr & to_set)
 {
 	m_pointed = to_set;
@@ -39,11 +34,6 @@ const pworld_ptr_set & pstate::get_worlds() const
 {
 	return m_worlds;
 }
-
-//const kedge_ptr_set & pstate::get_edges() const
-//{
-//	return m_edges;
-//}
 
 const pworld_ptr & pstate::get_pointed() const
 {
@@ -92,12 +82,11 @@ bool pstate::entails(const belief_formula & bf) const
 
 bool pstate::operator=(const pstate & to_copy)
 {
-//	set_edges(to_copy.get_edges());
 	set_worlds(to_copy.get_worlds());
 	set_max_depth(to_copy.get_max_depth());
 	set_pointed(to_copy.get_pointed());
 	return true;
-} // TODO: EDIT
+}
 
 bool pstate::entails(const belief_formula & to_check, const pworld_ptr_set & reachable) const
 {
@@ -282,16 +271,23 @@ pworld_ptr pstate::add_rep_world(const pworld & world)
 	}
 }*/
 
-//void pstate::add_edge(const kedge & edge)
-//{
-//
-//	m_edges.insert(pstore::get_instance().add_edge(edge));
-//}
+void pstate::add_edge(pworld_ptr & pw1, const pworld & pw2, const agent ag)
+{
+    auto it_pwm_1 = pw1.get_pworld_map().find(ag);
+
+    if (it_pwm_1 != pw1.get_pworld_map().end()) {
+        pworld_ptr_set pwps = it_pwm_1->second;
+        pwps.insert(pstore::get_instance().add_world(pw2));
+    } else {
+        pworld_map pmap = pw1.get_pworld_map();
+        pmap.insert(pworld_map::value_type(ag, {pstore::get_instance().add_world(pw2)}));
+    }
+}
 
 void pstate::build_initial()
 {
 	/** \todo for now prune building.*/
-	std::cout << "\nBuilding initial Kripke structure...\n";
+	std::cout << "\nBuilding initial possibility...\n";
 	build_initial_prune();
 }
 
@@ -309,9 +305,9 @@ void pstate::build_initial_prune()
 	generate_initial_pworlds(permutation, 0);
 
 
-	/*Building of all the consistent \ref kedge.*/
-	generate_initial_kedges();
-}   // TODO: EDIT
+	/*Building of all the consistent edges.*/
+    generate_initial_pedges();
+}
 
 /*From https://www.geeksforgeeks.org/generate-all-the-binary-strings-of-n-bits/ since is like generating all the binary numbers.*/
 void pstate::generate_initial_pworlds(fluent_set& permutation, int index)
@@ -380,76 +376,75 @@ void pstate::add_initial_pworld(const pworld & possible_add)
 	}
 }
 
-void pstate::generate_initial_kedges()
+void pstate::generate_initial_pedges()
 {
-//	pworld_ptr_set::const_iterator it_kwps_1, it_kwps_2;
-//
-//	pworld_ptr kwptr_tmp1, kwptr_tmp2;
-//
-//	/*This for add to *this* all the possible edges.*/
-//	for (it_kwps_1 = m_worlds.begin(); it_kwps_1 != m_worlds.end(); it_kwps_1++) {
-//		for (it_kwps_2 = it_kwps_1; it_kwps_2 != m_worlds.end(); it_kwps_2++) {
-//			for (unsigned int i = 0; i < domain::get_instance().get_agents().size(); i++) {
-//				kwptr_tmp1 = *it_kwps_1;
-//				kwptr_tmp2 = *it_kwps_2;
-//
-//				add_edge(kedge(kwptr_tmp1, kwptr_tmp2, i));
-//				add_edge(kedge(kwptr_tmp2, kwptr_tmp1, i));
-//
-//			}
-//		}
-//	}
-//
-//	//std::cout << "Tot edges: " << m_edges.size() << std::endl;
-//
-//	initially ini_conditions = domain::get_instance().get_initial_description();
-//
-//	formula_list::const_iterator it_fl;
-//	for (it_fl = ini_conditions.get_initial_conditions().begin(); it_fl != ini_conditions.get_initial_conditions().end(); it_fl++) {
-//		remove_initial_kedge_bf(*it_fl);
-//	}
+	pworld_ptr_set::const_iterator it_pwps_1, it_pwps_2;
+
+	pworld_ptr pwptr_tmp1, pwptr_tmp2;
+
+	/*This for add to *this* all the possible edges.*/
+	for (it_pwps_1 = m_worlds.begin(); it_pwps_1 != m_worlds.end(); it_pwps_1++) {
+		for (it_pwps_2 = it_pwps_1; it_pwps_2 != m_worlds.end(); it_pwps_2++) {
+			for (unsigned int i = 0; i < domain::get_instance().get_agents().size(); i++) {
+				pwptr_tmp1 = *it_pwps_1;
+				pwptr_tmp2 = *it_pwps_2;
+
+				add_edge(pwptr_tmp1, *pwptr_tmp2.get_ptr(), i);
+				add_edge(pwptr_tmp2, *pwptr_tmp1.get_ptr(), i);
+			}
+		}
+	}
+
+	//std::cout << "Tot edges: " << m_edges.size() << std::endl;
+
+	initially ini_conditions = domain::get_instance().get_initial_description();
+
+	formula_list::const_iterator it_fl;
+	for (it_fl = ini_conditions.get_initial_conditions().begin(); it_fl != ini_conditions.get_initial_conditions().end(); it_fl++) {
+        remove_initial_pedge_bf(*it_fl);
+	}
 	//std::cout << "Removed edges: " << count << std::endl;
 
 	//std::cout << "Final edges: " << m_edges.size() << std::endl;
 
 }
 
-void pstate::remove_kedge(const kedge & to_remove)
+void pstate::remove_edge(pworld_ptr & pw1, const pworld & pw2, const agent ag)
 {
+    auto it_pwm_1 = pw1.get_pworld_map().find(ag);
 
-//	m_edges.erase(pstore::get_instance().add_edge(to_remove));
-	//if(m_edges.erase(pstore::get_instance().add_edge(to_remove)) > 0)count++;
+    if (it_pwm_1 != pw1.get_pworld_map().end()) {
+        pworld_ptr_set pwps = it_pwm_1->second;
+        pwps.erase(pstore::get_instance().add_world(pw2));
+    }
 }
 
-void pstate::remove_initial_kedge(const fluent_formula & known_ff, agent ag)
+void pstate::remove_initial_pedge(const fluent_formula &known_ff, agent ag)
 {
-//
-//	pworld_ptr_set::const_iterator it_kwps_1, it_kwps_2;
-//
-//	pworld_ptr kwptr_tmp1, kwptr_tmp2;
-//
-//	/** \todo maybe don't loop twice on the world but exploit using it_kwps_2 = it_kwps_1:
-//	 * - remove (_1, _2).
-//	 * - remove (_2, _1).*/
-//	for (it_kwps_1 = m_worlds.begin(); it_kwps_1 != m_worlds.end(); it_kwps_1++) {
-//		for (it_kwps_2 = it_kwps_1; it_kwps_2 != m_worlds.end(); it_kwps_2++) {
-//			/** \todo or entails(-known_ff)?*/
-//			kwptr_tmp1 = *it_kwps_1;
-//			kwptr_tmp2 = *it_kwps_2;
-//			if (kwptr_tmp1.get_ptr()->entails(known_ff) && !kwptr_tmp2.get_ptr()->entails(known_ff)) {
-//				remove_kedge(kedge(kwptr_tmp1, kwptr_tmp2, ag));
-//				remove_kedge(kedge(kwptr_tmp2, kwptr_tmp1, ag));
-//			} else if (kwptr_tmp2.get_ptr()->entails(known_ff) && !kwptr_tmp1.get_ptr()->entails(known_ff)) {
-//
-//				remove_kedge(kedge(kwptr_tmp2, kwptr_tmp1, ag));
-//				remove_kedge(kedge(kwptr_tmp1, kwptr_tmp2, ag));
-//			}
-//		}
-//	}
+	pworld_ptr_set::const_iterator it_pwps_1, it_pwps_2;
 
+	pworld_ptr pwptr_tmp1, pwptr_tmp2;
+
+	/** \todo maybe don't loop twice on the world but exploit using it_kwps_2 = it_kwps_1:
+	 * - remove (_1, _2).
+	 * - remove (_2, _1).*/
+	for (it_pwps_1 = m_worlds.begin(); it_pwps_1 != m_worlds.end(); it_pwps_1++) {
+		for (it_pwps_2 = it_pwps_1; it_pwps_2 != m_worlds.end(); it_pwps_2++) {
+			/** \todo or entails(-known_ff)?*/
+			pwptr_tmp1 = *it_pwps_1;
+			pwptr_tmp2 = *it_pwps_2;
+			if (pwptr_tmp1.get_ptr()->entails(known_ff) && !pwptr_tmp2.get_ptr()->entails(known_ff)) {
+				remove_edge(pwptr_tmp1, *pwptr_tmp2.get_ptr(), ag);
+				remove_edge(pwptr_tmp2, *pwptr_tmp1.get_ptr(), ag);
+			} else if (pwptr_tmp2.get_ptr()->entails(known_ff) && !pwptr_tmp1.get_ptr()->entails(known_ff)) {
+                remove_edge(pwptr_tmp2, *pwptr_tmp1.get_ptr(), ag);
+                remove_edge(pwptr_tmp1, *pwptr_tmp2.get_ptr(), ag);
+			}
+		}
+	}
 }
 
-void pstate::remove_initial_kedge_bf(const belief_formula & to_check)
+void pstate::remove_initial_pedge_bf(const belief_formula &to_check)
 {
 	switch ( domain::get_instance().get_initial_description().get_ini_restriction() ) {
 	case S5:
@@ -472,7 +467,7 @@ void pstate::remove_initial_kedge_bf(const belief_formula & to_check)
 					helper::check_Bff_Bnotff(tmp.get_bf1(), tmp.get_bf2(), known_ff_ptr);
 					if (known_ff_ptr != nullptr) {
 						//printer::get_instance().print_list(*known_ff_ptr);
-						remove_initial_kedge(*known_ff_ptr, tmp.get_bf2().get_agent());
+                        remove_initial_pedge(*known_ff_ptr, tmp.get_bf2().get_agent());
 					}
 					return;
 
