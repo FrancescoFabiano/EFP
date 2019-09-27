@@ -61,7 +61,7 @@ private:
      * @param[in] beliefs: the set of \ref fluent to set as \ref m_pworld_set.
      *
      * \todo is the parameter passing the best one? Copy?*/
-    void set_pworld_set(const pworld_map & beliefs);
+    void set_pworld_map(const pworld_map &beliefs);
 
     /**
      * \brief Function that checks if the given \ref fluent_set is consistent.
@@ -111,7 +111,7 @@ public:
      * @param[in] description: the set of \ref fluent to set as \ref m_fluent_set.
      * 
      * \todo is the parameter passing the best one? Copy?*/
-    pworld(const fluent_set & description);
+    pworld(const fluent_set & description, const pworld_map & beliefs);
 
     /** \brief Copy constructor.
      * 

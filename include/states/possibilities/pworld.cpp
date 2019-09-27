@@ -17,7 +17,7 @@ pworld::pworld()
 {
 }
 
-pworld::pworld(const fluent_set & description)
+pworld::pworld(const fluent_set & description, const pworld_map & beliefs)
 {
 	/*
 	 * No need because consistent for construction
@@ -25,6 +25,7 @@ pworld::pworld(const fluent_set & description)
 	 *
 	 *try {*/
 	set_fluent_set(description);
+    set_pworld_map(beliefs);
 	set_id();
 	/*} catch (const std::invalid_argument& ia) {
 	 *	throw ia;
@@ -35,6 +36,7 @@ pworld::pworld(const fluent_set & description)
 pworld::pworld(const pworld & world)
 {
 	set_fluent_set(world.get_fluent_set());
+    set_pworld_map(world.get_pworld_map());
 	set_id();
 }
 
@@ -66,7 +68,7 @@ void pworld::set_fluent_set(const fluent_set & description)
 		throw std::invalid_argument("Non consistent set of fluent");*/
 }
 
-void pworld::set_pworld_set(const pworld_map & beliefs) {
+void pworld::set_pworld_map(const pworld_map &beliefs) {
     m_pworld_map = beliefs;
 }
 

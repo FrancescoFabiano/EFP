@@ -336,7 +336,7 @@ private:
      * @param[in] partially_obs_r: the events relation for partially observant agents.
      * @param[in] oblivious_obs_r: the events relation for oblivious agents.
      * @return the \ref pstate that results after the execution.*/
-    pstate execute_action_um(const action& act, const event_type_set& events, const event_type_relation& fully_obs_r, const event_type_relation& partially_obs_r, const event_type_relation& oblivious_obs_r) const;
+    pstate execute_action(const action &act, const event_type_set &events, const event_type_relation &fully_obs_r, const event_type_relation &partially_obs_r, const event_type_relation &oblivious_obs_r) const;
 
     /** \brief Function that applies the transition function for a \ref ONTIC \ref action effect on *this* implementing the Update Models semantic.
      *
@@ -346,7 +346,7 @@ private:
      *
      * @param[in] act: The \ref ONTIC action to be applied on *this*.
      * @return the \ref pstate that results after the execution.*/
-    pstate execute_ontic_um(const action & act) const;
+    pstate execute_ontic(const action &act) const;
     /** \brief Function that applies the transition function for a \ref SENSING \ref action effect on *this* implementing the Update Models semantic.
      *
      * The transition function is applied accordingly to mA*. Check the paper for more information.
@@ -355,7 +355,7 @@ private:
      *
      * @param[in] act: The \ref SENSING action to be applied on *this*.
      * @return the \ref pstate that results after the execution.*/
-    pstate execute_sensing_um(const action & act) const;
+    pstate execute_sensing(const action &act) const;
     /** \brief Function that applies the transition function for a \ref ANNOUNCEMENT \ref action effect on *this* implementing the Update Models semantic.
      *
      * The transition function is applied accordingly to mA*. Check the paper for more information.
@@ -364,7 +364,7 @@ private:
      *
      * @param[in] act: The \ref ANNOUNCEMENT action to be applied on *this*.
      * @return the \ref pstate that results after the execution.*/
-    pstate execute_announcement_um(const action & act) const;
+    pstate execute_announcement(const action &act) const;
 
 
     /** \brief Function that applies the transition function for a \ref ONTIC \ref action effect on *this*.
