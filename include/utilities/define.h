@@ -16,6 +16,7 @@
 #include <vector>
 #include <set>
 #include <map>
+#include <queue>
 #include <memory>
 
 
@@ -253,3 +254,8 @@ typedef std::map<agent, pworld_ptr_set> pworld_map; /**< \brief A map between ag
                                                     * while keeping information about the agents' beliefs.
                                                     *
                                                     * @see pworld and pstate.*/
+
+typedef std::queue<pworld_ptr> pworld_queue; /**< \brief A queue of \ref pworld_ptr.
+                                            *
+                                            * \todo The operator < for std::shared_ptr must be implemented.
+                                            * @see pworld and pstate.*/

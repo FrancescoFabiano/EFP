@@ -278,7 +278,7 @@ private:
      * @see kedge and pstore.
      *  
      * @param[in] to_add: the \ref kedge that has to be added to *this*.*/
-    void add_edge(pworld_ptr & pw1, const pworld & pw2, const agent ag);
+    void add_edge(pworld_ptr & pw1, const pworld & pw2, const agent ag) const;
 
     /** \brief Function that return the set of \ref agent that entails the obs condition.
      *
@@ -294,71 +294,27 @@ private:
      * @return the effects that are feasible in *this* with \p start as pointed world*.*/
     fluent_formula get_effects_if_entailed(const effects_map & map, const pworld_ptr & start) const;
 
-    /** \brief Function that adds the \ref pworld (kw, \ref SIGMA) or (kw, \ref TAU) to the Kripke structure ret.
+    /** \brief Function that applies the transition function for a \ref ONTIC \ref action effect on *this* implementing the possibilities semantic.
      *
-     * The Kripke structure is updated according to mA*. Check the paper for more information.
-     *
-     * @param[in] act: the \ref action being applied to *this*.
-     * @param[in] ret: the Kripke structure obtained after performing act.
-     * @param[in] effects: the effects of the action being performed to *this*  .
-     * @param[in] kw: the current \ref pworld of *this* being considered.
-     * @param[in] kws: the set of \ref SIGMA or \ref TAU pworlds of the new Kripke structure.
-     * @param[in] sigma: true iff a \ref SIGMA event is occurring.*/
-    void add_sigma_tau_worlds(const action& act, pstate& ret, const fluent_formula& effects, const pworld_ptr& kw, pworld_ptr_set& kws, bool sigma) const;
-    /** \brief Function that adds the \ref pworld (kw, \ref EPSILON) to the Kripke structure ret.
-     *
-     * The Kripke structure is updated according to mA*. Check the paper for more information.
-     *
-     * @param[in] ret: the Kripke structure obtained after performing act.
-     * @param[in] kw: the current \ref pworld of *this* being considered.
-     * @param[in] kws: the set of \ref EPSILON pworlds of the new Kripke structure.*/
-    void add_epsilon_worlds(pstate& ret, const pworld_ptr& kw, pworld_ptr_set& kws) const;
-    /** \brief Function that adds the \ref kedge ke to the Kripke structure ret.
-     *
-     * The Kripke structure is updated according to mA*. Check the paper for more information.
-     *
-     * @param[in] ret: the Kripke structure obtained after performing act.
-     * @param[in] ke: the current \ref kedge of *this* being considered.
-     * @param[in] kws1: a set of pworlds of the new Kripke structure.
-     * @param[in] kws2: a set of pworlds of the new Kripke structure.
-     * */
-    void add_edge_um(pstate& ret, const kedge_ptr& ke, const pworld_ptr_set& kws1, const pworld_ptr_set& kws2) const;
-
-    /** \brief Function that applies the transition function for an \ref action effect on *this* implementing the Update Models semantic.
-     *
-     * The transition function is applied accordingly to mA*. Check the paper for more information.
-     *
-     * @see action.
-     *
-     * @param[in] act: the \ref ONTIC action to be applied on *this*.
-     * @param[in] events: the events (\ref SIGMA, \ref TAU, \ref EPSILON) of the action to be applied on *this*.
-     * @param[in] fully_obs_r: the events relation for fully observant agents.
-     * @param[in] partially_obs_r: the events relation for partially observant agents.
-     * @param[in] oblivious_obs_r: the events relation for oblivious agents.
-     * @return the \ref pstate that results after the execution.*/
-    pstate execute_action(const action &act, const event_type_set &events, const event_type_relation &fully_obs_r, const event_type_relation &partially_obs_r, const event_type_relation &oblivious_obs_r) const;
-
-    /** \brief Function that applies the transition function for a \ref ONTIC \ref action effect on *this* implementing the Update Models semantic.
-     *
-     * The transition function is applied accordingly to mA*. Check the paper for more information.
+     * The transition function is applied accordingly to mA^rho. Check the paper for more information.
      *
      * @see action.
      *
      * @param[in] act: The \ref ONTIC action to be applied on *this*.
      * @return the \ref pstate that results after the execution.*/
     pstate execute_ontic(const action &act) const;
-    /** \brief Function that applies the transition function for a \ref SENSING \ref action effect on *this* implementing the Update Models semantic.
+    /** \brief Function that applies the transition function for a \ref SENSING \ref action effect on *this* implementing the possibilities semantic.
      *
-     * The transition function is applied accordingly to mA*. Check the paper for more information.
+     * The transition function is applied accordingly to mA^rho. Check the paper for more information.
      *
      * @see action.
      *
      * @param[in] act: The \ref SENSING action to be applied on *this*.
      * @return the \ref pstate that results after the execution.*/
     pstate execute_sensing(const action &act) const;
-    /** \brief Function that applies the transition function for a \ref ANNOUNCEMENT \ref action effect on *this* implementing the Update Models semantic.
+    /** \brief Function that applies the transition function for a \ref ANNOUNCEMENT \ref action effect on *this* implementing the possibilities semantic.
      *
-     * The transition function is applied accordingly to mA*. Check the paper for more information.
+     * The transition function is applied accordingly to mA^rho. Check the paper for more information.
      *
      * @see action.
      *
@@ -366,64 +322,6 @@ private:
      * @return the \ref pstate that results after the execution.*/
     pstate execute_announcement(const action &act) const;
 
-
-    /** \brief Function that applies the transition function for a \ref ONTIC \ref action effect on *this*.
-     *
-     * The transition function is applied accordingly to mA*. Check the paper for more information.
-     *  
-     * @see action.
-     *  
-     * @param[in] act: The \ref ONTIC action to be applied on *this*.
-     * @return the \ref pstate that results after the execution.*/
-//    pstate execute_ontic(const action & act) const;
-    /** \brief Function that applies either the transition function for a \ref SENSING or for an \ref ANNOUNCEMENT \ref action effect on *this*.
-     *
-     * @param[in] act: The \ref SENSING or \ref ANNOUNCEMENT action to be applied on *this*.
-     * @param[in] sensing: A boolean flag that is true iff act is a \ref SENSING action.
-     * @return the \ref pstate that results after the execution.*/
-//    pstate execute_sensing_or_announcement(const action & act, bool sensing) const;
-    /** \brief Function that applies the transition function for a \ref SENSING \ref action effect on *this*.
-     *
-     * The transition function is applied accordingly to mA*. Check the paper for more information.
-     *  
-     * @see action.
-     *  
-     * @param[in] act: The \ref SENSING action to be applied on *this*.
-     * @return the \ref pstate that results after the execution.*/
-//    pstate execute_sensing(const action & act) const;
-    /** \brief Function that applies the transition function for a \ref ANNOUNCEMENT \ref action effect on *this*.
-     *
-     * The transition function is applied accordingly to mA*. Check the paper for more information.
-     *  
-     * @see action.
-     *  
-     * @param[in] act: The \ref ANNOUNCEMENT action to be applied on *this*.
-     * @return the \ref pstate that results after the execution.*/
-//    pstate execute_announcement(const action & act) const;
-
-
-    /** \brief Recursive function that create and add the worlds generated by the execution of an \ref ONTIC \ref action.
-     *
-     * @param[in] start: the pointer to the pointed \ref pworld to use to check for reachability and exe conditions.
-     * @param[out] reached: the set of already reached and therefore modified \ref pworld.
-     * @param[out] ret: the kripke structure (\ref pstate) where to add the worlds.
-     * @param[in] fully_obs_agents: the set of fully_obs \ref agent in relation to \p act (used to optimize for global visibility).
-     * @param[in] effects: the effects of \p act executable in *this* (used to optimize for global checking).
-     * @param[in] act: the \ref ONTIC \ref action that modifies *this*
-     * @param[in] act_check: the type of checking to do on \p act 's effects.
-     * @param[out] map_for_edges: A map that stores pairs of <old_world, update_worlds> used for the edges.*/
-    void add_ret_ontic_worlds_internal(const pworld_ptr & start, pworld_ptr_set &reached, pstate& ret, const fluent_formula & effects, agent_set & fully_obs_agents, const action & act, action_check act_check, std::map<pworld_ptr, pworld_ptr>& map_for_edges) const;
-
-    /** \brief Recursive function that create and add the worlds generated by the execution of an \ref ONTIC \ref action.
-     *
-     * @param[in] start: the pointer to the pointed \ref pworld to use to check for reachability and exe conditions.
-     * @param[out] reached: the set of already reached and therefore modified \ref pworld.
-     * @param[out] ret: the kripke structure (\ref pstate) where to add the worlds.
-     * @param[in] fully_obs_agents: the set of fully_obs \ref agent in relation to \p act (used to optimize for global visibility).
-     * @param[in] act: the \ref ONTIC \ref action that modifies *this*.
-     * @param[in] act_check: the type of checking to do on \p act 's effects.
-     * @param[out] map_for_edges: A map that stores pairs of <old_world, update_worlds> used for the edges.*/
-    void add_ret_ontic_worlds(const pworld_ptr & start, pworld_ptr_set& reached, pstate& ret, agent_set & fully_obs_agents, const action & act, action_check act_check, std::map<pworld_ptr, pworld_ptr>& map_for_edges) const;
 public:
 
     /** \brief Setter of the field \ref m_worlds.
@@ -443,10 +341,6 @@ public:
      *
      * @return: the value of \ref m_worlds.*/
     const pworld_ptr_set & get_worlds() const;
-    /** \brief Getter of the field \ref m_edges.
-     *
-     * @return: the value of \ref m_edges.*/
-//    const kedge_ptr_set & get_edges() const;
     /** \brief Getter of the field \ref m_pointed.
      *
      * @return: the value of \ref m_pointed.*/
@@ -562,7 +456,7 @@ public:
 
     /** \brief Function that applies the transition function on *this* given an action.
      *
-     * The transition function is applied accordingly to mA*. Check the paper for more information.
+     * The transition function is applied accordingly to mA^rho. Check the paper for more information.
      *  
      * @see action.
      *  
