@@ -259,3 +259,11 @@ typedef std::queue<pworld_ptr> pworld_queue; /**< \brief A queue of \ref pworld_
                                             *
                                             * \todo The operator < for std::shared_ptr must be implemented.
                                             * @see pworld and pstate.*/
+
+typedef std::map<pworld_ptr, pworld_ptr> transition_map; /**< \brief A map that keeps track of the results of the transition function.
+                                                          *
+                                                          * @see pworld and pstate.*/
+
+typedef std::vector<std::tuple<pworld_ptr, pworld_ptr, agent>> beliefs_vector;/**< \brief A vector of tuples (pw1, pw2, ag) that represent that in \ref pworld pw1 the \agent ag believes that the \ref \pworld pw2 is possible
+                                                                               *
+                                                                               * @see pworld and pstate.*/

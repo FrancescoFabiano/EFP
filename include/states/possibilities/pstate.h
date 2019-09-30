@@ -294,13 +294,47 @@ private:
      * @return the effects that are feasible in *this* with \p start as pointed world*.*/
     fluent_formula get_effects_if_entailed(const effects_map & map, const pworld_ptr & start) const;
 
+    /** \brief Function that calculates the effect of the \ref action "act" to the \ref pworld "world"
+     *
+     * @param[in] act: the \ref ONTIC action to be applied on *this*.
+     * @param[in] world: the world where we are currently executing the \ref action.
+     * @param[in] it_eff: an iterator for fluent formulas.*/
+
+    void execute_ontic_effects(const action &act, pworld_ptr &world) const;
+    /** \brief Function that explores the unvisited \ref pworld encountered inside the agents' beliefs.
+     *
+     * We visit the worlds believed to be true by some fully observant \ref agent and we push them into "to_visit" if the transition function were not already applied to them.
+     * We also keep track of the agents' belief to be updated later (\ref backtrack_remaining_beliefs).
+     *
+     * @param[in] act: the \ref action to be applied on *this*.
+     * @param[in] world: the world being currently calculated.
+     * @param[in] current_pmap: the \ref pworld_map of currently visited \ref pworld.
+     * @param[in] to_visit: the \ref pworld_queue of \ref pworld yet to be considered.
+     * @param[in] calculated: a map that keeps track of the results of the transition function.
+     * @param[in] to_backtrack: a vector of tuples (pw1, pw2, ag) that represents the agents' beliefs to be updated later.
+     * @param[in] fully_obs_agents: the fully observant \ref agent set.
+     * @param[in] action_type: the type of the action being performed.*/
+    void explore_unvisited_pworlds(const action &act, pworld_ptr &world, pworld_map &current_pmap, pworld_queue &to_visit, transition_map &calculated, beliefs_vector &to_backtrack, agent_set &fully_obs_agents, agent_set &oblivious_obs_agents) const;
+    /** \brief Function that updates the agents' beliefs recorded into "to_backtrack".
+     *
+     * @param[in] calculated: a map that links the \ref pworld of *this* to their counterpart w.r.t. the transition function.
+     * @param[in] to_backtrack: a vector of tuples (pw1, pw2, ag) that represent that in \ref pworld pw1 the \agent ag believes that the \ref \pworld pw2 is possible.*/
+    void backtrack_remaining_beliefs(transition_map &calculated, beliefs_vector &to_backtrack) const;
+
+    /** \brief Function that applies the transition function for the \ref action effect on *this* implementing the possibilities semantic.
+     *
+     * @param act: the \ref action to be applied on *this*.
+     * @param ret: the \ref pstate resulting from the \ref action.
+     * @param fully_obs_agents: the fully observant \ref agent set.
+     * @param oblivious_obs_agents: the oblivious \ref agent set.*/
+    void execute_action(const action &act, pstate &ret, agent_set &fully_obs_agents, agent_set &oblivious_obs_agents) const;
     /** \brief Function that applies the transition function for a \ref ONTIC \ref action effect on *this* implementing the possibilities semantic.
      *
      * The transition function is applied accordingly to mA^rho. Check the paper for more information.
      *
      * @see action.
      *
-     * @param[in] act: The \ref ONTIC action to be applied on *this*.
+     * @param[in] act: the \ref ONTIC action to be applied on *this*.
      * @return the \ref pstate that results after the execution.*/
     pstate execute_ontic(const action &act) const;
     /** \brief Function that applies the transition function for a \ref SENSING \ref action effect on *this* implementing the possibilities semantic.
@@ -309,7 +343,7 @@ private:
      *
      * @see action.
      *
-     * @param[in] act: The \ref SENSING action to be applied on *this*.
+     * @param[in] act: the \ref SENSING action to be applied on *this*.
      * @return the \ref pstate that results after the execution.*/
     pstate execute_sensing(const action &act) const;
     /** \brief Function that applies the transition function for a \ref ANNOUNCEMENT \ref action effect on *this* implementing the possibilities semantic.
@@ -318,7 +352,7 @@ private:
      *
      * @see action.
      *
-     * @param[in] act: The \ref ANNOUNCEMENT action to be applied on *this*.
+     * @param[in] act: the \ref ANNOUNCEMENT action to be applied on *this*.
      * @return the \ref pstate that results after the execution.*/
     pstate execute_announcement(const action &act) const;
 
