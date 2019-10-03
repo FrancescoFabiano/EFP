@@ -682,18 +682,45 @@ kstate kstate::execute_action_um(const action& act, const event_type_set& events
     minus_set(oblivious_obs_agents, fully_obs_agents);
     minus_set(oblivious_obs_agents, partially_obs_agents);
 
-    agent_set::const_iterator it_agset;
-
-    // Creating the new worlds for the kstate ret
     kstate_map kmap;
 
-    kstate_map::const_iterator     it_kmap;
+    agent_set     ::const_iterator it_agset;
+    kstate_map    ::const_iterator it_kmap;
     kworld_ptr_set::const_iterator it_kwset1;
     kworld_ptr_set::const_iterator it_kwset2;
 
+    // Creating the new worlds for the kstate ret
     for (it_kwset1 = get_worlds().begin(); it_kwset1 != get_worlds().end(); it_kwset1++) {
         for (event_type e : events) {
-            add_ste_worlds(ret, *it_kwset1, kmap, e);
+            switch (act.get_type()) {
+                case ONTIC :{
+                    if (e == EPSILON || entails(act.get_executability(), *it_kwset1)) {
+                        add_ste_worlds(ret, *it_kwset1, kmap, e);
+                    }
+                    break;
+                }
+                case SENSING:
+                case ANNOUNCEMENT: {
+                    fluent_formula effects = get_effects_if_entailed(act.get_effects(), *it_kwset1);
+                    /** todo: controllare che l'effetto condizionale vada rispettato */
+                    if (e == EPSILON) {
+                        add_ste_worlds(ret, *it_kwset1, kmap, e);
+                    } else if (entails(act.get_executability(), *it_kwset1)) {
+                        bool ent = entails(effects, *it_kwset1);
+
+                        if ((e == SIGMA && ent) || (e == TAU && !ent)) {
+                            add_ste_worlds(ret, *it_kwset1, kmap, e);
+                        }
+                    }
+                    break;
+                }
+                default: {
+                    std::cerr << "Error in executing an action: ";
+                    std::cerr << "the type of the action is not defined correctly";
+                    std::cerr << std::endl;
+                    exit(1);
+                }
+            }
         }
     }
 
@@ -703,8 +730,8 @@ kstate kstate::execute_action_um(const action& act, const event_type_set& events
         fluent_formula::const_iterator it_eff;
 
         for (it_kmap = kmap.begin(); it_kmap != kmap.end(); it_kmap++) {
-            kworld_ptr kw = (*it_kmap).second;
-            event_type e  = (*it_kmap).first.second;
+            kworld_ptr kw = it_kmap->second;
+            event_type e  = it_kmap->first.second;
 
             if (e == SIGMA) {
                 fluent_formula effects = get_effects_if_entailed(act.get_effects(), kw);
@@ -717,23 +744,15 @@ kstate kstate::execute_action_um(const action& act, const event_type_set& events
         }
     }
 
-    // Removing worlds that do not satisfy the precondition
-//    for (it_kwset1 = ret.get_worlds().begin(); it_kwset1 != ret.get_worlds().end(); it_kwset1++) {
-//        fluent_formula effects = get_effects_if_entailed(act.get_effects(), *it_kwset1);
-//
-//        if (!it_kwset1->entails(effects)) {
-//            ret.get_worlds().erase(it_kwset1);
-//        }
-//    }
-
     // Updating the edges of ret
-    kedge_ptr_set::const_iterator it_kedptr;
+    kedge_ptr_set      ::const_iterator it_kedptr;
     event_type_relation::const_iterator it_etr;
-    int count = 0;
 
     for (it_kedptr = get_edges().begin(); it_kedptr != get_edges().end(); it_kedptr++) {
         agent label = it_kedptr->get_label();
-        event_type_relation ag_set = fully_obs_agents.find(label) != fully_obs_agents.end() ? fully_obs_r : partially_obs_agents.find(label) != partially_obs_agents.end() ? partially_obs_r : oblivious_obs_r;
+        event_type_relation ag_set = fully_obs_agents.find(label)     != fully_obs_agents.end()     ? fully_obs_r     :
+                                     partially_obs_agents.find(label) != partially_obs_agents.end() ? partially_obs_r :
+                                                                                                      oblivious_obs_r;
 
         for (it_etr = ag_set.begin(); it_etr != ag_set.end(); it_etr++) {
             event_type e1 = (*it_etr).first, e2 = (*it_etr).second;
@@ -741,34 +760,24 @@ kstate kstate::execute_action_um(const action& act, const event_type_set& events
 
             if (kw1 != kmap.end() && kw2 != kmap.end()) {
                 ret.add_edge(kedge(kw1->second, kw2->second, label));
-                std::cout << "printing new edge number " << (++count) << ": ";
-                kedge(kw1->second, kw2->second, label).print();
-                std::cout << std::endl;
             }
         }
     }
 
-    std::cout << std::endl << "printing post-execution" << std::endl;
-    std::cout << "printing ret edges: ";
-    ret.print();
     return ret;
 }
 
 kstate kstate::execute_ontic_um(const action& act) const {
-    event_type_set events = {SIGMA, EPSILON};
+    event_type_set events               = {SIGMA, EPSILON};
     event_type_relation fully_obs_r     = {{SIGMA, SIGMA}, {EPSILON, EPSILON}};
     event_type_relation partially_obs_r = {};
     event_type_relation oblivious_obs_r = {{SIGMA, EPSILON}, {EPSILON, EPSILON}};
 
-    std::cout << "executing ontic" << std::endl;
-    kstate ret = execute_action_um(act, events, fully_obs_r, partially_obs_r, oblivious_obs_r);
-    std::cout << "executed ontic" << std::endl;
-
-    return ret;
+    return execute_action_um(act, events, fully_obs_r, partially_obs_r, oblivious_obs_r);
 }
 
 kstate kstate::execute_sensing_um(const action& act) const {
-    event_type_set events = {SIGMA, TAU, EPSILON};
+    event_type_set events               = {SIGMA, TAU, EPSILON};
     event_type_relation fully_obs_r     = {{SIGMA, SIGMA}, {TAU, TAU}, {EPSILON, EPSILON}};
     event_type_relation partially_obs_r = {{SIGMA, SIGMA}, {TAU, TAU}, {EPSILON, EPSILON}, {SIGMA, TAU}, {TAU, SIGMA}};
     event_type_relation oblivious_obs_r = {{SIGMA, EPSILON}, {TAU, EPSILON}, {EPSILON, EPSILON}};
@@ -777,7 +786,7 @@ kstate kstate::execute_sensing_um(const action& act) const {
 }
 
 kstate kstate::execute_announcement_um(const action &act) const {
-    event_type_set events = {SIGMA, TAU, EPSILON};
+    event_type_set events               = {SIGMA, TAU, EPSILON};
     event_type_relation fully_obs_r     = {{SIGMA, SIGMA}, {TAU, TAU}, {EPSILON, EPSILON}};
     event_type_relation partially_obs_r = {{SIGMA, SIGMA}, {TAU, TAU}, {EPSILON, EPSILON}, {SIGMA, TAU}, {TAU, SIGMA}};
     event_type_relation oblivious_obs_r = {{SIGMA, EPSILON}, {TAU, EPSILON}, {EPSILON, EPSILON}};
