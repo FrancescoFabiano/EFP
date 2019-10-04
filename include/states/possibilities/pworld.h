@@ -105,13 +105,23 @@ public:
     pworld();
 
     /** \brief Constructor with parameters.
-     *Construct an object with the given info and then set the unique id.
+     * Construct an object with the given info and then set the unique id.
      * the set of \ref fluent to set as \ref m_fluent_set.
      * 
      * @param[in] description: the set of \ref fluent to set as \ref m_fluent_set.
-     * 
+     * @param[in] beliefs: the map of beliefs to set as \ref m_pworld_map.
+     *
      * \todo is the parameter passing the best one? Copy?*/
     pworld(const fluent_set & description, const pworld_map & beliefs);
+
+    /** \brief Constructor with parameters.
+     * Construct an object with the given info and then set the unique id.
+     * the set of \ref fluent to set as \ref m_fluent_set.
+     *
+     * @param[in] description: the set of \ref fluent to set as \ref m_fluent_set.
+     *
+     * \todo is the parameter passing the best one? Copy?*/
+    pworld(const fluent_set & description);
 
     /** \brief Copy constructor.
      * 

@@ -259,18 +259,6 @@ pworld_ptr pstate::add_rep_world(const pworld & world)
 	return add_rep_world(world, get_max_depth(), tmp);
 }
 
-/*void pstate::add_copy_world(const pworld & world, unsigned short repetition)
-{
-	pworld_ptr tmp = pstore::get_instance().add_world(world);
-	tmp.set_repetition(repetition);
-
-	//If this pworld_ptr exist then add another, we need to add a copy
-	if (!(std::get<1>(m_worlds.insert(tmp)))) {
-		///arg = 0 in pworld constructor by default but when put to x it set the extra id to x
-		add_copy_world(world, repetition + 1);
-	}
-}*/
-
 void pstate::add_edge(pworld_ptr & pw1, const pworld & pw2, const agent ag) const
 {
     auto it_pwm_1 = pw1.get_pworld_map().find(ag);
@@ -314,8 +302,7 @@ void pstate::generate_initial_pworlds(fluent_set& permutation, int index)
 {
 	int fluent_number = domain::get_instance().get_fluent_number();
 	if (index / 2 == fluent_number) {
-	    pworld_map tmp;     /** \todo: is it ok to use a tmp like this? */
-		pworld to_add(permutation, tmp);
+		pworld to_add(permutation);
 		add_initial_pworld(to_add);
 
 		return;
@@ -537,35 +524,30 @@ void pstate::remove_initial_pedge_bf(const belief_formula &to_check)
 pstate pstate::compute_succ(const action & act) const
 {
 	switch ( act.get_type() ) {
-	case ONTIC:
-	{
-		/*pstate tmp = execute_ontic(act);
-		std::cout << "\n*********************Printing this*********************\n";
-		print();
-		std::cout << "\n*********************Printing tmp*********************\n";
-		tmp.print();*/
-		return execute_ontic(act);
-		break;
-	}
-	case SENSING:
-	{
-		return execute_sensing(act);
-		break;
-	}
-	case ANNOUNCEMENT:
-	{
-		return execute_announcement(act);
-		break;
-	}
-	default:
-	{
-		std::cerr << "Error in executing an action: ";
-		std::cerr << "the type of the action is not defined correctly";
-		std::cerr << std::endl;
-		exit(1);
+        case ONTIC:
+        {
+            return execute_ontic(act);
+            break;
+        }
+        case SENSING:
+        {
+            return execute_sensing(act);
+            break;
+        }
+        case ANNOUNCEMENT:
+        {
+            return execute_announcement(act);
+            break;
+        }
+        default:
+        {
+            std::cerr << "Error in executing an action: ";
+            std::cerr << "the type of the action is not defined correctly";
+            std::cerr << std::endl;
+            exit(1);
 
-		break;
-	}
+            break;
+        }
 	}
 }
 

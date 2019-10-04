@@ -31,6 +31,14 @@ pworld::pworld(const fluent_set & description, const pworld_map & beliefs)
 	 *	throw ia;
 	 *} */
 }
+
+pworld::pworld(const fluent_set & description)
+{
+    pworld_map map = pworld_map();
+    set_fluent_set(description);
+    set_pworld_map(map);
+    set_id();
+}
 //generate an unique id given the state information -> the literals
 
 pworld::pworld(const pworld & world)
