@@ -562,7 +562,7 @@ void pstate::execute_ontic_effects(const action &act, pworld_ptr &world) const {
     }
 }
 
-void pstate::explore_unvisited_pworlds(const action &act, pworld_ptr &world, pworld_map &current_pmap, pworld_queue &to_visit, transition_map &calculated, beliefs_vector &to_backtrack, agent_set &fully_obs_agents, agent_set &oblivious_obs_agents) const {
+void pstate::explore_unvisited_pworlds(const action &act, pstate &ret, pworld_ptr &world, pworld_map &current_pmap, pworld_queue &to_visit, transition_map &calculated, beliefs_vector &to_backtrack, beliefs_vector &p_obs_beliefs, agent_set &fully_obs_agents, agent_set &oblivious_obs_agents) const {
     pworld_ptr_set::const_iterator it_pws;
     pworld_map::const_iterator it_pwm;
 
@@ -581,6 +581,7 @@ void pstate::explore_unvisited_pworlds(const action &act, pworld_ptr &world, pwo
             if (calculated.find(*it_pws) == calculated.end()) {                     // Then we do nothing and we update the calculated map
                 calculated.insert(transition_map::value_type(*it_pws, *it_pws));
             }
+            to_backtrack.emplace_back(world, *it_pws, ag);                          // And we also keep track of the "edge" that we must insert later
         } else {
             switch (act.get_type()) {
                 case ONTIC: {
@@ -588,11 +589,24 @@ void pstate::explore_unvisited_pworlds(const action &act, pworld_ptr &world, pwo
                     std::cerr << "ontic actions do not admit partially observant agents";
                     std::cerr << std::endl;
                     exit(1);
-                } case SENSING: {
-                    /** \todo: implement the sensing case.*/
-                    break;
-                } case ANNOUNCEMENT: {
-                    /** \todo: implement the announcement case.*/
+                }
+                case SENSING:
+                case ANNOUNCEMENT: {
+                    fluent_formula effects = get_effects_if_entailed(act.get_effects(), world);
+                    /** todo: controllare che l'effetto condizionale vada rispettato */
+                    if (entails(act.get_executability(), world) && entails(effects, world)) {
+                        for (it_pws = it_pwm->second.begin(); it_pws != it_pwm->second.end(); it_pws++) {
+                            if (calculated.find(*it_pws) != calculated.end()) {
+                                add_edge(world, *it_pws->get_ptr(), ag);
+                            } else {
+                                to_visit.push(*it_pws);
+                                to_backtrack.emplace_back(world, *it_pws, ag);
+                            }
+                            pworld_ptr po_pw = ret.add_rep_world(*it_pws->get_ptr(), it_pws->get_repetition() + 2);
+                            /** \todo: the fluent set of this pworld should contain the negation of the sensed fluent?*/
+                            p_obs_beliefs.emplace_back(world, po_pw, ag);
+                        }
+                    }
                     break;
                 } default: {
                     std::cerr << "Error in executing an action: ";
@@ -605,7 +619,7 @@ void pstate::explore_unvisited_pworlds(const action &act, pworld_ptr &world, pwo
     }
 }
 
-void pstate::backtrack_remaining_beliefs(transition_map &calculated, beliefs_vector &to_backtrack) const {
+void pstate::backtrack_remaining_beliefs(transition_map &calculated, beliefs_vector &to_backtrack, beliefs_vector &p_obs_beliefs) const {
     beliefs_vector::const_iterator it_bv;
 
     for (it_bv = to_backtrack.begin(); it_bv != to_backtrack.end(); it_bv++) {
@@ -619,12 +633,18 @@ void pstate::backtrack_remaining_beliefs(transition_map &calculated, beliefs_vec
             exit(1);
         }
     }
+
+    for (it_bv = p_obs_beliefs.begin(); it_bv != p_obs_beliefs.end(); it_bv++) {
+        pworld_ptr from = std::get<0>(*it_bv), to = std::get<1>(*it_bv);
+        add_edge(from, *to.get_ptr(), std::get<2>(*it_bv));
+    }
 }
 
 void pstate::execute_action(const action &act, pstate &ret, agent_set &fully_obs_agents, agent_set &oblivious_obs_agents) const {
     pworld_queue to_visit;          // The pworlds yet to visit
     transition_map calculated;      // A map that links the pworlds of *this* to the corresponding ones of ret
     beliefs_vector to_backtrack;    // A vector of tuples that contains the "edges" (u,v) where the pworld v still has to be calculated
+    beliefs_vector p_obs_beliefs;
 
     pworld_ptr current_pw;          // The current pworld being considered
     pworld_map current_pmap;        // And its current pworld_map
@@ -639,31 +659,17 @@ void pstate::execute_action(const action &act, pstate &ret, agent_set &fully_obs
         calculated.insert(transition_map::value_type(current_pw, pw_new));                              // And we update the calculated map
 
         // Execute the all the effects
-        switch (act.get_type()) {
-            case ONTIC: {
-                execute_ontic_effects(act, pw_new);
-                break;
-            } case SENSING: {
-                /** \todo: implement the sensing case.*/
-                break;
-            } case ANNOUNCEMENT: {
-                /** \todo: implement the announcement case.*/
-                break;
-            } default: {
-                std::cerr << "Error in executing an action: ";
-                std::cerr << "the type of the action is not defined correctly";
-                std::cerr << std::endl;
-                exit(1);
-            }
+        if (act.get_type() == ONTIC && entails(act.get_executability(), current_pw)) {
+            execute_ontic_effects(act, pw_new);
         }
 
         // We visit only those unvisited pworlds that are believed to be true by some fully observant agent
-        explore_unvisited_pworlds(act, pw_new, current_pmap, to_visit, calculated, to_backtrack, fully_obs_agents, oblivious_obs_agents);
+        explore_unvisited_pworlds(act, pw_new, current_pmap, to_visit, calculated, to_backtrack, p_obs_beliefs, fully_obs_agents, oblivious_obs_agents);
         to_visit.pop();
     }
 
     // Updating the remaining agents' beliefs
-    backtrack_remaining_beliefs(calculated, to_backtrack);
+    backtrack_remaining_beliefs(calculated, to_backtrack, p_obs_beliefs);
 
     // Updating the pointed world
     auto new_pointed = calculated.find(get_pointed());
