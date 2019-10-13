@@ -376,6 +376,10 @@ public:
      *
      * @return: the value of \ref m_pointed.*/
     const pworld_ptr & get_pointed() const;
+    /** \brief Getter of the field \ref m_beliefs.
+    *
+    * @return: the value of \ref m_beliefs.*/
+    const pworld_transitive_map & get_beliefs() const;
     /** \brief Getter of the field \ref m_max_depth.
      *
      * @return: the value of \ref m_max_depth.*/

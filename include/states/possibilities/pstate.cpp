@@ -40,6 +40,11 @@ const pworld_ptr & pstate::get_pointed() const
 	return m_pointed;
 }
 
+const pworld_transitive_map & pstate::get_beliefs() const
+{
+    return m_beliefs;
+}
+
 unsigned int pstate::get_max_depth() const
 {
 	return m_max_depth;
@@ -757,204 +762,229 @@ pstate pstate::execute_announcement(const action &act) const {
 
 void pstate::print() const
 {
-//	int counter = 1;
-//	std::cout << std::endl;
-//	std::cout << "The Pointed World has id ";
-//	printer::get_instance().print_list(get_pointed().get_fluent_set());
-//	std::cout << std::endl;
-//	std::cout << "*******************************************************************" << std::endl;
-//	;
-//	pworld_ptr_set::const_iterator it_kwset;
-//	std::cout << "World List:" << std::endl;
-//
-//	for (it_kwset = get_worlds().begin(); it_kwset != get_worlds().end(); it_kwset++) {
-//		std::cout << "W-" << counter << ": ";
-//		printer::get_instance().print_list(it_kwset->get_fluent_set());
-//		std::cout << " rep:" << it_kwset->get_repetition();
-//		std::cout << std::endl;
-//		counter++;
-//	}
-//	counter = 1;
-//	std::cout << std::endl;
-//	std::cout << "*******************************************************************" << std::endl;
-//	kedge_ptr_set::const_iterator it_keset;
-//	std::cout << "Edge List:" << std::endl;
-//	for (it_keset = get_edges().begin(); it_keset != get_edges().end(); it_keset++) {
-//
-//		std::cout << "E-" << counter << ": (";
-//		printer::get_instance().print_list(it_keset->get_from().get_fluent_set());
-//		std::cout << "," << it_keset->get_from().get_repetition();
-//		std::cout << ") - (";
-//		printer::get_instance().print_list(it_keset->get_to().get_fluent_set());
-//		std::cout << "," << it_keset->get_to().get_repetition();
-//		std::cout << ") ag:" << domain::get_instance().get_grounder().deground_agent(it_keset->get_label());
-//		std::cout << std::endl;
-//		counter++;
-//
-//	}
-//	std::cout << "*******************************************************************" << std::endl;
+	int counter = 1;
+	std::cout << std::endl;
+	std::cout << "The Pointed World has id ";
+	printer::get_instance().print_list(get_pointed().get_fluent_set());
+	std::cout << std::endl;
+	std::cout << "*******************************************************************" << std::endl;
+
+	pworld_ptr_set::const_iterator it_pwset;
+	std::cout << "World List:" << std::endl;
+
+	for (it_pwset = get_worlds().begin(); it_pwset != get_worlds().end(); it_pwset++) {
+		std::cout << "W-" << counter << ": ";
+		printer::get_instance().print_list(it_pwset->get_fluent_set());
+		std::cout << " rep:" << it_pwset->get_repetition();
+		std::cout << std::endl;
+		counter++;
+	}
+	counter = 1;
+	std::cout << std::endl;
+	std::cout << "*******************************************************************" << std::endl;
+	pworld_transitive_map::const_iterator it_pwtm;
+	pworld_map::const_iterator it_pwm;
+	std::cout << "Edge List:" << std::endl;
+	for (it_pwtm = get_beliefs().begin(); it_pwtm != get_beliefs().end(); it_pwtm++) {
+	    pworld_ptr from = it_pwtm->first;
+	    pworld_map from_map = it_pwtm->second;
+
+	    for (it_pwm = from_map.begin(); it_pwm != from_map.end(); it_pwm++) {
+	        agent ag = it_pwm->first;
+	        pworld_ptr_set to_set = it_pwm->second;
+
+	        for (it_pwset = to_set.begin(); it_pwset != to_set.end(); it_pwset++) {
+	            pworld_ptr to = *it_pwset;
+
+                std::cout << "E-" << counter << ": (";
+                printer::get_instance().print_list(from.get_fluent_set());
+                std::cout << "," << from.get_repetition();
+                std::cout << ") - (";
+                printer::get_instance().print_list(to.get_fluent_set());
+                std::cout << "," << to.get_repetition();
+                std::cout << ") ag:" << domain::get_instance().get_grounder().deground_agent(ag);
+                std::cout << std::endl;
+                counter++;
+	        }
+        }
+	}
+	std::cout << "*******************************************************************" << std::endl;
 }
 
 void pstate::print_graphviz(std::ostream & graphviz) const
 {
-//	string_set::const_iterator it_st_set;
-//	fluent_set::const_iterator it_fs;
-//
-//
-//	graphviz << "//WORLDS List:" << std::endl;
-//	std::map<fluent_set, int> map_world_to_index;
-//	std::map<unsigned short, char> map_rep_to_name;
-//	char found_rep = (char) ((char) domain::get_instance().get_agents().size() + 'A');
-//	int found_fs = 0;
-//	fluent_set tmp_fs;
-//	char tmp_unsh;
-//	string_set tmp_stset;
-//	bool print_first;
-//	pworld_ptr_set::const_iterator it_kwset;
-//	for (it_kwset = get_worlds().begin(); it_kwset != get_worlds().end(); it_kwset++) {
-//		if (*it_kwset == get_pointed())
-//			graphviz << "	node [shape = doublecircle] ";
-//		else
-//			graphviz << "	node [shape = circle] ";
-//
-//		print_first = false;
-//		tmp_fs = it_kwset->get_fluent_set();
-//		if (map_world_to_index.count(tmp_fs) == 0) {
-//			map_world_to_index[tmp_fs] = found_fs;
-//			found_fs++;
-//		}
-//		tmp_unsh = it_kwset->get_repetition();
-//		if (map_rep_to_name.count(tmp_unsh) == 0) {
-//			map_rep_to_name[tmp_unsh] = found_rep;
-//			found_rep++;
-//		}
-//		graphviz << "\"" << map_rep_to_name[tmp_unsh] << "_" << map_world_to_index[tmp_fs] << "\";";
-//		graphviz << "// (";
-//		tmp_stset = domain::get_instance().get_grounder().deground_fluent(tmp_fs);
-//		for (it_st_set = tmp_stset.begin(); it_st_set != tmp_stset.end(); it_st_set++) {
-//			if (print_first) {
-//				graphviz << ",";
-//			}
-//			print_first = true;
-//			graphviz << *it_st_set;
-//		}
-//		graphviz << ")\n";
-//	}
-//
-//	graphviz << "\n\n";
-//	graphviz << "//RANKS List:" << std::endl;
-//
-//	std::map<int, pworld_ptr_set> for_rank_print;
-//	for (it_kwset = get_worlds().begin(); it_kwset != get_worlds().end(); it_kwset++) {
-//		for_rank_print[it_kwset->get_repetition()].insert(*it_kwset);
-//	}
-//
-//	std::map<int, pworld_ptr_set>::const_iterator it_map_rank;
-//	for (it_map_rank = for_rank_print.begin(); it_map_rank != for_rank_print.end(); it_map_rank++) {
-//		graphviz << "	{rank = same; ";
-//		for (it_kwset = it_map_rank->second.begin(); it_kwset != it_map_rank->second.end(); it_kwset++) {
-//			graphviz << "\"" << map_rep_to_name[it_kwset->get_repetition()] << "_" << map_world_to_index[it_kwset->get_fluent_set()] << "\"; ";
-//		}
-//		graphviz << "}\n";
-//	}
-//
-//
-//	graphviz << "\n\n";
-//	graphviz << "//EDGES List:" << std::endl;
-//
-//	std::map < std::tuple<std::string, std::string>, std::set<std::string> > edges;
-//
-//	kedge_ptr_set::const_iterator it_keset;
-//	std::tuple<std::string, std::string> tmp_tuple;
-//	std::string tmp_string = "";
-//	for (it_keset = get_edges().begin(); it_keset != get_edges().end(); it_keset++) {
-//		tmp_string = "_" + std::to_string(map_world_to_index[it_keset->get_from().get_fluent_set()]);
-//		tmp_string.insert(0, 1, map_rep_to_name[it_keset->get_from().get_repetition()]);
-//		std::get<0>(tmp_tuple) = tmp_string;
-//
-//		tmp_string = "_" + std::to_string(map_world_to_index[it_keset->get_to().get_fluent_set()]);
-//		tmp_string.insert(0, 1, map_rep_to_name[it_keset->get_to().get_repetition()]);
-//		std::get<1>(tmp_tuple) = tmp_string;
-//
-//		edges[tmp_tuple].insert(domain::get_instance().get_grounder().deground_agent(it_keset->get_label()));
-//	}
-//
-//
-//	std::map < std::tuple<std::string, std::string>, std::set < std::string>>::iterator it_map;
-//	std::map < std::tuple<std::string, std::string>, std::set < std::string>>::const_iterator it_map_2;
-//
-//	std::map < std::tuple<std::string, std::string>, std::set < std::string>> to_print_double;
-//	for (it_map = edges.begin(); it_map != edges.end(); it_map++) {
-//		for (it_map_2 = it_map; it_map_2 != edges.end(); it_map_2++) {
-//			if (std::get<0>(it_map->first).compare(std::get<1>(it_map_2->first)) == 0) {
-//				if (std::get<1>(it_map->first).compare(std::get<0>(it_map_2->first)) == 0) {
-//					if (it_map->second == it_map_2->second) {
-//						if (std::get<0>(it_map->first).compare(std::get<1>(it_map->first)) != 0) {
-//							to_print_double[it_map->first] = it_map->second;
-//							edges.erase(it_map_2);
-//							it_map = edges.erase(it_map);
-//						}
-//					}
-//				}
-//			}
-//		}
-//	}
-//
-//	std::set<std::string>::const_iterator it_stset;
-//	for (it_map = edges.begin(); it_map != edges.end(); it_map++) {
-//		graphviz << "	\"";
-//		graphviz << std::get<0>(it_map->first);
-//		graphviz << "\" -> \"";
-//		graphviz << std::get<1>(it_map->first);
-//		graphviz << "\" ";
-//		graphviz << "[ label = \"";
-//		tmp_string = "";
-//		for (it_stset = it_map->second.begin(); it_stset != it_map->second.end(); it_stset++) {
-//			tmp_string += *it_stset;
-//			tmp_string += ",";
-//		}
-//		tmp_string.pop_back();
-//		graphviz << tmp_string;
-//		graphviz << "\" ];\n";
-//	}
-//
-//	for (it_map = to_print_double.begin(); it_map != to_print_double.end(); it_map++) {
-//		graphviz << "	\"";
-//		graphviz << std::get<0>(it_map->first);
-//		graphviz << "\" -> \"";
-//		graphviz << std::get<1>(it_map->first);
-//		graphviz << "\" ";
-//		graphviz << "[ dir=both label = \"";
-//		tmp_string = "";
-//		for (it_stset = it_map->second.begin(); it_stset != it_map->second.end(); it_stset++) {
-//
-//			tmp_string += *it_stset;
-//			tmp_string += ",";
-//		}
-//		tmp_string.pop_back();
-//		graphviz << tmp_string;
-//		graphviz << "\" ];\n";
-//	}
-//
-//	graphviz << "\n\n//WORLDS description Table:" << std::endl;
-//	graphviz << "	node [shape = plain]\n\n";
-//	graphviz << "	description[label=<\n";
-//	graphviz << "	<table border = \"0\" cellborder = \"1\" cellspacing = \"0\" >\n";
-//	for (it_kwset = get_worlds().begin(); it_kwset != get_worlds().end(); it_kwset++) {
-//		tmp_fs = it_kwset->get_fluent_set();
-//		print_first = false;
-//		graphviz << "		<tr><td>" << map_rep_to_name[it_kwset->get_repetition()] << "_" << map_world_to_index[tmp_fs] << "</td> <td>";
-//		for (it_fs = tmp_fs.begin(); it_fs != tmp_fs.end(); it_fs++) {
-//			if (print_first) {
-//				graphviz << ", ";
-//			}
-//			print_first = true;
-//			graphviz << domain::get_instance().get_grounder().deground_fluent(*it_fs);
-//		}
-//		graphviz << "</td></tr>\n";
-//	}
-//	graphviz << "	</table>>]\n";
-//	graphviz << "	{rank = max; description};\n";
+	string_set::const_iterator it_st_set;
+	fluent_set::const_iterator it_fs;
+
+
+	graphviz << "//WORLDS List:" << std::endl;
+	std::map<fluent_set, int> map_world_to_index;
+	std::map<unsigned short, char> map_rep_to_name;
+	char found_rep = (char) ((char) domain::get_instance().get_agents().size() + 'A');
+	int found_fs = 0;
+	fluent_set tmp_fs;
+	char tmp_unsh;
+	string_set tmp_stset;
+	bool print_first;
+	pworld_ptr_set::const_iterator it_pwset;
+	for (it_pwset = get_worlds().begin(); it_pwset != get_worlds().end(); it_pwset++) {
+		if (*it_pwset == get_pointed())
+			graphviz << "	node [shape = doublecircle] ";
+		else
+			graphviz << "	node [shape = circle] ";
+
+		print_first = false;
+		tmp_fs = it_pwset->get_fluent_set();
+		if (map_world_to_index.count(tmp_fs) == 0) {
+			map_world_to_index[tmp_fs] = found_fs;
+			found_fs++;
+		}
+		tmp_unsh = it_pwset->get_repetition();
+		if (map_rep_to_name.count(tmp_unsh) == 0) {
+			map_rep_to_name[tmp_unsh] = found_rep;
+			found_rep++;
+		}
+		graphviz << "\"" << map_rep_to_name[tmp_unsh] << "_" << map_world_to_index[tmp_fs] << "\";";
+		graphviz << "// (";
+		tmp_stset = domain::get_instance().get_grounder().deground_fluent(tmp_fs);
+		for (it_st_set = tmp_stset.begin(); it_st_set != tmp_stset.end(); it_st_set++) {
+			if (print_first) {
+				graphviz << ",";
+			}
+			print_first = true;
+			graphviz << *it_st_set;
+		}
+		graphviz << ")\n";
+	}
+
+	graphviz << "\n\n";
+	graphviz << "//RANKS List:" << std::endl;
+
+	std::map<int, pworld_ptr_set> for_rank_print;
+	for (it_pwset = get_worlds().begin(); it_pwset != get_worlds().end(); it_pwset++) {
+		for_rank_print[it_pwset->get_repetition()].insert(*it_pwset);
+	}
+
+	std::map<int, pworld_ptr_set>::const_iterator it_map_rank;
+	for (it_map_rank = for_rank_print.begin(); it_map_rank != for_rank_print.end(); it_map_rank++) {
+		graphviz << "	{rank = same; ";
+		for (it_pwset = it_map_rank->second.begin(); it_pwset != it_map_rank->second.end(); it_pwset++) {
+			graphviz << "\"" << map_rep_to_name[it_pwset->get_repetition()] << "_" << map_world_to_index[it_pwset->get_fluent_set()] << "\"; ";
+		}
+		graphviz << "}\n";
+	}
+
+
+	graphviz << "\n\n";
+	graphviz << "//EDGES List:" << std::endl;
+
+	std::map < std::tuple<std::string, std::string>, std::set<std::string> > edges;
+
+    pworld_transitive_map::const_iterator it_pwtm;
+    pworld_map::const_iterator it_pwm;
+	std::tuple<std::string, std::string> tmp_tuple;
+	std::string tmp_string = "";
+
+    for (it_pwtm = get_beliefs().begin(); it_pwtm != get_beliefs().end(); it_pwtm++) {
+        pworld_ptr from = it_pwtm->first;
+        pworld_map from_map = it_pwtm->second;
+
+        for (it_pwm = from_map.begin(); it_pwm != from_map.end(); it_pwm++) {
+            agent ag = it_pwm->first;
+            pworld_ptr_set to_set = it_pwm->second;
+
+            for (it_pwset = to_set.begin(); it_pwset != to_set.end(); it_pwset++) {
+                pworld_ptr to = *it_pwset;
+
+                tmp_string = "_" + std::to_string(map_world_to_index[from.get_fluent_set()]);
+                tmp_string.insert(0, 1, map_rep_to_name[from.get_repetition()]);
+                std::get<0>(tmp_tuple) = tmp_string;
+
+                tmp_string = "_" + std::to_string(map_world_to_index[to.get_fluent_set()]);
+                tmp_string.insert(0, 1, map_rep_to_name[to.get_repetition()]);
+                std::get<1>(tmp_tuple) = tmp_string;
+
+                edges[tmp_tuple].insert(domain::get_instance().get_grounder().deground_agent(ag));
+
+            }
+        }
+    }
+
+	std::map < std::tuple<std::string, std::string>, std::set < std::string>>::iterator it_map;
+	std::map < std::tuple<std::string, std::string>, std::set < std::string>>::const_iterator it_map_2;
+
+	std::map < std::tuple<std::string, std::string>, std::set < std::string>> to_print_double;
+	for (it_map = edges.begin(); it_map != edges.end(); it_map++) {
+		for (it_map_2 = it_map; it_map_2 != edges.end(); it_map_2++) {
+			if (std::get<0>(it_map->first).compare(std::get<1>(it_map_2->first)) == 0) {
+				if (std::get<1>(it_map->first).compare(std::get<0>(it_map_2->first)) == 0) {
+					if (it_map->second == it_map_2->second) {
+						if (std::get<0>(it_map->first).compare(std::get<1>(it_map->first)) != 0) {
+							to_print_double[it_map->first] = it_map->second;
+							edges.erase(it_map_2);
+							it_map = edges.erase(it_map);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	std::set<std::string>::const_iterator it_stset;
+	for (it_map = edges.begin(); it_map != edges.end(); it_map++) {
+		graphviz << "	\"";
+		graphviz << std::get<0>(it_map->first);
+		graphviz << "\" -> \"";
+		graphviz << std::get<1>(it_map->first);
+		graphviz << "\" ";
+		graphviz << "[ label = \"";
+		tmp_string = "";
+		for (it_stset = it_map->second.begin(); it_stset != it_map->second.end(); it_stset++) {
+			tmp_string += *it_stset;
+			tmp_string += ",";
+		}
+		tmp_string.pop_back();
+		graphviz << tmp_string;
+		graphviz << "\" ];\n";
+	}
+
+	for (it_map = to_print_double.begin(); it_map != to_print_double.end(); it_map++) {
+		graphviz << "	\"";
+		graphviz << std::get<0>(it_map->first);
+		graphviz << "\" -> \"";
+		graphviz << std::get<1>(it_map->first);
+		graphviz << "\" ";
+		graphviz << "[ dir=both label = \"";
+		tmp_string = "";
+		for (it_stset = it_map->second.begin(); it_stset != it_map->second.end(); it_stset++) {
+
+			tmp_string += *it_stset;
+			tmp_string += ",";
+		}
+		tmp_string.pop_back();
+		graphviz << tmp_string;
+		graphviz << "\" ];\n";
+	}
+
+	graphviz << "\n\n//WORLDS description Table:" << std::endl;
+	graphviz << "	node [shape = plain]\n\n";
+	graphviz << "	description[label=<\n";
+	graphviz << "	<table border = \"0\" cellborder = \"1\" cellspacing = \"0\" >\n";
+	for (it_pwset = get_worlds().begin(); it_pwset != get_worlds().end(); it_pwset++) {
+		tmp_fs = it_pwset->get_fluent_set();
+		print_first = false;
+		graphviz << "		<tr><td>" << map_rep_to_name[it_pwset->get_repetition()] << "_" << map_world_to_index[tmp_fs] << "</td> <td>";
+		for (it_fs = tmp_fs.begin(); it_fs != tmp_fs.end(); it_fs++) {
+			if (print_first) {
+				graphviz << ", ";
+			}
+			print_first = true;
+			graphviz << domain::get_instance().get_grounder().deground_fluent(*it_fs);
+		}
+		graphviz << "</td></tr>\n";
+	}
+	graphviz << "	</table>>]\n";
+	graphviz << "	{rank = max; description};\n";
 
 }
 
@@ -1013,50 +1043,3 @@ fluent_formula pstate::get_effects_if_entailed(const effects_map & map, const pw
 	}
 	return ret;
 }
-
-/*fluent_formula pstate::get_sensing_effects_if_entailed(const effects_map & map, const pworld_ptr & start) const
-{ 	fluent_formula ret;
-	fluent_formula retret;
-	fluent_set ret_tmp;
-
-	effects_map::const_iterator it_map;
-	for (it_map = map.begin(); it_map != map.end(); it_map++) {
-		if (entails(it_map->second, start)) {
-			if (start.get_ptr()->entails(it_map->first))
-				ret = helper::and_ff(ret, it_map->first);
-			else {
-				fluent_formula tmpp = it_map->first;
-				if (tmpp.size() == 1) {
-					fluent_set tmp = *(tmpp.begin());
-					if (tmp.size() == 1) {
-						fluent temp = *(tmp.begin());
-						if (temp % 2 == 0) {
-							temp = temp + 1;
-						} else {
-							temp = temp - 1;
-						}
-						ret_tmp.insert(temp);
-						retret.insert(ret_tmp);
-
-					} else {
-						std::cerr << "DEBUG--ERROR in sensing;";
-						exit(1);
-					}
-				} else {
-					std::cerr << "DEBUG--ERROR in sensing;";
-					exit(1);
-				}
-				ret = helper::and_ff(ret, retret);
-				retret.erase(ret_tmp);
-			}
-
-		}
-
-	}
-	if (ret.size() > 1) {
-
-		std::cerr << "\nNon determinism in action effect is not supported-2.\n";
-		exit(1);
-	}
-	return ret;
-}*/
