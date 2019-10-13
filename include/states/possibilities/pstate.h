@@ -272,7 +272,7 @@ private:
      * @param[in] from: the \ref pworld in which \ref agent "ag" currently is
      * @param[in] to: the \ref pworld believed from \ref agent "ag"
      * @param[in] ag: the \ref agent.*/
-    void add_edge(pworld_ptr & from, pworld_ptr & to, agent ag) const;
+    void add_edge(pworld_ptr & from, pworld_ptr & to, agent ag);
 
     /** \brief Function that return the set of \ref agent that entails the obs condition.
      *
@@ -313,10 +313,11 @@ private:
     void explore_unvisited_pworlds(const action &act, pstate &ret, pworld_ptr &world, pworld_map &current_pmap, pworld_queue &to_visit, transition_map &calculated, beliefs_vector &to_backtrack, beliefs_vector &p_obs_beliefs, agent_set &fully_obs_agents, agent_set &oblivious_obs_agents) const;
     /** \brief Function that updates the agents' beliefs recorded into "to_backtrack".
      *
+     * @param[in] ret: the \ref pstate resulting from the \ref action.
      * @param[in] calculated: a map that links the \ref pworld of *this* to their counterpart w.r.t. the transition function.
      * @param[in] to_backtrack: a vector of tuples (pw1, pw2, ag) that represent that in \ref pworld pw1 the \agent ag believes that the \ref \pworld pw2 is possible.
      * @param[in] p_obs_beliefs: represents the beliefs of the partially observant agents (in \ref SENSING/\ref ANNOUNCEMENT actions) about the \ref pworld that results from the negated \ref action.*/
-    void backtrack_remaining_beliefs(transition_map &calculated, beliefs_vector &to_backtrack, beliefs_vector &p_obs_beliefs) const;
+    void backtrack_remaining_beliefs(pstate &ret, transition_map &calculated, beliefs_vector &to_backtrack, beliefs_vector &p_obs_beliefs) const;
 
     /** \brief Function that applies the transition function for the \ref action effect on *this* implementing the possibilities semantic.
      *

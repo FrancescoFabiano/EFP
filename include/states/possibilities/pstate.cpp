@@ -260,7 +260,7 @@ pworld_ptr pstate::add_rep_world(const pworld & world)
 	return add_rep_world(world, get_max_depth(), tmp);
 }
 
-void pstate::add_edge(pworld_ptr &from, pworld_ptr &to, agent ag) const
+void pstate::add_edge(pworld_ptr &from, pworld_ptr &to, agent ag)
 {
     auto from_beliefs = m_beliefs.find(from);
 
@@ -281,7 +281,7 @@ void pstate::add_edge(pworld_ptr &from, pworld_ptr &to, agent ag) const
         pworld_ptr pwp = pstore::get_instance().add_world(*to.get_ptr());
 
         pwm.insert(pworld_map::value_type(ag, {pwp}));
-//        m_beliefs.insert(pworld_transitive_map::value_type(from, pwm));
+        m_beliefs.insert(pworld_transitive_map::value_type(from, pwm));
     }
 }
 
@@ -591,11 +591,11 @@ void pstate::explore_unvisited_pworlds(const action &act, pstate &ret, pworld_pt
             for (it_pws = believed_worlds.begin(); it_pws != believed_worlds.end(); it_pws++) {
                 auto calculated_pworld = calculated.find(*it_pws);
 
-                if (calculated_pworld != calculated.end()) {            // If we already calculated the transition function for this pworld
-                    add_edge(world, calculated_pworld->second, ag);     // Then we update agents' beliefs
+                if (calculated_pworld != calculated.end()) {                // If we already calculated the transition function for this pworld
+                    ret.add_edge(world, calculated_pworld->second, ag);     // Then we update agents' beliefs
                 } else {
-                    to_visit.push(*it_pws);                             // Otherwise we push the pworld in the to_visit queue
-                    to_backtrack.emplace_back(world, *it_pws, ag);      // And we keep track of the "edge" that we must insert later
+                    to_visit.push(*it_pws);                                 // Otherwise we push the pworld in the to_visit queue
+                    to_backtrack.emplace_back(world, *it_pws, ag);          // And we keep track of the "edge" that we must insert later
                 }
             }
         } else if (oblivious_obs_agents.find(ag) != oblivious_obs_agents.end()) {   // If we reach a pworld believed to be true by some oblivious agent
@@ -620,7 +620,7 @@ void pstate::explore_unvisited_pworlds(const action &act, pstate &ret, pworld_pt
                             auto calculated_pworld = calculated.find(*it_pws);
 
                             if (calculated_pworld != calculated.end()) {
-                                add_edge(world, calculated_pworld->second, ag);
+                                ret.add_edge(world, calculated_pworld->second, ag);
                             } else {
                                 to_visit.push(*it_pws);
                                 to_backtrack.emplace_back(world, *it_pws, ag);
@@ -643,7 +643,7 @@ void pstate::explore_unvisited_pworlds(const action &act, pstate &ret, pworld_pt
     }
 }
 
-void pstate::backtrack_remaining_beliefs(transition_map &calculated, beliefs_vector &to_backtrack, beliefs_vector &p_obs_beliefs) const {
+void pstate::backtrack_remaining_beliefs(pstate &ret, transition_map &calculated, beliefs_vector &to_backtrack, beliefs_vector &p_obs_beliefs) const {
     beliefs_vector::const_iterator it_bv;
 
     for (it_bv = to_backtrack.begin(); it_bv != to_backtrack.end(); it_bv++) {
@@ -651,7 +651,7 @@ void pstate::backtrack_remaining_beliefs(transition_map &calculated, beliefs_vec
 
         if (tmp != calculated.end()) {
             pworld_ptr from = std::get<0>(*it_bv);
-            add_edge(from, tmp->second, std::get<2>(*it_bv));
+            ret.add_edge(from, tmp->second, std::get<2>(*it_bv));
         } else {
             std::cerr << "\nSomething went wrong while updating the agents' beliefs\n";
             exit(1);
@@ -660,7 +660,7 @@ void pstate::backtrack_remaining_beliefs(transition_map &calculated, beliefs_vec
 
     for (it_bv = p_obs_beliefs.begin(); it_bv != p_obs_beliefs.end(); it_bv++) {
         pworld_ptr from = std::get<0>(*it_bv), to = std::get<1>(*it_bv);
-        add_edge(from, to, std::get<2>(*it_bv));
+        ret.add_edge(from, to, std::get<2>(*it_bv));
     }
 }
 
@@ -698,7 +698,7 @@ void pstate::execute_action(const action &act, pstate &ret, agent_set &fully_obs
     }
 
     // Updating the remaining agents' beliefs
-    backtrack_remaining_beliefs(calculated, to_backtrack, p_obs_beliefs);
+    backtrack_remaining_beliefs(ret, calculated, to_backtrack, p_obs_beliefs);
 
     // Updating the pointed world
     auto new_pointed = calculated.find(get_pointed());
