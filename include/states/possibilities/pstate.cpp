@@ -184,21 +184,17 @@ const pworld_ptr_set pstate::get_B_reachable_worlds(agent ag, pworld_ptr world) 
 bool pstate::get_B_reachable_worlds(agent ag, pworld_ptr world, pworld_ptr_set& ret) const
 {
 	/** \todo check: If a--i-->b, b--i-->c then a--i-->c must be there*/
-	bool is_fixed_point = true;
-	pworld_ptr_set::const_iterator it_pworld_1, it_pworld_2;
-	for (it_pworld_1 = m_worlds.begin(); it_pworld_1 != m_worlds.end(); it_pworld_1++) {
-	    auto pw = it_pworld_1->get_pworld_map().find(ag);
-	    
-	    if (pw != world.get_pworld_map().end()) {
-            // We use the pair of insert, if we add a new world (true in the set::insert) then is not a fixed point
-            for (it_pworld_2 = pw->second.begin(); it_pworld_2 != pw->second.end(); it_pworld_2++) {
-                if (std::get<1>(ret.insert(*it_pworld_2))) {
-                    is_fixed_point = false;
-                }
-            }
+	auto pw_map = m_beliefs.find(world);
+
+	if (pw_map != m_beliefs.end()) {
+	    auto pw_set = pw_map->second.find(ag);
+
+	    if (pw_set != pw_map->second.end()) {
+	        ret = pw_set->second;
+	        return true;
 	    }
 	}
-	return is_fixed_point;
+	return false;
 }
 
 const pworld_ptr_set pstate::get_E_reachable_worlds(const agent_set & ags, pworld_ptr world) const
@@ -259,16 +255,28 @@ pworld_ptr pstate::add_rep_world(const pworld & world)
 	return add_rep_world(world, get_max_depth(), tmp);
 }
 
-void pstate::add_edge(pworld_ptr & pw1, const pworld & pw2, const agent ag) const
+void pstate::add_edge(pworld_ptr &from, pworld_ptr &to, agent ag) const
 {
-    auto it_pwm_1 = pw1.get_pworld_map().find(ag);
+    auto from_beliefs = m_beliefs.find(from);
 
-    if (it_pwm_1 != pw1.get_pworld_map().end()) {
-        pworld_ptr_set pwps = it_pwm_1->second;
-        pwps.insert(pstore::get_instance().add_world(pw2));
+    if (from_beliefs != m_beliefs.end()) {
+        auto ag_beliefs = from_beliefs->second.find(ag);
+
+        if (ag_beliefs != from_beliefs->second.end()) {
+            pworld_ptr_set pw_set = ag_beliefs->second;
+            pw_set.insert(to);
+        } else {
+            pworld_map pwm = from_beliefs->second;
+            pworld_ptr pwp = pstore::get_instance().add_world(*to.get_ptr());
+
+            pwm.insert(pworld_map::value_type(ag, {pwp}));
+        }
     } else {
-        pworld_map pmap = pw1.get_pworld_map();
-        pmap.insert(pworld_map::value_type(ag, {pstore::get_instance().add_world(pw2)}));
+        pworld_map pwm;
+        pworld_ptr pwp = pstore::get_instance().add_world(*to.get_ptr());
+
+        pwm.insert(pworld_map::value_type(ag, {pwp}));
+//        m_beliefs.insert(pworld_transitive_map::value_type(from, pwm));
     }
 }
 
@@ -377,8 +385,8 @@ void pstate::generate_initial_pedges()
 				pwptr_tmp1 = *it_pwps_1;
 				pwptr_tmp2 = *it_pwps_2;
 
-				add_edge(pwptr_tmp1, *pwptr_tmp2.get_ptr(), i);
-				add_edge(pwptr_tmp2, *pwptr_tmp1.get_ptr(), i);
+				add_edge(pwptr_tmp1, pwptr_tmp2, i);
+				add_edge(pwptr_tmp2, pwptr_tmp1, i);
 			}
 		}
 	}
@@ -397,13 +405,17 @@ void pstate::generate_initial_pedges()
 
 }
 
-void pstate::remove_edge(pworld_ptr & pw1, const pworld & pw2, const agent ag)
+void pstate::remove_edge(pworld_ptr &from, const pworld &to, const agent ag)
 {
-    auto it_pwm_1 = pw1.get_pworld_map().find(ag);
+    auto from_beliefs = m_beliefs.find(from);
 
-    if (it_pwm_1 != pw1.get_pworld_map().end()) {
-        pworld_ptr_set pwps = it_pwm_1->second;
-        pwps.erase(pstore::get_instance().add_world(pw2));
+    if (from_beliefs != m_beliefs.end()) {
+        auto ag_beliefs = from_beliefs->second.find(ag);
+
+        if (ag_beliefs != from_beliefs->second.end()) {
+            pworld_ptr_set pw_set = ag_beliefs->second;
+            pw_set.erase(to);
+        }
     }
 }
 
@@ -568,10 +580,14 @@ void pstate::explore_unvisited_pworlds(const action &act, pstate &ret, pworld_pt
 
     for (it_pwm = current_pmap.begin(); it_pwm != current_pmap.end(); it_pwm++) {
         agent ag = it_pwm->first;
+        pworld_ptr_set believed_worlds = it_pwm->second;
+
         if (fully_obs_agents.find(ag) != fully_obs_agents.end()) {
-            for (it_pws = it_pwm->second.begin(); it_pws != it_pwm->second.end(); it_pws++) {
-                if (calculated.find(*it_pws) != calculated.end()) {     // If we already calculated the transition function for this pworld
-                    add_edge(world, *it_pws->get_ptr(), ag);            // Then we update agents' beliefs
+            for (it_pws = believed_worlds.begin(); it_pws != believed_worlds.end(); it_pws++) {
+                auto calculated_pworld = calculated.find(*it_pws);
+
+                if (calculated_pworld != calculated.end()) {            // If we already calculated the transition function for this pworld
+                    add_edge(world, calculated_pworld->second, ag);     // Then we update agents' beliefs
                 } else {
                     to_visit.push(*it_pws);                             // Otherwise we push the pworld in the to_visit queue
                     to_backtrack.emplace_back(world, *it_pws, ag);      // And we keep track of the "edge" that we must insert later
@@ -595,13 +611,16 @@ void pstate::explore_unvisited_pworlds(const action &act, pstate &ret, pworld_pt
                     fluent_formula effects = get_effects_if_entailed(act.get_effects(), world);
                     /** todo: controllare che l'effetto condizionale vada rispettato */
                     if (entails(act.get_executability(), world) && entails(effects, world)) {
-                        for (it_pws = it_pwm->second.begin(); it_pws != it_pwm->second.end(); it_pws++) {
-                            if (calculated.find(*it_pws) != calculated.end()) {
-                                add_edge(world, *it_pws->get_ptr(), ag);
+                        for (it_pws = believed_worlds.begin(); it_pws != believed_worlds.end(); it_pws++) {
+                            auto calculated_pworld = calculated.find(*it_pws);
+
+                            if (calculated_pworld != calculated.end()) {
+                                add_edge(world, calculated_pworld->second, ag);
                             } else {
                                 to_visit.push(*it_pws);
                                 to_backtrack.emplace_back(world, *it_pws, ag);
                             }
+
                             pworld_ptr po_pw = ret.add_rep_world(*it_pws->get_ptr(), it_pws->get_repetition() + 2);
                             /** \todo: the fluent set of this pworld should contain the negation of the sensed fluent?*/
                             p_obs_beliefs.emplace_back(world, po_pw, ag);
@@ -627,7 +646,7 @@ void pstate::backtrack_remaining_beliefs(transition_map &calculated, beliefs_vec
 
         if (tmp != calculated.end()) {
             pworld_ptr from = std::get<0>(*it_bv);
-            add_edge(from, *tmp->second.get_ptr(), std::get<2>(*it_bv));
+            add_edge(from, tmp->second, std::get<2>(*it_bv));
         } else {
             std::cerr << "\nSomething went wrong while updating the agents' beliefs\n";
             exit(1);
@@ -636,7 +655,7 @@ void pstate::backtrack_remaining_beliefs(transition_map &calculated, beliefs_vec
 
     for (it_bv = p_obs_beliefs.begin(); it_bv != p_obs_beliefs.end(); it_bv++) {
         pworld_ptr from = std::get<0>(*it_bv), to = std::get<1>(*it_bv);
-        add_edge(from, *to.get_ptr(), std::get<2>(*it_bv));
+        add_edge(from, to, std::get<2>(*it_bv));
     }
 }
 
@@ -648,23 +667,28 @@ void pstate::execute_action(const action &act, pstate &ret, agent_set &fully_obs
 
     pworld_ptr current_pw;          // The current pworld being considered
     pworld_map current_pmap;        // And its current pworld_map
+    pworld_transitive_map::const_iterator it_ptm;
 
     to_visit.push(get_pointed());   // We always visit the pointed pworld
 
     while (!to_visit.empty()) {
         current_pw = to_visit.front();
-        current_pmap = current_pw.get_pworld_map();
+        it_ptm = m_beliefs.find(current_pw);
 
-        pworld_ptr pw_new = ret.add_rep_world(*current_pw.get_ptr(), current_pw.get_repetition() + 1);  // We add the corresponding pworld in ret
-        calculated.insert(transition_map::value_type(current_pw, pw_new));                              // And we update the calculated map
+        if (it_ptm != m_beliefs.end()) {
+            current_pmap = it_ptm->second;
 
-        // Execute the all the effects
-        if (act.get_type() == ONTIC && entails(act.get_executability(), current_pw)) {
-            execute_ontic_effects(act, pw_new);
+            pworld_ptr pw_new = ret.add_rep_world(*current_pw.get_ptr(), current_pw.get_repetition() + 1);  // We add the corresponding pworld in ret
+            calculated.insert(transition_map::value_type(current_pw, pw_new));                              // And we update the calculated map
+
+            // Execute the all the effects
+            if (act.get_type() == ONTIC && entails(act.get_executability(), current_pw)) {
+                execute_ontic_effects(act, pw_new);
+            }
+
+            // We visit only those unvisited pworlds that are believed to be true by some fully observant agent
+            explore_unvisited_pworlds(act, ret, pw_new, current_pmap, to_visit, calculated, to_backtrack, p_obs_beliefs, fully_obs_agents, oblivious_obs_agents);
         }
-
-        // We visit only those unvisited pworlds that are believed to be true by some fully observant agent
-        explore_unvisited_pworlds(act, pw_new, current_pmap, to_visit, calculated, to_backtrack, p_obs_beliefs, fully_obs_agents, oblivious_obs_agents);
         to_visit.pop();
     }
 

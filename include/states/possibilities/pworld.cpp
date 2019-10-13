@@ -17,26 +17,9 @@ pworld::pworld()
 {
 }
 
-pworld::pworld(const fluent_set & description, const pworld_map & beliefs)
-{
-	/*
-	 * No need because consistent for construction
-	 * \throw std::invalid_argument whenever \p description is not consistent.
-	 *
-	 *try {*/
-	set_fluent_set(description);
-    set_pworld_map(beliefs);
-	set_id();
-	/*} catch (const std::invalid_argument& ia) {
-	 *	throw ia;
-	 *} */
-}
-
 pworld::pworld(const fluent_set & description)
 {
-    pworld_map map = pworld_map();
     set_fluent_set(description);
-    set_pworld_map(map);
     set_id();
 }
 //generate an unique id given the state information -> the literals
@@ -44,7 +27,6 @@ pworld::pworld(const fluent_set & description)
 pworld::pworld(const pworld & world)
 {
 	set_fluent_set(world.get_fluent_set());
-    set_pworld_map(world.get_pworld_map());
 	set_id();
 }
 
@@ -74,10 +56,6 @@ void pworld::set_fluent_set(const fluent_set & description)
 	m_fluent_set = description;
 	/*else
 		throw std::invalid_argument("Non consistent set of fluent");*/
-}
-
-void pworld::set_pworld_map(const pworld_map &beliefs) {
-    m_pworld_map = beliefs;
 }
 
 bool pworld::consistent(const fluent_set & to_check)
@@ -114,11 +92,6 @@ void pworld::set_id()
 const fluent_set & pworld::get_fluent_set() const
 {
 	return m_fluent_set;
-}
-
-const pworld_map & pworld::get_pworld_map() const
-{
-    return m_pworld_map;
 }
 
 pworld_id pworld::get_id() const
@@ -243,15 +216,6 @@ const fluent_set & pworld_ptr::get_fluent_set() const
 	}
 	std::cerr << "Error in creating a pworld_ptr\n";
 	exit(1);
-}
-
-const pworld_map & pworld_ptr::get_pworld_map() const
-{
-    if (m_ptr != nullptr) {
-        return get_ptr()->get_pworld_map();
-    }
-    std::cerr << "Error in creating a pworld_ptr\n";
-    exit(1);
 }
 
 pworld_id pworld_ptr::get_id() const

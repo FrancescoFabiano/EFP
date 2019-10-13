@@ -38,6 +38,10 @@ private:
      * 
      * @see pworld and pstore.*/
     pworld_ptr m_pointed;
+    /** \brief The beliefs of each \ref agent in every \ref pworld.
+     *
+     * @see pworld.*/
+    pworld_transitive_map m_beliefs;
     /** \brief Function that checks the entailment of a \ref fluent in a given \ref pworld.
      *     @see \ref pworld::entails(fluent) const
      *  
@@ -242,11 +246,13 @@ private:
      * The function creates all the edges and adds to *this* only the ones that respect \p ini_conditions.
      * All the other ones are stored in \ref pstore for future usees.*/
     void generate_initial_pedges();
-    /** \brief Function that removes the a \ref kedge_ptr from \ref m_edges.
+    /** \brief Function that removes the belief of \ref agent "ag" from \ref pworld "from" to \ref pworld "to".
      * 
-     * @param[in] to_remove: the \ref kedge which pointer has to be removed.*/
-    void remove_edge(pworld_ptr & pw1, const pworld & pw2, const agent ag);
-    /** \brief Function that removes the \ref kedge(s) that imply that \p ag is ignorant about \p known_ff from *this*.
+     * @param[in] from: the \ref pworld in which \ref agent "ag" currently is
+     * @param[in] to: the \ref pworld to remove
+     * @param[in] ag: the \ref agent.*/
+    void remove_edge(pworld_ptr & from, const pworld & to, const agent ag);
+    /** \brief Function that removes the \ref pedge(s) that imply that \p ag is ignorant about \p known_ff from *this*.
      *  
      * @param[in] known_ff: the \ref fluent_formula known by \p ag.
      * @param[in] ag: the \ref agent that knows \p known_ff.*/
@@ -261,26 +267,12 @@ private:
 
     void add_world(const pworld & to_add);
 
-    /* \brief Function that adds a \ref pworld with possible copies because of oblivious to *this*.
+    /** \brief Function that adds the belief of agent "ag" for the \ref pworld "pw" *this*.
      *
-     * The \ref pworld is added. The structure only stores the pointer to the \ref pworld so
-     * it is necessary to store the \ref pworld in \ref pstore.
-     * 
-     * @see pworld and pstore.
-     *  
-     * @param[in] to_add: the \ref pworld that has to be added to *this*.
-     * @param[in] repetition: the number of copy -1 that are certainly already in *this*, maybe there are more.
-    void add_copy_world(const pworld & to_add, unsigned short repetition);*/
-
-    /** \brief Function that adds a \ref kedge to the Kripke structure represented by *this*.
-     *
-     * The \ref kedge is added. The structure only stores the pointer to the \ref kedge so
-     * it is necessary to store the \ref kedge in \ref pstore.
-     * 
-     * @see kedge and pstore.
-     *  
-     * @param[in] to_add: the \ref kedge that has to be added to *this*.*/
-    void add_edge(pworld_ptr & pw1, const pworld & pw2, const agent ag) const;
+     * @param[in] from: the \ref pworld in which \ref agent "ag" currently is
+     * @param[in] to: the \ref pworld believed from \ref agent "ag"
+     * @param[in] ag: the \ref agent.*/
+    void add_edge(pworld_ptr & from, pworld_ptr & to, agent ag) const;
 
     /** \brief Function that return the set of \ref agent that entails the obs condition.
      *

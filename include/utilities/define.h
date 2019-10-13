@@ -250,10 +250,11 @@ typedef std::set<pworld_ptr> pworld_ptr_set; /**< \brief A set of \ref pworld_pt
 
 typedef std::map<agent, pworld_ptr_set> pworld_map; /**< \brief A map between agents and set of \ref pworld_ptr.
                                                     *
-                                                    * Mainly used to store all the \ref pworld of a \ref pstate without wasting memory,
-                                                    * while keeping information about the agents' beliefs.
-                                                    *
                                                     * @see pworld and pstate.*/
+
+typedef std::map<pworld_ptr, pworld_map> pworld_transitive_map; /**< \brief A map, for every \ref pworld, of the beleifs of its agents.
+                                                                 *
+                                                                 * @see pworld and pstate.*/
 
 typedef std::queue<pworld_ptr> pworld_queue; /**< \brief A queue of \ref pworld_ptr.
                                             *
