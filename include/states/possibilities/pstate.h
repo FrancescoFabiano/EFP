@@ -321,11 +321,30 @@ private:
 
     /** \brief Function that applies the transition function for the \ref action effect on *this* implementing the possibilities semantic.
      *
-     * @param act: the \ref action to be applied on *this*.
-     * @param ret: the \ref pstate resulting from the \ref action.
-     * @param fully_obs_agents: the fully observant \ref agent set.
-     * @param oblivious_obs_agents: the oblivious \ref agent set.*/
+     * @param act[in]: the \ref action to be applied on *this*.
+     * @param ret[in]: the \ref pstate resulting from the \ref action.
+     * @param fully_obs_agents[in]: the fully observant \ref agent set.
+     * @param oblivious_obs_agents[in]: the oblivious \ref agent set.*/
+    void execute_action_old(const action &act, pstate &ret, agent_set &fully_obs_agents, agent_set &oblivious_obs_agents) const;
+    /** \brief Function that applies the transition function for the \ref action effect on *this* implementing the possibilities semantic.
+     *
+     * @param act[in]: the \ref action to be applied on *this*.
+     * @param ret[in]: the \ref pstate resulting from the \ref action.
+     * @param fully_obs_agents[in]: the fully observant \ref agent set.
+     * @param oblivious_obs_agents[in]: the oblivious \ref agent set.*/
     void execute_action(const action &act, pstate &ret, agent_set &fully_obs_agents, agent_set &oblivious_obs_agents) const;
+    /** \brief Function that recursively calculates the \ref pworld resulting from the transition function.
+     *
+     * @param act[in]: the \ref action to be applied on *this*.
+     * @param ret[in]: the \ref pstate resulting from the \ref action.
+     * @param current_pw[in]: the world being currently calculated.
+     * @param offset[in]: the offset used in the creation of the new \red pworld.
+     * @param calculated[in]: a map that keeps track of the results of the transition function.
+     * @param p_obs_calculated[in]: a map that keeps track of the results of the transition function w.r.t. the beliefs of partially observant \ref agent.
+     * @param fully_obs_agents[in]: the fully observant \ref agent set.
+     * @param oblivious_obs_agents[in]: the oblivious \ref agent set.
+     * @return the \ref pworld resulting from the application of the transition function on "current_pw".*/
+    pworld_ptr execute_action_helper(const action &act, pstate &ret, const pworld_ptr &current_pw, int offset, transition_map &calculated, transition_map &p_obs_calculated, agent_set &fully_obs_agents, agent_set &oblivious_obs_agents) const;
     /** \brief Function that applies the transition function for a \ref ONTIC \ref action effect on *this* implementing the possibilities semantic.
      *
      * The transition function is applied accordingly to mA^rho. Check the paper for more information.
