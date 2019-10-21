@@ -30,6 +30,10 @@ private:
     
     /**\brief If this parameter is setted to true makes the functions verbose.*/
     bool m_debug;
+    /**\brief The selected type of state. */
+    state_type m_stype;
+    /**\brief If this parameter is setted to true then we use the optimized version for Kripke states.*/
+    bool m_kopt;
     /** \brief The pointer to a \ref reader object.
      * 
      * This is used to read the information from the the input file.
@@ -108,17 +112,27 @@ public:
      *
 * @param[in] name: the value to assign to \ref m_name.
      * @param[in] debug: the value to assign to \ref m_debug.
+     * @param[in] stype: the value to assign to \ref m_stype.
+     * @param[in] k_opt: the value to assign to \ref m_kopt.
      * @param[in] reader: the \ref reader pointer to assign to \ref m_reader.
      * @param[in] ini_res: the restriction to apply to \ref m_intial_description.
      * @param[in] goal_res: the \ref domain_restriction to assign to \ref m_goal_restriction.
      * @param[in] is_global_obsv: the \ref domain_restriction to assign to \ref m_is_global_obsv.
      * @param[in] act_check: the \ref action_check to assign to \ref m_act_check.*/
-    void set_domain(std::string name, bool debug, std::shared_ptr<reader> reader, domain_restriction ini_res, domain_restriction goal_res, bool is_global_obsv, action_check act_check);
+    void set_domain(std::string name, bool debug, state_type stype, bool k_opt, std::shared_ptr<reader> reader, domain_restriction ini_res, domain_restriction goal_res, bool is_global_obsv, action_check act_check);
 
     /** \brief Function that builds all the domain information.
      *
      * This function calls \ref build_fluents, \ref build_agents and \ref build_actions.*/
     void build();
+    /** \brief Returns the selected type of state.
+     *
+     * @return the boolean \ref m_stype.*/
+    const state_type & get_stype();
+    /** \brief Returns whether the planner uses the optimized version of the transition function for Kripke states.
+     *
+     * @return the boolean \ref m_kopt.*/
+    const bool & get_k_optimized();
 
     /** \brief Getter of the field \ref m_grounder.
      *

@@ -37,7 +37,8 @@ void print_usage(char* prog_name)
 	std::cout << "-st @state_type" << std::endl;
 	std::cout << "	Select the @state_type for the planner." << std::endl;
 	std::cout << "	Possible @state_type:" << std::endl;
-	std::cout << "		KRIPKE: The States are represented with Kripke structures. (Default)" << std::endl;
+	std::cout << "		KRIPKE: The States are represented with Kripke structures and the transition function follows the paper definition. (Default)" << std::endl;
+	std::cout << "		KRIPKE_OPT: The States are represented with Kripke structures and the transition function is optimized." << std::endl;
 	std::cout << "		POSS: The States are represented with Possibilities (NWF-SET)." << std::endl;
 	std::cout << "		OBDD: The States are represented with OBDDs." << std::endl;
 
@@ -109,6 +110,7 @@ int main(int argc, char** argv)
 	action_check act_check = EXE_POINTED__COND_WORLD; //default
 
 	bool execute_given_actions = false;
+	bool kopt = false;
 	std::vector<std::string> given_actions;
 
 
@@ -164,11 +166,15 @@ int main(int argc, char** argv)
 		} else if (strcmp(argv[i], "-st") == 0) {
 			i++;
 			if (i >= argc) {
-				std::cerr << "-st needs specification (KRIPKE, POSS, OBDD)." << std::endl;
+				std::cerr << "-st needs specification (KRIPKE, KRIPKE_OPT, POSS, OBDD)." << std::endl;
 				exit(1);
 			} else if (strcmp(argv[i], "KRIPKE") == 0) {
 				std::cout << "The States are represented with Kripke structures. (Default)" << std::endl;
 				state_struc = KRIPKE; //default
+			} else if (strcmp(argv[i], "KRIPKE_OPT") == 0) {
+				std::cout << "KRIPKE_OPT: The States are represented with Kripke structures and the transition function is optimized" << std::endl;
+				state_struc = KRIPKE;
+				kopt = true;
 			} else if (strcmp(argv[i], "POSS") == 0) {
 				std::cout << "The States are represented with Possibilities (NWF-SET)." << std::endl;
 				state_struc = POSSIBILITIES;
@@ -266,7 +272,7 @@ int main(int argc, char** argv)
 	}
 
 	//Domain building
-	domain::get_instance().set_domain(domain_name, debug, domain_reader, ini_restriction, goal_restriction, is_global_obsv, act_check);
+	domain::get_instance().set_domain(domain_name, debug, state_struc, kopt, domain_reader, ini_restriction, goal_restriction, is_global_obsv, act_check);
 	domain::get_instance().build();
 
 

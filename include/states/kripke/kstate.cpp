@@ -545,17 +545,17 @@ kstate kstate::compute_succ(const action & act) const
 		print();
 		std::cout << "\n*********************Printing tmp*********************\n";
 		tmp.print();*/
-		return execute_ontic_um(act);
+        return domain::get_instance().get_k_optimized() ? execute_ontic(act) : execute_ontic_um(act);
 		break;
 	}
 	case SENSING:
 	{
-		return execute_sensing_um(act);
+		return domain::get_instance().get_k_optimized() ? execute_sensing(act) : execute_sensing_um(act);
 		break;
 	}
 	case ANNOUNCEMENT:
 	{
-		return execute_announcement_um(act);
+		return domain::get_instance().get_k_optimized() ? execute_announcement(act) : execute_announcement_um(act);
 		break;
 	}
 	default:

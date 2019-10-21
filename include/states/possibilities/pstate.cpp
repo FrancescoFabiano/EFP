@@ -778,11 +778,11 @@ pworld_ptr pstate::execute_action_helper(const action &act, pstate &ret, const p
                     if (p_obs_calculated_pworld != p_obs_calculated.end()) {
                         ret.add_edge(new_pw, p_obs_calculated_pworld->second, ag);
                     } else {
-                        action neg_act = act; /** \todo: creare l'azione con gli effetti negati*/
-                        fluent_formula effects = get_effects_if_entailed(neg_act.get_effects(), *it_pws);
-
-                        if (entails(effects, *it_pws)) {
-                            pworld_ptr believed_pw = execute_action_helper(neg_act, ret, *it_pws, 2, calculated, p_obs_calculated, fully_obs_agents, oblivious_obs_agents);
+                        fluent_formula effects = get_effects_if_entailed(act.get_effects(), *it_pws);
+                        // La differenza sta nella negazione dell'entailment, in quanto il check viene eseguito negli effetti negati dell'azione
+                        if (!entails(effects, *it_pws)) {
+                            pworld_ptr believed_pw = execute_action_helper(act, ret, *it_pws, 2, calculated, p_obs_calculated, fully_obs_agents, oblivious_obs_agents);
+                            // TODO: Maybe using the offset is wrong...
                             ret.add_edge(new_pw, believed_pw, ag);
                             p_obs_calculated.insert(transition_map::value_type(*it_pws, believed_pw));
                         }

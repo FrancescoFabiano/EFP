@@ -42,7 +42,7 @@ void planner<T>::print_results(std::chrono::duration<double> elapsed_seconds, T 
 		}
 		system(("mkdir -p " + folder).c_str());
 		result.open(folder + domain::get_instance().get_name() + ".txt");
-		result << "EFP V 2.0 completed the search in " << elapsed_seconds.count() << "\n";
+		result << "EFP V 2.0 (" << domain::get_instance().get_stype() << " - kopt:" << domain::get_instance().get_k_optimized() << ") completed the search in " << elapsed_seconds.count() << "\n";
 		result.close();
 	}
 }
