@@ -1,0 +1,9 @@
+Oct 15 2017:
+	- combine initially C(B(i,phi)) with C(phi) since they are considered the same in S5-structure
+
+Oct 18 2017
+	- add function to correct false belief for sensing and announcement actions
+	Note:
+	- Fluent Formula (set of set of unsigned short int) is in DNF form 
+	- entail function DOES checks the requirement: there is at least one outgoing edge from the pointed state.
+	- entail1 function DOES NOT check the requirement that there is at least one outgoing edge from the pointed state.

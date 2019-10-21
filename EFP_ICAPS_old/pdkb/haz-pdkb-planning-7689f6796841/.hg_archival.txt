@@ -1,0 +1,5 @@
+repo: f163fe313c1e8a41b4d44ff7082bcea0ccaf943f
+node: 7689f67968412dd9b343279430af72df2692f0d7
+branch: default
+latesttag: aamas-2015-submission
+latesttagdistance: 89
