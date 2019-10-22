@@ -121,9 +121,9 @@ void planner<T>::execute_given_actions(const std::vector<std::string> act_name)
 				//std::cout << "\n\nTrying action " << (*it_acset).get_name() << "\n";
 				if (state.is_executable(*it_acset)) {
 					state = state.compute_succ(*it_acset);
-					if (domain::get_instance().get_debug()) state.print_graphviz();
+					//if (domain::get_instance().get_debug()) state.print_graphviz();
 					if (state.is_goal()) {
-
+						if (domain::get_instance().get_debug()) state.print_graphviz();
 						std::cout << "\n\nWell Done, Goal found after the execution of ";
 						for (it_stset2 = act_name.begin(); it_stset2 != it_stset; it_stset2++) {
 							std::cout << *it_stset2 << ", ";
@@ -140,7 +140,24 @@ void planner<T>::execute_given_actions(const std::vector<std::string> act_name)
 
 	if (domain::get_instance().get_debug()) {
 		std::cout << "\nGenerating the graphical representation of the states ...\n";
-		system(("sh scripts/generate_pdf.sh out/state/" + domain::get_instance().get_name()).c_str());
+
+		std::string name_folder_graphviz = "out/state/";
+		name_folder_graphviz += domain::get_instance().get_name();
+		switch ( domain::get_instance().get_stype() ) {
+		case KRIPKE:
+			name_folder_graphviz += "_kripke";
+			if (domain::get_instance().get_k_optimized()) {
+				name_folder_graphviz += "_opt";
+			}
+			break;
+		case POSSIBILITIES:
+			name_folder_graphviz += "_poss";
+			break;
+		default:
+			name_folder_graphviz += "_unknown";
+			break;
+		}
+		system(("sh scripts/generate_pdf.sh " + name_folder_graphviz).c_str());
 	}
 
 	return;

@@ -210,6 +210,20 @@ void state<T>::print_graphviz() const
 	std::ofstream graphviz;
 	std::string folder = "out/state/";
 	folder += domain::get_instance().get_name();
+	switch ( domain::get_instance().get_stype() ) {
+	case KRIPKE:
+		folder += "_kripke";
+		if (domain::get_instance().get_k_optimized()) {
+			folder += "_opt";
+		}
+		break;
+	case POSSIBILITIES:
+		folder += "_poss";
+		break;
+	default:
+		folder += "_unknown";
+		break;
+	}
 	system(("mkdir -p " + folder).c_str());
 	graphviz.open(folder + "/" + exec_act_names + ".dot");
 	graphviz << "digraph K_structure{\n";

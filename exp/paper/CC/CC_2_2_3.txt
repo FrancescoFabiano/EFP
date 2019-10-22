@@ -131,4 +131,4 @@ initially C([a,b], (at_b2_1, -at_b2_3) | (-at_b2_1, at_b2_3));
 %goal B(a,at_a_3);
 
 %Two Actions (The basic one as last otherwise syntax error)
-goal B(a,at_b1_1);
+goal at_a_2;

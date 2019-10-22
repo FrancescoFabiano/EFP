@@ -6,6 +6,6 @@ do
 	  dot -Teps "$file" >> "${file%.*}".eps
 	  epstopdf "${file%.*}".eps
 	  rm "${file%.*}".eps
-	  rm "${file%.*}".dot
+	  #rm "${file%.*}".dot
    fi
 done
