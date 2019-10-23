@@ -171,6 +171,7 @@ int main(int argc, char** argv)
 			} else if (strcmp(argv[i], "KRIPKE") == 0) {
 				std::cout << "The States are represented with Kripke structures. (Default)" << std::endl;
 				state_struc = KRIPKE; //default
+				kopt = false;
 			} else if (strcmp(argv[i], "KRIPKE_OPT") == 0) {
 				std::cout << "KRIPKE_OPT: The States are represented with Kripke structures and the transition function is optimized" << std::endl;
 				state_struc = KRIPKE;
@@ -297,24 +298,24 @@ int main(int argc, char** argv)
 		break;
 	}
 	case POSSIBILITIES:
-    {
-        planner< state<pstate> > m_planner;
-        if (execute_given_actions) {
-            if (old_check) {
-                m_planner.execute_given_actions_timed(given_actions);
-            } else {
-                m_planner.execute_given_actions(given_actions);
-            }
-            std::cout << "\n\n\n*****THE END*****\n";
-        } else {
-            if (m_planner.search_BFS(old_check)) {
-                std::cout << "\n\n\n*****THE END*****\n";
-            } else {
-                std::cout << "\n\n\n*****THE SAD END*****\n";
-            }
-        }
-        break;
-    }
+	{
+		planner< state<pstate> > m_planner;
+		if (execute_given_actions) {
+			if (old_check) {
+				m_planner.execute_given_actions_timed(given_actions);
+			} else {
+				m_planner.execute_given_actions(given_actions);
+			}
+			std::cout << "\n\n\n*****THE END*****\n";
+		} else {
+			if (m_planner.search_BFS(old_check)) {
+				std::cout << "\n\n\n*****THE END*****\n";
+			} else {
+				std::cout << "\n\n\n*****THE SAD END*****\n";
+			}
+		}
+		break;
+	}
 	case OBDD:
 	default:
 		std::cerr << "\nNot implemented yet\n";

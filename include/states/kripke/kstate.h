@@ -305,12 +305,15 @@ private:
     /** \brief Function that adds the \ref kworld (kw, \ref SIGMA), (kw, \ref TAU) or (kw, \ref EPSILON) to the Kripke structure ret.
      *
      * The Kripke structure is updated according to mA*. Check the paper for more information.
+     * Also this function updates the interpretations of the worlds
      *
      * @param[in] ret: the Kripke structure obtained after performing act.
      * @param[in] kw: the current \ref kworld of *this* being considered.
      * @param[in] kmap: the map between the kworlds of the old Kripke structure and the ones of the new structure.
-     * @param[in] e: the event type being considered.*/
-    void add_ste_worlds(kstate &ret, const kworld_ptr &kw, kstate_map &kmap, const event_type e) const;
+     * @param[in] e: the event type being considered.
+     * @param[in] repetition: action used to help updating the interpretations of the worlds
+     */
+    void add_ste_worlds(kstate &ret, const kworld_ptr &kw, kstate_map &kmap, const event_type e, const action & act) const;
 
     /** \brief Function that applies the transition function for an \ref action effect on *this* implementing the Update Models semantic.
      *
@@ -480,6 +483,7 @@ public:
      * It also uses \p repetition to avoid clashes with copies of \p world; it
      * represents the number to give to the pointer of \p word to differentiate it from its copies.
      * 
+     * 
      * @see kworld and kstore.
      *  
      * @param[in] to_add: the \ref kworld that has to be added to *this*.
@@ -573,10 +577,10 @@ public:
 
     /** \brief Function that prints the information of *this*.*/
     void print() const;
-    
-        /** \brief Function that prints the information of *this* in a Graphviz file.
-         *
-         * @param[in] graphviz: the ostream where to print the info of *this*.*/
+
+    /** \brief Function that prints the information of *this* in a Graphviz file.
+     *
+     * @param[in] graphviz: the ostream where to print the info of *this*.*/
     void print_graphviz(std::ostream& graphviz) const;
 
 
@@ -594,8 +598,8 @@ public:
      * @param[in] factor2: the set to remove from \p to_modify.*/
     template <class T>
     void minus_set(std::set<T> & to_modify, const std::set<T> & factor2) const;
-    
-    
+
+
     /*fluent_formula get_sensing_effects_if_entailed(const effects_map & map, const kworld_ptr & start) const;*/
 };
 

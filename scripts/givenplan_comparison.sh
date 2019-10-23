@@ -10,6 +10,6 @@ shift            # Shift all arguments to the left (original $1 gets lost)
 ARGUMENTS=("$@") # Rebuild the array with rest of arguments
 
 bin/efp.out $DOMAIN -old_check -e "${ARGUMENTS[@]}";
-# bin/efp.out $DOMAIN -old_check -e "${ARGUMENTS[@]};
+bin/efp.out $DOMAIN -old_check -e "${ARGUMENTS[@]};
 bin/efp.out $DOMAIN -old_check -st POSS -e "${ARGUMENTS[@]}";
 EFP_ICAPS_old/cpa+ $DOMAIN -old_check -e "${ARGUMENTS[@]}";

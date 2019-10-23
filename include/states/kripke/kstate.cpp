@@ -545,7 +545,7 @@ kstate kstate::compute_succ(const action & act) const
 		print();
 		std::cout << "\n*********************Printing tmp*********************\n";
 		tmp.print();*/
-        return domain::get_instance().get_k_optimized() ? execute_ontic(act) : execute_ontic_um(act);
+		return domain::get_instance().get_k_optimized() ? execute_ontic(act) : execute_ontic_um(act);
 		break;
 	}
 	case SENSING:
@@ -584,6 +584,7 @@ void kstate::add_ret_ontic_worlds_internal(const kworld_ptr & start, kworld_ptr_
 	fluent_set world_description = start.get_fluent_set();
 	//Execute the all the effects
 	//std::cout << "\n\n*************************" << act.get_name() << "*************************\n";
+	//Formula in helper that deals with the fluent_formula
 	for (it_eff = effects.begin(); it_eff != effects.end(); it_eff++) {
 		world_description = helper::ontic_exec(*it_eff, world_description);
 	}
@@ -654,144 +655,173 @@ void kstate::add_ret_ontic_worlds(const kworld_ptr & start, kworld_ptr_set &reac
 	add_ret_ontic_worlds_internal(start, reached, ret, effects, fully_obs_agents, act, act_check, map_for_edges);
 }
 
-void kstate::add_ste_worlds(kstate &ret, const kworld_ptr &kw, kstate_map &kmap, const event_type e) const {
-//    int offset = sigma ? 1 : 2;
-    bool tmp = false;
+void kstate::add_ste_worlds(kstate &ret, const kworld_ptr &kw, kstate_map &kmap, const event_type e, const action & act) const
+{
+	///Inside this function is also updated the fluent_set of the worlds linked to ontic and fully observant
+	///(Updating the interpretations of the worlds)
+	bool tmp = false;
+	fluent_set world_description = kw.get_fluent_set();
+	if (e == SIGMA) {
+		if (act.get_type() == ONTIC) {
+			fluent_formula::const_iterator it_eff;
+			fluent_formula effects = get_effects_if_entailed(act.get_effects(), kw);
+			if (effects.size() > 0) {
+				for (it_eff = effects.begin(); it_eff != effects.end(); it_eff++) {
+					world_description = helper::ontic_exec(*it_eff, world_description);
+				}
+			}
+		}
 
-    kmap.insert(kstate_map::value_type(
-            std::make_pair(kw, e), // sigma ? SIGMA : TAU
-            ret.add_rep_world(*(kw.get_ptr()), kw.get_repetition() + e, tmp)));
+		if (kw == get_pointed()) ret.set_pointed(ret.add_rep_world(kworld(world_description), kw.get_repetition() + e, tmp));
+	}
 
-//    kws.insert(kw);
-    if (e == SIGMA && kw == get_pointed()) ret.set_pointed(ret.add_rep_world(*(kw.get_ptr()), kw.get_repetition() + e, tmp));
-    /** \todo Change repetition in other rep world */
-    /** \todo Improve new pointed world */
+	kmap.insert(kstate_map::value_type(
+		std::make_pair(kw, e), // sigma ? SIGMA : TAU
+		ret.add_rep_world(kworld(world_description), kw.get_repetition() + e, tmp)));
+
 }
 
-kstate kstate::execute_action_um(const action& act, const event_type_set& events, const event_type_relation& fully_obs_r, const event_type_relation& partially_obs_r, const event_type_relation& oblivious_obs_r) const {
-    //The execution are all the same if we consider that false beliefs don't count.
-    kstate ret;
+kstate kstate::execute_action_um(const action& act, const event_type_set& events, const event_type_relation& fully_obs_r, const event_type_relation& partially_obs_r, const event_type_relation& oblivious_obs_r) const
+{
+	//The execution are all the same if we consider that false beliefs don't count.
+	kstate ret;
 
-    //This finds all the worlds that are reachable from the initial state following
-    //the edges labeled with fully observant agents.
-    agent_set agents = domain::get_instance().get_agents();
-    agent_set fully_obs_agents = get_agents_if_entailed(act.get_fully_observants(), get_pointed());
-    agent_set partially_obs_agents = get_agents_if_entailed(act.get_partially_observants(), get_pointed());
+	//This finds all the worlds that are reachable from the initial state following
+	//the edges labeled with fully observant agents.
+	agent_set agents = domain::get_instance().get_agents();
+	agent_set fully_obs_agents = get_agents_if_entailed(act.get_fully_observants(), get_pointed());
+	agent_set partially_obs_agents = get_agents_if_entailed(act.get_partially_observants(), get_pointed());
 
-    agent_set oblivious_obs_agents = agents;
-    minus_set(oblivious_obs_agents, fully_obs_agents);
-    minus_set(oblivious_obs_agents, partially_obs_agents);
+	agent_set oblivious_obs_agents = agents;
+	minus_set(oblivious_obs_agents, fully_obs_agents);
+	minus_set(oblivious_obs_agents, partially_obs_agents);
 
-    kstate_map kmap;
+	kstate_map kmap;
 
-    agent_set     ::const_iterator it_agset;
-    kstate_map    ::const_iterator it_kmap;
-    kworld_ptr_set::const_iterator it_kwset1;
-    kworld_ptr_set::const_iterator it_kwset2;
+	kworld_ptr_set::const_iterator it_kwset1;
+	// Creating the new worlds for the kstate ret
+	for (it_kwset1 = get_worlds().begin(); it_kwset1 != get_worlds().end(); it_kwset1++) {
+		for (event_type e : events) {
+			switch ( act.get_type() ) {
+			case ONTIC:
+			{
+				if ((e == EPSILON && (oblivious_obs_agents.size() > 0)) || (e == SIGMA && entails(act.get_executability(), *it_kwset1) && fully_obs_agents.size() > 0)) {
+					add_ste_worlds(ret, *it_kwset1, kmap, e, act);
+				}
+				break;
+			}
+			case SENSING:
+			case ANNOUNCEMENT:
+			{
+				fluent_formula effects = get_effects_if_entailed(act.get_effects(), *it_kwset1);
+				/** todo: controllare che l'effetto condizionale vada rispettato */
+				if (e == EPSILON && (oblivious_obs_agents.size() > 0)) {
+					add_ste_worlds(ret, *it_kwset1, kmap, e, act);
+				} else { // if (entails(act.get_executability(), *it_kwset1)) {
+					bool ent = entails(effects, *it_kwset1);
 
-    // Creating the new worlds for the kstate ret
-    for (it_kwset1 = get_worlds().begin(); it_kwset1 != get_worlds().end(); it_kwset1++) {
-        for (event_type e : events) {
-            switch (act.get_type()) {
-                case ONTIC :{
-                    if (e == EPSILON || entails(act.get_executability(), *it_kwset1)) {
-                        add_ste_worlds(ret, *it_kwset1, kmap, e);
-                    }
-                    break;
-                }
-                case SENSING:
-                case ANNOUNCEMENT: {
-                    fluent_formula effects = get_effects_if_entailed(act.get_effects(), *it_kwset1);
-                    /** todo: controllare che l'effetto condizionale vada rispettato */
-                    if (e == EPSILON) {
-                        add_ste_worlds(ret, *it_kwset1, kmap, e);
-                    } else if (entails(act.get_executability(), *it_kwset1)) {
-                        bool ent = entails(effects, *it_kwset1);
+					if ((e == SIGMA && ent && fully_obs_agents.size() > 0) || (e == TAU && !ent && partially_obs_agents.size() > 0)) {
+						add_ste_worlds(ret, *it_kwset1, kmap, e, act);
+					}
+				}
+				break;
+			}
+			default:
+			{
+				std::cerr << "Error in executing an action: ";
+				std::cerr << "the type of the action is not defined correctly";
+				std::cerr << std::endl;
+				exit(1);
+			}
+			}
+		}
+	}
 
-                        if ((e == SIGMA && ent) || (e == TAU && !ent)) {
-                            add_ste_worlds(ret, *it_kwset1, kmap, e);
-                        }
-                    }
-                    break;
-                }
-                default: {
-                    std::cerr << "Error in executing an action: ";
-                    std::cerr << "the type of the action is not defined correctly";
-                    std::cerr << std::endl;
-                    exit(1);
-                }
-            }
-        }
-    }
+	// Updating the edges of ret
+	kedge_ptr_set::const_iterator it_kedptr;
+	event_type_relation::const_iterator it_etr;
 
-    // Updating the interpretations of the worlds
-    if (act.get_type() == ONTIC) {
-        fluent_set                     world_description;
-        fluent_formula::const_iterator it_eff;
+	for (it_kedptr = get_edges().begin(); it_kedptr != get_edges().end(); it_kedptr++) {
+		agent label = it_kedptr->get_label();
+		event_type_relation ag_set = fully_obs_agents.find(label) != fully_obs_agents.end() ? fully_obs_r :
+			partially_obs_agents.find(label) != partially_obs_agents.end() ? partially_obs_r :
+			oblivious_obs_r;
 
-        for (it_kmap = kmap.begin(); it_kmap != kmap.end(); it_kmap++) {
-            kworld_ptr kw = it_kmap->second;
-            event_type e  = it_kmap->first.second;
+		for (it_etr = ag_set.begin(); it_etr != ag_set.end(); it_etr++) {
+			event_type e1 = (*it_etr).first, e2 = (*it_etr).second;
+			auto kw1 = kmap.find({it_kedptr->get_from(), e1}), kw2 = kmap.find({it_kedptr->get_to(), e2});
 
-            if (e == SIGMA) {
-                fluent_formula effects = get_effects_if_entailed(act.get_effects(), kw);
-                world_description = kw.get_fluent_set();
+			if (kw1 != kmap.end() && kw2 != kmap.end()) {
+				ret.add_edge(kedge(kw1->second, kw2->second, label));
+			}
+		}
+	}
 
-                for (it_eff = effects.begin(); it_eff != effects.end(); it_eff++) {
-                    world_description = helper::ontic_exec(*it_eff, world_description);
-                }
-            }
-        }
-    }
-
-    // Updating the edges of ret
-    kedge_ptr_set      ::const_iterator it_kedptr;
-    event_type_relation::const_iterator it_etr;
-
-    for (it_kedptr = get_edges().begin(); it_kedptr != get_edges().end(); it_kedptr++) {
-        agent label = it_kedptr->get_label();
-        event_type_relation ag_set = fully_obs_agents.find(label)     != fully_obs_agents.end()     ? fully_obs_r     :
-                                     partially_obs_agents.find(label) != partially_obs_agents.end() ? partially_obs_r :
-                                                                                                      oblivious_obs_r;
-
-        for (it_etr = ag_set.begin(); it_etr != ag_set.end(); it_etr++) {
-            event_type e1 = (*it_etr).first, e2 = (*it_etr).second;
-            auto kw1 = kmap.find({it_kedptr->get_from(), e1}), kw2 = kmap.find({it_kedptr->get_to(), e2});
-
-            if (kw1 != kmap.end() && kw2 != kmap.end()) {
-                ret.add_edge(kedge(kw1->second, kw2->second, label));
-            }
-        }
-    }
-
-    return ret;
+	return ret;
 }
 
-kstate kstate::execute_ontic_um(const action& act) const {
-    event_type_set events               = {SIGMA, EPSILON};
-    event_type_relation fully_obs_r     = {{SIGMA, SIGMA}, {EPSILON, EPSILON}};
-    event_type_relation partially_obs_r = {};
-    event_type_relation oblivious_obs_r = {{SIGMA, EPSILON}, {EPSILON, EPSILON}};
+kstate kstate::execute_ontic_um(const action& act) const
+{
+	event_type_set events = {SIGMA, EPSILON};
+	event_type_relation fully_obs_r = {
+		{SIGMA, SIGMA},
+		{EPSILON, EPSILON}
+	};
+	event_type_relation partially_obs_r = {};
+	event_type_relation oblivious_obs_r = {
+		{SIGMA, EPSILON},
+		{EPSILON, EPSILON}
+	};
 
-    return execute_action_um(act, events, fully_obs_r, partially_obs_r, oblivious_obs_r);
+	return execute_action_um(act, events, fully_obs_r, partially_obs_r, oblivious_obs_r);
 }
 
-kstate kstate::execute_sensing_um(const action& act) const {
-    event_type_set events               = {SIGMA, TAU, EPSILON};
-    event_type_relation fully_obs_r     = {{SIGMA, SIGMA}, {TAU, TAU}, {EPSILON, EPSILON}};
-    event_type_relation partially_obs_r = {{SIGMA, SIGMA}, {TAU, TAU}, {EPSILON, EPSILON}, {SIGMA, TAU}, {TAU, SIGMA}};
-    event_type_relation oblivious_obs_r = {{SIGMA, EPSILON}, {TAU, EPSILON}, {EPSILON, EPSILON}};
+kstate kstate::execute_sensing_um(const action& act) const
+{
+	event_type_set events = {SIGMA, TAU, EPSILON};
+	event_type_relation fully_obs_r = {
+		{SIGMA, SIGMA},
+		{TAU, TAU},
+		{EPSILON, EPSILON}
+	};
+	event_type_relation partially_obs_r = {
+		{SIGMA, SIGMA},
+		{TAU, TAU},
+		{EPSILON, EPSILON},
+		{SIGMA, TAU},
+		{TAU, SIGMA}
+	};
+	event_type_relation oblivious_obs_r = {
+		{SIGMA, EPSILON},
+		{TAU, EPSILON},
+		{EPSILON, EPSILON}
+	};
 
-    return execute_action_um(act, events, fully_obs_r, partially_obs_r, oblivious_obs_r);
+	return execute_action_um(act, events, fully_obs_r, partially_obs_r, oblivious_obs_r);
 }
 
-kstate kstate::execute_announcement_um(const action &act) const {
-    event_type_set events               = {SIGMA, TAU, EPSILON};
-    event_type_relation fully_obs_r     = {{SIGMA, SIGMA}, {TAU, TAU}, {EPSILON, EPSILON}};
-    event_type_relation partially_obs_r = {{SIGMA, SIGMA}, {TAU, TAU}, {EPSILON, EPSILON}, {SIGMA, TAU}, {TAU, SIGMA}};
-    event_type_relation oblivious_obs_r = {{SIGMA, EPSILON}, {TAU, EPSILON}, {EPSILON, EPSILON}};
+kstate kstate::execute_announcement_um(const action &act) const
+{
+	event_type_set events = {SIGMA, TAU, EPSILON};
+	event_type_relation fully_obs_r = {
+		{SIGMA, SIGMA},
+		{TAU, TAU},
+		{EPSILON, EPSILON}
+	};
+	event_type_relation partially_obs_r = {
+		{SIGMA, SIGMA},
+		{TAU, TAU},
+		{EPSILON, EPSILON},
+		{SIGMA, TAU},
+		{TAU, SIGMA}
+	};
+	event_type_relation oblivious_obs_r = {
+		{SIGMA, EPSILON},
+		{TAU, EPSILON},
+		{EPSILON, EPSILON}
+	};
 
-    return execute_action_um(act, events, fully_obs_r, partially_obs_r, oblivious_obs_r);
+	return execute_action_um(act, events, fully_obs_r, partially_obs_r, oblivious_obs_r);
 }
 
 kstate kstate::execute_ontic(const action& act) const
@@ -896,164 +926,165 @@ kstate kstate::execute_ontic(const action& act) const
 	return ret;
 }
 
-kstate kstate::execute_sensing_or_announcement(const action &act, bool sensing) const {
-    //The execution are all the same if we consider that false beliefs don't count.
-    kstate ret;
+kstate kstate::execute_sensing_or_announcement(const action &act, bool sensing) const
+{
+	//The execution are all the same if we consider that false beliefs don't count.
+	kstate ret;
 
-    //This finds all the worlds that are reachable from the initial state following
-    //the edges labeled with fully observant agents.
-    agent_set agents = domain::get_instance().get_agents();
+	//This finds all the worlds that are reachable from the initial state following
+	//the edges labeled with fully observant agents.
+	agent_set agents = domain::get_instance().get_agents();
 
-    agent_set fully_obs_agents = get_agents_if_entailed(act.get_fully_observants(), get_pointed());
-    agent_set partially_obs_agents = get_agents_if_entailed(act.get_partially_observants(), get_pointed());
+	agent_set fully_obs_agents = get_agents_if_entailed(act.get_fully_observants(), get_pointed());
+	agent_set partially_obs_agents = get_agents_if_entailed(act.get_partially_observants(), get_pointed());
 
-    agent_set oblivious_obs_agents = agents;
-    minus_set(oblivious_obs_agents, fully_obs_agents);
-    minus_set(oblivious_obs_agents, partially_obs_agents);
+	agent_set oblivious_obs_agents = agents;
+	minus_set(oblivious_obs_agents, fully_obs_agents);
+	minus_set(oblivious_obs_agents, partially_obs_agents);
 
-    agent_set fully_and_partial_ag = fully_obs_agents;
-    sum_set(fully_and_partial_ag, partially_obs_agents);
+	agent_set fully_and_partial_ag = fully_obs_agents;
+	sum_set(fully_and_partial_ag, partially_obs_agents);
 
-    agent_set::const_iterator it_agset;
+	agent_set::const_iterator it_agset;
 
-    kworld_ptr_set world_oblivious;
-    kworld_ptr_set tmp_world_set;
+	kworld_ptr_set world_oblivious;
+	kworld_ptr_set tmp_world_set;
 
-    kworld_ptr_set::const_iterator it_kwset;
+	kworld_ptr_set::const_iterator it_kwset;
 
-    if (oblivious_obs_agents.size() > 0) {
-        //ret = (*this);
-        tmp_world_set = get_E_reachable_worlds(oblivious_obs_agents, get_pointed());
-        for (it_agset = agents.begin(); it_agset != agents.end(); it_agset++) {
-            for (it_kwset = tmp_world_set.begin(); it_kwset != tmp_world_set.end(); it_kwset++) {
-                sum_set(world_oblivious, get_B_reachable_worlds(*it_agset, *it_kwset));
-            }
-        }
-        sum_set(world_oblivious, tmp_world_set);
-        ret.set_max_depth(get_max_depth() + 1);
-        ret.set_worlds(world_oblivious);
-    }
-
-
-
-
-    ///\todo Correct if more than one effects
-    fluent_formula effects = get_effects_if_entailed(act.get_effects(), get_pointed());
-
-    /** \todo add multiple fluents sensing
-     * fluent_set tmp_fs;
-     * fluent_set sensed_effects;
-     * fluent tmp_fluent;
-     *
-     * for (it_ff = effects.begin(); it_ff != effects.end(); it_ff++) {
-     *	tmp_fs = *it_ff;
-     *	for (it_fs = tmp_ff.begin(); it_fs != tmp_ff.end(); it_fs++) {
-     *		tmp_fluent = *it_fs;
-     *		if (get_pointed().entails(tmp_fluent)) {
-     *			sensed_effects.insert(tmp_fluent);
-     *		} else {
-     *			sensed_effects.insert(helper::negate_fluent(tmp_fluent));
-     *		}
-     *	}
-     *}*/
-
-    kworld_ptr_set entailing_set = get_C_reachable_worlds(fully_and_partial_ag, get_pointed());
-    entailing_set.insert(get_pointed());
-
-    kworld_ptr_set to_duplicate = entailing_set;
-    kworld_ptr_set not_entailing_set;
-    bool true_sensed = sensing ? get_pointed().entails(effects) : true;
-
-    for (it_kwset = entailing_set.begin(); it_kwset != entailing_set.end();) {
-        if ((!(it_kwset->entails(effects)) && true_sensed) || (it_kwset->entails(effects) && !true_sensed)) {
-            not_entailing_set.insert(*it_kwset);
-            it_kwset = entailing_set.erase(it_kwset);
-        } else {
-            it_kwset++;
-        }
-    }
-
-    //The updated edges
-    kworld_ptr from_old, to_old;
-    kworld_ptr from_new, to_new;
-    agent label;
-    kedge_ptr_set::const_iterator it_kedptr;
-    for (it_kedptr = get_edges().begin(); it_kedptr != get_edges().end(); it_kedptr++) {
-        from_old = it_kedptr->get_from();
-        to_old = it_kedptr->get_to();
-        label = it_kedptr->get_label();
-
-        ///\todo problem with false beliefs
-        if (world_oblivious.find(from_old) != world_oblivious.end()) {
-            /**\todo maybe add the check on to_old? if it doesn't exist return error*/
-            ret.add_edge(*(it_kedptr->get_ptr()));
-        }
-
-        if (fully_obs_agents.find(label) != fully_obs_agents.end()) {
-            /**\todo maybe faster to check the entailment directly*/
-            if ((entailing_set.find(from_old) != entailing_set.end() && not_entailing_set.find(to_old) != not_entailing_set.end())
-                || (entailing_set.find(to_old) != entailing_set.end() && not_entailing_set.find(from_old) != not_entailing_set.end())) {
-                ///\todo ottimiza
-                if (partially_obs_agents.size() > 1) {
-                    //from_new = ret.add_rep_world(*(from_old.get_ptr()), from_old.get_repetition());
-                    to_new = ret.add_rep_world(*(to_old.get_ptr()), to_old.get_repetition());
-                    //ret.add_edge(kedge(from_new, from_new, label));
-                    ret.add_edge(kedge(to_new, to_new, label));
-                }
-            } else if (entailing_set.find(from_old) != entailing_set.end() && entailing_set.find(to_old) != entailing_set.end()) {
-                ///\todo ottimiza
-                if ((to_duplicate.find(from_old) != to_duplicate.end())) {
-                    from_new = ret.add_rep_world(*(from_old.get_ptr()), from_old.get_repetition());
-                    to_new = ret.add_rep_world(*(to_old.get_ptr()), to_old.get_repetition());
-                    /**\todo add also (from,from)?(to,to)?*/
-                    ret.add_edge(kedge(from_new, to_new, label));
-                }
-            } else if (not_entailing_set.find(from_old) != not_entailing_set.end() && not_entailing_set.find(to_old) != not_entailing_set.end()) {
-                if (partially_obs_agents.size() > 1) {
-                    if ((to_duplicate.find(from_old) != to_duplicate.end())) {
-                        from_new = ret.add_rep_world(*(from_old.get_ptr()), from_old.get_repetition());
-                        to_new = ret.add_rep_world(*(to_old.get_ptr()), to_old.get_repetition());
-                        /**\todo add also (from,from)?(to,to)?*/
-                        ret.add_edge(kedge(from_new, to_new, label));
-                    }
-                }
-            }
-        } else if (partially_obs_agents.find(label) != partially_obs_agents.end()) {
-            //if (oblivious_obs_agents.size() > 1) {
-            if ((to_duplicate.find(from_old) != to_duplicate.end()) || (to_duplicate.find(to_old) != to_duplicate.end())) {
-                from_new = ret.add_rep_world(*(from_old.get_ptr()), from_old.get_repetition());
-                to_new = ret.add_rep_world(*(to_old.get_ptr()), to_old.get_repetition());
-                ret.add_edge(kedge(from_new, to_new, label));
-            }
-
-        } else {
-            //if (oblivious_obs_agents.size() > 1) {
-            //if (world_oblivious.find(from_old) == world_oblivious.end()) {
-            //\todo to check
-            if ((to_duplicate.find(from_old) != to_duplicate.end()) || (to_duplicate.find(to_old) != to_duplicate.end())) {
-                from_new = ret.add_rep_world(*(from_old.get_ptr()), from_old.get_repetition());
-                ret.add_edge(kedge(from_new, to_old, label));
-            }
-            //ret.add_edge(kedge(from_new, to_old, label));
-            /* Remove edge if not reachable by partial and not entails
-             * if (partial_size > 1 || entailing_set.find(from_old) != entailing_set.end()) {
-            }
-            if (partial_size > 1 || entailing_set.find(to_old) != entailing_set.end()) {
-            }*/
-        }
-    }
-
-    kworld_ptr pointed_tmp = get_pointed();
-    //if (oblivious_obs_agents.size() > 1) {
-    //if (world_oblivious.find(pointed_tmp) == world_oblivious.end()) {
-    ret.set_pointed(ret.add_rep_world(*(pointed_tmp.get_ptr()), pointed_tmp.get_repetition()));
-    //} else {
-    //Not really sure, what if not directly reachable?
-    //	ret.set_pointed(pointed_tmp);
-    //}
+	if (oblivious_obs_agents.size() > 0) {
+		//ret = (*this);
+		tmp_world_set = get_E_reachable_worlds(oblivious_obs_agents, get_pointed());
+		for (it_agset = agents.begin(); it_agset != agents.end(); it_agset++) {
+			for (it_kwset = tmp_world_set.begin(); it_kwset != tmp_world_set.end(); it_kwset++) {
+				sum_set(world_oblivious, get_B_reachable_worlds(*it_agset, *it_kwset));
+			}
+		}
+		sum_set(world_oblivious, tmp_world_set);
+		ret.set_max_depth(get_max_depth() + 1);
+		ret.set_worlds(world_oblivious);
+	}
 
 
-    return ret;
+
+
+	///\todo Correct if more than one effects
+	fluent_formula effects = get_effects_if_entailed(act.get_effects(), get_pointed());
+
+	/** \todo add multiple fluents sensing
+	 * fluent_set tmp_fs;
+	 * fluent_set sensed_effects;
+	 * fluent tmp_fluent;
+	 *
+	 * for (it_ff = effects.begin(); it_ff != effects.end(); it_ff++) {
+	 *	tmp_fs = *it_ff;
+	 *	for (it_fs = tmp_ff.begin(); it_fs != tmp_ff.end(); it_fs++) {
+	 *		tmp_fluent = *it_fs;
+	 *		if (get_pointed().entails(tmp_fluent)) {
+	 *			sensed_effects.insert(tmp_fluent);
+	 *		} else {
+	 *			sensed_effects.insert(helper::negate_fluent(tmp_fluent));
+	 *		}
+	 *	}
+	 *}*/
+
+	kworld_ptr_set entailing_set = get_C_reachable_worlds(fully_and_partial_ag, get_pointed());
+	entailing_set.insert(get_pointed());
+
+	kworld_ptr_set to_duplicate = entailing_set;
+	kworld_ptr_set not_entailing_set;
+	bool true_sensed = sensing ? get_pointed().entails(effects) : true;
+
+	for (it_kwset = entailing_set.begin(); it_kwset != entailing_set.end();) {
+		if ((!(it_kwset->entails(effects)) && true_sensed) || (it_kwset->entails(effects) && !true_sensed)) {
+			not_entailing_set.insert(*it_kwset);
+			it_kwset = entailing_set.erase(it_kwset);
+		} else {
+			it_kwset++;
+		}
+	}
+
+	//The updated edges
+	kworld_ptr from_old, to_old;
+	kworld_ptr from_new, to_new;
+	agent label;
+	kedge_ptr_set::const_iterator it_kedptr;
+	for (it_kedptr = get_edges().begin(); it_kedptr != get_edges().end(); it_kedptr++) {
+		from_old = it_kedptr->get_from();
+		to_old = it_kedptr->get_to();
+		label = it_kedptr->get_label();
+
+		///\todo problem with false beliefs
+		if (world_oblivious.find(from_old) != world_oblivious.end()) {
+			/**\todo maybe add the check on to_old? if it doesn't exist return error*/
+			ret.add_edge(*(it_kedptr->get_ptr()));
+		}
+
+		if (fully_obs_agents.find(label) != fully_obs_agents.end()) {
+			/**\todo maybe faster to check the entailment directly*/
+			if ((entailing_set.find(from_old) != entailing_set.end() && not_entailing_set.find(to_old) != not_entailing_set.end())
+				|| (entailing_set.find(to_old) != entailing_set.end() && not_entailing_set.find(from_old) != not_entailing_set.end())) {
+				///\todo ottimiza
+				if (partially_obs_agents.size() > 1) {
+					//from_new = ret.add_rep_world(*(from_old.get_ptr()), from_old.get_repetition());
+					to_new = ret.add_rep_world(*(to_old.get_ptr()), to_old.get_repetition());
+					//ret.add_edge(kedge(from_new, from_new, label));
+					ret.add_edge(kedge(to_new, to_new, label));
+				}
+			} else if (entailing_set.find(from_old) != entailing_set.end() && entailing_set.find(to_old) != entailing_set.end()) {
+				///\todo ottimiza
+				if ((to_duplicate.find(from_old) != to_duplicate.end())) {
+					from_new = ret.add_rep_world(*(from_old.get_ptr()), from_old.get_repetition());
+					to_new = ret.add_rep_world(*(to_old.get_ptr()), to_old.get_repetition());
+					/**\todo add also (from,from)?(to,to)?*/
+					ret.add_edge(kedge(from_new, to_new, label));
+				}
+			} else if (not_entailing_set.find(from_old) != not_entailing_set.end() && not_entailing_set.find(to_old) != not_entailing_set.end()) {
+				if (partially_obs_agents.size() > 1) {
+					if ((to_duplicate.find(from_old) != to_duplicate.end())) {
+						from_new = ret.add_rep_world(*(from_old.get_ptr()), from_old.get_repetition());
+						to_new = ret.add_rep_world(*(to_old.get_ptr()), to_old.get_repetition());
+						/**\todo add also (from,from)?(to,to)?*/
+						ret.add_edge(kedge(from_new, to_new, label));
+					}
+				}
+			}
+		} else if (partially_obs_agents.find(label) != partially_obs_agents.end()) {
+			//if (oblivious_obs_agents.size() > 1) {
+			if ((to_duplicate.find(from_old) != to_duplicate.end()) || (to_duplicate.find(to_old) != to_duplicate.end())) {
+				from_new = ret.add_rep_world(*(from_old.get_ptr()), from_old.get_repetition());
+				to_new = ret.add_rep_world(*(to_old.get_ptr()), to_old.get_repetition());
+				ret.add_edge(kedge(from_new, to_new, label));
+			}
+
+		} else {
+			//if (oblivious_obs_agents.size() > 1) {
+			//if (world_oblivious.find(from_old) == world_oblivious.end()) {
+			//\todo to check
+			if ((to_duplicate.find(from_old) != to_duplicate.end()) || (to_duplicate.find(to_old) != to_duplicate.end())) {
+				from_new = ret.add_rep_world(*(from_old.get_ptr()), from_old.get_repetition());
+				ret.add_edge(kedge(from_new, to_old, label));
+			}
+			//ret.add_edge(kedge(from_new, to_old, label));
+			/* Remove edge if not reachable by partial and not entails
+			 * if (partial_size > 1 || entailing_set.find(from_old) != entailing_set.end()) {
+			}
+			if (partial_size > 1 || entailing_set.find(to_old) != entailing_set.end()) {
+			}*/
+		}
+	}
+
+	kworld_ptr pointed_tmp = get_pointed();
+	//if (oblivious_obs_agents.size() > 1) {
+	//if (world_oblivious.find(pointed_tmp) == world_oblivious.end()) {
+	ret.set_pointed(ret.add_rep_world(*(pointed_tmp.get_ptr()), pointed_tmp.get_repetition()));
+	//} else {
+	//Not really sure, what if not directly reachable?
+	//	ret.set_pointed(pointed_tmp);
+	//}
+
+
+	return ret;
 }
 
 kstate kstate::execute_sensing(const action & act) const
@@ -1066,7 +1097,7 @@ kstate kstate::execute_sensing(const action & act) const
 	 * - Link the old state for oblivious.*/
 	/**\bug Wrong because the fluent changes accordingly to the pointed world*/
 
-    return execute_sensing_or_announcement(act, true);
+	return execute_sensing_or_announcement(act, true);
 }
 
 kstate kstate::execute_announcement(const action & act) const
@@ -1080,7 +1111,7 @@ kstate kstate::execute_announcement(const action & act) const
 
 	///Check who execute the action what believes bot what is true in pointed
 
-    return execute_sensing_or_announcement(act, false);
+	return execute_sensing_or_announcement(act, false);
 }
 
 void kstate::print() const
@@ -1219,7 +1250,7 @@ void kstate::print_graphviz(std::ostream & graphviz) const
 					if (it_map->second == it_map_2->second) {
 						if (std::get<0>(it_map->first).compare(std::get<1>(it_map->first)) != 0) {
 							to_print_double[it_map->first] = it_map->second;
-//							edges.erase(it_map_2);
+							it_map_2 = edges.erase(it_map_2);
 							it_map = edges.erase(it_map);
 						}
 					}

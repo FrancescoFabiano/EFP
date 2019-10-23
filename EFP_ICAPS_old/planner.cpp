@@ -1092,7 +1092,7 @@ void Planner::print_statistics() const
 			folder = folder + "findingplan/";
 		}
 		result.open(folder + m_domain_name + ".txt", std::ofstream::out | std::ofstream::app);
-		result << "EFP V 1.0 completed the search in " << m_timer->time(SEARCH_TIMER) << "\n";
+		result << "\nEFP Version 1.0 (on KRIPKE with STRANDARD transition function) completed the search in " << m_timer->time(SEARCH_TIMER) << "\n";
 		result.close();
 	}
 #endif

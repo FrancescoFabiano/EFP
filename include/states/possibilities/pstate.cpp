@@ -27,7 +27,7 @@ void pstate::set_pointed(const pworld_ptr & to_set)
 
 void pstate::set_beliefs(const pworld_transitive_map & to_set)
 {
-    m_beliefs = to_set;
+	m_beliefs = to_set;
 }
 
 void pstate::set_max_depth(unsigned int to_set)
@@ -274,9 +274,9 @@ void pstate::add_edge(pworld_ptr &from, pworld_ptr &to, agent ag)
 		pworld_map::iterator ag_beliefs = from_beliefs->second.find(ag);
 
 		if (ag_beliefs != from_beliefs->second.end()) {
-            ag_beliefs->second.insert(to);
+			ag_beliefs->second.insert(to);
 		} else {
-            from_beliefs->second.insert(pworld_map::value_type(ag,{to}));
+			from_beliefs->second.insert(pworld_map::value_type(ag,{to}));
 		}
 	} else {
 		pworld_map pwm;
@@ -569,29 +569,29 @@ pstate pstate::compute_succ(const action & act) const
 
 void pstate::execute_action(const action &act, pstate &ret, agent_set &fully_obs_agents, agent_set &oblivious_obs_agents) const
 {
-	transition_map calculated;          // A map that links the pworlds of *this* to the corresponding ones of ret
-	transition_map p_obs_calculated;    // A map that links the pworlds of *this* only believed by a partially observant agent to the corresponding ones of ret
+	transition_map calculated; // A map that links the pworlds of *this* to the corresponding ones of ret
+	transition_map p_obs_calculated; // A map that links the pworlds of *this* only believed by a partially observant agent to the corresponding ones of ret
 
 	pworld_ptr new_pointed = execute_action_helper(act, ret, get_pointed(), calculated, p_obs_calculated, fully_obs_agents, oblivious_obs_agents);
-	ret.set_pointed(new_pointed);       // Updating the pointed world
+	ret.set_pointed(new_pointed); // Updating the pointed world
 }
 
 pworld_ptr pstate::execute_action_helper(const action &act, pstate &ret, const pworld_ptr &current_pw, transition_map &calculated, transition_map &p_obs_calculated, agent_set &fully_obs_agents, agent_set &oblivious_obs_agents) const
 {
-    fluent_set world_description = current_pw.get_fluent_set();
+	fluent_set world_description = current_pw.get_fluent_set();
 
 	// Execute the all the effects
 	if (act.get_type() == ONTIC) {
-        fluent_formula effects = get_effects_if_entailed(act.get_effects(), current_pw);
-        fluent_formula::const_iterator it_eff;
+		fluent_formula effects = get_effects_if_entailed(act.get_effects(), current_pw);
+		fluent_formula::const_iterator it_eff;
 
-        for (it_eff = effects.begin(); it_eff != effects.end(); it_eff++) {
-            world_description = helper::ontic_exec(*it_eff, world_description);
-        }
+		for (it_eff = effects.begin(); it_eff != effects.end(); it_eff++) {
+			world_description = helper::ontic_exec(*it_eff, world_description);
+		}
 	}
 
-    pworld_ptr new_pw = ret.add_rep_world(pworld(world_description), current_pw.get_repetition());      // We add the corresponding pworld in ret
-    calculated.insert(transition_map::value_type(current_pw, new_pw));                                  // And we update the calculated map
+	pworld_ptr new_pw = ret.add_rep_world(pworld(world_description), current_pw.get_repetition()); // We add the corresponding pworld in ret
+	calculated.insert(transition_map::value_type(current_pw, new_pw)); // And we update the calculated map
 
 	auto it_pwtm = get_beliefs().find(current_pw);
 
@@ -614,14 +614,14 @@ pworld_ptr pstate::execute_action_helper(const action &act, pstate &ret, const p
 				} else {
 					fluent_formula effects = get_effects_if_entailed(act.get_effects(), *it_pws);
 					bool to_execute = is_oblivious_obs ? true : entails(effects, *it_pws);
-                    // For oblivious agents we copy the pworlds and the beliefs as they are while for fully and partially observant agents we check for the entailment
+					// For oblivious agents we copy the pworlds and the beliefs as they are while for fully and partially observant agents we check for the entailment
 					if (to_execute) {
 						pworld_ptr believed_pw = execute_action_helper(act, ret, *it_pws, calculated, p_obs_calculated, fully_obs_agents, oblivious_obs_agents);
 						ret.add_edge(new_pw, believed_pw, ag); // Otherwise we calculate the new pworld and we update agents' beliefs
 
 						if (is_fully_obs) {
-                            ret.set_max_depth(ret.get_max_depth() + 1 + current_pw.get_repetition());
-                        }
+							ret.set_max_depth(ret.get_max_depth() + 1 + current_pw.get_repetition());
+						}
 					}
 				}
 			}
@@ -680,7 +680,7 @@ pstate pstate::execute_sensing(const action &act) const
 	minus_set(oblivious_obs_agents, partially_obs_agents);
 
 	if (!oblivious_obs_agents.empty()) {
-        ret.set_max_depth(get_max_depth() + 1);
+		ret.set_max_depth(get_max_depth() + 1);
 	}
 
 	execute_action(act, ret, fully_obs_agents, oblivious_obs_agents);
@@ -701,9 +701,9 @@ pstate pstate::execute_announcement(const action &act) const
 	minus_set(oblivious_obs_agents, fully_obs_agents);
 	minus_set(oblivious_obs_agents, partially_obs_agents);
 
-    if (!oblivious_obs_agents.empty()) {
-        ret.set_max_depth(get_max_depth() + 1);
-    }
+	if (!oblivious_obs_agents.empty()) {
+		ret.set_max_depth(get_max_depth() + 1);
+	}
 
 	execute_action(act, ret, fully_obs_agents, oblivious_obs_agents);
 	return ret;
@@ -870,18 +870,16 @@ void pstate::print_graphviz(std::ostream & graphviz) const
 					if (it_map->second == it_map_2->second) {
 						if (std::get<0>(it_map->first).compare(std::get<1>(it_map->first)) != 0) {
 							to_print_double[it_map->first] = it_map->second;
-                            std::cerr << std::get<0>(it_map->first) << " " << std::get<0>(it_map_2->first) << "\n";
-//                            edges.erase(it_map_2);
-                            it_map = edges.erase(it_map);
-                            std::cerr << "\n\nDEBUG: exiting\n\n";
-                        }
+							edges.erase(it_map_2);
+							it_map = edges.erase(it_map);
+						}
 					}
 				}
 			}
 		}
 	}
 
-    std::set<std::string>::const_iterator it_stset;
+	std::set<std::string>::const_iterator it_stset;
 	for (it_map = edges.begin(); it_map != edges.end(); it_map++) {
 		graphviz << "	\"";
 		graphviz << std::get<0>(it_map->first);

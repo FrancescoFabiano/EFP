@@ -36,7 +36,7 @@ OUT_DIR = out
 
 #-----------------------------------PARSE FILES-----------------------------------#
 
-$(BIN_DIR)/efp.out:		$(OBJS)
+$(BIN_DIR)/efp.out: $(OBJS)
 		$(dir_guard)
 		$(CC) $(CFLAGS) $(OBJS) -o $(BIN_DIR)/efp.out -ll
 
@@ -229,8 +229,9 @@ old:
 	cd EFP_ICAPS_old/ && $(MAKE)
 	
 all:
+	$(MAKE) -j
 	$(MAKE) doxygen
-	$(MAKE) old
+	$(MAKE) -j old
 	
 clean:
 	@echo make clean is not supported instead you can use:

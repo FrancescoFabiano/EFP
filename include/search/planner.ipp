@@ -41,8 +41,25 @@ void planner<T>::print_results(std::chrono::duration<double> elapsed_seconds, T 
 			folder = folder + "findingplan/";
 		}
 		system(("mkdir -p " + folder).c_str());
-		result.open(folder + domain::get_instance().get_name() + ".txt");
-		result << "EFP V 2.0 (" << domain::get_instance().get_stype() << " - kopt:" << domain::get_instance().get_k_optimized() << ") completed the search in " << elapsed_seconds.count() << "\n";
+		result.open(folder + domain::get_instance().get_name() + ".txt", std::ofstream::out | std::ofstream::app);
+		result << "EFP Version 2.0 (";
+		switch ( domain::get_instance().get_stype() ) {
+		case KRIPKE:
+			if (domain::get_instance().get_k_optimized()) {
+				result << "on KRIPKE with OPTIMIZED transition function";
+			} else {
+				result << "on KRIPKE with STRANDARD transition function";
+
+			}
+			break;
+		case POSSIBILITIES:
+			result << "on POSS   with STANDARD transition function";
+			break;
+		default:
+			result << "on UNKNOWN with UNKNOWN transition function";
+			break;
+		}
+		result << ") completed the search in " << elapsed_seconds.count() << "\n";
 		result.close();
 	}
 }
@@ -121,7 +138,7 @@ void planner<T>::execute_given_actions(const std::vector<std::string> act_name)
 				//std::cout << "\n\nTrying action " << (*it_acset).get_name() << "\n";
 				if (state.is_executable(*it_acset)) {
 					state = state.compute_succ(*it_acset);
-					//if (domain::get_instance().get_debug()) state.print_graphviz();
+					if (domain::get_instance().get_debug()) state.print_graphviz();
 					if (state.is_goal()) {
 						if (domain::get_instance().get_debug()) state.print_graphviz();
 						std::cout << "\n\nWell Done, Goal found after the execution of ";
