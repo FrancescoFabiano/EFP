@@ -288,44 +288,6 @@ private:
      * @return the effects that are feasible in *this* with \p start as pointed world*.*/
     fluent_formula get_effects_if_entailed(const effects_map & map, const pworld_ptr & start) const;
 
-    /** \brief Function that calculates the effect of the \ref action "act" to the \ref pworld "world"
-     *
-     * @param[in] act: the \ref ONTIC action to be applied on *this*.
-     * @param[in] world: the world where we are currently executing the \ref action.
-     * @param[in] it_eff: an iterator for fluent formulas.*/
-
-    void execute_ontic_effects(const action &act, pworld_ptr &world) const;
-    /** \brief Function that explores the unvisited \ref pworld encountered inside the agents' beliefs.
-     *
-     * We visit the worlds believed to be true by some fully observant \ref agent and we push them into "to_visit" if the transition function were not already applied to them.
-     * We also keep track of the agents' belief to be updated later (\ref backtrack_remaining_beliefs).
-     *
-     * @param[in] act: the \ref action to be applied on *this*.
-     * @param[in] ret: the \ref pstate resulting from the \ref action.
-     * @param[in] world: the world being currently calculated.
-     * @param[in] current_pmap: the \ref pworld_map of currently visited \ref pworld.
-     * @param[in] to_visit: the \ref pworld_queue of \ref pworld yet to be considered.
-     * @param[in] calculated: a map that keeps track of the results of the transition function.
-     * @param[in] to_backtrack: a vector of tuples (pw1, pw2, ag) that represents the agents' beliefs to be updated later.
-     * @param[in] p_obs_beliefs: represents the beliefs of the partially observant agents (in \ref SENSING/\ref ANNOUNCEMENT actions) about the \ref pworld that results from the negated \ref action.
-     * @param[in] fully_obs_agents: the fully observant \ref agent set.
-     * @param[in] action_type: the type of the action being performed.*/
-    void explore_unvisited_pworlds(const action &act, pstate &ret, pworld_ptr &world, pworld_map &current_pmap, pworld_queue &to_visit, transition_map &calculated, beliefs_vector &to_backtrack, beliefs_vector &p_obs_beliefs, agent_set &fully_obs_agents, agent_set &oblivious_obs_agents) const;
-    /** \brief Function that updates the agents' beliefs recorded into "to_backtrack".
-     *
-     * @param[in] ret: the \ref pstate resulting from the \ref action.
-     * @param[in] calculated: a map that links the \ref pworld of *this* to their counterpart w.r.t. the transition function.
-     * @param[in] to_backtrack: a vector of tuples (pw1, pw2, ag) that represent that in \ref pworld pw1 the \agent ag believes that the \ref \pworld pw2 is possible.
-     * @param[in] p_obs_beliefs: represents the beliefs of the partially observant agents (in \ref SENSING/\ref ANNOUNCEMENT actions) about the \ref pworld that results from the negated \ref action.*/
-    void backtrack_remaining_beliefs(pstate &ret, transition_map &calculated, beliefs_vector &to_backtrack, beliefs_vector &p_obs_beliefs) const;
-
-    /** \brief Function that applies the transition function for the \ref action effect on *this* implementing the possibilities semantic.
-     *
-     * @param act[in]: the \ref action to be applied on *this*.
-     * @param ret[in]: the \ref pstate resulting from the \ref action.
-     * @param fully_obs_agents[in]: the fully observant \ref agent set.
-     * @param oblivious_obs_agents[in]: the oblivious \ref agent set.*/
-    void execute_action_old(const action &act, pstate &ret, agent_set &fully_obs_agents, agent_set &oblivious_obs_agents) const;
     /** \brief Function that applies the transition function for the \ref action effect on *this* implementing the possibilities semantic.
      *
      * @param act[in]: the \ref action to be applied on *this*.
@@ -338,13 +300,12 @@ private:
      * @param act[in]: the \ref action to be applied on *this*.
      * @param ret[in]: the \ref pstate resulting from the \ref action.
      * @param current_pw[in]: the world being currently calculated.
-     * @param offset[in]: the offset used in the creation of the new \red pworld.
      * @param calculated[in]: a map that keeps track of the results of the transition function.
      * @param p_obs_calculated[in]: a map that keeps track of the results of the transition function w.r.t. the beliefs of partially observant \ref agent.
      * @param fully_obs_agents[in]: the fully observant \ref agent set.
      * @param oblivious_obs_agents[in]: the oblivious \ref agent set.
      * @return the \ref pworld resulting from the application of the transition function on "current_pw".*/
-    pworld_ptr execute_action_helper(const action &act, pstate &ret, const pworld_ptr &current_pw, int offset, transition_map &calculated, transition_map &p_obs_calculated, agent_set &fully_obs_agents, agent_set &oblivious_obs_agents) const;
+    pworld_ptr execute_action_helper(const action &act, pstate &ret, const pworld_ptr &current_pw, transition_map &calculated, transition_map &p_obs_calculated, agent_set &fully_obs_agents, agent_set &oblivious_obs_agents) const;
     /** \brief Function that applies the transition function for a \ref ONTIC \ref action effect on *this* implementing the possibilities semantic.
      *
      * The transition function is applied accordingly to mA^rho. Check the paper for more information.
@@ -383,6 +344,10 @@ public:
      *
      * @param[in] to_set: the \ref pworld_ptr to assign to \ref m_pointed.*/
     void set_pointed(const pworld_ptr & to_set);
+    /** \brief Setter of the field \ref m_beliefs.
+     *
+     * @param[in] to_set: the \ref pworld_transitive_map to assign to \ref m_beliefs.*/
+    void set_beliefs(const pworld_transitive_map & to_set);
     /** \brief Setter of the field \ref m_max_depth.
      *
      * @param[in] to_set: the unsigned int to assign to \ref m_max_depth.*/

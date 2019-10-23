@@ -1219,7 +1219,7 @@ void kstate::print_graphviz(std::ostream & graphviz) const
 					if (it_map->second == it_map_2->second) {
 						if (std::get<0>(it_map->first).compare(std::get<1>(it_map->first)) != 0) {
 							to_print_double[it_map->first] = it_map->second;
-							edges.erase(it_map_2);
+//							edges.erase(it_map_2);
 							it_map = edges.erase(it_map);
 						}
 					}
