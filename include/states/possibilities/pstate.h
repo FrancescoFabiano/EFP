@@ -272,7 +272,12 @@ private:
      * @param[in] from: the \ref pworld in which \ref agent "ag" currently is
      * @param[in] to: the \ref pworld believed from \ref agent "ag"
      * @param[in] ag: the \ref agent.*/
-    void add_edge(pworld_ptr & from, pworld_ptr & to, agent ag);
+    void add_edge(const pworld_ptr & from, const pworld_ptr & to, agent ag);
+    /** \brief Function that adds the given beliefs to the \ref pworld "world".
+     *
+     * @param[in] world: the \ref pworld.
+     * @param[in] beliefs: a \ref pworld_map containing the beliefs.*/
+    void add_pworld_beliefs(const pworld_ptr & world, const pworld_map & beliefs);
 
     /** \brief Function that return the set of \ref agent that entails the obs condition.
      *
@@ -306,6 +311,12 @@ private:
      * @param oblivious_obs_agents[in]: the oblivious \ref agent set.
      * @return the \ref pworld resulting from the application of the transition function on "current_pw".*/
     pworld_ptr execute_action_helper(const action &act, pstate &ret, const pworld_ptr &current_pw, transition_map &calculated, transition_map &p_obs_calculated, agent_set &fully_obs_agents, agent_set &oblivious_obs_agents) const;
+    /** \brief Function that copies the \ref pworld(s) and the beliefs of the oblivious agents in the new \ref pstate.
+     *
+     * @param[in] ret: the new \ref pstate.
+     * @param[in] oblivious_obs_agents: the oblivious \ref agent(s).*/
+    void maintain_oblivious_believed_pworlds(pstate &ret, const agent_set &oblivious_obs_agents) const;
+
     /** \brief Function that applies the transition function for a \ref ONTIC \ref action effect on *this* implementing the possibilities semantic.
      *
      * The transition function is applied accordingly to mA^rho. Check the paper for more information.
