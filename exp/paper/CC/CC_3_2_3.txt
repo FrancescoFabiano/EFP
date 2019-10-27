@@ -184,4 +184,4 @@ initially C([a,b,c], -at_c_3);
 
 goal B(a,at_b1_1);
 goal B(c,at_b1_1);
-goal B(b,at_b2_3);
+%goal B(b,at_b2_3);

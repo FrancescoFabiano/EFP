@@ -683,12 +683,12 @@ pworld_ptr pstate::execute_sensing_announcement_helper(const action &act, pstate
 
                     if (calculated_pworld != calculated.end()) {                        // If we already calculated the transition function for this pworld
                         if (is_partially_obs ||                                         // If "ag" is PARTIALLY OBS, we always add an edge
-                           (is_fully_obs && (ent || negated_execution))) {              // If "ag" is FULLY OBS, we add an edge if he believes that "calculated" may be true (i.e., when "ent" holds) or
+                           (is_fully_obs && (ent != negated_execution))) {              // If "ag" is FULLY OBS, we add an edge if he believes that "calculated" may be true (i.e., when "ent" holds) XOR
                             ret.add_edge(new_pw, calculated_pworld->second, ag);        // if a PARTIALLY OBS agent believes that "ag" thinks that "calculated" may be true (i.e., when "negated_execution" holds)
                         }
                     } else {                                                            // If we did not already calculate the transition function
                         if (ent) {                                                      // We calculate when if the pworld entails the action effects...
-                            pworld_ptr believed_pw = execute_sensing_announcement_helper(act, ret, *it_pws, calculated, partially_obs_agents, oblivious_obs_agents, negated_execution);
+                            pworld_ptr believed_pw = execute_sensing_announcement_helper(act, ret, *it_pws, calculated, partially_obs_agents, oblivious_obs_agents, false);
                             ret.add_edge(new_pw, believed_pw, ag);
                         }
 
