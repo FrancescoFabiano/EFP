@@ -9,7 +9,8 @@ OBJS	=	$(BUILD_DIR)/bison.o $(BUILD_DIR)/lex.o $(BUILD_DIR)/main.o \
 			$(BUILD_DIR)/pworld.o $(BUILD_DIR)/pstate.o \
 			$(BUILD_DIR)/reader.o
 CC	= g++
-CFLAGS	= -g -Wall -ansi -std=c++14
+CFLAGS	= -g -Wall -ansi -Wfatal-errors -std=c++14 
+MAKEFLAGS += "-j -l $(shell grep -c ^processor /proc/cpuinfo)"
 
 dir_guard = @mkdir -p $(@D)
 BUILD_DIR = build
@@ -229,9 +230,9 @@ old:
 	cd EFP_ICAPS_old/ && $(MAKE)
 	
 all:
-	$(MAKE) -j
+	$(MAKE) 
 	$(MAKE) doxygen
-	$(MAKE) -j old
+	$(MAKE) old
 	
 clean:
 	@echo make clean is not supported instead you can use:

@@ -45,4 +45,5 @@ Doxygen/Docs/
 out/
 
 #Old planner
-EFP_ICAPS_old/
+EFP_ICAPS_old/cpa+
+EFP_ICAPS_old/bulit_date
