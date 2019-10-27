@@ -4,10 +4,7 @@
 for file in "$@"/*;
 do
    if [ "${file##*.}" = "dot" ]; then
-      #dot "$file" -Tpng -o "${file%.*}".png
-	  dot -Teps "$file" >> "${file%.*}".eps
-	  epstopdf "${file%.*}".eps
-	  rm "${file%.*}".eps
+	  dot -Tpdf "$file" >> "${file%.*}".pdf
 	  rm "${file%.*}".dot
    fi
 done

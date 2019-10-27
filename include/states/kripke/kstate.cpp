@@ -1025,7 +1025,7 @@ kstate kstate::execute_sensing_or_announcement(const action &act, bool sensing) 
 			if ((entailing_set.find(from_old) != entailing_set.end() && not_entailing_set.find(to_old) != not_entailing_set.end())
 				|| (entailing_set.find(to_old) != entailing_set.end() && not_entailing_set.find(from_old) != not_entailing_set.end())) {
 				///\todo ottimiza
-				if (partially_obs_agents.size() > 1) {
+				if (partially_obs_agents.size() > 0) {
 					//from_new = ret.add_rep_world(*(from_old.get_ptr()), from_old.get_repetition());
 					to_new = ret.add_rep_world(*(to_old.get_ptr()), to_old.get_repetition());
 					//ret.add_edge(kedge(from_new, from_new, label));
@@ -1040,7 +1040,7 @@ kstate kstate::execute_sensing_or_announcement(const action &act, bool sensing) 
 					ret.add_edge(kedge(from_new, to_new, label));
 				}
 			} else if (not_entailing_set.find(from_old) != not_entailing_set.end() && not_entailing_set.find(to_old) != not_entailing_set.end()) {
-				if (partially_obs_agents.size() > 1) {
+				if (partially_obs_agents.size() > 0) {
 					if ((to_duplicate.find(from_old) != to_duplicate.end())) {
 						from_new = ret.add_rep_world(*(from_old.get_ptr()), from_old.get_repetition());
 						to_new = ret.add_rep_world(*(to_old.get_ptr()), to_old.get_repetition());

@@ -122,7 +122,7 @@ goal C([a,b], at_b2_3);
 goal B(a,at_a_2);
 
 %Eight Actions
-%goal B(b,at_a_2);
+goal B(b,at_a_2);
 
 %Nine Actions (Comment Seven)
 %goal B(a,at_a_3);
@@ -131,4 +131,6 @@ goal B(a,at_a_2);
 %goal B(a,at_a_3);
 
 %Two Actions (The basic one as last otherwise syntax error)
-goal B(a, at_b1_1);
+%goal B(a, at_b_1);
+%goal B(b, at_a_3);
+%goal B(a, at_b1_1);
