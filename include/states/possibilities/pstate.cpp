@@ -201,7 +201,7 @@ bool pstate::get_B_reachable_worlds(agent ag, pworld_ptr world, pworld_ptr_set& 
 		auto pw_set = pw_map->second.find(ag);
 
 		if (pw_set != pw_map->second.end()) {
-			ret = pw_set->second;
+		    sum_set(ret, pw_set->second);
 			return true;
 		}
 	}
