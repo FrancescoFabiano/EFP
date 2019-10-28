@@ -187,7 +187,7 @@ private:
      *
      * 
      * \todo self-loop?*/
-    bool get_E_reachable_worlds(const agent_set &ags, kworld_ptr world, kworld_ptr_set& reached) const;
+    bool get_E_reachable_worlds(const agent_set &ags, kworld_ptr_set world, kworld_ptr_set& reached) const;
 
     /** \brief Function that returns all the reachable \ref kworld (in the *Common Knowledge* sense) given a \ref agent and the staring \ref kworld.
      * 

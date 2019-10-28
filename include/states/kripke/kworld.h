@@ -261,10 +261,10 @@ public:
      * @return the \ref kworld_id that is the id of the \ref kworld pointed by \ref m_ptr + \ref m_repetition.*/
     kworld_id get_id() const;
 
-    
-            /** \brief Function that check the entailment of a single \ref fluent in \ref m_ptr.
+
+    /** \brief Function that check the entailment of a single \ref fluent in \ref m_ptr.
      * 
-    * 
+     * 
      * @param[in] to_check: the \ref fluent that has to be checked if entailed by \ref m_ptr (if is present in \ref m_ptr).
      *
      * @return true: \p to_check is entailed;
@@ -286,7 +286,7 @@ public:
      * @return true: \p to_check is entailed;
      * @return false: \p -to_check is entailed.*/
     bool entails(const fluent_formula & to_check) const;
-    
+
     /**\brief The operator =.
      *
      * This operator assign the parameter without destroying \p to_copy.
@@ -304,9 +304,9 @@ public:
      * 
      * @return true: if *this* is smaller than \p to_compare.
      * @return false: otherwise.*/
-    
+
     bool operator<(const kworld_ptr & to_compare) const;
-      /**\brief The operator ==.
+    /**\brief The operator ==.
      * 
      * @param[in] to_compare: the \ref kworld_ptr to confront with *this*.
      * @return true: if *this* is equal to \p to_compare.

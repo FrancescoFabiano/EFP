@@ -53,7 +53,7 @@ void planner<T>::print_results(std::chrono::duration<double> elapsed_seconds, T 
 			}
 			break;
 		case POSSIBILITIES:
-			result << "on POSS   with STANDARD transition function";
+			result << "on POSS with STANDARD transition function";
 			break;
 		default:
 			result << "on UNKNOWN with UNKNOWN transition function";

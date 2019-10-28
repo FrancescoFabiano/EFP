@@ -43,6 +43,7 @@ Doxygen/Docs/
 
 # Out files
 out/
+*.tmp
 
 #Old planner
 EFP_ICAPS_old/cpa+

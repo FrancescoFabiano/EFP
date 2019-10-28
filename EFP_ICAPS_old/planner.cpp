@@ -11,7 +11,7 @@
 
 #include <fstream>
 
-/*************************************************************************
+/********----> PLAN is:----> PLAN is:*****************************************************************
  * Planner Implementation
  *************************************************************************/
 // Constructor & destructor
@@ -242,9 +242,13 @@ bool Planner::main()
 	if (sol != nullptr) {
 		vector<string> solution = sol->get_path();
 		vector<string>::iterator isol;
-		cout << "----> PLAN is: " << endl;
-		for (isol = solution.begin(); isol != solution.end(); isol++) {
-			cout << *isol << " ";
+		std::cout << "Plan Length: " << (solution.size() - 1);
+		std::cout << "\n\nExecuted actions: ";
+		for (isol = std::next(solution.begin(), 1); isol != solution.end(); isol++) {
+			cout << *isol;
+			if ((isol + 1) != solution.end()) {
+				std::cout << ", ";
+			}
 		}
 		cout << endl;
 		//sol->get_result();
@@ -1092,7 +1096,7 @@ void Planner::print_statistics() const
 			folder = folder + "findingplan/";
 		}
 		result.open(folder + m_domain_name + ".txt", std::ofstream::out | std::ofstream::app);
-		result << "\nEFP Version 1.0 (on KRIPKE with STRANDARD transition function) completed the search in " << m_timer->time(SEARCH_TIMER) << "\n";
+		result << "EFP Version 1.0 (on KRIPKE with STRANDARD transition function) completed the search in " << m_timer->time(SEARCH_TIMER) << "\n";
 		result.close();
 	}
 #endif

@@ -200,8 +200,8 @@ bool kstate::get_B_reachable_worlds(agent ag, kworld_ptr world, kworld_ptr_set& 
 	for (it_kedge = m_edges.begin(); it_kedge != m_edges.end(); it_kedge++) {
 		if (((*it_kedge).get_from() == world) && ((*it_kedge).get_label() == ag)) {
 			//We use the pair of insert, if we add a new world (true in the set::insert) then is not a fixed point
-			if (std::get<1>(ret.insert((*it_kedge).get_to()))) {
-
+			//if (std::get<1>(ret.insert((*it_kedge).get_to()))) {
+			if ((ret.insert((*it_kedge).get_to())).second) {
 				is_fixed_point = false;
 			}
 		}
@@ -212,19 +212,24 @@ bool kstate::get_B_reachable_worlds(agent ag, kworld_ptr world, kworld_ptr_set& 
 const kworld_ptr_set kstate::get_E_reachable_worlds(const agent_set & ags, kworld_ptr world) const
 {
 	kworld_ptr_set ret;
-	get_E_reachable_worlds(ags, world, ret);
+	kworld_ptr_set worlds;
+	worlds.insert(world);
+	get_E_reachable_worlds(ags, worlds, ret);
 
 	return ret;
 }
 
-bool kstate::get_E_reachable_worlds(const agent_set & ags, kworld_ptr world, kworld_ptr_set& ret) const
+bool kstate::get_E_reachable_worlds(const agent_set & ags, kworld_ptr_set worlds, kworld_ptr_set & ret) const
 {
 	bool is_fixed_point = true;
+	kworld_ptr_set::const_iterator it_kwptr;
 	agent_set::const_iterator it_agset;
-	for (it_agset = ags.begin(); it_agset != ags.end(); it_agset++) {
-		if (!get_B_reachable_worlds(*it_agset, world, ret)) {
-
-			is_fixed_point = false;
+	sum_set(worlds, ret);
+	for (it_kwptr = worlds.begin(); it_kwptr != worlds.end(); it_kwptr++) {
+		for (it_agset = ags.begin(); it_agset != ags.end(); it_agset++) {
+			if (!get_B_reachable_worlds(*it_agset, *it_kwptr, ret)) {
+				is_fixed_point = false;
+			}
 		}
 	}
 	return is_fixed_point;
@@ -234,9 +239,11 @@ const kworld_ptr_set kstate::get_C_reachable_worlds(const agent_set & ags, kworl
 {
 	//Use of fixed point to stop.
 	bool is_fixed_point = false;
+	kworld_ptr_set worlds;
+	worlds.insert(world);
 	kworld_ptr_set ret;
 	while (!is_fixed_point) {
-		is_fixed_point = get_E_reachable_worlds(ags, world, ret);
+		is_fixed_point = get_E_reachable_worlds(ags, worlds, ret);
 	}
 	return ret;
 }
@@ -681,7 +688,7 @@ void kstate::add_ste_worlds(kstate &ret, const kworld_ptr &kw, kstate_map &kmap,
 
 }
 
-kstate kstate::execute_action_um(const action& act, const event_type_set& events, const event_type_relation& fully_obs_r, const event_type_relation& partially_obs_r, const event_type_relation& oblivious_obs_r) const
+kstate kstate::execute_action_um(const action& act, const event_type_set& events, const event_type_relation& fully_obs_r, const event_type_relation& partially_obs_r, const event_type_relation & oblivious_obs_r) const
 {
 	//The execution are all the same if we consider that false beliefs don't count.
 	kstate ret;
@@ -760,7 +767,7 @@ kstate kstate::execute_action_um(const action& act, const event_type_set& events
 	return ret;
 }
 
-kstate kstate::execute_ontic_um(const action& act) const
+kstate kstate::execute_ontic_um(const action & act) const
 {
 	event_type_set events = {SIGMA, EPSILON};
 	event_type_relation fully_obs_r = {
@@ -776,7 +783,7 @@ kstate kstate::execute_ontic_um(const action& act) const
 	return execute_action_um(act, events, fully_obs_r, partially_obs_r, oblivious_obs_r);
 }
 
-kstate kstate::execute_sensing_um(const action& act) const
+kstate kstate::execute_sensing_um(const action & act) const
 {
 	event_type_set events = {SIGMA, TAU, EPSILON};
 	event_type_relation fully_obs_r = {
@@ -800,7 +807,7 @@ kstate kstate::execute_sensing_um(const action& act) const
 	return execute_action_um(act, events, fully_obs_r, partially_obs_r, oblivious_obs_r);
 }
 
-kstate kstate::execute_announcement_um(const action &act) const
+kstate kstate::execute_announcement_um(const action & act) const
 {
 	event_type_set events = {SIGMA, TAU, EPSILON};
 	event_type_relation fully_obs_r = {
@@ -824,7 +831,7 @@ kstate kstate::execute_announcement_um(const action &act) const
 	return execute_action_um(act, events, fully_obs_r, partially_obs_r, oblivious_obs_r);
 }
 
-kstate kstate::execute_ontic(const action& act) const
+kstate kstate::execute_ontic(const action & act) const
 {
 	/** \bug What happen if ontic removes ignorance?
 	 * for example:
@@ -928,6 +935,7 @@ kstate kstate::execute_ontic(const action& act) const
 
 kstate kstate::execute_sensing_or_announcement(const action &act, bool sensing) const
 {
+
 	//The execution are all the same if we consider that false beliefs don't count.
 	kstate ret;
 
@@ -966,8 +974,6 @@ kstate kstate::execute_sensing_or_announcement(const action &act, bool sensing) 
 	}
 
 
-
-
 	///\todo Correct if more than one effects
 	fluent_formula effects = get_effects_if_entailed(act.get_effects(), get_pointed());
 
@@ -995,6 +1001,18 @@ kstate kstate::execute_sensing_or_announcement(const action &act, bool sensing) 
 	kworld_ptr_set not_entailing_set;
 	bool true_sensed = sensing ? get_pointed().entails(effects) : true;
 
+	//	if (act.get_name().compare("tell_a_b2_3") == 0) {
+	//		std::cout << "DEBUG: Effects: ";
+	//		printer::get_instance().print_list(effects);
+	//		std::cout << " Is ";
+	//		if (true_sensed) {
+	//			std::cout << "True";
+	//		} else {
+	//			std::cout << "False";
+	//		}
+	//		std::cout << std::endl;
+	//	}
+
 	for (it_kwset = entailing_set.begin(); it_kwset != entailing_set.end();) {
 		if ((!(it_kwset->entails(effects)) && true_sensed) || (it_kwset->entails(effects) && !true_sensed)) {
 			not_entailing_set.insert(*it_kwset);
@@ -1004,23 +1022,66 @@ kstate kstate::execute_sensing_or_announcement(const action &act, bool sensing) 
 		}
 	}
 
+	//	for (it_kwset = entailing_set.begin(); it_kwset != entailing_set.end(); it_kwset++) {
+	//		if (act.get_name().compare("tell_a_b2_3") == 0) {
+	//
+	//			std::cout << "\nKWORLD - ENT (";
+	//			printer::get_instance().print_list(it_kwset->get_fluent_set());
+	//			std::cout << ")";
+	//		}
+	//	}
+	//
+	//	for (it_kwset = not_entailing_set.begin(); it_kwset != not_entailing_set.end(); it_kwset++) {
+	//		if (act.get_name().compare("tell_a_b2_3") == 0) {
+	//
+	//			std::cout << "\nKWORLD - NOT ENT (";
+	//			printer::get_instance().print_list(it_kwset->get_fluent_set());
+	//			std::cout << ")";
+	//		}
+	//	}
+
 	//The updated edges
 	kworld_ptr from_old, to_old;
 	kworld_ptr from_new, to_new;
 	agent label;
 	kedge_ptr_set::const_iterator it_kedptr;
 	for (it_kedptr = get_edges().begin(); it_kedptr != get_edges().end(); it_kedptr++) {
+
+
 		from_old = it_kedptr->get_from();
 		to_old = it_kedptr->get_to();
 		label = it_kedptr->get_label();
+
+		//		if (act.get_name().compare("tell_a_b2_3") == 0) {
+		//
+		//			if (entailing_set.find(from_old) != entailing_set.end() && entailing_set.find(to_old) != entailing_set.end()) {
+		//				std::cout << "\n(";
+		//				printer::get_instance().print_list(it_kedptr->get_from().get_fluent_set());
+		//				std::cout << "," << it_kedptr->get_from().get_repetition();
+		//				std::cout << ") - (";
+		//				printer::get_instance().print_list(it_kedptr->get_to().get_fluent_set());
+		//				std::cout << "," << it_kedptr->get_to().get_repetition();
+		//				std::cout << ") ag:" << domain::get_instance().get_grounder().deground_agent(it_kedptr->get_label());
+		//				//std::cout << std::endl;
+		//			}
+		//		}
+
 
 		///\todo problem with false beliefs
 		if (world_oblivious.find(from_old) != world_oblivious.end()) {
 			/**\todo maybe add the check on to_old? if it doesn't exist return error*/
 			ret.add_edge(*(it_kedptr->get_ptr()));
 		}
-
 		if (fully_obs_agents.find(label) != fully_obs_agents.end()) {
+
+			//			if (act.get_name().compare("tell_a_b2_3") == 0) {
+			//				if (entailing_set.find(from_old) != entailing_set.end()) {
+			//					if (entailing_set.find(to_old) != entailing_set.end()) {
+			//						std::cout << " F-";
+			//					}
+			//				}
+			//			}
+
 			/**\todo maybe faster to check the entailment directly*/
 			if ((entailing_set.find(from_old) != entailing_set.end() && not_entailing_set.find(to_old) != not_entailing_set.end())
 				|| (entailing_set.find(to_old) != entailing_set.end() && not_entailing_set.find(from_old) != not_entailing_set.end())) {
