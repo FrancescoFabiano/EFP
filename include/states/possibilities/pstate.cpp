@@ -32,7 +32,7 @@ void pstate::set_beliefs(const pworld_transitive_map & to_set)
 
 void pstate::set_max_depth(unsigned int to_set)
 {
-	m_max_depth = to_set;
+    if (m_max_depth < to_set) m_max_depth = to_set;
 }
 
 const pworld_ptr_set & pstate::get_worlds() const

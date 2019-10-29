@@ -32,7 +32,7 @@ void kstate::set_pointed(const kworld_ptr & to_set)
 
 void kstate::set_max_depth(unsigned int to_set)
 {
-	m_max_depth = to_set;
+	if (m_max_depth < to_set) m_max_depth = to_set;
 }
 
 const kworld_ptr_set & kstate::get_worlds() const
@@ -667,7 +667,9 @@ void kstate::add_ste_worlds(kstate &ret, const kworld_ptr &kw, kstate_map &kmap,
 	///Inside this function is also updated the fluent_set of the worlds linked to ontic and fully observant
 	///(Updating the interpretations of the worlds)
 	bool tmp = false;
+    int offset = kw.get_repetition() + e;
 	fluent_set world_description = kw.get_fluent_set();
+
 	if (e == SIGMA) {
 		if (act.get_type() == ONTIC) {
 			fluent_formula::const_iterator it_eff;
@@ -676,16 +678,22 @@ void kstate::add_ste_worlds(kstate &ret, const kworld_ptr &kw, kstate_map &kmap,
 				for (it_eff = effects.begin(); it_eff != effects.end(); it_eff++) {
 					world_description = helper::ontic_exec(*it_eff, world_description);
 				}
+
+				if (world_description != kw.get_fluent_set()) {
+				    ret.set_max_depth(ret.get_max_depth() + 1);
+				    offset += ret.get_max_depth();
+				}
 			}
 		}
-
-		if (kw == get_pointed()) ret.set_pointed(ret.add_rep_world(kworld(world_description), kw.get_repetition() + e, tmp));
 	}
 
 	kmap.insert(kstate_map::value_type(
-		std::make_pair(kw, e), // sigma ? SIGMA : TAU
-		ret.add_rep_world(kworld(world_description), kw.get_repetition() + e, tmp)));
+        {kw, e},
+		ret.add_rep_world(kworld(world_description), offset, tmp)));
 
+	if (e == SIGMA && kw == get_pointed()) {
+	    ret.set_pointed(kmap[{kw, SIGMA}]);
+	}
 }
 
 kstate kstate::execute_action_um(const action& act, const event_type_set& events, const event_type_relation& fully_obs_r, const event_type_relation& partially_obs_r, const event_type_relation & oblivious_obs_r) const
@@ -704,6 +712,12 @@ kstate kstate::execute_action_um(const action& act, const event_type_set& events
 	minus_set(oblivious_obs_agents, partially_obs_agents);
 
 	kstate_map kmap;
+
+	if (!oblivious_obs_agents.empty()) {
+	    ret.set_max_depth(get_max_depth() + 1);
+	} else {
+        ret.set_max_depth(get_max_depth());
+	}
 
 	kworld_ptr_set::const_iterator it_kwset1;
 	// Creating the new worlds for the kstate ret
