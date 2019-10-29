@@ -185,7 +185,7 @@ private:
      *
      * 
      * \todo self-loop?*/
-    bool get_E_reachable_worlds(const agent_set &ags, pworld_ptr world, pworld_ptr_set& reached) const;
+    bool get_E_reachable_worlds(const agent_set &ags, pworld_ptr_set world, pworld_ptr_set& reached) const;
 
     /** \brief Function that returns all the reachable \ref pworld (in the *Common Knowledge* sense) given a \ref agent and the staring \ref pworld.
      * 
@@ -374,8 +374,8 @@ public:
      * @return: the value of \ref m_pointed.*/
     const pworld_ptr & get_pointed() const;
     /** \brief Getter of the field \ref m_beliefs.
-    *
-    * @return: the value of \ref m_beliefs.*/
+     *
+     * @return: the value of \ref m_beliefs.*/
     const pworld_transitive_map & get_beliefs() const;
     /** \brief Getter of the field \ref m_max_depth.
      *
@@ -507,10 +507,10 @@ public:
 
     /** \brief Function that prints the information of *this*.*/
     void print() const;
-    
-        /** \brief Function that prints the information of *this* in a Graphviz file.
-         *
-         * @param[in] graphviz: the ostream where to print the info of *this*.*/
+
+    /** \brief Function that prints the information of *this* in a Graphviz file.
+     *
+     * @param[in] graphviz: the ostream where to print the info of *this*.*/
     void print_graphviz(std::ostream& graphviz) const;
 
 
@@ -528,8 +528,8 @@ public:
      * @param[in] factor2: the set to remove from \p to_modify.*/
     template <class T>
     void minus_set(std::set<T> & to_modify, const std::set<T> & factor2) const;
-    
-    
+
+
     /*fluent_formula get_sensing_effects_if_entailed(const effects_map & map, const pworld_ptr & start) const;*/
 };
 
