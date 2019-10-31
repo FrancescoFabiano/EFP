@@ -517,6 +517,12 @@ bool belief_formula::operator=(const belief_formula & to_copy)
 		{
 			break;
 		}
+			//REMOVE EVERY INPAREN
+		case BF_INPAREN:
+		{
+			*this = to_copy.get_bf1();
+			break;
+		}
 		case BF_FAIL:
 		default:
 		{

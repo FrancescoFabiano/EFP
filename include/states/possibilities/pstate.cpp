@@ -32,7 +32,7 @@ void pstate::set_beliefs(const pworld_transitive_map & to_set)
 
 void pstate::set_max_depth(unsigned int to_set)
 {
-    if (m_max_depth < to_set) m_max_depth = to_set;
+	if (m_max_depth < to_set) m_max_depth = to_set;
 }
 
 const pworld_ptr_set & pstate::get_worlds() const
@@ -482,7 +482,7 @@ void pstate::remove_initial_pedge_bf(const belief_formula & to_check)
 
 					//fluent_formula known_ff;
 					auto known_ff_ptr = std::make_shared<fluent_formula>();
-					helper::check_Bff_Bnotff(tmp.get_bf1(), tmp.get_bf2(), known_ff_ptr);
+					helper::check_Bff_notBff(tmp.get_bf1(), tmp.get_bf2(), known_ff_ptr);
 					if (known_ff_ptr != nullptr) {
 						//printer::get_instance().print_list(*known_ff_ptr);
 						remove_initial_pedge(*known_ff_ptr, tmp.get_bf2().get_agent());
@@ -949,7 +949,7 @@ void pstate::print_graphviz(std::ostream & graphviz) const
 					if (it_map->second == it_map_2->second) {
 						if (std::get<0>(it_map->first).compare(std::get<1>(it_map->first)) != 0) {
 							to_print_double[it_map->first] = it_map->second;
-							std::cerr << std::get<0>(it_map->first) << " " << std::get<0>(it_map_2->first) << "\n";
+							//std::cerr << std::get<0>(it_map->first) << " " << std::get<0>(it_map_2->first) << "\n";
 							it_map_2 = edges.erase(it_map_2);
 							it_map = edges.erase(it_map);
 						}

@@ -40,6 +40,7 @@ bool initially::check_restriction(const belief_formula & bf) //Apply the restric
 	{
 		switch ( bf.get_formula_type() ) {
 			//To admit initially [S5_ok AND S5_ok AND ...]  (Also taken care of in the add_initial_condition)
+
 		case PROPOSITIONAL_FORMULA:
 		{
 			if (bf.get_operator() != BF_AND) {
@@ -87,16 +88,17 @@ bool initially::check_restriction(const belief_formula & bf) //Apply the restric
 				if (tmp.get_operator() == BF_OR) {
 
 					//Check if **x1** and **x2** are B(i,phi) and B(i,-phi)
-					ret = helper::check_Bff_Bnotff(tmp.get_bf1(), tmp.get_bf2(), nullptr);
+					ret = helper::check_Bff_notBff(tmp.get_bf1(), tmp.get_bf2(), nullptr);
 				} else if (tmp.get_operator() == BF_AND) { //C(-B(i,*phi*) \ref BF_AND -B(i,-*phi*))
 					//Check if C ( x1 **AND** x2 )
 					//Check if **x1** and **x2** are **NOT**(...)
 					belief_formula tmp_nested1 = tmp.get_bf1();
 					belief_formula tmp_nested2 = tmp.get_bf2();
 					if (tmp_nested1.get_formula_type() == PROPOSITIONAL_FORMULA && tmp_nested2.get_formula_type() == PROPOSITIONAL_FORMULA) {
+
 						if (tmp_nested1.get_operator() == BF_NOT && tmp_nested2.get_operator() == BF_NOT) {
 							//Check tmp_nested1 and tmp_nested2 are B(i,phi) and B(i,-phi)
-							ret = helper::check_Bff_Bnotff(tmp_nested1.get_bf1(), tmp_nested2.get_bf1(), nullptr);
+							ret = helper::check_Bff_notBff(tmp_nested1.get_bf1(), tmp_nested2.get_bf1(), nullptr);
 						}
 					}
 				} else {

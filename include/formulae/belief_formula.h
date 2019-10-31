@@ -60,16 +60,17 @@ enum bf_operator
     BF_AND, /**< \brief The AND between \ref belief_formula(e).*/
     BF_OR, /**< \brief The OR between \ref belief_formula(e).*/
     BF_NOT, /**< \brief The NOT of a \ref belief_formula.*/
+    BF_INPAREN, /**< \brief When the \ref belief_formula is only surrounded by "()".*/
     BF_FAIL /**< \brief When the \ref belief_formula is not set PROPERLY (shouldn't be accessed if not \ref PROPOSITIONAL_FORMULA).*/
 };
 
 class belief_formula
 {
 private:
-    
+
     /**A boolean value that tells if *this* has been grounded*/
     bool m_is_grounded = false;
-    
+
     /*-******STRING FIELDs (private GETTER (for the grounding) and SETTER public for the reading)*************-*/
     /** \brief If *this* is a \ref FLUENT_FORMULA in this field is contained the 
      * string description of the actual \ref fluent_formula.*/
@@ -104,7 +105,7 @@ private:
 
     /*-******GROUNDED FIELDs (private SETTER (for the grounding/reading part) and GETTER public)*************-*/
     /**\brief The \ref bf_type of *this*.*/
-    bf_type m_formula_type = BF_EMPTY;// = BF_TYPE_FAIL; //Which case of belief formula this is
+    bf_type m_formula_type = BF_EMPTY; // = BF_TYPE_FAIL; //Which case of belief formula this is
     /**\brief If *this* is a \ref FLUENT_FORMULA in this field is contained the actual \ref fluent_formula.*/
     fluent_formula m_fluent_formula;
     /** \brief If *this* is a \ref BELIEF_FORMULA in this field is contained the \ref agent of the formula.
@@ -161,7 +162,7 @@ public:
      *
      * @param[in] to_copy: the \ref belief_formula to copy in *this*.*/
     belief_formula(const belief_formula & to_copy);
-    
+
     /** \brief Getter for the field \ref m_is_grounded.
      *
      * @return true: if *this* has been already grounded
@@ -272,7 +273,7 @@ public:
      * @return true: if the given \ref belief_formula is syntacticly equal to *this*.
      * @return false: otherwise.*/
     bool operator==(const belief_formula& to_compare) const;
-    
+
     /** \brief The = operator.
      *   
      * @param [in] to_copy: the \ref belief_formula to assign to *this*.

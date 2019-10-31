@@ -181,7 +181,7 @@ void planner<T>::execute_given_actions(const std::vector<std::string> act_name)
 }
 
 template <class T>
-/**\todo just for confrantation with old*/
+/**\todo just for confrontation with old*/
 void planner<T>::execute_given_actions_timed(const std::vector<std::string> act_name)
 {
 	T state;

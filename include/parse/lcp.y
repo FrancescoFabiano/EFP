@@ -414,7 +414,7 @@ LEFT_PAREN NEGATION belief_formula RIGHT_PAREN{
 LEFT_PAREN belief_formula RIGHT_PAREN{
     $$ = new belief_formula;
     $$->set_formula_type(PROPOSITIONAL_FORMULA);
-    $$->set_operator(BF_FAIL);
+    $$->set_operator(BF_INPAREN);
     $$->set_bf1(*$2);
 }
 |

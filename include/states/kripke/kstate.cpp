@@ -473,7 +473,7 @@ void kstate::remove_initial_kedge_bf(const belief_formula & to_check)
 
 					//fluent_formula known_ff;
 					auto known_ff_ptr = std::make_shared<fluent_formula>();
-					helper::check_Bff_Bnotff(tmp.get_bf1(), tmp.get_bf2(), known_ff_ptr);
+					helper::check_Bff_notBff(tmp.get_bf1(), tmp.get_bf2(), known_ff_ptr);
 					if (known_ff_ptr != nullptr) {
 						//printer::get_instance().print_list(*known_ff_ptr);
 						remove_initial_kedge(*known_ff_ptr, tmp.get_bf2().get_agent());

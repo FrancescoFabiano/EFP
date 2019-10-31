@@ -80,7 +80,7 @@ fluent_formula helper::and_ff(const fluent_formula& ff1, const fluent_formula& f
 	return ret;
 }
 
-bool helper::check_Bff_Bnotff(const belief_formula& to_check_1, const belief_formula& to_check_2, std::shared_ptr<fluent_formula> ret)
+bool helper::check_Bff_notBff(const belief_formula& to_check_1, const belief_formula& to_check_2, std::shared_ptr<fluent_formula> ret)
 {
 	/*GENERIC, to much
 	if (to_check_1.m_operator == BF_NOT) {
@@ -97,20 +97,37 @@ bool helper::check_Bff_Bnotff(const belief_formula& to_check_1, const belief_for
 	if (to_check_1.get_formula_type() == BELIEF_FORMULA && to_check_2.get_formula_type() == BELIEF_FORMULA) {
 		belief_formula to_check_nested_1 = to_check_1.get_bf1();
 		belief_formula to_check_nested_2 = to_check_2.get_bf1();
-		if (to_check_nested_1.get_formula_type() == FLUENT_FORMULA && to_check_nested_2.get_formula_type() == FLUENT_FORMULA) {
 
-			fluent_set tmp = *((to_check_nested_1.get_fluent_formula()).begin());
-			fluent f_to_check_1 = *(tmp.begin());
-			tmp = *((to_check_nested_2.get_fluent_formula()).begin());
-			fluent f_to_check_2 = *(tmp.begin());
-			if (f_to_check_1 == negate_fluent(f_to_check_2)) {
+		if (to_check_nested_1.get_formula_type() == FLUENT_FORMULA && to_check_nested_2.get_formula_type() == PROPOSITIONAL_FORMULA) {
+			if (to_check_nested_2.get_operator() == BF_NOT) {
+				fluent_set tmp = *((to_check_nested_1.get_fluent_formula()).begin());
+				fluent f_to_check_1 = *(tmp.begin());
+				tmp = *((to_check_nested_2.get_bf1().get_fluent_formula()).begin());
+				fluent f_to_check_2 = *(tmp.begin());
+				if (f_to_check_1 == f_to_check_2) {
 
-				if (ret != nullptr) {
-					ret->insert(tmp);
+					if (ret != nullptr) {
+						ret->insert(tmp);
+					}
+					return true;
 				}
-				return true;
+			}
+		} else if (to_check_nested_2.get_formula_type() == FLUENT_FORMULA && to_check_nested_1.get_formula_type() == PROPOSITIONAL_FORMULA) {
+			if (to_check_nested_1.get_operator() == BF_NOT) {
+				fluent_set tmp = *((to_check_nested_1.get_bf1().get_fluent_formula()).begin());
+				fluent f_to_check_1 = *(tmp.begin());
+				tmp = *((to_check_nested_2.get_fluent_formula()).begin());
+				fluent f_to_check_2 = *(tmp.begin());
+				if (f_to_check_1 == f_to_check_2) {
+
+					if (ret != nullptr) {
+						ret->insert(tmp);
+					}
+					return true;
+				}
 			}
 		}
+
 	}
 	return false;
 }
