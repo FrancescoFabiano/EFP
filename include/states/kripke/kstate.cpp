@@ -250,7 +250,6 @@ const kworld_ptr_set kstate::get_C_reachable_worlds(const agent_set & ags, kworl
 
 void kstate::add_world(const kworld & world)
 {
-
 	m_worlds.insert(kstore::get_instance().add_world(world));
 }
 
@@ -274,21 +273,8 @@ kworld_ptr kstate::add_rep_world(const kworld & world)
 	return add_rep_world(world, get_max_depth(), tmp);
 }
 
-/*void kstate::add_copy_world(const kworld & world, unsigned short repetition)
-{
-	kworld_ptr tmp = kstore::get_instance().add_world(world);
-	tmp.set_repetition(repetition);
-
-	//If this kworld_ptr exist then add another, we need to add a copy
-	if (!(std::get<1>(m_worlds.insert(tmp)))) {
-		///arg = 0 in kworld constructor by default but when put to x it set the extra id to x
-		add_copy_world(world, repetition + 1);
-	}
-}*/
-
 void kstate::add_edge(const kedge & edge)
 {
-
 	m_edges.insert(kstore::get_instance().add_edge(edge));
 }
 
@@ -726,7 +712,7 @@ kstate kstate::execute_action_um(const action& act, const event_type_set& events
 			switch ( act.get_type() ) {
 			case ONTIC:
 			{
-				if ((e == EPSILON && (oblivious_obs_agents.size() > 0)) || (e == SIGMA && entails(act.get_executability(), *it_kwset1) && fully_obs_agents.size() > 0)) {
+				if ((e == EPSILON && oblivious_obs_agents.size() > 0) || (e == SIGMA && fully_obs_agents.size() > 0)) {
 					add_ste_worlds(ret, *it_kwset1, kmap, e, act);
 				}
 				break;
@@ -763,17 +749,18 @@ kstate kstate::execute_action_um(const action& act, const event_type_set& events
 	event_type_relation::const_iterator it_etr;
 
 	for (it_kedptr = get_edges().begin(); it_kedptr != get_edges().end(); it_kedptr++) {
-		agent label = it_kedptr->get_label();
-		event_type_relation ag_set = fully_obs_agents.find(label) != fully_obs_agents.end() ? fully_obs_r :
-			partially_obs_agents.find(label) != partially_obs_agents.end() ? partially_obs_r :
-			oblivious_obs_r;
+		agent ag = it_kedptr->get_label();
+		event_type_relation e_type_set =
+		        fully_obs_agents.find(ag)     != fully_obs_agents.end()     ? fully_obs_r     :
+			    partially_obs_agents.find(ag) != partially_obs_agents.end() ? partially_obs_r :
+			    oblivious_obs_r;
 
-		for (it_etr = ag_set.begin(); it_etr != ag_set.end(); it_etr++) {
-			event_type e1 = (*it_etr).first, e2 = (*it_etr).second;
+		for (it_etr = e_type_set.begin(); it_etr != e_type_set.end(); it_etr++) {
+			event_type e1 = it_etr->first, e2 = it_etr->second;
 			auto kw1 = kmap.find({it_kedptr->get_from(), e1}), kw2 = kmap.find({it_kedptr->get_to(), e2});
 
 			if (kw1 != kmap.end() && kw2 != kmap.end()) {
-				ret.add_edge(kedge(kw1->second, kw2->second, label));
+				ret.add_edge(kedge(kw1->second, kw2->second, ag));
 			}
 		}
 	}
