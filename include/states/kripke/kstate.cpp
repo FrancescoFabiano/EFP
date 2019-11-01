@@ -99,6 +99,41 @@ bool kstate::operator=(const kstate & to_copy)
 	return true;
 }
 
+bool kstate::operator<(const kstate & to_compare) const
+{
+	if (m_max_depth < to_compare.get_max_depth()) {
+		return true;
+	}
+	if (m_pointed < to_compare.get_pointed()) {
+		return true;
+	}
+	if (m_worlds.size() < to_compare.get_worlds().size()) {
+		return true;
+	}
+	if (m_edges.size() < to_compare.get_edges().size()) {
+		return true;
+	}
+	kworld_ptr_set::const_iterator it_kwpts1, it_kwpts2;
+	it_kwpts2 = to_compare.get_worlds().begin();
+	for (it_kwpts1 = m_worlds.begin(); it_kwpts1 != m_worlds.end(); it_kwpts1++) {
+		if ((*it_kwpts1) < (*it_kwpts2)) {
+			return true;
+		}
+		it_kwpts2++;
+	}
+
+	kedge_ptr_set::const_iterator it_kepts1, it_kepts2;
+	it_kepts2 = to_compare.get_edges().begin();
+	for (it_kepts1 = m_edges.begin(); it_kepts1 != m_edges.end(); it_kepts1++) {
+		if ((*it_kepts1) < (*it_kepts2)) {
+			return true;
+		}
+		it_kepts2++;
+	}
+
+	return false;
+}
+
 bool kstate::entails(const belief_formula & to_check, const kworld_ptr_set & reachable) const
 {
 	kworld_ptr_set::const_iterator it_kwl;
@@ -192,7 +227,7 @@ const kworld_ptr_set kstate::get_B_reachable_worlds(agent ag, kworld_ptr world) 
 	return ret;
 }
 
-bool kstate::get_B_reachable_worlds(agent ag, kworld_ptr world, kworld_ptr_set& ret) const
+bool kstate::get_B_reachable_worlds(agent ag, kworld_ptr world, kworld_ptr_set & ret) const
 {
 	/** \todo check: If a--i-->b, b--i-->c then a--i-->c must be there*/
 	bool is_fixed_point = true;
@@ -653,7 +688,7 @@ void kstate::add_ste_worlds(kstate &ret, const kworld_ptr &kw, kstate_map &kmap,
 	///Inside this function is also updated the fluent_set of the worlds linked to ontic and fully observant
 	///(Updating the interpretations of the worlds)
 	bool tmp = false;
-    int offset = kw.get_repetition() + e;
+	int offset = kw.get_repetition() + e;
 	fluent_set world_description = kw.get_fluent_set();
 
 	if (e == SIGMA) {
@@ -666,19 +701,19 @@ void kstate::add_ste_worlds(kstate &ret, const kworld_ptr &kw, kstate_map &kmap,
 				}
 
 				if (world_description != kw.get_fluent_set()) {
-				    ret.set_max_depth(ret.get_max_depth() + 1);
-				    offset += ret.get_max_depth();
+					ret.set_max_depth(ret.get_max_depth() + 1);
+					offset += ret.get_max_depth();
 				}
 			}
 		}
 	}
 
-	kmap.insert(kstate_map::value_type(
-        {kw, e},
-		ret.add_rep_world(kworld(world_description), offset, tmp)));
+	kmap.insert(kstate_map::value_type({kw, e},
+	ret.add_rep_world(kworld(world_description), offset, tmp)));
 
 	if (e == SIGMA && kw == get_pointed()) {
-	    ret.set_pointed(kmap[{kw, SIGMA}]);
+		ret.set_pointed(kmap[{kw, SIGMA}
+		]);
 	}
 }
 
@@ -700,9 +735,9 @@ kstate kstate::execute_action_um(const action& act, const event_type_set& events
 	kstate_map kmap;
 
 	if (!oblivious_obs_agents.empty()) {
-	    ret.set_max_depth(get_max_depth() + 1);
+		ret.set_max_depth(get_max_depth() + 1);
 	} else {
-        ret.set_max_depth(get_max_depth());
+		ret.set_max_depth(get_max_depth());
 	}
 
 	kworld_ptr_set::const_iterator it_kwset1;
@@ -751,9 +786,9 @@ kstate kstate::execute_action_um(const action& act, const event_type_set& events
 	for (it_kedptr = get_edges().begin(); it_kedptr != get_edges().end(); it_kedptr++) {
 		agent ag = it_kedptr->get_label();
 		event_type_relation e_type_set =
-		        fully_obs_agents.find(ag)     != fully_obs_agents.end()     ? fully_obs_r     :
-			    partially_obs_agents.find(ag) != partially_obs_agents.end() ? partially_obs_r :
-			    oblivious_obs_r;
+			fully_obs_agents.find(ag) != fully_obs_agents.end() ? fully_obs_r :
+			partially_obs_agents.find(ag) != partially_obs_agents.end() ? partially_obs_r :
+			oblivious_obs_r;
 
 		for (it_etr = e_type_set.begin(); it_etr != e_type_set.end(); it_etr++) {
 			event_type e1 = it_etr->first, e2 = it_etr->second;

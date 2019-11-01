@@ -575,6 +575,16 @@ public:
      * @return false: otherwise.*/
     bool operator=(const kstate & to_copy);
 
+    /**\brief The operator < for set operation in \ref planning_graph.
+     *
+     * The ordering is based on kworlds and the kedges and pointed.
+     * 
+     * @param[in] to_compare: the \ref kstate to check for odering.
+     * 
+     * @return true: if *this* is smaller than \p to_compare.
+     * @return false: otherwise.*/
+    bool operator<(const kstate & to_compare) const;
+
     /** \brief Function that prints the information of *this*.*/
     void print() const;
 
