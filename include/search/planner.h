@@ -20,6 +20,7 @@
 
 //THIS IS BECAUSE IS A TEMPLATIC CLASS AND IT IS A DEPENDECY
 #include "../states/state_T.ipp"
+#include "../heuristics/planning_graph.ipp"
 
 /** @tparam T:
  *    - \ref KRIPKE

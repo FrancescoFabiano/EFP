@@ -26,6 +26,7 @@
 #include "possibilities/pstate.h"
 
 #include "../utilities/define.h"
+#include "../formulae/belief_formula.h"
 #include "../actions/action.h"
 #include "../domain/initially.h"
 
@@ -154,6 +155,23 @@ public:
      * 
      * \bug Is not supposed to override the method but it does.*/
     bool entails(const fluent_formula & to_check) const;
+
+    /** \brief Function that checks if *this* entails a \ref belief_formula.
+     * 
+     * The actual entailment is left to the specific state-representation (\ref m_representation).
+     * 
+     * @see kstate
+     *
+     * @param to_check: the \ref belief_formula to check if is entailed by *this*.
+     * 
+     * @return true if \p to_check is entailed by *this*.
+     * @return false if \p -to_check is entailed by *this*.
+     * 
+     * \todo add in see also the other state m_representations.
+     * 
+     * \bug Is not supposed to override the method but it does.*/
+    bool entails(const belief_formula & to_check) const;
+
     /** \brief Function that checks if *this* entails a CNF \ref formula_list.
      * 
      * The actual entailment is left to the specific state-representation (\ref m_representation).
@@ -221,6 +239,16 @@ public:
      * @return true: if \p the assignment went ok.
      * @return false: otherwise.*/
     bool operator=(const state<T> & to_copy);
+
+    /** \brief The < operator for set operations.
+     * 
+     * The results is left to the representations.
+     *   
+     * @param [in] to_copy: the \ref state to assign to *this*.
+     * @return true: if \p the assignment went ok.
+     * @return false: otherwise.*/
+    bool operator<(const state<T> & to_compare) const;
+
 
     /** \brief Function that prints the information of *this*.*/
     void print() const;

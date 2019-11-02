@@ -154,6 +154,13 @@ bool kworld::operator<(const kworld& to_compare) const
 	return false;
 }
 
+bool kworld::operator>(const kworld& to_compare) const
+{
+	if (m_id.compare(to_compare.get_id()) > 0)
+		return true;
+	return false;
+}
+
 bool kworld::operator==(const kworld& to_compare) const
 {
 	/**std way*/
@@ -264,6 +271,14 @@ bool kworld_ptr::entails(const fluent_formula & to_check) const
 bool kworld_ptr::operator<(const kworld_ptr & to_compare) const
 {
 	if (get_id().compare(to_compare.get_id()) < 0) {
+		return true;
+	}
+	return false;
+}
+
+bool kworld_ptr::operator>(const kworld_ptr & to_compare) const
+{
+	if (get_id().compare(to_compare.get_id()) > 0) {
 		return true;
 	}
 	return false;

@@ -99,6 +99,66 @@ bool pstate::operator=(const pstate & to_copy)
 	return true;
 }
 
+bool pstate::operator<(const pstate & to_compare) const
+{
+
+	if (m_max_depth < to_compare.get_max_depth()) {
+		return true;
+	} else if (m_max_depth > to_compare.get_max_depth()) {
+		return false;
+	}
+
+	if (m_pointed < to_compare.get_pointed()) {
+		return true;
+	} else if (m_pointed > to_compare.get_pointed()) {
+		return false;
+	}
+
+	if (m_worlds < to_compare.get_worlds()) {
+		return true;
+	} else if (m_worlds > to_compare.get_worlds()) {
+		return false;
+	}
+
+	pworld_transitive_map::const_iterator it_tramap1;
+	pworld_transitive_map::const_iterator it_tramap2 = to_compare.get_beliefs().begin();
+
+	pworld_map tmp_pwmap1, tmp_pwmap2;
+	pworld_map::const_iterator it_pwmap1, it_pwmap2;
+	//The same size is assured by the same size of m_worlds
+	for (it_tramap1 = m_beliefs.begin(); it_tramap1 != m_beliefs.end(); it_tramap1++) {
+		if (it_tramap1->first < it_tramap2->first) {
+			return true;
+		} else if (it_tramap1->first > it_tramap2->first) {
+			return false;
+		}
+
+		tmp_pwmap1 = it_tramap1->second;
+		tmp_pwmap2 = it_tramap2->second;
+		if (tmp_pwmap1.size() < tmp_pwmap2.size()) {
+			return true;
+		} else if (tmp_pwmap1.size() > tmp_pwmap2.size()) {
+			return false;
+		}
+		it_pwmap2 = tmp_pwmap2.begin();
+		for (it_pwmap1 = tmp_pwmap1.begin(); it_pwmap1 != tmp_pwmap1.end(); it_pwmap1++) {
+			if (it_pwmap1->first < it_pwmap2->first) {
+				return true;
+			} else if (it_pwmap1->first > it_pwmap2->first) {
+				return false;
+			}
+
+			if (it_pwmap1->second < it_pwmap2->second) {
+				return true;
+			} else if (it_pwmap1->second > it_pwmap2->second) {
+				return false;
+			}
+			it_pwmap2++;
+		}
+	}
+	return false;
+}
+
 bool pstate::entails(const belief_formula & to_check, const pworld_ptr_set & reachable) const
 {
 	pworld_ptr_set::const_iterator it_kwl;

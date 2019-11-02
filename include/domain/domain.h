@@ -20,14 +20,15 @@
 #include "../utilities/define.h"
 #include "../utilities/reader.h"
 #include "../actions/action.h"
+#include "../heuristics/planning_graph.h"
 
 class domain
 {
 private:
-    
+
     /**\brief The given to the *this*. (The name of the file that contains the description of *this*)*/
     std::string m_name;
-    
+
     /**\brief If this parameter is setted to true makes the functions verbose.*/
     bool m_debug;
     /**\brief The selected type of state. */
@@ -110,7 +111,7 @@ public:
 
     /** \brief Setter for the domains parameters.
      *
-* @param[in] name: the value to assign to \ref m_name.
+     * @param[in] name: the value to assign to \ref m_name.
      * @param[in] debug: the value to assign to \ref m_debug.
      * @param[in] stype: the value to assign to \ref m_stype.
      * @param[in] k_opt: the value to assign to \ref m_kopt.

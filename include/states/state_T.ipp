@@ -82,6 +82,14 @@ bool state<T>::operator=(const state<T> & given_state)
 }
 
 template <class T>
+bool state<T>::operator<(const state<T> & to_compare) const
+{
+	/**\warning each T must implement the operator <*/
+	return m_representation < to_compare.get_representation();
+
+}
+
+template <class T>
 void state<T>::set_executed_actions(const action_id_list & executed)
 {
 	m_executed_actions_id = executed;
@@ -119,6 +127,12 @@ bool state<T>::entails(const fluent_set & to_check) const
 
 template <class T>
 bool state<T>::entails(const fluent_formula & to_check) const
+{
+	return m_representation.entails(to_check);
+}
+
+template <class T>
+bool state<T>::entails(const belief_formula & to_check) const
 {
 	return m_representation.entails(to_check);
 }

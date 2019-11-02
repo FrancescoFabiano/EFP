@@ -1,0 +1,27 @@
+EFP version 2.0 - Built date: Sat Nov  2 19:15:09 CET 2019
+KRIPKE_OPT: The States are represented with Kripke structures and the transition function is optimized
+
+Building agent list...
+
+Building fluent literals...
+
+Building action list...
+
+Adding propositions to actions...
+
+Adding to pointed world and initial conditions...
+
+Adding to Goal...
+
+Building initial Kripke structure...
+
+
+The planning graph length is 4The planning graph length is 4The planning graph length is 2The planning graph length is 1The planning graph length is 1The planning graph length is 0
+
+Well Done, Goal found after the execution of left_b, b_check_1, right_a, a_check_3, left_a, tell_a_b2_3 :)
+
+
+
+
+
+*****THE END*****

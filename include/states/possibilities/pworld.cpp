@@ -19,8 +19,8 @@ pworld::pworld()
 
 pworld::pworld(const fluent_set & description)
 {
-    set_fluent_set(description);
-    set_id();
+	set_fluent_set(description);
+	set_id();
 }
 //generate an unique id given the state information -> the literals
 
@@ -146,6 +146,13 @@ bool pworld::operator<(const pworld& to_compare) const
 	return false;
 }
 
+bool pworld::operator>(const pworld& to_compare) const
+{
+	if (m_id.compare(to_compare.get_id()) > 0)
+		return true;
+	return false;
+}
+
 bool pworld::operator==(const pworld& to_compare) const
 {
 	/**std way*/
@@ -256,6 +263,14 @@ bool pworld_ptr::entails(const fluent_formula & to_check) const
 bool pworld_ptr::operator<(const pworld_ptr & to_compare) const
 {
 	if (get_id().compare(to_compare.get_id()) < 0) {
+		return true;
+	}
+	return false;
+}
+
+bool pworld_ptr::operator>(const pworld_ptr & to_compare) const
+{
+	if (get_id().compare(to_compare.get_id()) > 0) {
 		return true;
 	}
 	return false;

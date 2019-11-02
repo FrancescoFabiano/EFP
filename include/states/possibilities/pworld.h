@@ -150,6 +150,15 @@ public:
      * @return true: if \p to_compare is smaller than *this*
      * @return false: otherwise.*/
     bool operator<(const pworld& to_compare) const;
+    /**
+     *\brief The > operator based on the field \ref m_id.
+     * 
+     * @see pstore.
+     *     
+     * @param [in] to_compare: the \ref pworld to compare with *this*.
+     * @return true: if \p to_compare is bigger than *this*
+     * @return false: otherwise.*/
+    bool operator>(const pworld& to_compare) const;
 
     /** \brief The == operator based on the field \ref m_id.
      *     
@@ -262,10 +271,10 @@ public:
      * @return the \ref pworld_id that is the id of the \ref pworld pointed by \ref m_ptr + \ref m_repetition.*/
     pworld_id get_id() const;
 
-    
-            /** \brief Function that check the entailment of a single \ref fluent in \ref m_ptr.
+
+    /** \brief Function that check the entailment of a single \ref fluent in \ref m_ptr.
      * 
-    * 
+     * 
      * @param[in] to_check: the \ref fluent that has to be checked if entailed by \ref m_ptr (if is present in \ref m_ptr).
      *
      * @return true: \p to_check is entailed;
@@ -287,7 +296,7 @@ public:
      * @return true: \p to_check is entailed;
      * @return false: \p -to_check is entailed.*/
     bool entails(const fluent_formula & to_check) const;
-    
+
     /**\brief The operator =.
      *
      * This operator assign the parameter without destroying \p to_copy.
@@ -305,9 +314,20 @@ public:
      * 
      * @return true: if *this* is smaller than \p to_compare.
      * @return false: otherwise.*/
-    
+
     bool operator<(const pworld_ptr & to_compare) const;
-      /**\brief The operator ==.
+    /**\brief The operator > for \ref pstate < comparison.
+     *
+     * The ordering is based on the pointed object and not on the pointer itself so we have one
+     * copy of each pointed object.
+     * 
+     * @param[in] to_compare: the \ref pworld_ptr to check for odering.
+     * 
+     * @return true: if *this* is bigger than \p to_compare.
+     * @return false: otherwise.*/
+
+    bool operator>(const pworld_ptr & to_compare) const;
+    /**\brief The operator ==.
      * 
      * @param[in] to_compare: the \ref pworld_ptr to confront with *this*.
      * @return true: if *this* is equal to \p to_compare.

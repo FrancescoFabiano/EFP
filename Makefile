@@ -67,7 +67,8 @@ $(BUILD_DIR)/main.o:	$(SRC_DIR)/main.cpp \
 						$(UTILITIES_DIR)/reader.h \
 						$(DOMAIN_DIR)/domain.h \
 						$(SEARCH_DIR)/planner.h $(SEARCH_DIR)/planner.ipp \
-						$(STATES_DIR)/state_T.h $(STATES_DIR)/state_T.ipp
+						$(STATES_DIR)/state_T.h $(STATES_DIR)/state_T.ipp \
+						$(HEURISTIC_DIR)/planning_graph.h $(HEURISTIC_DIR)/planning_graph.ipp
 		$(dir_guard)
 		echo "#define BUILT_DATE \"`date`\"" > $(BUILD_DIR)/built_date
 		cat $(BUILD_DIR)/built_date $(SRC_DIR)/main.cpp > $(BUILD_DIR)/main.temp.cpp
@@ -132,7 +133,17 @@ $(BUILD_DIR)/proposition.o: $(ACTION_DIR)/proposition.cpp $(ACTION_DIR)/proposit
 #   					    $(UTILITIES_DIR)/define.h
 #		$(dir_guard)
 #		$(CC) $(CFLAGS) -c $(STATES_DIR)/state_T.cpp -o $(BUILD_DIR)/state_T.o
-		
+#
+##HEURISTICS
+#$(BUILD_DIR)/planning_graph.o: $(HEURISTIC_DIR)/planning_graph.cpp $(HEURISTIC_DIR)/planning_graph.h \
+#					   $(S_KRIPE_DIR)/kstate \
+#					   $(ACTION_DIR)/action.h \
+#					   $(FORMULA_DIR)/belief_formula.h \
+#					   $(UTILITIES_DIR)/define.h				   
+#		$(dir_guard)
+#		$(CC) $(CFLAGS) -c $(S_KRIPE_DIR)/planning_graph.cpp -o $(BUILD_DIR)/planning_graph.o
+
+
 ##KRIPKE STATES		
 $(BUILD_DIR)/kstate.o: $(S_KRIPE_DIR)/kstate.cpp $(S_KRIPE_DIR)/kstate.h \
 					   $(S_KRIPE_DIR)/kworld.h $(S_KRIPE_DIR)/kedge.h $(S_KRIPE_DIR)/kstore.h \

@@ -114,6 +114,13 @@ bool kedge::operator<(const kedge& to_compare) const
 	return false;
 }
 
+bool kedge::operator>(const kedge& to_compare) const
+{
+	if (m_edge_id.compare(to_compare.get_id()) > 0)
+		return true;
+	return false;
+}
+
 bool kedge::operator==(const kedge& to_compare) const
 {
 	/**std way*/
@@ -213,6 +220,14 @@ bool kedge_ptr::operator=(const kedge_ptr & to_copy)
 bool kedge_ptr::operator<(const kedge_ptr & to_compare) const
 {
 	if (get_id().compare(to_compare.get_id()) < 0) {
+		return true;
+	}
+	return false;
+}
+
+bool kedge_ptr::operator>(const kedge_ptr & to_compare) const
+{
+	if (get_id().compare(to_compare.get_id()) > 0) {
 		return true;
 	}
 	return false;

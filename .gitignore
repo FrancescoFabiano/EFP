@@ -35,6 +35,7 @@ build/
 bin/
 
 # Project
+EFP_ICAPS_old/nbproject/
 nbproject/
 readme_old
 

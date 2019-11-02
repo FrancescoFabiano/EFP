@@ -151,6 +151,15 @@ public:
      * @return false: otherwise.*/
     bool operator<(const kworld& to_compare) const;
 
+    /**
+     *\brief The > operator based on the field \ref m_id. 
+     * @see kstore.
+     *     
+     * @param [in] to_compare: the \ref kworld to compare with *this*.
+     * @return true: if \p to_compare is bigger than *this*
+     * @return false: otherwise.*/
+    bool operator>(const kworld& to_compare) const;
+
     /** \brief The == operator based on the field \ref m_id.
      *     
      * @param [in] to_compare: the \ref kworld to compare with *this*.
@@ -306,6 +315,15 @@ public:
      * @return false: otherwise.*/
 
     bool operator<(const kworld_ptr & to_compare) const;
+    /**\brief The operator > \ref kstate operator <.
+     *
+     * 
+     * @param[in] to_compare: the \ref kworld_ptr to check for odering.
+     * 
+     * @return true: if *this* is bigger than \p to_compare.
+     * @return false: otherwise.*/
+
+    bool operator>(const kworld_ptr & to_compare) const;
     /**\brief The operator ==.
      * 
      * @param[in] to_compare: the \ref kworld_ptr to confront with *this*.

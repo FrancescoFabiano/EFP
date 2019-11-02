@@ -138,7 +138,11 @@ void planner<T>::execute_given_actions(const std::vector<std::string> act_name)
 				//std::cout << "\n\nTrying action " << (*it_acset).get_name() << "\n";
 				if (state.is_executable(*it_acset)) {
 					state = state.compute_succ(*it_acset);
-					if (domain::get_instance().get_debug()) state.print_graphviz();
+					if (domain::get_instance().get_debug()) {
+						state.print_graphviz();
+					}
+					planning_graph<T> pg(state);
+					std::cout << "\nThe planning graph length is " << pg.get_length() << std::endl;
 					if (state.is_goal()) {
 						if (domain::get_instance().get_debug()) state.print_graphviz();
 						std::cout << "\n\nWell Done, Goal found after the execution of ";

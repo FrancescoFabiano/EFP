@@ -103,33 +103,65 @@ bool kstate::operator<(const kstate & to_compare) const
 {
 	if (m_max_depth < to_compare.get_max_depth()) {
 		return true;
-	}
-	if (m_pointed < to_compare.get_pointed()) {
-		return true;
-	}
-	if (m_worlds.size() < to_compare.get_worlds().size()) {
-		return true;
-	}
-	if (m_edges.size() < to_compare.get_edges().size()) {
-		return true;
-	}
-	kworld_ptr_set::const_iterator it_kwpts1, it_kwpts2;
-	it_kwpts2 = to_compare.get_worlds().begin();
-	for (it_kwpts1 = m_worlds.begin(); it_kwpts1 != m_worlds.end(); it_kwpts1++) {
-		if ((*it_kwpts1) < (*it_kwpts2)) {
-			return true;
-		}
-		it_kwpts2++;
+	} else if (m_max_depth > to_compare.get_max_depth()) {
+		return false;
 	}
 
-	kedge_ptr_set::const_iterator it_kepts1, it_kepts2;
-	it_kepts2 = to_compare.get_edges().begin();
-	for (it_kepts1 = m_edges.begin(); it_kepts1 != m_edges.end(); it_kepts1++) {
-		if ((*it_kepts1) < (*it_kepts2)) {
-			return true;
-		}
-		it_kepts2++;
+	if (m_pointed < to_compare.get_pointed()) {
+		return true;
+	} else if (m_pointed > to_compare.get_pointed()) {
+		return false;
 	}
+
+
+	if (m_worlds < to_compare.get_worlds()) {
+		return true;
+	} else if (m_worlds > to_compare.get_worlds()) {
+		return false;
+	}
+
+	if (m_edges < to_compare.get_edges()) {
+		return true;
+	} else if (m_edges > to_compare.get_edges()) {
+		return false;
+	}
+
+	//This are implemented in std
+
+	//	if (m_worlds.size() < to_compare.get_worlds().size()) {
+	//		return true;
+	//	} else if (m_worlds.size() > to_compare.get_worlds().size()) {
+	//		return false;
+	//	}
+	//
+	//	if (m_edges.size() < to_compare.get_edges().size()) {
+	//		return true;
+	//	} else if (m_edges.size() > to_compare.get_edges().size()) {
+	//		return false;
+	//	}
+
+	//	kworld_ptr_set::const_iterator it_kwpts1, it_kwpts2;
+	//	it_kwpts2 = to_compare.get_worlds().begin();
+	//	for (it_kwpts1 = m_worlds.begin(); it_kwpts1 != m_worlds.end(); it_kwpts1++) {
+	//		if ((*it_kwpts1) < (*it_kwpts2)) {
+	//			return true;
+	//		} else if ((*it_kwpts1) > (*it_kwpts2)) {
+	//			return false;
+	//		}
+	//		//The case when to compare has less world than this
+	//		it_kwpts2++;
+	//	}
+
+	//	kedge_ptr_set::const_iterator it_kepts1, it_kepts2;
+	//	it_kepts2 = to_compare.get_edges().begin();
+	//	for (it_kepts1 = m_edges.begin(); it_kepts1 != m_edges.end(); it_kepts1++) {
+	//		if ((*it_kepts1) < (*it_kepts2)) {
+	//			return true;
+	//		} else if ((*it_kepts1) > (*it_kepts2)) {
+	//			return false;
+	//		}
+	//		it_kepts2++;
+	//	}
 
 	return false;
 }

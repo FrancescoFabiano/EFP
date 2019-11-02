@@ -558,7 +558,9 @@ public:
 
     /** \brief Function that applies the transition function on *this* given an action.
      *
-     * The transition function is applied accordingly to mA*. Check the paper for more information.
+     * The transition function is applied accordingly to the optimization or not given as input.
+     * The non optimized one follows mA*. Check the paper for more information.
+     * The other uses some optz to reduce the state dimension.
      *  
      * @see action.
      *  
@@ -613,3 +615,4 @@ public:
     /*fluent_formula get_sensing_effects_if_entailed(const effects_map & map, const kworld_ptr & start) const;*/
 };
 
+typedef std::vector<kstate> kstate_set; /**< \brief A set of \ref kstate.*/

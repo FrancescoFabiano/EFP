@@ -158,7 +158,7 @@ public:
      * @param[in] label: the \ref agent that is the label of *this*.*/
     kedge(const kworld_ptr & from, const kworld_ptr & to, agent label);
 
-    
+
     /** \brief The < operator based on the field \ref m_edge_id.
      * Implemented to allow the ordering on set of \ref kedge (used in \ref kstore).
      * 
@@ -168,6 +168,14 @@ public:
      * @return true: if \p to_compare is smaller than *this*
      * @return false: otherwise.*/
     bool operator<(const kedge& to_compare) const;
+
+    /** \brief The > operator based on the field \ref m_edge_id. 
+     * @see kstore.
+     *     
+     * @param [in] to_compare: the \ref kedge to compare with *this*.
+     * @return true: if \p to_compare is bigger than *this*
+     * @return false: otherwise.*/
+    bool operator>(const kedge& to_compare) const;
 
     /** \brief The == operator based on the field \ref m_edge_id.
      *     
@@ -241,7 +249,7 @@ public:
      *  
      * @param[in] ptr: the pointer to assign to \ref m_ptr.*/
     void set_ptr(std::shared_ptr<const kedge>&& ptr);
-    
+
     /**\brief Getter for the field \ref m_ptr.
      *  
      * @return a copy of the pointer \ref m_ptr.*/
@@ -283,13 +291,21 @@ public:
      * @return true: if *this* is smaller than \p to_compare.
      * @return false: otherwise.*/
     bool operator<(const kedge_ptr & to_compare) const;
-        /**\brief The operator ==.
+
+    /**\brief The operator > \ref kstate operator <.
+     * 
+     * @param[in] to_compare: the \ref kedge_ptr to check for odering.
+     * 
+     * @return true: if *this* is bigger than \p to_compare.
+     * @return false: otherwise.*/
+    bool operator>(const kedge_ptr & to_compare) const;
+    /**\brief The operator ==.
      * 
      * @param[in] to_compare: the \ref kedge_ptr to confront with *this*.
      * @return true: if *this* is equal to \p to_compare.
      * @return false: otherwise.*/
     bool operator==(const kedge_ptr & to_compare) const;
-    
-        /** \brief Function used to print all the information of \ref m_ptr.*/
+
+    /** \brief Function used to print all the information of \ref m_ptr.*/
     void print() const;
 };
