@@ -9,24 +9,6 @@
 #include "planner.h"
 #include "../domain/domain.h"
 
-/*planner::planner(state_type given_state_type)
-{
-	m_state_type = given_state_type;
-	switch ( m_state_type ) {
-	case KRIPKE:
-	{
-		state<kstate> initial;
-		m_search_space.push(initial.build_initial());
-		std::cout << "\nInitial Done...\n";
-	}
-	case POSSIBILITIES:
-	case OBDD:
-	default:
-		std::cerr << "\nNot implemented yet\n";
-		exit(1);
-	}
-}*/
-
 template <class T>
 void planner<T>::print_results(std::chrono::duration<double> elapsed_seconds, T goal, bool old_check, bool givenplan)
 {
@@ -62,6 +44,29 @@ void planner<T>::print_results(std::chrono::duration<double> elapsed_seconds, T 
 		result << ") completed the search in " << elapsed_seconds.count() << "\n";
 		result.close();
 	}
+}
+
+template <class T>
+bool planner<T>::search(bool old_check, heuristics used_heur)
+{
+	switch ( used_heur ) {
+	case NO_H:
+	{
+		return search_BFS(old_check);
+		break;
+	}
+	case PLANNINGGRAPH:
+	{
+		return search_heur(old_check);
+		break;
+	}
+	default:
+	{
+		return search_BFS(old_check);
+		break;
+	}
+	}
+	return false;
 }
 
 template <class T>
@@ -114,6 +119,58 @@ bool planner<T>::search_BFS(bool old_check)
 }
 
 template <class T>
+bool planner<T>::search_heur(bool old_check)
+{
+	T initial;
+	auto start_timing = std::chrono::system_clock::now();
+	initial.build_initial();
+	auto end_timing = std::chrono::system_clock::now();
+	std::chrono::duration<double> elapsed_seconds = end_timing - start_timing;
+
+	std::cout << "\nInitial Built in " << elapsed_seconds.count() << " seconds\n";
+
+	action_set actions = domain::get_instance().get_actions();
+	action_set::const_iterator it_acset;
+	T popped_state;
+	T tmp_state;
+	action tmp_action;
+
+	start_timing = std::chrono::system_clock::now();
+	if (initial.is_goal()) {
+		end_timing = std::chrono::system_clock::now();
+		elapsed_seconds = end_timing - start_timing;
+		print_results(elapsed_seconds, initial, old_check, false);
+		return true;
+	}
+	m_heur_search_space.push(initial);
+
+	while (!m_heur_search_space.empty()) {
+		popped_state = m_heur_search_space.top();
+		m_heur_search_space.pop();
+
+		for (it_acset = actions.begin(); it_acset != actions.end(); it_acset++) {
+			tmp_action = *it_acset;
+			if (popped_state.is_executable(tmp_action)) {
+				tmp_state = popped_state.compute_succ(tmp_action);
+				if (tmp_state.is_goal()) {
+					end_timing = std::chrono::system_clock::now();
+					elapsed_seconds = end_timing - start_timing;
+					print_results(elapsed_seconds, tmp_state, old_check, false);
+					return true;
+				}
+				planning_graph<T> pg(tmp_state);
+				if (pg.is_satisfiable()) {
+					tmp_state.set_heuristic_value(pg.get_length());
+					m_heur_search_space.push(tmp_state);
+				}
+			}
+		}
+	}
+	std::cout << "\nNo plan found for this goal.\n";
+	return false;
+}
+
+template <class T>
 void planner<T>::execute_given_actions(const std::vector<std::string> act_name)
 {
 	T state;
@@ -141,8 +198,6 @@ void planner<T>::execute_given_actions(const std::vector<std::string> act_name)
 					if (domain::get_instance().get_debug()) {
 						state.print_graphviz();
 					}
-					planning_graph<T> pg(state);
-					std::cout << "\nThe planning graph length is " << pg.get_length() << std::endl;
 					if (state.is_goal()) {
 						if (domain::get_instance().get_debug()) state.print_graphviz();
 						std::cout << "\n\nWell Done, Goal found after the execution of ";

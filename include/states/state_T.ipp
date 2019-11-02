@@ -59,7 +59,7 @@ unsigned short state<T>::get_plan_length() const
 }
 
 template <class T>
-int state<T>::get_heuristic_value() const
+short state<T>::get_heuristic_value() const
 {
 	return m_heuristic_value;
 }
@@ -108,7 +108,7 @@ void state<T>::set_plan_length(unsigned short length)
 }
 
 template <class T>
-void state<T>::set_heuristic_value(int heuristic_value)
+void state<T>::set_heuristic_value(short heuristic_value)
 {
 	m_heuristic_value = heuristic_value;
 }

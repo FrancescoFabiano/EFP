@@ -59,7 +59,7 @@ private:
     /** \brief The heuristic value of the *this*.
      *
      * This value is given by the chosen implementation of \ref heuristic.*/
-    int m_heuristic_value;
+    short m_heuristic_value;
 
     /** \brief Setter for the field \ref m_executed_actions_id.
      *
@@ -75,10 +75,6 @@ private:
      *
      * @param[in] to_set: the length of the plan to copy in \ref m_plan_length.*/
     void set_plan_length(unsigned short to_set);
-    /** \brief Setter for the field \ref m_heuristic_value.
-     *
-     * @param[in] to_set: the int to copy in \ref m_heuristic_value.*/
-    void set_heuristic_value(int to_set);
 
     /** \brief Setter of \ref m_representation.
      *     
@@ -116,10 +112,14 @@ public:
      *     
      * @return the length of the plan up to *this*.*/
     unsigned short get_plan_length() const;
+    /** \brief Setter for the field \ref m_heuristic_value.
+     *
+     * @param[in] to_set: the int to copy in \ref m_heuristic_value.*/
+    void set_heuristic_value(short to_set);
     /** \brief Getter of \ref m_heuristic_value.
      *     
      * @return the heuristic value *this*.*/
-    int get_heuristic_value() const;
+    short get_heuristic_value() const;
     /** \brief Getter of \ref m_representation.
      *     
      * @return the m_representation of *this*.*/

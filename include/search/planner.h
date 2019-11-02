@@ -22,25 +22,24 @@
 #include "../states/state_T.ipp"
 #include "../heuristics/planning_graph.ipp"
 
-/** @tparam T:
- *    - \ref KRIPKE
- *    - \ref POSSIBILITIES
- *    - \ref OBDD*/
+/** \brief Class used as comparator for the priority queue.*/
+template <class T>
+struct compare_heuristic
+{
+
+    bool operator()(const T & state1, const T & state2)
+    {
+        return state1.get_heuristic_value() > state2.get_heuristic_value();
+    }
+};
+
 template <class T>
 class planner
 {
 private:
     /**The queue that contains all the states<T> yet to be visited.*/
     std::queue< T > m_search_space;
-
-    /* \brief The \ref state_type.*/
-    //state_type m_state_type;
-public:
-    /*Constructor that from the initialized domain creates the initial state and place it inside \ref m_search_space
-     *
-     * @param[in] given_state_type: the type of state representation to set as m_state_type.*/
-    // planner(state_type given_state_type);
-
+    std::priority_queue<T, std::vector<T>, compare_heuristic<T> > m_heur_search_space;
 
     /**Function that searches on m_search_space using BFS on all the actions.
      * 
@@ -48,6 +47,25 @@ public:
      * @return true if a plan is found.
      * @return false otherwise.*/
     bool search_BFS(bool old_check);
+
+
+    /**Function that searches on m_search_space using Best First Search.
+     * 
+     * @param[in] old_check: if true print the plan time in a file to easy the confrontation with the old version.
+     * @return true if a plan is found.
+     * @return false otherwise.*/
+    bool search_heur(bool old_check);
+    /* \brief The \ref state_type.*/
+    //state_type m_state_type;
+public:
+
+    /**Function that searches on m_search_space.
+     * 
+     * Calls either \ref search_BFS(bool old_check) or \ref search_heur(bool old_check)
+     * @param[in] old_check: if true print the plan time in a file to easy the confrontation with the old version.
+     * @param[in] used_heur: used to determine if any heuristic has to be used and which one.
+     * @return true if a plan is found.*/
+    bool search(bool old_check, heuristics used_heur);
 
     /**Function print out the solution time.
      * 

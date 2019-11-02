@@ -96,6 +96,18 @@ typedef std::map<action_id, std::string> reverse_action_name_map; /**< \brief Th
                                                            * 
                                                            * @see grounder.*/
 
+/** \brief The possible heuristics applicable to the domain.*/
+enum heuristics
+{
+    NO_H, /**< Breadth first search is executed*/
+    PLANNINGGRAPH, /**< A planning graph is used to calculate the distance of each state from the goal.
+                    * 
+                    * For now for every state is computed a planning graph and then the lenght of it is returned.
+                    * 
+                    * \todo Optimize and maybe create only one planning graph and check where the state belongs.
+                    * .*/
+};
+
 /** \brief The possible restriction applicable to the domain.
  *
  * These restrictions have mostly to do with the Kripke representation and
@@ -132,8 +144,8 @@ enum domain_restriction
 /** \brief The possible way of checking an action effects executability.*/
 enum action_check
 {
-    EXE_POINTED__COND_POINTED,/**< \brief Both the executability and the conditional effects are checked only on the state.*/
-    EXE_POINTED__COND_WORLD,/**< \brief The executionability is checked only on the state but the conditional effects are checked in every worlds.*/
+    EXE_POINTED__COND_POINTED, /**< \brief Both the executability and the conditional effects are checked only on the state.*/
+    EXE_POINTED__COND_WORLD, /**< \brief The executionability is checked only on the state but the conditional effects are checked in every worlds.*/
     EXE_WORLD__COND_WORLD/**< \brief Both the executability and the conditional effects are checked in every world.*/
 };
 
@@ -151,8 +163,8 @@ typedef std::map<fluent_formula, belief_formula> effects_map; /**< \brief Used t
 
 enum event_type
 {
-    EPSILON,/**< \brief The null event.*/
-    SIGMA,/**< \brief Event corresponding to ... */
+    EPSILON, /**< \brief The null event.*/
+    SIGMA, /**< \brief Event corresponding to ... */
     TAU/**< \brief  Event corresponding to ... */
 };
 
@@ -265,6 +277,6 @@ typedef std::map<pworld_ptr, pworld_ptr> transition_map; /**< \brief A map that 
                                                           *
                                                           * @see pworld and pstate.*/
 
-typedef std::vector<std::tuple<pworld_ptr, pworld_ptr, agent>> beliefs_vector;/**< \brief A vector of tuples (pw1, pw2, ag) that represent that in \ref pworld pw1 the \agent ag believes that the \ref \pworld pw2 is possible
+typedef std::vector<std::tuple<pworld_ptr, pworld_ptr, agent>> beliefs_vector; /**< \brief A vector of tuples (pw1, pw2, ag) that represent that in \ref pworld pw1 the \agent ag believes that the \ref \pworld pw2 is possible
                                                                                *
                                                                                * @see pworld and pstate.*/
