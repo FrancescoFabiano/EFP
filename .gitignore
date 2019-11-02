@@ -49,6 +49,14 @@ out/
 #Old planner
 EFP_ICAPS_old/cpa+
 EFP_ICAPS_old/built_date
+EFP_ICAPS_old/bison.c
+EFP_ICAPS_old/lcp.output
+EFP_ICAPS_old/lcp.tab.c
+EFP_ICAPS_old/lcp.tab.h
+EFP_ICAPS_old/lex.c
+EFP_ICAPS_old/lex.yy.c
+EFP_ICAPS_old/tok.h
+
 
 #Other files
 .idea/*
