@@ -229,7 +229,7 @@ const fluent_set & kworld_ptr::get_fluent_set() const
 	if (m_ptr != nullptr) {
 		return get_ptr()->get_fluent_set();
 	}
-	std::cerr << "Error in creating a kworld_ptr\n";
+	std::cerr << "Error in creating a kworld_ptr (fluent_set)\n";
 	exit(1);
 }
 
@@ -238,7 +238,7 @@ kworld_id kworld_ptr::get_id() const
 	if (m_ptr != nullptr) {
 		return(get_ptr()->get_id()).append(std::to_string(get_repetition()));
 	}
-	std::cerr << "\nError in creating a kworld_ptr\n";
+	std::cerr << "\nError in creating a kworld_ptr (id)\n";
 	exit(1);
 }
 

@@ -794,7 +794,7 @@ kstate kstate::execute_action_um(const action& act, const event_type_set& events
 				} else { // if (entails(act.get_executability(), *it_kwset1)) {
 					bool ent = entails(effects, *it_kwset1);
 
-					if ((e == SIGMA && ent && fully_obs_agents.size() > 0) || (e == TAU && !ent && partially_obs_agents.size() > 0)) {
+					if ((e == SIGMA && ent) || (e == TAU && !ent && partially_obs_agents.size() > 0)) {
 						add_ste_worlds(ret, *it_kwset1, kmap, e, act);
 					}
 				}
