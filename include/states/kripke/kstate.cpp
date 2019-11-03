@@ -779,7 +779,7 @@ kstate kstate::execute_action_um(const action& act, const event_type_set& events
 			switch ( act.get_type() ) {
 			case ONTIC:
 			{
-				if ((e == EPSILON && oblivious_obs_agents.size() > 0) || (e == SIGMA && fully_obs_agents.size() > 0)) {
+				if ((e == EPSILON && oblivious_obs_agents.size() > 0) || (e == SIGMA)) {
 					add_ste_worlds(ret, *it_kwset1, kmap, e, act);
 				}
 				break;
