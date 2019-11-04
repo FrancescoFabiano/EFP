@@ -4,7 +4,11 @@
 #	where:
 #			"exp/paper/CC/CC_2_2_3.txt" is the path to the domain name
 
-bin/efp.out        $@ -debug -st POSS;
-bin/efp.out        $@ -debug -st KRIPKE_OPT;
-bin/efp.out        $@ -debug -st KRIPKE;
-#EFP_ICAPS_old/cpa+ $@ -debug;
+representations=("KRIPKE_OPT" "KRIPKE" "POSS" "OLD");
+
+for repr in "${representations[@]}"; do
+    if [ "$repr" != "OLD" ]; then 
+        bin/efp.out        $@ -debug -st $repr;
+    fi;
+    #sleep 5s;
+done

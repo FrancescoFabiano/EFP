@@ -7,28 +7,19 @@
 if [ -f out/EFP_comparison/findingplan/"${@##*/}" ] ; then
     rm out/EFP_comparison/findingplan/"${@##*/}"
 fi
+representations=("KRIPKE_OPT" "KRIPKE" "POSS" "OLD");
 
-#EXECUTE WITH KRIPKE OPTIMIZED
-bin/efp.out        $@ -old_check -st KRIPKE_OPT > findingplan_comparison.tmp;
-grep -w "Executed actions:" findingplan_comparison.tmp >> out/EFP_comparison/findingplan/"${@##*/}";
-grep -w "Plan Length:" findingplan_comparison.tmp  >> out/EFP_comparison/findingplan/"${@##*/}";
-echo $'\n' >> out/EFP_comparison/findingplan/"${@##*/}";
+for repr in "${representations[@]}"; do
+    if [ "$repr" = "OLD" ]; then 
+        EFP_ICAPS_old/cpa+ $@ -old_check > findingplan_comparison.tmp;
+    else
+        bin/efp.out        $@ -old_check -st $repr > findingplan_comparison.tmp;
+    fi;
+    grep -w "Executed actions:" findingplan_comparison.tmp >> out/EFP_comparison/findingplan/"${@##*/}";
+    grep -w "Plan Length:" findingplan_comparison.tmp  >> out/EFP_comparison/findingplan/"${@##*/}";
+    echo $'\n' >> out/EFP_comparison/findingplan/"${@##*/}";
 
-#EXECUTE WITH KRIPKE
-bin/efp.out        $@ -old_check -st KRIPKE > findingplan_comparison.tmp;
-grep -w "Executed actions:" findingplan_comparison.tmp >> out/EFP_comparison/findingplan/"${@##*/}";
-grep -w "Plan Length:" findingplan_comparison.tmp  >> out/EFP_comparison/findingplan/"${@##*/}";
-echo $'\n' >> out/EFP_comparison/findingplan/"${@##*/}";
-
-#EXECUTE WITH KRIPKE POSSIBILITIES
-bin/efp.out        $@ -old_check -st POSS > findingplan_comparison.tmp;
-grep -w "Executed actions:" findingplan_comparison.tmp >> out/EFP_comparison/findingplan/"${@##*/}";
-grep -w "Plan Length:" findingplan_comparison.tmp  >> out/EFP_comparison/findingplan/"${@##*/}";
-echo $'\n' >> out/EFP_comparison/findingplan/"${@##*/}";
-
-#EXECUTE WITH OLD VERSIONE
-EFP_ICAPS_old/cpa+ $@ -old_check > findingplan_comparison.tmp;
-grep -w "Executed actions:" findingplan_comparison.tmp >> out/EFP_comparison/findingplan/"${@##*/}";
-grep -w "Plan Length:" findingplan_comparison.tmp  >> out/EFP_comparison/findingplan/"${@##*/}";
+    sleep 5s;
+done
 
 rm findingplan_comparison.tmp;

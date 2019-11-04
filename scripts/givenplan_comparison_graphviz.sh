@@ -10,7 +10,9 @@ DOMAIN="$1" # Name of the domain
 shift            # Shift all arguments to the left (original $1 gets lost)
 ARGUMENTS=("$@") # Rebuild the array with rest of arguments
 
-bin/efp.out        $DOMAIN -debug -st KRIPKE_OPT -e "${ARGUMENTS[@]}";
-bin/efp.out        $DOMAIN -debug -st KRIPKE     -e "${ARGUMENTS[@]}";
-bin/efp.out        $DOMAIN -debug -st POSS       -e "${ARGUMENTS[@]}";
-#EFP_ICAPS_old/cpa+ $DOMAIN -debug                -e "${ARGUMENTS[@]}";
+representations=("KRIPKE_OPT" "KRIPKE" "POSS" "OLD");
+for repr in "${representations[@]}"; do
+    if [ "$repr" != "OLD" ]; then 
+        bin/efp.out        $DOMAIN -debug -st $repr -e "${ARGUMENTS[@]}";
+    fi;
+done
