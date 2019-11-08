@@ -747,16 +747,17 @@ pworld_ptr pstate::execute_sensing_announcement_helper(const action &act, pstate
 					}
 				} else { // Otherwise, if we have a FULLY/PARTIALLY observant agent
 					auto calculated_pworld = calculated.find(*it_pws);
-					fluent_formula effects = get_effects_if_entailed(act.get_effects(), *it_pws);
-					bool ent = entails(effects, *it_pws);
+					fluent_formula effects = get_effects_if_entailed(act.get_effects(), get_pointed());
+					bool ent = entails(effects, *it_pws) == entails(effects, get_pointed());
+					bool is_consistent_belief = is_partially_obs || // If "ag" is PARTIALLY OBS, we always add an edge; If "ag" is FULLY OBS, we add an edge if he believes that "calculated" may be true (i.e., when "ent" holds) XOR
+                                                (is_fully_obs && (ent != negated_execution)); // if a PARTIALLY OBS agent believes that "ag" thinks that "calculated" may be true (i.e., when "negated_execution" holds)
 
 					if (calculated_pworld != calculated.end()) { // If we already calculated the transition function for this pworld
-						if (is_partially_obs || // If "ag" is PARTIALLY OBS, we always add an edge
-							(is_fully_obs && (ent != negated_execution))) { // If "ag" is FULLY OBS, we add an edge if he believes that "calculated" may be true (i.e., when "ent" holds) XOR
-							ret.add_edge(new_pw, calculated_pworld->second, ag); // if a PARTIALLY OBS agent believes that "ag" thinks that "calculated" may be true (i.e., when "negated_execution" holds)
+						if (is_consistent_belief) {
+							ret.add_edge(new_pw, calculated_pworld->second, ag);
 						}
 					} else { // If we did not already calculate the transition function
-						if (ent) { // We calculate when if the pworld entails the action effects...
+						if (is_consistent_belief) { // We calculate it if it would result in a consistent belief...
 							pworld_ptr believed_pw = execute_sensing_announcement_helper(act, ret, *it_pws, calculated, partially_obs_agents, oblivious_obs_agents, false);
 							ret.add_edge(new_pw, believed_pw, ag);
 						}
