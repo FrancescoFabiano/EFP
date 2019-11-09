@@ -73,6 +73,9 @@ template <class T>
 bool planner<T>::search_BFS(bool old_check)
 {
 	T initial;
+	bool check_visited = domain::get_instance().check_visited();
+	std::set<T> visited_states;
+
 	auto start_timing = std::chrono::system_clock::now();
 	initial.build_initial();
 	auto end_timing = std::chrono::system_clock::now();
@@ -110,7 +113,10 @@ bool planner<T>::search_BFS(bool old_check)
 					print_results(elapsed_seconds, tmp_state, old_check, false);
 					return true;
 				}
-				m_search_space.push(tmp_state);
+				if (!check_visited || visited_states.insert(tmp_state).second) {
+					m_search_space.push(tmp_state);
+				}
+
 			}
 		}
 	}
@@ -122,6 +128,9 @@ template <class T>
 bool planner<T>::search_heur(bool old_check)
 {
 	T initial;
+	bool check_visited = domain::get_instance().check_visited();
+	std::set<T> visited_states;
+
 	auto start_timing = std::chrono::system_clock::now();
 	initial.build_initial();
 	auto end_timing = std::chrono::system_clock::now();
@@ -160,8 +169,10 @@ bool planner<T>::search_heur(bool old_check)
 				}
 				planning_graph<T> pg(tmp_state);
 				if (pg.is_satisfiable()) {
-					tmp_state.set_heuristic_value(pg.get_length());
-					m_heur_search_space.push(tmp_state);
+					if (!check_visited || visited_states.insert(tmp_state).second) {
+						tmp_state.set_heuristic_value(pg.get_length());
+						m_heur_search_space.push(tmp_state);
+					}
 				}
 			}
 		}

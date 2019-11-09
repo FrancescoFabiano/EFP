@@ -71,6 +71,9 @@ void print_usage(char* prog_name)
 	/*std::cout << "-ini_build @building_tech" << std::endl;
 	std::cout << "	Set the @building_tech that describes how the initial state will be build." << std::endl;*/
 
+	std::cout << "-check_visited" << std::endl;
+	std::cout << "	The planner will check for visited states (by default it does not)." << std::endl;
+
 	std::cout << "-h @heuristic" << std::endl;
 	std::cout << "	Set the @heuristic to use to perform the search." << std::endl;
 	std::cout << "	Possible @heuristic:" << std::endl;
@@ -104,6 +107,7 @@ int main(int argc, char** argv)
 	bool debug = false;
 	bool old_check = false;
 	bool is_global_obsv = true;
+	bool check_visited = false;
 	heuristics used_heur = NO_H;
 	state_type state_struc = KRIPKE; //default
 	domain_restriction ini_restriction = S5; //default
@@ -164,6 +168,11 @@ int main(int argc, char** argv)
 				std::cerr << "Wrong specification for '-gr'; use 'S5' or 'K45' or 'NONE'." << std::endl;
 				exit(1);
 			}
+		} else if (strcmp(argv[i], "-check_visited") == 0) {
+
+			std::cout << "The planner will check for visited states" << std::endl;
+			check_visited = true;
+
 		} else if (strcmp(argv[i], "-st") == 0) {
 			i++;
 			if (i >= argc) {
@@ -290,7 +299,7 @@ int main(int argc, char** argv)
 	}
 
 	//Domain building
-	domain::get_instance().set_domain(domain_name, debug, state_struc, kopt, domain_reader, ini_restriction, goal_restriction, is_global_obsv, act_check);
+	domain::get_instance().set_domain(domain_name, debug, state_struc, kopt, domain_reader, ini_restriction, goal_restriction, is_global_obsv, act_check, check_visited);
 	domain::get_instance().build();
 
 

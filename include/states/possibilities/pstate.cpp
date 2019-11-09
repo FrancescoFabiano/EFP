@@ -102,11 +102,11 @@ bool pstate::operator=(const pstate & to_copy)
 bool pstate::operator<(const pstate & to_compare) const
 {
 
-	if (m_max_depth < to_compare.get_max_depth()) {
+	/*if (m_max_depth < to_compare.get_max_depth()) {
 		return true;
 	} else if (m_max_depth > to_compare.get_max_depth()) {
 		return false;
-	}
+	}*/
 
 	if (m_pointed < to_compare.get_pointed()) {
 		return true;
@@ -750,7 +750,7 @@ pworld_ptr pstate::execute_sensing_announcement_helper(const action &act, pstate
 					fluent_formula effects = get_effects_if_entailed(act.get_effects(), get_pointed());
 					bool ent = entails(effects, *it_pws) == entails(effects, get_pointed());
 					bool is_consistent_belief = is_partially_obs || // If "ag" is PARTIALLY OBS, we always add an edge; If "ag" is FULLY OBS, we add an edge if he believes that "calculated" may be true (i.e., when "ent" holds) XOR
-                                                (is_fully_obs && (ent != negated_execution)); // if a PARTIALLY OBS agent believes that "ag" thinks that "calculated" may be true (i.e., when "negated_execution" holds)
+						(is_fully_obs && (ent != negated_execution)); // if a PARTIALLY OBS agent believes that "ag" thinks that "calculated" may be true (i.e., when "negated_execution" holds)
 
 					if (calculated_pworld != calculated.end()) { // If we already calculated the transition function for this pworld
 						if (is_consistent_belief) {

@@ -111,3 +111,15 @@ initially C([a,b], (at_b2_1, -at_b2_3) | (-at_b2_1, at_b2_3));
 
 %Three Actions
 goal B(b,at_b1_1);
+
+%Five Actions
+goal B(b,at_b2_3);
+
+%Six Actions
+goal C([a,b], at_b2_3);
+
+%Seven Actions
+goal B(a,at_a_2);
+
+%Eight Actions
+goal B(b,at_a_2);
