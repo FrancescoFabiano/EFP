@@ -1,0 +1,15 @@
+EFP Version 2.0 (on KRIPKE with OPTIMIZED transition function) completed the search in 0.039288
+Executed actions: right, sense, right, right, shout_4
+Plan Length: 5
+
+
+EFP Version 2.0 (on KRIPKE with STRANDARD transition function) completed the search in 0.115843
+Executed actions: right, sense, right, right, shout_4, shout_4
+Plan Length: 6
+
+
+EFP Version 2.0 (on POSS with STANDARD transition function) completed the search in 0.013951
+Executed actions: right, sense, right, right, shout_4
+Plan Length: 5
+
+
