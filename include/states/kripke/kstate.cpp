@@ -101,11 +101,11 @@ bool kstate::operator=(const kstate & to_copy)
 
 bool kstate::operator<(const kstate & to_compare) const
 {
-	if (m_max_depth < to_compare.get_max_depth()) {
+	/*if (m_max_depth < to_compare.get_max_depth()) {
 		return true;
 	} else if (m_max_depth > to_compare.get_max_depth()) {
 		return false;
-	}
+	}*/
 
 	if (m_pointed < to_compare.get_pointed()) {
 		return true;

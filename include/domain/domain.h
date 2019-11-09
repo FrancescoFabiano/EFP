@@ -71,6 +71,8 @@ private:
     bool m_is_global_obsv;
     /** \brief The \ref action_check used in *this*.*/
     action_check m_act_check;
+    /** \brief If the \ref search process should check for already visited_states.*/
+    bool m_check_visited;
 
     /** \brief Function that from the file stores the \ref agent information.*/
     void build_agents();
@@ -119,8 +121,9 @@ public:
      * @param[in] ini_res: the restriction to apply to \ref m_intial_description.
      * @param[in] goal_res: the \ref domain_restriction to assign to \ref m_goal_restriction.
      * @param[in] is_global_obsv: the \ref domain_restriction to assign to \ref m_is_global_obsv.
-     * @param[in] act_check: the \ref action_check to assign to \ref m_act_check.*/
-    void set_domain(std::string name, bool debug, state_type stype, bool k_opt, std::shared_ptr<reader> reader, domain_restriction ini_res, domain_restriction goal_res, bool is_global_obsv, action_check act_check);
+     * @param[in] act_check: the \ref action_check to assign to \ref m_act_check.
+     * @param[in] check_visited: If the \ref search process should check for already visited_states.*/
+    void set_domain(std::string name, bool debug, state_type stype, bool k_opt, std::shared_ptr<reader> reader, domain_restriction ini_res, domain_restriction goal_res, bool is_global_obsv, action_check act_check, bool check_visited);
 
     /** \brief Function that builds all the domain information.
      *
@@ -164,6 +167,10 @@ public:
      *
      * @return the field \ref m_debug.*/
     bool get_debug();
+    /** \brief Getter of the field \ref m_check_visited.
+     *
+     * @return the field \ref m_check_visited.*/
+    bool check_visited();
     /** \brief Getter of the field \ref m_name.
      *
      * @return the field \ref m_name.*/

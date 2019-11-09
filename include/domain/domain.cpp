@@ -18,7 +18,7 @@ domain& domain::get_instance()
 	return instance;
 }
 
-void domain::set_domain(std::string name, bool debug, state_type stype, bool k_opt, std::shared_ptr<reader> reader, domain_restriction ini_res, domain_restriction goal_res, bool is_global_obsv, action_check act_check)
+void domain::set_domain(std::string name, bool debug, state_type stype, bool k_opt, std::shared_ptr<reader> reader, domain_restriction ini_res, domain_restriction goal_res, bool is_global_obsv, action_check act_check, bool check_visited)
 {
 	m_name = name;
 	m_debug = debug;
@@ -29,16 +29,19 @@ void domain::set_domain(std::string name, bool debug, state_type stype, bool k_o
 	m_goal_restriction = goal_res;
 	m_is_global_obsv = is_global_obsv;
 	m_act_check = act_check;
+	m_check_visited = check_visited;
 }
 
 const state_type & domain::get_stype()
 {
-    return m_stype;
+	return m_stype;
 }
+
 const bool & domain::get_k_optimized()
 {
-    return m_kopt;
+	return m_kopt;
 }
+
 const grounder & domain::get_grounder()
 {
 	return m_grounder;
@@ -72,6 +75,11 @@ bool domain::get_is_global_obsv()
 bool domain::get_debug()
 {
 	return m_debug;
+}
+
+bool domain::check_visited()
+{
+	return m_check_visited;
 }
 
 std::string domain::get_name()
