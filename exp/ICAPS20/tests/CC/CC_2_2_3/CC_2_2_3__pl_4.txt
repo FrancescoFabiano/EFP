@@ -1,3 +1,5 @@
+%%% Executed actions: left_a a_check_1 right_b b_check_3 %%%
+
 fluent at_a_1, at_a_2, at_a_3, at_b_1, at_b_2, at_b_3, at_b1_1, at_b1_3, at_b2_1, at_b2_3;
 action right_a, left_a, right_b, left_b, a_check_1, a_check_3, b_check_1, b_check_3, tell_a_b1_1, tell_a_b2_1, tell_b_b1_1, tell_b_b2_1, tell_a_b1_3, tell_a_b2_3, tell_b_b1_3, tell_b_b2_3;
 
@@ -107,19 +109,6 @@ initially C([a,b], -at_b_3);
 initially C([a,b], (at_b1_1, -at_b1_3) | (-at_b1_1, at_b1_3));
 initially C([a,b], (at_b2_1, -at_b2_3) | (-at_b2_1, at_b2_3));
 
-
-
-%Three Actions
-goal B(b,at_b1_1);
-
-%Five Actions
+% 4 actions
 goal B(b,at_b2_3);
-
-%Six Actions
-goal C([a,b], at_b2_3);
-
-%Seven Actions
-goal B(a,at_a_2);
-
-%Eight Actions
-goal B(b,at_a_2);
+goal B(a,at_b1_1);
