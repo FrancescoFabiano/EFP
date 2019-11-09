@@ -57,71 +57,71 @@ unsigned int pstate::get_max_depth() const
 
 bool pstate::operator=(const pstate & to_copy)
 {
-    set_worlds(to_copy.get_worlds());
-    set_beliefs(to_copy.get_beliefs());
-    set_max_depth(to_copy.get_max_depth());
-    set_pointed(to_copy.get_pointed());
-    return true;
+	set_worlds(to_copy.get_worlds());
+	set_beliefs(to_copy.get_beliefs());
+	m_max_depth = to_copy.get_max_depth();
+	set_pointed(to_copy.get_pointed());
+	return true;
 }
 
 bool pstate::operator<(const pstate & to_compare) const
 {
 
-    if (m_max_depth < to_compare.get_max_depth()) {
-        return true;
-    } else if (m_max_depth > to_compare.get_max_depth()) {
-        return false;
-    }
+	if (m_max_depth < to_compare.get_max_depth()) {
+		return true;
+	} else if (m_max_depth > to_compare.get_max_depth()) {
+		return false;
+	}
 
-    if (m_pointed < to_compare.get_pointed()) {
-        return true;
-    } else if (m_pointed > to_compare.get_pointed()) {
-        return false;
-    }
+	if (m_pointed < to_compare.get_pointed()) {
+		return true;
+	} else if (m_pointed > to_compare.get_pointed()) {
+		return false;
+	}
 
-    if (m_worlds < to_compare.get_worlds()) {
-        return true;
-    } else if (m_worlds > to_compare.get_worlds()) {
-        return false;
-    }
+	if (m_worlds < to_compare.get_worlds()) {
+		return true;
+	} else if (m_worlds > to_compare.get_worlds()) {
+		return false;
+	}
 
-    pworld_transitive_map::const_iterator it_tramap1;
-    pworld_transitive_map::const_iterator it_tramap2 = to_compare.get_beliefs().begin();
+	pworld_transitive_map::const_iterator it_tramap1;
+	pworld_transitive_map::const_iterator it_tramap2 = to_compare.get_beliefs().begin();
 
-    pworld_map tmp_pwmap1, tmp_pwmap2;
-    pworld_map::const_iterator it_pwmap1, it_pwmap2;
-    //The same size is assured by the same size of m_worlds
-    for (it_tramap1 = m_beliefs.begin(); it_tramap1 != m_beliefs.end(); it_tramap1++) {
-        if (it_tramap1->first < it_tramap2->first) {
-            return true;
-        } else if (it_tramap1->first > it_tramap2->first) {
-            return false;
-        }
+	pworld_map tmp_pwmap1, tmp_pwmap2;
+	pworld_map::const_iterator it_pwmap1, it_pwmap2;
+	//The same size is assured by the same size of m_worlds
+	for (it_tramap1 = m_beliefs.begin(); it_tramap1 != m_beliefs.end(); it_tramap1++) {
+		if (it_tramap1->first < it_tramap2->first) {
+			return true;
+		} else if (it_tramap1->first > it_tramap2->first) {
+			return false;
+		}
 
-        tmp_pwmap1 = it_tramap1->second;
-        tmp_pwmap2 = it_tramap2->second;
-        if (tmp_pwmap1.size() < tmp_pwmap2.size()) {
-            return true;
-        } else if (tmp_pwmap1.size() > tmp_pwmap2.size()) {
-            return false;
-        }
-        it_pwmap2 = tmp_pwmap2.begin();
-        for (it_pwmap1 = tmp_pwmap1.begin(); it_pwmap1 != tmp_pwmap1.end(); it_pwmap1++) {
-            if (it_pwmap1->first < it_pwmap2->first) {
-                return true;
-            } else if (it_pwmap1->first > it_pwmap2->first) {
-                return false;
-            }
+		tmp_pwmap1 = it_tramap1->second;
+		tmp_pwmap2 = it_tramap2->second;
+		if (tmp_pwmap1.size() < tmp_pwmap2.size()) {
+			return true;
+		} else if (tmp_pwmap1.size() > tmp_pwmap2.size()) {
+			return false;
+		}
+		it_pwmap2 = tmp_pwmap2.begin();
+		for (it_pwmap1 = tmp_pwmap1.begin(); it_pwmap1 != tmp_pwmap1.end(); it_pwmap1++) {
+			if (it_pwmap1->first < it_pwmap2->first) {
+				return true;
+			} else if (it_pwmap1->first > it_pwmap2->first) {
+				return false;
+			}
 
-            if (it_pwmap1->second < it_pwmap2->second) {
-                return true;
-            } else if (it_pwmap1->second > it_pwmap2->second) {
-                return false;
-            }
-            it_pwmap2++;
-        }
-    }
-    return false;
+			if (it_pwmap1->second < it_pwmap2->second) {
+				return true;
+			} else if (it_pwmap1->second > it_pwmap2->second) {
+				return false;
+			}
+			it_pwmap2++;
+		}
+	}
+	return false;
 }
 
 bool pstate::entails(fluent f) const
@@ -260,9 +260,9 @@ bool pstate::get_B_reachable_worlds(agent ag, const pworld_ptr & world, pworld_p
 		auto pw_set = pw_map->second.find(ag);
 
 		if (pw_set != pw_map->second.end()) {
-            unsigned long previous_size = ret.size();
+			unsigned long previous_size = ret.size();
 			sum_set(ret, pw_set->second);
-            unsigned long current_size = ret.size();
+			unsigned long current_size = ret.size();
 
 			return previous_size == current_size;
 		}
@@ -751,7 +751,7 @@ pworld_ptr pstate::execute_sensing_announcement_helper(const action &act, pstate
 					fluent_formula effects = get_effects_if_entailed(act.get_effects(), get_pointed());
 					bool ent = act.get_type() == SENSING ? entails(effects, *it_pws) == entails(effects, get_pointed()) : entails(effects, *it_pws);
 					bool is_consistent_belief = is_partially_obs || // If "ag" is PARTIALLY OBS, we always add an edge; If "ag" is FULLY OBS, we add an edge if he believes that "calculated" may be true (i.e., when "ent" holds) XOR
-                                                (is_fully_obs && (ent != negated_execution)); // if a PARTIALLY OBS agent believes that "ag" thinks that "calculated" may be true (i.e., when "negated_execution" holds)
+						(is_fully_obs && (ent != negated_execution)); // if a PARTIALLY OBS agent believes that "ag" thinks that "calculated" may be true (i.e., when "negated_execution" holds)
 
 					if (calculated_pworld != calculated.end()) { // If we already calculated the transition function for this pworld
 						if (is_consistent_belief) {

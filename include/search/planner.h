@@ -78,12 +78,17 @@ public:
 
     /**Function that searches on m_search_space using the given actions.
      *@param[in] act_name: the names of the \ref action to execute (ordered).*/
-    void execute_given_actions(const std::vector<std::string> act_name);
+    void execute_given_actions(const std::vector<std::string>& act_name);
 
     /**Function that searches on m_search_space using the given actions and print out the execution time.
      * 
      * Every useless I\O step is removed for time accuracy
      * 
      *@param[in] act_name: the names of the \ref action to execute (ordered).*/
-    void execute_given_actions_timed(const std::vector<std::string> act_name);
+    void execute_given_actions_timed(const std::vector<std::string>& act_name);
+
+    /**Function that checks whether the given actions exist. 
+     * 
+     *@param[in] act_name: the names of the \ref action to execute (ordered).*/
+    void check_actions_names(const std::vector<std::string>& act_name);
 };
