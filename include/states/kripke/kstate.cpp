@@ -94,7 +94,7 @@ bool kstate::operator=(const kstate & to_copy)
 {
 	set_edges(to_copy.get_edges());
 	set_worlds(to_copy.get_worlds());
-	set_max_depth(to_copy.get_max_depth());
+	m_max_depth = get_max_depth();
 	set_pointed(to_copy.get_pointed());
 	return true;
 }
@@ -771,7 +771,6 @@ kstate kstate::execute_action_um(const action& act, const event_type_set& events
 	} else {
 		ret.set_max_depth(get_max_depth());
 	}
-
 	kworld_ptr_set::const_iterator it_kwset1;
 	// Creating the new worlds for the kstate ret
 	for (it_kwset1 = get_worlds().begin(); it_kwset1 != get_worlds().end(); it_kwset1++) {
@@ -792,8 +791,8 @@ kstate kstate::execute_action_um(const action& act, const event_type_set& events
 				if (e == EPSILON && (oblivious_obs_agents.size() > 0)) {
 					add_ste_worlds(ret, *it_kwset1, kmap, e, act);
 				} else { // if (entails(act.get_executability(), *it_kwset1)) {
-					bool ent = entails(effects, *it_kwset1);
-
+					bool ent = (entails(effects, *it_kwset1) == entails(effects));
+					//Is sigma when both the pointed and the world we are updating have the same interpretation of the fluent
 					if ((e == SIGMA && ent) || (e == TAU && !ent && partially_obs_agents.size() > 0)) {
 						add_ste_worlds(ret, *it_kwset1, kmap, e, act);
 					}
