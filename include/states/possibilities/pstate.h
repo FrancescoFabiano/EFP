@@ -50,7 +50,7 @@ private:
      *
      * @return true: \p to_check is entailed in \p world;
      * @return false: \p -to_check is entailed in \p world.*/
-    bool entails(fluent to_check, pworld_ptr world) const;
+    bool entails(fluent to_check, const pworld_ptr & world) const;
     /**
      *\brief Function that checks the entailment of a conjunctive set of \ref fluent in a given \ref pworld.
      *     @see \ref pworld::entails(const fluent_set &) const
@@ -60,7 +60,7 @@ private:
      *
      * @return true: \p to_check is entailed in \p world;
      * @return false: \p -to_check is entailed in \p world.*/
-    bool entails(const fluent_set & to_check, pworld_ptr world) const;
+    bool entails(const fluent_set & to_check, const pworld_ptr & world) const;
     /**
      *\brief Function that checks the entailment of a conjunctive set of \ref fluent in a given \ref pworld.
      *     @see \ref pworld::entails(const fluent_formula &) const
@@ -70,7 +70,7 @@ private:
      *
      * @return true: \p to_check is entailed in \p world;
      * @return false: \p -to_check is entailed in \p world.*/
-    bool entails(const fluent_formula & to_check, pworld_ptr world) const;
+    bool entails(const fluent_formula & to_check, const pworld_ptr & world) const;
 
     /** \brief Function that checks the entailment of a \ref belief_formula.
      * 
@@ -91,7 +91,7 @@ private:
      * @return false: \p -to_check is entailed starting from \p world.
      * 
      * \todo self-loop?*/
-    bool entails(const belief_formula & to_check, pworld_ptr world) const;
+    bool entails(const belief_formula & to_check, const pworld_ptr & world) const;
     /** \brief Function that checks the entailment of a \ref belief_formula on several possible starting points.
      * 
      * This function eases the task to check the entailment from several starting \ref pworld simultaneously.
@@ -119,7 +119,7 @@ private:
      * @return false: \p -to_check is entailed starting from \p world.
      * 
      * \todo self-loop?*/
-    bool entails(const formula_list & to_check, pworld_ptr world) const;
+    bool entails(const formula_list & to_check, const pworld_ptr & world) const;
 
     /** \brief Function that returns all the reachable \ref pworld given the \ref agent and the staring \ref pworld.
      * 
@@ -136,7 +136,7 @@ private:
      *
      * 
      * \todo self-loop?*/
-    const pworld_ptr_set get_B_reachable_worlds(agent ag, pworld_ptr world) const;
+    const pworld_ptr_set get_B_reachable_worlds(agent ag, const pworld_ptr & world) const;
 
     /** \brief Function that returns all the reachable \ref pworld given the \ref agent and the staring \ref pworld.
      * 
@@ -152,7 +152,7 @@ private:
      *
      * 
      * \todo self-loop?*/
-    bool get_B_reachable_worlds(agent ag, pworld_ptr world, pworld_ptr_set& reached) const;
+    bool get_B_reachable_worlds(agent ag, const pworld_ptr & world, pworld_ptr_set & reached) const;
 
     /** \brief Function that returns all the reachable \ref pworld given a set of \ref agent and the staring \ref pworld.
      * 
@@ -169,7 +169,7 @@ private:
      *
      * 
      * \todo self-loop?*/
-    const pworld_ptr_set get_E_reachable_worlds(const agent_set & ags, pworld_ptr world) const;
+    const pworld_ptr_set get_E_reachable_worlds(const agent_set & ags, const pworld_ptr & world) const;
 
     /** \brief Function that returns all the reachable \ref pworld given a set of \ref agent and the staring \ref pworld.
      * 
@@ -179,13 +179,13 @@ private:
      * @see \ref belief_formula, get_B_reachable_worlds(agent, pworld_ptr, pworld_ptr_set) const and get_C_reachable_worlds(const agent_set &, pworld_ptr world) const.
      * 
      * @param[in] ags: the set of label of the \ref kedge that the function follows to check the transitivity.
-     * @param[in] world: the pointers to the set of \ref pworld where to start to check the entailment.
+     * @param[in] worlds: the pointers to the set of \ref pworld where to start to check the entailment.
      *
      * @param[out] reached: the set of pointers to all the reachable worlds.
      *
      * 
      * \todo self-loop?*/
-    bool get_E_reachable_worlds(const agent_set &ags, pworld_ptr_set world, pworld_ptr_set& reached) const;
+    bool get_E_reachable_worlds(const agent_set &ags, pworld_ptr_set & worlds, pworld_ptr_set & reached) const;
 
     /** \brief Function that returns all the reachable \ref pworld (in the *Common Knowledge* sense) given a \ref agent and the staring \ref pworld.
      * 
@@ -200,7 +200,7 @@ private:
      * @return a set of pointers to all the reachable worlds.
      * 
      * \todo self-loop?*/
-    const pworld_ptr_set get_C_reachable_worlds(const agent_set &, pworld_ptr world) const;
+    const pworld_ptr_set get_C_reachable_worlds(const agent_set &, const pworld_ptr & world) const;
 
     /** \brief Function that builds the initial Kripke structure given the initial conditions in a structural way.
      *

@@ -286,7 +286,7 @@ const kworld_ptr_set kstate::get_E_reachable_worlds(const agent_set & ags, kworl
 	return ret;
 }
 
-bool kstate::get_E_reachable_worlds(const agent_set & ags, kworld_ptr_set worlds, kworld_ptr_set & ret) const
+bool kstate::get_E_reachable_worlds(const agent_set & ags, kworld_ptr_set &worlds, kworld_ptr_set & ret) const
 {
 	bool is_fixed_point = true;
 	kworld_ptr_set::const_iterator it_kwptr;

@@ -55,12 +55,81 @@ unsigned int pstate::get_max_depth() const
 	return m_max_depth;
 }
 
+bool pstate::operator=(const pstate & to_copy)
+{
+    set_worlds(to_copy.get_worlds());
+    set_beliefs(to_copy.get_beliefs());
+    set_max_depth(to_copy.get_max_depth());
+    set_pointed(to_copy.get_pointed());
+    return true;
+}
+
+bool pstate::operator<(const pstate & to_compare) const
+{
+
+    if (m_max_depth < to_compare.get_max_depth()) {
+        return true;
+    } else if (m_max_depth > to_compare.get_max_depth()) {
+        return false;
+    }
+
+    if (m_pointed < to_compare.get_pointed()) {
+        return true;
+    } else if (m_pointed > to_compare.get_pointed()) {
+        return false;
+    }
+
+    if (m_worlds < to_compare.get_worlds()) {
+        return true;
+    } else if (m_worlds > to_compare.get_worlds()) {
+        return false;
+    }
+
+    pworld_transitive_map::const_iterator it_tramap1;
+    pworld_transitive_map::const_iterator it_tramap2 = to_compare.get_beliefs().begin();
+
+    pworld_map tmp_pwmap1, tmp_pwmap2;
+    pworld_map::const_iterator it_pwmap1, it_pwmap2;
+    //The same size is assured by the same size of m_worlds
+    for (it_tramap1 = m_beliefs.begin(); it_tramap1 != m_beliefs.end(); it_tramap1++) {
+        if (it_tramap1->first < it_tramap2->first) {
+            return true;
+        } else if (it_tramap1->first > it_tramap2->first) {
+            return false;
+        }
+
+        tmp_pwmap1 = it_tramap1->second;
+        tmp_pwmap2 = it_tramap2->second;
+        if (tmp_pwmap1.size() < tmp_pwmap2.size()) {
+            return true;
+        } else if (tmp_pwmap1.size() > tmp_pwmap2.size()) {
+            return false;
+        }
+        it_pwmap2 = tmp_pwmap2.begin();
+        for (it_pwmap1 = tmp_pwmap1.begin(); it_pwmap1 != tmp_pwmap1.end(); it_pwmap1++) {
+            if (it_pwmap1->first < it_pwmap2->first) {
+                return true;
+            } else if (it_pwmap1->first > it_pwmap2->first) {
+                return false;
+            }
+
+            if (it_pwmap1->second < it_pwmap2->second) {
+                return true;
+            } else if (it_pwmap1->second > it_pwmap2->second) {
+                return false;
+            }
+            it_pwmap2++;
+        }
+    }
+    return false;
+}
+
 bool pstate::entails(fluent f) const
 {
 	return entails(f, m_pointed);
 }
 
-bool pstate::entails(fluent f, pworld_ptr world) const
+bool pstate::entails(fluent f, const pworld_ptr & world) const
 {
 	return world.get_ptr()->entails(f);
 }
@@ -70,7 +139,7 @@ bool pstate::entails(const fluent_set & fl) const
 	return entails(fl, m_pointed);
 }
 
-bool pstate::entails(const fluent_set & fl, pworld_ptr world) const
+bool pstate::entails(const fluent_set & fl, const pworld_ptr & world) const
 {
 	return world.get_ptr()->entails(fl);
 }
@@ -80,7 +149,7 @@ bool pstate::entails(const fluent_formula & ff) const
 	return entails(ff, m_pointed);
 }
 
-bool pstate::entails(const fluent_formula & ff, pworld_ptr world) const
+bool pstate::entails(const fluent_formula & ff, const pworld_ptr & world) const
 {
 	return world.get_ptr()->entails(ff);
 }
@@ -90,87 +159,17 @@ bool pstate::entails(const belief_formula & bf) const
 	return entails(bf, m_pointed);
 }
 
-bool pstate::operator=(const pstate & to_copy)
-{
-	set_worlds(to_copy.get_worlds());
-	set_beliefs(to_copy.get_beliefs());
-	set_max_depth(to_copy.get_max_depth());
-	set_pointed(to_copy.get_pointed());
-	return true;
-}
-
-bool pstate::operator<(const pstate & to_compare) const
-{
-
-	if (m_max_depth < to_compare.get_max_depth()) {
-		return true;
-	} else if (m_max_depth > to_compare.get_max_depth()) {
-		return false;
-	}
-
-	if (m_pointed < to_compare.get_pointed()) {
-		return true;
-	} else if (m_pointed > to_compare.get_pointed()) {
-		return false;
-	}
-
-	if (m_worlds < to_compare.get_worlds()) {
-		return true;
-	} else if (m_worlds > to_compare.get_worlds()) {
-		return false;
-	}
-
-	pworld_transitive_map::const_iterator it_tramap1;
-	pworld_transitive_map::const_iterator it_tramap2 = to_compare.get_beliefs().begin();
-
-	pworld_map tmp_pwmap1, tmp_pwmap2;
-	pworld_map::const_iterator it_pwmap1, it_pwmap2;
-	//The same size is assured by the same size of m_worlds
-	for (it_tramap1 = m_beliefs.begin(); it_tramap1 != m_beliefs.end(); it_tramap1++) {
-		if (it_tramap1->first < it_tramap2->first) {
-			return true;
-		} else if (it_tramap1->first > it_tramap2->first) {
-			return false;
-		}
-
-		tmp_pwmap1 = it_tramap1->second;
-		tmp_pwmap2 = it_tramap2->second;
-		if (tmp_pwmap1.size() < tmp_pwmap2.size()) {
-			return true;
-		} else if (tmp_pwmap1.size() > tmp_pwmap2.size()) {
-			return false;
-		}
-		it_pwmap2 = tmp_pwmap2.begin();
-		for (it_pwmap1 = tmp_pwmap1.begin(); it_pwmap1 != tmp_pwmap1.end(); it_pwmap1++) {
-			if (it_pwmap1->first < it_pwmap2->first) {
-				return true;
-			} else if (it_pwmap1->first > it_pwmap2->first) {
-				return false;
-			}
-
-			if (it_pwmap1->second < it_pwmap2->second) {
-				return true;
-			} else if (it_pwmap1->second > it_pwmap2->second) {
-				return false;
-			}
-			it_pwmap2++;
-		}
-	}
-	return false;
-}
-
 bool pstate::entails(const belief_formula & to_check, const pworld_ptr_set & reachable) const
 {
-	pworld_ptr_set::const_iterator it_kwl;
-	for (it_kwl = reachable.begin(); it_kwl != reachable.end(); it_kwl++) {
-		/**\todo why setted contary?*/
-		if (!entails(to_check, (*it_kwl)))
+	pworld_ptr_set::const_iterator it_pws;
+	for (it_pws = reachable.begin(); it_pws != reachable.end(); it_pws++) {
+		if (!entails(to_check, *it_pws))
 			return false;
 	}
 	return true;
 }
 
-bool pstate::entails(const belief_formula & bf, pworld_ptr world) const
+bool pstate::entails(const belief_formula & bf, const pworld_ptr & world) const
 {
 	/*
 	 The entailment of a \ref belief_formula just call recursively the entailment on all the reachable world with that formula.
@@ -232,19 +231,19 @@ bool pstate::entails(const belief_formula & bf, pworld_ptr world) const
 	}
 }
 
-bool pstate::entails(const formula_list & to_check, pworld_ptr world) const
+bool pstate::entails(const formula_list & to_check, const pworld_ptr & world) const
 {
 	//formula_list expresses CNF formula
 	formula_list::const_iterator it_fl;
 	for (it_fl = to_check.begin(); it_fl != to_check.end(); it_fl++) {
-		if (!entails((*it_fl), world)) {
+		if (!entails(*it_fl, world)) {
 			return false;
 		}
 	}
 	return true;
 }
 
-const pworld_ptr_set pstate::get_B_reachable_worlds(agent ag, pworld_ptr world) const
+const pworld_ptr_set pstate::get_B_reachable_worlds(agent ag, const pworld_ptr & world) const
 {
 	pworld_ptr_set ret;
 	get_B_reachable_worlds(ag, world, ret);
@@ -252,7 +251,7 @@ const pworld_ptr_set pstate::get_B_reachable_worlds(agent ag, pworld_ptr world) 
 	return ret;
 }
 
-bool pstate::get_B_reachable_worlds(agent ag, pworld_ptr world, pworld_ptr_set& ret) const
+bool pstate::get_B_reachable_worlds(agent ag, const pworld_ptr & world, pworld_ptr_set& ret) const
 {
 	/** \todo check: If a--i-->b, b--i-->c then a--i-->c must be there*/
 	auto pw_map = m_beliefs.find(world);
@@ -261,14 +260,17 @@ bool pstate::get_B_reachable_worlds(agent ag, pworld_ptr world, pworld_ptr_set& 
 		auto pw_set = pw_map->second.find(ag);
 
 		if (pw_set != pw_map->second.end()) {
+            unsigned long previous_size = ret.size();
 			sum_set(ret, pw_set->second);
-			return true;
+            unsigned long current_size = ret.size();
+
+			return previous_size == current_size;
 		}
 	}
 	return false;
 }
 
-const pworld_ptr_set pstate::get_E_reachable_worlds(const agent_set & ags, pworld_ptr world) const
+const pworld_ptr_set pstate::get_E_reachable_worlds(const agent_set & ags, const pworld_ptr & world) const
 {
 	pworld_ptr_set ret;
 	pworld_ptr_set worlds;
@@ -278,7 +280,7 @@ const pworld_ptr_set pstate::get_E_reachable_worlds(const agent_set & ags, pworl
 	return ret;
 }
 
-bool pstate::get_E_reachable_worlds(const agent_set & ags, pworld_ptr_set worlds, pworld_ptr_set& ret) const
+bool pstate::get_E_reachable_worlds(const agent_set & ags, pworld_ptr_set & worlds, pworld_ptr_set & ret) const
 {
 	bool is_fixed_point = true;
 	agent_set::const_iterator it_agset;
@@ -296,7 +298,7 @@ bool pstate::get_E_reachable_worlds(const agent_set & ags, pworld_ptr_set worlds
 
 }
 
-const pworld_ptr_set pstate::get_C_reachable_worlds(const agent_set & ags, pworld_ptr world) const
+const pworld_ptr_set pstate::get_C_reachable_worlds(const agent_set & ags, const pworld_ptr & world) const
 {
 	//Use of fixed point to stop.
 	bool is_fixed_point = false;
@@ -311,7 +313,6 @@ const pworld_ptr_set pstate::get_C_reachable_worlds(const agent_set & ags, pworl
 
 void pstate::add_world(const pworld & world)
 {
-
 	m_worlds.insert(pstore::get_instance().add_world(world));
 }
 
@@ -748,7 +749,7 @@ pworld_ptr pstate::execute_sensing_announcement_helper(const action &act, pstate
 				} else { // Otherwise, if we have a FULLY/PARTIALLY observant agent
 					auto calculated_pworld = calculated.find(*it_pws);
 					fluent_formula effects = get_effects_if_entailed(act.get_effects(), get_pointed());
-					bool ent = entails(effects, *it_pws) == entails(effects, get_pointed());
+					bool ent = act.get_type() == SENSING ? entails(effects, *it_pws) == entails(effects, get_pointed()) : entails(effects, *it_pws);
 					bool is_consistent_belief = is_partially_obs || // If "ag" is PARTIALLY OBS, we always add an edge; If "ag" is FULLY OBS, we add an edge if he believes that "calculated" may be true (i.e., when "ent" holds) XOR
                                                 (is_fully_obs && (ent != negated_execution)); // if a PARTIALLY OBS agent believes that "ag" thinks that "calculated" may be true (i.e., when "negated_execution" holds)
 
