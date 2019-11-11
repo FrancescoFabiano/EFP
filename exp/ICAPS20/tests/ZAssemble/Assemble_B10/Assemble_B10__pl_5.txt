@@ -35,10 +35,16 @@ a observes act_res;
 b observes act_res;
 
 initially qualify_a, qualify_b, -assemble, -restart;
-initially C([a,b], (-B(a, qualify_a)));
-initially C([a,b], (-B(a, qualify_b)));
-initially C([a,b], (-B(b, qualify_a)));
-initially C([a,b], (-B(b, qualify_b)));
+initially C([a,b], ((-B(a, qualify_a)), (-B(a, -qualify_a))));
+initially C([a,b], ((-B(a, qualify_b)), (-B(a, -qualify_b))));
+initially C([a,b], ((-B(b, qualify_a)), (-B(b, -qualify_a))));
+initially C([a,b], ((-B(b, qualify_b)), (-B(b, -qualify_b))));
+initially C([a,b], B(a, -assemble));
+initially C([a,b], B(b, -assemble));
+initially C([a,b], B(a, -restart));
+initially C([a,b], B(b, -restart));
+
+
 
 % 5 actions
 goal B(a, assemble);

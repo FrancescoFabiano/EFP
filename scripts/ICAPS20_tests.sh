@@ -8,6 +8,8 @@ OUTPATH_FINDINGPLAN='out/EFP_comparison/findingplan/'
 mkdir -p $OUTPATH
 DOMAIN_EXT=".txt"; # Name of the domain
 
+ITERATIONS=3;
+MAX_TIME_PER_ITERATION=3600; 
 
 
 
@@ -21,11 +23,14 @@ for dir in $INPATH*; do
         #mkdir -p $OUTPATH"$(basename $dir)"
 
         for file in $(find "$dir"/ -type f -name *$DOMAIN_EXT); do
-        mkdir -p $OUTPATH"$(basename $dir)"/"$(basename ${file%%.*})"/"for_average"
+			mkdir -p $OUTPATH"$(basename $dir)"/"$(basename ${file%%.*})"/"for_average"
 
             echo -e "    Solving the instance $(basename ${file%%.*})";
-            for i in {1..3}; do
-                . scripts/comparison_timeout.sh "$file";
+            i="1";
+			while [[ $i -le $ITERATIONS ]]; do
+				start=$SECONDS;
+				. scripts/comparison_visited.sh "$file";
+				duration=$(( SECONDS - start ));
                 #mv $OUTPATH_FINDINGPLAN"$(basename $file)" $OUTPATH"$(basename $dir)"/"$(basename $file)"
                 grep -w "EFP" $OUTPATH_FINDINGPLAN"$(basename $file)" >> $OUTPATH"$(basename $dir)"/"$(basename ${file%%.*})"/"for_average"/"exec_$i.txt";
                # while read line; do
@@ -34,6 +39,13 @@ for dir in $INPATH*; do
                #      echo ${line##* };
                # fi;
                #done < $OUTPATH_FINDINGPLAN"$(basename $file)";
+				if [[ $duration -gt $MAX_TIME_PER_ITERATION ]]; then
+					i=$(( $ITERATIONS + 1 ));
+					#echo $i;
+				else
+					i=$(( $i + 1 ));
+					#echo $i;
+				fi
             done
             mv $OUTPATH_FINDINGPLAN"$(basename $file)" $OUTPATH"$(basename $dir)"/"$(basename ${file%%.*})"/"results.txt";
         done

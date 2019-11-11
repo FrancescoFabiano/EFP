@@ -41,7 +41,11 @@ void planner<T>::print_results(std::chrono::duration<double> elapsed_seconds, T 
 			result << "on UNKNOWN with UNKNOWN transition function";
 			break;
 		}
-		result << ") completed the search in " << elapsed_seconds.count() << "\n";
+		result << ") ";
+		if (domain::get_instance().check_visited()) {
+			result << "with VISTED-STATE ";
+		}
+		result << "completed the search in " << elapsed_seconds.count() << "\n";
 		result.close();
 	}
 }
