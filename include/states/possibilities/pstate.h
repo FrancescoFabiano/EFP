@@ -119,7 +119,7 @@ private:
      * @return false: \p -to_check is entailed starting from \p world.
      * 
      * \todo self-loop?*/
-    bool entails(const formula_list & to_check, const pworld_ptr & world) const;
+    //bool entails(const formula_list & to_check, const pworld_ptr & world) const;
 
     /** \brief Function that returns all the reachable \ref pworld given the \ref agent and the staring \ref pworld.
      * 

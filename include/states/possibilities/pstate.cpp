@@ -61,17 +61,18 @@ bool pstate::operator=(const pstate & to_copy)
 	set_beliefs(to_copy.get_beliefs());
 	m_max_depth = to_copy.get_max_depth();
 	set_pointed(to_copy.get_pointed());
+	//std::cerr << "\nDEBUG: eq ";
 	return true;
 }
 
 bool pstate::operator<(const pstate & to_compare) const
 {
 
-	if (m_max_depth < to_compare.get_max_depth()) {
+	/*if (m_max_depth < to_compare.get_max_depth()) {
 		return true;
 	} else if (m_max_depth > to_compare.get_max_depth()) {
 		return false;
-	}
+	}*/
 
 	if (m_pointed < to_compare.get_pointed()) {
 		return true;
@@ -231,17 +232,17 @@ bool pstate::entails(const belief_formula & bf, const pworld_ptr & world) const
 	}
 }
 
-bool pstate::entails(const formula_list & to_check, const pworld_ptr & world) const
-{
-	//formula_list expresses CNF formula
-	formula_list::const_iterator it_fl;
-	for (it_fl = to_check.begin(); it_fl != to_check.end(); it_fl++) {
-		if (!entails(*it_fl, world)) {
-			return false;
-		}
-	}
-	return true;
-}
+//bool pstate::entails(const formula_list & to_check, const pworld_ptr & world) const
+//{
+//	//formula_list expresses CNF formula
+//	formula_list::const_iterator it_fl;
+//	for (it_fl = to_check.begin(); it_fl != to_check.end(); it_fl++) {
+//		if (!entails(*it_fl, world)) {
+//			return false;
+//		}
+//	}
+//	return true;
+//}
 
 const pworld_ptr_set pstate::get_B_reachable_worlds(agent ag, const pworld_ptr & world) const
 {
@@ -258,7 +259,6 @@ bool pstate::get_B_reachable_worlds(agent ag, const pworld_ptr & world, pworld_p
 
 	if (pw_map != m_beliefs.end()) {
 		auto pw_set = pw_map->second.find(ag);
-
 		if (pw_set != pw_map->second.end()) {
 			unsigned long previous_size = ret.size();
 			sum_set(ret, pw_set->second);
@@ -266,8 +266,9 @@ bool pstate::get_B_reachable_worlds(agent ag, const pworld_ptr & world, pworld_p
 
 			return previous_size == current_size;
 		}
+		/**@bug: We don't know why sometimes is outside the two if cases.*/
 	}
-	return false;
+	return true;
 }
 
 const pworld_ptr_set pstate::get_E_reachable_worlds(const agent_set & ags, const pworld_ptr & world) const
@@ -283,13 +284,12 @@ const pworld_ptr_set pstate::get_E_reachable_worlds(const agent_set & ags, const
 bool pstate::get_E_reachable_worlds(const agent_set & ags, pworld_ptr_set & worlds, pworld_ptr_set & ret) const
 {
 	bool is_fixed_point = true;
-	agent_set::const_iterator it_agset;
 	pworld_ptr_set::const_iterator it_pwptr;
+	agent_set::const_iterator it_agset;
 	sum_set(worlds, ret);
 	for (it_pwptr = worlds.begin(); it_pwptr != worlds.end(); it_pwptr++) {
 		for (it_agset = ags.begin(); it_agset != ags.end(); it_agset++) {
 			if (!get_B_reachable_worlds(*it_agset, *it_pwptr, ret)) {
-
 				is_fixed_point = false;
 			}
 		}
@@ -302,9 +302,9 @@ const pworld_ptr_set pstate::get_C_reachable_worlds(const agent_set & ags, const
 {
 	//Use of fixed point to stop.
 	bool is_fixed_point = false;
-	pworld_ptr_set ret;
 	pworld_ptr_set worlds;
 	worlds.insert(world);
+	pworld_ptr_set ret;
 	while (!is_fixed_point) {
 		is_fixed_point = get_E_reachable_worlds(ags, worlds, ret);
 	}
@@ -614,6 +614,7 @@ void pstate::remove_initial_pedge_bf(const belief_formula & to_check)
 /** \warning executability should be check in \ref state (or \ref planner).*/
 pstate pstate::compute_succ(const action & act) const
 {
+	//std::cerr << "\nDEBUG: Executing " << act.get_name();
 	switch ( act.get_type() ) {
 	case ONTIC:
 	{
@@ -680,7 +681,14 @@ pworld_ptr pstate::execute_ontic_helper(const action &act, pstate &ret, const pw
 
 	for (it_eff = current_pw_effects.begin(); it_eff != current_pw_effects.end(); it_eff++) {
 		world_description = helper::ontic_exec(*it_eff, world_description);
+		//		if (act.get_name().compare("distract_c_a") == 0) {
+		//			std::cerr << "\nDEBUG: Inside the first ONTIC loop " << act.get_name();
+		//		}
 	}
+
+	//	if (act.get_name().compare("distract_c_a") == 0) {
+	//		std::cerr << "\nDEBUG: Out the first ONTIC loop " << act.get_name();
+	//	}
 
 	pworld_ptr new_pw = ret.add_rep_world(pworld(world_description), current_pw.get_repetition()); // We add the corresponding pworld in ret
 	calculated.insert(transition_map::value_type(current_pw, new_pw)); // And we update the calculated map
@@ -694,9 +702,18 @@ pworld_ptr pstate::execute_ontic_helper(const action &act, pstate &ret, const pw
 		for (it_pwm = it_pwtm->second.begin(); it_pwm != it_pwtm->second.end(); it_pwm++) {
 			agent ag = it_pwm->first;
 
+			//			if (act.get_name().compare("distract_c_a") == 0) {
+			//				std::cerr << "\nDEBUG: Inside the SECOND ONTIC loop " << act.get_name();
+			//			}
+
 			bool is_oblivious_obs = oblivious_obs_agents.find(ag) != oblivious_obs_agents.end();
 
 			for (it_pws = it_pwm->second.begin(); it_pws != it_pwm->second.end(); it_pws++) {
+
+				//				if (act.get_name().compare("distract_c_a") == 0) {
+				//					std::cerr << "\nDEBUG: Inside the Third ONTIC loop " << act.get_name();
+				//				}
+
 				if (is_oblivious_obs) { // If we are dealing with an OBLIVIOUS agent we maintain its beliefs as they were
 					auto maintained_pworld = ret.get_worlds().find(*it_pws);
 
@@ -716,8 +733,15 @@ pworld_ptr pstate::execute_ontic_helper(const action &act, pstate &ret, const pw
 					}
 				}
 			}
+			//			if (act.get_name().compare("distract_c_a") == 0) {
+			//				std::cerr << "\nDEBUG: Out the Second ONTIC loop " << act.get_name();
+			//			}
 		}
+		//std::cerr << "\nDEBUG: Out the THIRD ONTIC loop " << act.get_name();
+
 	}
+	//std::cerr << "\nDEBUG: RETURN TO " << act.get_name();
+
 	return new_pw;
 }
 
@@ -759,10 +783,9 @@ pworld_ptr pstate::execute_sensing_announcement_helper(const action &act, pstate
 						}
 					} else { // If we did not already calculate the transition function
 						if (is_consistent_belief) { // We calculate it if it would result in a consistent belief...
-							pworld_ptr believed_pw = execute_sensing_announcement_helper(act, ret, *it_pws, calculated, partially_obs_agents, oblivious_obs_agents, false);
+							pworld_ptr believed_pw = execute_sensing_announcement_helper(act, ret, *it_pws, calculated, partially_obs_agents, oblivious_obs_agents, negated_execution);
 							ret.add_edge(new_pw, believed_pw, ag);
 						}
-
 						if (!ent && is_partially_obs) { // ...and when it does not entail the action effects, but a PARTIALLY OBS agent believes that it may be true
 							pworld_ptr believed_pw_neg = execute_sensing_announcement_helper(act, ret, *it_pws, calculated, partially_obs_agents, oblivious_obs_agents, true);
 							ret.add_edge(new_pw, believed_pw_neg, ag);
@@ -792,6 +815,7 @@ pstate pstate::execute_ontic(const action & act) const
 
 	pworld_ptr new_pointed = execute_ontic_helper(act, ret, get_pointed(), calculated, oblivious_obs_agents);
 	ret.set_pointed(new_pointed); // Updating the pointed world
+	//std::cerr << "\nDEBUG: Out ONTIC " << act.get_name();
 
 	return ret;
 }

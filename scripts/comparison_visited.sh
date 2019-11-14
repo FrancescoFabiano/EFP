@@ -8,7 +8,7 @@ if [ -f out/EFP_comparison/findingplan/"${@##*/}" ] ; then
     rm out/EFP_comparison/findingplan/"${@##*/}"
 fi
 
-TIMEOUT="30m" 
+TIMEOUT="30m";
 
 
 representations=("KRIPKE_OPT" "KRIPKE" "POSS" "OLD");

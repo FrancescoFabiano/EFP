@@ -10,9 +10,9 @@ for repr in "${representations[@]}"; do
     else
         bin/efp.out        $@ -old_check -st $repr -h PG > findingplan_comparison.tmp;
     fi;
-    echo $'\n' >> out/EFP_comparison/findingplan/"${@##*/}";
     grep -w "Executed actions:" findingplan_comparison.tmp >> out/EFP_comparison/findingplan/"${@##*/}";
     grep -w "Plan Length:" findingplan_comparison.tmp  >> out/EFP_comparison/findingplan/"${@##*/}";
+	echo $'\n' >> out/EFP_comparison/findingplan/"${@##*/}";
     #sleep 5s;
 done
 

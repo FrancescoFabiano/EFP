@@ -6,6 +6,9 @@
  * \author Francesco Fabiano.
  * \date May 6, 2019
  */
+#include <algorithm>
+
+
 #include "planner.h"
 #include "../domain/domain.h"
 
@@ -109,8 +112,14 @@ bool planner<T>::search_BFS(bool old_check)
 		m_search_space.pop();
 		for (it_acset = actions.begin(); it_acset != actions.end(); it_acset++) {
 			tmp_action = *it_acset;
+
+			//			std::cout << "\nDEBUG: HERE with: \n";
+			//			tmp_action.print();
+			//			std::cout << "\nand \n";
+			//			popped_state.print();
 			if (popped_state.is_executable(tmp_action)) {
 				tmp_state = popped_state.compute_succ(tmp_action);
+				//tmp_state.print();
 				if (tmp_state.is_goal()) {
 					end_timing = std::chrono::system_clock::now();
 					elapsed_seconds = end_timing - start_timing;
@@ -186,7 +195,7 @@ bool planner<T>::search_heur(bool old_check)
 }
 
 template <class T>
-void planner<T>::execute_given_actions(const std::vector<std::string>& act_name)
+void planner<T>::execute_given_actions(std::vector<std::string>& act_name)
 {
 	check_actions_names(act_name);
 
@@ -258,7 +267,7 @@ void planner<T>::execute_given_actions(const std::vector<std::string>& act_name)
 
 template <class T>
 /**\todo just for confrontation with old*/
-void planner<T>::execute_given_actions_timed(const std::vector<std::string>& act_name)
+void planner<T>::execute_given_actions_timed(std::vector<std::string>& act_name)
 {
 	check_actions_names(act_name);
 
@@ -291,19 +300,22 @@ void planner<T>::execute_given_actions_timed(const std::vector<std::string>& act
 
 template <class T>
 /**\todo just for confrontation with old*/
-void planner<T>::check_actions_names(const std::vector<std::string>& act_name)
+void planner<T>::check_actions_names(std::vector<std::string>& act_name)
 {
 
 	string_set domain_act;
 	action_set::const_iterator it_acset;
 
-	std::vector<std::string>::const_iterator it_stset;
+	std::vector<std::string>::iterator it_stset;
 
 	for (it_acset = domain::get_instance().get_actions().begin(); it_acset != domain::get_instance().get_actions().end(); it_acset++) {
 		domain_act.insert(it_acset->get_name());
 	}
 
 	for (it_stset = act_name.begin(); it_stset != act_name.end(); it_stset++) {
+
+		(*it_stset).erase(std::remove((*it_stset).begin(), (*it_stset).end(), ','), (*it_stset).end());
+
 		if (domain_act.find(*it_stset) == domain_act.end()) {
 			std::cerr << "\nERROR in giving the action list: the action " << *it_stset << " does not exist.\n";
 			exit(1);

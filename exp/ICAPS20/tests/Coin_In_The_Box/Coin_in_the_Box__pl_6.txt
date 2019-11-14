@@ -151,7 +151,7 @@ initially tail, has_key_a, -has_key_b, -has_key_c, -opened, looking_a, -looking_
 %initially C([a,b,c],B(a,tail));
 
 % 6 actions
-goal B(b, (-B(a, tail)));
-goal B(c, B(b, B(a, tail)));
-goal (-B(a, B(c, tail)));
+goal B(b, ((-B(a, tail)), (-B(a, (-tail)))));
+%goal B(c, B(b, B(a, tail)));
+goal (-B(a, (B(c, tail) | B(c,(-tail)))));
 goal C([b,c], tail);

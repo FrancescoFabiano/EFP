@@ -226,7 +226,7 @@ clean_build:
 	rm -f -r $(BIN_DIR) $(BUILD_DIR)
 	
 clean_out:
-	rm -f -r $(OUT_DIR)
+	rm -f -r $(OUT_DIR) *tmp
 
 clear:
 	$(MAKE) clean_build
