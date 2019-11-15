@@ -1,3 +1,5 @@
+%%% Executed actions: right_a share_c_sc_1 right_b share_b_sb_2 left_a share_a_sa_1 %%%
+
 fluent at_a_1,at_a_2,at_b_1,at_b_2,at_c_1,at_c_2,sa,sb,sc;
 
 action right_a, right_b, right_c, left_a, left_b, left_c, share_a_sa_1, share_a_sa_2, share_a_sb_1, share_a_sb_2, share_a_sc_1, share_a_sc_2, share_b_sa_1, share_b_sa_2, share_b_sb_1, share_b_sb_2, share_b_sc_1, share_b_sc_2, share_c_sa_1, share_c_sa_2, share_c_sb_1, share_c_sb_2, share_c_sc_1, share_c_sc_2;
@@ -159,26 +161,21 @@ b observes share_c_sc_2 if at_b_2;
 c observes share_c_sc_1 if at_c_1;
 c observes share_c_sc_2 if at_c_2;
 
-initially at_a_1, at_b_1, at_c_1, (-at_a_2), (-at_b_2), (-at_c_2),sa,sb,sc;
+initially at_a_1, at_b_1, at_c_1, -at_a_2, -at_b_2, -at_c_2, sa, sb, sc;
 initially C([a,b,c], at_a_1);
 initially C([a,b,c], at_b_1);
 initially C([a,b,c], at_c_1);
 initially C([a,b,c], -at_a_2);
 initially C([a,b,c], -at_b_2);
 initially C([a,b,c], -at_c_2);
-initially C([a,b,c], B(a,sa) | B(a,-sa));
-initially C([a,b,c], B(b,sb) | B(b,-sb));
-initially C([a,b,c], B(c,sc) | B(c,-sc));
-%initially C([a,b,c], sa);
-%initially C([a,b,c], sc);
+initially C([a,b,c], (B(a,sa) | B(a,(-sa))));
+initially C([a,b,c], (B(b,sb) | B(b,(-sb))));
+initially C([a,b,c], (B(c,sc) | B(c,(-sc))));
 
+% 6 actions
 goal B(a, sb);
-%goal B(b, (-B(a,sb)));
-%goal B(c, B(b,(-B(a,sb))));
-%goal B(b, sc);
-%goal (-B(a, sc));
+goal B(b, sc);
+goal B(c, sa);
+goal (-B(a, sc));
 goal (-B(c, sb));
-goal B(b,B(a,(-B(c, sb))));
-%goal B(b,-B(a,sb));
-%goal (-B(b, sa));
-%goal (-B(c, sb));
+goal (-B(b, (B(c, sa) | B(c,(-sa)))));
