@@ -309,15 +309,15 @@ private:
     pworld_ptr execute_ontic_helper(const action &act, pstate &ret, const pworld_ptr &current_pw, transition_map &calculated, agent_set &oblivious_obs_agents) const;
     /** \brief Function that recursively calculates the \ref pworld resulting from the transition function.
      *
-     * @param[in] act: the \ref SENSING/\ref ANNOUNCEMENT \ref action to be applied on *this*.
+     * @param[in] effects: the effects of the \ref SENSING/\ref ANNOUNCEMENT \ref action to be applied on *this*.
      * @param[in] ret: the \ref pstate resulting from the \ref action.
      * @param[in] current_pw: the world being currently calculated.
      * @param[in] calculated: a map that keeps track of the results of the transition function.
      * @param[in] partially_obs_agents: the partially observant \ref agent set.
      * @param[in] oblivious_obs_agents: the oblivious \ref agent set.
-     * @param[in] negated_execution: true whether a partially observant \ref agent believes that the current \ref pworld may be true.
+     * @param[in] previous_entailment: the value of the coming state entailment (if first is pointed).
      * @return the \ref pworld resulting from the application of the transition function on "current_pw".*/
-    pworld_ptr execute_sensing_announcement_helper(const action &act, pstate &ret, const pworld_ptr &current_pw, transition_map &calculated, agent_set &partially_obs_agents, agent_set &oblivious_obs_agents, bool negated_execution) const;
+    pworld_ptr execute_sensing_announcement_helper(const fluent_formula &effects, pstate &ret, const pworld_ptr &current_pw, transition_map &calculated, agent_set &partially_obs_agents, agent_set &oblivious_obs_agents, bool previous_entailment) const;
     /** \brief Function that applies the transition function for a \ref ONTIC \ref action effect on *this* implementing the possibilities semantic.
      *
      * The transition function is applied accordingly to mA^rho. Check the paper for more information.

@@ -745,7 +745,7 @@ pworld_ptr pstate::execute_ontic_helper(const action &act, pstate &ret, const pw
 	return new_pw;
 }
 
-pworld_ptr pstate::execute_sensing_announcement_helper(const action &act, pstate &ret, const pworld_ptr &current_pw, transition_map &calculated, agent_set &partially_obs_agents, agent_set &oblivious_obs_agents, bool negated_execution) const
+pworld_ptr pstate::execute_sensing_announcement_helper(const fluent_formula &effects, pstate &ret, const pworld_ptr &current_pw, transition_map &calculated, agent_set &partially_obs_agents, agent_set &oblivious_obs_agents, bool previous_entailment) const
 {
 	pworld_ptr new_pw = ret.add_rep_world(pworld(current_pw.get_fluent_set()), current_pw.get_repetition()); // We add the corresponding pworld in ret
 	calculated.insert(transition_map::value_type(current_pw, new_pw)); // And we update the calculated map
@@ -772,10 +772,13 @@ pworld_ptr pstate::execute_sensing_announcement_helper(const action &act, pstate
 					}
 				} else { // Otherwise, if we have a FULLY/PARTIALLY observant agent
 					auto calculated_pworld = calculated.find(*it_pws);
-					fluent_formula effects = get_effects_if_entailed(act.get_effects(), get_pointed());
-					bool ent = act.get_type() == SENSING ? entails(effects, *it_pws) == entails(effects, get_pointed()) : entails(effects, *it_pws);
+					//fluent_formula effects = get_effects_if_entailed(act.get_effects(), get_pointed());
+					//bool ent = act.get_type() == SENSING ? entails(effects, *it_pws) == entails(effects, get_pointed()) : entails(effects, *it_pws);
+					bool ent = entails(effects, *it_pws); // == entails(effects, get_pointed());
+
+
 					bool is_consistent_belief = is_partially_obs || // If "ag" is PARTIALLY OBS, we always add an edge; If "ag" is FULLY OBS, we add an edge if he believes that "calculated" may be true (i.e., when "ent" holds) XOR
-						(is_fully_obs && (ent != negated_execution)); // if a PARTIALLY OBS agent believes that "ag" thinks that "calculated" may be true (i.e., when "negated_execution" holds)
+						(is_fully_obs && (ent == previous_entailment)); // if a PARTIALLY OBS agent believes that "ag" thinks that "calculated" may be true (i.e., when "previous_entailment" holds)
 
 					if (calculated_pworld != calculated.end()) { // If we already calculated the transition function for this pworld
 						if (is_consistent_belief) {
@@ -783,13 +786,13 @@ pworld_ptr pstate::execute_sensing_announcement_helper(const action &act, pstate
 						}
 					} else { // If we did not already calculate the transition function
 						if (is_consistent_belief) { // We calculate it if it would result in a consistent belief...
-							pworld_ptr believed_pw = execute_sensing_announcement_helper(act, ret, *it_pws, calculated, partially_obs_agents, oblivious_obs_agents, negated_execution);
+							pworld_ptr believed_pw = execute_sensing_announcement_helper(effects, ret, *it_pws, calculated, partially_obs_agents, oblivious_obs_agents, ent);
 							ret.add_edge(new_pw, believed_pw, ag);
 						}
-						if (!ent && is_partially_obs) { // ...and when it does not entail the action effects, but a PARTIALLY OBS agent believes that it may be true
-							pworld_ptr believed_pw_neg = execute_sensing_announcement_helper(act, ret, *it_pws, calculated, partially_obs_agents, oblivious_obs_agents, true);
-							ret.add_edge(new_pw, believed_pw_neg, ag);
-						}
+						//						else if (is_partially_obs && (ent != previous_entailment)) { // ...and when it does not entail the action effects, but a PARTIALLY OBS agent believes that it may be true
+						//							pworld_ptr believed_pw_neg = execute_sensing_announcement_helper(act, ret, *it_pws, calculated, partially_obs_agents, oblivious_obs_agents, ent);
+						//							ret.add_edge(new_pw, believed_pw_neg, ag);
+						//						}
 					}
 				}
 			}
@@ -841,7 +844,9 @@ pstate pstate::execute_sensing(const action & act) const
 	transition_map calculated; // A map that links the pworlds of *this* to the corresponding ones of ret
 	maintain_oblivious_believed_pworlds(ret, oblivious_obs_agents);
 
-	pworld_ptr new_pointed = execute_sensing_announcement_helper(act, ret, get_pointed(), calculated, partially_obs_agents, oblivious_obs_agents, false);
+	fluent_formula effects = get_effects_if_entailed(act.get_effects(), get_pointed());
+
+	pworld_ptr new_pointed = execute_sensing_announcement_helper(effects, ret, get_pointed(), calculated, partially_obs_agents, oblivious_obs_agents, entails(effects));
 	ret.set_pointed(new_pointed); // Updating the pointed world
 
 	return ret;
@@ -849,29 +854,32 @@ pstate pstate::execute_sensing(const action & act) const
 
 pstate pstate::execute_announcement(const action & act) const
 {
-	pstate ret;
-
-	//This finds all the worlds that are reachable from the initial state following
-	//the edges labeled with fully observant agents.
-	agent_set agents = domain::get_instance().get_agents();
-	agent_set fully_obs_agents = get_agents_if_entailed(act.get_fully_observants(), get_pointed());
-	agent_set partially_obs_agents = get_agents_if_entailed(act.get_partially_observants(), get_pointed());
-
-	agent_set oblivious_obs_agents = agents;
-	minus_set(oblivious_obs_agents, fully_obs_agents);
-	minus_set(oblivious_obs_agents, partially_obs_agents);
-
-	if (!oblivious_obs_agents.empty()) {
-		ret.set_max_depth(get_max_depth() + 1);
-	}
-
-	transition_map calculated; // A map that links the pworlds of *this* to the corresponding ones of ret
-	maintain_oblivious_believed_pworlds(ret, oblivious_obs_agents);
-
-	pworld_ptr new_pointed = execute_sensing_announcement_helper(act, ret, get_pointed(), calculated, partially_obs_agents, oblivious_obs_agents, false);
-	ret.set_pointed(new_pointed); // Updating the pointed world
-
-	return ret;
+	//	pstate ret;
+	//
+	//	//This finds all the worlds that are reachable from the initial state following
+	//	//the edges labeled with fully observant agents.
+	//	agent_set agents = domain::get_instance().get_agents();
+	//	agent_set fully_obs_agents = get_agents_if_entailed(act.get_fully_observants(), get_pointed());
+	//	agent_set partially_obs_agents = get_agents_if_entailed(act.get_partially_observants(), get_pointed());
+	//
+	//	agent_set oblivious_obs_agents = agents;
+	//	minus_set(oblivious_obs_agents, fully_obs_agents);
+	//	minus_set(oblivious_obs_agents, partially_obs_agents);
+	//
+	//	if (!oblivious_obs_agents.empty()) {
+	//		ret.set_max_depth(get_max_depth() + 1);
+	//	}
+	//
+	//	transition_map calculated; // A map that links the pworlds of *this* to the corresponding ones of ret
+	//	maintain_oblivious_believed_pworlds(ret, oblivious_obs_agents);
+	//
+	//	fluent_formula effects = get_effects_if_entailed(act.get_effects(), get_pointed());
+	//
+	//	pworld_ptr new_pointed = execute_sensing_announcement_helper(act, ret, get_pointed(), calculated, partially_obs_agents, oblivious_obs_agents, entails(effects));
+	//	ret.set_pointed(new_pointed); // Updating the pointed world
+	//
+	//	return ret;
+	return execute_sensing(act);
 }
 
 void pstate::print() const

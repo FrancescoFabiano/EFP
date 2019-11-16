@@ -1002,7 +1002,7 @@ kstate kstate::execute_ontic(const action & act) const
 
 kstate kstate::execute_sensing_or_announcement(const action &act, bool sensing) const
 {
-
+	/**@bug: We interpret the announced value has in sensing, it has to respect the pointed world????*/
 	//The execution are all the same if we consider that false beliefs don't count.
 	kstate ret;
 
