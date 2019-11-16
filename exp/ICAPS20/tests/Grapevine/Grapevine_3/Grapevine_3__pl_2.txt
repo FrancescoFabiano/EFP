@@ -168,9 +168,9 @@ initially C([a,b,c], at_c_1);
 initially C([a,b,c], -at_a_2);
 initially C([a,b,c], -at_b_2);
 initially C([a,b,c], -at_c_2);
-initially B(a,sa);
-initially B(b,sb);
-initially B(c,sc));
+initially C([a,b,c], (B(a,sa) | B(a,(-sa))));
+initially C([a,b,c], (B(b,sb) | B(b,(-sb))));
+initially C([a,b,c], (B(c,sc) | B(c,(-sc))));
 
 % 2 actions
 goal B(a, sb);
