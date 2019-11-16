@@ -1,4 +1,4 @@
-%%% Executed actions: share_b_sb_1 share_c_sc_1 %%%
+%%% Executed actions: right_a share_c_sc_1 right_b share_b_sb_2 left_a share_a_sa_1 %%%
 
 fluent at_a_1,at_a_2,at_b_1,at_b_2,at_c_1,at_c_2,sa,sb,sc;
 
@@ -168,10 +168,14 @@ initially C([a,b,c], at_c_1);
 initially C([a,b,c], -at_a_2);
 initially C([a,b,c], -at_b_2);
 initially C([a,b,c], -at_c_2);
-initially B(a,sa);
-initially B(b,sb);
-initially B(c,sc));
+initially C([a,b,c], (B(a,sa) | B(a,(-sa))));
+initially C([a,b,c], (B(b,sb) | B(b,(-sb))));
+initially C([a,b,c], (B(c,sc) | B(c,(-sc))));
 
-% 2 actions
+% 6 actions
 goal B(a, sb);
 goal B(b, sc);
+goal B(c, sa);
+goal (-B(a, sc));
+goal (-B(c, sb));
+goal (-B(b, (B(c, sa) | B(c,(-sa)))));
