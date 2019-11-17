@@ -11,7 +11,7 @@ fi
 TIMEOUT="30m";
 
 
-representations=("KRIPKE_OPT" "KRIPKE" "POSS");# "OLD");
+representations=("KRIPKE_OPT" "KRIPKE" "POSS" "OLD");
 
 for repr in "${representations[@]}"; do
 
