@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 #Just Run
-RESPATH="/mnt/c/Users/Francesco/Desktop/ICAPS_res/";
+RESPATH="/mnt/c/Users/Francesco/Desktop/ICAPS_res/Grapevine/";
 DOMAIN_EXT=".txt"; # Name of the domain
 
 #mv $OUTPATH_FINDINGPLAN $OUTPATH$DOMAIN_NAME$DOMAIN_EXT;
 
 echo -e "\nExecution of efp.out in all the folders in" $RESPATH "\n"
-#echo "NAME, INDEX, KRIPKE STANDARD, K-STD V,  KRIPKE OPT, K-OPT V, POSS, POSS V, OLD" > "$RESPATH/graphres.csv";
+echo "NAME, INDEX, KRIPKE STANDARD, K-STD V,  KRIPKE OPT, K-OPT V, POSS, POSS V, OLD" > "$RESPATH/graphres.csv";
 INDEX=1;
 for dir in $RESPATH*; do
     if [ -d "$dir" ]; then
@@ -78,46 +78,46 @@ for dir in $RESPATH*; do
 					ITERATION=$(( $ITERATION + 1 ));
 				done;
 				
-				echo -n "K-OLD  " > "$dirNest/results_average.txt";
-				echo "$AVG_KOLD / $ITERATION" | bc -l >> "$dirNest/results_average.txt";
-				echo " " >> "$dirNest/results_average.txt";
+				#echo -n "K-OLD  " > "$dir/results_average.txt";
+				#echo "$AVG_KOLD / $ITERATION" | bc -l >> "$dir/results_average.txt";
+				#echo " " >> "$dir/results_average.txt";
 
 				
-				echo -n "K-STD  " >> "$dirNest/results_average.txt";
-				echo "$AVG_KSTD_V / $ITERATION" | bc -l >> "$dirNest/results_average.txt";
-				#echo "$AVG_KSTD / $ITERATION" | bc -l >> "$dirNest/results_average.txt";
-				echo " " >> "$dirNest/results_average.txt";
+				#echo -n "K-STD  " >> "$dir/results_average.txt";
+				#echo "$AVG_KSTD_V / $ITERATION" | bc -l >> "$dir/results_average.txt";
+				#echo "$AVG_KSTD / $ITERATION" | bc -l >> "$dir/results_average.txt";
+				#echo " " >> "$dir/results_average.txt";
 				
 				
-				echo -n "K-OPT  " >> "$dirNest/results_average.txt";
-				echo "$AVG_KOPT_V / $ITERATION" | bc -l >> "$dirNest/results_average.txt";
-				#echo "$AVG_KOPT / $ITERATION" | bc -l >> "$dirNest/results_average.txt";
-				echo " " >> "$dirNest/results_average.txt";
+				#echo -n "K-OPT  " >> "$dir/results_average.txt";
+				#echo "$AVG_KOPT_V / $ITERATION" | bc -l >> "$dir/results_average.txt";
+				#echo "$AVG_KOPT / $ITERATION" | bc -l >> "$dir/results_average.txt";
+				#echo " " >> "$dir/results_average.txt";
 				
 				
-				echo -n "POSS   " >> "$dirNest/results_average.txt";
-				echo "$AVG_POSS_V / $ITERATION" | bc -l >> "$dirNest/results_average.txt";
-				#echo "$AVG_POSS / $ITERATION" | bc -l >> "$dirNest/results_average.txt";
-				echo " " >> "$dirNest/results_average.txt";
-				# echo -n "$(basename $dir),$INDEX," >> "$RESPATH/graphres.csv";
-				# INDEX=$(( $INDEX + 1 ));
-				# echo "$AVG_KSTD / $ITERATION" | bc -l >> "$RESPATH/graphres.csv";
-				# echo -n "," >> "$RESPATH/graphres.csv";
-				# echo "$AVG_KSTD_V / $ITERATION" | bc -l >> "$RESPATH/graphres.csv";
-				# echo -n "," >> "$RESPATH/graphres.csv";
+				#echo -n "POSS   " >> "$dir/results_average.txt";
+				#echo "$AVG_POSS_V / $ITERATION" | bc -l >> "$dir/results_average.txt";
+				#echo "$AVG_POSS / $ITERATION" | bc -l >> "$dir/results_average.txt";
+				#echo " " >> "$dir/results_average.txt";
+				#echo -n "$(basename $dir),$INDEX," >> "$RESPATH/graphres.csv";
+				#INDEX=$(( $INDEX + 1 ));
+				echo "scale=2; $AVG_KSTD / $ITERATION" | bc >> "$RESPATH/graphres.csv";
+				echo -n ',' >> "$RESPATH/graphres.csv";
+				echo "scale=2; $AVG_KSTD_V / $ITERATION" | bc >> "$RESPATH/graphres.csv";
+				echo -n ',' >> "$RESPATH/graphres.csv";
 
 				
-				# echo "$AVG_KOPT / $ITERATION" | bc -l >> "$RESPATH/graphres.csv";
-				# echo -n "," >> "$RESPATH/graphres.csv";
-				# echo "$AVG_KOPT_V / $ITERATION" | bc -l >> "$RESPATH/graphres.csv";
-				# echo -n "," >> "$RESPATH/graphres.csv";
+				echo "scale=2; $AVG_KOPT / $ITERATION" | bc >> "$RESPATH/graphres.csv";
+				echo -n ',' >> "$RESPATH/graphres.csv";
+				echo "scale=2; $AVG_KOPT_V / $ITERATION" | bc >> "$RESPATH/graphres.csv";
+				echo -n ',' >> "$RESPATH/graphres.csv";
 
-				# echo "$AVG_POSS / $ITERATION" | bc -l >> "$RESPATH/graphres.csv";
-				# echo -n "," >> "$RESPATH/graphres.csv";
-				# echo "$AVG_POSS_V / $ITERATION" | bc -l >> "$RESPATH/graphres.csv";
-				# echo -n "," >> "$RESPATH/graphres.csv";
+				echo "scale=2; $AVG_POSS / $ITERATION" | bc >> "$RESPATH/graphres.csv";
+				echo -n ',' >> "$RESPATH/graphres.csv";
+				echo "scale=2; $AVG_POSS_V / $ITERATION" | bc >> "$RESPATH/graphres.csv";
+				echo -n ',' >> "$RESPATH/graphres.csv";
 
-				# echo "$AVG_KOLD / $ITERATION" | bc -l >> "$RESPATH/graphres.csv";
+				echo "scale=2; $AVG_POSS_V / $ITERATION" | bc >> "$RESPATH/graphres.csv";
 				fi;
 		done;
 	fi;
