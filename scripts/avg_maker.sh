@@ -83,21 +83,26 @@ for dir in $RESPATH*; do
 				echo " " >> "$dirNest/results_average.txt";
 
 				
-				echo -n "K-STD  " >> "$dirNest/results_average.txt";
+				echo -n "K-STD_V  " >> "$dirNest/results_average.txt";
 				echo "$AVG_KSTD_V / $ITERATION" | bc -l >> "$dirNest/results_average.txt";
-				#echo "$AVG_KSTD / $ITERATION" | bc -l >> "$dirNest/results_average.txt";
+								echo -n "K-STD  " >> "$dirNest/results_average.txt";
+
+				echo "$AVG_KSTD / $ITERATION" | bc -l >> "$dirNest/results_average.txt";
 				echo " " >> "$dirNest/results_average.txt";
 				
 				
-				echo -n "K-OPT  " >> "$dirNest/results_average.txt";
+				echo -n "K-OPT_V  " >> "$dirNest/results_average.txt";
 				echo "$AVG_KOPT_V / $ITERATION" | bc -l >> "$dirNest/results_average.txt";
-				#echo "$AVG_KOPT / $ITERATION" | bc -l >> "$dirNest/results_average.txt";
+								echo -n "K-OPT  " >> "$dirNest/results_average.txt";
+
+				echo "$AVG_KOPT / $ITERATION" | bc -l >> "$dirNest/results_average.txt";
 				echo " " >> "$dirNest/results_average.txt";
 				
 				
-				echo -n "POSS   " >> "$dirNest/results_average.txt";
+				echo -n "POSS_V   " >> "$dirNest/results_average.txt";
 				echo "$AVG_POSS_V / $ITERATION" | bc -l >> "$dirNest/results_average.txt";
-				#echo "$AVG_POSS / $ITERATION" | bc -l >> "$dirNest/results_average.txt";
+				echo -n "POSS   " >> "$dirNest/results_average.txt";
+				echo "$AVG_POSS / $ITERATION" | bc -l >> "$dirNest/results_average.txt";
 				echo " " >> "$dirNest/results_average.txt";
 				# echo -n "$(basename $dir),$INDEX," >> "$RESPATH/graphres.csv";
 				# INDEX=$(( $INDEX + 1 ));

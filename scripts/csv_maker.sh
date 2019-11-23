@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #Just Run
-RESPATH="/mnt/c/Users/Francesco/Desktop/ICAPS_res/Grapevine/";
+RESPATH="/mnt/c/Users/Francesco/Desktop/ICAPS_res/";
 DOMAIN_EXT=".txt"; # Name of the domain
 
 #mv $OUTPATH_FINDINGPLAN $OUTPATH$DOMAIN_NAME$DOMAIN_EXT;
@@ -99,25 +99,25 @@ for dir in $RESPATH*; do
 				#echo "$AVG_POSS_V / $ITERATION" | bc -l >> "$dir/results_average.txt";
 				#echo "$AVG_POSS / $ITERATION" | bc -l >> "$dir/results_average.txt";
 				#echo " " >> "$dir/results_average.txt";
-				#echo -n "$(basename $dir),$INDEX," >> "$RESPATH/graphres.csv";
-				#INDEX=$(( $INDEX + 1 ));
-				echo "scale=2; $AVG_KSTD / $ITERATION" | bc >> "$RESPATH/graphres.csv";
+				echo -n "$(basename $dir),$INDEX," >> "$RESPATH/graphres.csv";
+				INDEX=$(( $INDEX + 1 ));
+				echo "scale=3; $AVG_KSTD / $ITERATION" | bc >> "$RESPATH/graphres.csv";
 				echo -n ',' >> "$RESPATH/graphres.csv";
-				echo "scale=2; $AVG_KSTD_V / $ITERATION" | bc >> "$RESPATH/graphres.csv";
+				echo "scale=3; $AVG_KSTD_V / $ITERATION" | bc >> "$RESPATH/graphres.csv";
 				echo -n ',' >> "$RESPATH/graphres.csv";
 
 				
-				echo "scale=2; $AVG_KOPT / $ITERATION" | bc >> "$RESPATH/graphres.csv";
+				echo "scale=3; $AVG_KOPT / $ITERATION" | bc >> "$RESPATH/graphres.csv";
 				echo -n ',' >> "$RESPATH/graphres.csv";
-				echo "scale=2; $AVG_KOPT_V / $ITERATION" | bc >> "$RESPATH/graphres.csv";
-				echo -n ',' >> "$RESPATH/graphres.csv";
-
-				echo "scale=2; $AVG_POSS / $ITERATION" | bc >> "$RESPATH/graphres.csv";
-				echo -n ',' >> "$RESPATH/graphres.csv";
-				echo "scale=2; $AVG_POSS_V / $ITERATION" | bc >> "$RESPATH/graphres.csv";
+				echo "scale=3; $AVG_KOPT_V / $ITERATION" | bc >> "$RESPATH/graphres.csv";
 				echo -n ',' >> "$RESPATH/graphres.csv";
 
-				echo "scale=2; $AVG_POSS_V / $ITERATION" | bc >> "$RESPATH/graphres.csv";
+				echo "scale=3; $AVG_POSS / $ITERATION" | bc >> "$RESPATH/graphres.csv";
+				echo -n ',' >> "$RESPATH/graphres.csv";
+				echo "scale=3; $AVG_POSS_V / $ITERATION" | bc >> "$RESPATH/graphres.csv";
+				echo -n ',' >> "$RESPATH/graphres.csv";
+
+				echo "scale=3; $AVG_KOLD / $ITERATION" | bc >> "$RESPATH/graphres.csv";
 				fi;
 		done;
 	fi;
