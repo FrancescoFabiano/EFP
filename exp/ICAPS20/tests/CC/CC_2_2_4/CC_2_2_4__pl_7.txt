@@ -209,6 +209,6 @@ initially C([a,b], (at_b2_1,-at_b2_3,-at_b2_4) | (-at_b2_1,at_b2_3,-at_b2_4) | (
 goal B(b,at_b1_1);
 goal B(b,at_b2_3);
 goal B(a, at_b2_3);
-goal B(a, (-B(b, at_b2_3)));
+goal B(a, (-B(b, at_b2_3)), (-B(b, (-at_b2_3))));
 goal B(a,at_a_3);
 goal B(b,at_a_3);

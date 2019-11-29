@@ -21,7 +21,6 @@
  */
 #pragma once
 
-#include <list>
 #include <memory>
 
 #include "../utilities/define.h"
@@ -281,7 +280,3 @@ public:
      * @return false: otherwise.*/
     bool operator=(const belief_formula& to_copy);
 };
-
-typedef std::list<belief_formula> formula_list; /**< \brief A CNF formula of \ref belief_formula.
-                                                 *
-                                                 * Each element of the formula is a \ref belief_formula.*/

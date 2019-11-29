@@ -36,8 +36,8 @@ int main(int argc, char **argv)
 		} else if (strcmp(argv[i], "-debug") == 0) {
 			cout << " debug is on " << endl;
 			planner.debug = true;
-		} else if (strcmp(argv[i], "-old_check") == 0) {
-			planner.old_check = true;
+		} else if (strcmp(argv[i], "-results_file") == 0) {
+			planner.results_file = true;
 		} else if (strcmp(argv[i], "-mpg") == 0) {
 			cout << " search with planning graph heuristic " << endl;
 			planner.m_heuristic = PLANNINGGRAPH;
@@ -79,7 +79,7 @@ int main(int argc, char **argv)
 		exit(1);
 	}
 
-	if (planner.old_check) {
+	if (planner.results_file) {
 		std::string domain_name = argv[1];
 		domain_name = domain_name.substr(domain_name.find_last_of("\\/") + 1);
 		domain_name = domain_name.substr(0, domain_name.find_last_of("."));

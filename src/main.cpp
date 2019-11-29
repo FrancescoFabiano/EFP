@@ -77,7 +77,11 @@ void print_usage(char* prog_name)
 	std::cout << "-h @heuristic" << std::endl;
 	std::cout << "	Set the @heuristic to use to perform the search." << std::endl;
 	std::cout << "	Possible @heuristic:" << std::endl;
-	std::cout << "		PG: Use the planning graph to retrieve the state distance from the plan (create one planning graph for each state)" << std::endl;
+	std::cout << "		L_PG: A planning graph is used to calculate the distance of each state from the goal." << std::endl;
+	std::cout << "		S_PG: A planning graph is used to calculate the sum of each sub-goal distance starting from the state." << std::endl;
+	std::cout << "		SUBGOALS: We select the state with the highest number of satisfied subgoals." << std::endl;
+
+
 
 	std::cout << "-e action1 action2 action3 ..." << std::endl;
 	std::cout << "	Perform a sequence of actions and print out" << std::endl;
@@ -86,8 +90,8 @@ void print_usage(char* prog_name)
 	std::cout << "	If the @debug option is on the states are printed as pdf in out/states/@domain_name/." << std::endl << std::endl;
 
 
-	std::cout << "-old_check" << std::endl;
-	std::cout << "	Print the plan time in a file to easy the confrontation with the old version." << std::endl << std::endl;
+	std::cout << "-results_file" << std::endl;
+	std::cout << "	Print the plan time in a file to make the tests confrontations easier." << std::endl << std::endl;
 
 
 	std::cout << "EXAMPLES:" << std::endl;
@@ -105,7 +109,7 @@ int main(int argc, char** argv)
 {
 
 	bool debug = false;
-	bool old_check = false;
+	bool results_file = false;
 	bool is_global_obsv = true;
 	bool check_visited = false;
 	heuristics used_heur = NO_H;
@@ -132,8 +136,8 @@ int main(int argc, char** argv)
 		if (strcmp(argv[i], "-debug") == 0) {
 			std::cout << "Debug is on." << std::endl;
 			debug = true;
-		} else if (strcmp(argv[i], "-old_check") == 0) {
-			old_check = true;
+		} else if (strcmp(argv[i], "-results_file") == 0) {
+			results_file = true;
 		}//No case sensitivity
 		else if (strcmp(argv[i], "-ir") == 0) {
 			i++;
@@ -237,11 +241,17 @@ int main(int argc, char** argv)
 			} else if (strcmp(argv[i], "NONE") == 0) {
 				std::cout << "Breadth first search. (Default)" << std::endl;
 				used_heur = NO_H; //default
-			} else if (strcmp(argv[i], "PG") == 0) {
+			} else if (strcmp(argv[i], "L_PG") == 0) {
 				std::cout << "A planning graph is used to calculate the distance of each state from the goal." << std::endl;
-				used_heur = PLANNINGGRAPH;
+				used_heur = L_PG;
+			} else if (strcmp(argv[i], "S_PG") == 0) {
+				std::cout << "A planning graph is used to calculate the sum of each sub-goal distance starting from the state." << std::endl;
+				used_heur = S_PG;
+			} else if (strcmp(argv[i], "SUBGOALS") == 0) {
+				std::cout << "We select the state with the highest number of satisfied subgoals." << std::endl;
+				used_heur = SUBGOALS;
 			} else {
-				std::cerr << "Wrong specification for '-h'; use 'NONE' or 'PG'." << std::endl;
+				std::cerr << "Wrong specification for '-h'; use 'NONE' or 'L_PG' or 'S_PG' or 'SUBGOALS'." << std::endl;
 				exit(1);
 			}
 		} else if (strcmp(argv[i], "-e") == 0) {
@@ -259,27 +269,6 @@ int main(int argc, char** argv)
 			print_usage(argv[0]);
 		}
 
-
-		/* else if (strcmp(argv[i], "-mpg") == 0) {
-			std::cout << " search with max planning graph heuristic " << std::endl;
-			planner.m_heuristic = PLANNINGGRAPH;
-			planner.useHeuristic = true;
-		} else if (strcmp(argv[i], "-spg") == 0) {
-			std::cout << " search with sum planning graph heuristic " << std::endl;
-			planner.m_heuristic = SUMPLANNINGGRAPH;
-			planner.useHeuristic = true;
-		} else if (strcmp(argv[i], "-e") == 0) {
-			planner.m_task = DOPLAN;
-
-			if (i == argc - 1)
-				print_usage(argv[0]);
-			i++;
-
-			while (i < argc && argv[i][0] != '-') {
-				planner.m_plan.push_back(string(argv[i++]));
-			}
-		} else
-			print_usage(argv[0]);*/
 		i++;
 	}
 	std::string domain_name = argv[1];
@@ -308,14 +297,14 @@ int main(int argc, char** argv)
 	{
 		planner< state<kstate> > m_planner;
 		if (execute_given_actions) {
-			if (old_check) {
+			if (results_file) {
 				m_planner.execute_given_actions_timed(given_actions);
 			} else {
 				m_planner.execute_given_actions(given_actions);
 			}
 			std::cout << "\n\n\n*****THE END*****\n";
 		} else {
-			if (m_planner.search(old_check, used_heur)) {
+			if (m_planner.search(results_file, used_heur)) {
 				std::cout << "\n\n\n*****THE END*****\n";
 			} else {
 				std::cout << "\n\n\n*****THE SAD END*****\n";
@@ -327,14 +316,14 @@ int main(int argc, char** argv)
 	{
 		planner< state<pstate> > m_planner;
 		if (execute_given_actions) {
-			if (old_check) {
+			if (results_file) {
 				m_planner.execute_given_actions_timed(given_actions);
 			} else {
 				m_planner.execute_given_actions(given_actions);
 			}
 			std::cout << "\n\n\n*****THE END*****\n";
 		} else {
-			if (m_planner.search(old_check, used_heur)) {
+			if (m_planner.search(results_file, used_heur)) {
 				std::cout << "\n\n\n*****THE END*****\n";
 			} else {
 				std::cout << "\n\n\n*****THE SAD END*****\n";

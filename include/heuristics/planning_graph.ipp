@@ -10,6 +10,8 @@
 
 #include "planning_graph.h"
 #include "../domain/domain.h"
+//TODO REMOVE DEBUG
+//std::chrono::duration<double> t1, t2, t3, t4;
 
 
 //pg_eState::pg_eState()
@@ -254,6 +256,8 @@ bool pg_state_level<T>::operator=(const pg_state_level& to_assign)
 template <class T>
 planning_graph<T>::planning_graph(const T& state_init)
 {
+	//TODO REMOVE DEBUG
+	//auto start_pg_build = std::chrono::system_clock::now();
 
 	m_goal = domain::get_instance().get_goal_description();
 	pg_state_level<T> pg_init;
@@ -261,31 +265,83 @@ planning_graph<T>::planning_graph(const T& state_init)
 	m_state_levels.push_back(pg_init);
 	m_never_executed = domain::get_instance().get_actions();
 	set_length(0);
+	set_sum(0);
 
 
-	if (!m_state_levels.back().pg_entailment(m_goal)) {
-		pg_build_layer();
-	} else {
-		std::cerr << "The given state is goal";
+	//TODO REMOVE DEBUG
+	//auto start_pg_goal_ini = std::chrono::system_clock::now();
+
+	bool goal_reached = true;
+	formula_list::const_iterator it_fl;
+	//Remove each sub goal already satisfied: it will always be and we just need to check it once
+	//std::cout << "\n\nNEW PLANNING GRAPH\n";
+	for (it_fl = m_goal.begin(); it_fl != m_goal.end();) {
+		if (m_state_levels.back().pg_entailment(*it_fl)) {
+			it_fl = m_goal.erase(it_fl);
+
+		} else {
+			goal_reached = false;
+			it_fl++;
+		}
 	}
+
+	//TODO REMOVE DEBUG
+	/*auto end_pg_goal_ini = std::chrono::system_clock::now();
+	std::chrono::duration<double> pg_goal_ini_time = end_pg_goal_ini - start_pg_goal_ini;
+	t1 = std::chrono::milliseconds::zero();
+	t2 = std::chrono::milliseconds::zero();
+	t3 = std::chrono::milliseconds::zero();
+	t4 = std::chrono::milliseconds::zero();*/
+
+	if (!goal_reached) {
+		pg_build_layer();
+
+	} else {
+		std::cerr << "\nBUILDING: The given state is goal\n";
+		exit(1);
+	}
+
+	//TODO REMOVE DEBUG
+	/*auto end_pg_build = std::chrono::system_clock::now();
+	std::chrono::duration<double> pg_build_time = end_pg_build - start_pg_build;
+	std::cout << "\n\nGenerated Planning Graph in " << pg_build_time.count() << " seconds of which:";
+	std::cout << "\nFirst goal check:      " << pg_goal_ini_time.count();
+	std::cout << "\nAction Level creation: " << t1.count();
+	std::cout << "\n\nState Level Creation:  " << t2.count() << " of which:";
+	std::cout << "\nState equality:        " << t4.count();
+	std::cout << "\n\nGoals Check:           " << t3.count() << std::endl;*/
+
 
 }
 
-template <class T>
-planning_graph<T>::planning_graph(const std::set<T>& pg_init)
-{
-	m_goal = domain::get_instance().get_goal_description();
-	m_state_levels.push_back(pg_state_level<T>(pg_init));
-	m_never_executed = domain::get_instance().get_actions();
-	set_length(0);
-
-	if (!m_state_levels.back().pg_entailment(m_goal)) {
-		pg_build_layer();
-	} else {
-		std::cerr << "The given state is goal";
-	}
-
-}
+//template <class T>
+//planning_graph<T>::planning_graph(const std::set<T>& pg_init)
+//{
+//	m_goal = domain::get_instance().get_goal_description();
+//	m_state_levels.push_back(pg_state_level<T>(pg_init));
+//	m_never_executed = domain::get_instance().get_actions();
+//	set_length(0);
+//	set_sum(0);
+//
+//	bool goal_reached = true;
+//	formula_list::const_iterator it_fl;
+//	//Remove each sub goal already satisfied: it will always be and we just need to check it once
+//	for (it_fl = m_goal.begin(); it_fl != m_goal.end(); it_fl++) {
+//
+//		if (m_state_levels.back().pg_entailment(*it_fl)) {
+//			it_fl = m_goal.erase(it_fl);
+//		} else {
+//			goal_reached = false;
+//		}
+//	}
+//
+//	if (!goal_reached) {
+//		pg_build_layer();
+//	} else {
+//		std::cerr << "The given state is goal";
+//	}
+//
+//}
 
 template <class T>
 void planning_graph<T>::set_satisfiable(bool sat)
@@ -304,19 +360,28 @@ bool planning_graph<T>::is_satisfiable()
 template <class T>
 void planning_graph<T>::pg_build_layer()
 {
+
 	pg_state_level<T> s_level_curr = m_state_levels.back();
 	pg_action_level a_level_curr;
 	a_level_curr.set_depth(get_length());
+	//TODO REMOVE DEBUG
+	//auto start = std::chrono::system_clock::now();
 	if (m_action_levels.size() > 0) {
 		a_level_curr = m_action_levels.back();
 	}
 	action_set::iterator it_actset;
-	for (it_actset = m_never_executed.begin(); it_actset != m_never_executed.end(); it_actset++) {
+	for (it_actset = m_never_executed.begin(); it_actset != m_never_executed.end();) {
 		if (s_level_curr.pg_executable(*it_actset)) {
 			a_level_curr.add_action(*it_actset);
 			it_actset = m_never_executed.erase(it_actset);
+		} else {
+			it_actset++;
 		}
 	}
+	//TODO REMOVE DEBUG
+	/*auto end = std::chrono::system_clock::now();
+	t1 += end - start;*/
+
 	add_action_level(a_level_curr);
 	set_length(get_length() + 1);
 
@@ -325,26 +390,70 @@ void planning_graph<T>::pg_build_layer()
 	s_level_next.set_depth(get_length());
 	bool new_state_insertion = false;
 	T tmp_state;
+
+	//TODO REMOVE DEBUG
+	//start = std::chrono::system_clock::now();
+
 	for (it_actset = a_level_curr.get_actions().begin(); it_actset != a_level_curr.get_actions().end(); it_actset++) {
 
 		for (typename std::set<T>::const_iterator it_kstset = s_level_curr.get_eStates().begin(); it_kstset != s_level_curr.get_eStates().end(); it_kstset++) {
 			tmp_state = *it_kstset;
-			if (tmp_state.is_executable(*it_actset)) {
-				if (s_level_next.add_eState(tmp_state.compute_succ(*it_actset))) {
-					new_state_insertion = true;
-				}
+			//if (tmp_state.is_executable(*it_actset)) {
+			//TODO REMOVE DEBUG
+			/*auto startN = std::chrono::system_clock::now();
+			bool tmptest = s_level_next.add_eState(tmp_state.compute_succ(*it_actset));
+			auto endN = std::chrono::system_clock::now();
+			t4 += endN - startN;
+			if (tmptest) {
+				new_state_insertion = true;
+			}*/
+			//}
+
+			if (s_level_next.add_eState(tmp_state.compute_succ(*it_actset))) {
+				new_state_insertion = true;
 			}
+
 		}
 	}
+	//TODO REMOVE DEBUG
+	/*end = std::chrono::system_clock::now();
+	t2 += end - start;*/
+
 	add_state_level(s_level_next);
-	if (s_level_next.pg_entailment(m_goal)) {
+
+	bool goal_reached = true;
+	//unsigned short goal_index = 0;
+
+
+	formula_list::const_iterator it_fl;
+
+	//TODO REMOVE DEBUG
+	//start = std::chrono::system_clock::now();
+
+	//Remove each sub goal already satisfied: it will always be and we just need to check it once
+	for (it_fl = m_goal.begin(); it_fl != m_goal.end();) {
+
+		if (s_level_next.pg_entailment(*it_fl)) {
+			it_fl = m_goal.erase(it_fl);
+			m_pg_sum += m_pg_length;
+
+		} else {
+			it_fl++;
+			goal_reached = false;
+		}
+	}
+	//TODO REMOVE DEBUG
+	/*end = std::chrono::system_clock::now();
+	t3 += end - start;*/
+
+
+	if (goal_reached) {
 		set_satisfiable(true);
 		return;
 	} else if (!new_state_insertion) {
 		set_satisfiable(false);
 		return;
 	} else {
-
 		pg_build_layer();
 	}
 }
@@ -371,6 +480,13 @@ void planning_graph<T>::set_length(unsigned short length)
 }
 
 template <class T>
+void planning_graph<T>::set_sum(unsigned short sum)
+{
+
+	m_pg_sum = sum;
+}
+
+template <class T>
 unsigned short planning_graph<T>::get_length()
 {
 	if (is_satisfiable()) {
@@ -379,6 +495,16 @@ unsigned short planning_graph<T>::get_length()
 	std::cerr << "\nThe planning graph could not find any solution. Check for the satisfiability before calling \"get_length\"\n";
 	exit(1);
 }//construct planning graph and return the level that satisfied the goal.
+
+template <class T>
+unsigned short planning_graph<T>::get_sum()
+{
+	if (is_satisfiable()) {
+		return m_pg_sum;
+	}
+	std::cerr << "\nThe planning graph could not find any solution. Check for the satisfiability before calling \"get_sum\"\n";
+	exit(1);
+}//
 
 template <class T>
 const pg_worlds_score & planning_graph<T>::get_worlds_score()

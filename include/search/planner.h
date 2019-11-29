@@ -20,7 +20,7 @@
 
 //THIS IS BECAUSE IS A TEMPLATIC CLASS AND IT IS A DEPENDECY
 #include "../states/state_T.ipp"
-#include "../heuristics/planning_graph.ipp"
+#include "../heuristics/heuristic_manager.ipp"
 
 /** \brief Class used as comparator for the priority queue.*/
 template <class T>
@@ -43,37 +43,38 @@ private:
 
     /**Function that searches on m_search_space using BFS on all the actions.
      * 
-     * @param[in] old_check: if true print the plan time in a file to easy the confrontation with the old version.
+     * @param[in] results_file: if true print the plan time in a file to easy the confrontation with the old version.
      * @return true if a plan is found.
      * @return false otherwise.*/
-    bool search_BFS(bool old_check);
+    bool search_BFS(bool results_file);
 
 
     /**Function that searches on m_search_space using Best First Search.
      * 
-     * @param[in] old_check: if true print the plan time in a file to easy the confrontation with the old version.
+     * @param[in] results_file: if true print the plan time in a file to easy the confrontation with the old version.
+     * @param[in] used_heur: used to determine if any heuristic has to be used and which one.
      * @return true if a plan is found.
      * @return false otherwise.*/
-    bool search_heur(bool old_check);
+    bool search_heur(bool results_file, heuristics used_heur);
     /* \brief The \ref state_type.*/
     //state_type m_state_type;
 public:
 
     /**Function that searches on m_search_space.
      * 
-     * Calls either \ref search_BFS(bool old_check) or \ref search_heur(bool old_check)
-     * @param[in] old_check: if true print the plan time in a file to easy the confrontation with the old version.
+     * Calls either \ref search_BFS(bool results_file) or \ref search_heur(bool results_file)
+     * @param[in] results_file: if true print the plan time in a file to easy the confrontation with the old version.
      * @param[in] used_heur: used to determine if any heuristic has to be used and which one.
      * @return true if a plan is found.*/
-    bool search(bool old_check, heuristics used_heur);
+    bool search(bool results_file, heuristics used_heur);
 
     /**Function print out the solution time.
      * 
      * @param[in] elapsed_seconds: the time of the search.
      * @param[in] goal: the goal state.
-     * @param[in] old_check: if true print the plan time in a file to easy the confrontation with the old version.
+     * @param[in] results_file: if true print the plan time in a file to easy the confrontation with the old version.
      * @param[in] givenplan: if true changes the name of the output folder for the comparison time.*/
-    void print_results(std::chrono::duration<double> elapsed_seconds, T goal, bool old_check, bool givenplan);
+    void print_results(std::chrono::duration<double> elapsed_seconds, T goal, bool results_file, bool givenplan);
 
 
     /**Function that searches on m_search_space using the given actions.

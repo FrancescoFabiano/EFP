@@ -59,7 +59,7 @@ private:
     /** \brief The heuristic value of the *this*.
      *
      * This value is given by the chosen implementation of \ref heuristic.*/
-    short m_heuristic_value;
+    short m_heuristic_value = 0;
 
     /** \brief Setter for the field \ref m_executed_actions_id.
      *

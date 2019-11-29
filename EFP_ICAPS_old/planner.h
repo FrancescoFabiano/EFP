@@ -169,7 +169,7 @@ public:
     Heuristics m_heuristic;
     bool useHeuristic;
     string m_domain_name; // domain name
-    bool old_check = false;
+    bool results_file = false;
     bool givenplan = false;
 
 protected:

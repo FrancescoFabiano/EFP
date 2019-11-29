@@ -146,6 +146,7 @@ private:
     std::vector< pg_state_level<T> > m_state_levels; //for union of \K_i levels for the sake of saving memory
     std::vector<pg_action_level> m_action_levels; //for A_i levels
     unsigned short m_pg_length = 0;
+    unsigned short m_pg_sum = 0;
     bool m_satisfiable;
     formula_list m_goal;
     pg_worlds_score m_worlds_score;
@@ -160,13 +161,16 @@ private:
 public:
 
     planning_graph(const T& pg_init);
-    planning_graph(const std::set<T>& pg_init);
+    // planning_graph(const std::set<T>& pg_init);
 
     void set_length(unsigned short length); //construct planning graph and return the level that satisfied the goal.
+    void set_sum(unsigned short sum); //construct planning graph and return the level that satisfied the goal.
+
 
 
     bool is_satisfiable(); //construct planning graph and return the level that satisfied the goal.
     unsigned short get_length(); //construct planning graph and return the level that satisfied the goal.
+    unsigned short get_sum();
     const pg_worlds_score & get_worlds_score();
     const pg_bfs_score & get_bfs_score();
 };

@@ -17,7 +17,7 @@ for repr in "${representations[@]}"; do
 
 
     if [ "$repr" != "OLD" ]; then 
-		timeout $TIMEOUT bin/efp.out $@ -old_check -check_visited -st $repr > findingplan_comparison.tmp
+		timeout $TIMEOUT bin/efp.out $@ -results_file -check_visited -st $repr > findingplan_comparison.tmp
         exit_status=$?;
  
 		if [[ $exit_status -eq 124 ]]; then
@@ -51,10 +51,10 @@ for repr in "${representations[@]}"; do
 
 
     if [ "$repr" = "OLD" ]; then 
-        timeout $TIMEOUT EFP_ICAPS_old/cpa+ $@ -old_check > findingplan_comparison.tmp
+        timeout $TIMEOUT EFP_ICAPS_old/cpa+ $@ -results_file > findingplan_comparison.tmp
         exit_status=$?;
     else
-        timeout $TIMEOUT bin/efp.out $@ -old_check -st $repr > findingplan_comparison.tmp
+        timeout $TIMEOUT bin/efp.out $@ -results_file -st $repr > findingplan_comparison.tmp
         exit_status=$?;
     fi;
     if [[ $exit_status -eq 124 ]]; then

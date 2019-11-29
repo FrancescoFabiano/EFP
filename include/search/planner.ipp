@@ -13,11 +13,11 @@
 #include "../domain/domain.h"
 
 template <class T>
-void planner<T>::print_results(std::chrono::duration<double> elapsed_seconds, T goal, bool old_check, bool givenplan)
+void planner<T>::print_results(std::chrono::duration<double> elapsed_seconds, T goal, bool results_file, bool givenplan)
 {
 	std::cout << "\n\n\nWell Done, Goal found in " << elapsed_seconds.count() << " :)\n";
 	goal.print();
-	if (old_check) {
+	if (results_file) {
 		std::ofstream result;
 		std::string folder = "out/EFP_comparison/";
 		if (givenplan) {
@@ -54,30 +54,19 @@ void planner<T>::print_results(std::chrono::duration<double> elapsed_seconds, T 
 }
 
 template <class T>
-bool planner<T>::search(bool old_check, heuristics used_heur)
+bool planner<T>::search(bool results_file, heuristics used_heur)
 {
-	switch ( used_heur ) {
-	case NO_H:
-	{
-		return search_BFS(old_check);
-		break;
+	if (used_heur == NO_H) {
+		return search_BFS(results_file);
+	} else {
+		return search_heur(results_file, used_heur);
 	}
-	case PLANNINGGRAPH:
-	{
-		return search_heur(old_check);
-		break;
-	}
-	default:
-	{
-		return search_BFS(old_check);
-		break;
-	}
-	}
+
 	return false;
 }
 
 template <class T>
-bool planner<T>::search_BFS(bool old_check)
+bool planner<T>::search_BFS(bool results_file)
 {
 	T initial;
 	bool check_visited = domain::get_instance().check_visited();
@@ -100,7 +89,7 @@ bool planner<T>::search_BFS(bool old_check)
 	if (initial.is_goal()) {
 		end_timing = std::chrono::system_clock::now();
 		elapsed_seconds = end_timing - start_timing;
-		print_results(elapsed_seconds, initial, old_check, false);
+		print_results(elapsed_seconds, initial, results_file, false);
 		return true;
 	}
 
@@ -112,18 +101,13 @@ bool planner<T>::search_BFS(bool old_check)
 		m_search_space.pop();
 		for (it_acset = actions.begin(); it_acset != actions.end(); it_acset++) {
 			tmp_action = *it_acset;
-
-			//			std::cout << "\nDEBUG: HERE with: \n";
-			//			tmp_action.print();
-			//			std::cout << "\nand \n";
-			//			popped_state.print();
 			if (popped_state.is_executable(tmp_action)) {
 				tmp_state = popped_state.compute_succ(tmp_action);
 				//tmp_state.print();
 				if (tmp_state.is_goal()) {
 					end_timing = std::chrono::system_clock::now();
 					elapsed_seconds = end_timing - start_timing;
-					print_results(elapsed_seconds, tmp_state, old_check, false);
+					print_results(elapsed_seconds, tmp_state, results_file, false);
 					return true;
 				}
 				if (!check_visited || visited_states.insert(tmp_state).second) {
@@ -138,8 +122,9 @@ bool planner<T>::search_BFS(bool old_check)
 }
 
 template <class T>
-bool planner<T>::search_heur(bool old_check)
+bool planner<T>::search_heur(bool results_file, heuristics used_heur)
 {
+	heuristic_manager<T> h_manager(used_heur);
 	T initial;
 	bool check_visited = domain::get_instance().check_visited();
 	std::set<T> visited_states;
@@ -161,11 +146,10 @@ bool planner<T>::search_heur(bool old_check)
 	if (initial.is_goal()) {
 		end_timing = std::chrono::system_clock::now();
 		elapsed_seconds = end_timing - start_timing;
-		print_results(elapsed_seconds, initial, old_check, false);
+		print_results(elapsed_seconds, initial, results_file, false);
 		return true;
 	}
 	m_heur_search_space.push(initial);
-
 	while (!m_heur_search_space.empty()) {
 		popped_state = m_heur_search_space.top();
 		m_heur_search_space.pop();
@@ -177,13 +161,13 @@ bool planner<T>::search_heur(bool old_check)
 				if (tmp_state.is_goal()) {
 					end_timing = std::chrono::system_clock::now();
 					elapsed_seconds = end_timing - start_timing;
-					print_results(elapsed_seconds, tmp_state, old_check, false);
+					print_results(elapsed_seconds, tmp_state, results_file, false);
 					return true;
 				}
-				planning_graph<T> pg(tmp_state);
-				if (pg.is_satisfiable()) {
-					if (!check_visited || visited_states.insert(tmp_state).second) {
-						tmp_state.set_heuristic_value(pg.get_length());
+				if (!check_visited || visited_states.insert(tmp_state).second) {
+					h_manager.set_heuristic_value(tmp_state);
+
+					if (tmp_state.get_heuristic_value() >= 0) {
 						m_heur_search_space.push(tmp_state);
 					}
 				}

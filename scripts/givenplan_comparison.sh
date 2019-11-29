@@ -13,8 +13,8 @@ ARGUMENTS=("$@") # Rebuild the array with rest of arguments
 representations=("KRIPKE_OPT" "KRIPKE" "POSS" "OLD");
 for repr in "${representations[@]}"; do
     if [ "$repr" = "OLD" ]; then 
-        EFP_ICAPS_old/cpa+ $DOMAIN -old_check           -e "${ARGUMENTS[@]}";
+        EFP_ICAPS_old/cpa+ $DOMAIN -results_file           -e "${ARGUMENTS[@]}";
     else
-        bin/efp.out        $DOMAIN -old_check -st $repr -e "${ARGUMENTS[@]}";
+        bin/efp.out        $DOMAIN -results_file -st $repr -e "${ARGUMENTS[@]}";
     fi;
 done

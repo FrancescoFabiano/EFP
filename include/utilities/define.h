@@ -18,6 +18,8 @@
 #include <map>
 #include <queue>
 #include <memory>
+#include <list>
+
 
 
 /*****************************************************************
@@ -100,12 +102,21 @@ typedef std::map<action_id, std::string> reverse_action_name_map; /**< \brief Th
 enum heuristics
 {
     NO_H, /**< Breadth first search is executed*/
-    PLANNINGGRAPH, /**< A planning graph is used to calculate the distance of each state from the goal.
+    L_PG, /**< A planning graph is used to calculate the distance of each state from the goal.
                     * 
                     * For now for every state is computed a planning graph and then the lenght of it is returned.
                     * 
                     * \todo Optimize and maybe create only one planning graph and check where the state belongs.
                     * .*/
+    S_PG, /**< A planning graph is used to calculate the sungoals distance of each state from the goal.
+                    * 
+                    * For now for every state is computed a planning graph and then the sum of the distances of each subgoals is returned
+                    * 
+                    * \todo Optimize and maybe create only one planning graph and check where the state belongs.
+                    * .*/
+    SUBGOALS, /**< For each state is calculate dthe number of (found or) missing subgoals
+                    * 
+                    * The group operator C is splitted in more belief_formulae.*/
 };
 
 /** \brief The possible restriction applicable to the domain.
@@ -153,6 +164,9 @@ enum action_check
  * Actions Related
  ****************************************************************/
 class belief_formula;
+typedef std::list<belief_formula> formula_list; /**< \brief A CNF formula of \ref belief_formula.
+                                                 *
+                                                 * Each element of the formula is a \ref belief_formula.*/
 typedef std::map<agent, fluent_formula> observability_map; /**< \brief Used to express the obsverbability conditions.
                                 * 
                                 * Each element associates an \ref agent to the observability conditions for an \ref action.*/

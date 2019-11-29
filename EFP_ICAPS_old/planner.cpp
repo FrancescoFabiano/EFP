@@ -1087,7 +1087,7 @@ void Planner::print_statistics() const
 	printf("  Search: %.3f (sec) [%.2f %%]\n",
 		m_timer->time(SEARCH_TIMER),
 		100.0 * m_timer->time(SEARCH_TIMER) / total);
-	if (old_check) {
+	if (results_file) {
 		std::ofstream result;
 		std::string folder = "out/EFP_comparison/";
 		if (givenplan) {
