@@ -18,9 +18,12 @@
 #include <chrono>
 #include <ctime>
 
+
+#include "../domain/domain.h"
+#include "../heuristics/heuristics_manager.h"
 //THIS IS BECAUSE IS A TEMPLATIC CLASS AND IT IS A DEPENDECY
 #include "../states/state_T.ipp"
-#include "../heuristics/heuristic_manager.ipp"
+#include "../heuristics/planning_graph.ipp"
 
 /** \brief Class used as comparator for the priority queue.*/
 template <class T>

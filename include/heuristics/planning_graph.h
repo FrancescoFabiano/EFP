@@ -25,34 +25,7 @@
 #include "../states/kripke/kstate.h"
 #include "../states/possibilities/pstate.h"
 #include "../formulae/belief_formula.h"
-
-/****************************
- CLASS EpistemicModelsNode
- ***************************/
-//class pg_eState
-//{
-//private:
-//    kstate m_partial_kripke;
-//    kworld_ptr_set m_pointeds; //set of states is as pointed states
-//    //vector<Kripke*> kripkeVec;
-//    action_id m_action;
-//
-//public:
-//    pg_eState();
-//    pg_eState(const kstate & partial_kripke, const kworld_ptr_set & pointeds);
-//    void set_partial_kripke(const kstate & partial_kripke);
-//    void set_pointeds(const kworld_ptr_set & pointeds);
-//    void add_pointed(kworld_ptr pointed);
-//    void set_action(action_id action);
-//
-//    const kstate & get_partial_kripke() const;
-//    const kworld_ptr_set & get_pointeds() const;
-//    action_id get_action() const;
-//    //printing
-//    void print() const;
-//};
-//
-//typedef std::vector<pg_eState> pg_eState_set; /**< \brief A vector of \ref pg_eState.*/
+#include "../domain/domain.h"
 
 /***********************************************************************
  class: PGraphActionLevel
@@ -160,13 +133,15 @@ private:
 
 public:
 
-    planning_graph(const T& pg_init);
+    // planning_graph(const T& pg_init);
+    planning_graph(const T& pg_init, const formula_list & goal);
+
     // planning_graph(const std::set<T>& pg_init);
 
     void set_length(unsigned short length); //construct planning graph and return the level that satisfied the goal.
     void set_sum(unsigned short sum); //construct planning graph and return the level that satisfied the goal.
 
-
+    void set_goal(const formula_list & goal);
 
     bool is_satisfiable(); //construct planning graph and return the level that satisfied the goal.
     unsigned short get_length(); //construct planning graph and return the level that satisfied the goal.

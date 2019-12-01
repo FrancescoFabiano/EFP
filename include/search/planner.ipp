@@ -7,10 +7,7 @@
  * \date May 6, 2019
  */
 #include <algorithm>
-
-
 #include "planner.h"
-#include "../domain/domain.h"
 
 template <class T>
 void planner<T>::print_results(std::chrono::duration<double> elapsed_seconds, T goal, bool results_file, bool givenplan)
@@ -124,7 +121,7 @@ bool planner<T>::search_BFS(bool results_file)
 template <class T>
 bool planner<T>::search_heur(bool results_file, heuristics used_heur)
 {
-	heuristic_manager<T> h_manager(used_heur);
+	heuristics_manager h_manager(used_heur);
 	T initial;
 	bool check_visited = domain::get_instance().check_visited();
 	std::set<T> visited_states;
@@ -305,4 +302,75 @@ void planner<T>::check_actions_names(std::vector<std::string>& act_name)
 			exit(1);
 		}
 	}
+}
+
+
+//OTHER CLASSES' IMPLEMENTATIONS
+
+template <class T>
+void heuristics_manager::set_heuristic_value(T & eState)
+{
+
+	switch ( m_used_heur ) {
+	case L_PG:
+	{
+		planning_graph<T> pg(eState, m_goals);
+		if (pg.is_satisfiable()) {
+			eState.set_heuristic_value(pg.get_length());
+		} else {
+			eState.set_heuristic_value(-1);
+		}
+		break;
+	}
+	case S_PG:
+	{
+		planning_graph<T> pg(eState, m_goals);
+		if (pg.is_satisfiable()) {
+			eState.set_heuristic_value(pg.get_sum());
+		} else {
+			eState.set_heuristic_value(-1);
+		}
+		break;
+	}
+	case SUBGOALS:
+	{
+		eState.set_heuristic_value(satisfied_goals::get_instance().get_unsatisfied_goals(eState));
+		break;
+	}
+	default:
+	{
+		std::cerr << "\nWrong Heuristic Selection\n";
+		exit(1);
+	}
+
+	}
+}
+
+template <class T>
+unsigned short satisfied_goals::get_unsatisfied_goals(const T & eState) const
+{
+	unsigned short ret = m_goals_number;
+
+	formula_list::const_iterator it_fl;
+	for (it_fl = m_goals.begin(); it_fl != m_goals.end(); it_fl++) {
+		if (eState.entails(*it_fl)) {
+			ret--;
+		}
+	}
+	return ret;
+
+}
+
+template <class T>
+unsigned short satisfied_goals::get_satisfied_goals(const T & eState) const
+{
+	unsigned short ret = 0;
+
+	formula_list::const_iterator it_fl;
+	for (it_fl = m_goals.begin(); it_fl != m_goals.end(); it_fl++) {
+		if (eState.entails(*it_fl)) {
+			ret++;
+		}
+	}
+	return ret;
 }

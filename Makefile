@@ -7,7 +7,9 @@ OBJS	=	$(BUILD_DIR)/bison.o $(BUILD_DIR)/lex.o $(BUILD_DIR)/main.o \
 			$(BUILD_DIR)/kedge.o $(BUILD_DIR)/kworld.o $(BUILD_DIR)/kstate.o \
 			$(BUILD_DIR)/pstore.o \
 			$(BUILD_DIR)/pworld.o $(BUILD_DIR)/pstate.o \
-			$(BUILD_DIR)/reader.o
+			$(BUILD_DIR)/reader.o \
+			$(BUILD_DIR)/heuristics_manager.o $(BUILD_DIR)/satisfied_goals.o \
+			
 CC	= g++
 CFLAGS	= -g -Wall -ansi -Wfatal-errors -std=c++14 
 MAKEFLAGS += "-j -l $(shell grep -c ^processor /proc/cpuinfo)"
@@ -67,8 +69,7 @@ $(BUILD_DIR)/main.o:	$(SRC_DIR)/main.cpp \
 						$(UTILITIES_DIR)/reader.h \
 						$(DOMAIN_DIR)/domain.h \
 						$(SEARCH_DIR)/planner.h $(SEARCH_DIR)/planner.ipp \
-						$(STATES_DIR)/state_T.h $(STATES_DIR)/state_T.ipp \
-						$(HEURISTIC_DIR)/planning_graph.h $(HEURISTIC_DIR)/planning_graph.ipp
+						$(STATES_DIR)/state_T.h $(STATES_DIR)/state_T.ipp 
 		$(dir_guard)
 		echo "#define BUILT_DATE \"`date`\"" > $(BUILD_DIR)/built_date
 		cat $(BUILD_DIR)/built_date $(SRC_DIR)/main.cpp > $(BUILD_DIR)/main.temp.cpp
@@ -135,6 +136,18 @@ $(BUILD_DIR)/proposition.o: $(ACTION_DIR)/proposition.cpp $(ACTION_DIR)/proposit
 #		$(CC) $(CFLAGS) -c $(STATES_DIR)/state_T.cpp -o $(BUILD_DIR)/state_T.o
 #
 ##HEURISTICS
+$(BUILD_DIR)/heuristics_manager.o: $(HEURISTIC_DIR)/heuristics_manager.cpp $(HEURISTIC_DIR)/heuristics_manager.h \
+								   $(UTILITIES_DIR)/define.h \
+								   $(HEURISTIC_DIR)/satisfied_goals.h \
+								   $(HEURISTIC_DIR)/planning_graph.h $(HEURISTIC_DIR)/planning_graph.ipp
+		$(dir_guard)
+		$(CC) $(CFLAGS) -c $(HEURISTIC_DIR)/heuristics_manager.cpp -o $(BUILD_DIR)/heuristics_manager.o 
+
+$(BUILD_DIR)/satisfied_goals.o: $(HEURISTIC_DIR)/satisfied_goals.cpp $(HEURISTIC_DIR)/satisfied_goals.h \
+								$(UTILITIES_DIR)/define.h \
+								$(FORMULA_DIR)/belief_formula.h
+		$(dir_guard)
+		$(CC) $(CFLAGS) -c $(HEURISTIC_DIR)/satisfied_goals.cpp -o $(BUILD_DIR)/satisfied_goals.o
 #$(BUILD_DIR)/planning_graph.o: $(HEURISTIC_DIR)/planning_graph.cpp $(HEURISTIC_DIR)/planning_graph.h \
 #					   $(S_KRIPE_DIR)/kstate \
 #					   $(ACTION_DIR)/action.h \
@@ -246,9 +259,4 @@ all:
 	$(MAKE) old
 	
 clean:
-	@echo make clean is not supported instead you can use:
-	@echo \ \ \ \ \ \ make clean_build: removes all compiletion-generated files.
-	@echo \ \ \ \ \ \ make clean_out: removes all the file in out/ '('the pdf visualization of the states')'.
-	@echo \ \ \ \ \ \ make clear: executes both clean_build and clean_out.
-	@echo \ \ \ \ \ \ make fresh: executes clear and also remove doxygen documentation.
-	@echo \ \ \ \ \ \ make old: cleans and compile the old version (1.0) of EFP.
+	$(MAKE) clean_build

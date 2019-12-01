@@ -17,8 +17,9 @@
  */
 
 #pragma once
+#include "../utilities/define.h"
+#include "../formulae/belief_formula.h"
 
-template <class T>
 class satisfied_goals
 {
 private:
@@ -28,32 +29,36 @@ private:
     /** \brief A local copy of the goal that is possibly modified (Added more subgoals).*/
     formula_list m_goals;
 
-    /** \brief Function that expands the group formulae to have more sub_goals
-     * 
-     * For example: We have C([a,b], \phi) we then transform it in:
-     *      - B(a, \phi);
-     *      - B(b, \phi);
-     * FUTURE DEVELOPEMENT
-     *      - B(a, (B(b, \phi)));
-     *      - B(b, (B(a, \phi)));
-     *      - B(a, (B(b, B(a, \phi))));
-     *      - etc. (Following \ref depth)
-     * FUTURE DEVELOPEMENT
-     *      - C([a,b], \phi).
-     * 
+    /**Private constructor because is a Singleton class*/
+    satisfied_goals();
+
+    /**Setter of the field \ref m_goals
+     *
+     * @param[in] to_set: the cnf of expanded sub goals to set as \ref m_goals.
      */
-    void expand_goals();
-
-
+    void set_goals(const formula_list & to_set);
+    /**Setter of the field \ref m_goals_number
+     *
+     * @return: the number of expanded sub goals to set.
+     */
+    void set_goals_number(unsigned short to_set);
 public:
 
-    /** \brief Class constructor that takes care of the goals rewriting.*/
-    satisfied_goals();
+    /** \brief To get always (the same instance of) *this* and the same instantiated fields.
+     * \warning the \ref set has to called in the heuristics_manager file only.*/
+    static satisfied_goals& get_instance();
+
+    /** \brief Class setter that assign the goals and the size to *this*.
+     *
+     * @param[in] goals: The goal description, expanded by \ref heuristics_manager.
+     */
+    void set(const formula_list & goals);
 
     /** \brief Function that return the number of unsatisifed goals of \ref eState
      * 
      * @param[in] eState: The (templatic) state where to check for unsatisfied goals
      * @return: The number of unsatisfied goals in \ref eState.*/
+    template< class T>
     unsigned short get_unsatisfied_goals(const T & eState) const;
 
 
@@ -61,6 +66,7 @@ public:
      * 
      * @param[in] eState: The (templatic) state where to check for satisfied goals
      * @return: The number of satisfied goals in \ref eState.*/
+    template< class T>
     unsigned short get_satisfied_goals(const T & eState) const;
 
     /**Getter of the field \ref m_goals
@@ -68,27 +74,24 @@ public:
      * @return: the cnf of expanded sub goals.
      */
     const formula_list & get_goals() const;
-    /**Setter of the field \ref m_goals
-     *
-     * @param[in] to_set: the cnf of expanded sub goals to set as \ref m_goals.
-     */
-    void set_goals(const formula_list & to_set);
 
     /**Getter of the field \ref m_goals_number
      *
      * @return: the number of expanded sub goals.
      */
     unsigned short get_goals_number() const;
-    /**Setter of the field \ref m_goals_number
-     *
-     * @return: the number of expanded sub goals to set.
-     */
-    void set_goals_number(unsigned short to_set);
 
-    /** \brief The = operator.
+
+    /* \brief The = operator.
      *   
      * @param [in] to_copy: the \ref s to assign to *this*.
      * @return true: if \p the satisfied_goals went ok.
-     * @return false: otherwise.*/
-    bool operator=(const satisfied_goals<T>& to_copy);
+     * @return false: otherwise.
+    bool operator=(const satisfied_goals<T>& to_copy);*/
+
+
+    /** \brief Copy constructor removed since is Singleton class. */
+    satisfied_goals(satisfied_goals const&) = delete;
+    /** \brief Copy operator removed since Singleton class. */
+    void operator=(satisfied_goals const&) = delete;
 };

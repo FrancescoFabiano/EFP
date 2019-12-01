@@ -14,10 +14,10 @@
 #include <vector>
 
 
-
 #include "../include/search/planner.ipp"
 #include "../include/utilities/reader.h"
 #include "../include/domain/domain.h"
+
 
 #define VERSION "2.0"
 

@@ -254,12 +254,10 @@ bool pg_state_level<T>::operator=(const pg_state_level& to_assign)
 /*\******************************************************************************************************************/
 
 template <class T>
-planning_graph<T>::planning_graph(const T& state_init)
+planning_graph<T>::planning_graph(const T& state_init, const formula_list & goal)
 {
-	//TODO REMOVE DEBUG
-	//auto start_pg_build = std::chrono::system_clock::now();
 
-	m_goal = domain::get_instance().get_goal_description();
+	set_goal(goal);
 	pg_state_level<T> pg_init;
 	pg_init.add_eState(state_init);
 	m_state_levels.push_back(pg_init);
@@ -268,13 +266,8 @@ planning_graph<T>::planning_graph(const T& state_init)
 	set_sum(0);
 
 
-	//TODO REMOVE DEBUG
-	//auto start_pg_goal_ini = std::chrono::system_clock::now();
-
 	bool goal_reached = true;
 	formula_list::const_iterator it_fl;
-	//Remove each sub goal already satisfied: it will always be and we just need to check it once
-	//std::cout << "\n\nNEW PLANNING GRAPH\n";
 	for (it_fl = m_goal.begin(); it_fl != m_goal.end();) {
 		if (m_state_levels.back().pg_entailment(*it_fl)) {
 			it_fl = m_goal.erase(it_fl);
@@ -285,14 +278,6 @@ planning_graph<T>::planning_graph(const T& state_init)
 		}
 	}
 
-	//TODO REMOVE DEBUG
-	/*auto end_pg_goal_ini = std::chrono::system_clock::now();
-	std::chrono::duration<double> pg_goal_ini_time = end_pg_goal_ini - start_pg_goal_ini;
-	t1 = std::chrono::milliseconds::zero();
-	t2 = std::chrono::milliseconds::zero();
-	t3 = std::chrono::milliseconds::zero();
-	t4 = std::chrono::milliseconds::zero();*/
-
 	if (!goal_reached) {
 		pg_build_layer();
 
@@ -300,19 +285,8 @@ planning_graph<T>::planning_graph(const T& state_init)
 		std::cerr << "\nBUILDING: The given state is goal\n";
 		exit(1);
 	}
-
-	//TODO REMOVE DEBUG
-	/*auto end_pg_build = std::chrono::system_clock::now();
-	std::chrono::duration<double> pg_build_time = end_pg_build - start_pg_build;
-	std::cout << "\n\nGenerated Planning Graph in " << pg_build_time.count() << " seconds of which:";
-	std::cout << "\nFirst goal check:      " << pg_goal_ini_time.count();
-	std::cout << "\nAction Level creation: " << t1.count();
-	std::cout << "\n\nState Level Creation:  " << t2.count() << " of which:";
-	std::cout << "\nState equality:        " << t4.count();
-	std::cout << "\n\nGoals Check:           " << t3.count() << std::endl;*/
-
-
 }
+
 
 //template <class T>
 //planning_graph<T>::planning_graph(const std::set<T>& pg_init)
@@ -360,7 +334,6 @@ bool planning_graph<T>::is_satisfiable()
 template <class T>
 void planning_graph<T>::pg_build_layer()
 {
-
 	pg_state_level<T> s_level_curr = m_state_levels.back();
 	pg_action_level a_level_curr;
 	a_level_curr.set_depth(get_length());
@@ -398,6 +371,7 @@ void planning_graph<T>::pg_build_layer()
 
 		for (typename std::set<T>::const_iterator it_kstset = s_level_curr.get_eStates().begin(); it_kstset != s_level_curr.get_eStates().end(); it_kstset++) {
 			tmp_state = *it_kstset;
+
 			//if (tmp_state.is_executable(*it_actset)) {
 			//TODO REMOVE DEBUG
 			/*auto startN = std::chrono::system_clock::now();
@@ -505,6 +479,12 @@ unsigned short planning_graph<T>::get_sum()
 	std::cerr << "\nThe planning graph could not find any solution. Check for the satisfiability before calling \"get_sum\"\n";
 	exit(1);
 }//
+
+template <class T>
+void planning_graph<T>::set_goal(const formula_list & goal)
+{
+	m_goal = goal;
+}
 
 template <class T>
 const pg_worlds_score & planning_graph<T>::get_worlds_score()
