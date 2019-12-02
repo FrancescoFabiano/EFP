@@ -29,16 +29,27 @@ private:
      * For example: We have C([a,b], \phi) we then transform it in:
      *      - B(a, \phi);
      *      - B(b, \phi);
-     * FUTURE DEVELOPEMENT
      *      - B(a, (B(b, \phi)));
      *      - B(b, (B(a, \phi)));
      *      - B(a, (B(b, B(a, \phi))));
      *      - etc. (Following \ref depth)
-     * FUTURE DEVELOPEMENT
      *      - C([a,b], \phi).
      * 
+     * @param[in] nesting: The max_depth of the generated subgoals. It is set to two for now so everybody know that everybody know.
+     * 
      */
-    void expand_goals();
+    void expand_goals(unsigned short nesting = 2);
+
+    /**The recursive function to generate the various nested goals
+     *
+     * @param[in] nesting: The max_depth of the generated subgoals.
+     * @param[in] depth: The depth of the currently generating subgoal.
+     * @param[in] to_explore: The belief formula from which generate the next subgoal.
+     * @param[in] agents: The agents for whom the new subgoals have to be generated.
+     * @param[in] gr: The grounder for the belief_formula production. 
+     */
+    void produce_subgoals(unsigned short nesting, unsigned short depth, const belief_formula & to_explore, const agent_set & agents, const grounder & gr);
+
 
 
 public:

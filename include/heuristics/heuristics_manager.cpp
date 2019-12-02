@@ -27,28 +27,69 @@ heuristics_manager::heuristics_manager(heuristics used_heur)
 	}
 }
 
-void heuristics_manager::expand_goals()
+void heuristics_manager::expand_goals(unsigned short nesting)
 {
-
-	formula_list original_goal = m_goals;
-	formula_list::const_iterator it_fl;
-	agent_set::const_iterator it_agset;
 
 	grounder gr = domain::get_instance().get_grounder();
 
-	//unsigned short added_subgoals = 0;
+	formula_list::const_iterator it_fl;
+
+	formula_list original_goal = m_goals;
+
 	for (it_fl = original_goal.begin(); it_fl != original_goal.end(); it_fl++) {
-		belief_formula to_explore = *it_fl;
-		if (to_explore.get_formula_type() == C_FORMULA) {
-			for (it_agset = to_explore.get_group_agents().begin(); it_agset != to_explore.get_group_agents().end(); it_agset++) {
+		produce_subgoals(nesting, 0, (*it_fl), (*it_fl).get_group_agents(), gr);
+	}
+
+	//	formula_list original_goal = m_goals;
+	//	formula_list::const_iterator it_fl;
+	//	agent_set::const_iterator it_agset;
+	//
+	//	grounder gr = domain::get_instance().get_grounder();
+	//
+	//	//unsigned short added_subgoals = 0;
+	//	for (it_fl = original_goal.begin(); it_fl != original_goal.end(); it_fl++) {
+	//		belief_formula to_explore = *it_fl;
+	//		if (to_explore.get_formula_type() == C_FORMULA) {
+	//			for (it_agset = to_explore.get_group_agents().begin(); it_agset != to_explore.get_group_agents().end(); it_agset++) {
+	//				belief_formula new_subgoal;
+	//				new_subgoal.set_formula_type(BELIEF_FORMULA);
+	//				new_subgoal.set_bf1(to_explore.get_bf1());
+	//				new_subgoal.set_string_agent(gr.deground_agent(*it_agset));
+	//				new_subgoal.ground();
+	//				m_goals.push_back(new_subgoal);
+	//			}
+	//			//m_goals_number++;
+	//		}
+	//	}
+}
+
+void heuristics_manager::produce_subgoals(unsigned short nesting, unsigned short depth, const belief_formula & to_explore, const agent_set & agents, const grounder & gr)
+{
+
+	formula_list::const_iterator it_fl;
+	agent_set::const_iterator it_agset;
+
+	//unsigned short added_subgoals = 0;
+
+	if ((to_explore.get_formula_type() == C_FORMULA && depth == 0)
+		|| (to_explore.get_formula_type() == BELIEF_FORMULA && depth > 0)) {
+		for (it_agset = agents.begin(); it_agset != agents.end(); it_agset++) {
+			if ((to_explore.get_agent() != *it_agset) || (depth == 0)) {
 				belief_formula new_subgoal;
 				new_subgoal.set_formula_type(BELIEF_FORMULA);
-				new_subgoal.set_bf1(to_explore.get_bf1());
+				if (depth == 0) {
+					new_subgoal.set_bf1(to_explore.get_bf1());
+				} else {
+					new_subgoal.set_bf1(to_explore);
+				}
 				new_subgoal.set_string_agent(gr.deground_agent(*it_agset));
 				new_subgoal.ground();
 				m_goals.push_back(new_subgoal);
+
+				if (nesting > (depth + 1)) {
+					produce_subgoals(nesting, (depth + 1), new_subgoal, agents, gr);
+				}
 			}
-			//m_goals_number++;
 		}
 	}
 }
