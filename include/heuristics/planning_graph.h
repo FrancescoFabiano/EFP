@@ -16,7 +16,7 @@
 #pragma once
 
 #include <stdio.h>
-#include <list>
+#include <set>
 #include <map>
 
 #include "../utilities/define.h"
@@ -27,42 +27,94 @@
 #include "../formulae/belief_formula.h"
 #include "../domain/domain.h"
 
-/***********************************************************************
- class: PGraphActionLevel
- ************************************************************************/
+/**
+ * \class pg_action_level
+ * \brief Class that implements an action level of the planning graph.
+ *
+ * 
+ *
+ * \copyright GNU Public License.
+ * 
+ * \author Francesco Fabiano.
+ * \date September 24, 2019
+ */
 
 class pg_action_level
 {
 protected:
     //Waste memory
     //Use ptr
+    /*\brief The set of executable actions in the relative \ref pg_state_level*/
     action_set m_actions;
+    /*\brief The depth of the action level*/
     unsigned short m_depth = 0;
 
 public:
+    /*Constructor of this that calls the standard constructors for each field and set the depth to 0*/
     pg_action_level();
+    /*Constructor of this that set the depth to 0 and m_actions
+     *
+     * @param[in] actions: the value to assign to m_actions. 
+     */
     pg_action_level(const action_set & actions);
+    /*Constructor of this that set the depth and m_actions
+     *
+     * @param[in] actions: the value to assign to m_actions. 
+     * @param[in] depth: the value to assign to m_depth. 
+     */
     pg_action_level(const action_set & actions, unsigned short depth);
 
+    /*Setter of the field m_depth
+     *
+     * @param[in] depth: the value to assign to m_depth. 
+     */
     void set_depth(unsigned short depth);
-    unsigned short get_depth()const;
+    /*Getter of the field m_depth
+     *
+     * @return: the value to assign to m_depth. 
+     */
+    unsigned short get_depth() const;
 
+    /*Setter of the field m_actions
+     *
+     * @param[in] actions: the value to assign to m_actions. 
+     */
     void set_actions(const action_set & actions);
+    /*Function that add a single \ref action to *this*
+     *
+     * @param[in] act: the \ref action to add to m_actions if not present.
+     */
     void add_action(const action & act);
 
-    //Use ptr instead
+    /*Getter of the field m_actions
+     *
+     * @return: the value to assign to m_actions. 
+     */
     const action_set & get_actions() const;
+    /*The = operator
+     * 
+     * @param[in]to_assign: The object to copy in *this* */
     bool operator=(const pg_action_level& to_assign);
 
 
     //printing
+    /* A printing function
+     */
     void print() const;
 };
-//
-///***********************************************************************
-// class: PGraphENodeLevel
-// ************************************************************************/
-//
+
+/**
+ * \class pg_state_level
+ * \brief Class that implements a state layer of the epistemic planning graph data structure
+ * 
+ * \details In this implementation the state layer contains complete e-state in order to have a complete planning graph
+ * 
+ *
+ * \copyright GNU Public License.
+ * 
+ * \author Francesco Fabiano.
+ * \date September 24, 2019
+ */
 
 template <class T>
 class pg_state_level
@@ -70,82 +122,195 @@ class pg_state_level
 private:
     //Is a class of pointer, not much memory required
     //Maybe make it templatic
+    /*\brief The set of the e-States contained in *this**/
     std::set<T> m_eStates;
+    /*\brief The depth of *this*, which state layer is*/
     unsigned short m_depth = 0;
 
+    /*Function that checks satisfaction of a belief formula given an epistemic state level's eStates.
+     *
+     * A belief formula is entailed when is entailed by at least one eState in the level.
+     * 
+     * @param[in] eStates: The eState of the level where to check for the belief formula entailment.
+     * @param[in] bf: The belief formula to check for entailment.
+     */
+    bool pg_entailment(const std::set<T> & eStates, const belief_formula & bf) const;
+
+    /*Function that checks satisfaction of a CNF of belief_formula given an epistemic state level's eStates.
+     *
+     * A formula_list formula is entailed all its component are entailed by at least one eState in the level.
+     * 
+     * @param[in] eStates: The eState of the level where to check for the formula entailment.
+     * @param[in] fl: The CNF of belief_formula to check for entailment.
+     */
+    bool pg_entailment(const std::set<T> & eStates, const formula_list & fl) const;
+
+
 public:
+    /*Constructor that sets the depth to 0 and call the standard constructor for the other fields
+     */
     pg_state_level();
+    /*Constructor of this that set the depth = 0 and m_eStates.
+     *
+     * @param[in] eStates: the value to assign to m_eStates. 
+     * @param[in] depth: the value to assign to m_depth. 
+     */
     pg_state_level(const std::set<T> & eStates);
+    /*Constructor of this that set the depth and m_eStates
+     *
+     * @param[in] eStates: the value to assign to m_eStates. 
+     * @param[in] depth: the value to assign to m_depth. 
+     */
     pg_state_level(const std::set<T> & eStates, unsigned short depth);
 
-
+    /*Setter of the field m_eStates
+     *
+     * @param[in] eStates: the value to assign to m_eStates. 
+     */
     void set_eStates(const std::set<T> & eStates);
-    bool add_eState(const T & eState);
-
-    void set_depth(unsigned short depth);
-    unsigned short get_depth()const;
-
+    /*Getter of the field m_eStates
+     *
+     * @return: the value to assign to m_eStates. 
+     */
     const std::set<T>& get_eStates() const;
 
-    //check satisfaction of a belief formula given an epistemic_model_list level (i.e., eNodes)
-    bool pg_entailment(const std::set<T> & eStates, const belief_formula & bf) const;
-    bool pg_entailment(const belief_formula & bf) const;
+    /*Function that add a single eState to *this*
+     *
+     * @param[in] eState: the eState to add to m_eStates if not present.
+     */
+    bool add_eState(const T & eState);
 
-    bool pg_entailment(const std::set<T> & eStates, const formula_list & fl) const;
+    /*Setter of the field m_depth
+     *
+     * @param[in] depth: the value to assign to m_depth. 
+     */
+    void set_depth(unsigned short depth);
+    /*Getter of the field m_depth
+     *
+     * @return: the value to assign to m_depth. 
+     */
+    unsigned short get_depth() const;
+
+    /*Function that checks satisfaction of a belief_formula on *this*.
+     * 
+     * @param[in] bf: The belief_formula to check for entailment.
+     * 
+     * @return: true if the formula is entailed.
+     * @return: false otherwise.
+     */
+    bool pg_entailment(const belief_formula & bf) const;
+    /*Function that checks satisfaction of a CNF of belief_formula on *this*.
+     * 
+     * @param[in] fl: The CNF of belief_formula to check for entailment.
+     * @return: true if the formula is entailed.
+     * @return: false otherwise.
+     */
     bool pg_entailment(const formula_list & fl) const;
 
+    /*Function that checks if an action is executable on *this*.
+     * 
+     * @param[in] act: The act which we need to check for executability on *this*.
+     * @return: true if the action's executability conditions are entailed.
+     * @return: false otherwise.
+     */
     bool pg_executable(const action & act) const;
 
+    /*The = operator
+     * 
+     * @param[in]to_assign: The object to copy in *this* */
     bool operator=(const pg_state_level& to_assign);
 };
-//
-///***********************************************************************
-// class: PlanningGraph
-// ************************************************************************/
-/***********************************************************************
- class: PlanningGraph
+
+/*\**********************************************************************
+ class: planning_graph
  ************************************************************************/
-
-//We now consider conditional execution
-
-typedef std::map<fluent_set, unsigned short> pg_worlds_score;
-typedef std::map<belief_formula, unsigned short> pg_bfs_score;
+//typedef std::map<fluent_set, unsigned short> pg_worlds_score; FOR FUTURE USE
+//typedef std::map<belief_formula, unsigned short> pg_bfs_score;
 
 template <class T>
 class planning_graph
 {
 private:
-    //std::vector<pg_state_level> m_state_levels; //for union of \K_i levels for the sake of saving memory
-    std::vector< pg_state_level<T> > m_state_levels; //for union of \K_i levels for the sake of saving memory
-    std::vector<pg_action_level> m_action_levels; //for A_i levels
+    /*\brief The list of \ref pg_state_level that represents the state levels of the planning_graph*/
+    std::vector< pg_state_level<T> > m_state_levels;
+    /*\brief The list of \ref pg_action_level that represents the action levels of the planning_graph*/
+    std::vector<pg_action_level> m_action_levels;
+
+    /*\brief The length of the planning_graph -- used after the goal is reached*/
     unsigned short m_pg_length = 0;
+    /*\brief The sum of the depths of the levels that contain a subgoal*/
     unsigned short m_pg_sum = 0;
+    /*\brief If the planning graph can find a solution*/
     bool m_satisfiable;
+
+    /*\brief The list of the subgoals (possibly enanched by \ref heuristics_manager)*/
     formula_list m_goal;
-    pg_worlds_score m_worlds_score;
-    pg_bfs_score m_bfs_score;
-    //use ptr instead
+    // pg_worlds_score m_worlds_score; FOR FUTURE USE
+    //pg_bfs_score m_bfs_score;FOR FUTURE USE
+    /*\brief The set of action never executed in the planning_graph for optimization*/
     action_set m_never_executed;
+
+    /*Setter of the field m_satisfiable
+     *
+     * @param[in] sat: the value to assign to m_satisfiable. 
+     */
     void set_satisfiable(bool sat);
+    /*The main function that build the planning_graph layer by layer until the goal is found or the planning_graph is saturated*/
     void pg_build_layer();
+    /*Function add the next (depth + 1) state layer to m_state_levels
+     *
+     * @param[in] s_level: The level to add to m_state_levels.
+     */
     void add_state_level(const pg_state_level<T> & s_level);
+    /*Function add the next (depth + 1) action layer to m_actions_levels
+     * 
+     * @param[in] a_level: The level to add to m_action_levels.
+     */
     void add_action_level(const pg_action_level & a_level);
 
 public:
 
-    // planning_graph(const T& pg_init);
+    /*Constructor of *this* that set the intial state level and the goal from the domain
+     *
+     * @param[in] pg_init: the initial state to set as initial level (Only one because no conformant at the moment). 
+     * @param[in] goal: the (possibly enhanced) goal description to set in m_goal. 
+     */
     planning_graph(const T& pg_init, const formula_list & goal);
 
-    // planning_graph(const std::set<T>& pg_init);
-
-    void set_length(unsigned short length); //construct planning graph and return the level that satisfied the goal.
-    void set_sum(unsigned short sum); //construct planning graph and return the level that satisfied the goal.
-
+    /*Setter of the field m_length
+     *
+     * @param[in] length: the value to assign to m_length. 
+     */
+    void set_length(unsigned short length);
+    /*Setter of the field m_sum
+     *
+     * @param[in] sum: the value to assign to m_sum. 
+     */
+    void set_sum(unsigned short sum);
+    /*Setter of the field m_goal
+     *
+     * @param[in] goal: the value to assign to m_goal. 
+     */
     void set_goal(const formula_list & goal);
 
-    bool is_satisfiable(); //construct planning graph and return the level that satisfied the goal.
-    unsigned short get_length(); //construct planning graph and return the level that satisfied the goal.
+    /*Function that tells if the planning graph can satisfy the domain.
+     *
+     * @return: True if a solution is found with the planning graph. 
+     * @return: False otherwise. 
+     */
+    bool is_satisfiable();
+
+    /*Getter of the field m_length
+     *
+     * @return: the value to assigned to m_length. 
+     */
+    unsigned short get_length();
+    /*Getter of the field m_sum
+     *
+     * @return: the value to assigned to m_sum. 
+     */
     unsigned short get_sum();
-    const pg_worlds_score & get_worlds_score();
-    const pg_bfs_score & get_bfs_score();
+
+    /*const pg_worlds_score & get_worlds_score();
+    const pg_bfs_score & get_bfs_score(); FOR FUTURE USE*/
 };

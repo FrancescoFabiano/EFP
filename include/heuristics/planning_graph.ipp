@@ -486,7 +486,7 @@ void planning_graph<T>::set_goal(const formula_list & goal)
 	m_goal = goal;
 }
 
-template <class T>
+/*template <class T>
 const pg_worlds_score & planning_graph<T>::get_worlds_score()
 {
 	if (is_satisfiable()) {
@@ -505,4 +505,4 @@ const pg_bfs_score & planning_graph<T>::get_bfs_score()
 	}
 	std::cerr << "\nThe planning graph could not find any solution. Check for the satisfiability before calling \"get_bfs_score\"\n";
 	exit(1);
-}
+} FOR FUTURE USE */
