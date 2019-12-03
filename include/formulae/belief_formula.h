@@ -8,6 +8,7 @@
  *    - \ref PROPOSITIONAL_FORMULA -- \ref BF_NOT(*phi*) or (*phi_1* \ref BF_AND *phi_2*) or (*phi_1* \ref BF_OR *phi_2*);
  *    - \ref E_FORMULA -- E([set of \ref agent], *phi*);
  *    - \ref C_FORMULA -- C([set of \ref agent], *phi*);
+ *    - \ref D_FORMULA -- D([set of \ref agent], *phi*);
  * 
  * 
  * @see reader, domain
@@ -47,6 +48,9 @@ enum bf_type
     C_FORMULA, /**< \brief A \ref belief_formula of the form C([set of \ref agent], *phi*).
                      * 
                      *  This represent the Common Knowledge of a set of \ref agent of a \ref belief_formula *phi*.*/
+    D_FORMULA, /**< \brief A \ref belief_formula of the form D([set of \ref agent], *phi*).
+                     * 
+                     *  This represent the Distributed Knowledge of a set of \ref agent of a \ref belief_formula *phi*.*/
     BF_EMPTY, /**< \brief When the belief formula is empty.*/
     BF_TYPE_FAIL /**< \brief The failure case.*/
 };
@@ -79,7 +83,7 @@ private:
      *  string description of the \ref agent of the formula.*/
     std::string m_string_agent;
 
-    /** \brief If this is a \ref E_FORMULA or a \ref C_FORMULA here is contained the
+    /** \brief If this is a \ref E_FORMULA, \ref C_FORMULA or a \ref D_FORMULA here is contained the
      *  string description of the relative set of \ref agent.*/
     string_set m_string_group_agents;
 
@@ -115,10 +119,11 @@ private:
      *
      * - Given the \ref PROPOSITIONAL_FORMULA *phi_1* **op** *phi_2* \ref m_operator contains **op**.*/
     bf_operator m_operator;
-    /** \brief If this is a \ref E_FORMULA or a \ref C_FORMULA here is contained the relative set of \ref agent.
+    /** \brief If this is a \ref E_FORMULA, \ref C_FORMULA or a \ref D_FORMULA here is contained the relative set of \ref agent.
      *
      * - If *this* is \ref E_FORMULA, i.e., E(**ags**, *phi*), \ref m_group_agents contains **ags**;
-     * - if *this* is \ref C_FORMULA, i.e., C(**ags**, *phi*), \ref m_group_agents contains **ags**.*/
+     * - if *this* is \ref C_FORMULA, i.e., C(**ags**, *phi*), \ref m_group_agents contains **ags**;
+     * - If *this* is \ref D_FORMULA, i.e., E(**ags**, *phi*), \ref m_group_agents contains **ags**.*/
     agent_set m_group_agents;
 
     /** \brief Setter for the field \ref m_fluent_formula.
@@ -142,6 +147,7 @@ private:
      * - if *this* is \ref PROPOSITIONAL_FORMULA, i.e. *phi_1* **op** *phi_2*, \ref m_bf1 contains *phi_1*;
      * - if *this* is \ref E_FORMULA, i.e., E(ags, *phi*), \ref m_bf1 contains *phi*;
      * - if *this* is \ref C_FORMULA, i.e., C(ags, *phi*), \ref m_bf1 contains *phi*;
+     * - if *this* is \ref D_FORMULA, i.e., D(ags, *phi*), \ref m_bf1 contains *phi*;
      * - null_ptr otherwise.*/
     std::shared_ptr<belief_formula> m_bf1;
     /** \brief In this field is contained the second nested \ref belief_formula of *this*.

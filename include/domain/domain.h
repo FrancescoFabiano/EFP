@@ -20,7 +20,6 @@
 #include "../utilities/define.h"
 #include "../utilities/reader.h"
 #include "../actions/action.h"
-#include "../heuristics/heuristics_manager.h"
 
 class domain
 {

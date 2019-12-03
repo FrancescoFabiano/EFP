@@ -35,6 +35,7 @@ comment %.*$
 "B" {return B;}
 "C" {return C;}
 "E" {return E;}
+"D" {return D;}
 
 
 "[" {return LEFT_BRAC;}

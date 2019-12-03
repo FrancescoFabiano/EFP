@@ -15,10 +15,6 @@
 
 #pragma once
 
-#include <stdio.h>
-#include <set>
-#include <map>
-
 #include "../utilities/define.h"
 #include "../actions/action.h"
 #include "../states/state_T.h"

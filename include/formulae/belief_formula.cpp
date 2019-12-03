@@ -207,6 +207,14 @@ void belief_formula::print() const
 		std::cout << "))";
 		break;
 
+	case D_FORMULA:
+		std::cout << "D([";
+		printer::get_instance().print_list(m_string_group_agents);
+		std::cout << "],";
+		m_bf1->print();
+		std::cout << ")";
+		break;
+
 	case C_FORMULA:
 		std::cout << "C([";
 		printer::get_instance().print_list(m_string_group_agents);
@@ -374,6 +382,7 @@ void belief_formula::ground()
 
 		case E_FORMULA:
 		case C_FORMULA:
+		case D_FORMULA:
 			set_group_agents(gr.ground_agent(get_string_group_agents()));
 			//m_group_agents = gr.ground_agent(m_string_group_agents);
 			m_bf1->ground();
@@ -454,6 +463,7 @@ bool belief_formula::operator==(const belief_formula & to_compare) const
 			}
 			case E_FORMULA:
 			case C_FORMULA:
+			case D_FORMULA:
 			{
 				if (m_group_agents == to_compare.get_group_agents()) {
 					return get_bf1() == to_compare.get_bf1();
@@ -537,6 +547,7 @@ bool belief_formula::operator=(const belief_formula & to_copy)
 	}
 	case E_FORMULA:
 	case C_FORMULA:
+	case D_FORMULA:
 	{
 		//If has been grounded
 		if (m_is_grounded) {

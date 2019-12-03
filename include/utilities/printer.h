@@ -20,6 +20,8 @@
 
 #include "../domain/grounder.h"
 #include "../formulae/belief_formula.h"
+#include "../states/kripke/kworld.h"
+#include "../states/possibilities/pworld.h"
 
 class printer
 {
@@ -91,6 +93,11 @@ public:
      * @param[in] to_print: the \ref kworld_ptr_set to be printed.*/
     void print_list(const kworld_ptr_set& to_print);
 
+    /** \brief Function used to print all the \ref kworld_ptr inside \p to_print.
+     * 
+     * @param[in] to_print: the \ref kworld_ptr_set to be printed.*/
+    void print_list(const pworld_ptr_set& to_print);
+
 
     /** \brief Function used to print all the \ref action name inside \p to_print.
      * 
@@ -101,7 +108,7 @@ public:
      * 
      * @param[in] to_print: the \ref agent_set to be printed.*/
     void print_list_ag(const agent_set& to_print);
-    
+
     /** \brief Copy constructor removed since is Singleton class. */
     printer(printer const&) = delete;
     /** \brief Copy operator removed since Singleton class. */

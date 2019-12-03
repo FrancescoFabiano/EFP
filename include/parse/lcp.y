@@ -61,6 +61,7 @@ extern std::shared_ptr<reader> domain_reader;
 %token B
 %token C
 %token E
+%token D
 
 %type <str_val> id
 %type <str_val> constant
@@ -430,7 +431,15 @@ C LEFT_PAREN LEFT_BRAC agent_list RIGHT_BRAC COMMA belief_formula RIGHT_PAREN {
    $$->set_formula_type(C_FORMULA);
    $$->set_string_group_agents(*$4);
    $$->set_bf1(*$7);
+}
+|
+D LEFT_PAREN LEFT_BRAC agent_list RIGHT_BRAC COMMA belief_formula RIGHT_PAREN {
+   $$ = new belief_formula;
+   $$->set_formula_type(D_FORMULA);
+   $$->set_string_group_agents(*$4);
+   $$->set_bf1(*$7);
 };
+
 
 
 /* if part for fluent_formula */

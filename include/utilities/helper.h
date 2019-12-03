@@ -101,7 +101,6 @@ public:
      * 
      * @return the description of the world after \p effect has been applied to \p world_description.*/
     static fluent_set ontic_exec(const fluent_formula& effect, const fluent_set& world_description);
-
 };
 
 

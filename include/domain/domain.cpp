@@ -245,6 +245,8 @@ void domain::build_initially()
 		}
 			//S5 -> Edge
 		case C_FORMULA:
+			//No more S5
+		case D_FORMULA:
 			//Possible S5 -> initally [C(phi2), C(phi2)]
 		case PROPOSITIONAL_FORMULA:
 			//No more S5
@@ -322,7 +324,7 @@ bool domain::check_goal_restriction(const belief_formula& bf)//Apply the restric
 	/** \todo: Maybe a separated class?*/
 	bool ret = false;
 	switch ( m_goal_restriction ) {
-		//We only admit C(belief)
+		//We only admit non negative goals
 	case NONEG:
 		switch ( bf.get_formula_type() ) {
 		case FLUENT_FORMULA:
@@ -331,9 +333,8 @@ bool domain::check_goal_restriction(const belief_formula& bf)//Apply the restric
 		case BELIEF_FORMULA:
 			ret = true;
 			break;
+		case D_FORMULA:
 		case C_FORMULA:
-			ret = check_goal_restriction(bf.get_bf1());
-			break;
 		case E_FORMULA:
 			ret = check_goal_restriction(bf.get_bf1());
 			break;

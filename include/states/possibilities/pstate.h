@@ -152,7 +152,7 @@ private:
      *
      * 
      * \todo self-loop?*/
-    bool get_B_reachable_worlds(agent ag, const pworld_ptr & world, pworld_ptr_set & reached) const;
+    bool get_B_reachable_worlds_recoursive(agent ag, const pworld_ptr & world, pworld_ptr_set & reached) const;
 
     /** \brief Function that returns all the reachable \ref pworld given a set of \ref agent and the staring \ref pworld.
      * 
@@ -185,7 +185,19 @@ private:
      *
      * 
      * \todo self-loop?*/
-    bool get_E_reachable_worlds(const agent_set &ags, pworld_ptr_set & worlds, pworld_ptr_set & reached) const;
+    bool get_E_reachable_worlds_recoursive(const agent_set &ags, const pworld_ptr_set & worlds, pworld_ptr_set & reached) const;
+
+    /** \brief Function that returns all the Distributed reachable \ref pworld given a set of \ref agent and the staring \ref pworld.
+     * 
+     * This function finds the intersection of the worlds reachable by all the agents in \ref ags starting from \ref world
+     * @param[in] ags: the set of label of the \ref kedge that the function follows to check the transitivity.
+     * @param[in] world: the pointers to the set of \ref pworld where to start to check the entailment.
+     *
+     * @return a set of pointers to all the D_reachable worlds.
+     *
+     * 
+     * \todo self-loop?*/
+    const pworld_ptr_set get_D_reachable_worlds(const agent_set & ags, const pworld_ptr & world) const;
 
     /** \brief Function that returns all the reachable \ref pworld (in the *Common Knowledge* sense) given a \ref agent and the staring \ref pworld.
      * 
@@ -200,7 +212,7 @@ private:
      * @return a set of pointers to all the reachable worlds.
      * 
      * \todo self-loop?*/
-    const pworld_ptr_set get_C_reachable_worlds(const agent_set &, const pworld_ptr & world) const;
+    const pworld_ptr_set get_C_reachable_worlds(const agent_set & ags, const pworld_ptr & world) const;
 
     /** \brief Function that builds the initial Kripke structure given the initial conditions in a structural way.
      *

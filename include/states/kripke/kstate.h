@@ -154,7 +154,7 @@ private:
      *
      * 
      * \todo self-loop?*/
-    bool get_B_reachable_worlds(agent ag, kworld_ptr world, kworld_ptr_set& reached) const;
+    bool get_B_reachable_worlds_recoursive(agent ag, kworld_ptr world, kworld_ptr_set& reached) const;
 
     /** \brief Function that returns all the reachable \ref kworld given a set of \ref agent and the staring \ref kworld.
      * 
@@ -181,13 +181,13 @@ private:
      * @see \ref belief_formula, get_B_reachable_worlds(agent, kworld_ptr, kworld_ptr_set) const and get_C_reachable_worlds(const agent_set &, kworld_ptr world) const.
      * 
      * @param[in] ags: the set of label of the \ref kedge that the function follows to check the transitivity.
-     * @param[in] world: the pointers to the set of \ref kworld where to start to check the entailment.
+     * @param[in] worlds: the pointers to the set of \ref kworld where to start to check the entailment.
      *
      * @param[out] reached: the set of pointers to all the reachable worlds.
      *
      * 
      * \todo self-loop?*/
-    bool get_E_reachable_worlds(const agent_set &ags, kworld_ptr_set &world, kworld_ptr_set& reached) const;
+    bool get_E_reachable_worlds_recoursive(const agent_set &ags, const kworld_ptr_set &worlds, kworld_ptr_set& reached) const;
 
     /** \brief Function that returns all the reachable \ref kworld (in the *Common Knowledge* sense) given a \ref agent and the staring \ref kworld.
      * 
@@ -203,6 +203,16 @@ private:
      * 
      * \todo self-loop?*/
     const kworld_ptr_set get_C_reachable_worlds(const agent_set &, kworld_ptr world) const;
+
+    /** \brief Function that returns all the reachable \ref kworld given a set of \ref agent and the staring \ref kworld.
+     * 
+     * This function finds the intersection of the worlds reachable by all the agents in \ref ags starting from \ref world
+     * 
+     * @param[in] ags: the set of label of the \ref kedge that the function follows to check the transitivity.
+     * @param[in] world: the pointers to the set of \ref kworld where to start to check the entailment.
+     *
+     * @return a set of pointers to all the D_reachable worlds.*/
+    const kworld_ptr_set get_D_reachable_worlds(const agent_set & ags, kworld_ptr world) const;
 
     /** \brief Function that builds the initial Kripke structure given the initial conditions in a structural way.
      *
@@ -595,12 +605,13 @@ public:
      * @param[in] graphviz: the ostream where to print the info of *this*.*/
     void print_graphviz(std::ostream& graphviz) const;
 
-
     /** \brief Function that return the sum_set of the two parameters by modifying the first one.
      *
      *  
      * @param[out] to_modify: the set in which is added \p factor2.
      * @param[in] factor2: the set to add to \p to_modify.*/
+    /* @return: True if at least one new element is added.
+     * @return: False otherwise.*/
     template <class T>
     void sum_set(std::set<T> & to_modify, const std::set<T> & factor2) const;
     /** \brief Function that return the set difference of the two parameters by modifying the first one.
@@ -610,9 +621,6 @@ public:
      * @param[in] factor2: the set to remove from \p to_modify.*/
     template <class T>
     void minus_set(std::set<T> & to_modify, const std::set<T> & factor2) const;
-
-
-    /*fluent_formula get_sensing_effects_if_entailed(const effects_map & map, const kworld_ptr & start) const;*/
 };
 
 typedef std::vector<kstate> kstate_set; /**< \brief A set of \ref kstate.*/

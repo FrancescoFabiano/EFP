@@ -225,6 +225,15 @@ const fluent_set & pworld_ptr::get_fluent_set() const
 	exit(1);
 }
 
+pworld_id pworld_ptr::get_fluent_based_id() const
+{
+	if (m_ptr != nullptr) {
+		return(get_ptr()->get_id());
+	}
+	std::cerr << "\nError in creating a pworld_ptr\n";
+	exit(1);
+}
+
 pworld_id pworld_ptr::get_id() const
 {
 	if (m_ptr != nullptr) {

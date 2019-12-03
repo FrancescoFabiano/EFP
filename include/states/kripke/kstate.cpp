@@ -221,7 +221,10 @@ bool kstate::entails(const belief_formula & bf, kworld_ptr world) const
 		//Check the entails on the E-reachable worlds
 		return entails(bf.get_bf1(), get_E_reachable_worlds(bf.get_group_agents(), world));
 		break;
-
+		//Check the entails on the D-reachable worlds
+	case D_FORMULA:
+		return entails(bf.get_bf1(), get_D_reachable_worlds(bf.get_group_agents(), world));
+		break;
 		//Check the entails on the C-reachable worlds
 	case C_FORMULA:
 		return entails(bf.get_bf1(), get_C_reachable_worlds(bf.get_group_agents(), world));
@@ -254,12 +257,16 @@ bool kstate::entails(const formula_list & to_check, kworld_ptr world) const
 const kworld_ptr_set kstate::get_B_reachable_worlds(agent ag, kworld_ptr world) const
 {
 	kworld_ptr_set ret;
-	get_B_reachable_worlds(ag, world, ret);
-
+	kedge_ptr_set::const_iterator it_kedge;
+	for (it_kedge = m_edges.begin(); it_kedge != m_edges.end(); it_kedge++) {
+		if (((*it_kedge).get_from() == world) && ((*it_kedge).get_label() == ag)) {
+			ret.insert((*it_kedge).get_to());
+		}
+	}
 	return ret;
 }
 
-bool kstate::get_B_reachable_worlds(agent ag, kworld_ptr world, kworld_ptr_set & ret) const
+bool kstate::get_B_reachable_worlds_recoursive(agent ag, kworld_ptr world, kworld_ptr_set & ret) const
 {
 	/** \todo check: If a--i-->b, b--i-->c then a--i-->c must be there*/
 	bool is_fixed_point = true;
@@ -278,23 +285,30 @@ bool kstate::get_B_reachable_worlds(agent ag, kworld_ptr world, kworld_ptr_set &
 
 const kworld_ptr_set kstate::get_E_reachable_worlds(const agent_set & ags, kworld_ptr world) const
 {
+	/*Optimized, the K^0 call of this function
+	 *
+	 * Not calling B_reachability iteratively for optimization
+	 */
 	kworld_ptr_set ret;
-	kworld_ptr_set worlds;
-	worlds.insert(world);
-	get_E_reachable_worlds(ags, worlds, ret);
-
+	kedge_ptr_set::const_iterator it_kedge;
+	for (it_kedge = m_edges.begin(); it_kedge != m_edges.end(); it_kedge++) {
+		if (((*it_kedge).get_from() == world) && (ags.find((*it_kedge).get_label()) != ags.end())) {
+			ret.insert((*it_kedge).get_to());
+		}
+	}
 	return ret;
 }
 
-bool kstate::get_E_reachable_worlds(const agent_set & ags, kworld_ptr_set &worlds, kworld_ptr_set & ret) const
+bool kstate::get_E_reachable_worlds_recoursive(const agent_set & ags, const kworld_ptr_set &worlds, kworld_ptr_set & ret) const
 {
+	/*Optimized, the K^i (recoursive) call of this function*/
+
 	bool is_fixed_point = true;
-	kworld_ptr_set::const_iterator it_kwptr;
-	agent_set::const_iterator it_agset;
-	sum_set(worlds, ret);
-	for (it_kwptr = worlds.begin(); it_kwptr != worlds.end(); it_kwptr++) {
-		for (it_agset = ags.begin(); it_agset != ags.end(); it_agset++) {
-			if (!get_B_reachable_worlds(*it_agset, *it_kwptr, ret)) {
+	kedge_ptr_set::const_iterator it_kedge;
+	/*\bug What if the pointed is not reachable, correct this*/
+	for (it_kedge = m_edges.begin(); it_kedge != m_edges.end(); it_kedge++) {
+		if ((worlds.find((*it_kedge).get_from()) != worlds.end()) && (ags.find((*it_kedge).get_label()) != ags.end())) {
+			if (ret.insert((*it_kedge).get_to()).second) {
 				is_fixed_point = false;
 			}
 		}
@@ -306,13 +320,50 @@ const kworld_ptr_set kstate::get_C_reachable_worlds(const agent_set & ags, kworl
 {
 	//Use of fixed point to stop.
 	bool is_fixed_point = false;
-	kworld_ptr_set worlds;
-	worlds.insert(world);
+	//THIS IS K^0
+	kworld_ptr_set newly_reached = get_E_reachable_worlds(ags, world);
+	kworld_ptr_set already_reached;
 	kworld_ptr_set ret;
+	//FROM HERE K^i UNTIL FIXED_POINT
 	while (!is_fixed_point) {
-		is_fixed_point = get_E_reachable_worlds(ags, worlds, ret);
+		sum_set(newly_reached, ret);
+		minus_set(newly_reached, already_reached);
+		is_fixed_point = get_E_reachable_worlds_recoursive(ags, newly_reached, ret);
+		already_reached = newly_reached;
 	}
 	return ret;
+}
+
+const kworld_ptr_set kstate::get_D_reachable_worlds(const agent_set & ags, kworld_ptr world) const
+{
+	agent_set::const_iterator it_agset = ags.begin();
+	if (it_agset != ags.end()) {
+		kworld_ptr_set ret = get_B_reachable_worlds((*it_agset), world);
+		while (it_agset != ags.end()) {
+			it_agset++;
+			kworld_ptr_set::iterator it_pwset1 = ret.begin();
+
+			kworld_ptr_set to_intersect = get_B_reachable_worlds((*it_agset), world);
+			kworld_ptr_set::const_iterator it_pwset2 = to_intersect.begin();
+			while ((it_pwset1 != ret.end()) && (it_pwset2 != to_intersect.end())) {
+				if (*it_pwset1 < *it_pwset2) {
+					ret.erase(it_pwset1++);
+				} else if (*it_pwset2 < *it_pwset1) {
+					++it_pwset2;
+				} else { // *it_pwset1 == *it_pwset2
+					++it_pwset1;
+					++it_pwset2;
+				}
+			}
+			// Anything left in ret from here on did not appear in to_intersect,
+			// so we remove it.
+			ret.erase(it_pwset1, ret.end());
+		}
+
+		return ret;
+	}
+	std::cerr << "\nERROR: At least one agent is needed for D operator\n";
+	exit(1);
 }
 
 void kstate::add_world(const kworld & world)
@@ -1446,7 +1497,6 @@ void kstate::print_graphviz(std::ostream & graphviz) const
 }
 
 /******************************MOVE TO HELPER*********************************/
-
 template <class T>
 void kstate::sum_set(std::set<T> & to_modify, const std::set<T> & factor2) const
 {
