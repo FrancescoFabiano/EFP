@@ -182,6 +182,7 @@ bool kstate::entails(const belief_formula & bf, kworld_ptr world) const
 	/*
 	 The entailment of a \ref belief_formula just call recursively the entailment on all the reachable world with that formula.
 	 */
+	kworld_ptr_set D_reachable;
 	switch ( bf.get_formula_type() ) {
 
 	case FLUENT_FORMULA:
@@ -223,7 +224,12 @@ bool kstate::entails(const belief_formula & bf, kworld_ptr world) const
 		break;
 		//Check the entails on the D-reachable worlds
 	case D_FORMULA:
-		return entails(bf.get_bf1(), get_D_reachable_worlds(bf.get_group_agents(), world));
+		D_reachable = get_D_reachable_worlds(bf.get_group_agents(), world);
+		if (D_reachable.size() > 0) {
+			return entails(bf.get_bf1(), D_reachable);
+		} else {
+			return false;
+		}
 		break;
 		//Check the entails on the C-reachable worlds
 	case C_FORMULA:
@@ -240,6 +246,8 @@ bool kstate::entails(const belief_formula & bf, kworld_ptr world) const
 		std::cerr << "Something went wrong in checking entailment for Belief formula";
 		exit(1);
 	}
+	return false;
+
 }
 
 bool kstate::entails(const formula_list & to_check, kworld_ptr world) const
@@ -336,34 +344,36 @@ const kworld_ptr_set kstate::get_C_reachable_worlds(const agent_set & ags, kworl
 
 const kworld_ptr_set kstate::get_D_reachable_worlds(const agent_set & ags, kworld_ptr world) const
 {
+	/**@bug: Notion of D-Reachable is correct (page 24 of Reasoning about Knowledge)*/
 	agent_set::const_iterator it_agset = ags.begin();
-	if (it_agset != ags.end()) {
-		kworld_ptr_set ret = get_B_reachable_worlds((*it_agset), world);
-		while (it_agset != ags.end()) {
-			it_agset++;
-			kworld_ptr_set::iterator it_pwset1 = ret.begin();
+	kworld_ptr_set ret = get_B_reachable_worlds((*it_agset), world);
+	it_agset++;
 
-			kworld_ptr_set to_intersect = get_B_reachable_worlds((*it_agset), world);
-			kworld_ptr_set::const_iterator it_pwset2 = to_intersect.begin();
-			while ((it_pwset1 != ret.end()) && (it_pwset2 != to_intersect.end())) {
-				if (*it_pwset1 < *it_pwset2) {
-					ret.erase(it_pwset1++);
-				} else if (*it_pwset2 < *it_pwset1) {
-					++it_pwset2;
-				} else { // *it_pwset1 == *it_pwset2
-					++it_pwset1;
-					++it_pwset2;
-				}
+	for (; it_agset != ags.end(); it_agset++) {
+
+		kworld_ptr_set::iterator it_pwset1 = ret.begin();
+		kworld_ptr_set to_intersect = get_B_reachable_worlds((*it_agset), world);
+		kworld_ptr_set::const_iterator it_pwset2 = to_intersect.begin();
+		while ((it_pwset1 != ret.end()) && (it_pwset2 != to_intersect.end())) {
+
+			if ((*it_pwset1 < *it_pwset2) && ((*it_pwset1).get_fluent_based_id().compare((*it_pwset2).get_fluent_based_id()) != 0)) {
+				ret.erase(it_pwset1++);
+			} else if ((*it_pwset2 < *it_pwset1) && ((*it_pwset1).get_fluent_based_id().compare((*it_pwset2).get_fluent_based_id()) != 0)) {
+				++it_pwset2;
+			} else { // *it_pwset1 == *it_pwset2
+				++it_pwset1;
+				++it_pwset2;
 			}
-			// Anything left in ret from here on did not appear in to_intersect,
-			// so we remove it.
-			ret.erase(it_pwset1, ret.end());
 		}
 
-		return ret;
+		// Anything left in ret from here on did not appear in to_intersect,
+		// so we remove it.
+		ret.erase(it_pwset1, ret.end());
+
 	}
-	std::cerr << "\nERROR: At least one agent is needed for D operator\n";
+	std::cerr << "\nERROR: D_REACHABLILITY not yet Implemented correctly\n";
 	exit(1);
+	return ret;
 }
 
 void kstate::add_world(const kworld & world)

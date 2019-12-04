@@ -363,6 +363,8 @@ const pworld_ptr_set pstate::get_D_reachable_worlds(const agent_set & ags, const
 		ret.erase(it_pwset1, ret.end());
 
 	}
+	std::cerr << "\nERROR: D_REACHABLILITY not yet Implemented correctly\n";
+	exit(1);
 	return ret;
 }
 

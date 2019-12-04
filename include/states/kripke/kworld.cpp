@@ -233,6 +233,15 @@ const fluent_set & kworld_ptr::get_fluent_set() const
 	exit(1);
 }
 
+kworld_id kworld_ptr::get_fluent_based_id() const
+{
+	if (m_ptr != nullptr) {
+		return(get_ptr()->get_id());
+	}
+	std::cerr << "\nError in creating a kworld_ptr (id)\n";
+	exit(1);
+}
+
 kworld_id kworld_ptr::get_id() const
 {
 	if (m_ptr != nullptr) {

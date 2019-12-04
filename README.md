@@ -3,29 +3,27 @@
 ## Goal
 Realize an Epistemic Forward Planner that bases its concept on different states representations such as:
 - [x] *Kripke structure*
-- [ ] *possibilities*
+- [x] *possibilities*
 - [ ] *OBDDs*
 
-## The situation:
-- We have PG-EFP, an epistemic forward planner based on Kripke structure that also uses epistemic planning graph.
+## Current situation:
+Implemented EFP v. 2.0 that uses templatic e-States representations with relative templatic transition function.
+The planner is based on several scientific pubblications where are described the different semantics and tranisition functions.
+In particular we have the following configurations:
+-**eState:** *Kripke Structures*; **transition function:** *event based updates (mA\*)* (Baral et al. 2015, Le et al. 2018);
+-**eState:** *Kripke Structures*; **transition function:** *optimized event based updates* (Fabiano et al. 2020);
+-**eState:** *Possibilities*; **transition function:** *Iterative transition function mA^p* (Fabiano et al. 2019, Fabiano et al. 2020).
 
-## Problems:
-- Transition function is ok? Do we need to check the executability on every word?
-- What happen if an action is not executable accordingly to one of the fully observant agent but it is for others
-- Ontic generates duplicates?
-- Is announcement with false beliefs an ontic? It creates the world if it didn't exist. old semantic + ontic update for fully observant (sensing the same)
+Moreover the planner admits templatic heuristics usage.
+At the moment we implemented:
+- a complete (yet inefficient) version of the *Epistemic planning graph* introduced in (Le et al. 2018);
+- *number of satisfied goals* that possibly expands the original goal for a better scalability.
+
   
-## Future works
-- Encode the concept of possibility;
-- Prepare for dynamic programming exploiment.
-
+## Future works and some ideas
 - Think about OBDDs.
-
-- Allow the planner to work with every the representation.
-
-- Heuristics.
-
-## Theorical ideas to study
+- More Heuristics.
+- Is announcement with false beliefs an ontic? It creates the world if it didn't exist. old semantic + ontic update for fully observant (sensing the same)
 - If **ag_i** sees as partial **ag_y** announcing **phi** and **ag_i** thought that **ag_y** did not know **phi** how should **ag_i** react?
 - If **ag_i** sees as partial **ag_y** announcing **f** and **ag_i** knows **f** then
 	- **ag_i** believes that **ag_y** knows **f**; or
@@ -50,10 +48,36 @@ Realize an Epistemic Forward Planner that bases its concept on different states 
 ###Usage
 - **make**: to compile the planner.
 - **make doxygen**: to compile the planner and the documentation (to check it open doxygen/Docs/html/index.html).
-- **make clean_build**: removes all compiletion-generated files.
+- **make clean**: removes all compilation-generated files.
+- **make clean_build**: removes all compilation-generated files.
 - **make clean_out**: removes all the file in out/ (the pdf visualization of the states).
 - **make clear**: executes both **clean_build** and **clean_out**.
 - **make fresh**: executes **clear** and also removes doxygen documentation.
 - **make old**: cleans and compile the old version (1.0) of EFP.
 - **make all**: executes **make doxygen** and **make_old**.
 	
+	
+###Extras
+- The repository also includes several scripts to help in the testing/debugging process. These are located inside the folder *scripts*.
+- All the utilized beanchmark are preserved in the folder *exp*.
+- The folder *ICAPS_EFP_OLD* contains EFP v. 1.0 (introduced in (Le et al. 2018)) for comparison and testing.
+
+####Bibliography
+Baral, C.; Gelfond, G.; Pontelli, E.; and Son, T. C. 2015.
+An action language for multi-agent domains: Foundations.
+CoRR abs/1511.01960.
+
+
+Fabiano, F.; Burigana, A.; Dovier, A.; and Pontelli, E. 2020.
+EFP 2.0: A Multi-Agent Epistemic Solver with Multiple e-State Representations.
+Under Review at the 30th International Conference on Automated Planning and Scheduling.
+
+
+Fabiano, F.; Riouak, I.; Dovier, A.; and Pontelli, E. 2019.
+Non-well-founded set based multi-agent epistemic action language.
+In Proceedings of the 34th Italian Conference on Computational Logic, volume 2396 of CEUR Workshop Proceedings, 242–259.
+
+
+Le, T.; Fabiano, F.; Son, T. C.; and Pontelli, E. 2018.
+EFP and PG-EFP: Epistemic forward search planners in multiagent domains.
+In Proceedings of the Twenty-Eighth International Conference on Automated Planning and Scheduling, 161–170. Delft, The Netherlands: AAAI Press.

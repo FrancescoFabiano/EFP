@@ -265,6 +265,12 @@ public:
      *     
      * @return the \ref fluent_set that is the description of the \ref kworld pointed by \ref m_ptr.*/
     const fluent_set & get_fluent_set() const;
+
+    /** \brief Function that return the field m_id of the pointed \ref kworld.
+     *     
+     * @return the \ref kworld_id that is the id of the \ref kworld pointed by \ref m_ptr*/
+    kworld_id get_fluent_based_id() const;
+
     /** \brief Function that return the field m_id of the pointed \ref kworld + \ref m_repetition.
      *     
      * @return the \ref kworld_id that is the id of the \ref kworld pointed by \ref m_ptr + \ref m_repetition.*/
