@@ -1,7 +1,7 @@
 # EFP
 
 ## Goal
-Realize an Epistemic Forward Planner that bases its concept on different states representations such as:
+Realize a scalable Epistemic Forward Planner that bases its concept on different states representations such as:
 - [x] *Kripke structure*
 - [x] *possibilities*
 - [ ] *OBDDs*
@@ -39,13 +39,13 @@ At the moment we implemented:
 - Lies and biased info;
 - ethic constraints.
 
-###Reqiurements
+### Reqiurements
 - flex
 - bison
 - texlive-font-utils
 - graphviz
 
-###Usage
+### Usage
 - **make**: to compile the planner.
 - **make doxygen**: to compile the planner and the documentation (to check it open doxygen/Docs/html/index.html).
 - **make clean**: removes all compilation-generated files.
@@ -57,12 +57,12 @@ At the moment we implemented:
 - **make all**: executes **make doxygen** and **make_old**.
 	
 	
-###Extras
+### Extras
 - The repository also includes several scripts to help in the testing/debugging process. These are located inside the folder *scripts*.
 - All the utilized beanchmark are preserved in the folder *exp*.
 - The folder *ICAPS_EFP_OLD* contains EFP v. 1.0 (introduced in (Le et al. 2018)) for comparison and testing.
 
-####Bibliography
+#### Bibliography
 Baral, C.; Gelfond, G.; Pontelli, E.; and Son, T. C. 2015.
 An action language for multi-agent domains: Foundations.
 CoRR abs/1511.01960.
