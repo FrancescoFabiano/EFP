@@ -114,6 +114,10 @@ enum heuristics
                     * 
                     * \todo Optimize and maybe create only one planning graph and check where the state belongs.
                     * .*/
+    C_PG, /**< A single planning graph is used to calculate the distance of each grounded belief formula from initial state and goal.
+                    * 
+                    * This follows the idea of converting belief formula in fluent and just execute classical planning graph.
+                    * .*/
     SUBGOALS, /**< For each state is calculate dthe number of (found or) missing subgoals
                     * 
                     * The group operator C is splitted in more belief_formulae.*/
@@ -291,6 +295,7 @@ typedef std::map<pworld_ptr, pworld_ptr> transition_map; /**< \brief A map that 
                                                           *
                                                           * @see pworld and pstate.*/
 
-typedef std::vector<std::tuple<pworld_ptr, pworld_ptr, agent>> beliefs_vector; /**< \brief A vector of tuples (pw1, pw2, ag) that represent that in \ref pworld pw1 the \agent ag believes that the \ref \pworld pw2 is possible
+typedef std::vector<std::tuple<pworld_ptr, pworld_ptr, agent> > beliefs_vector; /**< \brief A vector of tuples (pw1, pw2, ag) that represent that in \ref pworld pw1 the \agent ag believes that the \ref \pworld pw2 is possible
                                                                                *
                                                                                * @see pworld and pstate.*/
+typedef std::map<belief_formula, unsigned short> pg_bfs_score; /** A map to store the info of the classical planning graph*/

@@ -221,7 +221,6 @@ public:
  class: planning_graph
  ************************************************************************/
 //typedef std::map<fluent_set, unsigned short> pg_worlds_score; FOR FUTURE USE
-//typedef std::map<belief_formula, unsigned short> pg_bfs_score;
 
 template <class T>
 class planning_graph
@@ -241,8 +240,9 @@ private:
 
     /*\brief The list of the subgoals (possibly enanched by \ref heuristics_manager)*/
     formula_list m_goal;
-    // pg_worlds_score m_worlds_score; FOR FUTURE USE
-    //pg_bfs_score m_bfs_score;FOR FUTURE USE
+    //pg_worlds_score m_worlds_score; FOR FUTURE USE
+    /*\brief A map that contains the first level of encounter (if any) of a belief formula calculated by list_bf_classical*/
+    pg_bfs_score m_bfs_score;
     /*\brief The set of action never executed in the planning_graph for optimization*/
     action_set m_never_executed;
 
@@ -252,7 +252,31 @@ private:
      */
     void set_satisfiable(bool sat);
     /*The main function that build the planning_graph layer by layer until the goal is found or the planning_graph is saturated*/
-    void pg_build_layer();
+    void pg_build();
+    /*The main function that build the planning_graph layer by layer until the goal is found or the planning_graph is saturated
+     *
+     * This function also check for every level which fluents or belief formula are entailed.
+     * It is a sort of conversion to classical planning with grounding of finite nesting belief formula and common knowledge
+     * 
+     * @param[out] converted_bf: The (converted) fluents to yet be entailed by the planning graph.
+     */
+    void pg_build_classical(std::vector<belief_formula> & converted_bf);
+    /*Function that returns the list of fluents and belief formulae that represent the fluent of the conversion to classical planning
+     * 
+     * @param[in] nesting: the max depth of belief_formula to consider fluents in the conversion to classical planning (1 as default).
+     * @return: A vector (not a set to avoid unnecessary sorting and comparison) that contains all the belief_formulae as fluents.
+     */
+    std::vector<belief_formula> list_bf_classical(unsigned short nesting = 1);
+
+    /**The recursive function to generate the various nested fluents for classical conversion
+     *
+     * @param[in] nesting: The max_depth of the generated subgoals.
+     * @param[in] depth: The depth of the currently generating subgoal.
+     * @param[in] to_explore: The belief formula from which generate the next fluents.
+     * @param[out] ret: The list of already generated fluents in which to add the new ones. 
+     */
+    void make_nested_bf_classical(unsigned short nesting, unsigned short depth, belief_formula & to_explore, std::vector<belief_formula> & ret);
+
     /*Function add the next (depth + 1) state layer to m_state_levels
      *
      * @param[in] s_level: The level to add to m_state_levels.
@@ -269,9 +293,10 @@ public:
     /*Constructor of *this* that set the intial state level and the goal from the domain
      *
      * @param[in] pg_init: the initial state to set as initial level (Only one because no conformant at the moment). 
-     * @param[in] goal: the (possibly enhanced) goal description to set in m_goal. 
+     * @param[in] goal: the (possibly enhanced) goal description to set in m_goal.
+     * @param[in] is_single: if the planning graph is constructed for each state (false) or just once to extrapolate info (true).
      */
-    planning_graph(const T& pg_init, const formula_list & goal);
+    planning_graph(const T& pg_init, const formula_list & goal, bool is_single = false);
 
     /*Setter of the field m_length
      *
@@ -306,6 +331,12 @@ public:
      * @return: the value to assigned to m_sum. 
      */
     unsigned short get_sum();
+
+    /*Getter of the field m_bfs_score
+     *
+     * @return: the value to assigned to m_bfs_score. 
+     */
+    const pg_bfs_score & get_bfs_score();
 
     /*const pg_worlds_score & get_worlds_score();
     const pg_bfs_score & get_bfs_score(); FOR FUTURE USE*/

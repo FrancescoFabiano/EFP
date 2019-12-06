@@ -79,6 +79,7 @@ void print_usage(char* prog_name)
 	std::cout << "	Possible @heuristic:" << std::endl;
 	std::cout << "		L_PG: A planning graph is used to calculate the distance of each state from the goal." << std::endl;
 	std::cout << "		S_PG: A planning graph is used to calculate the sum of each sub-goal distance starting from the state." << std::endl;
+	std::cout << "		C_PG: A single planning graph is used to calculate the sum of each 'grounded' belief formula." << std::endl;
 	std::cout << "		SUBGOALS: We select the state with the highest number of satisfied subgoals." << std::endl;
 
 
@@ -236,7 +237,7 @@ int main(int argc, char** argv)
 		} else if (strcmp(argv[i], "-h") == 0) {
 			i++;
 			if (i >= argc) {
-				std::cerr << "-h needs specification (NONE, PG)." << std::endl;
+				std::cerr << "-h needs specification (NONE, L_PG, S_PG, C_PG, SUBGOALS)." << std::endl;
 				exit(1);
 			} else if (strcmp(argv[i], "NONE") == 0) {
 				std::cout << "Breadth first search. (Default)" << std::endl;
@@ -247,11 +248,14 @@ int main(int argc, char** argv)
 			} else if (strcmp(argv[i], "S_PG") == 0) {
 				std::cout << "A planning graph is used to calculate the sum of each sub-goal distance starting from the state." << std::endl;
 				used_heur = S_PG;
+			} else if (strcmp(argv[i], "C_PG") == 0) {
+				std::cout << "A single planning graph is used to calculate the sum of each 'grounded' belief formula." << std::endl;
+				used_heur = C_PG;
 			} else if (strcmp(argv[i], "SUBGOALS") == 0) {
 				std::cout << "We select the state with the highest number of satisfied subgoals." << std::endl;
 				used_heur = SUBGOALS;
 			} else {
-				std::cerr << "Wrong specification for '-h'; use 'NONE' or 'L_PG' or 'S_PG' or 'SUBGOALS'." << std::endl;
+				std::cerr << "Wrong specification for '-h'; use 'NONE' or 'L_PG' or 'S_PG' or 'C_PG' or 'SUBGOALS'." << std::endl;
 				exit(1);
 			}
 		} else if (strcmp(argv[i], "-e") == 0) {

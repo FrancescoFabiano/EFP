@@ -22,6 +22,11 @@ bool belief_formula::get_is_grounded() const
 	return m_is_grounded;
 }
 
+void belief_formula::set_is_grounded(bool is_grounded)
+{
+	m_is_grounded = is_grounded;
+}
+
 void belief_formula::set_formula_type(bf_type to_set)
 {
 	m_formula_type = to_set;
@@ -41,12 +46,19 @@ bf_type belief_formula::get_formula_type() const
 void belief_formula::set_fluent_formula(const fluent_formula & to_set)
 {
 	if (to_set.size() < 1) {
-		std::cerr << "Error in declaring a belief_formula ";
+		std::cerr << "\nError in declaring a belief_formula ";
 		std::cerr << "there must be at least one fluent in a formula.";
 		std::cerr << std::endl;
 		exit(1);
 	}
 	m_fluent_formula = to_set;
+}
+
+void belief_formula::set_fluent_formula_from_fluent(fluent to_set)
+{
+	fluent_set tmp;
+	tmp.insert(to_set);
+	m_fluent_formula.insert(tmp);
 }
 
 const fluent_formula & belief_formula::get_fluent_formula() const
@@ -195,21 +207,20 @@ void belief_formula::set_bf2(const belief_formula & to_set)
 
 void belief_formula::print() const
 {
-
 	switch ( m_formula_type ) {
 
 	case FLUENT_FORMULA:
-		printer::get_instance().print_list(m_string_fluent_formula);
+		printer::get_instance().print_list(m_fluent_formula);
 		break;
 	case BELIEF_FORMULA:
-		std::cout << "B(" << m_string_agent << ",(";
+		std::cout << "B(" << domain::get_instance().get_grounder().deground_agent(m_agent) << ",(";
 		m_bf1->print();
 		std::cout << "))";
 		break;
 
 	case D_FORMULA:
 		std::cout << "D([";
-		printer::get_instance().print_list(m_string_group_agents);
+		printer::get_instance().print_list_ag(m_group_agents);
 		std::cout << "],";
 		m_bf1->print();
 		std::cout << ")";
@@ -217,7 +228,7 @@ void belief_formula::print() const
 
 	case C_FORMULA:
 		std::cout << "C([";
-		printer::get_instance().print_list(m_string_group_agents);
+		printer::get_instance().print_list_ag(m_group_agents);
 		std::cout << "],";
 		m_bf1->print();
 		std::cout << ")";
@@ -225,7 +236,7 @@ void belief_formula::print() const
 
 	case E_FORMULA:
 		std::cout << "E([";
-		printer::get_instance().print_list(m_string_group_agents);
+		printer::get_instance().print_list_ag(m_group_agents);
 		std::cout << "],";
 		m_bf1->print();
 		std::cout << ")";
@@ -262,6 +273,15 @@ void belief_formula::print() const
 		break;
 
 	}
+};
+
+void belief_formula::print_deground()
+{
+
+	ground();
+	m_is_grounded = true;
+
+	print();
 };
 
 /*void belief_formula::print_grounded(const grounder& grounder) const
@@ -572,4 +592,95 @@ bool belief_formula::operator=(const belief_formula & to_copy)
 	}
 
 	return true;
+}
+
+bool belief_formula::operator<(const belief_formula& to_compare) const
+{
+
+	if (get_formula_type() < to_compare.get_formula_type()) {
+		return true;
+	} else if (get_formula_type() == to_compare.get_formula_type()) {
+		switch ( m_formula_type ) {
+		case FLUENT_FORMULA:
+		{
+			if (get_fluent_formula() < to_compare.get_fluent_formula()) {
+				return true;
+			}
+
+			break;
+		}
+		case BELIEF_FORMULA:
+		{
+
+			//If has been grounded
+			if (get_agent() < to_compare.get_agent()) {
+				return true;
+			} else if (get_agent() == to_compare.get_agent()) {
+				return(get_bf1() < to_compare.get_bf1());
+			}
+			break;
+		}
+		case PROPOSITIONAL_FORMULA:
+		{
+			if (get_operator() < to_compare.get_operator()) {
+				return true;
+			} else if (get_operator() == to_compare.get_operator()) {
+				switch ( m_operator ) {
+				case BF_AND:
+				case BF_OR:
+				{
+					if (get_bf1() < to_compare.get_bf1()) {
+						return true;
+					} else if (get_bf1() == to_compare.get_bf1()) {
+						return(get_bf2() < to_compare.get_bf2());
+					}
+					break;
+				}
+				case BF_NOT:
+				{
+					return(get_bf1() < to_compare.get_bf1());
+					break;
+
+				}
+					//REMOVE EVERY INPAREN
+				case BF_INPAREN:
+				case BF_FAIL:
+				default:
+				{
+					std::cerr << "Error in comparing belief_formulae";
+					std::cerr << std::endl;
+					exit(1);
+					break;
+				}
+				}
+			}
+			break;
+		}
+		case E_FORMULA:
+		case C_FORMULA:
+		case D_FORMULA:
+		{
+			//If has been grounded
+			if (get_group_agents() < to_compare.get_group_agents()) {
+				return true;
+			} else if (get_group_agents() == to_compare.get_group_agents()) {
+				return(get_bf1() < to_compare.get_bf1());
+			}
+			break;
+		}
+		case BF_EMPTY:
+			/*Maybe
+			 return true;
+			 */
+		case BF_TYPE_FAIL:
+		default:
+		{
+			std::cerr << "Error in comparing belief_formulae";
+			std::cerr << std::endl;
+			exit(1);
+			break;
+		}
+		}
+	}
+	return false;
 }

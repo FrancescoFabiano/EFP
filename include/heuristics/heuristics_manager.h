@@ -23,6 +23,9 @@ private:
     heuristics m_used_heur;
     /*The goal description, possibly expanded to exploit the heuristic even more*/
     formula_list m_goals;
+    /*A map which contains the value of each "grounded" bf w.r.t. the classical planning graph.*/
+    pg_bfs_score m_bf_score;
+
 
     /** \brief Function that expands the group formulae to have more sub_goals
      * 
@@ -46,17 +49,18 @@ private:
      * @param[in] depth: The depth of the currently generating subgoal.
      * @param[in] to_explore: The belief formula from which generate the next subgoal.
      * @param[in] agents: The agents for whom the new subgoals have to be generated.
-     * @param[in] gr: The grounder for the belief_formula production. 
      */
-    void produce_subgoals(unsigned short nesting, unsigned short depth, const belief_formula & to_explore, const agent_set & agents, const grounder & gr);
+    void produce_subgoals(unsigned short nesting, unsigned short depth, const belief_formula & to_explore, const agent_set & agents);
 
 
 
 public:
     /** \brief Class constructor that uses the chosen heuristic to perform the operation
      * 
-     * @param[in] used_heur: Which heuristic has to be used.*/
-    heuristics_manager(heuristics used_heur);
+     * @param[in] used_heur: Which heuristic has to be used.
+     * @param[in] ini_eState: The initial_state used for C_PG*/
+    template <class T>
+    heuristics_manager(heuristics used_heur, const T & ini_eState);
     /** \brief The function that compute heuristic value
      * 
      * @param[out] eState: The state to update with the calculated heuristic value.*/

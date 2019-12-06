@@ -1,43 +1,14 @@
 #include "heuristics_manager.h"
 
-heuristics_manager::heuristics_manager(heuristics used_heur)
-{
-	set_used_h(used_heur);
-	m_goals = domain::get_instance().get_goal_description();
-	switch ( m_used_heur ) {
-	case L_PG:
-	case S_PG:
-	{
-		expand_goals();
-		break;
-
-	}
-	case SUBGOALS:
-	{
-		expand_goals();
-		satisfied_goals::get_instance().set(m_goals);
-		break;
-	}
-	default:
-	{
-		std::cerr << "\nWrong Heuristic Selection\n";
-		exit(1);
-	}
-
-	}
-}
-
 void heuristics_manager::expand_goals(unsigned short nesting)
 {
-
-	grounder gr = domain::get_instance().get_grounder();
 
 	formula_list::const_iterator it_fl;
 
 	formula_list original_goal = m_goals;
 
 	for (it_fl = original_goal.begin(); it_fl != original_goal.end(); it_fl++) {
-		produce_subgoals(nesting, 0, (*it_fl), (*it_fl).get_group_agents(), gr);
+		produce_subgoals(nesting, 0, (*it_fl), (*it_fl).get_group_agents());
 	}
 
 	//	formula_list original_goal = m_goals;
@@ -63,10 +34,9 @@ void heuristics_manager::expand_goals(unsigned short nesting)
 	//	}
 }
 
-void heuristics_manager::produce_subgoals(unsigned short nesting, unsigned short depth, const belief_formula & to_explore, const agent_set & agents, const grounder & gr)
+void heuristics_manager::produce_subgoals(unsigned short nesting, unsigned short depth, const belief_formula & to_explore, const agent_set & agents)
 {
 
-	formula_list::const_iterator it_fl;
 	agent_set::const_iterator it_agset;
 
 	//unsigned short added_subgoals = 0;
@@ -82,12 +52,12 @@ void heuristics_manager::produce_subgoals(unsigned short nesting, unsigned short
 				} else {
 					new_subgoal.set_bf1(to_explore);
 				}
-				new_subgoal.set_string_agent(gr.deground_agent(*it_agset));
-				new_subgoal.ground();
+				new_subgoal.set_agent(*it_agset);
+				new_subgoal.set_is_grounded(true);
 				m_goals.push_back(new_subgoal);
 
 				if (nesting > (depth + 1)) {
-					produce_subgoals(nesting, (depth + 1), new_subgoal, agents, gr);
+					produce_subgoals(nesting, (depth + 1), new_subgoal, agents);
 				}
 			}
 		}

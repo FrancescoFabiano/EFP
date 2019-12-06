@@ -10,9 +10,9 @@ Realize a scalable Epistemic Forward Planner that bases its concept on different
 Implemented EFP v. 2.0 that uses templatic e-States representations with relative templatic transition function.
 The planner is based on several scientific pubblications where are described the different semantics and tranisition functions.
 In particular we have the following configurations:
-- **eState:** *Kripke Structures*; **transition function:** *event based updates---mA\** (Baral et al. 2015, Le et al. 2018);
+- **eState:** *Kripke Structures*; **transition function:** *event based updates---mA<sup>\*</sup>* (Baral et al. 2015, Le et al. 2018);
 - **eState:** *Kripke Structures*; **transition function:** *optimized event based updates* (Fabiano et al. 2020);
-- **eState:** *Possibilities*; **transition function:** *Iterative transition function mA<sup>p</sup>* (Fabiano et al. 2019, Fabiano et al. 2020).
+- **eState:** *Possibilities*; **transition function:** *Iterative transition function---mA<sup>p</sup>* (Fabiano et al. 2019, Fabiano et al. 2020).
 
 Moreover the planner admits templatic heuristics usage.
 At the moment we implemented:

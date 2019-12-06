@@ -121,7 +121,6 @@ bool planner<T>::search_BFS(bool results_file)
 template <class T>
 bool planner<T>::search_heur(bool results_file, heuristics used_heur)
 {
-	heuristics_manager h_manager(used_heur);
 	T initial;
 	bool check_visited = domain::get_instance().check_visited();
 	std::set<T> visited_states;
@@ -132,6 +131,13 @@ bool planner<T>::search_heur(bool results_file, heuristics used_heur)
 	std::chrono::duration<double> elapsed_seconds = end_timing - start_timing;
 
 	std::cout << "\nInitial Built in " << elapsed_seconds.count() << " seconds\n";
+
+	start_timing = std::chrono::system_clock::now();
+	heuristics_manager h_manager(used_heur, initial);
+	end_timing = std::chrono::system_clock::now();
+	elapsed_seconds = end_timing - start_timing;
+	std::cout << "\nHeuristic Built in " << elapsed_seconds.count() << " seconds\n";
+
 
 	action_set actions = domain::get_instance().get_actions();
 	action_set::const_iterator it_acset;
@@ -149,6 +155,7 @@ bool planner<T>::search_heur(bool results_file, heuristics used_heur)
 	m_heur_search_space.push(initial);
 	while (!m_heur_search_space.empty()) {
 		popped_state = m_heur_search_space.top();
+		//std::cerr << "\nDEBUG: Picked the state with heur = " << popped_state.get_heuristic_value() << "\n\n\n";
 		m_heur_search_space.pop();
 
 		for (it_acset = actions.begin(); it_acset != actions.end(); it_acset++) {
@@ -164,14 +171,15 @@ bool planner<T>::search_heur(bool results_file, heuristics used_heur)
 				if (!check_visited || visited_states.insert(tmp_state).second) {
 					h_manager.set_heuristic_value(tmp_state);
 
-					if (tmp_state.get_heuristic_value() >= 0) {
+					if ((tmp_state.get_heuristic_value() >= 0) || (used_heur == C_PG)) {
+						//std::cerr << "\nDEBUG: Generated a state with heur = " << tmp_state.get_heuristic_value();
 						m_heur_search_space.push(tmp_state);
 					}
 				}
 			}
 		}
 	}
-	std::cout << "\nNo plan found for this goal.\n";
+	std::cout << "\n\nIt does not exists any Plan for this domain instance:(\n";
 	return false;
 }
 
@@ -304,73 +312,5 @@ void planner<T>::check_actions_names(std::vector<std::string>& act_name)
 	}
 }
 
-
-//OTHER CLASSES' IMPLEMENTATIONS
-
-template <class T>
-void heuristics_manager::set_heuristic_value(T & eState)
-{
-
-	switch ( m_used_heur ) {
-	case L_PG:
-	{
-		planning_graph<T> pg(eState, m_goals);
-		if (pg.is_satisfiable()) {
-			eState.set_heuristic_value(pg.get_length());
-		} else {
-			eState.set_heuristic_value(-1);
-		}
-		break;
-	}
-	case S_PG:
-	{
-		planning_graph<T> pg(eState, m_goals);
-		if (pg.is_satisfiable()) {
-			eState.set_heuristic_value(pg.get_sum());
-		} else {
-			eState.set_heuristic_value(-1);
-		}
-		break;
-	}
-	case SUBGOALS:
-	{
-		eState.set_heuristic_value(satisfied_goals::get_instance().get_unsatisfied_goals(eState));
-		break;
-	}
-	default:
-	{
-		std::cerr << "\nWrong Heuristic Selection\n";
-		exit(1);
-	}
-
-	}
-}
-
-template <class T>
-unsigned short satisfied_goals::get_unsatisfied_goals(const T & eState) const
-{
-	unsigned short ret = m_goals_number;
-
-	formula_list::const_iterator it_fl;
-	for (it_fl = m_goals.begin(); it_fl != m_goals.end(); it_fl++) {
-		if (eState.entails(*it_fl)) {
-			ret--;
-		}
-	}
-	return ret;
-
-}
-
-template <class T>
-unsigned short satisfied_goals::get_satisfied_goals(const T & eState) const
-{
-	unsigned short ret = 0;
-
-	formula_list::const_iterator it_fl;
-	for (it_fl = m_goals.begin(); it_fl != m_goals.end(); it_fl++) {
-		if (eState.entails(*it_fl)) {
-			ret++;
-		}
-	}
-	return ret;
-}
+/*\ IMPLEMENTATION OF OTHER TEMPLATIC FUNCTIONS INSTANCIATED WITH A TEMPLATIC STATE*/
+#include "../heuristics/heuristics_template.ipp"

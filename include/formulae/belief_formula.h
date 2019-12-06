@@ -125,15 +125,6 @@ private:
      * - if *this* is \ref C_FORMULA, i.e., C(**ags**, *phi*), \ref m_group_agents contains **ags**;
      * - If *this* is \ref D_FORMULA, i.e., E(**ags**, *phi*), \ref m_group_agents contains **ags**.*/
     agent_set m_group_agents;
-
-    /** \brief Setter for the field \ref m_fluent_formula.
-     *
-     * @param[in] to_set: the \ref fluent_formula object to copy in \ref m_fluent_formula.*/
-    void set_fluent_formula(const fluent_formula& to_set);
-    /** \brief Setter for the field \ref m_agent.
-     *
-     * @param[in] to_set: the \ref agent object to copy in \ref m_agent.*/
-    void set_agent(agent to_set);
     /** \brief Setter for the field \ref m_group_agents.
      *
      * @param[in] to_set: the \ref agent_set object to copy in \ref m_group_agents.*/
@@ -174,6 +165,21 @@ public:
      * @return false: otherwise.*/
     bool get_is_grounded() const;
 
+    /** \brief Setter for the field \ref m_is_grounded.
+     *
+     * Used when we create extra belief_formula directly grounded
+     * @param[in] is_grounded: the value to assign to m_is_grounded.*/
+    void set_is_grounded(bool is_grounded);
+
+    /** \brief Setter for the field \ref m_fluent_formula.
+     *
+     * @param[in] to_set: the \ref fluent_formula object to copy in \ref m_fluent_formula.*/
+    void set_fluent_formula(const fluent_formula& to_set);
+
+    /** \brief Setter for the field \ref m_fluent_formula.
+     *
+     * @param[in] to_set: the \ref fluent object to insert in \ref m_fluent_formula.*/
+    void set_fluent_formula_from_fluent(fluent to_set);
 
     /** \brief Setter of the field \ref m_string_fluent_formula.
      * 
@@ -182,6 +188,12 @@ public:
      * 
      * @param[in] to_set: the \ref string_set_set to set as *this* \ref fluent_formula in string description.*/
     void set_string_fluent_formula(const string_set_set & to_set);
+
+
+    /** \brief Setter for the field \ref m_agent.
+     *
+     * @param[in] to_set: the \ref agent object to copy in \ref m_agent.*/
+    void set_agent(agent to_set);
 
     /** \brief Setter of the field \ref m_string_agent.
      * 
@@ -259,6 +271,11 @@ public:
      * \todo Since the string parameter should be removed print thanks to a \ref grounder.*/
     void print() const;
 
+    /** \brief Function that print *this* (std::string parameters representation) degrounding the parameters.
+     *
+     * \todo Since the string parameter should be removed print thanks to a \ref grounder.*/
+    void print_deground();
+
     /* \brief Function that print *this* where *this* is grounded.
      *
      * @param[in] gr: the \ref grounder obj used to ground the fields of *this*.
@@ -285,4 +302,11 @@ public:
      * @return true: if \p the assignment went ok.
      * @return false: otherwise.*/
     bool operator=(const belief_formula& to_copy);
+
+    /** \brief The < operator for set operations.
+     *   
+     * @param [in] to_compare: the \ref state to to_compare to *this*.
+     * @return true: if *this* is smaller then to_compare.
+     * @return false: otherwise.*/
+    bool operator<(const belief_formula& to_compare) const;
 };

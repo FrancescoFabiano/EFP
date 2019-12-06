@@ -244,8 +244,8 @@ public:
      * 
      * The results is left to the representations.
      *   
-     * @param [in] to_copy: the \ref state to assign to *this*.
-     * @return true: if \p the assignment went ok.
+     * @param [in] to_compare: the \ref state to to_compare to *this*.
+     * @return true: if *this* is smaller then to_compare.
      * @return false: otherwise.*/
     bool operator<(const state<T> & to_compare) const;
 
