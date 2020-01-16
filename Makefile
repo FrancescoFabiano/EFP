@@ -7,6 +7,7 @@ OBJS	=	$(BUILD_DIR)/bison.o $(BUILD_DIR)/lex.o $(BUILD_DIR)/main.o \
 			$(BUILD_DIR)/kedge.o $(BUILD_DIR)/kworld.o $(BUILD_DIR)/kstate.o \
 			$(BUILD_DIR)/pstore.o \
 			$(BUILD_DIR)/pworld.o $(BUILD_DIR)/pstate.o \
+			$(BUILD_DIR)/pstore_opt.o $(BUILD_DIR)/pstate_opt.o \
 			$(BUILD_DIR)/reader.o \
 			$(BUILD_DIR)/heuristics_manager.o $(BUILD_DIR)/satisfied_goals.o \
 			
@@ -30,6 +31,7 @@ PARSE_DIR = $(INCLUDE_DIR)/parse
 STATES_DIR = $(INCLUDE_DIR)/states
 S_KRIPE_DIR = $(STATES_DIR)/kripke
 S_POSSIBILITY_DIR = $(STATES_DIR)/possibilities
+S_POSSIBILITY_OPT_DIR = $(STATES_DIR)/possibilities_opt
 UTILITIES_DIR = $(INCLUDE_DIR)/utilities
 SEARCH_DIR = $(INCLUDE_DIR)/search
 
@@ -205,6 +207,23 @@ $(BUILD_DIR)/pstore.o: $(S_POSSIBILITY_DIR)/pstore.cpp $(S_POSSIBILITY_DIR)/psto
 					   $(UTILITIES_DIR)/define.h
 		$(dir_guard)
 		$(CC) $(CFLAGS) -c $(S_POSSIBILITY_DIR)/pstore.cpp -o $(BUILD_DIR)/pstore.o
+		
+#The optimized version		
+$(BUILD_DIR)/pstate_opt.o: $(S_POSSIBILITY_OPT_DIR)/pstate_opt.cpp $(S_POSSIBILITY_OPT_DIR)/pstate_opt.h \
+					   $(S_POSSIBILITY_OPT_DIR)/pstore_opt.h \
+					   $(ACTION_DIR)/action.h \
+					   $(DOMAIN_DIR)/initially.h \
+					   $(UTILITIES_DIR)/helper.h \
+					   $(UTILITIES_DIR)/define.h
+		$(dir_guard)
+		$(CC) $(CFLAGS) -c $(S_POSSIBILITY_OPT_DIR)/pstate_opt.cpp -o $(BUILD_DIR)/pstate_opt.o
+
+
+$(BUILD_DIR)/pstore_opt.o: $(S_POSSIBILITY_OPT_DIR)/pstore_opt.cpp $(S_POSSIBILITY_OPT_DIR)/pstore_opt.h \
+					   $(S_POSSIBILITY_OPT_DIR)/pstate_opt.cpp\
+					   $(UTILITIES_DIR)/define.h
+		$(dir_guard)
+		$(CC) $(CFLAGS) -c $(S_POSSIBILITY_OPT_DIR)/pstore_opt.cpp -o $(BUILD_DIR)/pstore_opt.o
 
 ####DOMAIN
 $(BUILD_DIR)/initially.o: $(DOMAIN_DIR)/initially.cpp $(DOMAIN_DIR)/initially.h \

@@ -24,6 +24,8 @@
 
 #include "kripke/kstate.h"
 #include "possibilities/pstate.h"
+#include "possibilities_opt/pstate_opt.h"
+
 
 #include "../utilities/define.h"
 #include "../formulae/belief_formula.h"
