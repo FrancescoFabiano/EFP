@@ -9,7 +9,7 @@
 
 #include <iostream>
 #include <tuple>
-
+#include <stack>
 
 #include "kstate.h"
 #include "../../domain/domain.h"
@@ -374,6 +374,68 @@ const kworld_ptr_set kstate::get_D_reachable_worlds(const agent_set & ags, kworl
 	std::cerr << "\nERROR: D_REACHABLILITY not yet Implemented correctly\n";
 	exit(1);
 	return ret;
+}
+
+const kscc_set kstate::tarjan_scc(const kworld_ptr & kwp)
+{
+	int time = 0;
+
+	kscc_set scc_set;
+
+	std::stack<kworld_ptr> kw_stack;
+
+	std::map<kworld_ptr, int> discovery_time;
+	std::map<kworld_ptr, int> low_time;
+	std::map<kworld_ptr, bool> on_stack;
+
+	kworld_ptr_set::const_iterator it_kwps;
+
+	for (it_kwps = m_worlds.begin(); it_kwps != m_worlds.end(); it_kwps++) {
+		discovery_time[*it_kwps] = -1;
+		low_time[*it_kwps] = -1;
+	}
+
+	tarjan_scc_helper(scc_set, kwp, kw_stack, discovery_time, low_time, on_stack, time);
+	return scc_set;
+}
+
+void kstate::tarjan_scc_helper(kscc_set scc_set, const kworld_ptr & u, std::stack<kworld_ptr> & kw_stack, std::map<kworld_ptr, int> & discovery_time, std::map<kworld_ptr, int> & low_time, std::map<kworld_ptr, bool> & on_stack, int & time)
+{
+	// Initialize discovery time and low value 
+    discovery_time[u] = low_time[u] = ++time;
+    kw_stack.push(u);
+    on_stack[u] = true;
+	// Go through all vertices adjacent to this
+    kedge_ptr_set::const_iterator it_keps;
+
+    for (it_keps = m_edges.begin(); it_keps != m_edges.end(); it_keps++) {
+		if (it_keps->get_from() == u) {
+			kworld_ptr v = it_keps->get_to();
+			// If 'v' is not visited yet, then recur for it
+			if (discovery_time[v] == -1) {
+				tarjan_scc_helper(scc_set, v, kw_stack, discovery_time, low_time, on_stack, time);
+				// Check if the subtree rooted with 'v' has a connection to one of the ancestors of 'u'
+				low_time[u] = std::min(low_time[u], low_time[v]);
+			} else if (on_stack[v]) {
+				// Update low value of 'u' only of 'v' is still in stack (i.e. it's a back edge, not cross edge). 
+				low_time[u] = std::min(low_time[u], discovery_time[v]);
+			}
+		}
+    }
+	// Head node found, pop the stack and print an SCC 
+    if (low_time[u] == discovery_time[u]) {
+		std::vector<kworld_ptr> scc;
+        while (1) { 
+            kworld_ptr w = kw_stack.top();
+			scc.push_back(w); 
+            on_stack[w] = false; 
+            kw_stack.pop();
+			if (u == w) {
+				break;
+			}
+        }
+		scc_set.insert(scc);
+    } 
 }
 
 void kstate::add_world(const kworld & world)

@@ -55,6 +55,22 @@ kworld_id kworld::hash_fluents_into_id()
 	return hash_fluents_into_id(m_fluent_set);
 }
 
+unsigned int kworld::hash_fluents_into_numerical_id(const fluent_set& fl)
+{
+	std::string ret;
+	fluent_set::const_iterator it_fl;
+	for (it_fl = fl.begin(); it_fl != fl.end(); it_fl++) {
+		ret.append(std::to_string(1 - (*it_fl % 2)));
+	}
+
+	return std::stoi(ret, 0, 2);
+}
+
+unsigned int kworld::hash_fluents_into_numerical_id()
+{
+	return hash_fluents_into_numerical_id(m_fluent_set);
+}
+
 void kworld::set_fluent_set(const fluent_set & description)
 {
 	/*
@@ -97,6 +113,11 @@ void kworld::set_id()
 	m_id = hash_fluents_into_id();
 }
 
+void kworld::set_numerical_id()
+{
+	m_numerical_id = hash_fluents_into_numerical_id();
+}
+
 const fluent_set & kworld::get_fluent_set() const
 {
 	return m_fluent_set;
@@ -105,6 +126,11 @@ const fluent_set & kworld::get_fluent_set() const
 kworld_id kworld::get_id() const
 {
 	return m_id;
+}
+
+unsigned int kworld::get_numerical_id() const
+{
+	return m_numerical_id;
 }
 
 bool kworld::entails(fluent to_check) const

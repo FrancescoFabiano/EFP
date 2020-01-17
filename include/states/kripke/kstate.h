@@ -214,6 +214,28 @@ private:
      * @return a set of pointers to all the D_reachable worlds.*/
     const kworld_ptr_set get_D_reachable_worlds(const agent_set & ags, kworld_ptr world) const;
 
+    /** \brief Function that determines the strongly connected components of the given \ref kstate.
+     *
+     * This function implements the linear time DFS-based Tarjan's algorithm to find the scc(s).
+     *
+     * @param[in] pointed: the pointed world of the state (pointed Kripke structure).
+     *
+     * @return a set of vectors representing each scc.*/
+    const kscc_set tarjan_scc(const kworld_ptr & pointed);
+
+    /** \brief Function that determines the strongly connected components of the given \ref kstate.
+     *
+     * This function implements the linear time DFS-based Tarjan's algorithm to find the scc(s).
+     *
+     * @param[in] scc_set: the set of scc.
+     * @param[in] u: the current \ref kworld.
+     * @param[in] kw_stack: the stack of visited \ref kworld.
+     * @param[in] discovery_time: the map that stores the discovery time of each visited \ref kworld.
+     * @param[in] low_time: the map that stores for each \ref kworld the discovery time of the earliest visited vertex that can be reached from subtree rooted in said \ref kworld.
+     * @param[in] on_stack: the map that keeps track of the presence of each \ref kworld inside the stack.
+     * @param[in] time: the current time.*/
+    void tarjan_scc_helper(kscc_set scc_set, const kworld_ptr & u, std::stack<kworld_ptr> & kw_stack, std::map<kworld_ptr, int> & discovery_time, std::map<kworld_ptr, int> & low_time, std::map<kworld_ptr, bool> & on_stack, int & time);
+
     /** \brief Function that builds the initial Kripke structure given the initial conditions in a structural way.
      *
      *         -# Compute the set of *phi* not know by \ref agent ag for each \ref agent;

@@ -30,6 +30,8 @@ private:
     fluent_set m_fluent_set;
     /** \brief The unique id of *this* computed with \ref hash_fluents_into_id().*/
     kworld_id m_id;
+    /** \brief The unique numerical id of *this* computed with \ref hash_fluents_into_numerical_id().*/
+    unsigned int m_numerical_id;
 
     /** \brief Function used to hash the the info of an edge in a unique id.
      * 
@@ -43,6 +45,18 @@ private:
      *
      * @return the unique id of *this*. */
     kworld_id hash_fluents_into_id();
+
+    /** \brief Function used to hash the the info of an edge in a unique numerical id.
+     * 
+     * @param[in] description: the interpretation of the \ref fluent in the world.
+     * @return the unique numerical id of the world.
+     * 
+     * @warning Useless if not moved to \ref kstore.*/
+    unsigned int hash_fluents_into_numerical_id(const fluent_set& description);
+    /** \brief Function used to hash the the info of *this* in a unique numerical id.
+     *
+     * @return the unique numerical id of *this*. */
+    unsigned int hash_fluents_into_numerical_id();
 
     /** \brief Setter for the field \ref m_fluent_set.
      * 
@@ -69,6 +83,8 @@ private:
     /** \brief Function that uses the info of *this* to set its \ref m_id.*/
     void set_id();
 
+    /** \brief Function that uses the info of *this* to set its \ref m_numerical_id.*/
+    void set_numerical_id();
 
     /** \brief Getter of \ref m_fluent_set.
      * 
@@ -83,6 +99,12 @@ private:
      * 
      * @return the int that is the unique id of *this*.*/
     kworld_id get_id() const;
+    /** \brief Getter of \ref m_numerical_id.
+     *     
+     * Only accessible by the \ref kworld_ptr.
+     * 
+     * @return the int that is the unique id of *this*.*/
+    unsigned int get_numerical_id() const;
 
 public:
     /** \brief Empty constructor, call the default constructor of all the fields.*/
@@ -275,6 +297,11 @@ public:
      *     
      * @return the \ref kworld_id that is the id of the \ref kworld pointed by \ref m_ptr + \ref m_repetition.*/
     kworld_id get_id() const;
+
+    /** \brief Function that return the field m_numerical_id of the pointed \ref kworld + \ref m_repetition.
+     *     
+     * @return the numerical id that is the id of the \ref kworld pointed by \ref m_ptr + \ref m_repetition.*/
+    unsigned int get_numerical_id() const;
 
 
     /** \brief Function that check the entailment of a single \ref fluent in \ref m_ptr.

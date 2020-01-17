@@ -17,6 +17,7 @@
 #include <set>
 #include <map>
 #include <queue>
+#include <stack>
 #include <memory>
 #include <list>
 
@@ -256,6 +257,15 @@ typedef std::set<kworld_ptr> kworld_ptr_set; /**< \brief A set of \ref kworld_pt
                                             * @see kworld and kstate.*/
 
 typedef std::map<std::pair<kworld_ptr, event_type>, kworld_ptr> kstate_map;
+
+typedef std::vector<kworld_ptr> kscc; /**< \brief A vector of \ref kworld_ptr that represents a strongly connected component.
+                                       *
+                                       * @see kworld and kstate.*/
+
+typedef std::set<kscc> kscc_set;      /**< \brief A set of \ref kscc that represents all the strongly connected components of a \ref kstate.
+                                       *
+                                       * @see kworld and kstate.*/
+
 /*****************Possibilities*****************/
 class pworld;
 typedef std::string pworld_id; /**< \brief The id of a \ref pworld in a \ref pstate.
