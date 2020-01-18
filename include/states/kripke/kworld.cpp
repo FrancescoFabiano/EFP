@@ -277,6 +277,15 @@ kworld_id kworld_ptr::get_id() const
 	exit(1);
 }
 
+unsigned int kworld_ptr::get_numerical_id() const
+{
+	if (m_ptr != nullptr) {
+		return(get_ptr()->get_numerical_id());
+	}
+	std::cerr << "\nError in creating a kworld_ptr (id)\n";
+	exit(1);
+}
+
 void kworld_ptr::set_repetition(unsigned short to_set)
 {
 	m_repetition = to_set;

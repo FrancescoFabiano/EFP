@@ -376,12 +376,13 @@ const kworld_ptr_set kstate::get_D_reachable_worlds(const agent_set & ags, kworl
 	return ret;
 }
 
-const kscc_set kstate::tarjan_scc(const kworld_ptr & kwp)
+const kscc_map kstate::tarjan_scc()
 {
 	int time = 0;
 
-	kscc_set scc_set;
-
+	// kscc_set scc_set;
+	kscc_map cc;
+	
 	std::stack<kworld_ptr> kw_stack;
 
 	std::map<kworld_ptr, int> discovery_time;
@@ -395,13 +396,13 @@ const kscc_set kstate::tarjan_scc(const kworld_ptr & kwp)
 		low_time[*it_kwps] = -1;
 	}
 
-	tarjan_scc_helper(scc_set, kwp, kw_stack, discovery_time, low_time, on_stack, time);
-	return scc_set;
+	tarjan_scc_helper(cc, get_pointed(), kw_stack, discovery_time, low_time, on_stack, time);
+	return cc;
 }
 
-void kstate::tarjan_scc_helper(kscc_set scc_set, const kworld_ptr & u, std::stack<kworld_ptr> & kw_stack, std::map<kworld_ptr, int> & discovery_time, std::map<kworld_ptr, int> & low_time, std::map<kworld_ptr, bool> & on_stack, int & time)
+void kstate::tarjan_scc_helper(kscc_map cc, const kworld_ptr & u, std::stack<kworld_ptr> & kw_stack, std::map<kworld_ptr, int> & discovery_time, std::map<kworld_ptr, int> & low_time, std::map<kworld_ptr, bool> & on_stack, int & time)
 {
-	// Initialize discovery time and low value 
+	// Initialize discovery time and low value
     discovery_time[u] = low_time[u] = ++time;
     kw_stack.push(u);
     on_stack[u] = true;
@@ -413,29 +414,88 @@ void kstate::tarjan_scc_helper(kscc_set scc_set, const kworld_ptr & u, std::stac
 			kworld_ptr v = it_keps->get_to();
 			// If 'v' is not visited yet, then recur for it
 			if (discovery_time[v] == -1) {
-				tarjan_scc_helper(scc_set, v, kw_stack, discovery_time, low_time, on_stack, time);
+				tarjan_scc_helper(cc, v, kw_stack, discovery_time, low_time, on_stack, time);
 				// Check if the subtree rooted with 'v' has a connection to one of the ancestors of 'u'
 				low_time[u] = std::min(low_time[u], low_time[v]);
 			} else if (on_stack[v]) {
-				// Update low value of 'u' only of 'v' is still in stack (i.e. it's a back edge, not cross edge). 
+				// Update low value of 'u' only of 'v' is still in stack (i.e. it's a back edge, not cross edge).
 				low_time[u] = std::min(low_time[u], discovery_time[v]);
 			}
 		}
     }
-	// Head node found, pop the stack and print an SCC 
+	// Head node found, pop the stack and print an SCC
     if (low_time[u] == discovery_time[u]) {
-		std::vector<kworld_ptr> scc;
-        while (1) { 
+		// std::vector<kworld_ptr> scc;
+        while (1) {
             kworld_ptr w = kw_stack.top();
-			scc.push_back(w); 
-            on_stack[w] = false; 
+			// scc.push_back(w);
+			cc[w] = low_time[u];		// The connected component of w is identified by the value low_time of the head of the scc
+            on_stack[w] = false;
             kw_stack.pop();
 			if (u == w) {
 				break;
 			}
         }
-		scc_set.insert(scc);
+		// scc_set.insert(scc);
     } 
+}
+
+kscc_leaf_table kstate::find_kscc_leaves(kscc_map & cc)
+{
+	kscc_adj_list adj_list;
+	kscc_leaf_table leaf_table;
+	kedge_ptr_set::const_iterator it_keps;
+	// We determine the adjacency list of the scc
+    for (it_keps = m_edges.begin(); it_keps != m_edges.end(); it_keps++) {
+		adj_list[cc[it_keps->get_from()]].insert(cc[it_keps->get_to()]);
+	}
+	
+	kscc_adj_list::const_iterator it_kal;
+	// We determine which scc are leaves
+	for (it_kal = adj_list.begin(); it_kal != adj_list.end(); it_kal++) {
+		int cc = it_kal->first;
+		auto cc_list = it_kal->second;
+
+		leaf_table[cc] = cc_list.find(cc) != cc_list.end() && cc_list.size() == 1;
+	}
+	return leaf_table;
+}
+
+krank_table kstate::calculate_rank(kscc_map & cc)
+{
+	krank_table rank_table;
+	std::map<kworld_ptr, bool> visited;
+	kscc_leaf_table leaf_table = find_kscc_leaves(cc);
+	kworld_ptr_set::const_iterator it_kwps;
+
+	for (it_kwps = m_worlds.begin(); it_kwps != m_worlds.end(); it_kwps++) {
+		if (leaf_table[cc[*it_kwps]]) {		// If it_kwps is inside a scc that is a leaf
+			rank_table[*it_kwps] = -1;
+		} else {
+			rank_table[*it_kwps] = it_kwps->get_numerical_id();
+		}
+		visited[*it_kwps] = false;
+	}
+
+	calculate_rank_helper(rank_table, cc, m_pointed, visited);
+	return rank_table;
+}
+
+void kstate::calculate_rank_helper(krank_table & rank_table, kscc_map & cc, kworld_ptr & u, std::map<kworld_ptr, bool> & visited)
+{
+	kedge_ptr_set::const_iterator it_keps;
+	visited[u] = true;
+
+    for (it_keps = m_edges.begin(); it_keps != m_edges.end(); it_keps++) {
+		if (it_keps->get_from() == u && !visited[u]) {
+			kworld_ptr v = it_keps->get_to();
+
+			if (cc[u] != cc[v]) {	// If 'u' and 'v' are not in the same scc
+				calculate_rank_helper(rank_table, cc, v, visited);
+				rank_table[u] = std::max(rank_table[u], rank_table[v]);
+			}
+		}
+	}
 }
 
 void kstate::add_world(const kworld & world)

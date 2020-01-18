@@ -258,13 +258,21 @@ typedef std::set<kworld_ptr> kworld_ptr_set; /**< \brief A set of \ref kworld_pt
 
 typedef std::map<std::pair<kworld_ptr, event_type>, kworld_ptr> kstate_map;
 
-typedef std::vector<kworld_ptr> kscc; /**< \brief A vector of \ref kworld_ptr that represents a strongly connected component.
-                                       *
-                                       * @see kworld and kstate.*/
+typedef std::map<kworld_ptr, int> kscc_map; /**< \brief A map that associates to each \ref kworld a scc.
+                                             *
+                                             * @see kworld and kstate.*/
 
-typedef std::set<kscc> kscc_set;      /**< \brief A set of \ref kscc that represents all the strongly connected components of a \ref kstate.
-                                       *
-                                       * @see kworld and kstate.*/
+typedef std::map<int, std::set<int>> kscc_adj_list; /**< \brief A map that associates to each scc the set of its adjacent scc.
+                                                     *
+                                                     * @see kworld and kstate.*/
+
+typedef std::map<int, bool> kscc_leaf_table; /**< \brief A map that associates to each scc a boolean that states whether the scc is a leaf.
+                                              *
+                                              * @see kworld and kstate.*/
+
+typedef std::map<kworld_ptr, int> krank_table; /**< \brief A map that associates to each \ref kworld a rank.
+                                                *
+                                                * @see kworld and kstate.*/
 
 /*****************Possibilities*****************/
 class pworld;
