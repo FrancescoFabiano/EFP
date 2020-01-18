@@ -45,6 +45,7 @@ Doxygen/Docs/
 # Out files
 out/
 *.tmp
+callgrind.out*
 
 #Old planner
 EFP_ICAPS_old/cpa+
