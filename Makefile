@@ -10,6 +10,8 @@ OBJS	=	$(BUILD_DIR)/bison.o $(BUILD_DIR)/lex.o $(BUILD_DIR)/main.o \
 			$(BUILD_DIR)/pstore_opt.o $(BUILD_DIR)/pstate_opt.o \
 			$(BUILD_DIR)/reader.o \
 			$(BUILD_DIR)/heuristics_manager.o $(BUILD_DIR)/satisfied_goals.o \
+						$(BUILD_DIR)/bisimulation.o
+
 			
 CC	= g++
 CFLAGS	= -g -Wall -ansi -Wfatal-errors -std=c++14 
@@ -19,8 +21,11 @@ dir_guard = @mkdir -p $(@D)
 BUILD_DIR = build
 BIN_DIR = bin
 
-LIB_DIR = lib
 SRC_DIR = src
+
+
+LIB_DIR = lib
+BISIMULATION_DIR = $(LIB_DIR)/bisimulation
 
 INCLUDE_DIR = include
 ACTION_DIR = $(INCLUDE_DIR)/actions
@@ -39,11 +44,12 @@ DOXYGEN_DIR = doxygen
 OUT_DIR = out
 
 
-#-----------------------------------PARSE FILES-----------------------------------#
-
 $(BIN_DIR)/efp.out: $(OBJS)
 		$(dir_guard)
 		$(CC) $(CFLAGS) $(OBJS) -o $(BIN_DIR)/efp.out -ll
+		
+#-----------------------------------PARSE FILES-----------------------------------#
+
 
 $(BUILD_DIR)/lex.o:		$(BUILD_DIR)/lex.c
 		$(dir_guard)
@@ -78,6 +84,11 @@ $(BUILD_DIR)/main.o:	$(SRC_DIR)/main.cpp \
 		cat $(BUILD_DIR)/built_date $(SRC_DIR)/main.cpp > $(BUILD_DIR)/main.temp.cpp
 		$(CC) $(CFLAGS) -c $(BUILD_DIR)/main.temp.cpp -o $(BUILD_DIR)/main.o
 		rm $(BUILD_DIR)/main.temp.cpp
+		
+#-----------------------------------LIBRARY FILES-----------------------------------#
+$(BUILD_DIR)/bisimulation.o: $(BISIMULATION_DIR)/bisimulation.cpp $(BISIMULATION_DIR)/bisimulation.h
+		$(dir_guard)
+		$(CC) $(CFLAGS) -c $(BISIMULATION_DIR)/bisimulation.cpp -o $(BUILD_DIR)/bisimulation.o
 		
 #-----------------------------------INCLUDE FILES-----------------------------------#
 ####UTILITIES

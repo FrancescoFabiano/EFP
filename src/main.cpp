@@ -17,6 +17,7 @@
 #include "../include/search/planner.ipp"
 #include "../include/utilities/reader.h"
 #include "../include/domain/domain.h"
+#include "../lib/bisimulation/bisimulation.h"
 
 
 #define VERSION "2.0"
@@ -96,12 +97,15 @@ void print_usage(char* prog_name)
 
 
 	std::cout << "EXAMPLES:" << std::endl;
-	std::cout << prog_name << " ex.al" << std::endl;
-	std::cout << "	Find a plan for ex.al. The system will" << std::endl;
-	std::cout << "	automatically detect necessary fluents to be considered." << std::endl;
-	std::cout << prog_name << " ex.al -e \"move(2,table)\" \"move(1,2)\" -p" << std::endl;
-	std::cout << "	Execute the plan [move(2,table);move(1,2)]." << std::endl;
-	std::cout << "	The possible world semantics is used." << std::endl << std::endl;
+	std::cout << prog_name << " ex.txt -st POSS" << std::endl;
+	std::cout << "	Find a plan for ex.al." << std::endl;
+	std::cout << "	The solver will use Possibilities as e-state representation." << std::endl;
+	std::cout << prog_name << " ex.txt -st KRIPKE_OPT -h SUBGOALS" << std::endl;
+	std::cout << "	Find a plan for ex.al with the heuristic \"SUBGOALS\"." << std::endl;
+	std::cout << "	The solver will use Kripke Structures with the optimized transition function." << std::endl;
+	std::cout << prog_name << " ex.al -e open_a peek_a" << std::endl;
+	std::cout << "	Execute the plan [open_a; peek_a]." << std::endl;
+	std::cout << "	As no e-state representation is selected the solver will use Kripke Structures." << std::endl << std::endl;
 
 	exit(1);
 }
