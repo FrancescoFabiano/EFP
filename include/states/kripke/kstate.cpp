@@ -10,10 +10,12 @@
 #include <iostream>
 #include <tuple>
 #include <stack>
+#include <stdio.h>
 
 #include "kstate.h"
 #include "../../domain/domain.h"
 #include "../../utilities/helper.h"
+#include "../../../lib/bisumulation/bisimulation.h"
 
 void kstate::set_worlds(const kworld_ptr_set & to_set)
 {
@@ -376,126 +378,111 @@ const kworld_ptr_set kstate::get_D_reachable_worlds(const agent_set & ags, kworl
 	return ret;
 }
 
-const kscc_map kstate::tarjan_scc()
+const automa kstate::kstate_to_automaton(std::map<kworld_ptr, int> & index_map) const
 {
-	int time = 0;
+	automa *a;
+	int Nvertex = get_worlds().size(), Nbehavs = get_edges().size();
+	v_elem *Vertex;
+	bhtab *behavs;
 
-	// kscc_set scc_set;
-	kscc_map cc;
+	Vertex = (v_elem *) malloc(sizeof(v_elem) * Nvertex);
+	behavs = (bhtab  *) malloc(sizeof(bhtab));
+
+	// Initializating behavs
+	agent_set ag_set = domain::get_instance().get_agents();
+	agent_set::const_iterator it_ags;
+
+	int bhtabSize = ag_set.size();
+	char agent[32];
 	
-	std::stack<kworld_ptr> kw_stack;
+	behavs->ap = 0;
+	behavs->n = bhtabSize;
+	behavs->bh = (char **) malloc(sizeof(bhtab) * bhtabSize);
 
-	std::map<kworld_ptr, int> discovery_time;
-	std::map<kworld_ptr, int> low_time;
-	std::map<kworld_ptr, bool> on_stack;
+	for (it_ags = ag_set.begin(); it_ags != ag_set.end(); it_ags++) {
+		itoa(*it_ags, agent, 10);
+		behavs->bh[*it_ags] = strcat("ag", agent);
+	}
 
+	// Initializating vertices
 	kworld_ptr_set::const_iterator it_kwps;
-
-	for (it_kwps = m_worlds.begin(); it_kwps != m_worlds.end(); it_kwps++) {
-		discovery_time[*it_kwps] = -1;
-		low_time[*it_kwps] = -1;
-	}
-
-	tarjan_scc_helper(cc, get_pointed(), kw_stack, discovery_time, low_time, on_stack, time);
-	return cc;
-}
-
-void kstate::tarjan_scc_helper(kscc_map cc, const kworld_ptr & u, std::stack<kworld_ptr> & kw_stack, std::map<kworld_ptr, int> & discovery_time, std::map<kworld_ptr, int> & low_time, std::map<kworld_ptr, bool> & on_stack, int & time)
-{
-	// Initialize discovery time and low value
-    discovery_time[u] = low_time[u] = ++time;
-    kw_stack.push(u);
-    on_stack[u] = true;
-	// Go through all vertices adjacent to this
-    kedge_ptr_set::const_iterator it_keps;
-
-    for (it_keps = m_edges.begin(); it_keps != m_edges.end(); it_keps++) {
-		if (it_keps->get_from() == u) {
-			kworld_ptr v = it_keps->get_to();
-			// If 'v' is not visited yet, then recur for it
-			if (discovery_time[v] == -1) {
-				tarjan_scc_helper(cc, v, kw_stack, discovery_time, low_time, on_stack, time);
-				// Check if the subtree rooted with 'v' has a connection to one of the ancestors of 'u'
-				low_time[u] = std::min(low_time[u], low_time[v]);
-			} else if (on_stack[v]) {
-				// Update low value of 'u' only of 'v' is still in stack (i.e. it's a back edge, not cross edge).
-				low_time[u] = std::min(low_time[u], discovery_time[v]);
-			}
-		}
-    }
-	// Head node found, pop the stack and print an SCC
-    if (low_time[u] == discovery_time[u]) {
-		// std::vector<kworld_ptr> scc;
-        while (1) {
-            kworld_ptr w = kw_stack.top();
-			// scc.push_back(w);
-			cc[w] = low_time[u];		// The connected component of w is identified by the value low_time of the head of the scc
-            on_stack[w] = false;
-            kw_stack.pop();
-			if (u == w) {
-				break;
-			}
-        }
-		// scc_set.insert(scc);
-    } 
-}
-
-kscc_leaf_table kstate::find_kscc_leaves(kscc_map & cc)
-{
-	kscc_adj_list adj_list;
-	kscc_leaf_table leaf_table;
 	kedge_ptr_set::const_iterator it_keps;
-	// We determine the adjacency list of the scc
-    for (it_keps = m_edges.begin(); it_keps != m_edges.end(); it_keps++) {
-		adj_list[cc[it_keps->get_from()]].insert(cc[it_keps->get_to()]);
+	kadj_list::const_iterator it_kal;
+	std::map<kworld_ptr, agent_set>::const_iterator it_kw_ags;
+	agent_set::const_iterator it_ags;
+
+	std::map<kworld_ptr, int> edge_counter;
+	kadj_list adj_list;							// Map: from -> (to -> ag_set)
+
+	// Building a temporary adjacency list adn calculating the number of outgoing edges for each kworld
+	for (it_keps = get_edges().begin(); it_keps != get_edges().end(); it_keps++) {
+		adj_list[it_keps->get_from()][it_keps->get_to()].insert(it_keps->get_label());
+		edge_counter[it_keps->get_from()]++;
 	}
 	
-	kscc_adj_list::const_iterator it_kal;
-	// We determine which scc are leaves
+	int i = 0;
+
+	for (it_kwps = get_worlds().begin(); it_kwps != get_worlds().end(); it_kwps++) {
+		index_map[*it_kwps] = i;
+		// Vertex[i] = (v_elem *) malloc(sizeof(v_elem));
+		Vertex[i].ne = edge_counter[*it_kwps];
+		Vertex[i].e  = (e_elem *) malloc(sizeof(e_elem) * Vertex[i].ne);
+		i++;
+	}
+
+	int from, to, j = 0, k = 0, nbh;
+
 	for (it_kal = adj_list.begin(); it_kal != adj_list.end(); it_kal++) {
-		int cc = it_kal->first;
-		auto cc_list = it_kal->second;
+		from = index_map[it_kal->first];																// For each kworld 'from'
 
-		leaf_table[cc] = cc_list.find(cc) != cc_list.end() && cc_list.size() == 1;
-	}
-	return leaf_table;
-}
+		for (it_kw_ags = it_kal->second.begin(); it_kw_ags != it_kal->second.end(); it_kw_ags++) {		// For each edge that reaches the kworld 'to'
+			to = index_map[it_kw_ags->first];
+			nbh = it_kw_ags->second.size();
 
-krank_table kstate::calculate_rank(kscc_map & cc)
-{
-	krank_table rank_table;
-	std::map<kworld_ptr, bool> visited;
-	kscc_leaf_table leaf_table = find_kscc_leaves(cc);
-	kworld_ptr_set::const_iterator it_kwps;
+			Vertex[from].e[j].nbh = nbh;																// Let j be the index of the adjacency list of from that stores the kedge (from, to)
+			Vertex[from].e[j].bh  = (int *) malloc(sizeof(int) * nbh);									// Let nbh be the number of agents in such kedge
+			Vertex[from].e[j].tv  = to;																	// Update the value of the reache kworld
+			j++;																						// Update the value of the index j
 
-	for (it_kwps = m_worlds.begin(); it_kwps != m_worlds.end(); it_kwps++) {
-		if (leaf_table[cc[*it_kwps]]) {		// If it_kwps is inside a scc that is a leaf
-			rank_table[*it_kwps] = -1;
-		} else {
-			rank_table[*it_kwps] = it_kwps->get_numerical_id();
-		}
-		visited[*it_kwps] = false;
-	}
-
-	calculate_rank_helper(rank_table, cc, m_pointed, visited);
-	return rank_table;
-}
-
-void kstate::calculate_rank_helper(krank_table & rank_table, kscc_map & cc, kworld_ptr & u, std::map<kworld_ptr, bool> & visited)
-{
-	kedge_ptr_set::const_iterator it_keps;
-	visited[u] = true;
-
-    for (it_keps = m_edges.begin(); it_keps != m_edges.end(); it_keps++) {
-		if (it_keps->get_from() == u && !visited[u]) {
-			kworld_ptr v = it_keps->get_to();
-
-			if (cc[u] != cc[v]) {	// If 'u' and 'v' are not in the same scc
-				calculate_rank_helper(rank_table, cc, v, visited);
-				rank_table[u] = std::max(rank_table[u], rank_table[v]);
+			for (it_ags = it_kw_ags->second.begin(); it_ags != it_kw_ags->second.end(); it_ags++) {		// For each agent 'ag' in the label of the kedge
+				Vertex[from].e[j].bh[k++] = *it_ags;													// Update the value of the label at index k to 'ag'
 			}
+			k = 0;																						// Reset k
 		}
+		j = 0;																							// Reset j
 	}
+
+	// Building the automaton
+	a = (automa *) malloc(sizeof(automa));
+	a->Nvertex = Nvertex;
+	a->Nbehavs = Nbehavs;
+	a->Vertex  = Vertex;
+	a->behavs  = behavs;
+
+	return *a;
+}
+
+const kstate kstate::automaton_to_kstate(automa & a, std::map<int, kworld_ptr> & index_map) const
+{
+
+}
+
+kstate kstate::calc_min_bisimilar()
+{
+	kstate ret;
+	std::map<kworld_ptr, int> & index_map;
+	kworld_ptr_set::const_iterator it_kwps;
+	int i = 0;
+
+	for (it_kwps = get_worlds().begin(); it_kwps != get_worlds().end(); it_kwps++) {
+		index_map[i++] = *it_kwps;
+	}
+
+	automa a = kstate_to_automaton(index_map);
+	MinimizeAutoma(*a);
+	ret = automaton_to_kstate(a);
+	DisposeAutoma(*a);
+	return ret;
 }
 
 void kstate::add_world(const kworld & world)

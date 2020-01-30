@@ -25,6 +25,8 @@
 #include "../../utilities/define.h"
 #include "../../domain/initially.h"
 #include "../../actions/action.h"
+#include "../../bisimulation/IO_FC2.h"
+#include "../../bisimulation/fastBisimulation.h"
 
 class kstate
 {
@@ -214,51 +216,25 @@ private:
      * @return a set of pointers to all the D_reachable worlds.*/
     const kworld_ptr_set get_D_reachable_worlds(const agent_set & ags, kworld_ptr world) const;
 
-    /** \brief Function that determines the strongly connected components of the current \ref kstate.
-     *
-     * This function implements the linear time DFS-based Tarjan's algorithm to find the scc(s).
-     *
-     * @return a map that associates to each \ref kworld a scc id.*/
-    const kscc_map tarjan_scc();
-
-    /** \brief Function that determines the strongly connected components of the given \ref kstate.
-     *
-     * This function implements the linear time DFS-based Tarjan's algorithm to find the scc(s).
-     *
-     * @param[in] cc: the map of scc.
-     * @param[in] u: the current \ref kworld.
-     * @param[in] kw_stack: the stack of visited \ref kworld.
-     * @param[in] discovery_time: the map that stores the discovery time of each visited \ref kworld.
-     * @param[in] low_time: the map that stores for each \ref kworld the discovery time of the earliest visited vertex that can be reached from subtree rooted in said \ref kworld.
-     * @param[in] on_stack: the map that keeps track of the presence of each \ref kworld inside the stack.
-     * @param[in] time: the current time.*/
-    void tarjan_scc_helper(kscc_map cc, const kworld_ptr & u, std::stack<kworld_ptr> & kw_stack, std::map<kworld_ptr, int> & discovery_time, std::map<kworld_ptr, int> & low_time, std::map<kworld_ptr, bool> & on_stack, int & time);
-
-    /** \brief Function that determines the strongly connected components that are leaves.
-     *
-     * @param[in] cc: the map of scc.
+    /** \brief Function that transforms *this* into an equivalent automaton.
      * 
-     * @return the leaf table of the scc.*/
-    kscc_leaf_table find_kscc_leaves(kscc_map & cc);
-
-    /** \brief Function that calculates the rank of each \ref kworld.
+     * @param[in] index_map: a map that associates a unique id to each \ref kworld.
+     * 
+     * @return the automaton.*/
+    const automa kstate_to_automaton(std::map<kworld_ptr, int> & index_map) const;
+    /** \brief Function that transforms the given automaton into an equivalent \ref kstate.
+     * 
+     * @param[in] a: the automaton to transform.
+     * @param[in] index_map: a map that associates a unique id to each \ref kworld.
+     * 
+     * @return the \ref kstate.*/
+    const kstate automaton_to_kstate(automa & a, std::map<kworld_ptr, int> & index_map) const;
+    /** \brief Function that determines the mimimum \ref kstate that is bisimilar to the current one.
      *
-     * This function follows the definition of rank on non-well-founded sets given in Dovier, Piazza, Policriti (2015).
+     * The function follows the approach of the algorithm described in Dovier, Piazza, Policriti (2004).
      *
-     * @param[in] cc: the map of scc.
-     *
-     * @return a map that associates to each \ref kworld a rank.*/
-    krank_table calculate_rank(kscc_map & cc);
-
-    /** \brief Function that determines the strongly connected components of the given \ref kstate.
-     *
-     * This function implements the linear time DFS-based Tarjan's algorithm to find the scc(s).
-     *
-     * @param[in] rank_table: the current rank table.
-     * @param[in] cc: the map of scc.
-     * @param[in] u: the current \ref kworld.
-     * @param[in] visited: the map that keeps track of which \ref kworld has already been visited.*/
-    void calculate_rank_helper(krank_table & rank_table, kscc_map & cc, kworld_ptr & u, std::map<kworld_ptr, bool> & visited);
+     * @return the minimum bisimilar \ref kstate.*/
+    kstate calc_min_bisimilar();
 
     /** \brief Function that builds the initial Kripke structure given the initial conditions in a structural way.
      *

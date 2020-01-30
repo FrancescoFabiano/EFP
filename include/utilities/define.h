@@ -274,6 +274,8 @@ typedef std::map<kworld_ptr, int> krank_table; /**< \brief A map that associates
                                                 *
                                                 * @see kworld and kstate.*/
 
+typedef std::map<kworld_ptr, std::map<kworld_ptr, agent_set>> kadj_list;
+
 /*****************Possibilities*****************/
 class pworld;
 typedef std::string pworld_id; /**< \brief The id of a \ref pworld in a \ref pstate.

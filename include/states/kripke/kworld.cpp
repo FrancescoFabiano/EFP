@@ -26,6 +26,7 @@ kworld::kworld(const fluent_set & description)
 	 *try {*/
 	set_fluent_set(description);
 	set_id();
+	set_numerical_id();
 	/*} catch (const std::invalid_argument& ia) {
 	 *	throw ia;
 	 *} */
@@ -36,6 +37,7 @@ kworld::kworld(const kworld & world)
 {
 	set_fluent_set(world.get_fluent_set());
 	set_id();
+	set_numerical_id();
 }
 
 kworld_id kworld::hash_fluents_into_id(const fluent_set& fl)
