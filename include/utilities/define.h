@@ -237,6 +237,7 @@ typedef std::set<kedge_ptr> kedge_ptr_set; /**< \brief A set of \ref kedge_ptr.
                                             * @see kedge and kstate*/
 
 class kworld;
+///\todo: remove string from code because they have terrible performances
 typedef std::string kworld_id; /**< \brief The id of a \ref kworld in a \ref kstate.
                                 * 
                                 * The id is calculated through an hash (kworld::hash_fluents_into_id()) of the info of the \ref kworld.
