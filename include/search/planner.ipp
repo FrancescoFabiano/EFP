@@ -197,7 +197,23 @@ void planner<T>::execute_given_actions(std::vector<std::string>& act_name)
 		std::cout << "\n\n";
 	}
 
-	if (domain::get_instance().get_debug()) state.print_graphviz();
+	if (domain::get_instance().get_debug()) {
+		state.print_graphviz();
+		std::cerr << "\nDEBUG: FATTO PRE BISIMULATION\n";
+		if (domain::get_instance().get_bisimulation()) {
+			T tempState = state;
+			std::cerr << "\nDEBUG: FATTO ASSIGNEMENT PRE BISIMULATION\n";
+			
+			state.calc_min_bisimilar();
+			std::cerr << "\nDEBUG: FATTO BISIMULATION\n";
+
+			state.print_graphviz("_b");
+			std::cerr << "\nDEBUG: FATTO PRINT POST BISIMULATION\n";
+
+			state = tempState;
+			std::cerr << "\nDEBUG: FATTO ASSIGNEMENT POST BISIMULATION\n";
+		}
+	}
 
 
 	std::vector<std::string>::const_iterator it_stset;

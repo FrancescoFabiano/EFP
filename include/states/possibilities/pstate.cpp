@@ -953,6 +953,12 @@ pstate pstate::execute_announcement(const action & act) const
 	return execute_sensing(act);
 }
 
+
+void pstate::calc_min_bisimilar(){
+			std::cerr << "\nMin bisimilar is not supported for possibilities yet.\n";
+		exit(1);
+}
+
 void pstate::print() const
 {
 	int counter = 1;

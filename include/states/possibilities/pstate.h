@@ -510,6 +510,11 @@ public:
      * \todo The action must be executable on *this* otherwise it will return a null_ptr.*/
     pstate compute_succ(const action & act) const;
 
+    /** \brief Function that makes *this* the mimimum \ref poss that is bisimilar to the current one.
+     *
+     * Not yet implemented.*/
+    void calc_min_bisimilar();
+
     /** \brief The copy operator.
      *   
      * @param [in] to_copy: the \ref pstate to assign to *this*.

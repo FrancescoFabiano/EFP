@@ -17,8 +17,6 @@
 #include "../include/search/planner.ipp"
 #include "../include/utilities/reader.h"
 #include "../include/domain/domain.h"
-#include "../lib/bisimulation/bisimulation.h"
-
 
 #define VERSION "2.0"
 
@@ -117,6 +115,7 @@ int main(int argc, char** argv)
 	bool results_file = false;
 	bool is_global_obsv = true;
 	bool check_visited = false;
+	bool bisimulation = false;
 	heuristics used_heur = NO_H;
 	state_type state_struc = KRIPKE; //default
 	domain_restriction ini_restriction = S5; //default
@@ -262,7 +261,9 @@ int main(int argc, char** argv)
 				std::cerr << "Wrong specification for '-h'; use 'NONE' or 'L_PG' or 'S_PG' or 'C_PG' or 'SUBGOALS'." << std::endl;
 				exit(1);
 			}
-		} else if (strcmp(argv[i], "-e") == 0) {
+		} else if (strcmp(argv[i], "-bisimulation") == 0) {
+			bisimulation = true;
+		}else if (strcmp(argv[i], "-e") == 0) {
 			execute_given_actions = true;
 
 			if (i == argc - 1)
@@ -296,7 +297,7 @@ int main(int argc, char** argv)
 	}
 
 	//Domain building
-	domain::get_instance().set_domain(domain_name, debug, state_struc, kopt, domain_reader, ini_restriction, goal_restriction, is_global_obsv, act_check, check_visited);
+	domain::get_instance().set_domain(domain_name, debug, state_struc, kopt, domain_reader, ini_restriction, goal_restriction, is_global_obsv, act_check, check_visited, bisimulation);
 	domain::get_instance().build();
 
 

@@ -19,6 +19,7 @@
 #pragma once
 #include <iostream>
 #include <stdlib.h>
+#include <cstring>
 
 #include "../../include/domain/domain.h"
 #include "../../include/utilities/define.h"
@@ -175,8 +176,8 @@ private:
     BIS_indexType splitD[BIS_MAXINDEX]; //list of split blocks
     BIS_indexType b1List, b_1List, dList; //starting pointers of the lists above
 
-    std::map<kworld_ptr, int> m_index_map;		// From kworld to int
-	std::vector<kworld_ptr> m_kworld_vec;			// Vector of all kworld_ptr
+    std::map<kworld_ptr, int> m_index_map; // From kworld to int
+    std::vector<kworld_ptr> m_kworld_vec; // Vector of all kworld_ptr
     std::map<int, int> m_compact_indices;
 
     //from  PaigeTarjan

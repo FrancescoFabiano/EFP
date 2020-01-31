@@ -235,6 +235,14 @@ public:
      * \bug Is not supposed to override the method but it does.*/
     state<T> compute_succ(const action & act) const;
 
+
+    /** \brief Function that determines the mimimum \ref e-state that is bisimilar to the current one.
+     *
+     * The function depends on the type of e-state.
+     *
+     * @return the minimum bisimilar e-state to *this*.*/
+    void calc_min_bisimilar();
+
     /** \brief The copy operator.
      *   
      * @param [in] to_copy: the \ref state to assign to *this*.
@@ -255,7 +263,10 @@ public:
     /** \brief Function that prints the information of *this*.*/
     void print() const;
 
-    /** \brief Function that prints the information of *this* in a Graphviz file.*/
-    void print_graphviz() const;
+    /** \brief Function that prints the information of *this* in a Graphviz file.
+     *
+     * @param [in] postfix: The postfix to give to the name of the file (default "").
+     */
+    void print_graphviz(std::string postfix = "") const;
 };
 

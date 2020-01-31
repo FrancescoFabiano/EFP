@@ -179,6 +179,15 @@ state<T> state<T>::compute_succ(const action & act) const
 }
 
 template <class T>
+void state<T>::calc_min_bisimilar()
+{
+	std::cerr << "\nDEBUG: ENTRATO IN STATE<T> BISIMULATION\n";
+	m_representation.calc_min_bisimilar();
+	std::cerr << "\nDEBUG: FINE STATE<T> BISIMULATION\n";
+
+}
+
+template <class T>
 bool state<T>::is_executable(const action & act) const
 {
 	return entails(act.get_executability());
@@ -205,7 +214,7 @@ void state<T>::print() const
 }
 
 template <class T>
-void state<T>::print_graphviz() const
+void state<T>::print_graphviz(std::string postfix) const
 {
 	std::cout << "\nStarted Graphviz-Printing ";
 	printer::get_instance().print_list(get_executed_actions());
@@ -239,7 +248,7 @@ void state<T>::print_graphviz() const
 		break;
 	}
 	system(("mkdir -p " + folder).c_str());
-	graphviz.open(folder + "/" + exec_act_names + ".dot");
+	graphviz.open(folder + "/" + exec_act_names + postfix + ".dot");
 	graphviz << "digraph K_structure{\n";
 	graphviz << "	rankdir=BT;\n";
 	graphviz << "	size=\"8,5\"\n";

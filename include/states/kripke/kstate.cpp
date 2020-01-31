@@ -385,7 +385,7 @@ const automa kstate::kstate_to_automaton(std::map<kworld_ptr, int> & index_map, 
 	bhtab *behavs;
 
 	Vertex = (v_elem *) malloc(sizeof(v_elem) * Nvertex);
-	behavs = (bhtab  *) malloc(sizeof(bhtab));
+	behavs = (bhtab *) malloc(sizeof(bhtab));
 
 	// Initializating behavs
 	agent_set ag_set = domain::get_instance().get_agents();
@@ -393,13 +393,13 @@ const automa kstate::kstate_to_automaton(std::map<kworld_ptr, int> & index_map, 
 
 	int bhtabSize = ag_set.size();
 	char agent[32];
-	
+
 	behavs->ap = 0;
 	behavs->n = bhtabSize;
 	behavs->bh = (char **) malloc(sizeof(bhtab) * bhtabSize);
 
 	for (it_ags = ag_set.begin(); it_ags != ag_set.end(); it_ags++) {
-		strcpy(agent, std::to_string(*it_ags).c_str());
+		std::strcpy(agent, std::to_string(*it_ags).c_str());
 		behavs->bh[*it_ags] = agent;
 	}
 
@@ -410,14 +410,14 @@ const automa kstate::kstate_to_automaton(std::map<kworld_ptr, int> & index_map, 
 	std::map<kworld_ptr, agent_set>::const_iterator it_kw_ags;
 
 	std::map<kworld_ptr, int> edge_counter;
-	kadj_list adj_list;							// Map: from -> (to -> ag_set)
+	kadj_list adj_list; // Map: from -> (to -> ag_set)
 
 	// Building a temporary adjacency list adn calculating the number of outgoing edges for each kworld
 	for (it_keps = get_edges().begin(); it_keps != get_edges().end(); it_keps++) {
 		adj_list[it_keps->get_from()][it_keps->get_to()].insert(it_keps->get_label());
 		edge_counter[it_keps->get_from()]++;
 	}
-	
+
 	int i = 0, c = 0;
 
 	for (it_kwps = get_worlds().begin(); it_kwps != get_worlds().end(); it_kwps++) {
@@ -429,47 +429,47 @@ const automa kstate::kstate_to_automaton(std::map<kworld_ptr, int> & index_map, 
 		}
 
 		Vertex[i].ne = edge_counter[*it_kwps];
-		Vertex[i].e  = (e_elem *) malloc(sizeof(e_elem) * Vertex[i].ne);
+		Vertex[i].e = (e_elem *) malloc(sizeof(e_elem) * Vertex[i].ne);
 		i++;
 	}
 
 	int from, to, j = 0, k = 0, nbh;
 
 	for (it_kal = adj_list.begin(); it_kal != adj_list.end(); it_kal++) {
-		from = index_map[it_kal->first];																// For each kworld 'from'
+		from = index_map[it_kal->first]; // For each kworld 'from'
 
-		for (it_kw_ags = it_kal->second.begin(); it_kw_ags != it_kal->second.end(); it_kw_ags++) {		// For each edge that reaches the kworld 'to'
+		for (it_kw_ags = it_kal->second.begin(); it_kw_ags != it_kal->second.end(); it_kw_ags++) { // For each edge that reaches the kworld 'to'
 			to = index_map[it_kw_ags->first];
 			nbh = it_kw_ags->second.size();
 
-			Vertex[from].e[j].nbh = nbh;																// Let j be the index of the adjacency list of from that stores the kedge (from, to)
-			Vertex[from].e[j].bh  = (int *) malloc(sizeof(int) * nbh);									// Let nbh be the number of agents in such kedge
-			Vertex[from].e[j].tv  = to;																	// Update the value of the reache kworld
-			j++;																						// Update the value of the index j
+			Vertex[from].e[j].nbh = nbh; // Let j be the index of the adjacency list of from that stores the kedge (from, to)
+			Vertex[from].e[j].bh = (int *) malloc(sizeof(int) * nbh); // Let nbh be the number of agents in such kedge
+			Vertex[from].e[j].tv = to; // Update the value of the reache kworld
+			j++; // Update the value of the index j
 
-			for (it_ags = it_kw_ags->second.begin(); it_ags != it_kw_ags->second.end(); it_ags++) {		// For each agent 'ag' in the label of the kedge
-				Vertex[from].e[j].bh[k++] = *it_ags;													// Update the value of the label at index k to 'ag'
+			for (it_ags = it_kw_ags->second.begin(); it_ags != it_kw_ags->second.end(); it_ags++) { // For each agent 'ag' in the label of the kedge
+				Vertex[from].e[j].bh[k++] = *it_ags; // Update the value of the label at index k to 'ag'
 			}
-			k = 0;																						// Reset k
+			k = 0; // Reset k
 		}
-		j = 0;																							// Reset j
+		j = 0; // Reset j
 	}
 
 	// Building the automaton
 	a = (automa *) malloc(sizeof(automa));
 	a->Nvertex = Nvertex;
 	a->Nbehavs = Nbehavs;
-	a->Vertex  = Vertex;
-	a->behavs  = behavs;
+	a->Vertex = Vertex;
+	a->behavs = behavs;
 
 	return *a;
 }
 
 void kstate::automaton_to_kstate(automa & a, std::vector<kworld_ptr> & kworld_vec)
 {
-    kworld_ptr_set worlds;
+	kworld_ptr_set worlds;
 	kedge_ptr_set edges;
-    kworld_ptr pointed;
+	kworld_ptr pointed;
 
 	int i, j, k;
 
@@ -477,13 +477,16 @@ void kstate::automaton_to_kstate(automa & a, std::vector<kworld_ptr> & kworld_ve
 		if (a.Vertex[i].ne != BIS_DELETED) {
 			worlds.insert(kworld_vec[i]);
 
+
 			for (j = 0; j < a.Vertex[i].ne; j++) {
 				for (k = 0; k < a.Vertex[i].e[j].nbh; k++) {
-					kedge e = kedge(kworld_vec[i], kworld_vec[a.Vertex[i].e[j].tv], a.Vertex[i].e[j].bh[k]);
+					add_edge(kedge(kworld_vec[i], kworld_vec[a.Vertex[i].e[j].tv], a.Vertex[i].e[j].bh[k]));
 				}
 			}
 		}
 	}
+	//To Adjust
+	pointed = kworld_vec[0];
 
 	set_worlds(worlds);
 	set_edges(edges);
@@ -492,22 +495,31 @@ void kstate::automaton_to_kstate(automa & a, std::vector<kworld_ptr> & kworld_ve
 
 void kstate::calc_min_bisimilar()
 {
-	kstate ret;
-	std::map<kworld_ptr, int> index_map;		// From kworld to int
-	std::vector<kworld_ptr> kworld_vec;			// Vector of all kworld_ptr
+	//kstate ret;
+	std::cerr << "\nDEBUG: INIZIO BISIMULATION IN KSTATE\n";
+
+	std::map<kworld_ptr, int> index_map; // From kworld to int
+	std::vector<kworld_ptr> kworld_vec; // Vector of all kworld_ptr
 	std::map<int, int> compact_indices;
-	kworld_ptr_set::const_iterator it_kwps;
+	//kworld_ptr_set::const_iterator it_kwps;
+	std::cerr << "\nDEBUG: PRE-ALLOCAZIONE AUTOMA\n";
+
 	automa a;
 
 	kworld_vec.reserve(get_worlds().size());
 
+	std::cerr << "\nDEBUG: PRE-CREAZIONE AUTOMA\n";
 	a = kstate_to_automaton(index_map, kworld_vec, compact_indices);
-	bisimulation b(index_map, kworld_vec, compact_indices);
-
-	if (b.MinimizeAutoma(&a)) {
-		automaton_to_kstate(a, kworld_vec);
-		b.DisposeAutoma(&a);
-	}
+	std::cerr << "\nDEBUG: POST-CREAZIONE AUTOMA\n";
+/*\************ERROR IN KSTATE_TO_AUTOMATON************
+*	bisimulation b(index_map, kworld_vec, compact_indices);
+*	std::cerr << "\nDEBUG: CREATO OGGETTO BISIMULATION\n";
+*
+*
+*	if (b.MinimizeAutoma(&a)) {
+*		automaton_to_kstate(a, kworld_vec);
+*		b.DisposeAutoma(&a);
+*	}*/
 }
 
 void kstate::add_world(const kworld & world)
