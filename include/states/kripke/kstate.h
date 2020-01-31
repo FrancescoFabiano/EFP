@@ -25,8 +25,7 @@
 #include "../../utilities/define.h"
 #include "../../domain/initially.h"
 #include "../../actions/action.h"
-#include "../../bisimulation/IO_FC2.h"
-#include "../../bisimulation/fastBisimulation.h"
+#include "../../../lib/bisimulation/bisimulation.h"
 
 class kstate
 {
@@ -219,22 +218,23 @@ private:
     /** \brief Function that transforms *this* into an equivalent automaton.
      * 
      * @param[in] index_map: a map that associates a unique id to each \ref kworld.
+     * @param[in] kworld_vec: the vector of all \ref kworld.
      * 
      * @return the automaton.*/
-    const automa kstate_to_automaton(std::map<kworld_ptr, int> & index_map) const;
+    const automa kstate_to_automaton(std::map<kworld_ptr, int> & index_map, std::vector<kworld_ptr> & kworld_vec, std::map<int, int> & compact_indices) const;
     /** \brief Function that transforms the given automaton into an equivalent \ref kstate.
      * 
      * @param[in] a: the automaton to transform.
      * @param[in] index_map: a map that associates a unique id to each \ref kworld.
      * 
      * @return the \ref kstate.*/
-    const kstate automaton_to_kstate(automa & a, std::map<kworld_ptr, int> & index_map) const;
+    void automaton_to_kstate(automa & a, std::vector<kworld_ptr> & kworld_vec);
     /** \brief Function that determines the mimimum \ref kstate that is bisimilar to the current one.
      *
      * The function follows the approach of the algorithm described in Dovier, Piazza, Policriti (2004).
      *
      * @return the minimum bisimilar \ref kstate.*/
-    kstate calc_min_bisimilar();
+    void calc_min_bisimilar();
 
     /** \brief Function that builds the initial Kripke structure given the initial conditions in a structural way.
      *

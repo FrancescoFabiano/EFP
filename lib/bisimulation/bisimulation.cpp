@@ -103,9 +103,12 @@ void bisimulation::CreateG(int num_v, v_elem *Gtemp)
 	// realta' la loro etichetta potrebbe assumere un qualunque valore). Tutti questi stati
 	// apparterranno quindi, come si puo' notare dall'assegnamento "G[v].block = 0", al blocco
 	// 0, ovvero all'elemento dell'array X di indice 0.
+	int n_id, n_agents = domain::get_instance().get_agents().size();
+
 	for (v = 0; v < num_v; v++) {
-		G[v].block = 0;
-		G[v].label = 0;
+		n_id = m_kworld_vec[v].get_numerical_id();
+		G[v].block = m_compact_indices[n_id];
+		G[v].label = n_id + n_agents;					// We reserve the values from 0 to n-1 to the labels of agents nodes
 	}
 
 	// La variabile "numberOfNodes" e' globale e indica il numero totale di stati del grafo su
@@ -151,7 +154,7 @@ void bisimulation::CreateG(int num_v, v_elem *Gtemp)
 			// Creo gli stati dal secondo in poi nella catena delle etichette. Questo ciclo viene
 			// eseguito solamente nel caso in cui l'arco che stiamo considerando possegga piu' di
 			// una etichetta
-			for (b = 1; b < Gtemp[v].e[e].nbh; b++) {
+			for (b = 1; b < Gtemp[v].e[e].nbh; b++) {			// **************************** TODO: CHECK IF LABELS AND BLOCKS ARE CORRECT!! ****************************
 				// Creo un nuovo stato
 				G[numberOfNodes].block = Gtemp[v].e[e].bh[b];
 				G[numberOfNodes].label = Gtemp[v].e[e].bh[b];
@@ -812,4 +815,9 @@ bool bisimulation::MinimizeAutoma(automa *A)
 
 }
 
-
+bisimulation::bisimulation(const std::map<kworld_ptr, int> & index_map, const std::vector<kworld_ptr> & kworld_vec, const std::map<int, int> & compact_indices)
+{
+	m_index_map = index_map;
+	m_kworld_vec = kworld_vec;
+	m_compact_indices = compact_indices;
+}

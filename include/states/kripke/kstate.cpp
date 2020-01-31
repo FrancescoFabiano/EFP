@@ -15,7 +15,6 @@
 #include "kstate.h"
 #include "../../domain/domain.h"
 #include "../../utilities/helper.h"
-#include "../../../lib/bisumulation/bisimulation.h"
 
 void kstate::set_worlds(const kworld_ptr_set & to_set)
 {
@@ -378,7 +377,7 @@ const kworld_ptr_set kstate::get_D_reachable_worlds(const agent_set & ags, kworl
 	return ret;
 }
 
-const automa kstate::kstate_to_automaton(std::map<kworld_ptr, int> & index_map) const
+const automa kstate::kstate_to_automaton(std::map<kworld_ptr, int> & index_map, std::vector<kworld_ptr> & kworld_vec, std::map<int, int> & compact_indices) const
 {
 	automa *a;
 	int Nvertex = get_worlds().size(), Nbehavs = get_edges().size();
@@ -400,8 +399,8 @@ const automa kstate::kstate_to_automaton(std::map<kworld_ptr, int> & index_map) 
 	behavs->bh = (char **) malloc(sizeof(bhtab) * bhtabSize);
 
 	for (it_ags = ag_set.begin(); it_ags != ag_set.end(); it_ags++) {
-		itoa(*it_ags, agent, 10);
-		behavs->bh[*it_ags] = strcat("ag", agent);
+		strcpy(agent, std::to_string(*it_ags).c_str());
+		behavs->bh[*it_ags] = agent;
 	}
 
 	// Initializating vertices
@@ -409,7 +408,6 @@ const automa kstate::kstate_to_automaton(std::map<kworld_ptr, int> & index_map) 
 	kedge_ptr_set::const_iterator it_keps;
 	kadj_list::const_iterator it_kal;
 	std::map<kworld_ptr, agent_set>::const_iterator it_kw_ags;
-	agent_set::const_iterator it_ags;
 
 	std::map<kworld_ptr, int> edge_counter;
 	kadj_list adj_list;							// Map: from -> (to -> ag_set)
@@ -420,11 +418,16 @@ const automa kstate::kstate_to_automaton(std::map<kworld_ptr, int> & index_map) 
 		edge_counter[it_keps->get_from()]++;
 	}
 	
-	int i = 0;
+	int i = 0, c = 0;
 
 	for (it_kwps = get_worlds().begin(); it_kwps != get_worlds().end(); it_kwps++) {
 		index_map[*it_kwps] = i;
-		// Vertex[i] = (v_elem *) malloc(sizeof(v_elem));
+		kworld_vec[i] = *it_kwps;
+
+		if (compact_indices.insert({it_kwps->get_numerical_id(), c}).second) {
+			c++;
+		}
+
 		Vertex[i].ne = edge_counter[*it_kwps];
 		Vertex[i].e  = (e_elem *) malloc(sizeof(e_elem) * Vertex[i].ne);
 		i++;
@@ -462,27 +465,49 @@ const automa kstate::kstate_to_automaton(std::map<kworld_ptr, int> & index_map) 
 	return *a;
 }
 
-const kstate kstate::automaton_to_kstate(automa & a, std::map<int, kworld_ptr> & index_map) const
+void kstate::automaton_to_kstate(automa & a, std::vector<kworld_ptr> & kworld_vec)
 {
+    kworld_ptr_set worlds;
+	kedge_ptr_set edges;
+    kworld_ptr pointed;
 
-}
+	int i, j, k;
 
-kstate kstate::calc_min_bisimilar()
-{
-	kstate ret;
-	std::map<kworld_ptr, int> & index_map;
-	kworld_ptr_set::const_iterator it_kwps;
-	int i = 0;
+	for (i = 0; i < a.Nvertex; i++) {
+		if (a.Vertex[i].ne != BIS_DELETED) {
+			worlds.insert(kworld_vec[i]);
 
-	for (it_kwps = get_worlds().begin(); it_kwps != get_worlds().end(); it_kwps++) {
-		index_map[i++] = *it_kwps;
+			for (j = 0; j < a.Vertex[i].ne; j++) {
+				for (k = 0; k < a.Vertex[i].e[j].nbh; k++) {
+					kedge e = kedge(kworld_vec[i], kworld_vec[a.Vertex[i].e[j].tv], a.Vertex[i].e[j].bh[k]);
+				}
+			}
+		}
 	}
 
-	automa a = kstate_to_automaton(index_map);
-	MinimizeAutoma(*a);
-	ret = automaton_to_kstate(a);
-	DisposeAutoma(*a);
-	return ret;
+	set_worlds(worlds);
+	set_edges(edges);
+	set_pointed(pointed);
+}
+
+void kstate::calc_min_bisimilar()
+{
+	kstate ret;
+	std::map<kworld_ptr, int> index_map;		// From kworld to int
+	std::vector<kworld_ptr> kworld_vec;			// Vector of all kworld_ptr
+	std::map<int, int> compact_indices;
+	kworld_ptr_set::const_iterator it_kwps;
+	automa a;
+
+	kworld_vec.reserve(get_worlds().size());
+
+	a = kstate_to_automaton(index_map, kworld_vec, compact_indices);
+	bisimulation b(index_map, kworld_vec, compact_indices);
+
+	if (b.MinimizeAutoma(&a)) {
+		automaton_to_kstate(a, kworld_vec);
+		b.DisposeAutoma(&a);
+	}
 }
 
 void kstate::add_world(const kworld & world)
