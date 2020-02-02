@@ -12,6 +12,7 @@
 #include <stack>
 #include <stdio.h>
 
+
 #include "kstate.h"
 #include "../../domain/domain.h"
 #include "../../utilities/helper.h"
@@ -398,10 +399,15 @@ const automa kstate::kstate_to_automaton(std::map<kworld_ptr, int> & index_map, 
 	behavs->n = bhtabSize;
 	behavs->bh = (char **) malloc(sizeof(bhtab) * bhtabSize);
 
+	//std::cerr << "\nDEBUG: Inizializzazione Behavs\n";
+
 	for (it_ags = ag_set.begin(); it_ags != ag_set.end(); it_ags++) {
 		std::strcpy(agent, std::to_string(*it_ags).c_str());
 		behavs->bh[*it_ags] = agent;
 	}
+
+	//std::cerr << "\nDEBUG: Fine Inizializzazione Behavs\n";
+
 
 	// Initializating vertices
 	kworld_ptr_set::const_iterator it_kwps;
@@ -412,8 +418,11 @@ const automa kstate::kstate_to_automaton(std::map<kworld_ptr, int> & index_map, 
 	std::map<kworld_ptr, int> edge_counter;
 	kadj_list adj_list; // Map: from -> (to -> ag_set)
 
-	// Building a temporary adjacency list adn calculating the number of outgoing edges for each kworld
-	for (it_keps = get_edges().begin(); it_keps != get_edges().end(); it_keps++) {
+	//std::cerr << "\nDEBUG: Inizializzazione Edges\n";
+
+
+	// Building a temporary adjacency list and calculating the number of outgoing edges for each kworld
+	for (it_keps = m_edges.begin(); it_keps != m_edges.end(); it_keps++) {
 		adj_list[it_keps->get_from()][it_keps->get_to()].insert(it_keps->get_label());
 		edge_counter[it_keps->get_from()]++;
 	}
@@ -428,6 +437,9 @@ const automa kstate::kstate_to_automaton(std::map<kworld_ptr, int> & index_map, 
 	Vertex[0].e = (e_elem *) malloc(sizeof(e_elem) * Vertex[0].ne);
 
 	int i = 1, c = 1;
+
+	//std::cerr << "\nDEBUG: Inizializzazione Vertex\n";
+
 
 	for (it_kwps = get_worlds().begin(); it_kwps != get_worlds().end(); it_kwps++) {
 		if (!(*it_kwps == get_pointed())) {
@@ -444,27 +456,48 @@ const automa kstate::kstate_to_automaton(std::map<kworld_ptr, int> & index_map, 
 		}
 	}
 
+	//std::cerr << "\nDEBUG: Fine Inizializzazione Vertex\n";
+
+
 	int from, to, j = 0, k = 0, nbh;
 
+	//std::cerr << "\nDEBUG: Inizializzazione Mappa\n";
 	for (it_kal = adj_list.begin(); it_kal != adj_list.end(); it_kal++) {
 		from = index_map[it_kal->first]; // For each kworld 'from'
+
+		//std::cerr << "\nDEBUG: Inizializzazione K\n";
 
 		for (it_kw_ags = it_kal->second.begin(); it_kw_ags != it_kal->second.end(); it_kw_ags++) { // For each edge that reaches the kworld 'to'
 			to = index_map[it_kw_ags->first];
 			nbh = it_kw_ags->second.size();
 
+			//std::cerr << "\nDEBUG: 1\n";
+
+
 			Vertex[from].e[j].nbh = nbh; // Let j be the index of the adjacency list of from that stores the kedge (from, to)
 			Vertex[from].e[j].bh = (int *) malloc(sizeof(int) * nbh); // Let nbh be the number of agents in such kedge
 			Vertex[from].e[j].tv = to; // Update the value of the reache kworld
-			j++; // Update the value of the index j
+
+			//std::cerr << "\nDEBUG: 2\n";
 
 			for (it_ags = it_kw_ags->second.begin(); it_ags != it_kw_ags->second.end(); it_ags++) { // For each agent 'ag' in the label of the kedge
+				//std::cerr << "\nDEBUG: j is: " << j << " and k is: " << k << "\n";
 				Vertex[from].e[j].bh[k++] = *it_ags; // Update the value of the label at index k to 'ag'
+				//std::cerr << "\nDEBUG: j is: " << j << " and k is: " << k << "\n";
 			}
+			j++; // Update the value of the index j
+
+
+			//std::cerr << "\nDEBUG: 3\n";
+
 			k = 0; // Reset k
 		}
+		//std::cerr << "\nDEBUG: Fine Inizializzazione K\n";
+
 		j = 0; // Reset j
 	}
+
+	//std::cerr << "\nDEBUG: Fine Inizializzazione Mappa\n";
 
 	// Building the automaton
 	a = (automa *) malloc(sizeof(automa));
@@ -504,30 +537,32 @@ void kstate::automaton_to_kstate(automa & a, std::vector<kworld_ptr> & kworld_ve
 void kstate::calc_min_bisimilar()
 {
 	//kstate ret;
-	std::cerr << "\nDEBUG: INIZIO BISIMULATION IN KSTATE\n";
+	std::cerr << "\nDEBUG: INIZIO BISIMULATION IN KSTATE\n" << std::flush;
 
 	std::map<kworld_ptr, int> index_map; // From kworld to int
 	std::vector<kworld_ptr> kworld_vec; // Vector of all kworld_ptr
 	std::map<int, int> compact_indices;
 	//kworld_ptr_set::const_iterator it_kwps;
-	std::cerr << "\nDEBUG: PRE-ALLOCAZIONE AUTOMA\n";
+	std::cerr << "\nDEBUG: PRE-ALLOCAZIONE AUTOMA\n" << std::flush;
 
 	automa a;
 
 	kworld_vec.reserve(get_worlds().size());
 
-	std::cerr << "\nDEBUG: PRE-CREAZIONE AUTOMA\n";
+	std::cout << "\nDEBUG: PRE-CREAZIONE AUTOMA\n" << std::flush;
 	a = kstate_to_automaton(index_map, kworld_vec, compact_indices);
 	std::cerr << "\nDEBUG: POST-CREAZIONE AUTOMA\n";
-/*\************ERROR IN KSTATE_TO_AUTOMATON************
-*	bisimulation b(index_map, kworld_vec, compact_indices);
-*	std::cerr << "\nDEBUG: CREATO OGGETTO BISIMULATION\n";
-*
-*
-*	if (b.MinimizeAutoma(&a)) {
-*		automaton_to_kstate(a, kworld_vec);
-*		b.DisposeAutoma(&a);
-*	}*/
+
+	/*\***********ERROR IN BISIMULATION************/
+
+	bisimulation b(index_map, kworld_vec, compact_indices);
+	std::cerr << "\nDEBUG: CREATO OGGETTO BISIMULATION\n" << std::flush;
+
+
+	/*	if (b.MinimizeAutoma(&a)) {
+	 *		automaton_to_kstate(a, kworld_vec);
+	 *		b.DisposeAutoma(&a);
+	 *	}*/
 }
 
 void kstate::add_world(const kworld & world)
