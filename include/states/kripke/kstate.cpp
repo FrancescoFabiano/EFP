@@ -418,19 +418,30 @@ const automa kstate::kstate_to_automaton(std::map<kworld_ptr, int> & index_map, 
 		edge_counter[it_keps->get_from()]++;
 	}
 
-	int i = 0, c = 0;
+	// The pointed world is set to the index 0. This ensures that, when deleting the bisimilar nodes, the pointed kworld
+	// is always chosen as the first of its block. Therefore, we do not need to update it when converting back to a kstate
+	index_map[get_pointed()] = 0;
+	kworld_vec[0] = get_pointed();
+	compact_indices[0] = 0;
+
+	Vertex[0].ne = edge_counter[get_pointed()];
+	Vertex[0].e = (e_elem *) malloc(sizeof(e_elem) * Vertex[0].ne);
+
+	int i = 1, c = 1;
 
 	for (it_kwps = get_worlds().begin(); it_kwps != get_worlds().end(); it_kwps++) {
-		index_map[*it_kwps] = i;
-		kworld_vec[i] = *it_kwps;
+		if (!(*it_kwps == get_pointed())) {
+			index_map[*it_kwps] = i;
+			kworld_vec[i] = *it_kwps;
 
-		if (compact_indices.insert({it_kwps->get_numerical_id(), c}).second) {
-			c++;
+			if (compact_indices.insert({it_kwps->get_numerical_id(), c}).second) {
+				c++;
+			}
+
+			Vertex[i].ne = edge_counter[*it_kwps];
+			Vertex[i].e = (e_elem *) malloc(sizeof(e_elem) * Vertex[i].ne);
+			i++;
 		}
-
-		Vertex[i].ne = edge_counter[*it_kwps];
-		Vertex[i].e = (e_elem *) malloc(sizeof(e_elem) * Vertex[i].ne);
-		i++;
 	}
 
 	int from, to, j = 0, k = 0, nbh;
@@ -469,7 +480,8 @@ void kstate::automaton_to_kstate(automa & a, std::vector<kworld_ptr> & kworld_ve
 {
 	kworld_ptr_set worlds;
 	kedge_ptr_set edges;
-	kworld_ptr pointed;
+	// The pointed world does not change when we calculate the minimum bisimilar state
+	// Hence we do not need to update it
 
 	int i, j, k;
 
@@ -477,20 +489,16 @@ void kstate::automaton_to_kstate(automa & a, std::vector<kworld_ptr> & kworld_ve
 		if (a.Vertex[i].ne != BIS_DELETED) {
 			worlds.insert(kworld_vec[i]);
 
-
 			for (j = 0; j < a.Vertex[i].ne; j++) {
 				for (k = 0; k < a.Vertex[i].e[j].nbh; k++) {
-					add_edge(kedge(kworld_vec[i], kworld_vec[a.Vertex[i].e[j].tv], a.Vertex[i].e[j].bh[k]));
+					edges.insert(kstore::get_instance().add_edge(kedge(kworld_vec[i], kworld_vec[a.Vertex[i].e[j].tv], a.Vertex[i].e[j].bh[k])));
 				}
 			}
 		}
 	}
-	//To Adjust
-	pointed = kworld_vec[0];
 
 	set_worlds(worlds);
 	set_edges(edges);
-	set_pointed(pointed);
 }
 
 void kstate::calc_min_bisimilar()
