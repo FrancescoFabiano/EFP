@@ -177,7 +177,8 @@ $(BUILD_DIR)/kstate.o: $(S_KRIPE_DIR)/kstate.cpp $(S_KRIPE_DIR)/kstate.h \
 					   $(ACTION_DIR)/action.h \
 					   $(DOMAIN_DIR)/initially.h \
 					   $(UTILITIES_DIR)/helper.h \
-					   $(UTILITIES_DIR)/define.h
+					   $(UTILITIES_DIR)/define.h \
+					   $(BISIMULATION_DIR)/bisimulation.h
 		$(dir_guard)
 		$(CC) $(CFLAGS) -c $(S_KRIPE_DIR)/kstate.cpp -o $(BUILD_DIR)/kstate.o
 

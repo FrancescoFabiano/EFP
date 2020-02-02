@@ -22,7 +22,7 @@
 #include <cstring>
 
 #include "../../include/domain/domain.h"
-#include "../../include/utilities/define.h"
+//#include "../../include/utilities/define.h"
 #include "../../include/states/kripke/kworld.h"
 
 //STRUCTURE DECLARATION
