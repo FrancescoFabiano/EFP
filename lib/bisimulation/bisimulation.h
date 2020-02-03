@@ -166,9 +166,9 @@ private:
     BIS_indexType freeQBlock, QBlockLimit;
     BIS_indexType freeXBlock;
 
-    struct graph G[BIS_MAXINDEX];
-    struct qPartition Q[BIS_MAXINDEX];
-    struct xPartition X[BIS_MAXINDEX];
+    struct graph* G;
+    struct qPartition* Q;
+    struct xPartition* X;
 
 
     BIS_indexType B1[BIS_MAXINDEX]; //copy of B
@@ -219,5 +219,6 @@ public:
     bool MinimizeAutoma(automa *A);
 
     bisimulation(const std::map<kworld_ptr, int> & index_map, const std::vector<kworld_ptr> & kworld_vec, const std::map<int, int> & compact_indices);
+    //bisimulation();
 
 };

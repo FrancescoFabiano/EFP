@@ -1,6 +1,5 @@
 #include "bisimulation.h"
 
-
 void bisimulation::FillStructures(automa *A)
 {
 	/*
@@ -31,6 +30,7 @@ void bisimulation::FillStructures(automa *A)
 	// l'elemento di indice "A->Nbehavs" non avra' alcun elemento successivo.
 	// Il campo "firstBlock" viene qui inizializzato a BIS_NIL, ma verra' riconsiderato e aggiornato
 	// correttamente dalla funzione "setpointers".
+	std::cerr << "\nDEBUG: Started X\n" << std::flush;
 
 	// Inizializzazione del primo e dell'ultimo blocco di X
 	X[0].prevXBlock = BIS_NIL;
@@ -40,21 +40,35 @@ void bisimulation::FillStructures(automa *A)
 	X[A->Nbehavs - 1].nextXBlock = BIS_NIL;
 	X[A->Nbehavs - 1].firstBlock = BIS_NIL;
 
+
+
 	// Inizializzazione dei restanti blocchi di X
 	for (i = 1; i < (A->Nbehavs - 1); i++) {
 		X[i].nextXBlock = i + 1;
 		X[i].prevXBlock = i - 1;
 		X[i].firstBlock = BIS_NIL;
 	};
+	std::cerr << "\nDEBUG: Done X\n" << std::flush;
 
 	// Questa funzione si occupa effettivamente della conversione del grafo "A", con i soli
 	// archi etichettati, in uno con i soli stati etichettati. Inoltre assegna ad ogni stato
 	// l'elemento di X che rappresenta la sua etichetta (per i dettagli si vedano le spiegazioni
 	// delle funzioni "createG" e "setpointers")
+
+	std::cerr << "\nDEBUG: Create G\n" << std::flush;
+
 	CreateG(A->Nvertex, A->Vertex);
 
+	std::cerr << "\nDEBUG: Create G Done\n" << std::flush;
+
 	// Gestione dei puntatori tra le strutture dati G ed X
+
+	std::cerr << "\nDEBUG: Pointers\n" << std::flush;
+
 	SetPointers(A->Nbehavs);
+
+	std::cerr << "\nDEBUG: Pointers Done\n" << std::flush;
+
 
 	// Procedura che inizializza i restanti campi di G (quelli non inizializzati dalle precedenti
 	// funzioni) e quelli di Q
@@ -105,11 +119,28 @@ void bisimulation::CreateG(int num_v, v_elem *Gtemp)
 	// 0, ovvero all'elemento dell'array X di indice 0.
 	int n_id, n_agents = domain::get_instance().get_agents().size();
 
-	for (v = 0; v < num_v; v++) {
-		n_id = m_kworld_vec[v].get_numerical_id();
-		G[v].block = m_compact_indices[n_id];
-		G[v].label = n_id + n_agents;					// We reserve the values from 0 to n-1 to the labels of agents nodes
+
+	std::cerr << "\nDEBUG: For\n" << std::flush;
+
+	std::vector<kworld_ptr>::const_iterator it_kwp;
+	int temp_counter = 0;
+	for (it_kwp = m_kworld_vec.begin(); it_kwp != m_kworld_vec.end(); it_kwp++) {
+		std::cerr << "DEBUG: World " << temp_counter << " has ID: " << it_kwp->get_numerical_id() << std::endl;
+		temp_counter++;
 	}
+
+
+	for (v = 0; v < num_v; v++) {
+				n_id = m_kworld_vec[v].get_numerical_id();
+				G[v].block = m_compact_indices[n_id];
+				G[v].label = n_id + n_agents; // We reserve the values from 0 to n-1 to the labels of agents nodes
+
+
+//		n_id = 0;
+//		G[v].block = m_compact_indices[n_id];
+//		G[v].label = n_id + n_agents; // We reserve the values from 0 to n-1 to the labels of agents nodes
+	}
+	std::cerr << "\nDEBUG: For Done\n" << std::flush;
 
 	// La variabile "numberOfNodes" e' globale e indica il numero totale di stati del grafo su
 	// cui verranno eseguiti gli algorimi di PaigeTarjan e FastBisimulation. A questo punto sono
@@ -154,7 +185,7 @@ void bisimulation::CreateG(int num_v, v_elem *Gtemp)
 			// Creo gli stati dal secondo in poi nella catena delle etichette. Questo ciclo viene
 			// eseguito solamente nel caso in cui l'arco che stiamo considerando possegga piu' di
 			// una etichetta
-			for (b = 1; b < Gtemp[v].e[e].nbh; b++) {			// **************************** TODO: CHECK IF LABELS AND BLOCKS ARE CORRECT!! ****************************
+			for (b = 1; b < Gtemp[v].e[e].nbh; b++) { // **************************** TODO: CHECK IF LABELS AND BLOCKS ARE CORRECT!! ****************************
 				// Creo un nuovo stato
 				G[numberOfNodes].block = Gtemp[v].e[e].bh[b];
 				G[numberOfNodes].label = Gtemp[v].e[e].bh[b];
@@ -213,7 +244,7 @@ void bisimulation::SetPointers(int n)
 			X[x].firstBlock = i;
 			G[i].prevInBlock = BIS_NIL;
 			G[i].nextInBlock = BIS_NIL;
-		}			// Se invece tale blocco "x" ha gia' un rappresentante, lego lo stato i, attraverso i puntatori
+		}// Se invece tale blocco "x" ha gia' un rappresentante, lego lo stato i, attraverso i puntatori
 			// "prevInBlock" e "nextInBlock" all'ultimo elemento che ho trovato con uguale etichetta.
 			// L'array "curr_node" viene appunto usato per tenere traccia di quale sia l'ultimo stato che
 			// ho trovato, per ogni etichetta (curr_node ha dimensione pari al numero totale di etichette)
@@ -294,7 +325,7 @@ void bisimulation::MarkDeletedNodes()
 		if (Q[q].size == BIS_NOTUSED) {
 			Q[q].size = BIS_USED;
 			Q[q].firstNode = i;
-		}			// Altrimenti indico che tale stato dev'essere cancellato, in quanto bisimile allo stato
+		}// Altrimenti indico che tale stato dev'essere cancellato, in quanto bisimile allo stato
 			// rappresentante del blocco cui esso appartiene. Utilizzo il campo "nextInBlock" in quanto
 			// non sara' piu' utilizzato da alcuna funzione
 		else
@@ -801,11 +832,24 @@ void bisimulation::PaigeTarjan()
 
 bool bisimulation::MinimizeAutoma(automa *A)
 {
+	std::cerr << "\nDEBUG: IN MINIMIZE\n" << std::flush;
+
 	FillStructures(A);
+	std::cerr << "\nDEBUG: Filled structures\n" << std::flush;
+
 	Inverse();
 
+	std::cerr << "\nDEBUG: Inverse done\n" << std::flush;
+
+
 	if (InitPaigeTarjan() == 0) {
+		std::cerr << "\nDEBUG: Init done\n" << std::flush;
+
 		PaigeTarjan();
+
+		std::cerr << "\nDEBUG: PaigeTarjan done\n" << std::flush;
+
+
 		/*CHECK BECAUSE THEY DON'T CONSIDER NODES WITH LABELS*/
 		GetMinimizedAutoma(A);
 		return true;
@@ -814,10 +858,31 @@ bool bisimulation::MinimizeAutoma(automa *A)
 	return false;
 
 }
+//
 
 bisimulation::bisimulation(const std::map<kworld_ptr, int> & index_map, const std::vector<kworld_ptr> & kworld_vec, const std::map<int, int> & compact_indices)
 {
+
+	G = (graph *) malloc(sizeof(graph) * BIS_MAXINDEX);
+	Q = (qPartition *) malloc(sizeof(qPartition) * BIS_MAXINDEX);
+	X = (xPartition *) malloc(sizeof(xPartition) * BIS_MAXINDEX);
+
 	m_index_map = index_map;
 	m_kworld_vec = kworld_vec;
 	m_compact_indices = compact_indices;
+
+std::vector<kworld_ptr>::const_iterator it_kwp;
+	int temp_counter = 0;
+	for (it_kwp = m_kworld_vec.begin(); it_kwp != m_kworld_vec.end(); it_kwp++) {
+		std::cerr << "DEBUG: World " << temp_counter << " has ID: " << it_kwp->get_numerical_id() << std::endl;
+		temp_counter++;
+	}
 }
+
+//
+//bisimulation::bisimulation(){
+//        struct graph G[BIS_MAXINDEX];
+//        struct qPartition Q[BIS_MAXINDEX];
+//        struct xPartition X[BIS_MAXINDEX];
+//	
+//}

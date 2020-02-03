@@ -430,7 +430,7 @@ const automa kstate::kstate_to_automaton(std::map<kworld_ptr, int> & index_map, 
 	// The pointed world is set to the index 0. This ensures that, when deleting the bisimilar nodes, the pointed kworld
 	// is always chosen as the first of its block. Therefore, we do not need to update it when converting back to a kstate
 	index_map[get_pointed()] = 0;
-	kworld_vec[0] = get_pointed();
+	kworld_vec.push_back(get_pointed());
 	compact_indices[0] = 0;
 
 	Vertex[0].ne = edge_counter[get_pointed()];
@@ -441,10 +441,12 @@ const automa kstate::kstate_to_automaton(std::map<kworld_ptr, int> & index_map, 
 	//std::cerr << "\nDEBUG: Inizializzazione Vertex\n";
 
 
-	for (it_kwps = get_worlds().begin(); it_kwps != get_worlds().end(); it_kwps++) {
+	for (it_kwps = m_worlds.begin(); it_kwps != m_worlds.end(); it_kwps++) {
 		if (!(*it_kwps == get_pointed())) {
+				std::cerr << "\nDEBUG: World\n";
+
 			index_map[*it_kwps] = i;
-			kworld_vec[i] = *it_kwps;
+			kworld_vec.push_back(*it_kwps);
 
 			if (compact_indices.insert({it_kwps->get_numerical_id(), c}).second) {
 				c++;
@@ -499,6 +501,13 @@ const automa kstate::kstate_to_automaton(std::map<kworld_ptr, int> & index_map, 
 
 	//std::cerr << "\nDEBUG: Fine Inizializzazione Mappa\n";
 
+		std::vector<kworld_ptr>::const_iterator it_kwp;
+	int temp_counter = 0;
+	for (it_kwp = kworld_vec.begin(); it_kwp != kworld_vec.end(); it_kwp++) {
+		std::cerr << "DEBUG: World " << temp_counter << " has ID: " << it_kwp->get_numerical_id() << std::endl;
+		temp_counter++;
+	}
+	
 	// Building the automaton
 	a = (automa *) malloc(sizeof(automa));
 	a->Nvertex = Nvertex;
@@ -554,15 +563,19 @@ void kstate::calc_min_bisimilar()
 	std::cerr << "\nDEBUG: POST-CREAZIONE AUTOMA\n";
 
 	/*\***********ERROR IN BISIMULATION************/
-
+	
 	bisimulation b(index_map, kworld_vec, compact_indices);
+	//bisimulation b;
+
 	std::cerr << "\nDEBUG: CREATO OGGETTO BISIMULATION\n" << std::flush;
 
 
-	/*	if (b.MinimizeAutoma(&a)) {
-	 *		automaton_to_kstate(a, kworld_vec);
-	 *		b.DisposeAutoma(&a);
-	 *	}*/
+	if (b.MinimizeAutoma(&a)) {
+			std::cerr << "\nDEBUG: IN MINIMIZE\n" << std::flush;
+
+		//automaton_to_kstate(a, kworld_vec);
+		b.DisposeAutoma(&a);
+	}
 }
 
 void kstate::add_world(const kworld & world)
