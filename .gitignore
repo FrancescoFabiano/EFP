@@ -38,6 +38,8 @@ bin/
 EFP_ICAPS_old/nbproject/
 nbproject/
 readme_old
+.vscode/
+compile_commands.json
 
 # Doxygen
 Doxygen/Docs/
