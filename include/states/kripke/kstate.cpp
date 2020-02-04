@@ -424,7 +424,10 @@ const automa kstate::kstate_to_automaton(std::map<kworld_ptr, int> & index_map, 
 	// Building a temporary adjacency list and calculating the number of outgoing edges for each kworld
 	for (it_keps = m_edges.begin(); it_keps != m_edges.end(); it_keps++) {
 		adj_list[it_keps->get_from()][it_keps->get_to()].insert(it_keps->get_label());
-		edge_counter[it_keps->get_from()]++;
+		//DEBUG:Change this
+		//edge_counter[it_keps->get_from()]++;
+		edge_counter[it_keps->get_from()] = 2;
+
 	}
 
 	// The pointed world is set to the index 0. This ensures that, when deleting the bisimilar nodes, the pointed kworld
@@ -443,8 +446,6 @@ const automa kstate::kstate_to_automaton(std::map<kworld_ptr, int> & index_map, 
 
 	for (it_kwps = m_worlds.begin(); it_kwps != m_worlds.end(); it_kwps++) {
 		if (!(*it_kwps == get_pointed())) {
-				std::cerr << "\nDEBUG: World\n";
-
 			index_map[*it_kwps] = i;
 			kworld_vec.push_back(*it_kwps);
 
@@ -490,7 +491,7 @@ const automa kstate::kstate_to_automaton(std::map<kworld_ptr, int> & index_map, 
 			j++; // Update the value of the index j
 
 
-			//std::cerr << "\nDEBUG: 3\n";
+			//std::cerr << "\nDEBUG J: " << j-1 << "\n";
 
 			k = 0; // Reset k
 		}
@@ -501,13 +502,13 @@ const automa kstate::kstate_to_automaton(std::map<kworld_ptr, int> & index_map, 
 
 	//std::cerr << "\nDEBUG: Fine Inizializzazione Mappa\n";
 
-		std::vector<kworld_ptr>::const_iterator it_kwp;
-	int temp_counter = 0;
-	for (it_kwp = kworld_vec.begin(); it_kwp != kworld_vec.end(); it_kwp++) {
-		std::cerr << "DEBUG: World " << temp_counter << " has ID: " << it_kwp->get_numerical_id() << std::endl;
-		temp_counter++;
-	}
-	
+	//		std::vector<kworld_ptr>::const_iterator it_kwp;
+	//	int temp_counter = 0;
+	//	for (it_kwp = kworld_vec.begin(); it_kwp != kworld_vec.end(); it_kwp++) {
+	//		//std::cerr << "DEBUG: World " << temp_counter << " has ID: " << it_kwp->get_numerical_id() << std::endl;
+	//		temp_counter++;
+	//	}
+	//	
 	// Building the automaton
 	a = (automa *) malloc(sizeof(automa));
 	a->Nvertex = Nvertex;
@@ -546,35 +547,35 @@ void kstate::automaton_to_kstate(automa & a, std::vector<kworld_ptr> & kworld_ve
 void kstate::calc_min_bisimilar()
 {
 	//kstate ret;
-	std::cerr << "\nDEBUG: INIZIO BISIMULATION IN KSTATE\n" << std::flush;
+	//std::cerr << "\nDEBUG: INIZIO BISIMULATION IN KSTATE\n" << std::flush;
 
 	std::map<kworld_ptr, int> index_map; // From kworld to int
 	std::vector<kworld_ptr> kworld_vec; // Vector of all kworld_ptr
 	std::map<int, int> compact_indices;
 	//kworld_ptr_set::const_iterator it_kwps;
-	std::cerr << "\nDEBUG: PRE-ALLOCAZIONE AUTOMA\n" << std::flush;
+	//std::cerr << "\nDEBUG: PRE-ALLOCAZIONE AUTOMA\n" << std::flush;
 
 	automa a;
 
 	kworld_vec.reserve(get_worlds().size());
 
-	std::cout << "\nDEBUG: PRE-CREAZIONE AUTOMA\n" << std::flush;
+	//std::cerr << "\nDEBUG: PRE-CREAZIONE AUTOMA\n" << std::flush;
 	a = kstate_to_automaton(index_map, kworld_vec, compact_indices);
-	std::cerr << "\nDEBUG: POST-CREAZIONE AUTOMA\n";
+	//std::cerr << "\nDEBUG: POST-CREAZIONE AUTOMA\n";
 
 	/*\***********ERROR IN BISIMULATION************/
-	
+
 	bisimulation b(index_map, kworld_vec, compact_indices);
 	//bisimulation b;
 
-	std::cerr << "\nDEBUG: CREATO OGGETTO BISIMULATION\n" << std::flush;
+	//std::cerr << "\nDEBUG: CREATO OGGETTO BISIMULATION\n" << std::flush;
 
-
+	std::cerr << "\nDEBUG: IN MINIMIZE\n" << std::flush;
 	if (b.MinimizeAutoma(&a)) {
-			std::cerr << "\nDEBUG: IN MINIMIZE\n" << std::flush;
+	std::cerr << "\nDEBUG: MINIMIZE DONE\n" << std::flush;
 
 		//automaton_to_kstate(a, kworld_vec);
-		b.DisposeAutoma(&a);
+		//b.DisposeAutoma(&a);
 	}
 }
 

@@ -181,9 +181,9 @@ state<T> state<T>::compute_succ(const action & act) const
 template <class T>
 void state<T>::calc_min_bisimilar()
 {
-	std::cerr << "\nDEBUG: ENTRATO IN STATE<T> BISIMULATION\n";
+	//std::cerr << "\nDEBUG: ENTRATO IN STATE<T> BISIMULATION\n";
 	m_representation.calc_min_bisimilar();
-	std::cerr << "\nDEBUG: FINE STATE<T> BISIMULATION\n";
+	//std::cerr << "\nDEBUG: FINE STATE<T> BISIMULATION\n";
 
 }
 
