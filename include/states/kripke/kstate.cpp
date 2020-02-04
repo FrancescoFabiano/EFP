@@ -425,8 +425,8 @@ const automa kstate::kstate_to_automaton(std::map<kworld_ptr, int> & index_map, 
 	for (it_keps = m_edges.begin(); it_keps != m_edges.end(); it_keps++) {
 		adj_list[it_keps->get_from()][it_keps->get_to()].insert(it_keps->get_label());
 		//DEBUG:Change this
-		//edge_counter[it_keps->get_from()]++;
-		edge_counter[it_keps->get_from()] = 2;
+		edge_counter[it_keps->get_from()]++;
+		//edge_counter[it_keps->get_from()] = 2;
 
 	}
 
@@ -439,6 +439,7 @@ const automa kstate::kstate_to_automaton(std::map<kworld_ptr, int> & index_map, 
 	Vertex[0].ne = edge_counter[get_pointed()];
 	Vertex[0].e = (e_elem *) malloc(sizeof(e_elem) * Vertex[0].ne);
 
+	//int i = 1, c = 1;
 	int i = 1, c = 1;
 
 	//std::cerr << "\nDEBUG: Inizializzazione Vertex\n";
@@ -570,11 +571,11 @@ void kstate::calc_min_bisimilar()
 
 	//std::cerr << "\nDEBUG: CREATO OGGETTO BISIMULATION\n" << std::flush;
 
-	std::cerr << "\nDEBUG: IN MINIMIZE\n" << std::flush;
+	//std::cerr << "\nDEBUG: IN MINIMIZE\n" << std::flush;
 	if (b.MinimizeAutoma(&a)) {
-	std::cerr << "\nDEBUG: MINIMIZE DONE\n" << std::flush;
+	//std::cerr << "\nDEBUG: MINIMIZE DONE\n" << std::flush;
 
-		//automaton_to_kstate(a, kworld_vec);
+		automaton_to_kstate(a, kworld_vec);
 		//b.DisposeAutoma(&a);
 	}
 }

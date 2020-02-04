@@ -132,9 +132,9 @@ void bisimulation::CreateG(int num_v, v_elem *Gtemp)
 
 	for (v = 0; v < num_v; v++) {
 		n_id = m_kworld_vec[v].get_numerical_id();
-		G[v].block = m_compact_indices[n_id];
-		G[v].label = n_id + n_agents; // We reserve the values from 0 to n-1 to the labels of agents nodes
-
+		G[v].block = m_compact_indices[n_id] + n_agents;
+		G[v].label = G[v].block; // We reserve the values from 0 to n-1 to the labels of agents nodes
+				//std::cerr << "\nDEBUG:label " << G[v].block << std::endl; 
 
 		//		n_id = 0;
 		//		G[v].block = m_compact_indices[n_id];
@@ -195,6 +195,8 @@ void bisimulation::CreateG(int num_v, v_elem *Gtemp)
 			G[numberOfNodes].block = Gtemp[v].e[e].bh[0];
 			//std::cerr << "\n1" << std::endl;
 			G[numberOfNodes].label = Gtemp[v].e[e].bh[0];
+					//std::cerr << "\nDEBUG:label " << G[numberOfNodes].label << std::endl; 
+
 			//std::cerr << "\n2" << std::endl;
 
 			numberOfNodes++;
@@ -217,6 +219,8 @@ void bisimulation::CreateG(int num_v, v_elem *Gtemp)
 				// Creo un nuovo stato
 				G[numberOfNodes].block = Gtemp[v].e[e].bh[b];
 				G[numberOfNodes].label = Gtemp[v].e[e].bh[b];
+						//DEBUG
+		//std::cerr << "\nDEBUG:label " << G[numberOfNodes].label << std::endl; 
 
 				// Aggiorno la lista di adiacenza dello stato precedentemente creato, ovvero aggiungo
 				// un arco dal penultimo stato che abbiamo creato a quello appena creato
@@ -241,6 +245,7 @@ void bisimulation::CreateG(int num_v, v_elem *Gtemp)
 			e++;
 
 		}
+		Gtemp[v].ne = e;
 
 		//std::cerr << "\nDEBUG: Adj For Internal Done\n" << std::flush;
 
@@ -453,6 +458,9 @@ int bisimulation::InitPaigeTarjan()
 			end = l;
 		Q[l].prevBlock = X[l].prevXBlock;
 		Q[l].nextBlock = X[l].nextXBlock;
+//		if (Q[l].nextBlock == -1){
+//			std::cerr << "\n\nDEBUG: E' COLPA MIA\n\n";
+//		}
 		Q[l].firstNode = X[l].firstBlock;
 		Q[l].superBlock = 0;
 		//compute Q[].size
@@ -496,6 +504,9 @@ int bisimulation::InitPaigeTarjan()
 		B_1[i] = numberOfNodes;
 		splitD[i] = numberOfNodes;
 	}
+	
+	//std::cerr << "\nDEBUG: N of Nodes" << numberOfNodes << std::endl;
+	
 	Q[numberOfNodes - 1].nextBlock = BIS_NIL;
 	X[numberOfNodes - 1].nextXBlock = BIS_NIL;
 
@@ -537,6 +548,34 @@ void bisimulation::PaigeTarjan()
 	//std::cerr << "\nDEBUG: WHILE START\n" << std::flush;
 
 
+	//DEBUG
+	std::cerr << "\nDEBUG:Printing Q\n";
+	//for (int i = 0; i < Q->size; i++) {
+	int i = 0;
+	while(Q[i].nextBlock != BIS_NIL){
+		std::cerr << "\n\tQ[" << i << "]:";
+		std::cerr << "\n\t\tFirst Node:" << Q[i].firstNode;
+		std::cerr << "\n\t\tNext Block:" << Q[i].nextBlock;
+		std::cerr << "\n\t\tSize:" << Q[i].size;
+		std::cerr << "\n\t\tSuperblock: " << Q[i].superBlock;
+		i++;
+	}
+	std::cerr << "\nDone Q\n";
+	
+//		std::cerr << "\nDEBUG:Printing X\n";
+//	i = 0;
+//	while(X[i].nextXBlock != BIS_NIL){
+//		std::cerr << "\n\tX[" << i << "]:";
+//		std::cerr << "\n\t\tFirst Node:" << X[i].firstBlock;
+//		std::cerr << "\n\t\tNext Block:" << X[i].nextXBlock;
+//		//std::cerr << "\n\t\tSize:" << X[i].size;
+//		//std::cerr << "\n\t\tSuperblock: " << X[i].superBlock;
+//		i++;
+//	}
+//	std::cerr << "\nDone X\n";
+
+	
+
 	while (C != BIS_NIL) {
 		//std::cerr << "\nDEBUG: INI\n" << std::flush;
 
@@ -552,9 +591,22 @@ void bisimulation::PaigeTarjan()
 		/*examine the first two blocks in the of blocks of Q contained in S;
 		let B be the smaller, remove B from S*/
 		//std::cerr << "First Block Size: " << Q[X[S].firstBlock].size << std::endl;
+		
+		
+		std::cerr << "\n\n\n\nDEBUG:\n";
+		std::cerr << "\tS: " << S << std::endl;
+		//std::cerr << "\tX[S]: " << X[S] << std::endl;
+		std::cerr << "\tX[S].firstBlock: " << X[S].firstBlock << std::endl;
+		//std::cerr << "\tQ[X[S].firstBlock]: " << Q[X[S].firstBlock] << std::endl;
+		std::cerr << "\tQ[X[S].firstBlock].nextBlock: " << Q[X[S].firstBlock].nextBlock << std::endl;
+		std::cerr << "\tQ[Q[X[S].firstBlock].nextBlock].firstNode " << Q[Q[X[S].firstBlock].nextBlock].firstNode << std::endl;
+		std::cerr << "\nDEBUG:\n\n\n";
+
+
+		
+		
 		std::cerr << "\nAccessing the blocks : " << Q[X[S].firstBlock].firstNode << " and " << Q[Q[X[S].firstBlock].nextBlock].firstNode << std::endl;
 		//std::cerr << "Error in accessing next block of: " << Q[Q[X[S].firstBlock].nextBlock].size << std::endl;
-
 		if (Q[X[S].firstBlock].size < Q[Q[X[S].firstBlock].nextBlock].size) {
 			//std::cerr << "\nDEBUG: FIRST IF\n" << std::flush;
 
@@ -564,8 +616,7 @@ void bisimulation::PaigeTarjan()
 			Q[B].nextBlock = BIS_NIL;
 			Q[S_B].prevBlock = BIS_NIL;
 
-		}
-		else{
+		} else {
 
 			//std::cerr << "\nDEBUG: FIRST ELSE\n" << std::flush;
 
