@@ -1818,24 +1818,27 @@ fluent_formula kstate::get_effects_if_entailed(const effects_map & map, const kw
 
 void kstate::DEBUG_add_extra_world()
 {
-
-	kworld extra(m_worlds.begin()->get_fluent_set());
-	unsigned short depth = m_worlds.begin()->get_repetition()+4;
+	
+	kworld_ptr tmp_ptr = *m_worlds.begin();
+	kworld extra(tmp_ptr.get_fluent_set());
+	unsigned short depth = tmp_ptr.get_repetition()+4;
 	//std::cout << "\n\nDEBUG: Depth: " << depth << "\n\n";
-	add_rep_world(extra,depth);
+	kworld_ptr extra_ptr = add_rep_world(extra,depth);
 	set_max_depth(get_max_depth() + depth);
 
+	
+	
 
 	kedge_ptr_set::const_iterator it_kep;
 	for (it_kep = m_edges.begin(); it_kep != m_edges.end(); it_kep++) {
-		if (it_kep->get_from() == *m_worlds.begin() && !(it_kep->get_to() == *m_worlds.begin())) {
-			kedge extra_ed(extra, it_kep->get_to(), it_kep->get_label());
+		if (it_kep->get_from() == tmp_ptr && !(it_kep->get_to() == tmp_ptr)) {
+			kedge extra_ed(extra_ptr, it_kep->get_to(), it_kep->get_label());
 			add_edge(extra_ed);
-		} else if (it_kep->get_to() == *m_worlds.begin() && !(it_kep->get_from() == *m_worlds.begin())) {
-			kedge extra_ed(it_kep->get_from(), extra, it_kep->get_label());
+		} else if (it_kep->get_to() == tmp_ptr && !(it_kep->get_from() == tmp_ptr)) {
+			kedge extra_ed(it_kep->get_from(), extra_ptr, it_kep->get_label());
 			add_edge(extra_ed);
-		} else if (it_kep->get_to() == *m_worlds.begin() && it_kep->get_from() == *m_worlds.begin()) {
-			kedge extra_ed(extra, extra, it_kep->get_label());
+		} else if (it_kep->get_to() == tmp_ptr && it_kep->get_from() == tmp_ptr) {
+			kedge extra_ed(extra_ptr, extra_ptr, it_kep->get_label());
 			add_edge(extra_ed);
 		}
 	}
