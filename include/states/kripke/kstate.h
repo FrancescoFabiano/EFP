@@ -643,6 +643,8 @@ public:
      * @param[in] factor2: the set to remove from \p to_modify.*/
     template <class T>
     void minus_set(std::set<T> & to_modify, const std::set<T> & factor2) const;
+
+    void DEBUG_add_extra_world();
 };
 
 typedef std::vector<kstate> kstate_set; /**< \brief A set of \ref kstate.*/

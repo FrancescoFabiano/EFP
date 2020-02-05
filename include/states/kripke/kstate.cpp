@@ -547,37 +547,40 @@ void kstate::automaton_to_kstate(automa & a, std::vector<kworld_ptr> & kworld_ve
 
 void kstate::calc_min_bisimilar()
 {
+	
+	DEBUG_add_extra_world();
+	
 	//kstate ret;
 	//std::cerr << "\nDEBUG: INIZIO BISIMULATION IN KSTATE\n" << std::flush;
-
-	std::map<kworld_ptr, int> index_map; // From kworld to int
-	std::vector<kworld_ptr> kworld_vec; // Vector of all kworld_ptr
-	std::map<int, int> compact_indices;
-	//kworld_ptr_set::const_iterator it_kwps;
-	//std::cerr << "\nDEBUG: PRE-ALLOCAZIONE AUTOMA\n" << std::flush;
-
-	automa a;
-
-	kworld_vec.reserve(get_worlds().size());
-
-	//std::cerr << "\nDEBUG: PRE-CREAZIONE AUTOMA\n" << std::flush;
-	a = kstate_to_automaton(index_map, kworld_vec, compact_indices);
-	//std::cerr << "\nDEBUG: POST-CREAZIONE AUTOMA\n";
-
-	/*\***********ERROR IN BISIMULATION************/
-
-	bisimulation b(index_map, kworld_vec, compact_indices);
-	//bisimulation b;
-
-	//std::cerr << "\nDEBUG: CREATO OGGETTO BISIMULATION\n" << std::flush;
-
-	//std::cerr << "\nDEBUG: IN MINIMIZE\n" << std::flush;
-	if (b.MinimizeAutoma(&a)) {
-	//std::cerr << "\nDEBUG: MINIMIZE DONE\n" << std::flush;
-
-		automaton_to_kstate(a, kworld_vec);
-		//b.DisposeAutoma(&a);
-	}
+//
+//	std::map<kworld_ptr, int> index_map; // From kworld to int
+//	std::vector<kworld_ptr> kworld_vec; // Vector of all kworld_ptr
+//	std::map<int, int> compact_indices;
+//	//kworld_ptr_set::const_iterator it_kwps;
+//	//std::cerr << "\nDEBUG: PRE-ALLOCAZIONE AUTOMA\n" << std::flush;
+//
+//	automa a;
+//
+//	kworld_vec.reserve(get_worlds().size());
+//
+//	//std::cerr << "\nDEBUG: PRE-CREAZIONE AUTOMA\n" << std::flush;
+//	a = kstate_to_automaton(index_map, kworld_vec, compact_indices);
+//	//std::cerr << "\nDEBUG: POST-CREAZIONE AUTOMA\n";
+//
+//	/*\***********ERROR IN BISIMULATION************/
+//
+//	bisimulation b(index_map, kworld_vec, compact_indices);
+//	//bisimulation b;
+//
+//	//std::cerr << "\nDEBUG: CREATO OGGETTO BISIMULATION\n" << std::flush;
+//
+//	//std::cerr << "\nDEBUG: IN MINIMIZE\n" << std::flush;
+//	if (b.MinimizeAutoma(&a)) {
+//		//std::cerr << "\nDEBUG: MINIMIZE DONE\n" << std::flush;
+//
+//		automaton_to_kstate(a, kworld_vec);
+//		//b.DisposeAutoma(&a);
+//	}
 }
 
 void kstate::add_world(const kworld & world)
@@ -1811,3 +1814,30 @@ fluent_formula kstate::get_effects_if_entailed(const effects_map & map, const kw
 	}
 	return ret;
 }*/
+
+
+void kstate::DEBUG_add_extra_world()
+{
+
+	kworld extra(m_worlds.begin()->get_fluent_set());
+	unsigned short depth = m_worlds.begin()->get_repetition()+4;
+	//std::cout << "\n\nDEBUG: Depth: " << depth << "\n\n";
+	add_rep_world(extra,depth);
+	set_max_depth(get_max_depth() + depth);
+
+
+	kedge_ptr_set::const_iterator it_kep;
+	for (it_kep = m_edges.begin(); it_kep != m_edges.end(); it_kep++) {
+		if (it_kep->get_from() == *m_worlds.begin() && !(it_kep->get_to() == *m_worlds.begin())) {
+			kedge extra_ed(extra, it_kep->get_to(), it_kep->get_label());
+			add_edge(extra_ed);
+		} else if (it_kep->get_to() == *m_worlds.begin() && !(it_kep->get_from() == *m_worlds.begin())) {
+			kedge extra_ed(it_kep->get_from(), extra, it_kep->get_label());
+			add_edge(extra_ed);
+		} else if (it_kep->get_to() == *m_worlds.begin() && it_kep->get_from() == *m_worlds.begin()) {
+			kedge extra_ed(extra, extra, it_kep->get_label());
+			add_edge(extra_ed);
+		}
+	}
+
+}
