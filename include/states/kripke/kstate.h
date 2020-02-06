@@ -215,21 +215,34 @@ private:
      * @return a set of pointers to all the D_reachable worlds.*/
     const kworld_ptr_set get_D_reachable_worlds(const agent_set & ags, kworld_ptr world) const;
 
+    /** Function that calculates all the reachable \ref kworld.
+     * 
+     * @param[in] kw: the current \ref kworld.
+     * @param[in] reached_worlds: the set of all the reached \ref kworld.
+     * @param[in] adj_list: the adjacency list of thr \ref kstate.*/
+    void get_all_reachable_worlds(const kworld_ptr & kw, kworld_ptr_set & reached_worlds, std::map<kworld_ptr, kworld_ptr_set> & adj_list) const;
+    /** Function that cleares all the unreachable \ref kworld of *this*.*/
+    void clean_unreachable_kworlds();
+
     /** \brief Function that transforms *this* into an equivalent automaton.
      * 
      * @param[in] index_map: a map that associates a unique id to each \ref kworld.
      * @param[in] kworld_vec: the vector of all \ref kworld.
+     * @param[in] compact_indices: we associate to the \ref kworld numerical ids a second kind of numerical ids. These new ids are consecutive numbers (hence, they are compact).
      * 
-     * @return the automaton.*/
+     * @return the automaton equivalent to *this*.*/
     const automa kstate_to_automaton(std::map<kworld_ptr, int> & index_map, std::vector<kworld_ptr> & kworld_vec, std::map<int, int> & compact_indices) const;
     /** \brief Function that transforms the given automaton into an equivalent \ref kstate.
      * 
      * @param[in] a: the automaton to transform.
-     * @param[in] index_map: a map that associates a unique id to each \ref kworld.
+     * @param[in] kworld_vec: the vector of all \ref kworld.
      * 
      * @return the \ref kstate.*/
     void automaton_to_kstate(automa & a, std::vector<kworld_ptr> & kworld_vec);
-
+    /** \brief Function that sets *this* as the mimimum \ref kstate that is bisimilar to the current one.
+     *
+     * The function follows the approach of the algorithm described in Paige and Tarjan (1986).*/
+    void calc_min_bisimilar();
 
     /** \brief Function that builds the initial Kripke structure given the initial conditions in a structural way.
      *
@@ -596,11 +609,6 @@ public:
      * 
      * \todo The action must be executable on *this* otherwise it will return a null_ptr.*/
     kstate compute_succ(const action & act) const;
-
-    /** \brief Function that sets *this* as the mimimum \ref kstate that is bisimilar to the current one.
-     *
-     * The function follows the approach of the algorithm described in Dovier, Piazza, Policriti (2004).*/
-    void calc_min_bisimilar();
 
     /** \brief The copy operator.
      *   
