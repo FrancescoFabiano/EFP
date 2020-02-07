@@ -239,10 +239,7 @@ private:
      * 
      * @return the \ref kstate.*/
     void automaton_to_kstate(automa & a, std::vector<kworld_ptr> & kworld_vec);
-    /** \brief Function that sets *this* as the mimimum \ref kstate that is bisimilar to the current one.
-     *
-     * The function follows the approach of the algorithm described in Paige and Tarjan (1986).*/
-    void calc_min_bisimilar();
+
 
     /** \brief Function that builds the initial Kripke structure given the initial conditions in a structural way.
      *
@@ -609,6 +606,12 @@ public:
      * 
      * \todo The action must be executable on *this* otherwise it will return a null_ptr.*/
     kstate compute_succ(const action & act) const;
+
+
+    /** \brief Function that sets *this* as the mimimum \ref kstate that is bisimilar to the current one.
+     *
+     * The function follows the approach of the algorithm described in Paige and Tarjan (1986).*/
+    void calc_min_bisimilar();
 
     /** \brief The copy operator.
      *   

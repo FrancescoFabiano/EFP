@@ -17,35 +17,35 @@ for repr in "${representations[@]}"; do
 
 
     if [ "$repr" != "OLD" ]; then 
-		timeout $TIMEOUT bin/efp.out $@ -results_file -check_visited -st $repr > findingplan_comparison.tmp
+        timeout $TIMEOUT bin/efp.out $@ -results_file -check_visited -st $repr > findingplan_comparison.tmp
         exit_status=$?;
  
-		if [[ $exit_status -eq 124 ]]; then
-			
-			TOPRINT="EFP Version ";
+	if [[ $exit_status -eq 124 ]]; then
+	
+            TOPRINT="EFP Version ";
 
-			if [ "$repr" = "OLD" ]; then 
-				TOPRINT+="1.0 (on KRIPKE with STRANDARD transition function)"
-			fi;
-			if [ "$repr" = "KRIPKE_OPT" ]; then
-				TOPRINT+="2.0 (on KRIPKE with OPTIMIZED transition function)"
-			fi;
-			if [ "$repr" = "KRIPKE" ]; then
-				TOPRINT+="2.0 (on KRIPKE with STANDARD transition function)"
-			fi;
-			if [ "$repr" = "POSS" ]; then
-				TOPRINT+="2.0 (on POSS with STANDARD transition function)"
-			fi;
+            if [ "$repr" = "OLD" ]; then 
+                TOPRINT+="1.0 (on KRIPKE with STRANDARD transition function)"
+            fi;
+            if [ "$repr" = "KRIPKE_OPT" ]; then
+		TOPRINT+="2.0 (on KRIPKE with OPTIMIZED transition function)"
+            fi;
+            if [ "$repr" = "KRIPKE" ]; then
+		TOPRINT+="2.0 (on KRIPKE with STANDARD transition function)"
+            fi;
+            if [ "$repr" = "POSS" ]; then
+                TOPRINT+="2.0 (on POSS with STANDARD transition function)"
+            fi;
 	   
-			TOPRINT+=" with VISTED-STATE TIMED-OUT"
-			echo -e "$TOPRINT" >> out/EFP_comparison/findingplan/"${@##*/}";
+            TOPRINT+=" with VISTED-STATE TIMED-OUT"
+            echo -e "$TOPRINT" >> out/EFP_comparison/findingplan/"${@##*/}";
 
-		else
+	else
 
-			grep -w "Executed actions:" findingplan_comparison.tmp >> out/EFP_comparison/findingplan/"${@##*/}";
-			grep -w "Plan Length:" findingplan_comparison.tmp  >> out/EFP_comparison/findingplan/"${@##*/}";
+            grep -w "Executed actions:" findingplan_comparison.tmp >> out/EFP_comparison/findingplan/"${@##*/}";
+            grep -w "Plan Length:" findingplan_comparison.tmp  >> out/EFP_comparison/findingplan/"${@##*/}";
+	fi;
 
-		fi;
     fi;    
     sleep 10s;
 

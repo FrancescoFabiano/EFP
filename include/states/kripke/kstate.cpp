@@ -593,7 +593,7 @@ void kstate::calc_min_bisimilar()
 	clean_unreachable_kworlds();
 
 	
-	kstate ret;
+	//kstate ret;
 	// std::cerr << "\nDEBUG: INIZIO BISIMULATION IN KSTATE\n" << std::flush;
 
 	std::map<kworld_ptr, int> index_map; // From kworld to int

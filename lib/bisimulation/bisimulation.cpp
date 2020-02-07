@@ -549,18 +549,18 @@ void bisimulation::PaigeTarjan()
 
 
 	//DEBUG
-	std::cerr << "\nDEBUG:Printing Q\n";
-	//for (int i = 0; i < Q->size; i++) {
-	int i = 0;
-	while(Q[i].nextBlock != BIS_NIL){
-		std::cerr << "\n\tQ[" << i << "]:";
-		std::cerr << "\n\t\tFirst Node:" << Q[i].firstNode;
-		std::cerr << "\n\t\tNext Block:" << Q[i].nextBlock;
-		std::cerr << "\n\t\tSize:" << Q[i].size;
-		std::cerr << "\n\t\tSuperblock: " << Q[i].superBlock;
-		i++;
-	}
-	std::cerr << "\nDone Q\n";
+//	std::cerr << "\nDEBUG:Printing Q\n";
+//	//for (int i = 0; i < Q->size; i++) {
+//	int i = 0;
+//	while(Q[i].nextBlock != BIS_NIL){
+//		std::cerr << "\n\tQ[" << i << "]:";
+//		std::cerr << "\n\t\tFirst Node:" << Q[i].firstNode;
+//		std::cerr << "\n\t\tNext Block:" << Q[i].nextBlock;
+//		std::cerr << "\n\t\tSize:" << Q[i].size;
+//		std::cerr << "\n\t\tSuperblock: " << Q[i].superBlock;
+//		i++;std::cerr
+//	}
+//	std::cerr << "\nDone Q\n";
 	
 //		std::cerr << "\nDEBUG:Printing X\n";
 //	i = 0;
@@ -593,19 +593,19 @@ void bisimulation::PaigeTarjan()
 		//std::cerr << "First Block Size: " << Q[X[S].firstBlock].size << std::endl;
 		
 		
-		std::cerr << "\n\n\n\nDEBUG:\n";
-		std::cerr << "\tS: " << S << std::endl;
-		//std::cerr << "\tX[S]: " << X[S] << std::endl;
-		std::cerr << "\tX[S].firstBlock: " << X[S].firstBlock << std::endl;
-		//std::cerr << "\tQ[X[S].firstBlock]: " << Q[X[S].firstBlock] << std::endl;
-		std::cerr << "\tQ[X[S].firstBlock].nextBlock: " << Q[X[S].firstBlock].nextBlock << std::endl;
-		std::cerr << "\tQ[Q[X[S].firstBlock].nextBlock].firstNode " << Q[Q[X[S].firstBlock].nextBlock].firstNode << std::endl;
-		std::cerr << "\nDEBUG:\n\n\n";
+//		std::cerr << "\n\n\n\nDEBUG:\n";
+//		std::cerr << "\tS: " << S << std::endl;
+//		//std::cerr << "\tX[S]: " << X[S] << std::endl;
+//		std::cerr << "\tX[S].firstBlock: " << X[S].firstBlock << std::endl;
+//		//std::cerr << "\tQ[X[S].firstBlock]: " << Q[X[S].firstBlock] << std::endl;
+//		std::cerr << "\tQ[X[S].firstBlock].nextBlock: " << Q[X[S].firstBlock].nextBlock << std::endl;
+//		std::cerr << "\tQ[Q[X[S].firstBlock].nextBlock].firstNode " << Q[Q[X[S].firstBlock].nextBlock].firstNode << std::endl;
+//		std::cerr << "\nDEBUG:\n\n\n";
 
 
 		
 		
-		std::cerr << "\nAccessing the blocks : " << Q[X[S].firstBlock].firstNode << " and " << Q[Q[X[S].firstBlock].nextBlock].firstNode << std::endl;
+		//std::cerr << "\nAccessing the blocks : " << Q[X[S].firstBlock].firstNode << " and " << Q[Q[X[S].firstBlock].nextBlock].firstNode << std::endl;
 		//std::cerr << "Error in accessing next block of: " << Q[Q[X[S].firstBlock].nextBlock].size << std::endl;
 		if (Q[X[S].firstBlock].size < Q[Q[X[S].firstBlock].nextBlock].size) {
 			//std::cerr << "\nDEBUG: FIRST IF\n" << std::flush;
@@ -628,7 +628,7 @@ void bisimulation::PaigeTarjan()
 			Q[B].nextBlock = BIS_NIL;
 			Q[B].prevBlock = BIS_NIL;
 		}
-		std::cerr << "Accessed the blocks" << std::endl;
+		//std::cerr << "Accessed the blocks" << std::endl;
 
 		//std::cerr << "\nDEBUG: FIRST IF ELSE DONE\n" << std::flush;
 

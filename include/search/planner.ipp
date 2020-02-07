@@ -71,6 +71,8 @@ bool planner<T>::search_BFS(bool results_file)
 
 	auto start_timing = std::chrono::system_clock::now();
 	initial.build_initial();
+	if (domain::get_instance().get_bisimulation()) initial.calc_min_bisimilar();
+
 	auto end_timing = std::chrono::system_clock::now();
 	std::chrono::duration<double> elapsed_seconds = end_timing - start_timing;
 
@@ -101,6 +103,8 @@ bool planner<T>::search_BFS(bool results_file)
 			if (popped_state.is_executable(tmp_action)) {
 				tmp_state = popped_state.compute_succ(tmp_action);
 				//tmp_state.print();
+				if (domain::get_instance().get_bisimulation()) tmp_state.calc_min_bisimilar();
+
 				if (tmp_state.is_goal()) {
 					end_timing = std::chrono::system_clock::now();
 					elapsed_seconds = end_timing - start_timing;
@@ -127,6 +131,7 @@ bool planner<T>::search_heur(bool results_file, heuristics used_heur)
 
 	auto start_timing = std::chrono::system_clock::now();
 	initial.build_initial();
+	if (domain::get_instance().get_bisimulation()) initial.calc_min_bisimilar();
 	auto end_timing = std::chrono::system_clock::now();
 	std::chrono::duration<double> elapsed_seconds = end_timing - start_timing;
 
@@ -162,6 +167,7 @@ bool planner<T>::search_heur(bool results_file, heuristics used_heur)
 			tmp_action = *it_acset;
 			if (popped_state.is_executable(tmp_action)) {
 				tmp_state = popped_state.compute_succ(tmp_action);
+				if (domain::get_instance().get_bisimulation()) tmp_state.calc_min_bisimilar();
 				if (tmp_state.is_goal()) {
 					end_timing = std::chrono::system_clock::now();
 					elapsed_seconds = end_timing - start_timing;
