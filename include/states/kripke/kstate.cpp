@@ -464,9 +464,15 @@ const automa kstate::kstate_to_automaton(std::map<kworld_ptr, int> & index_map, 
 
 	// Building a temporary adjacency list and calculating the number of outgoing edges for each kworld
 	for (it_keps = m_edges.begin(); it_keps != m_edges.end(); it_keps++) {
-		adj_list[it_keps->get_from()][it_keps->get_to()].insert(it_keps->get_label());
+		
 		//DEBUG:Change this
-		edge_counter[it_keps->get_from()]++;
+		if (adj_list[it_keps->get_from()][it_keps->get_to()].empty())
+		{
+			edge_counter[it_keps->get_from()]++;
+		}
+		
+		adj_list[it_keps->get_from()][it_keps->get_to()].insert(it_keps->get_label());
+		
 		//edge_counter[it_keps->get_from()] = 2;
 
 	}
@@ -594,37 +600,31 @@ void kstate::calc_min_bisimilar()
 	clean_unreachable_kworlds();
 
 	
-	//kstate ret;
-	// std::cerr << "\nDEBUG: INIZIO BISIMULATION IN KSTATE\n" << std::flush;
+	//std::cerr << "\nDEBUG: INIZIO BISIMULATION IN KSTATE\n" << std::flush;
+	 std::map<kworld_ptr, int> index_map; // From kworld to int
+	 std::vector<kworld_ptr> kworld_vec; // Vector of all kworld_ptr
+	 std::map<int, int> compact_indices;
+	//std::cerr << "\nDEBUG: PRE-ALLOCAZIONE AUTOMA\n" << std::flush;
 
-	// std::map<kworld_ptr, int> index_map; // From kworld to int
-	// std::vector<kworld_ptr> kworld_vec; // Vector of all kworld_ptr
-	// std::map<int, int> compact_indices;
-	// //kworld_ptr_set::const_iterator it_kwps;
-	// // std::cerr << "\nDEBUG: PRE-ALLOCAZIONE AUTOMA\n" << std::flush;
+	automa a;
+	kworld_vec.reserve(get_worlds().size());
 
-	// automa a;
-
-	// kworld_vec.reserve(get_worlds().size());
-
-	// // std::cerr << "\nDEBUG: PRE-CREAZIONE AUTOMA\n" << std::flush;
-	// a = kstate_to_automaton(index_map, kworld_vec, compact_indices);
-	// // std::cerr << "\nDEBUG: POST-CREAZIONE AUTOMA\n";
+	//std::cerr << "\nDEBUG: PRE-CREAZIONE AUTOMA\n" << std::flush;
+	a = kstate_to_automaton(index_map, kworld_vec, compact_indices);
+	//std::cerr << "\nDEBUG: POST-CREAZIONE AUTOMA\n";
 
 	// /*\***********ERROR IN BISIMULATION************/
 
-	// bisimulation b(index_map, kworld_vec, compact_indices);
-	// //bisimulation b;
+	 bisimulation b(index_map, kworld_vec, compact_indices);
 
 	// // std::cerr << "\nDEBUG: CREATO OGGETTO BISIMULATION\n" << std::flush;
 
-	// // std::cerr << "\nDEBUG: IN MINIMIZE\n" << std::flush;
-	// if (b.MinimizeAutoma(&a)) {
-	// 	// std::cerr << "\nDEBUG: MINIMIZE DONE\n" << std::flush;
-
-	// 	automaton_to_kstate(a, kworld_vec);
-	// 	//b.DisposeAutoma(&a);
-	// }
+	 // std::cerr << "\nDEBUG: IN MINIMIZE\n" << std::flush;
+	 if (b.MinimizeAutoma(&a)) {
+	 	// std::cerr << "\nDEBUG: MINIMIZE DONE\n" << std::flush;
+	 	automaton_to_kstate(a, kworld_vec);
+	 	//b.DisposeAutoma(&a);
+	 }
 }
 
 void kstate::add_world(const kworld & world)

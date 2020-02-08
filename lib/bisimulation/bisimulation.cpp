@@ -174,10 +174,10 @@ void bisimulation::CreateG(int num_v, v_elem *Gtemp)
 
 
 		//We consider Gtemp[v].ne as the total number of edges, in the original version ne is edges/nb
-		e = 0;
+		//e = 0;
 
 		// Ciclo che considera tutti gli archi uscenti da "v"
-		for (BIS_indexType e1 = 0; e1 < Gtemp[v].ne; e1++) {
+		for (e = 0; e < Gtemp[v].ne; e++) {
 
 			//Debug
 
@@ -230,7 +230,7 @@ void bisimulation::CreateG(int num_v, v_elem *Gtemp)
 
 				numberOfNodes++;
 				//Increment also for every bh the counter
-				e1++;
+				//e1++;
 			}
 
 			//std::cerr << "\nDEBUG: Adj For Internal Internal Done\n" << std::flush;
@@ -242,10 +242,10 @@ void bisimulation::CreateG(int num_v, v_elem *Gtemp)
 			G[numberOfNodes - 1].adj->next = NULL;
 			//std::cerr << "\nDEBUG: Here\n" << std::flush;
 
-			e++;
+			//e++;
 
 		}
-		Gtemp[v].ne = e;
+		//Gtemp[v].ne = e;
 
 		//std::cerr << "\nDEBUG: Adj For Internal Done\n" << std::flush;
 
@@ -590,24 +590,20 @@ void bisimulation::PaigeTarjan()
 
 		/*examine the first two blocks in the of blocks of Q contained in S;
 		let B be the smaller, remove B from S*/
-		//std::cerr << "First Block Size: " << Q[X[S].firstBlock].size << std::endl;
-		
-		
-//		std::cerr << "\n\n\n\nDEBUG:\n";
-//		std::cerr << "\tS: " << S << std::endl;
-//		//std::cerr << "\tX[S]: " << X[S] << std::endl;
-//		std::cerr << "\tX[S].firstBlock: " << X[S].firstBlock << std::endl;
-//		//std::cerr << "\tQ[X[S].firstBlock]: " << Q[X[S].firstBlock] << std::endl;
-//		std::cerr << "\tQ[X[S].firstBlock].nextBlock: " << Q[X[S].firstBlock].nextBlock << std::endl;
-//		std::cerr << "\tQ[Q[X[S].firstBlock].nextBlock].firstNode " << Q[Q[X[S].firstBlock].nextBlock].firstNode << std::endl;
-//		std::cerr << "\nDEBUG:\n\n\n";
-
-
-		
-		
-		//std::cerr << "\nAccessing the blocks : " << Q[X[S].firstBlock].firstNode << " and " << Q[Q[X[S].firstBlock].nextBlock].firstNode << std::endl;
-		//std::cerr << "Error in accessing next block of: " << Q[Q[X[S].firstBlock].nextBlock].size << std::endl;
-		if (Q[X[S].firstBlock].size < Q[Q[X[S].firstBlock].nextBlock].size) {
+		/*std::cerr << "First Block Size: " << Q[X[S].firstBlock].size << std::endl;
+		std::cerr << "\n\n\n\nDEBUG:\n";
+		std::cerr << "\tS: " << S << std::endl;
+		std::cerr << "\tX[S].firstBlock: " << X[S].firstBlock << std::endl;
+		std::cerr << "\tQ[X[S].firstBlock].nextBlock: " << Q[X[S].firstBlock].nextBlock << std::endl;
+		std::cerr << "\tQ[Q[X[S].firstBlock].nextBlock].firstNode " << Q[Q[X[S].firstBlock].nextBlock].firstNode << std::endl;
+		std::cerr << "\nDEBUG:\n\n\n";
+		std::cerr << "\nAccessing the blocks : " << Q[X[S].firstBlock].firstNode << " and " << Q[Q[X[S].firstBlock].nextBlock].firstNode << std::endl;
+		std::cerr << "Error in accessing next block of: " << Q[Q[X[S].firstBlock].nextBlock].size << std::endl;*/
+		if(Q[X[S].firstBlock].nextBlock == -1){
+			C = BIS_NIL;
+			break;
+		}
+		else if (Q[X[S].firstBlock].size < Q[Q[X[S].firstBlock].nextBlock].size) {
 			//std::cerr << "\nDEBUG: FIRST IF\n" << std::flush;
 
 			B = X[S].firstBlock;
@@ -617,7 +613,6 @@ void bisimulation::PaigeTarjan()
 			Q[S_B].prevBlock = BIS_NIL;
 
 		} else {
-
 			//std::cerr << "\nDEBUG: FIRST ELSE\n" << std::flush;
 
 			B = Q[X[S].firstBlock].nextBlock;
@@ -629,7 +624,6 @@ void bisimulation::PaigeTarjan()
 			Q[B].prevBlock = BIS_NIL;
 		}
 		//std::cerr << "Accessed the blocks" << std::endl;
-
 		//std::cerr << "\nDEBUG: FIRST IF ELSE DONE\n" << std::flush;
 
 
@@ -980,8 +974,9 @@ bool bisimulation::MinimizeAutoma(automa *A)
 
 	if (InitPaigeTarjan() == 0) {
 		//std::cerr << "\nDEBUG: IN PAIGE-TARJAN\n" << std::flush;
-
 		PaigeTarjan();
+		//std::cerr << "\nDEBUG: OUT PAIGE-TARJAN\n" << std::flush;
+
 
 		//std::cerr << "\nDEBUG: PAIGE-TARJAN DONE\n" << std::flush;
 
