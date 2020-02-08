@@ -216,7 +216,7 @@ void state<T>::print() const
 template <class T>
 void state<T>::print_graphviz(std::string postfix) const
 {
-	std::cout << "\nStarted Graphviz-Printing ";
+	std::cout << "\nGraphviz-Printing of ";
 	printer::get_instance().print_list(get_executed_actions());
 	std::string exec_act_names;
 	action_id_list::const_iterator it_act;
@@ -255,6 +255,6 @@ void state<T>::print_graphviz(std::string postfix) const
 	m_representation.print_graphviz(graphviz);
 	graphviz << "}";
 	graphviz.close();
-	std::cout << " Done.";
+	std::cout << postfix<< " done.";
 
 }

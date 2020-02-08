@@ -203,22 +203,16 @@ void planner<T>::execute_given_actions(std::vector<std::string>& act_name)
 		std::cout << "\n\n";
 	}
 
+	std::string bis_postfix = "";
+
 	if (domain::get_instance().get_debug()) {
-		state.print_graphviz();
-		//std::cerr << "\nDEBUG: FATTO PRE BISIMULATION\n";
+
 		if (domain::get_instance().get_bisimulation()) {
-			T tempState = state;
-			//std::cerr << "\nDEBUG: FATTO ASSIGNEMENT PRE BISIMULATION\n";
-
 			state.calc_min_bisimilar();
-			//std::cerr << "\nDEBUG: FATTO BISIMULATION\n";
-
-			state.print_graphviz("_b");
-			//std::cerr << "\nDEBUG: FATTO PRINT POST BISIMULATION\n";
-
-			state = tempState;
-			//std::cerr << "\nDEBUG: FATTO ASSIGNEMENT POST BISIMULATION\n";
+			bis_postfix = "-b";
 		}
+		state.print_graphviz(bis_postfix);
+
 	}
 
 
@@ -233,21 +227,11 @@ void planner<T>::execute_given_actions(std::vector<std::string>& act_name)
 				if (state.is_executable(*it_acset)) {
 					state = state.compute_succ(*it_acset);
 					if (domain::get_instance().get_debug()) {
-						state.print_graphviz();
-						//std::cerr << "\nDEBUG: FATTO PRE BISIMULATION\n";
 						if (domain::get_instance().get_bisimulation()) {
-							T tempState = state;
-							//std::cerr << "\nDEBUG: FATTO ASSIGNEMENT PRE BISIMULATION\n";
-
 							state.calc_min_bisimilar();
-							//std::cerr << "\nDEBUG: FATTO BISIMULATION\n";
-
-							state.print_graphviz("_b");
-							//std::cerr << "\nDEBUG: FATTO PRINT POST BISIMULATION\n";
-
-							state = tempState;
-							//std::cerr << "\nDEBUG: FATTO ASSIGNEMENT POST BISIMULATION\n";
+							bis_postfix = "__bis";
 						}
+						state.print_graphviz(bis_postfix);
 					}
 
 					if (state.is_goal()) {

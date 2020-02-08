@@ -292,9 +292,9 @@ int main(int argc, char** argv)
 
 	//timer.start(READ_TIMER);
 	domain_reader->read();
-	if (debug) {
-		domain_reader->print();
-	}
+//	if (debug) {
+//		domain_reader->print();
+//	}
 
 	//Domain building
 	domain::get_instance().set_domain(domain_name, debug, state_struc, kopt, domain_reader, ini_restriction, goal_restriction, is_global_obsv, act_check, check_visited, bisimulation);
