@@ -222,7 +222,7 @@ private:
      * @param[in] adj_list: the adjacency list of thr \ref kstate.*/
     void get_all_reachable_worlds(const kworld_ptr & kw, kworld_ptr_set & reached_worlds, std::map<kworld_ptr, kworld_ptr_set> & adj_list) const;
     /** Function that cleares all the unreachable \ref kworld of *this*.*/
-    void clean_unreachable_kworlds();
+    void clean_unreachable_kworlds(std::map<kworld_ptr, kworld_ptr_set> & adj_list);
 
     /** \brief Function that transforms *this* into an equivalent automaton.
      * 
@@ -231,7 +231,7 @@ private:
      * @param[in] compact_indices: we associate to the \ref kworld numerical ids a second kind of numerical ids. These new ids are consecutive numbers (hence, they are compact).
      * 
      * @return the automaton equivalent to *this*.*/
-    const automa kstate_to_automaton(std::map<kworld_ptr, int> & index_map, std::vector<kworld_ptr> & kworld_vec, std::map<int, int> & compact_indices) const;
+    const automa kstate_to_automaton(std::map<kworld_ptr, kworld_ptr_set> & adj_list, std::map<kworld_ptr, int> & index_map, std::vector<kworld_ptr> & kworld_vec, std::map<int, int> & compact_indices) const;
     /** \brief Function that transforms the given automaton into an equivalent \ref kstate.
      * 
      * @param[in] a: the automaton to transform.
