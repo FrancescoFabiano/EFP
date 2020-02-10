@@ -1,15 +1,15 @@
 /**
  * \brief Class used to store compact version of the code implemented following [An Efficient Algorithm for Computing Bisimulation Equivalence (Dovier, Piazza, Policriti)].
- * 
+ *
  * This class collects all the code from the various original classes (bisimulation.zip) in one file to easy their usage.
  * We also applied some conversion:
  * - All the defined constant are preceded by "BIS_";
  * - Some of the "extern" elements are transformed into class fields.
- * 
- * For detailed information on this code see bisimlation.zip and the papers 
+ *
+ * For detailed information on this code see bisimlation.zip and the papers
  * [An Efficient Algorithm for Computing Bisimulation Equivalence (Dovier, Piazza, Policriti), Three Partition Refinement Algorithms (Paige-Tarjan)]
- * 
- * 
+ *
+ *
  * \copyright GNU Public License.
  *
  * \author Francesco Fabiano.
@@ -63,7 +63,7 @@ struct adjList
 struct adjList_1
 {
     BIS_indexType node;
-    struct adjList *adj; //pointer to the corrispondente edge in G
+    struct adjList *adj; //pointer to the corresponding edge in G
     struct adjList_1 *next;
 };
 
@@ -171,6 +171,12 @@ private:
     struct xPartition* X;
 
 
+    BIS_indexType maxRank = 0;
+    //adjList_1 *borderEdges[BIS_MAXINDEX];
+    //borderEdges[i] stores the edges going to i from nodes of different rank
+
+    BIS_indexType rankPartition;
+
     BIS_indexType B1[BIS_MAXINDEX]; //copy of B
     BIS_indexType B_1[BIS_MAXINDEX]; //list to maintain E-1(B) and E-1(S-B)
     BIS_indexType splitD[BIS_MAXINDEX]; //list of split blocks
@@ -189,10 +195,35 @@ private:
     //from FastBisimulation
     // void Inverse();
     //void Rank();
-    void PaigeTarjan(BIS_indexType);
     //void FastBisimulationAlgorithm();
     void DisposeGraph();
     //int InitFBA();
+
+
+
+    int InitFBA(BIS_indexType numberOfNodes);
+
+    //compute Paige and Tarjan modified for the fast bisimulation algorithm.
+    //It analysed only the nodes of Rank rank that are in the Xblock C.
+    void PaigeTarjan(BIS_indexType rank);
+
+    //split computes a single split as regards the single block B.
+    /*The function consists of step 3 and step 4 of PaigeTarjan, even if there are
+    some differences: once used for the split, B is not anymore necessary; so B1, S1
+    and the counters are not computed; since we are interested in the edges between
+    nodes of different rank we scan borderEdges[] instead of G[].adj_1*/
+    void Split(BIS_indexType B);
+    /* modified strongly connected component;
+   the first visit is for G-1 and the second for G;
+   Q[].prevBlock represents the color of the nodes during the DFS visit,
+   Q[].superBlock represents the forefathers in the SCC,
+   Q[].firstNode represents the finishing time of the first DFS visit in SCC()*/
+    void Rank(BIS_indexType numberOfNodes);
+    void FirstDFS_visit(BIS_indexType i);
+    void SecondDFS_visit(BIS_indexType i, BIS_indexType ff);
+
+    //compute FastBisimulationAlgorithms
+    void FastBisimulationAlgorithm();
 
     /***********Automata Related**************/
     void FillStructures(automa *A);
@@ -216,7 +247,8 @@ public:
     /* Our implementation */
 
     /*Return true if bisimulation has been executed, false otherwise*/
-    bool MinimizeAutoma(automa *A);
+    bool MinimizeAutomaPT(automa *A);
+    bool MinimizeAutomaFB(automa *A);
 
     bisimulation(const std::map<kworld_ptr, int> & index_map, const std::vector<kworld_ptr> & kworld_vec, const std::map<int, int> & compact_indices);
     //bisimulation();

@@ -458,7 +458,7 @@ const automa kstate::kstate_to_automaton(std::map<kworld_ptr, kworld_ptr_set> & 
 
 	// Building a temporary adjacency list and calculating the number of outgoing edges for each kworld
 	for (it_keps = m_edges.begin(); it_keps != m_edges.end(); it_keps++) {
-		
+
 		//DEBUG:Change this
 		// if (adj_list[it_keps->get_from()][it_keps->get_to()].empty())
 		// {
@@ -587,7 +587,7 @@ void kstate::automaton_to_kstate(automa & a, std::vector<kworld_ptr> & kworld_ve
 
 void kstate::calc_min_bisimilar()
 {
-	// DEBUG_add_extra_world();
+	//DEBUG_add_extra_world();
 
 	// ************* Cleaning unreachable kworlds *************
 
@@ -600,11 +600,11 @@ void kstate::calc_min_bisimilar()
 	
 	clean_unreachable_kworlds(adj_list);
 
-	
+
 	//std::cerr << "\nDEBUG: INIZIO BISIMULATION IN KSTATE\n" << std::flush;
-	 std::map<kworld_ptr, int> index_map; // From kworld to int
-	 std::vector<kworld_ptr> kworld_vec; // Vector of all kworld_ptr
-	 std::map<int, int> compact_indices;
+	std::map<kworld_ptr, int> index_map; // From kworld to int
+	std::vector<kworld_ptr> kworld_vec; // Vector of all kworld_ptr
+	std::map<int, int> compact_indices;
 	//std::cerr << "\nDEBUG: PRE-ALLOCAZIONE AUTOMA\n" << std::flush;
 
 	automa a;
@@ -615,17 +615,14 @@ void kstate::calc_min_bisimilar()
 	//std::cerr << "\nDEBUG: POST-CREAZIONE AUTOMA\n";
 
 	// /*\***********ERROR IN BISIMULATION************/
-
 	bisimulation b(index_map, kworld_vec, compact_indices);
 
-	// // std::cerr << "\nDEBUG: CREATO OGGETTO BISIMULATION\n" << std::flush;
-
-	 // std::cerr << "\nDEBUG: IN MINIMIZE\n" << std::flush;
-	 if (b.MinimizeAutoma(&a)) {
-	 	// std::cerr << "\nDEBUG: MINIMIZE DONE\n" << std::flush;
-	 	automaton_to_kstate(a, kworld_vec);
-	 	//b.DisposeAutoma(&a);
-	 }
+	//std::cerr << "\nDEBUG: IN MINIMIZE\n" << std::flush;
+	if (b.MinimizeAutomaPT(&a)) {
+		//std::cerr << "\nDEBUG: MINIMIZE DONE\n" << std::flush;
+		automaton_to_kstate(a, kworld_vec);
+		b.DisposeAutoma(&a);
+	}
 }
 
 void kstate::add_world(const kworld & world)
@@ -1863,16 +1860,16 @@ fluent_formula kstate::get_effects_if_entailed(const effects_map & map, const kw
 
 void kstate::DEBUG_add_extra_world()
 {
-	
+
 	kworld_ptr tmp_ptr = *m_worlds.begin();
 	kworld extra(tmp_ptr.get_fluent_set());
-	unsigned short depth = tmp_ptr.get_repetition()+4;
+	unsigned short depth = tmp_ptr.get_repetition() + 4;
 	//std::cout << "\n\nDEBUG: Depth: " << depth << "\n\n";
-	kworld_ptr extra_ptr = add_rep_world(extra,depth);
+	kworld_ptr extra_ptr = add_rep_world(extra, depth);
 	set_max_depth(get_max_depth() + depth);
 
-	
-	
+
+
 
 	kedge_ptr_set::const_iterator it_kep;
 	for (it_kep = m_edges.begin(); it_kep != m_edges.end(); it_kep++) {
