@@ -29,8 +29,8 @@ for dir in $INPATH*; do
             i="1";
             while [[ $i -le $ITERATIONS ]]; do
                 start=$SECONDS;
-		. scripts/comparison_bisimulation.sh "$file";
-		duration=$(( SECONDS - start ));
+				. scripts/comparison_bisimulation.sh "$file";
+				duration=$(( SECONDS - start ));
                 #mv $OUTPATH_FINDINGPLAN"$(basename $file)" $OUTPATH"$(basename $dir)"/"$(basename $file)"
                 grep -w "EFP" $OUTPATH_FINDINGPLAN"$(basename $file)" >> $OUTPATH"$(basename $dir)"/"$(basename ${file%%.*})"/"for_average"/"exec_$i.txt";
                # while read line; do
@@ -39,13 +39,13 @@ for dir in $INPATH*; do
                #      echo ${line##* };
                # fi;
                #done < $OUTPATH_FINDINGPLAN"$(basename $file)";
-		if [[ $duration -gt $MAX_TIME_PER_ITERATION ]]; then
-		i=$(( $ITERATIONS + 1 ));
-		#echo $i;
-		else
-		i=$(( $i + 1 ));
-		#echo $i;
-		fi
+				if [[ $duration -gt $MAX_TIME_PER_ITERATION ]]; then
+					i=$(( $ITERATIONS + 1 ));
+					#echo $i;
+				else
+					i=$(( $i + 1 ));
+					#echo $i;
+				fi
             done
             mv $OUTPATH_FINDINGPLAN"$(basename $file)" $OUTPATH"$(basename $dir)"/"$(basename ${file%%.*})"/"results.txt";
         done

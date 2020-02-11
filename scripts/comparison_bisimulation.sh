@@ -24,9 +24,8 @@ for repr in "${representations[@]}"; do
 	if [[ $exit_status -eq 124 ]]; then
 	
         TOPRINT="EFP Version ";
-
         if [ "$repr" = "KRIPKE" ]; then
-			TOPRINT+="2.0 (on KRIPKE with STANDARD transition function)"
+			TOPRINT+="2.0 (on KRIPKE with STANDARD transition function and bisimulation)"
         fi;
         if [ "$repr" = "POSS" ]; then
             TOPRINT+="2.0 (on POSS with STANDARD transition function)"

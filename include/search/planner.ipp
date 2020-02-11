@@ -31,8 +31,12 @@ void planner<T>::print_results(std::chrono::duration<double> elapsed_seconds, T 
 				result << "on KRIPKE with OPTIMIZED transition function";
 			} else {
 				result << "on KRIPKE with STANDARD transition function";
-
 			}
+
+			if (domain::get_instance().get_bisimulation()) {
+				result << " and bisimulation";
+			}
+
 			break;
 		case POSSIBILITIES:
 			result << "on POSS with STANDARD transition function";
