@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #Just Run
-RESPATH="/mnt/c/Users/Francesco/Desktop/ICAPS_res/";
+RESPATH="ICAPS_res_bis/";
 DOMAIN_EXT=".txt"; # Name of the domain
 
 #mv $OUTPATH_FINDINGPLAN $OUTPATH$DOMAIN_NAME$DOMAIN_EXT;

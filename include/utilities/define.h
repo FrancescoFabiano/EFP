@@ -259,7 +259,10 @@ typedef std::set<kworld_ptr> kworld_ptr_set; /**< \brief A set of \ref kworld_pt
 
 typedef std::map<std::pair<kworld_ptr, event_type>, kworld_ptr> kstate_map;
 
-typedef std::map<kworld_ptr, std::map<kworld_ptr, agent_set>> kagent_map;
+typedef unsigned short bis_label;
+typedef std::set<bis_label> bis_label_set;
+
+typedef std::map<kworld_ptr, std::map<kworld_ptr, bis_label_set>> kbislabel_map;
 
 /*****************Possibilities*****************/
 class pworld;

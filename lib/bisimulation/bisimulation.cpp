@@ -126,8 +126,8 @@ void bisimulation::CreateG(int num_v, v_elem *Gtemp)
 	// realta' la loro etichetta potrebbe assumere un qualunque valore). Tutti questi stati
 	// apparterranno quindi, come si puo' notare dall'assegnamento "G[v].block = 0", al blocco
 	// 0, ovvero all'elemento dell'array X di indice 0.
-	int n_agents = domain::get_instance().get_agents().size();
-	BIS_indexType n_id;
+//	int n_agents = domain::get_instance().get_agents().size();
+//	BIS_indexType n_id;
 
 
 	//std::cerr << "\nDEBUG: For\n" << std::flush;
@@ -141,13 +141,13 @@ void bisimulation::CreateG(int num_v, v_elem *Gtemp)
 
 
 	for (v = 0; v < num_v; v++) {
-		n_id = m_compact_indices[m_kworld_vec[v].get_numerical_id()] + n_agents;
-		G[v].block = n_id;
-		G[v].label = n_id; // We reserve the values from 0 to n-1 to the labels of agents nodes
+		//n_id = m_compact_indices[m_kworld_vec[v].get_numerical_id()] + n_agents;
+		G[v].block = 0;
+		G[v].label = 0; // We reserve the values from 0 to n-1 to the labels of agents nodes
 		//G[v].rank = n_id; // We reserve the values from 0 to n-1 to the labels of agents nodes
-		if (n_id > maxRank) {
-			maxRank = n_id;
-		}
+//		if (n_id > maxRank) {
+//			maxRank = n_id;
+//		}
 
 		//std::cerr << "\nDEBUG:label " << G[v].block << std::endl;
 
@@ -614,10 +614,11 @@ void bisimulation::PaigeTarjan()
 		std::cerr << "\nDEBUG:\n\n\n";
 		std::cerr << "\nAccessing the blocks : " << Q[X[S].firstBlock].firstNode << " and " << Q[Q[X[S].firstBlock].nextBlock].firstNode << std::endl;
 		std::cerr << "Error in accessing next block of: " << Q[Q[X[S].firstBlock].nextBlock].size << std::endl;*/
-		if (Q[X[S].firstBlock].nextBlock == -1) {
-			C = BIS_NIL;
-			break;
-		} else if (Q[X[S].firstBlock].size < Q[Q[X[S].firstBlock].nextBlock].size) {
+//		if (Q[X[S].firstBlock].nextBlock == -1) {
+//			C = BIS_NIL;
+//			break;
+//		} else 
+		if (Q[X[S].firstBlock].size < Q[Q[X[S].firstBlock].nextBlock].size) {
 			//std::cerr << "\nDEBUG: FIRST IF\n" << std::flush;
 
 			B = X[S].firstBlock;
@@ -625,10 +626,8 @@ void bisimulation::PaigeTarjan()
 			X[S].firstBlock = S_B;
 			Q[B].nextBlock = BIS_NIL;
 			Q[S_B].prevBlock = BIS_NIL;
-
 		} else {
 			//std::cerr << "\nDEBUG: FIRST ELSE\n" << std::flush;
-
 			B = Q[X[S].firstBlock].nextBlock;
 			S_B = X[S].firstBlock;
 			Q[S_B].nextBlock = Q[B].nextBlock;
@@ -2003,13 +2002,13 @@ void bisimulation::SecondDFS_visit(BIS_indexType i, BIS_indexType ff)
 
 bool bisimulation::MinimizeAutomaPT(automa *A)
 {
-	//std::cerr << "\nDEBUG: IN MINIMIZE\n" << std::flush;
+//	std::cerr << "\nDEBUG: IN MINIMIZE\n" << std::flush;
 	FillStructures(A);
-	//std::cerr << "\nDEBUG: Filled structures\n" << std::flush;
+//	std::cerr << "\nDEBUG: Filled structures\n" << std::flush;
 
 	Inverse();
 
-	//std::cerr << "\nDEBUG: Inverse done\n" << std::flush;
+//	std::cerr << "\nDEBUG: Inverse done\n" << std::flush;
 
 
 	if (InitPaigeTarjan() == 0) {
@@ -2052,14 +2051,14 @@ bool bisimulation::MinimizeAutomaFB(automa *A)
 
 }
 
-bisimulation::bisimulation(const std::map<kworld_ptr, int> & index_map, const std::vector<kworld_ptr> & kworld_vec, const std::map<int, int> & compact_indices)
+bisimulation::bisimulation(/*const std::map<kworld_ptr, int> & index_map,*/ const std::vector<kworld_ptr> & kworld_vec, const std::map<int, int> & compact_indices)
 {
 
 	G = (graph *) malloc(sizeof(graph) * BIS_MAXINDEX);
 	Q = (qPartition *) malloc(sizeof(qPartition) * BIS_MAXINDEX);
 	X = (xPartition *) malloc(sizeof(xPartition) * BIS_MAXINDEX);
 
-	m_index_map = index_map;
+	//m_index_map = index_map;
 	m_kworld_vec = kworld_vec;
 	m_compact_indices = compact_indices;
 }

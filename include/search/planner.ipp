@@ -200,7 +200,7 @@ void planner<T>::execute_given_actions(std::vector<std::string>& act_name)
 
 	T state;
 	state.build_initial();
-
+	
 	if (state.is_goal()) {
 		std::cout << "\nInitial was Goal:)\n";
 	} else {
@@ -213,7 +213,7 @@ void planner<T>::execute_given_actions(std::vector<std::string>& act_name)
 
 		if (domain::get_instance().get_bisimulation()) {
 			state.calc_min_bisimilar();
-			bis_postfix = "-b";
+			bis_postfix = "__b";
 		}
 		state.print_graphviz(bis_postfix);
 
