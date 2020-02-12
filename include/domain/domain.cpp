@@ -18,7 +18,7 @@ domain& domain::get_instance()
 	return instance;
 }
 
-void domain::set_domain(std::string name, bool debug, state_type stype, bool k_opt, std::shared_ptr<reader> reader, domain_restriction ini_res, domain_restriction goal_res, bool is_global_obsv, action_check act_check, bool check_visited, bool bisimulation)
+void domain::set_domain(std::string name, bool debug, state_type stype, bool k_opt, std::shared_ptr<reader> reader, domain_restriction ini_res, domain_restriction goal_res, bool is_global_obsv, action_check act_check, bool check_visited, bis_type bisimulation)
 {
 	m_name = name;
 	m_debug = debug;
@@ -108,7 +108,7 @@ const formula_list & domain::get_goal_description()
 	return m_goal_description;
 }
 
-bool domain::get_bisimulation()
+bis_type domain::get_bisimulation()
 {
 	return m_bisimulation;
 }

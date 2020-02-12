@@ -126,8 +126,8 @@ void bisimulation::CreateG(int num_v, v_elem *Gtemp)
 	// realta' la loro etichetta potrebbe assumere un qualunque valore). Tutti questi stati
 	// apparterranno quindi, come si puo' notare dall'assegnamento "G[v].block = 0", al blocco
 	// 0, ovvero all'elemento dell'array X di indice 0.
-//	int n_agents = domain::get_instance().get_agents().size();
-//	BIS_indexType n_id;
+	//	int n_agents = domain::get_instance().get_agents().size();
+	//	BIS_indexType n_id;
 
 
 	//std::cerr << "\nDEBUG: For\n" << std::flush;
@@ -145,9 +145,9 @@ void bisimulation::CreateG(int num_v, v_elem *Gtemp)
 		G[v].block = 0;
 		G[v].label = 0; // We reserve the values from 0 to n-1 to the labels of agents nodes
 		//G[v].rank = n_id; // We reserve the values from 0 to n-1 to the labels of agents nodes
-//		if (n_id > maxRank) {
-//			maxRank = n_id;
-//		}
+		//		if (n_id > maxRank) {
+		//			maxRank = n_id;
+		//		}
 
 		//std::cerr << "\nDEBUG:label " << G[v].block << std::endl;
 
@@ -614,10 +614,10 @@ void bisimulation::PaigeTarjan()
 		std::cerr << "\nDEBUG:\n\n\n";
 		std::cerr << "\nAccessing the blocks : " << Q[X[S].firstBlock].firstNode << " and " << Q[Q[X[S].firstBlock].nextBlock].firstNode << std::endl;
 		std::cerr << "Error in accessing next block of: " << Q[Q[X[S].firstBlock].nextBlock].size << std::endl;*/
-//		if (Q[X[S].firstBlock].nextBlock == -1) {
-//			C = BIS_NIL;
-//			break;
-//		} else 
+		//		if (Q[X[S].firstBlock].nextBlock == -1) {
+		//			C = BIS_NIL;
+		//			break;
+		//		} else 
 		if (Q[X[S].firstBlock].size < Q[Q[X[S].firstBlock].nextBlock].size) {
 			//std::cerr << "\nDEBUG: FIRST IF\n" << std::flush;
 
@@ -974,26 +974,169 @@ void bisimulation::PaigeTarjan()
 
 }
 
+void bisimulation::Rank()
+{
+	BIS_indexType i, temp, r;
 
+	//initialisation of the nodes
+	for (i = 0; i < numberOfNodes; i++) {
+		//color is BIS_WHITE
+		Q[i].prevBlock = BIS_WHITE;
+		//i is forefather of itself
+		Q[i].superBlock = i;
+		//all the nodes are well-founded
+		G[i].WFflag = true;
+		//to normalize the ranks
+		Q[i].size = 0;
+	}
+	//timestamp is set to zero
+	t = 0;
 
-/*pointer to the XBlocks that are not in the main partition pointed by C.
-It contains the XBlocks with nodes of the rank being analysed that are not
-in C; after the call PaigeTarjan(i) it contains all the blocks of the
-minimised subgraph of rank i; these are the block that have to be used to
-split block of higher rank*/
+	//first DFS visit
+	for (i = 0; i < numberOfNodes; i++)
+		if (Q[i].prevBlock == BIS_WHITE)
+			FirstDFS_visit(i);
 
-//max value of the rank
-//BIS_indexType maxRank;
-adjList_1 *borderEdges[BIS_MAXINDEX];
-//borderEdges[i] stores the edges going to i from nodes of different rank
+	/*to avoid a second initialisation of the colors of the nodes(Q[].prevBlock)
+	the meaning of the colors is inverted: BIS_WHITE <--> BIS_BLACK*/
 
-//BIS_indexType rankPartition;
+	/*second DFS visit in order of decreasing finishing time (Q[].firstNode)
+	as computed in the first DFS visit*/
+	for (i = numberOfNodes - 1; i >= 0; i--) { /*(1)*/
+		temp = Q[i].firstNode; //node that has to be visited
+		if ((Q[temp].prevBlock) == BIS_BLACK) {
+			SecondDFS_visit(temp, temp);
+			//to normalize the ranks:
+			r = G[temp].rank;
+			if (r != -1){
+				if ((r % 2) != 0){
+					Q[r / 2].size = 2;}
+				else {
+					if (Q[r / 2].size == 0)
+						Q[r / 2].size = 1;
+				}
+			}
+			/*we mark the values of the rank actually used.
+			Q[i].size==0 means that there are no nodes of rank i
+			Q[i].size==1 means that there are only nodes with even rank i/2
+			Q[i].size==2 means that there are nodes with even rank (i-1)/2
+			    and odd rank (i-1)/2 - 1
+			At the end Q[].size contains a sequence of 1 and 2 followed by 0
+			N.B.: we need to analyse the different values of the rank; hence we can
+			scan only the rank of the forefathers and avoid scanning the rank of all
+			the other nodes*/
 
-//initialise FastBisimulationAlgorithms
+			/*the rank of the forefathers has to be duplicated since it can
+			be overwritten during the normalization of the ranks in initFBA()*/
+			Q[temp].nextBlock = G[temp].rank;
+		}
+	}
+	//at the end of the second DFS visit all the nodes are BIS_WHITE (=0)
+}
+/*PRE-CONDITION OF Rank():
+  a graph G and his inverse;
+  POST-CONDITION OF Rank():
+Q[i].superBlock == i => i is a forefather,
+Q[i].superBlock == x != i => x is the forefather of i;
+NB: the forefather is found during the second DFS visit of SCC():
+  in fact each time we find a BIS_BLACK node during the for-loop (1),
+  this node is the forefather of all the nodes we will discover
+  (their color is BIS_BLACK) in the following DFS visit;
+G[i].rank: rank of the nodes in G;
+  for each i: G[Q[i].superBlock].rank is the rank of i,
+  forefathers have proper rank,
+  collapsing nodes have not significant value and hence
+    should refer to their forefather for the rank;
+G[i].WFflag represents the condition of well-fondness
+
+Q[].size is used to normalize the ranks: for an explanation see InitFba*/
+
+/*modified version of DFS_visit to optimise the computation of Rank();
+  firstDFS_visit visits G-1 and stores the finishing time in Q[].firstNode;
+  i is the node being visited*/
+void bisimulation::FirstDFS_visit(BIS_indexType i)
+{
+	BIS_indexType j;
+	struct adjList_1 *adj_1;
+
+	//visit G-1
+	adj_1 = G[i].adj_1;
+	Q[i].prevBlock = BIS_GRAY;
+	while (adj_1 != NULL) {
+		j = adj_1->node;
+		if (Q[j].prevBlock == BIS_WHITE)
+			FirstDFS_visit(j);
+		adj_1 = adj_1->next;
+	}
+	Q[i].prevBlock = BIS_BLACK;
+	//store the finishig time of the first DFS visit
+	Q[t++].firstNode = i;
+	/*the node i is stored at the index t corresponding to its finishing time
+	 to avoid re-ordering*/
+}
+
+/*modified version of DFS_visit to optimise the computation of Rank();
+  secondDFS_visit visits G and stores the forefather of the nodes in
+  Q[].superBlock;
+  i is the node being visited, ff is its forefather;
+  remember that the meaning of the colors is inverted: BIS_WHITE <--> BIS_BLACK*/
+void bisimulation::SecondDFS_visit(BIS_indexType i, BIS_indexType ff)
+{
+	BIS_indexType j;
+	struct adjList *adj;
+	//stores the temporary value of the rank computed from the children of a node
+	BIS_indexType tempRank;
+
+	//visit G
+	Q[i].prevBlock = BIS_GRAY;
+	G[i].rank = -1;
+	tempRank = -1;
+
+	/*if a node is not a forefather, it is sure that it is not well-founded;
+	the forefathers are well-founded only if all their children are well-founded
+	(and it will result during the visit)*/
+	if (i != ff)
+		G[i].WFflag = false;
+
+	adj = G[i].adj;
+	while (adj != NULL) {
+		j = adj->node;
+		//it is the first time we visit j that is in the same SCC of i
+		if (Q[j].prevBlock == BIS_BLACK) {
+			Q[j].superBlock = ff;
+			SecondDFS_visit(j, ff);
+		}
+		if (Q[i].superBlock == Q[j].superBlock) { //SCC(i) == SCC(j)
+			//the rank should not increase
+			tempRank = G[j].rank;
+			//i is non-well-founded
+			G[i].WFflag = false;
+		} else { //SCC(i) != SCC(j)
+			if (G[j].WFflag == true) //j well-founded
+				//the rank should increase of 1
+				tempRank = G[Q[j].superBlock].rank + 1;
+			else { //j not well-founded
+				//the rank should not increase
+				tempRank = G[Q[j].superBlock].rank;
+				//j is non-well-founded then also i
+				G[i].WFflag = false;
+			}
+		}
+		//the rank of a node is the max among the ranks of the children
+		if (tempRank > G[i].rank)
+			G[i].rank = tempRank;
+		adj = adj->next;
+	}//endwhile
+
+	//well-founded nodes have even rank
+	if (G[i].WFflag == true)
+		(G[i].rank)++;
+	Q[i].prevBlock = BIS_WHITE;
+}
 
 /*it return a exit code: 0 means proceed the computation with
 FastBisimulationAlgorithm()*/
-int bisimulation::InitFBA(BIS_indexType numberOfNodes)
+int bisimulation::InitFBA()
 {
 	BIS_indexType i, temp;
 
@@ -1050,11 +1193,9 @@ int bisimulation::InitFBA(BIS_indexType numberOfNodes)
 	/*we are going to scan the nodes regarding the label-blocks
 	so we can build the bisimulation structures that are composed by
 	X-blocks and Q-blocks regarding both ranks and labels*/
-	for (BIS_indexType l = 0; l != BIS_NIL; l = X[l].nextXBlock) { //for each label block
-
+	for (BIS_indexType l = 0; l != BIS_NIL; l = X[l].nextXBlock) //for each label block
 		for (i = X[l].firstBlock; i != BIS_NIL; i = tmpi) {//for each node
 			//the node i has to be inserted in the block j corresponding to rank j-1
-
 			tmpi = G[i].nextInBlock;
 			j = G[i].rank + 1;
 			if (Q[j].firstNode == BIS_NIL) { //the block is empty: add i
@@ -1096,9 +1237,8 @@ int bisimulation::InitFBA(BIS_indexType numberOfNodes)
 				/*moving these nodes we need to update G[].block to the new value
 				of newBlock. The complexity can arise only to O(nON): we can update
 				G[].block only once for each node*/
-				for (BIS_indexType k = Q[newBlock].firstNode; k != BIS_NIL; k = G[k].nextInBlock) {
+				for (BIS_indexType k = Q[newBlock].firstNode; k != BIS_NIL; k = G[k].nextInBlock)
 					G[k].block = newBlock;
-				}
 				/*instead of updating G[].block we could have chosen to move the nodes
 				with label B to the new block. In this case it would have been necessary
 				to scan the chain of different (as regards the label) blocks but with
@@ -1116,7 +1256,6 @@ int bisimulation::InitFBA(BIS_indexType numberOfNodes)
 				G[i].block = j;
 			} //end else
 		} //end fors
-	}
 
 	//initialisation of Q and X
 	for (i = 0; i < maxRank + 2; i++) {
@@ -1221,13 +1360,8 @@ void bisimulation::PaigeTarjan(BIS_indexType rank)
 
 	//REMINDER: XBlock that are not in C but have Rank rank
 	rankPartition = BIS_NIL;
-	//	std::cerr << "\nDEBUG: TEST 3.1\n" << X[C].firstBlock << std::flush;
-	//	std::cerr << "\nDEBUG: TEST 3.2\n" << Q[X[C].firstBlock].firstNode << std::flush;
-	//	std::cerr << "\nDEBUG: TEST 3.3\n" << G[Q[X[C].firstBlock].firstNode].rank << std::flush;
 
 	while (C != BIS_NIL && rank == G[Q[X[C].firstBlock].firstNode].rank) {
-
-		std::cerr << "\nDEBUG: TEST 5\n" << std::flush;
 
 		/*Step 1(select a refining block) & Step 2(update X)*/
 		//select some block S from C
@@ -1238,26 +1372,22 @@ void bisimulation::PaigeTarjan(BIS_indexType rank)
 
 		/*examine the first two blocks in the of blocks of Q contained in S;
 		let B be the smaller, remove B from S*/
-		if (Q[X[S].firstBlock].nextBlock == -1) {
-			if (Q[X[S].firstBlock].size < Q[Q[X[S].firstBlock].nextBlock].size) {
-				B = X[S].firstBlock;
-				S_B = Q[X[S].firstBlock].nextBlock;
-				X[S].firstBlock = S_B;
-				Q[B].nextBlock = BIS_NIL;
-				Q[S_B].prevBlock = BIS_NIL;
+		if (Q[X[S].firstBlock].size < Q[Q[X[S].firstBlock].nextBlock].size) {
+			B = X[S].firstBlock;
+			S_B = Q[X[S].firstBlock].nextBlock;
+			X[S].firstBlock = S_B;
+			Q[B].nextBlock = BIS_NIL;
+			Q[S_B].prevBlock = BIS_NIL;
 
-			} else {
-				B = Q[X[S].firstBlock].nextBlock;
-				S_B = X[S].firstBlock;
-				Q[S_B].nextBlock = Q[B].nextBlock;
-				if (Q[S_B].nextBlock != BIS_NIL)
-					Q[Q[S_B].nextBlock].prevBlock = S_B;
-				Q[B].nextBlock = BIS_NIL;
-				Q[B].prevBlock = BIS_NIL;
-			}
+		} else {
+			B = Q[X[S].firstBlock].nextBlock;
+			S_B = X[S].firstBlock;
+			Q[S_B].nextBlock = Q[B].nextBlock;
+			if (Q[S_B].nextBlock != BIS_NIL)
+				Q[Q[S_B].nextBlock].prevBlock = S_B;
+			Q[B].nextBlock = BIS_NIL;
+			Q[B].prevBlock = BIS_NIL;
 		}
-
-
 
 		//and create a new simple block S1 of X containing B as its only block of Q;
 		//REMINDER S1 is not in C, hence has to be added to rankPartition
@@ -1285,7 +1415,6 @@ void bisimulation::PaigeTarjan(BIS_indexType rank)
 			rankPartition = S;
 			X[S].prevXBlock = BIS_NIL;
 		}
-		std::cerr << "\nDEBUG: TEST 6\n" << std::flush;
 
 		/*Step 3(compute E-1(B))*/
 		/*by scanning the edges xEy such that y belongs to B
@@ -1302,15 +1431,9 @@ void bisimulation::PaigeTarjan(BIS_indexType rank)
 		while (y != BIS_NIL) { //for each y belonging to B
 			B1[y] = G[y].nextInBlock; //copy the elements of B in B1
 			adj = G[y].adj_1;
-			std::cerr << "\nDEBUG: TEST 7\n" << std::flush;
-
 			while (adj != NULL) { //for each node in the adj_1 of y
 				x = adj->node;
-				std::cerr << "\nDEBUG: TEST 8\n" << std::flush;
-
 				if (B_1[x] == numberOfNodes) {
-					std::cerr << "\nDEBUG: TEST 9a\n" << std::flush;
-
 					//node not already added to E-1(B)
 					B_1[x] = b_1List;
 					b_1List = x;
@@ -1319,17 +1442,10 @@ void bisimulation::PaigeTarjan(BIS_indexType rank)
 					cxS->node = x;
 					cxS->value = 1;
 					G[x].countxB = cxS; /*1*/
-				} else {
-					std::cerr << "\nDEBUG: TEST 9b\n" << std::flush;
+				} else
 					(G[x].countxB->value)++;
-					std::cerr << "\nDEBUG: TEST 10\n" << std::flush;
-
-				}
-
 				adj = adj->next; //next node in the adj_1 of y
 			}
-			std::cerr << "\nDEBUG: TEST 9\n" << std::flush;
-
 			y = G[y].nextInBlock; //next node y belonging to B
 		}
 
@@ -1464,10 +1580,6 @@ void bisimulation::PaigeTarjan(BIS_indexType rank)
 		nodes having different rank, hence we don't need to do anything special!*/
 		y = b1List;
 		b_1List = BIS_NIL;
-
-		std::cerr << "\nDEBUG: TEST 6\n" << std::flush;
-
-
 		while (y != BIS_NIL) { //for each y belonging to B1
 			adj = G[y].adj_1;
 			while (adj != NULL) { //for each node in the adj_1 of y -> scan xEy, y in B
@@ -1789,28 +1901,19 @@ void bisimulation::FastBisimulationAlgorithm()
 		/*in the case of the Exceptions above, we remove the XBlock, representing
 		the rank component, from C and store it in rankPartition, ready to the
 		succesive sequence of simple splits */
-
-		//	std::cerr << "\nDEBUG: TEST 1.4 " << G[Q[X[C].firstBlock].firstNode].WFflag << std::endl;
-
-
-
 		if ((Q[X[C].firstBlock].nextBlock == BIS_NIL) ||
 			G[Q[X[C].firstBlock].firstNode].WFflag) {
-			std::cerr << "\nDEBUG: TEST 2\n" << std::flush;
-
 			rankPartition = C;
 			C = X[C].nextXBlock;
 			X[C].prevXBlock = BIS_NIL;
 			X[rankPartition].prevXBlock = BIS_NIL;
 			X[rankPartition].nextXBlock = BIS_NIL;
 		} else {
-
 			//if (MultipleNodes(C))
 			PaigeTarjan(i); //rank = i
 			//else
 			// PaigeTarjanBonic();
 		}
-
 
 		/*the sub-graph of rank i is minimised and all the blocks are in the chain
 		pointed by rankPartition*/
@@ -1829,198 +1932,20 @@ void bisimulation::FastBisimulationAlgorithm()
 	}
 }
 
-
-//local declaration for Rank()
-int t; //timestamp
-void FirstDFS_visit(BIS_indexType);
-void SecondDFS_visit(BIS_indexType, BIS_indexType);
-
-/* modified strongly connected component;
-   the first visit is for G-1 and the second for G;
-   Q[].prevBlock represents the color of the nodes during the DFS visit,
-   Q[].superBlock represents the forefathers in the SCC,
-   Q[].firstNode represents the finishing time of the first DFS visit in SCC()*/
-void bisimulation::Rank(BIS_indexType numberOfNodes)
-{
-	BIS_indexType i, temp, r;
-
-	//initialisation of the nodes
-	for (i = 0; i < numberOfNodes; i++) {
-		//color is BIS_WHITE
-		Q[i].prevBlock = BIS_WHITE;
-		//i is forefather of itself
-		Q[i].superBlock = i;
-		//all the nodes are well-founded
-		G[i].WFflag = true;
-		//to normalize the ranks
-		Q[i].size = 0;
-	}
-	//timestamp is set to zero
-	t = 0;
-
-	//first DFS visit
-	for (i = 0; i < numberOfNodes; i++)
-		if (Q[i].prevBlock == BIS_WHITE)
-			FirstDFS_visit(i);
-
-	/*to avoid a second initialisation of the colors of the nodes(Q[].prevBlock)
-	the meaning of the colors is inverted: BIS_WHITE <--> BIS_BLACK*/
-
-	/*second DFS visit in order of decreasing finishing time (Q[].firstNode)
-	as computed in the first DFS visit*/
-	for (i = numberOfNodes - 1; i >= 0; i--) { /*(1)*/
-		temp = Q[i].firstNode; //node that has to be visited
-		if ((Q[temp].prevBlock) == BIS_BLACK) {
-			SecondDFS_visit(temp, temp);
-			//to normalize the ranks:
-			r = G[temp].rank;
-			if (r != -1) {
-				if ((r % 2) != 0) {
-					Q[r / 2].size = 2;
-				} else {
-					if (Q[r / 2].size == 0)
-						Q[r / 2].size = 1;
-				}
-			}
-			/*we mark the values of the rank actually used.
-			Q[i].size==0 means that there are no nodes of rank i
-			Q[i].size==1 means that there are only nodes with even rank i/2
-			Q[i].size==2 means that there are nodes with even rank (i-1)/2
-			    and odd rank (i-1)/2 - 1
-			At the end Q[].size contains a sequence of 1 and 2 followed by 0
-			N.B.: we need to analyse the different values of the rank; hence we can
-			scan only the rank of the forefathers and avoid scanning the rank of all
-			the other nodes*/
-
-			/*the rank of the forefathers has to be duplicated since it can
-			be overwritten during the normalization of the ranks in initFBA()*/
-			Q[temp].nextBlock = G[temp].rank;
-		}
-	}
-	//at the end of the second DFS visit all the nodes are BIS_WHITE (=0)
-}
-/*PRE-CONDITION OF Rank():
-  a graph G and his inverse;
-  POST-CONDITION OF Rank():
-Q[i].superBlock == i => i is a forefather,
-Q[i].superBlock == x != i => x is the forefather of i;
-NB: the forefather is found during the second DFS visit of SCC():
-  in fact each time we find a BIS_BLACK node during the for-loop (1),
-  this node is the forefather of all the nodes we will discover
-  (their color is BIS_BLACK) in the following DFS visit;
-G[i].rank: rank of the nodes in G;
-  for each i: G[Q[i].superBlock].rank is the rank of i,
-  forefathers have proper rank,
-  collapsing nodes have not significant value and hence
-    should refer to their forefather for the rank;
-G[i].WFflag represents the condition of well-fondness
-
-Q[].size is used to normalize the ranks: for an explanation see InitFba*/
-
-/*modified version of DFS_visit to optimise the computation of Rank();
-  firstDFS_visit visits G-1 and stores the finishing time in Q[].firstNode;
-  i is the node being visited*/
-void bisimulation::FirstDFS_visit(BIS_indexType i)
-{
-	BIS_indexType j;
-	struct adjList_1 *adj_1;
-
-	//visit G-1
-	adj_1 = G[i].adj_1;
-	Q[i].prevBlock = BIS_GRAY;
-	while (adj_1 != NULL) {
-		j = adj_1->node;
-		if (Q[j].prevBlock == BIS_WHITE)
-			FirstDFS_visit(j);
-		adj_1 = adj_1->next;
-	}
-	Q[i].prevBlock = BIS_BLACK;
-	//store the finishig time of the first DFS visit
-	Q[t++].firstNode = i;
-	/*the node i is stored at the index t corresponding to its finishing time
-	 to avoid re-ordering*/
-}
-
-/*modified version of DFS_visit to optimise the computation of Rank();
-  secondDFS_visit visits G and stores the forefather of the nodes in
-  Q[].superBlock;
-  i is the node being visited, ff is its forefather;
-  remember that the meaning of the colors is inverted: BIS_WHITE <--> BIS_BLACK*/
-void bisimulation::SecondDFS_visit(BIS_indexType i, BIS_indexType ff)
-{
-	BIS_indexType j;
-	struct adjList *adj;
-	//stores the temporary value of the rank computed from the children of a node
-	BIS_indexType tempRank;
-
-	//visit G
-	Q[i].prevBlock = BIS_GRAY;
-	G[i].rank = -1;
-	tempRank = -1;
-
-	/*if a node is not a forefather, it is sure that it is not well-founded;
-	the forefathers are well-founded only if all their children are well-founded
-	(and it will result during the visit)*/
-	if (i != ff)
-		G[i].WFflag = false;
-
-	adj = G[i].adj;
-	while (adj != NULL) {
-		j = adj->node;
-		//it is the first time we visit j that is in the same SCC of i
-		if (Q[j].prevBlock == BIS_BLACK) {
-			Q[j].superBlock = ff;
-			SecondDFS_visit(j, ff);
-		}
-		if (Q[i].superBlock == Q[j].superBlock) { //SCC(i) == SCC(j)
-			//the rank should not increase
-			tempRank = G[j].rank;
-			//i is non-well-founded
-			G[i].WFflag = false;
-		} else { //SCC(i) != SCC(j)
-			if (G[j].WFflag == true) //j well-founded
-				//the rank should increase of 1
-				tempRank = G[Q[j].superBlock].rank + 1;
-			else { //j not well-founded
-				//the rank should not increase
-				tempRank = G[Q[j].superBlock].rank;
-				//j is non-well-founded then also i
-				G[i].WFflag = false;
-			}
-		}
-		//the rank of a node is the max among the ranks of the children
-		if (tempRank > G[i].rank)
-			G[i].rank = tempRank;
-		adj = adj->next;
-	}//endwhile
-
-	//well-founded nodes have even rank
-	if (G[i].WFflag == true)
-		(G[i].rank)++;
-	Q[i].prevBlock = BIS_WHITE;
-}
-
 bool bisimulation::MinimizeAutomaPT(automa *A)
 {
-//	std::cerr << "\nDEBUG: IN MINIMIZE\n" << std::flush;
+	//	std::cerr << "\nDEBUG: IN MINIMIZE\n" << std::flush;
 	FillStructures(A);
-//	std::cerr << "\nDEBUG: Filled structures\n" << std::flush;
+	//	std::cerr << "\nDEBUG: Filled structures\n" << std::flush;
 
 	Inverse();
 
-//	std::cerr << "\nDEBUG: Inverse done\n" << std::flush;
+	//	std::cerr << "\nDEBUG: Inverse done\n" << std::flush;
 
 
 	if (InitPaigeTarjan() == 0) {
-		//std::cerr << "\nDEBUG: IN PAIGE-TARJAN\n" << std::flush;
 		PaigeTarjan();
-		//std::cerr << "\nDEBUG: OUT PAIGE-TARJAN\n" << std::flush;
 
-
-		//std::cerr << "\nDEBUG: PAIGE-TARJAN DONE\n" << std::flush;
-
-
-		/*CHECK BECAUSE THEY DON'T CONSIDER NODES WITH LABELS*/
 		GetMinimizedAutoma(A);
 		return true;
 
@@ -2033,16 +1958,12 @@ bool bisimulation::MinimizeAutomaFB(automa *A)
 {
 	//std::cerr << "\nDEBUG: IN MINIMIZE\n" << std::flush;
 	FillStructures(A);
-	std::cerr << "\nDEBUG: Filled structures\n" << std::flush;
-
 	Inverse();
 
-	std::cerr << "\nDEBUG: Inverse done\n" << std::flush;
-
-	Rank(A->Nvertex);
-	if (InitFBA(A->Nvertex) == 0) {
+	Rank();
+	if (InitFBA() == 0) {
 		FastBisimulationAlgorithm();
-		/*CHECK BECAUSE THEY DON'T CONSIDER NODES WITH LABELS*/
+
 		GetMinimizedAutoma(A);
 		return true;
 
@@ -2061,6 +1982,7 @@ bisimulation::bisimulation(/*const std::map<kworld_ptr, int> & index_map,*/ cons
 	//m_index_map = index_map;
 	m_kworld_vec = kworld_vec;
 	m_compact_indices = compact_indices;
+
 }
 
 //

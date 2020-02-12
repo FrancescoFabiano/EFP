@@ -124,6 +124,13 @@ enum heuristics
                     * The group operator C is splitted in more belief_formulae.*/
 };
 
+enum bis_type
+{
+    BIS_NONE, /**< No Bisimulation is used*/
+    PaigeTarjan, /**< The standard Paige-Tarjan Algorithm..*/
+    FastBisimulation /**< The Fast-Bisimulation Algorithm introduced by Dovier et al, 2001.*/
+};
+
 /** \brief The possible restriction applicable to the domain.
  *
  * These restrictions have mostly to do with the Kripke representation and

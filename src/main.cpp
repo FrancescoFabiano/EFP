@@ -54,6 +54,13 @@ void print_usage(char* prog_name)
 	std::cout << "		NONE: The Goal does not have restrictions. (Default)" << std::endl;
 	std::cout << "		NONEG: The Goal does not accept negative belief formula (-B(i,phi))." << std::endl;
 
+	std::cout << "-bis @bisimulation_type" << std::endl;
+	std::cout << "	Set the @bisimulation_type used for the kstate reduction." << std::endl;
+	std::cout << "	Possible @bisimulation_type:" << std::endl;
+	std::cout << "		NONE: No Bisimulation is used for the reduction. (Default)" << std::endl;
+	std::cout << "		PT: The Paige-Tarjan Algorithm." << std::endl;
+	std::cout << "		FB: The Fast-Bisimulation Algorithm introduced by Dovier et al, 2001." << std::endl;
+
 	std::cout << "-act_obsv @action_observability" << std::endl;
 	std::cout << "	Set the type of @action_observability for the action execution." << std::endl;
 	std::cout << "	Possible @action_observability:" << std::endl;
@@ -115,7 +122,7 @@ int main(int argc, char** argv)
 	bool results_file = false;
 	bool is_global_obsv = true;
 	bool check_visited = false;
-	bool bisimulation = false;
+	bis_type bisimulation = BIS_NONE;
 	heuristics used_heur = NO_H;
 	state_type state_struc = KRIPKE; //default
 	domain_restriction ini_restriction = S5; //default
@@ -261,9 +268,26 @@ int main(int argc, char** argv)
 				std::cerr << "Wrong specification for '-h'; use 'NONE' or 'L_PG' or 'S_PG' or 'C_PG' or 'SUBGOALS'." << std::endl;
 				exit(1);
 			}
-		} else if (strcmp(argv[i], "-bisimulation") == 0) {
-			bisimulation = true;
-		}else if (strcmp(argv[i], "-e") == 0) {
+		} else if (strcmp(argv[i], "-bis") == 0) {
+			i++;
+			if (i >= argc) {
+				std::cerr << "-bis needs specification (NONE,PT,FB)." << std::endl;
+				exit(1);
+			} else if (strcmp(argv[i], "NONE") == 0) {
+				std::cout << "No Bisimulation is used for the reduction. (Default)" << std::endl;
+				bisimulation = BIS_NONE; //default
+			} else if (strcmp(argv[i], "PT") == 0) {
+				std::cout << "The Paige-Tarjan Algorithm is used for kstate reduction." << std::endl;
+				bisimulation = PaigeTarjan;
+			} else if (strcmp(argv[i], "FB") == 0) {
+				std::cout << "The Fast-Bisimulation Algorithm introduced by Dovier et al, 2001 is used for kstate reduction." << std::endl;
+				bisimulation = FastBisimulation;
+			}
+			else {
+				std::cerr << "Wrong specification for '-gr'; use 'S5' or 'K45' or 'NONE'." << std::endl;
+				exit(1);
+			}
+		} else if (strcmp(argv[i], "-e") == 0) {
 			execute_given_actions = true;
 
 			if (i == argc - 1)
@@ -292,9 +316,9 @@ int main(int argc, char** argv)
 
 	//timer.start(READ_TIMER);
 	domain_reader->read();
-//	if (debug) {
-//		domain_reader->print();
-//	}
+	//	if (debug) {
+	//		domain_reader->print();
+	//	}
 
 	//Domain building
 	domain::get_instance().set_domain(domain_name, debug, state_struc, kopt, domain_reader, ini_restriction, goal_restriction, is_global_obsv, act_check, check_visited, bisimulation);

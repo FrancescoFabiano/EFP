@@ -33,7 +33,7 @@ void planner<T>::print_results(std::chrono::duration<double> elapsed_seconds, T 
 				result << "on KRIPKE with STANDARD transition function";
 			}
 
-			if (domain::get_instance().get_bisimulation()) {
+			if (domain::get_instance().get_bisimulation() != BIS_NONE) {
 				result << " and bisimulation";
 			}
 
@@ -75,7 +75,7 @@ bool planner<T>::search_BFS(bool results_file)
 
 	auto start_timing = std::chrono::system_clock::now();
 	initial.build_initial();
-	if (domain::get_instance().get_bisimulation()) initial.calc_min_bisimilar();
+	if (domain::get_instance().get_bisimulation() != BIS_NONE) initial.calc_min_bisimilar();
 
 	auto end_timing = std::chrono::system_clock::now();
 	std::chrono::duration<double> elapsed_seconds = end_timing - start_timing;
@@ -107,7 +107,7 @@ bool planner<T>::search_BFS(bool results_file)
 			if (popped_state.is_executable(tmp_action)) {
 				tmp_state = popped_state.compute_succ(tmp_action);
 				//tmp_state.print();
-				if (domain::get_instance().get_bisimulation()) tmp_state.calc_min_bisimilar();
+				if (domain::get_instance().get_bisimulation()!= BIS_NONE) tmp_state.calc_min_bisimilar();
 
 				if (tmp_state.is_goal()) {
 					end_timing = std::chrono::system_clock::now();
@@ -135,7 +135,7 @@ bool planner<T>::search_heur(bool results_file, heuristics used_heur)
 
 	auto start_timing = std::chrono::system_clock::now();
 	initial.build_initial();
-	if (domain::get_instance().get_bisimulation()) initial.calc_min_bisimilar();
+	if (domain::get_instance().get_bisimulation() != BIS_NONE) initial.calc_min_bisimilar();
 	auto end_timing = std::chrono::system_clock::now();
 	std::chrono::duration<double> elapsed_seconds = end_timing - start_timing;
 
@@ -171,7 +171,7 @@ bool planner<T>::search_heur(bool results_file, heuristics used_heur)
 			tmp_action = *it_acset;
 			if (popped_state.is_executable(tmp_action)) {
 				tmp_state = popped_state.compute_succ(tmp_action);
-				if (domain::get_instance().get_bisimulation()) tmp_state.calc_min_bisimilar();
+				if (domain::get_instance().get_bisimulation() != BIS_NONE) tmp_state.calc_min_bisimilar();
 				if (tmp_state.is_goal()) {
 					end_timing = std::chrono::system_clock::now();
 					elapsed_seconds = end_timing - start_timing;
@@ -211,7 +211,7 @@ void planner<T>::execute_given_actions(std::vector<std::string>& act_name)
 
 	if (domain::get_instance().get_debug()) {
 
-		if (domain::get_instance().get_bisimulation()) {
+		if (domain::get_instance().get_bisimulation() != BIS_NONE) {
 			state.calc_min_bisimilar();
 			bis_postfix = "__b";
 		}
@@ -231,7 +231,7 @@ void planner<T>::execute_given_actions(std::vector<std::string>& act_name)
 				if (state.is_executable(*it_acset)) {
 					state = state.compute_succ(*it_acset);
 					if (domain::get_instance().get_debug()) {
-						if (domain::get_instance().get_bisimulation()) {
+						if (domain::get_instance().get_bisimulation() != BIS_NONE) {
 							state.calc_min_bisimilar();
 							bis_postfix = "__bis";
 						}

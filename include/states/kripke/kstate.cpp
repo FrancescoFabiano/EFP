@@ -620,8 +620,8 @@ void kstate::calc_min_bisimilar()
 
 	// ************* Cleaning unreachable kworlds *************
 	//DEBUG_add_extra_world();
-	
-	
+
+
 
 	std::map<kworld_ptr, kworld_ptr_set> adj_list;
 	kedge_ptr_set::const_iterator it_keps;
@@ -651,10 +651,16 @@ void kstate::calc_min_bisimilar()
 	bisimulation b(kworld_vec, compact_indices);
 
 	//std::cerr << "\nDEBUG: IN MINIMIZE\n" << std::flush;
-	if (b.MinimizeAutomaPT(&a)) {
-		//std::cerr << "\nDEBUG: MINIMIZE DONE\n" << std::flush;
-		automaton_to_kstate(a, kworld_vec);
-		b.DisposeAutoma(&a);
+	if (domain::get_instance().get_bisimulation() == PaigeTarjan) {
+		if (b.MinimizeAutomaPT(&a)) {
+			automaton_to_kstate(a, kworld_vec);
+			b.DisposeAutoma(&a);
+		}
+	} else {
+		if (b.MinimizeAutomaFB(&a)) {
+			automaton_to_kstate(a, kworld_vec);
+			b.DisposeAutoma(&a);
+		}
 	}
 }
 
@@ -940,7 +946,7 @@ void kstate::remove_initial_kedge_bf(const belief_formula & to_check)
 /** \warning executability should be check in \ref state (or \ref planner).*/
 kstate kstate::compute_succ(const action & act) const
 {
-		switch ( act.get_type() ) {
+	switch ( act.get_type() ) {
 	case ONTIC:
 	{
 		/*kstate tmp = execute_ontic(act);

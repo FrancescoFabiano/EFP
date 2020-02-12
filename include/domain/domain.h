@@ -72,8 +72,8 @@ private:
     action_check m_act_check;
     /** \brief If the \ref search process should check for already visited_states.*/
     bool m_check_visited;
-    /** \brief If the \ref states are reduced in size with bisimulation*/
-    bool m_bisimulation;
+    /** \brief If the \ref states are reduced in size with bisimulation and with which algorithm*/
+    bis_type m_bisimulation;
 
     /** \brief Function that from the file stores the \ref agent information.*/
     void build_agents();
@@ -125,7 +125,7 @@ public:
      * @param[in] act_check: the \ref action_check to assign to \ref m_act_check.
      * @param[in] check_visited: If the \ref search process should check for already visited_states.
      * @param[in] bisimulation: If the \ref states are reduced in size with bisimulation.*/
-    void set_domain(std::string name, bool debug, state_type stype, bool k_opt, std::shared_ptr<reader> reader, domain_restriction ini_res, domain_restriction goal_res, bool is_global_obsv, action_check act_check, bool check_visited, bool bisimulation);
+    void set_domain(std::string name, bool debug, state_type stype, bool k_opt, std::shared_ptr<reader> reader, domain_restriction ini_res, domain_restriction goal_res, bool is_global_obsv, action_check act_check, bool check_visited, bis_type bisimulation);
 
     /** \brief Function that builds all the domain information.
      *
@@ -184,7 +184,7 @@ public:
     /** \brief Getter of the field \ref m_bisimulation.
      *
      * @return the field \ref m_bisimulation.*/
-    bool get_bisimulation();
+    bis_type get_bisimulation();
 
 
     /** \brief Getter of the field \ref m_intial_description.

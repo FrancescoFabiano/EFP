@@ -171,11 +171,13 @@ private:
     struct xPartition* X;
 
 
-    BIS_indexType maxRank = 0;
-    //adjList_1 *borderEdges[BIS_MAXINDEX];
+    BIS_indexType maxRank;
+    BIS_indexType rankPartition;
+
+    adjList_1 *borderEdges[BIS_MAXINDEX];
+    int t; //timestamp
     //borderEdges[i] stores the edges going to i from nodes of different rank
 
-    BIS_indexType rankPartition;
 
     BIS_indexType B1[BIS_MAXINDEX]; //copy of B
     BIS_indexType B_1[BIS_MAXINDEX]; //list to maintain E-1(B) and E-1(S-B)
@@ -201,7 +203,7 @@ private:
 
 
 
-    int InitFBA(BIS_indexType numberOfNodes);
+    int InitFBA();
 
     //compute Paige and Tarjan modified for the fast bisimulation algorithm.
     //It analysed only the nodes of Rank rank that are in the Xblock C.
@@ -218,7 +220,7 @@ private:
    Q[].prevBlock represents the color of the nodes during the DFS visit,
    Q[].superBlock represents the forefathers in the SCC,
    Q[].firstNode represents the finishing time of the first DFS visit in SCC()*/
-    void Rank(BIS_indexType numberOfNodes);
+    void Rank();
     void FirstDFS_visit(BIS_indexType i);
     void SecondDFS_visit(BIS_indexType i, BIS_indexType ff);
 
