@@ -401,6 +401,9 @@ void kstate::clean_unreachable_kworlds(std::map<kworld_ptr, kworld_ptr_set> & ad
 
 	reached_worlds.insert(get_pointed());
 	get_all_reachable_worlds(get_pointed(), reached_worlds, adj_list);
+	//reached_worlds = get_C_reachable_worlds(domain::get_instance().get_agents(),get_pointed());
+	//reached_worlds.insert(get_pointed());
+
 
 	for (it_keps = m_edges.begin(); it_keps != m_edges.end(); it_keps++) {
 		if (reached_worlds.find(it_keps->get_from()) != reached_worlds.end()) {
@@ -630,6 +633,7 @@ void kstate::calc_min_bisimilar()
 
 	std::map<kworld_ptr, kworld_ptr_set> adj_list;
 	kedge_ptr_set::const_iterator it_keps;
+
 
 	for (it_keps = m_edges.begin(); it_keps != m_edges.end(); it_keps++) {
 		adj_list[it_keps->get_from()].insert(it_keps->get_to());

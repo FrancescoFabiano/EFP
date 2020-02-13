@@ -67,4 +67,4 @@ initially C([a,b,c],-at_4);
 % 8 actions
 goal B(b, at_1);
 goal B(c,B(a,B(c,q)));
-goal (-B(b,q));
+goal ((-B(b, q)), (-B(b, (-q))));
