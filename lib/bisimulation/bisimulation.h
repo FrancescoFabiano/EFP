@@ -253,6 +253,6 @@ public:
     bool MinimizeAutomaFB(automa *A);
 
     bisimulation(/*const std::map<kworld_ptr, int> & index_map,*/ const std::vector<kworld_ptr> & kworld_vec, const std::map<int, int> & compact_indices);
-    //bisimulation();
+    ~bisimulation();
 
 };

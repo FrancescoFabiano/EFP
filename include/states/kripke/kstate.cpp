@@ -405,6 +405,13 @@ void kstate::clean_unreachable_kworlds(std::map<kworld_ptr, kworld_ptr_set> & ad
 	for (it_keps = m_edges.begin(); it_keps != m_edges.end(); it_keps++) {
 		if (reached_worlds.find(it_keps->get_from()) != reached_worlds.end()) {
 			reached_edges.insert(*it_keps);
+		} else {
+			adj_list[it_keps->get_from()].erase(it_keps->get_to());
+
+			if (adj_list[it_keps->get_from()].size() == 0) {
+				adj_list.erase(it_keps->get_from());
+				reached_worlds.erase(it_keps->get_from());
+			}
 		}
 	}
 
@@ -620,8 +627,6 @@ void kstate::calc_min_bisimilar()
 
 	// ************* Cleaning unreachable kworlds *************
 	//DEBUG_add_extra_world();
-
-
 
 	std::map<kworld_ptr, kworld_ptr_set> adj_list;
 	kedge_ptr_set::const_iterator it_keps;

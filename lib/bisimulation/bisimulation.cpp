@@ -1985,6 +1985,20 @@ bisimulation::bisimulation(/*const std::map<kworld_ptr, int> & index_map,*/ cons
 
 }
 
+bisimulation::~bisimulation()
+{
+	delete []G;
+	delete []Q;
+	delete []X;
+
+	// delete []B1;
+	// delete []B_1;
+	// delete []splitD;
+
+	// delete m_kworld_vec;
+	// delete m_compact_indices;
+}
+
 //
 //bisimulation::bisimulation(){
 //        struct graph G[BIS_MAXINDEX];
