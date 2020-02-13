@@ -439,20 +439,20 @@ void kstate::clean_unreachable_kworlds(const std::map<kworld_ptr, kworld_ptr_set
 	
 	
 	
-	std::cout << "\n\n\nDEBUG Original Edges:\n";
-	kedge_ptr_set::const_iterator it_print_e;
-	for (it_print_e = m_edges.begin(); it_print_e != m_edges.end(); it_print_e++) {
-		//printer::get_instance().print_list(domain::get_instance().get_grounder().deground_fluent(it_print->get_fluent_set()));
-		it_print_e->print();
-		//std::cerr << std::endl;
-	}
+//	std::cout << "\n\n\nDEBUG Original Edges:\n";
+//	kedge_ptr_set::const_iterator it_print_e;
+//	for (it_print_e = m_edges.begin(); it_print_e != m_edges.end(); it_print_e++) {
+//		//printer::get_instance().print_list(domain::get_instance().get_grounder().deground_fluent(it_print->get_fluent_set()));
+//		it_print_e->print();
+//		//std::cerr << std::endl;
+//	}
 
-		std::cout << "\nDEBUG Reached Edges:\n";
-	for (it_print_e = reached_edges.begin(); it_print_e != reached_edges.end(); it_print_e++) {
-		//printer::get_instance().print_list(domain::get_instance().get_grounder().deground_fluent(it_print->get_fluent_set()));
-		it_print_e->print();
-		//std::cerr << std::endl;
-	}
+//		std::cout << "\nDEBUG Reached Edges:\n";
+//	for (it_print_e = reached_edges.begin(); it_print_e != reached_edges.end(); it_print_e++) {
+//		//printer::get_instance().print_list(domain::get_instance().get_grounder().deground_fluent(it_print->get_fluent_set()));
+//		it_print_e->print();
+//		//std::cerr << std::endl;
+//	}
 	set_worlds(reached_worlds);
 	set_edges(reached_edges);
 
