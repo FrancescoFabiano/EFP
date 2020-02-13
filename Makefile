@@ -14,8 +14,18 @@ OBJS	=	$(BUILD_DIR)/bison.o $(BUILD_DIR)/lex.o $(BUILD_DIR)/main.o \
 
 			
 CC	= g++
-CFLAGS	= -g -Wall -ansi -Wfatal-errors -std=c++14 
-MAKEFLAGS += "-j -l $(shell grep -c ^processor /proc/cpuinfo)"
+
+BUILD := multi_t
+
+ifeq ($(BUILD),multi_t)
+       MAKEFLAGS += "-j -l $(shell grep -c ^processor /proc/cpuinfo)"
+endif
+
+ifeq ($(BUILD),valgrind)
+       MAKEFLAGS += "-fno-inline -j -l $(shell grep -c ^processor /proc/cpuinfo)"
+endif
+
+CFLAGS := -g -Wall -ansi -Wfatal-errors -std=c++14
 
 dir_guard = @mkdir -p $(@D)
 BUILD_DIR = build

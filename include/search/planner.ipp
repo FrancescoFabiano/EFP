@@ -72,12 +72,16 @@ bool planner<T>::search_BFS(bool results_file)
 	T initial;
 	bool check_visited = domain::get_instance().check_visited();
 	bool bisimulation = false;
-	if (domain::get_instance().get_bisimulation() != BIS_NONE){ bisimulation = true;}
+	if (domain::get_instance().get_bisimulation() != BIS_NONE) {
+		bisimulation = true;
+	}
 	std::set<T> visited_states;
 
 	auto start_timing = std::chrono::system_clock::now();
 	initial.build_initial();
-	if (bisimulation) {initial.calc_min_bisimilar();}
+	if (bisimulation) {
+		initial.calc_min_bisimilar();
+	}
 
 	auto end_timing = std::chrono::system_clock::now();
 	std::chrono::duration<double> elapsed_seconds = end_timing - start_timing;
@@ -109,7 +113,9 @@ bool planner<T>::search_BFS(bool results_file)
 			if (popped_state.is_executable(tmp_action)) {
 				tmp_state = popped_state.compute_succ(tmp_action);
 				//tmp_state.print();
-				if (bisimulation) {tmp_state.calc_min_bisimilar();}
+				if (bisimulation) {
+					tmp_state.calc_min_bisimilar();
+				}
 
 				if (tmp_state.is_goal()) {
 					end_timing = std::chrono::system_clock::now();
@@ -135,7 +141,9 @@ bool planner<T>::search_heur(bool results_file, heuristics used_heur)
 	bool check_visited = domain::get_instance().check_visited();
 	std::set<T> visited_states;
 	bool bisimulation = false;
-	if (domain::get_instance().get_bisimulation() != BIS_NONE){ bisimulation = true;}
+	if (domain::get_instance().get_bisimulation() != BIS_NONE) {
+		bisimulation = true;
+	}
 
 	auto start_timing = std::chrono::system_clock::now();
 	initial.build_initial();
@@ -175,7 +183,9 @@ bool planner<T>::search_heur(bool results_file, heuristics used_heur)
 			tmp_action = *it_acset;
 			if (popped_state.is_executable(tmp_action)) {
 				tmp_state = popped_state.compute_succ(tmp_action);
-				if (bisimulation) {tmp_state.calc_min_bisimilar();}
+				if (bisimulation) {
+					tmp_state.calc_min_bisimilar();
+				}
 				if (tmp_state.is_goal()) {
 					end_timing = std::chrono::system_clock::now();
 					elapsed_seconds = end_timing - start_timing;
@@ -203,10 +213,12 @@ void planner<T>::execute_given_actions(std::vector<std::string>& act_name)
 	check_actions_names(act_name);
 
 	bool bisimulation = false;
-	if (domain::get_instance().get_bisimulation() != BIS_NONE){ bisimulation = true;}
+	if (domain::get_instance().get_bisimulation() != BIS_NONE) {
+		bisimulation = true;
+	}
 	T state;
 	state.build_initial();
-	
+
 	if (state.is_goal()) {
 		std::cout << "\nInitial was Goal:)\n";
 	} else {
@@ -215,8 +227,8 @@ void planner<T>::execute_given_actions(std::vector<std::string>& act_name)
 
 	std::string bis_postfix = "";
 	if (bisimulation) {
-			state.calc_min_bisimilar();
-			bis_postfix = "__b";
+		state.calc_min_bisimilar();
+		bis_postfix = "__b";
 	}
 	if (domain::get_instance().get_debug()) {
 		state.print_graphviz(bis_postfix);
@@ -235,8 +247,8 @@ void planner<T>::execute_given_actions(std::vector<std::string>& act_name)
 				if (state.is_executable(*it_acset)) {
 					state = state.compute_succ(*it_acset);
 					if (bisimulation) {
-			state.calc_min_bisimilar();
-	}
+						state.calc_min_bisimilar();
+					}
 					if (domain::get_instance().get_debug()) {
 						state.print_graphviz(bis_postfix);
 					}

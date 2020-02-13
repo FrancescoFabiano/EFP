@@ -130,7 +130,7 @@ kworld_id kworld::get_id() const
 	return m_id;
 }
 
-unsigned int kworld::get_numerical_id() const
+int kworld::get_numerical_id() const
 {
 	return m_numerical_id;
 }
@@ -279,7 +279,7 @@ kworld_id kworld_ptr::get_id() const
 	exit(1);
 }
 
-unsigned int kworld_ptr::get_numerical_id() const
+int kworld_ptr::get_numerical_id() const
 {
 	if (m_ptr != nullptr) {
 		return(get_ptr()->get_numerical_id());

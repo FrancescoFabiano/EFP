@@ -220,9 +220,9 @@ private:
      * @param[in] kw: the current \ref kworld.
      * @param[in] reached_worlds: the set of all the reached \ref kworld.
      * @param[in] adj_list: the adjacency list of thr \ref kstate.*/
-    void get_all_reachable_worlds(const kworld_ptr & kw, kworld_ptr_set & reached_worlds, std::map<kworld_ptr, kworld_ptr_set> & adj_list) const;
+    void get_all_reachable_worlds(const kworld_ptr & kw, kworld_ptr_set & reached_worlds, const std::map<kworld_ptr, kworld_ptr_set> & adj_list) const;
     /** Function that cleares all the unreachable \ref kworld of *this*.*/
-    void clean_unreachable_kworlds(std::map<kworld_ptr, kworld_ptr_set> & adj_list);
+    void clean_unreachable_kworlds(const std::map<kworld_ptr, kworld_ptr_set> & adj_list);
 
     /** \brief Function that transforms *this* into an equivalent automaton.
      * 
@@ -231,14 +231,14 @@ private:
      * @param[in] compact_indices: we associate to the \ref kworld numerical ids a second kind of numerical ids. These new ids are consecutive numbers (hence, they are compact).
      * 
      * @return the automaton equivalent to *this*.*/
-    const automa kstate_to_automaton(std::map<kworld_ptr, kworld_ptr_set> & adj_list, std::map<kworld_ptr, int> & index_map, std::vector<kworld_ptr> & kworld_vec, std::map<int, int> & compact_indices) const;
+    const automa kstate_to_automaton(const std::map<kworld_ptr, kworld_ptr_set> & adj_list, std::vector<kworld_ptr> & kworld_vec) const;
     /** \brief Function that transforms the given automaton into an equivalent \ref kstate.
      * 
      * @param[in] a: the automaton to transform.
      * @param[in] kworld_vec: the vector of all \ref kworld.
      * 
      * @return the \ref kstate.*/
-    void automaton_to_kstate(automa & a, std::vector<kworld_ptr> & kworld_vec);
+    void automaton_to_kstate(automa & a, const std::vector<kworld_ptr> & kworld_vec);
 
 
     /** \brief Function that builds the initial Kripke structure given the initial conditions in a structural way.

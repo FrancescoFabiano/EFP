@@ -13,7 +13,9 @@ void bisimulation::FillStructures(automa *A)
 	    "fill_structure" che la analizzera' e creera' un grafo equivalente con i soli stati
 	    etichettati. La struttura dati in cui tale automa viene memorizzato e' G, anch'essa
 	    utilizzata dalle procedure che implementano PaigeTarjan e FastBisimulation.
+
 	    INPUT:      A, l'automa con soli archi etichettati che dev'essere convertito
+
 	    OUTPUT:     nessuno (Gli array X, Q e G sono globali, quindi non e' stato necessario
 			ritornare alcunche' come output)
 	 */
@@ -107,8 +109,10 @@ void bisimulation::CreateG(int num_v, v_elem *Gtemp)
 	    un elemento dell'array X, che rappresenta in modo univoco una etichetta del grafo). In altre
 	    parole, all'inizio, tutti gli stati con uguale etichetta apparterranno ad uno stesso blocco.
 	    L'array X ha dimensione pari al numero totale delle etichette.
+
 	    INPUT:      num_v, il numero di vertici del grafo Gtemp
 			Gtemp, il grafo con i soli archi etichettati
+
 	    OUTPUT:     nessuno (L'array G e' globale, quindi non e' stato necessario ritornare
 			alcunche' come output)
 	 */
@@ -219,7 +223,7 @@ void bisimulation::CreateG(int num_v, v_elem *Gtemp)
 			// lista di adiacenza di v, ovvero un nuovo arco che raggiunge lo stato appenza creato
 			*curr_adj = new struct adjList;
 			(*curr_adj)->node = numberOfNodes - 1;
-			(*curr_adj)->next = NULL;
+			(*curr_adj)->next = nullptr;
 			curr_adj = &((*curr_adj)->next);
 			//std::cerr << "\nDEBUG: Adj For Internal Internal\n" << std::flush;
 
@@ -237,7 +241,7 @@ void bisimulation::CreateG(int num_v, v_elem *Gtemp)
 				// un arco dal penultimo stato che abbiamo creato a quello appena creato
 				G[numberOfNodes - 1].adj = new struct adjList;
 				G[numberOfNodes - 1].adj->node = numberOfNodes;
-				G[numberOfNodes - 1].adj->next = NULL;
+				G[numberOfNodes - 1].adj->next = nullptr;
 
 				numberOfNodes++;
 				//Increment also for every bh the counter
@@ -250,7 +254,7 @@ void bisimulation::CreateG(int num_v, v_elem *Gtemp)
 			// Aggiornamento della lista di adiacenza dell'ultimo stato che abbiamo creato
 			G[numberOfNodes - 1].adj = new struct adjList;
 			G[numberOfNodes - 1].adj->node = Gtemp[v].e[e].tv;
-			G[numberOfNodes - 1].adj->next = NULL;
+			G[numberOfNodes - 1].adj->next = nullptr;
 			//std::cerr << "\nDEBUG: Here\n" << std::flush;
 
 			//e++;
@@ -280,7 +284,9 @@ void bisimulation::SetPointers(int n)
 	    qualunque elemento (blocco) di X, guardando il campo "firstBlock" e seguendo i puntatori agli
 	    elementi precedente e successivo, e' possibile individuare tutti gli stati appartenenti a tale
 	    blocco.
+
 	    INPUT:      n, il numero totale di etichette
+
 	    OUTPUT:     nessuno (G ed X sono globali)
 	 */
 
@@ -326,7 +332,9 @@ void bisimulation::GetMinimizedAutoma(automa *A)
 	    Questa funzione crea, a partire dal grafo minimizzato (con soli stati etichettati) memorizzato
 	    in G e dal grafo iniziale A (con soli archi etichettati) passato come input, il grafo minimizzato
 	    con soli archi etichettati, che verra' salvato su un file .FC2 dalla funzione "SaveToFC2"
+
 	    INPUT:      A, l'automa di partenza con i soli archi etichettati
+
 	    OUTPUT:     nessuno
 	 */
 
@@ -347,11 +355,14 @@ void bisimulation::MarkDeletedNodes()
 	    il valore che alcuni campi degli array G e Q assumono al termine della computazione delle
 	    funzioni che implementano gli algoritmi di PaigeTarjan e FastBisimulation. Tali stati vengono
 	    effettivamente eliminati dalle funzioni "DeleteNodes" e "SaveToFC2".
+
 	    Nota: le implementazioni degli algoritmi di minimizzazione qui proposte sono distruttive
 		  rispetto agli array Q ed X, pertanto l'unico modo per sapere quali stati sono bisimili
 		  tra loro, e' controllare il campo "block" di tali stati, che indica dunque il blocco
 		  cui essi appartengono.
+
 	    INPUT:      nessuno
+
 	    OUTPUT:     nessuno
 	 */
 
@@ -395,7 +406,9 @@ void bisimulation::DeleteNodes(automa *A)
 	    L'automa A che viene modificato da questa funzione verra' successivamente passato come input alla
 	    funzione "SaveToFC2" che capira' quali stati e quali archi debbano essere memorizzati nel file .FC2
 	    che produrra' come output.
+
 	    INPUT:      A, l'automa di partenza, con i soli archi etichettati
+
 	    OUTPUT:     nessuno
 	 */
 
@@ -435,8 +448,8 @@ void bisimulation::Inverse()
 
 	for (i = 0; i < numberOfNodes; i++) {
 		adj = G[i].adj;
-		while (adj != NULL) {
-			adj->countxS = NULL; //initialisation to avoid inconsistent pointers
+		while (adj != nullptr) {
+			adj->countxS = nullptr; //initialisation to avoid inconsistent pointers
 			a = new struct adjList_1;
 			a->node = i;
 			a->next = G[adj->node].adj_1;
@@ -522,11 +535,11 @@ int bisimulation::InitPaigeTarjan()
 	for (i = 0; i < numberOfNodes; i++) {
 		adj = G[i].adj;
 		//to avoid the creation of a counter set to zero
-		if (adj == NULL)
+		if (adj == nullptr)
 			continue;
 		cxS = new struct counter;
 		cxS->value = 0;
-		while (adj != NULL) {
+		while (adj != nullptr) {
 			(cxS->value)++;
 			/*each edge xEy contains a pointer to count(x,U);
 			remember that each edge y(E-1)x contains a pointer to the edge xEy!*/
@@ -664,7 +677,7 @@ void bisimulation::PaigeTarjan()
 		while (y != BIS_NIL) { //for each y belonging to B
 			B1[y] = G[y].nextInBlock; //copy the elements of B in B1
 			adj = G[y].adj_1;
-			while (adj != NULL) { //for each node in the adj_1 of y
+			while (adj != nullptr) { //for each node in the adj_1 of y
 				x = adj->node;
 				if (B_1[x] == numberOfNodes) {
 					//node not already added to E-1(B)
@@ -802,7 +815,7 @@ void bisimulation::PaigeTarjan()
 		b_1List = BIS_NIL;
 		while (y != BIS_NIL) { //for each y belonging to B1
 			adj = G[y].adj_1;
-			while (adj != NULL) { //for each node in the adj_1 of y -> scan xEy, y in B
+			while (adj != nullptr) { //for each node in the adj_1 of y -> scan xEy, y in B
 				x = adj->node;
 				if (G[x].countxB->value == adj->adj->countxS->value)
 					if (B_1[x] == numberOfNodes) {
@@ -935,7 +948,7 @@ void bisimulation::PaigeTarjan()
 
 			adj = G[y].adj_1;
 
-			while (adj != NULL) {//for each node in the adj_1 of y -> scan xEy, y in B
+			while (adj != nullptr) {//for each node in the adj_1 of y -> scan xEy, y in B
 				x = adj->node;
 				cxS = adj->adj->countxS;
 				if (cxS->value != 1) {
@@ -1035,6 +1048,7 @@ G[i].rank: rank of the nodes in G;
   collapsing nodes have not significant value and hence
     should refer to their forefather for the rank;
 G[i].WFflag represents the condition of well-fondness
+
 Q[].size is used to normalize the ranks: for an explanation see InitFba*/
 
 /*modified version of DFS_visit to optimise the computation of Rank();
@@ -1048,7 +1062,7 @@ void bisimulation::FirstDFS_visit(BIS_indexType i)
 	//visit G-1
 	adj_1 = G[i].adj_1;
 	Q[i].prevBlock = BIS_GRAY;
-	while (adj_1 != NULL) {
+	while (adj_1 != nullptr) {
 		j = adj_1->node;
 		if (Q[j].prevBlock == BIS_WHITE)
 			FirstDFS_visit(j);
@@ -1085,7 +1099,7 @@ void bisimulation::SecondDFS_visit(BIS_indexType i, BIS_indexType ff)
 		G[i].WFflag = false;
 
 	adj = G[i].adj;
-	while (adj != NULL) {
+	while (adj != nullptr) {
 		j = adj->node;
 		//it is the first time we visit j that is in the same SCC of i
 		if (Q[j].prevBlock == BIS_BLACK) {
@@ -1290,11 +1304,11 @@ int bisimulation::InitFBA()
 	for (i = 0; i < numberOfNodes; i++) {
 		adj = G[i].adj;
 		//to avoid the creation of a counter set to zero
-		if (adj == NULL)
+		if (adj == nullptr)
 			continue;
 		cxS = new struct counter;
 		cxS->value = 0;
-		while (adj != NULL) {
+		while (adj != nullptr) {
 			(cxS->value)++;
 			//each edge xEy contains a pointer to count(x,U);
 			//remember that each edge y(E-1)x contains a pointer to the edge xEy!
@@ -1312,9 +1326,9 @@ int bisimulation::InitFBA()
 	for (i = 0; i < numberOfNodes; i++) {
 		j = G[i].rank;
 		adj_1 = G[i].adj_1;
-		a = NULL;
-		b = NULL;
-		while (adj_1 != NULL) {
+		a = nullptr;
+		b = nullptr;
+		while (adj_1 != nullptr) {
 			next = adj_1->next;
 			if (j == G[adj_1->node].rank) {
 				adj_1->next = a;
@@ -1417,7 +1431,7 @@ void bisimulation::PaigeTarjan(BIS_indexType rank)
 		while (y != BIS_NIL) { //for each y belonging to B
 			B1[y] = G[y].nextInBlock; //copy the elements of B in B1
 			adj = G[y].adj_1;
-			while (adj != NULL) { //for each node in the adj_1 of y
+			while (adj != nullptr) { //for each node in the adj_1 of y
 				x = adj->node;
 				if (B_1[x] == numberOfNodes) {
 					//node not already added to E-1(B)
@@ -1568,7 +1582,7 @@ void bisimulation::PaigeTarjan(BIS_indexType rank)
 		b_1List = BIS_NIL;
 		while (y != BIS_NIL) { //for each y belonging to B1
 			adj = G[y].adj_1;
-			while (adj != NULL) { //for each node in the adj_1 of y -> scan xEy, y in B
+			while (adj != nullptr) { //for each node in the adj_1 of y -> scan xEy, y in B
 				x = adj->node;
 				if (G[x].countxB->value == adj->adj->countxS->value)
 					if (B_1[x] == numberOfNodes) {
@@ -1711,7 +1725,7 @@ void bisimulation::PaigeTarjan(BIS_indexType rank)
 		y = b1List;
 		while (y != BIS_NIL) { //for each y belonging to B
 			adj = G[y].adj_1;
-			while (adj != NULL) { //for each node in the adj_1 of y -> scan xEy, y in B
+			while (adj != nullptr) { //for each node in the adj_1 of y -> scan xEy, y in B
 				x = adj->node;
 				cxS = adj->adj->countxS;
 				if (cxS->value != 1) {
@@ -1756,7 +1770,7 @@ void bisimulation::Split(BIS_indexType B)
 	b_1List = BIS_NIL;
 	while (y != BIS_NIL) { //for each y belonging to B
 		adj = borderEdges[y]; //instead G[y].adj_1;
-		while (adj != NULL) { //for each node in the adj_1 of y
+		while (adj != nullptr) { //for each node in the adj_1 of y
 			x = adj->node;
 			if (B_1[x] == numberOfNodes) {
 				//node not already added to E-1(B)
@@ -1961,8 +1975,36 @@ bool bisimulation::MinimizeAutomaFB(automa *A)
 bisimulation::bisimulation()
 {
 
-	G = (graph *) malloc(sizeof(graph) * BIS_MAXINDEX);
+	BIS_indexType G_size = BIS_MAXINDEX;
+	
+	G = (graph *) malloc(sizeof(graph) * G_size);
 	Q = (qPartition *) malloc(sizeof(qPartition) * BIS_MAXINDEX);
 	X = (xPartition *) malloc(sizeof(xPartition) * BIS_MAXINDEX);
 
+	//m_index_map = index_map;
+//	m_kworld_vec = kworld_vec;
+//	m_compact_indices = compact_indices;
+
 }
+//
+//bisimulation::~bisimulation()
+//{
+//	delete []G;
+//	delete []Q;
+//	delete []X;
+//
+//	// delete []B1;
+//	// delete []B_1;
+//	// delete []splitD;
+//
+//	// delete m_kworld_vec;
+//	// delete m_compact_indices;
+//}
+
+//
+//bisimulation::bisimulation(){
+//        struct graph G[BIS_MAXINDEX];
+//        struct qPartition Q[BIS_MAXINDEX];
+//        struct xPartition X[BIS_MAXINDEX];
+//
+//}

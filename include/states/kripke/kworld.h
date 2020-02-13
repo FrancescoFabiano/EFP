@@ -104,7 +104,7 @@ private:
      * Only accessible by the \ref kworld_ptr.
      * 
      * @return the int that is the unique id of *this*.*/
-    unsigned int get_numerical_id() const;
+    int get_numerical_id() const;
 
 public:
     /** \brief Empty constructor, call the default constructor of all the fields.*/
@@ -301,7 +301,7 @@ public:
     /** \brief Function that return the field m_numerical_id of the pointed \ref kworld + \ref m_repetition.
      *     
      * @return the numerical id that is the id of the \ref kworld pointed by \ref m_ptr + \ref m_repetition.*/
-    unsigned int get_numerical_id() const;
+    int get_numerical_id() const;
 
 
     /** \brief Function that check the entailment of a single \ref fluent in \ref m_ptr.

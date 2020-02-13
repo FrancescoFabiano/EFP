@@ -33,7 +33,7 @@
 typedef int BIS_indexType;
 
 
-#define     BIS_MAX_bhtmp      400
+//#define     BIS_MAX_bhtmp      400
 #define     BIS_USED             1
 #define     BIS_NOTUSED          0
 #define     BIS_DELETED         -1
@@ -155,10 +155,22 @@ struct automa_struct
 //extern struct xPartition X[];
 // extern adjList_1 *borderEdges[];
 
+
+//extern BIS_indexType B1[]; //copy of B
+//extern BIS_indexType B_1[]; //list to maintain E-1(B) and E-1(S-B)
+//extern BIS_indexType splitD[]; //list of split blocks
+//extern BIS_indexType b1List, b_1List, dList; //starting pointers of the lists above
+//
+//
+//extern struct graph G[];
+//extern struct qPartition Q[];
+//extern struct xPartition X[];
+//extern adjList_1 *borderEdges[];
+
 class bisimulation
 {
 private:
-    int numberOfNodes;
+    int numberOfNodes = 0;
     //pointer to the complete structure of the graph (G,Q,X)
     BIS_indexType C;
 
@@ -166,30 +178,30 @@ private:
     BIS_indexType freeQBlock, QBlockLimit;
     BIS_indexType freeXBlock;
 
-    BIS_indexType maxRank;
-    BIS_indexType rankPartition;
     int t; //timestamp
 
 
-    struct graph* G;
-    struct qPartition* Q;
-    struct xPartition* X;
+    BIS_indexType maxRank;
+    BIS_indexType rankPartition;
 
 
 
+    BIS_indexType *B1; //copy of B
+    BIS_indexType *B_1; //list to maintain E-1(B) and E-1(S-B)
+    BIS_indexType *splitD; //list of split blocks
+    BIS_indexType b1List, b_1List, dList; //starting pointers of the lists above
 
-    adjList_1 *borderEdges[BIS_MAXINDEX];
+
+    graph* G;
+    qPartition* Q;
+    xPartition* X;
+    adjList_1 **borderEdges;
+
     //borderEdges[i] stores the edges going to i from nodes of different rank
 
 
-    BIS_indexType B1[BIS_MAXINDEX]; //copy of B
-    BIS_indexType B_1[BIS_MAXINDEX]; //list to maintain E-1(B) and E-1(S-B)
-    BIS_indexType splitD[BIS_MAXINDEX]; //list of split blocks
-    BIS_indexType b1List, b_1List, dList; //starting pointers of the lists above
 
-    //  std::map<kworld_ptr, int> m_index_map; // From kworld to int
-    //    std::vector<kworld_ptr> m_kworld_vec; // Vector of all kworld_ptr
-    //    std::map<int, int> m_compact_indices;
+
 
     //from  PaigeTarjan
     void PaigeTarjan();
@@ -254,8 +266,6 @@ public:
     /*Return true if bisimulation has been executed, false otherwise*/
     bool MinimizeAutomaPT(automa *A);
     bool MinimizeAutomaFB(automa *A);
-
     bisimulation();
-    // ~bisimulation();
-
+    ~bisimulation();
 };
