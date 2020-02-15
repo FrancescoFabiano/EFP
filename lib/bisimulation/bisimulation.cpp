@@ -1,5 +1,23 @@
 #include "bisimulation.h"
 
+/*\***IO_FC2.cpp****/
+void bisimulation::DisposeAutoma(automa *a)
+/* Rilascia la memoria allocata per l'automa */
+{
+	BIS_indexType i, j, Nv, Ne;
+	v_elem *Vertex;
+
+	Nv = a->Nvertex;
+	Vertex = a->Vertex;
+
+	for (i = 0; i < Nv; i++) {
+		Ne = Vertex[i].ne;
+		for (j = 0; j < Ne; j++) free(Vertex[i].e[j].bh);
+		free(Vertex[i].e);
+	}
+	free(a);
+}
+
 void bisimulation::FillStructures(automa *A)
 {
 	/*
@@ -13,7 +31,9 @@ void bisimulation::FillStructures(automa *A)
 	    "fill_structure" che la analizzera' e creera' un grafo equivalente con i soli stati
 	    etichettati. La struttura dati in cui tale automa viene memorizzato e' G, anch'essa
 	    utilizzata dalle procedure che implementano PaigeTarjan e FastBisimulation.
+
 	    INPUT:      A, l'automa con soli archi etichettati che dev'essere convertito
+
 	    OUTPUT:     nessuno (Gli array X, Q e G sono globali, quindi non e' stato necessario
 			ritornare alcunche' come output)
 	 */
@@ -28,7 +48,6 @@ void bisimulation::FillStructures(automa *A)
 	// l'elemento di indice "A->Nbehavs" non avra' alcun elemento successivo.
 	// Il campo "firstBlock" viene qui inizializzato a BIS_NIL, ma verra' riconsiderato e aggiornato
 	// correttamente dalla funzione "setpointers".
-	//std::cerr << "\nDEBUG: Started X\n" << std::flush;
 
 	// Inizializzazione del primo e dell'ultimo blocco di X
 	X[0].prevXBlock = BIS_NIL;
@@ -38,64 +57,24 @@ void bisimulation::FillStructures(automa *A)
 	X[A->Nbehavs - 1].nextXBlock = BIS_NIL;
 	X[A->Nbehavs - 1].firstBlock = BIS_NIL;
 
-
-
 	// Inizializzazione dei restanti blocchi di X
 	for (i = 1; i < (A->Nbehavs - 1); i++) {
 		X[i].nextXBlock = i + 1;
 		X[i].prevXBlock = i - 1;
 		X[i].firstBlock = BIS_NIL;
 	};
-	//std::cerr << "\nDEBUG: Done X\n" << std::flush;
 
 	// Questa funzione si occupa effettivamente della conversione del grafo "A", con i soli
 	// archi etichettati, in uno con i soli stati etichettati. Inoltre assegna ad ogni stato
 	// l'elemento di X che rappresenta la sua etichetta (per i dettagli si vedano le spiegazioni
 	// delle funzioni "createG" e "setpointers")
-
-	//std::cerr << "\nDEBUG: Create G\n" << std::flush;
-
 	CreateG(A->Nvertex, A->Vertex);
 
-	//std::cerr << "\nDEBUG: Create G Done\n" << std::flush;
-
 	// Gestione dei puntatori tra le strutture dati G ed X
-
-	//std::cerr << "\nDEBUG: Pointers\n" << std::flush;
-
 	SetPointers(A->Nbehavs);
-
-	//std::cerr << "\nDEBUG: Pointers Done\n" << std::flush;
-
 
 	// Procedura che inizializza i restanti campi di G (quelli non inizializzati dalle precedenti
 	// funzioni) e quelli di Q
-}
-
-void bisimulation::DisposeAutoma(automa *A)
-/* Rilascia la memoria allocata per l'automa */
-{
-	BIS_indexType i, j, Nv, Ne;
-	v_elem *Vertex;
-
-	Nv = A->Nvertex;
-	Vertex = A->Vertex;
-
-	//std::cerr << "\nDEBUG: Vado\n";
-	for (i = 0; i < Nv; i++) {
-		//std::cerr << "\nDEBUG: Vado 1\n";
-
-		Ne = Vertex[i].ne;
-		for (j = 0; j < Ne; j++) {
-			//std::cerr << "\nDEBUG: Vado 2\n";
-			free(Vertex[i].e[j].bh);
-		}
-		free(Vertex[i].e);
-	}
-	//std::cerr << "\nDEBUG: Vado 3\n";
-	//free(A);
-	//std::cerr << "\nDEBUG: Vado 4\n";
-
 }
 
 void bisimulation::CreateG(int num_v, v_elem *Gtemp)
@@ -107,8 +86,10 @@ void bisimulation::CreateG(int num_v, v_elem *Gtemp)
 	    un elemento dell'array X, che rappresenta in modo univoco una etichetta del grafo). In altre
 	    parole, all'inizio, tutti gli stati con uguale etichetta apparterranno ad uno stesso blocco.
 	    L'array X ha dimensione pari al numero totale delle etichette.
+
 	    INPUT:      num_v, il numero di vertici del grafo Gtemp
 			Gtemp, il grafo con i soli archi etichettati
+
 	    OUTPUT:     nessuno (L'array G e' globale, quindi non e' stato necessario ritornare
 			alcunche' come output)
 	 */
@@ -122,36 +103,10 @@ void bisimulation::CreateG(int num_v, v_elem *Gtemp)
 	// realta' la loro etichetta potrebbe assumere un qualunque valore). Tutti questi stati
 	// apparterranno quindi, come si puo' notare dall'assegnamento "G[v].block = 0", al blocco
 	// 0, ovvero all'elemento dell'array X di indice 0.
-	//	int n_agents = domain::get_instance().get_agents().size();
-	//	BIS_indexType n_id;
-
-
-	//std::cerr << "\nDEBUG: For\n" << std::flush;
-
-	//	std::vector<kworld_ptr>::const_iterator it_kwp;
-	//	int temp_counter = 0;
-	//	for (it_kwp = m_kworld_vec.begin(); it_kwp != m_kworld_vec.end(); it_kwp++) {
-	//		std::cerr << "DEBUG: World " << temp_counter << " has ID: " << it_kwp->get_numerical_id() << std::endl;
-	//		temp_counter++;
-	//	}
-
-
 	for (v = 0; v < num_v; v++) {
-		//n_id = m_compact_indices[m_kworld_vec[v].get_numerical_id()] + n_agents;
 		G[v].block = 0;
-		G[v].label = 0; // We reserve the values from 0 to n-1 to the labels of agents nodes
-		//G[v].rank = n_id; // We reserve the values from 0 to n-1 to the labels of agents nodes
-		//		if (n_id > maxRank) {
-		//			maxRank = n_id;
-		//		}
-
-		//std::cerr << "\nDEBUG:label " << G[v].block << std::endl;
-
-		//		n_id = 0;
-		//		G[v].block = m_compact_indices[n_id];
-		//		G[v].label = n_id + n_agents; // We reserve the values from 0 to n-1 to the labels of agents nodes
+		G[v].label = 0;
 	}
-	//std::cerr << "\nDEBUG: For Done\n" << std::flush;
 
 	// La variabile "numberOfNodes" e' globale e indica il numero totale di stati del grafo su
 	// cui verranno eseguiti gli algorimi di PaigeTarjan e FastBisimulation. A questo punto sono
@@ -172,48 +127,19 @@ void bisimulation::CreateG(int num_v, v_elem *Gtemp)
 	// etichetta "i" verso quello con etichetta "j". Ovviamente il primo degli "n" stati avra' un
 	// arco entrante proveniente dallo stato "v" che stiamo considerando, mentre l'ultimo degli "n"
 	// stati, avra' un arco uscente verso lo stato in cui giungeva l'arco che stiamo "spezzando".
-
-	//std::cerr << "\nDEBUG: Adj For start\n" << std::flush;
-
-
 	for (v = 0; v < num_v; v++) {
 		// Puntatore alla lista di adiacenza dello stato corrente, che verra' creata dalle seguenti
 		// linee di codice
 		curr_adj = &(G[v].adj);
 
-		//std::cerr << "\nDEBUG: " << num_v << "Adj For Internal start\n" << std::flush;
-
-
-		//We consider Gtemp[v].ne as the total number of edges, in the original version ne is edges/nb
-		//e = 0;
-
 		// Ciclo che considera tutti gli archi uscenti da "v"
 		for (e = 0; e < Gtemp[v].ne; e++) {
-
-			//Debug
-
 			// Creo un nuovo stato (il primo nella catena di etichette). Come detto precedentemente
-			// il campo "block" viene qui inizializzato con l'indice dell'elemento di X che rappresenta
+			// il campo "block" viene qui inizializzato con l'indice dell'elemento di X che rappresenta 
 			// l'etichetta dello stato che stiamo creando
-			//std::cerr << "\nDEBUG: Ini\n" << std::flush;
-			//std::cerr << "\nDEBUG: numberOfNodes is: " << numberOfNodes << std::endl;
-			//std::cerr << "\nDEBUG: e is: " << e << std::endl;
-			//std::cerr << "\nDEBUG: Gtemp[v].ne is: " << Gtemp[v].ne << std::endl;
-			//std::cerr << "\nDEBUG: v is: " << v << std::endl;
-			//std::cerr << "\nDEBUG: label is: " << G[numberOfNodes].label << std::endl;
-
-
 			G[numberOfNodes].block = Gtemp[v].e[e].bh[0];
-			//std::cerr << "\n1" << std::endl;
 			G[numberOfNodes].label = Gtemp[v].e[e].bh[0];
-			//std::cerr << "\nDEBUG:label " << G[numberOfNodes].label << std::endl;
-
-			//std::cerr << "\n2" << std::endl;
-
 			numberOfNodes++;
-			//	std::cerr << "\nDEBUG: numberOfNodes is: " << numberOfNodes << std::endl;
-			//std::cerr << "\nDEBUG: Break\n" << std::flush;
-
 
 			// Aggiornamento della lista di adiacenza di v. Viene aggiunto un nuovo elemento nella
 			// lista di adiacenza di v, ovvero un nuovo arco che raggiunge lo stato appenza creato
@@ -221,17 +147,14 @@ void bisimulation::CreateG(int num_v, v_elem *Gtemp)
 			(*curr_adj)->node = numberOfNodes - 1;
 			(*curr_adj)->next = NULL;
 			curr_adj = &((*curr_adj)->next);
-			//std::cerr << "\nDEBUG: Adj For Internal Internal\n" << std::flush;
 
 			// Creo gli stati dal secondo in poi nella catena delle etichette. Questo ciclo viene
 			// eseguito solamente nel caso in cui l'arco che stiamo considerando possegga piu' di
 			// una etichetta
-			for (b = 1; b < Gtemp[v].e[e].nbh; b++) { // **************************** TODO: CHECK IF LABELS AND BLOCKS ARE CORRECT!! ****************************
+			for (b = 1; b < Gtemp[v].e[e].nbh; b++) {
 				// Creo un nuovo stato
 				G[numberOfNodes].block = Gtemp[v].e[e].bh[b];
 				G[numberOfNodes].label = Gtemp[v].e[e].bh[b];
-				//DEBUG
-				//std::cerr << "\nDEBUG:label " << G[numberOfNodes].label << std::endl;
 
 				// Aggiorno la lista di adiacenza dello stato precedentemente creato, ovvero aggiungo
 				// un arco dal penultimo stato che abbiamo creato a quello appena creato
@@ -240,31 +163,14 @@ void bisimulation::CreateG(int num_v, v_elem *Gtemp)
 				G[numberOfNodes - 1].adj->next = NULL;
 
 				numberOfNodes++;
-				//Increment also for every bh the counter
-				//e1++;
 			}
-
-			//std::cerr << "\nDEBUG: Adj For Internal Internal Done\n" << std::flush;
-
 
 			// Aggiornamento della lista di adiacenza dell'ultimo stato che abbiamo creato
 			G[numberOfNodes - 1].adj = new struct adjList;
 			G[numberOfNodes - 1].adj->node = Gtemp[v].e[e].tv;
 			G[numberOfNodes - 1].adj->next = NULL;
-			//std::cerr << "\nDEBUG: Here\n" << std::flush;
-
-			//e++;
-
 		}
-		//Gtemp[v].ne = e;
-
-		//std::cerr << "\nDEBUG: Adj For Internal Done\n" << std::flush;
-
 	}
-	//std::cerr << "\nDEBUG: numberOfNodes is: " << numberOfNodes << std::endl;
-
-	//std::cerr << "\nDEBUG: Adj For Done\n" << std::flush;
-
 }
 
 void bisimulation::SetPointers(int n)
@@ -280,7 +186,9 @@ void bisimulation::SetPointers(int n)
 	    qualunque elemento (blocco) di X, guardando il campo "firstBlock" e seguendo i puntatori agli
 	    elementi precedente e successivo, e' possibile individuare tutti gli stati appartenenti a tale
 	    blocco.
+
 	    INPUT:      n, il numero totale di etichette
+
 	    OUTPUT:     nessuno (G ed X sono globali)
 	 */
 
@@ -326,7 +234,9 @@ void bisimulation::GetMinimizedAutoma(automa *A)
 	    Questa funzione crea, a partire dal grafo minimizzato (con soli stati etichettati) memorizzato
 	    in G e dal grafo iniziale A (con soli archi etichettati) passato come input, il grafo minimizzato
 	    con soli archi etichettati, che verra' salvato su un file .FC2 dalla funzione "SaveToFC2"
+
 	    INPUT:      A, l'automa di partenza con i soli archi etichettati
+
 	    OUTPUT:     nessuno
 	 */
 
@@ -347,11 +257,14 @@ void bisimulation::MarkDeletedNodes()
 	    il valore che alcuni campi degli array G e Q assumono al termine della computazione delle
 	    funzioni che implementano gli algoritmi di PaigeTarjan e FastBisimulation. Tali stati vengono
 	    effettivamente eliminati dalle funzioni "DeleteNodes" e "SaveToFC2".
+
 	    Nota: le implementazioni degli algoritmi di minimizzazione qui proposte sono distruttive
 		  rispetto agli array Q ed X, pertanto l'unico modo per sapere quali stati sono bisimili
 		  tra loro, e' controllare il campo "block" di tali stati, che indica dunque il blocco
 		  cui essi appartengono.
+
 	    INPUT:      nessuno
+
 	    OUTPUT:     nessuno
 	 */
 
@@ -395,7 +308,9 @@ void bisimulation::DeleteNodes(automa *A)
 	    L'automa A che viene modificato da questa funzione verra' successivamente passato come input alla
 	    funzione "SaveToFC2" che capira' quali stati e quali archi debbano essere memorizzati nel file .FC2
 	    che produrra' come output.
+
 	    INPUT:      A, l'automa di partenza, con i soli archi etichettati
+
 	    OUTPUT:     nessuno
 	 */
 
@@ -427,25 +342,8 @@ void bisimulation::DeleteNodes(automa *A)
 	}
 }
 
-void bisimulation::Inverse()
-{
-	BIS_indexType i;
-	struct adjList *adj;
-	struct adjList_1 *a;
-
-	for (i = 0; i < numberOfNodes; i++) {
-		adj = G[i].adj;
-		while (adj != NULL) {
-			adj->countxS = NULL; //initialisation to avoid inconsistent pointers
-			a = new struct adjList_1;
-			a->node = i;
-			a->next = G[adj->node].adj_1;
-			G[adj->node].adj_1 = a;
-			a->adj = adj;
-			adj = adj->next;
-		}
-	}
-}
+/*\***paigeTarjan.cpp****/
+//initialise paige and Tarjan
 
 int bisimulation::InitPaigeTarjan()
 {
@@ -460,9 +358,6 @@ int bisimulation::InitPaigeTarjan()
 			end = l;
 		Q[l].prevBlock = X[l].prevXBlock;
 		Q[l].nextBlock = X[l].nextXBlock;
-		//		if (Q[l].nextBlock == -1){
-		//			std::cerr << "\n\nDEBUG: E' COLPA MIA\n\n";
-		//		}
 		Q[l].firstNode = X[l].firstBlock;
 		Q[l].superBlock = 0;
 		//compute Q[].size
@@ -506,9 +401,6 @@ int bisimulation::InitPaigeTarjan()
 		B_1[i] = numberOfNodes;
 		splitD[i] = numberOfNodes;
 	}
-
-	//std::cerr << "\nDEBUG: N of Nodes" << numberOfNodes << std::endl;
-
 	Q[numberOfNodes - 1].nextBlock = BIS_NIL;
 	X[numberOfNodes - 1].nextXBlock = BIS_NIL;
 
@@ -547,74 +439,25 @@ void bisimulation::PaigeTarjan()
 	struct counter *cxS;
 	BIS_indexType x, y, d, e;
 
-	//std::cerr << "\nDEBUG: WHILE START\n" << std::flush;
-
-
-	//DEBUG
-	//	std::cerr << "\nDEBUG:Printing Q\n";
-	//	//for (int i = 0; i < Q->size; i++) {
-	//	int i = 0;
-	//	while(Q[i].nextBlock != BIS_NIL){
-	//		std::cerr << "\n\tQ[" << i << "]:";
-	//		std::cerr << "\n\t\tFirst Node:" << Q[i].firstNode;
-	//		std::cerr << "\n\t\tNext Block:" << Q[i].nextBlock;
-	//		std::cerr << "\n\t\tSize:" << Q[i].size;
-	//		std::cerr << "\n\t\tSuperblock: " << Q[i].superBlock;
-	//		i++;std::cerr
-	//	}
-	//	std::cerr << "\nDone Q\n";
-
-	//		std::cerr << "\nDEBUG:Printing X\n";
-	//	i = 0;
-	//	while(X[i].nextXBlock != BIS_NIL){
-	//		std::cerr << "\n\tX[" << i << "]:";
-	//		std::cerr << "\n\t\tFirst Node:" << X[i].firstBlock;
-	//		std::cerr << "\n\t\tNext Block:" << X[i].nextXBlock;
-	//		//std::cerr << "\n\t\tSize:" << X[i].size;
-	//		//std::cerr << "\n\t\tSuperblock: " << X[i].superBlock;
-	//		i++;
-	//	}
-	//	std::cerr << "\nDone X\n";
-
-
-
 	while (C != BIS_NIL) {
-		//std::cerr << "\nDEBUG: INI\n" << std::flush;
 
 		/*Step 1(select a refining block) & Step 2(update X)*/
 		//select some block S from C
 		S = C;
-		//std::cerr << "\nDEBUG: INI ASSIGNEMENT\n" << std::flush;
-
 		/*if S has more than two blocks, it has to be put back to C;
 		hence it is not removed from X until we are sure it is not still
 		compound after removing B from it*/
 
 		/*examine the first two blocks in the of blocks of Q contained in S;
 		let B be the smaller, remove B from S*/
-		/*std::cerr << "First Block Size: " << Q[X[S].firstBlock].size << std::endl;
-		std::cerr << "\n\n\n\nDEBUG:\n";
-		std::cerr << "\tS: " << S << std::endl;
-		std::cerr << "\tX[S].firstBlock: " << X[S].firstBlock << std::endl;
-		std::cerr << "\tQ[X[S].firstBlock].nextBlock: " << Q[X[S].firstBlock].nextBlock << std::endl;
-		std::cerr << "\tQ[Q[X[S].firstBlock].nextBlock].firstNode " << Q[Q[X[S].firstBlock].nextBlock].firstNode << std::endl;
-		std::cerr << "\nDEBUG:\n\n\n";
-		std::cerr << "\nAccessing the blocks : " << Q[X[S].firstBlock].firstNode << " and " << Q[Q[X[S].firstBlock].nextBlock].firstNode << std::endl;
-		std::cerr << "Error in accessing next block of: " << Q[Q[X[S].firstBlock].nextBlock].size << std::endl;*/
-		//		if (Q[X[S].firstBlock].nextBlock == -1) {
-		//			C = BIS_NIL;
-		//			break;
-		//		} else 
 		if (Q[X[S].firstBlock].size < Q[Q[X[S].firstBlock].nextBlock].size) {
-			//std::cerr << "\nDEBUG: FIRST IF\n" << std::flush;
-
 			B = X[S].firstBlock;
 			S_B = Q[X[S].firstBlock].nextBlock;
 			X[S].firstBlock = S_B;
 			Q[B].nextBlock = BIS_NIL;
 			Q[S_B].prevBlock = BIS_NIL;
+
 		} else {
-			//std::cerr << "\nDEBUG: FIRST ELSE\n" << std::flush;
 			B = Q[X[S].firstBlock].nextBlock;
 			S_B = X[S].firstBlock;
 			Q[S_B].nextBlock = Q[B].nextBlock;
@@ -623,9 +466,6 @@ void bisimulation::PaigeTarjan()
 			Q[B].nextBlock = BIS_NIL;
 			Q[B].prevBlock = BIS_NIL;
 		}
-		//std::cerr << "Accessed the blocks" << std::endl;
-		//std::cerr << "\nDEBUG: FIRST IF ELSE DONE\n" << std::flush;
-
 
 		//and create a new simple block S1 of X containing B as its only block of Q
 		S1 = freeXBlock;
@@ -647,9 +487,6 @@ void bisimulation::PaigeTarjan()
 			/*WE DO NOT FREE THE BLOCK S: the XBlock still exists but it is
 			not in the chain of C*/
 		}
-
-		//std::cerr << "\nDEBUG: STEP 2 DONE\n" << std::flush;
-
 
 		/*Step 3(compute E-1(B))*/
 		/*by scanning the edges xEy such that y belongs to B
@@ -679,12 +516,8 @@ void bisimulation::PaigeTarjan()
 					(G[x].countxB->value)++;
 				adj = adj->next; //next node in the adj_1 of y
 			}
-			//std::cerr << "\nDEBUG: STEP 3 2-WHILE\n" << std::flush;
-
 			y = G[y].nextInBlock; //next node y belonging to B
 		}
-		//std::cerr << "\nDEBUG: STEP 3 1-WHILE\n" << std::flush;
-
 
 		/*Step 4(refine Q with respect to B)*/
 		/*for each block D of Q containing some element of E-1(B)
@@ -751,8 +584,6 @@ void bisimulation::PaigeTarjan()
 			B_1[y] = numberOfNodes;
 		}//endwhile
 
-		//std::cerr << "\nDEBUG: STEP 4 1-WHILE DONE\n" << std::flush;
-
 		//dList points to the list of new blocks splitD
 		d = dList;
 		while (d != BIS_NIL) {
@@ -790,7 +621,6 @@ void bisimulation::PaigeTarjan()
 			//re-initialisation of splitD
 			splitD[e] = numberOfNodes;
 		}
-		//std::cerr << "\nDEBUG: STEP 4 2-WHILE DONE\n" << std::flush;
 
 		/*Step 5(compute E-1(B) - E-1(S_B))*/
 		/*Scan each x such that xEy and y belongs to B; determine count(x,B)
@@ -814,7 +644,6 @@ void bisimulation::PaigeTarjan()
 			}
 			y = B1[y];
 		}
-		//std::cerr << "\nDEBUG: STEP 5 DONE\n" << std::flush;
 
 		/*Step 6(refine Q with respect to S_B)*/
 		/*proceed exactly as in Step 4, but scan E-1(B) - E_1(S - B)
@@ -882,7 +711,6 @@ void bisimulation::PaigeTarjan()
 			//re-initialisation of B_1
 			B_1[y] = numberOfNodes;
 		}//endwhile
-		//std::cerr << "\nDEBUG: STEP 6 1-WHILE DONE\n" << std::flush;
 
 		//dList points to the list of new blocks splitD
 		d = dList;
@@ -920,9 +748,6 @@ void bisimulation::PaigeTarjan()
 			splitD[e] = numberOfNodes;
 		}
 
-		////std::cerr << "\nDEBUG: STEP 6 2-WHILE DONE\n" << std::flush;
-
-
 		/*Step 7(update counts)*/
 		/*scan the edges xEy tc y belongs to B1.
 		To process an edge decrement count(x,S) (to which xEy points).
@@ -930,11 +755,8 @@ void bisimulation::PaigeTarjan()
 		and make xEy point to count(x,B) (to which x points).
 		Discard B1 (re-initialise it).*/
 		y = b1List;
-
 		while (y != BIS_NIL) { //for each y belonging to B
-
 			adj = G[y].adj_1;
-
 			while (adj != NULL) {//for each node in the adj_1 of y -> scan xEy, y in B
 				x = adj->node;
 				cxS = adj->adj->countxS;
@@ -954,13 +776,40 @@ void bisimulation::PaigeTarjan()
 			//re-initialisation of B1
 			B1[x] = numberOfNodes;
 		}
-		//std::cerr << "\nDEBUG: STEP 7 DONE\n" << std::flush;
-
 	}//end while
-
-
 }
 
+
+/*\***fastBisimulation.cpp****/
+
+//FUNCTIONS
+//construct the inverse of the graph represented by adjacency list
+
+void bisimulation::Inverse()
+{
+	BIS_indexType i;
+	struct adjList *adj;
+	struct adjList_1 *a;
+
+	for (i = 0; i < numberOfNodes; i++) {
+		adj = G[i].adj;
+		while (adj != NULL) {
+			adj->countxS = NULL; //initialisation to avoid inconsistent pointers
+			a = new struct adjList_1;
+			a->node = i;
+			a->next = G[adj->node].adj_1;
+			G[adj->node].adj_1 = a;
+			a->adj = adj;
+			adj = adj->next;
+		}
+	}
+}
+
+/* modified strongly connected component;
+   the first visit is for G-1 and the second for G;
+   Q[].prevBlock represents the color of the nodes during the DFS visit,
+   Q[].superBlock represents the forefathers in the SCC,
+   Q[].firstNode represents the finishing time of the first DFS visit in SCC()*/
 void bisimulation::Rank()
 {
 	BIS_indexType i, temp, r;
@@ -995,9 +844,9 @@ void bisimulation::Rank()
 			SecondDFS_visit(temp, temp);
 			//to normalize the ranks:
 			r = G[temp].rank;
-			if (r != -1){
-				if ((r % 2) != 0){
-					Q[r / 2].size = 2;}
+			if (r != -1) {
+				if ((r % 2) != 0)
+					Q[r / 2].size = 2;
 				else {
 					if (Q[r / 2].size == 0)
 						Q[r / 2].size = 1;
@@ -1035,6 +884,7 @@ G[i].rank: rank of the nodes in G;
   collapsing nodes have not significant value and hence
     should refer to their forefather for the rank;
 G[i].WFflag represents the condition of well-fondness
+
 Q[].size is used to normalize the ranks: for an explanation see InitFba*/
 
 /*modified version of DFS_visit to optimise the computation of Rank();
@@ -1918,19 +1768,46 @@ void bisimulation::FastBisimulationAlgorithm()
 	}
 }
 
+void bisimulation::VisAutoma(automa *a)
+{
+	int i, j, k;
+	v_elem *Vertex;
+	bhtab *behavs;
+	int Nvertex, Nbehavs;
+
+
+	Nvertex = a->Nvertex;
+	Nbehavs = a->Nbehavs;
+	Vertex = a->Vertex;
+	behavs = a->behavs;
+
+	std::cout << "Numero Vertici: " << Nvertex << "\nNumero behavs: " << Nbehavs << std::endl;
+	std::cout << "\nTabella dei behavs\n";
+	for (i = 0; i < Nbehavs; i++) std::cout << i << ": " << behavs->bh[i] << std::endl;
+
+	std::cout << "\n Vertici e relativi archi\n";
+	for (i = 0; i < Nvertex; i++) {
+		if (Vertex[i].ne > 0) {
+			std::cout << "\nNe[" << i << "] = " << Vertex[i].ne << std::endl;
+			for (j = 0; j < Vertex[i].ne; j++) {
+				for (k = 0; k < Vertex[i].e[j].nbh; k++) std::cout << Vertex[i].e[j].bh[k] << ".";
+				std::cout << " -> " << Vertex[i].e[j].tv << std::endl;
+			}
+		}
+	}
+}
+
+/*----------------------------------------------------------------------------*/
+
 bool bisimulation::MinimizeAutomaPT(automa *A)
 {
-	//	std::cerr << "\nDEBUG: IN MINIMIZE\n" << std::flush;
 	FillStructures(A);
-	//	std::cerr << "\nDEBUG: Filled structures\n" << std::flush;
-
 	Inverse();
-
-	//	std::cerr << "\nDEBUG: Inverse done\n" << std::flush;
 
 
 	if (InitPaigeTarjan() == 0) {
 		PaigeTarjan();
+
 
 		GetMinimizedAutoma(A);
 		return true;

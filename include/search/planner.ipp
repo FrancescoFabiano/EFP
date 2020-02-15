@@ -243,7 +243,7 @@ void planner<T>::execute_given_actions(std::vector<std::string>& act_name)
 	for (it_stset = act_name.begin(); it_stset != act_name.end(); it_stset++) {
 		for (it_acset = domain::get_instance().get_actions().begin(); it_acset != domain::get_instance().get_actions().end(); it_acset++) {
 			if ((*it_acset).get_name().compare(*it_stset) == 0) {
-				//std::cout << "\n\nTrying action " << (*it_acset).get_name() << "\n";
+				//std::cout << "\n\nDEBUG: Executing action " << (*it_acset).get_name() << "\n";
 				if (state.is_executable(*it_acset)) {
 					state = state.compute_succ(*it_acset);
 					if (bisimulation) {

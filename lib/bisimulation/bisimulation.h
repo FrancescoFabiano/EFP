@@ -166,19 +166,16 @@ private:
     BIS_indexType freeQBlock, QBlockLimit;
     BIS_indexType freeXBlock;
 
-    BIS_indexType maxRank;
-    BIS_indexType rankPartition;
-    int t; //timestamp
-
-
     struct graph* G;
     struct qPartition* Q;
     struct xPartition* X;
 
 
-
+    BIS_indexType maxRank;
+    BIS_indexType rankPartition;
 
     adjList_1 *borderEdges[BIS_MAXINDEX];
+    int t; //timestamp
     //borderEdges[i] stores the edges going to i from nodes of different rank
 
 
@@ -188,8 +185,8 @@ private:
     BIS_indexType b1List, b_1List, dList; //starting pointers of the lists above
 
     //  std::map<kworld_ptr, int> m_index_map; // From kworld to int
-    //    std::vector<kworld_ptr> m_kworld_vec; // Vector of all kworld_ptr
-    //    std::map<int, int> m_compact_indices;
+    std::vector<kworld_ptr> m_kworld_vec; // Vector of all kworld_ptr
+    std::map<int, int> m_compact_indices;
 
     //from  PaigeTarjan
     void PaigeTarjan();
@@ -248,6 +245,8 @@ private:
 public:
     /* Rilascia la memoria allocata per l'automa */
     void DisposeAutoma(automa *A);
+    void VisAutoma(automa *A);
+
 
     /* Our implementation */
 
@@ -256,6 +255,6 @@ public:
     bool MinimizeAutomaFB(automa *A);
 
     bisimulation();
-    // ~bisimulation();
+
 
 };

@@ -222,7 +222,7 @@ private:
      * @param[in] adj_list: the adjacency list of thr \ref kstate.*/
     void get_all_reachable_worlds(const kworld_ptr & kw, kworld_ptr_set & reached_worlds, const std::map<kworld_ptr, kworld_ptr_set> & adj_list) const;
     /** Function that cleares all the unreachable \ref kworld of *this*.*/
-    void clean_unreachable_kworlds(const std::map<kworld_ptr, kworld_ptr_set> & adj_list);
+    void clean_unreachable_kworlds(std::map<kworld_ptr, kworld_ptr_set> & adj_list);
 
     /** \brief Function that transforms *this* into an equivalent automaton.
      * 
@@ -238,7 +238,7 @@ private:
      * @param[in] kworld_vec: the vector of all \ref kworld.
      * 
      * @return the \ref kstate.*/
-    void automaton_to_kstate(automa & a, const std::vector<kworld_ptr> & kworld_vec);
+    void automaton_to_kstate(const automa & a, const std::vector<kworld_ptr> & kworld_vec);
 
 
     /** \brief Function that builds the initial Kripke structure given the initial conditions in a structural way.

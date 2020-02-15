@@ -135,7 +135,8 @@ bool kedge::operator=(const kedge& to_assign)
 	set_from(to_assign.get_from());
 	set_to(to_assign.get_to());
 	set_label(to_assign.get_label());
-	set_id();
+	//set_id();
+	m_edge_id = to_assign.get_id();
 	return true;
 }
 
