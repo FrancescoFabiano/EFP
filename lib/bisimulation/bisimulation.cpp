@@ -1770,32 +1770,59 @@ void bisimulation::FastBisimulationAlgorithm()
 
 void bisimulation::VisAutoma(automa *a)
 {
-	int i, j, k;
-	v_elem *Vertex;
-	bhtab *behavs;
-	int Nvertex, Nbehavs;
+  int i, j, k;
+  v_elem *Vertex;
+  bhtab *behavs;
+  int Nvertex, Nbehavs;
 
 
-	Nvertex = a->Nvertex;
-	Nbehavs = a->Nbehavs;
-	Vertex = a->Vertex;
-	behavs = a->behavs;
+  Nvertex = a->Nvertex;
+  Nbehavs = a->Nbehavs;
+  Vertex  = a->Vertex;
+  behavs  = a->behavs;
 
-	std::cout << "Numero Vertici: " << Nvertex << "\nNumero behavs: " << Nbehavs << std::endl;
-	std::cout << "\nTabella dei behavs\n";
-	for (i = 0; i < Nbehavs; i++) std::cout << i << ": " << behavs->bh[i] << std::endl;
+  std::printf("Numero Vertici: %d\nNumero behavs: %d\n",Nvertex,Nbehavs);
+  std::printf("\nTabella dei behavs\n");
+  for (i=0; i<Nbehavs; i++) std::printf("%d: %s\n",i,behavs->bh[i]);
 
-	std::cout << "\n Vertici e relativi archi\n";
-	for (i = 0; i < Nvertex; i++) {
-		if (Vertex[i].ne > 0) {
-			std::cout << "\nNe[" << i << "] = " << Vertex[i].ne << std::endl;
-			for (j = 0; j < Vertex[i].ne; j++) {
-				for (k = 0; k < Vertex[i].e[j].nbh; k++) std::cout << Vertex[i].e[j].bh[k] << ".";
-				std::cout << " -> " << Vertex[i].e[j].tv << std::endl;
-			}
-		}
-	}
+  std::printf("\n Vertici e relativi archi\n");
+  for (i=0; i<Nvertex; i++) {
+    std::printf("\nNe[%d] = %d\n",i,Vertex[i].ne);
+    for (j=0; j<Vertex[i].ne; j++) {
+      for (k=0; k<Vertex[i].e[j].nbh; k++) std::printf("%d.",Vertex[i].e[j].bh[k]);
+      std::printf(" ->%d\n",Vertex[i].e[j].tv);
+    }
+  }
 }
+
+//void bisimulation::VisAutoma(automa *a)
+//{
+//	int i, j, k;
+//	v_elem *Vertex;
+//	bhtab *behavs;
+//	int Nvertex, Nbehavs;
+//
+//
+//	Nvertex = a->Nvertex;
+//	Nbehavs = a->Nbehavs;
+//	Vertex = a->Vertex;
+//	behavs = a->behavs;
+//
+//	std::cout << "Numero Vertici: " << Nvertex << "\nNumero behavs: " << Nbehavs << std::endl;
+//	std::cout << "\nTabella dei behavs\n";
+//	for (i = 0; i < Nbehavs; i++) std::cout << i << ": " << behavs->bh[i] << std::endl;
+//
+//	std::cout << "\n Vertici e relativi archi\n";
+//	for (i = 0; i < Nvertex; i++) {
+//		if (Vertex[i].ne > 0) {
+//			std::cout << "\nNe[" << i << "] = " << Vertex[i].ne << std::endl;
+//			for (j = 0; j < Vertex[i].ne; j++) {
+//				for (k = 0; k < Vertex[i].e[j].nbh; k++) std::cout << Vertex[i].e[j].bh[k] << ".";
+//				std::cout << " -> " << Vertex[i].e[j].tv << std::endl;
+//			}
+//		}
+//	}
+//}
 
 /*----------------------------------------------------------------------------*/
 
