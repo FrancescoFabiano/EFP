@@ -1772,18 +1772,14 @@ void bisimulation::VisAutoma(automa *a)
 {
   int i, j, k;
   v_elem *Vertex;
-  bhtab *behavs;
   int Nvertex, Nbehavs;
 
 
   Nvertex = a->Nvertex;
   Nbehavs = a->Nbehavs;
   Vertex  = a->Vertex;
-  behavs  = a->behavs;
 
   std::printf("Numero Vertici: %d\nNumero behavs: %d\n",Nvertex,Nbehavs);
-  std::printf("\nTabella dei behavs\n");
-  for (i=0; i<Nbehavs; i++) std::printf("%d: %s\n",i,behavs->bh[i]);
 
   std::printf("\n Vertici e relativi archi\n");
   for (i=0; i<Nvertex; i++) {

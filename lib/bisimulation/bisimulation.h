@@ -119,7 +119,7 @@ struct xPartition
 //DATA STRUCTURES BIS_USED FOR THE INPUT AND THE OUTPUT FROM FC2 FILES
 typedef struct e_elem_struct e_elem;
 typedef struct v_elem_struct v_elem;
-typedef struct bhtab_struct bhtab;
+// typedef struct bhtab_struct bhtab;
 typedef struct automa_struct automa;
 
 struct e_elem_struct
@@ -135,19 +135,11 @@ struct v_elem_struct
     e_elem *e; // Vettore di edges
 };
 
-struct bhtab_struct
-{
-    int ap; // Azioni Predefinite (set to 0)
-    int n; // Number of Behaviors (Agents)
-    char **bh; // Name of the Behaviors (Agents)
-};
-
 struct automa_struct
 {
     int Nvertex;
     int Nbehavs;
     v_elem *Vertex;
-    bhtab *behavs;
 };
 
 //extern struct graph G[];
