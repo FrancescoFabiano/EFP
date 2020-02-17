@@ -428,45 +428,29 @@ const automa kstate::kstate_to_automaton(const std::map<kworld_ptr, kworld_ptr_s
 
 	std::map<int, int> compact_indices;
 	std::map<kworld_ptr, int> index_map;
+	kbislabel_map label_map; // Map: from -> (to -> ag_set)
 
 	automa *a;
 	int Nvertex = get_worlds().size();
+	int ag_set_size = domain::get_instance().get_agents().size();
 	//BIS_ADAPTATION For the loop that identifies the id (We add one edge for each node)
 	v_elem *Vertex;
-	bhtab *behavs;
 
 	Vertex = (v_elem *) malloc(sizeof(v_elem) * Nvertex);
-	behavs = (bhtab *) malloc(sizeof(bhtab));
-
-	// Initializating behavs
-	int ag_set_size = domain::get_instance().get_agents().size();
-	bis_label_set::const_iterator it_bislab;
-
-
-
-	//std::cerr << "\nDEBUG: Fine Inizializzazione Behavs\n";
-
 
 	// Initializating vertices
 	kworld_ptr_set::const_iterator it_kwps;
 	kedge_ptr_set::const_iterator it_keps;
 	kbislabel_map::const_iterator it_klm;
+	bis_label_set::const_iterator it_bislab;
 	std::map<kworld_ptr, bis_label_set>::const_iterator it_kw_bislab;
 
-	// std::map<kworld_ptr, int> edge_counter;
-	kbislabel_map label_map; // Map: from -> (to -> ag_set)
-
 	//std::cerr << "\nDEBUG: Inizializzazione Edges\n";
-
-
-	// Building a temporary adjacency list and calculating the number of outgoing edges for each kworld
 
 	// The pointed world is set to the index 0. This ensures that, when deleting the bisimilar nodes, the pointed kworld
 	// is always chosen as the first of its block. Therefore, we do not need to update it when converting back to a kstate
 	index_map[get_pointed()] = 0;
 	kworld_vec.push_back(get_pointed());
-
-
 	compact_indices[get_pointed().get_numerical_id()] = 0;
 
 	//For the loop that identifies the id
@@ -480,11 +464,9 @@ const automa kstate::kstate_to_automaton(const std::map<kworld_ptr, kworld_ptr_s
 	//	}
 	//	Vertex[0].e = (e_elem *) malloc(sizeof(e_elem) * Vertex[0].ne);
 
-	//int i = 1, c = 1;
 	int i = 1, c = 1;
 
 	//std::cerr << "\nDEBUG: Inizializzazione Vertex\n";
-
 
 	for (it_kwps = m_worlds.begin(); it_kwps != m_worlds.end(); it_kwps++) {
 		if (!(*it_kwps == get_pointed())) {
@@ -511,23 +493,8 @@ const automa kstate::kstate_to_automaton(const std::map<kworld_ptr, kworld_ptr_s
 
 	//BIS_ADAPTATION For the loop that identifies the id (We add one potential label for each node)
 	int bhtabSize = ag_set_size + c;
-	char label[32];
-
-	behavs->ap = 0;
-	behavs->n = bhtabSize;
-	//Here something is fishy
-	//@PER_BURI: Questa allocazione mi puzza la puoi controllare; a noi serve behavs? Se lo eliminassimo anche da bismulation?
-	//@PER_BURI: Quando stampi behavs legge memoria a caso (Lo vedi con VisAutoma).
-	behavs->bh = (char **) malloc(sizeof(bhtab) * bhtabSize);
 
 	//std::cerr << "\nDEBUG: Inizializzazione Behavs\n";
-
-	//BIS_ADAPTATION Added new labels
-	for (int l = 0; l < bhtabSize; l++) {
-		std::strcpy(label, std::to_string(l).c_str());
-		behavs->bh[l] = label;
-	}
-
 
 	//BIS_ADAPTATION (Moved down here)
 	for (it_keps = m_edges.begin(); it_keps != m_edges.end(); it_keps++) {
@@ -565,13 +532,6 @@ const automa kstate::kstate_to_automaton(const std::map<kworld_ptr, kworld_ptr_s
 			to = index_map[it_kw_bislab->first];
 			//nbh = it_kw_bislab->second.size();
 
-			//std::cerr << "\nDEBUG: 1\n";
-
-
-
-
-			//std::cerr << "\nDEBUG: 2\n";
-
 			for (it_bislab = it_kw_bislab->second.begin(); it_bislab != it_kw_bislab->second.end(); it_bislab++) { // For each agent 'ag' in the label of the kedge
 				//std::cerr << "\nDEBUG: j is: " << j << " and k is: " << k << "\n";
 				//nbh = 1;
@@ -608,11 +568,9 @@ const automa kstate::kstate_to_automaton(const std::map<kworld_ptr, kworld_ptr_s
 	a->Nvertex = Nvertex;
 	a->Nbehavs = Nbehavs;
 	a->Vertex = Vertex;
-	a->behavs = behavs;
 
 	//	std::cerr << "\nDEBUG: \n\tNvertex = " << Nvertex << std::endl;
 	//	std::cerr << "\tNbehavs = " << Nbehavs << std::endl;
-
 
 	return *a;
 }
@@ -634,7 +592,6 @@ void kstate::automaton_to_kstate(const automa & a, const std::vector<kworld_ptr>
 				for (k = 0; k < a.Vertex[i].e[j].nbh; k++) {
 					label = a.Vertex[i].e[j].bh[k];
 					if (label < agents_size) {
-						//@PER_BURI: Qui non bisognerebbe anche controllare che "a.Vertex[i].e[j].tv" esista?
 						edges.insert(kstore::get_instance().add_edge(kedge(kworld_vec[i], kworld_vec[a.Vertex[i].e[j].tv], label)));
 					}
 				}
@@ -650,7 +607,6 @@ void kstate::automaton_to_kstate(const automa & a, const std::vector<kworld_ptr>
 
 	set_worlds(worlds);
 	set_edges(edges);
-
 }
 
 void kstate::calc_min_bisimilar()
