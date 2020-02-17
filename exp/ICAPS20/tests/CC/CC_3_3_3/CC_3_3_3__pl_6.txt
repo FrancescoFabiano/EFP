@@ -301,5 +301,5 @@ initially C([a,b,c], (at_b3_1, -at_b3_3) | (-at_b3_1, at_b3_3));
 goal B(b,at_b1_1);
 goal B(b,at_b2_3);
 goal C([a,b], at_b2_3);
-goal B(a,at_a_2);
-goal B(b,at_a_2);
+goal B(a,at_b1_1);
+goal B(a, ((-B(b,at_b1_1), (-B(b,-at_b1_1)))));

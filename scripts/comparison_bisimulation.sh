@@ -10,24 +10,28 @@ fi
 
 TIMEOUT="30m";
 
-representations=("KRIPKE" "POSS");
+representations=("KRIPKE_PT" "KRIPKE_FB");
 
 for repr in "${representations[@]}"; do
     if [ "$repr" = "POSS" ]; then 
         timeout $TIMEOUT bin/efp.out $@ -results_file -check_visited -st $repr > findingplan_comparison.tmp
         exit_status=$?;
-	else
-        timeout $TIMEOUT bin/efp.out $@ -results_file -check_visited -st $repr -bisimulation > findingplan_comparison.tmp
+	elif [ "$repr" = "KRIPKE_PT" ]; then
+        timeout $TIMEOUT bin/efp.out $@ -results_file -check_visited -st KRIPKE -bis PT > findingplan_comparison.tmp
+        exit_status=$?;
+	elif [ "$repr" = "KRIPKE_FB" ]; then
+        timeout $TIMEOUT bin/efp.out $@ -results_file -check_visited -st KRIPKE -bis PT > findingplan_comparison.tmp
         exit_status=$?;
 	fi;
 	
 	if [[ $exit_status -eq 124 ]]; then
 	
         TOPRINT="EFP Version ";
-        if [ "$repr" = "KRIPKE" ]; then
-			TOPRINT+="2.0 (on KRIPKE with STANDARD transition function and bisimulation)"
-        fi;
-        if [ "$repr" = "POSS" ]; then
+        if [ "$repr" = "KRIPKE_PT" ]; then
+			TOPRINT+="2.0 (on KRIPKE with STANDARD transition function and Paige-Tarjan Bisimulation)"
+        elif [ "$repr" = "KRIPKE_FB" ]; then
+			TOPRINT+="2.0 (on KRIPKE with STANDARD transition function and fast Bisimulation)"
+        elif [ "$repr" = "POSS" ]; then
             TOPRINT+="2.0 (on POSS with STANDARD transition function)"
         fi;
 	   

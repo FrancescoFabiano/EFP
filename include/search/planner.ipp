@@ -33,8 +33,10 @@ void planner<T>::print_results(std::chrono::duration<double> elapsed_seconds, T 
 				result << "on KRIPKE with STANDARD transition function";
 			}
 
-			if (domain::get_instance().get_bisimulation() != BIS_NONE) {
-				result << " and bisimulation";
+			if (domain::get_instance().get_bisimulation() == PaigeTarjan) {
+				result << " and Paige-Tarjan Bisimulation";
+			}else if (domain::get_instance().get_bisimulation() == FastBisimulation) {
+				result << " and Fast Bismulation";
 			}
 
 			break;
