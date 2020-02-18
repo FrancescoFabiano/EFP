@@ -4,7 +4,7 @@
 #	where "exp/paper/CC/CC_2_2_3.txt" is the path to the domain name
 
 
-TIMEOUT="25m" 
+TIMEOUT="30m" 
 
 
 #REMOVE OLD COPIES

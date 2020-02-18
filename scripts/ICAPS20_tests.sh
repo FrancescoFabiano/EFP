@@ -29,7 +29,12 @@ for dir in $INPATH*; do
             i="1";
             while [[ $i -le $ITERATIONS ]]; do
                 start=$SECONDS;
-				. scripts/comparison_bisimulation.sh "$file";
+				if [ "$(basename $dir)" = "redo" ]; then
+					. scripts/comparison.sh "$file";
+				else
+					. scripts/comparison_bisimulation.sh "$file";
+				fi
+				
 				duration=$(( SECONDS - start ));
                 #mv $OUTPATH_FINDINGPLAN"$(basename $file)" $OUTPATH"$(basename $dir)"/"$(basename $file)"
                 grep -w "EFP" $OUTPATH_FINDINGPLAN"$(basename $file)" >> $OUTPATH"$(basename $dir)"/"$(basename ${file%%.*})"/"for_average"/"exec_$i.txt";
