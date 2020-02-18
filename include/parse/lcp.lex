@@ -1,12 +1,14 @@
 /* Scanner for AL language */
 
+%option nounput
+
 %{
 #include "../include/utilities/define.h"
 #include "../include/actions/proposition.h"
 #include "../include/formulae/belief_formula.h"
 #include "tok.h"
 
-int yyerror(char *s);
+int yyerror(const char* s);
 //int yylineno = 1;
 %}
 
@@ -52,5 +54,5 @@ comment %.*$
 [\n]		{ yylineno++;	}
 {comment} ;
 
-.		{ std::cerr << "SCANNER "; yyerror(""); exit(1);	}
+.		{std::cerr << "SCANNER "; yyerror(""); exit(1);	}
 

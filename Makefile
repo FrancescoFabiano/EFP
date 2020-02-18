@@ -25,6 +25,7 @@ ifeq ($(BUILD),valgrind)
        MAKEFLAGS += "-fno-inline -j -l $(shell grep -c ^processor /proc/cpuinfo)"
 endif
 
+
 CFLAGS := -g -Wall -ansi -Wfatal-errors -std=c++14
 
 dir_guard = @mkdir -p $(@D)

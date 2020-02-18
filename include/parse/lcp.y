@@ -2,7 +2,7 @@
 %{
 #include "../include/utilities/reader.h"
 
-int yyerror(char *s);
+int yyerror(const char *s);
 int yylex(void);
 
 std::string get_negation(const std::string*);
@@ -87,7 +87,7 @@ extern std::shared_ptr<reader> domain_reader;
 %type <str_list> action_decl
 %type <str_list> action_decls
 
-%type <str_list> if_part
+/*DEBUG_WARNING_REMOVAL %type <str_list> if_ DEBUG_WARNING_REMOVAL*/
 %type <str_list2> if_part_fluent
 %type <bf> if_part_bf
 %type <bf> init
@@ -97,7 +97,7 @@ extern std::shared_ptr<reader> domain_reader;
 
 %type <str_list2> formula
 %type <bf> belief_formula
-%type <str_list2> gd_formula
+/* DEBUG_WARNING_REMOVAL %type <str_list2> gd_formula DEBUG_WARNING_REMOVAL*/
 
 //%type <prop> static_law
 %type <prop> dynamic_law
@@ -351,15 +351,15 @@ agent_decls agent_decl
 ;
 
 /* domain description */
-if_part: 
+/*DEBUG_WARNING_REMOVAL if_part: DEBUG_WARNING_REMOVAL*/ 
 /* empty */
-{
+/*DEBUG_WARNING_REMOVAL {
   $$ = new string_set;
 }
 |
 IF literal_list {
   $$ = $2;
-};
+};DEBUG_WARNING_REMOVAL*/
 
 /* if part for belief_formula */
 if_part_bf:
@@ -371,8 +371,6 @@ if_part_bf:
 |
 IF belief_formula {
   $$ = $2;
-
-
 };
 
 belief_formula:
@@ -621,7 +619,7 @@ init_spec:
 };
 
 /* goal */
-gd_formula:
+/*DEBUG_WARNING_REMOVAL gd_formula:
 literal {
   string_set s1;
 
@@ -656,7 +654,7 @@ gd_formula OR gd_formula {
 | LEFT_PAREN gd_formula RIGHT_PAREN
 {
   $$ = $2;
-};
+}; DEBUG_WARNING_REMOVAL*/
 
 goal:
 GOAL belief_formula SEMICOLON
@@ -687,7 +685,7 @@ int yyerror(std::string s)
   return 0;
 }
 
-int yyerror(char *s)
+int yyerror(const char *s)
 {
   return yyerror(std::string(s));
 }
