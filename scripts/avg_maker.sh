@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #Just Run
-RESPATH="ICAPS_res_bis/";
+RESPATH="ICAPS_res/";
 DOMAIN_EXT=".txt"; # Name of the domain
 
 #mv $OUTPATH_FINDINGPLAN $OUTPATH$DOMAIN_NAME$DOMAIN_EXT;
@@ -27,6 +27,8 @@ for dir in $RESPATH*; do
 				AVG_KOLD=0;
 
 				for file in $(find "$dirNest"/ -type f -name *$DOMAIN_EXT); do
+					if [[ "$(basename $file)" == *"exec_"* ]]; then
+
 					#echo $file;
 					#mv $OUTPATH_FINDINGPLAN"$(basename $file)" $OUTPATH"$(basename $dir)"/"$(basename $file)"
 					while read line; do
@@ -76,6 +78,7 @@ for dir in $RESPATH*; do
 							fi;
 					done < $file;
 					ITERATION=$(( $ITERATION + 1 ));
+					fi
 				done;
 				
 				echo -n "K-OLD  " > "$dirNest/results_average.txt";
@@ -123,7 +126,7 @@ for dir in $RESPATH*; do
 				# echo -n "," >> "$RESPATH/graphres.csv";
 
 				# echo "$AVG_KOLD / $ITERATION" | bc -l >> "$RESPATH/graphres.csv";
-				fi;
+			fi;
 		done;
 	fi;
     echo -e "Done with $(basename $dir)\n"

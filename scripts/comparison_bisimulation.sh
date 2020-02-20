@@ -17,10 +17,10 @@ for repr in "${representations[@]}"; do
         timeout $TIMEOUT bin/efp.out $@ -results_file -check_visited -st $repr > findingplan_comparison.tmp
         exit_status=$?;
 	elif [ "$repr" = "KRIPKE_PT" ]; then
-        timeout $TIMEOUT bin/efp.out $@ -results_file -check_visited -st KRIPKE -bis PT > findingplan_comparison.tmp
+       timeout $TIMEOUT	bin/efp.out $@ -results_file -check_visited -st KRIPKE -bis PT > findingplan_comparison.tmp
         exit_status=$?;
 	elif [ "$repr" = "KRIPKE_FB" ]; then
-        timeout $TIMEOUT bin/efp.out $@ -results_file -check_visited -st KRIPKE -bis FB > findingplan_comparison.tmp
+       timeout $TIMEOUT bin/efp.out $@ -results_file -check_visited -st KRIPKE -bis FB > findingplan_comparison.tmp
         exit_status=$?;
 	fi;
 	
