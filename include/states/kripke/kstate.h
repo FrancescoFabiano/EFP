@@ -629,7 +629,7 @@ public:
      * @return true: if *this* is smaller than \p to_compare.
      * @return false: otherwise.*/
     bool operator<(const kstate & to_compare) const;
-    // bool operator==(const kstate & to_compare) const;
+    bool operator==(const kstate & to_compare) const;
 
     /** \brief Function that prints the information of *this*.*/
     void print() const;

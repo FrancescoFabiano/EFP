@@ -103,18 +103,16 @@ bool kstate::operator=(const kstate & to_copy)
 	return true;
 }
 
-// bool kstate::operator==(const kstate & to_compare) const
-// {
-// 	if (m_pointed == to_compare.get_pointed()) {
-// 		return true;
-// 	}
+bool kstate::operator==(const kstate & to_compare) const
+{
+	if (m_pointed.get_numerical_id() == to_compare.get_pointed().get_numerical_id()) {
+		return true;
+	}
 
-// 	automa a1 = get_automaton();
-// 	automa a2 = to_compare.get_automaton();
-// 	bisimulation b;
+	bisimulation b;
 
-// 	return b.compare_automata(&a1, &a2, true);
-// }
+	return b.compare_automata_eq(*this, to_compare);
+}
 
 bool kstate::operator<(const kstate & to_compare) const
 {
@@ -124,9 +122,9 @@ bool kstate::operator<(const kstate & to_compare) const
 		return false;
 	}*/
 
-	if (m_pointed.get_fluent_set() < to_compare.get_pointed().get_fluent_set()) {
+	if (m_pointed.get_numerical_id() < to_compare.get_pointed().get_numerical_id()) {
 		return true;
-	} else if (m_pointed.get_fluent_set() > to_compare.get_pointed().get_fluent_set()) {
+	} else if (m_pointed.get_numerical_id() > to_compare.get_pointed().get_numerical_id()) {
 		return false;
 	}
 

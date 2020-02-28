@@ -68,10 +68,17 @@ void bisimulation::FillStructures(automa *A)
 	// archi etichettati, in uno con i soli stati etichettati. Inoltre assegna ad ogni stato
 	// l'elemento di X che rappresenta la sua etichetta (per i dettagli si vedano le spiegazioni
 	// delle funzioni "createG" e "setpointers")
+
+	// std::cerr << "\nDEBUG: [FillStructures] initialized X...\n";
+
 	CreateG(A->Nvertex, A->Vertex);
+
+	// std::cerr << "\nDEBUG: [FillStructures] created G...\n";
 
 	// Gestione dei puntatori tra le strutture dati G ed X
 	SetPointers(A->Nbehavs);
+
+	// std::cerr << "\nDEBUG: [FillStructures] set pointers...\n";
 
 	// Procedura che inizializza i restanti campi di G (quelli non inizializzati dalle precedenti
 	// funzioni) e quelli di Q
@@ -1825,14 +1832,19 @@ void bisimulation::VisAutoma(automa *a)
 bool bisimulation::MinimizeAutomaPT(automa *A)
 {
 	FillStructures(A);
+	// std::cerr << "\nDEBUG: [MinimizeAutomaPT] filled structures...\n";
 	Inverse();
+	// std::cerr << "\nDEBUG: [MinimizeAutomaPT] calculated inverse...\n";
 
 
 	if (InitPaigeTarjan() == 0) {
+		// std::cerr << "\nDEBUG: [MinimizeAutomaPT] done init...\n";
 		PaigeTarjan();
 
+		// std::cerr << "\nDEBUG: [MinimizeAutomaPT] done PaigeTarjan...\n";
 
 		GetMinimizedAutoma(A);
+		// std::cerr << "\nDEBUG: [MinimizeAutomaPT] done minimization...\n";
 		return true;
 
 	}
@@ -1866,7 +1878,7 @@ automa* bisimulation::merge_kstate_to_automaton(const kstate & ks1, const kstate
 	kbislabel_map label_map1, label_map2; // Map: from -> (to -> ag_set)
 
 	automa *a;
-	int Nvertex = adj_list1.size() + adj_list2.size();
+	int Nvertex = ks1.get_worlds().size() + ks2.get_worlds().size();
 	int ag_set_size = domain::get_instance().get_agents().size();
 	//BIS_ADAPTATION For the loop that identifies the id (We add one edge for each node)
 	v_elem *Vertex;
@@ -1886,7 +1898,6 @@ automa* bisimulation::merge_kstate_to_automaton(const kstate & ks1, const kstate
 	// is always chosen as the first of its block. Therefore, we do not need to update it when converting back to a kstate
 	index_map1[ks1.get_pointed()] = 0;
 	compact_indices[ks1.get_pointed().get_numerical_id()] = 0;
-
 	Vertex[0].ne = 0;
 
 	int i = 1, c = 1;
@@ -1905,17 +1916,20 @@ automa* bisimulation::merge_kstate_to_automaton(const kstate & ks1, const kstate
 		label_map1[*it_kwps][*it_kwps].insert(compact_indices[it_kwps->get_numerical_id()] + ag_set_size);
 	}
 
-	index_map2[ks2.get_pointed()] = root2 = i++;
+	index_map2[ks2.get_pointed()] = root2 = i;
+	Vertex[i].ne = 0;
+	i++;
 
-	if (compact_indices.insert({ks2.get_pointed().get_numerical_id(), c}).second) {
-		c++;
-	}
+	// if (compact_indices.insert({ks2.get_pointed().get_numerical_id(), c}).second) {
+	// 	c++;
+	// }
 
 	for (it_kwps = ks2.get_worlds().begin(); it_kwps != ks2.get_worlds().end(); it_kwps++) {
 		if (!(*it_kwps == ks2.get_pointed())) {
 			index_map2[*it_kwps] = i;
 
-			if (compact_indices.find(it_kwps->get_numerical_id()) == compact_indices.end()) {
+			if (compact_indices.insert({it_kwps->get_numerical_id(), c}).second) {
+				// return nullptr;
 				c++;
 			}
 
@@ -2005,10 +2019,14 @@ automa* bisimulation::merge_automata(const kstate & ks1, const kstate & ks2, int
 		adj_list2[it_keps->get_from()].insert(it_keps->get_to());
 	}
 
+	// std::cerr << "\nDEBUG: [merge_automata] calculated adj lists...\n";
+
 	/**todo: using clean messes up with const qualifier of ks1 and ks2*/
 
 	// ks1.clean_unreachable_kworlds(adj_list1);
 	// ks2.clean_unreachable_kworlds(adj_list2);
+
+	// std::cerr << "\nDEBUG: Entering merge_kstate_to_automaton...\n";
 
 	return merge_kstate_to_automaton(ks1, ks2, adj_list1, adj_list2, root2);
 
@@ -2038,14 +2056,62 @@ automa* bisimulation::merge_automata(const kstate & ks1, const kstate & ks2, int
 bool bisimulation::compare_automata(const kstate & ks1, const kstate & ks2)
 {
 	int root1 = 0, root2;
+
+	// std::cerr << "\nDEBUG: Entering merge_automata...\n";
 	automa* a = merge_automata(ks1, ks2, root2);
+
+	// if (a == nullptr) {
+	// 	return true;
+	// }
+
+	// std::cerr << "\nDEBUG: Exited merge_automata...\n";
+	// std::cerr << "\nDEBUG: root2 = " << root2 << "\n";
+
 	bool ret;
 	
 	if (MinimizeAutomaPT(a)) {
 		// if (eq) {
 		// 	ret = G[root1].block == G[root2].block;
 		// } else {
+		// std::cerr << "\nDEBUG: Minimized automaton...\n";
+		// std::cerr << "\nDEBUG: G[root1].block = " << G[root1].block << "\n";
+		// std::cerr << "\nDEBUG: G[root2].block = " << G[root2].block << "\n";
+
 		ret = G[root1].block < G[root2].block;
+		// }
+	} else {
+		ret = false;
+	}
+
+	// DisposeAutoma(a);
+	return ret;
+}
+
+bool bisimulation::compare_automata_eq(const kstate & ks1, const kstate & ks2)
+{
+	int root1 = 0, root2;
+
+	// std::cerr << "\nDEBUG: Entering merge_automata...\n";
+	automa* a = merge_automata(ks1, ks2, root2);
+
+	// if (a == nullptr) {
+	// 	return true;
+	// }
+
+	// std::cerr << "\nDEBUG: Exited merge_automata...\n";
+	// std::cerr << "\nDEBUG: root2 = " << root2 << "\n";
+
+	bool ret;
+	
+	if (MinimizeAutomaPT(a)) {
+		// if (eq) {
+		// 	ret = G[root1].block == G[root2].block;
+		// } else {
+		// std::cerr << "\nDEBUG: Minimized automaton...\n";
+		// std::cerr << "\nDEBUG: G[root1].block = " << G[root1].block << "\n";
+		// std::cerr << "\nDEBUG: G[root2].block = " << G[root2].block << "\n";
+
+		ret = G[root1].block == G[root2].block;
 		// }
 	} else {
 		ret = false;
