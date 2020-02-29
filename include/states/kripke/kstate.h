@@ -45,6 +45,7 @@ private:
      * 
      * @see kworld and kstore.*/
     kworld_ptr m_pointed;
+
     /** \brief Function that checks the entailment of a \ref fluent in a given \ref kworld.
      *     @see \ref kworld::entails(fluent) const
      *  
@@ -221,9 +222,7 @@ private:
      * @param[in] reached_worlds: the set of all the reached \ref kworld.
      * @param[in] adj_list: the adjacency list of thr \ref kstate.*/
     void get_all_reachable_worlds(const kworld_ptr & kw, kworld_ptr_set & reached_worlds, const std::map<kworld_ptr, kworld_ptr_set> & adj_list) const;
-    /** Function that cleares all the unreachable \ref kworld of *this*.*/
-    void clean_unreachable_kworlds(std::map<kworld_ptr, kworld_ptr_set> & adj_list);
-
+    
     /** \brief Function that transforms *this* into an equivalent automaton.
      * 
      * @param[in] index_map: a map that associates a unique id to each \ref kworld.
@@ -607,7 +606,8 @@ public:
      * \todo The action must be executable on *this* otherwise it will return a null_ptr.*/
     kstate compute_succ(const action & act) const;
 
-
+    /** Function that cleares all the unreachable \ref kworld of *this*.*/
+    void clean_unreachable_kworlds(std::map<kworld_ptr, kworld_ptr_set> & adj_list);
     /** \brief Function that sets *this* as the mimimum \ref kstate that is bisimilar to the current one.
      *
      * The function follows the approach of the algorithm described in Paige and Tarjan (1986).*/
@@ -629,6 +629,7 @@ public:
      * @return true: if *this* is smaller than \p to_compare.
      * @return false: otherwise.*/
     bool operator<(const kstate & to_compare) const;
+    bool operator==(const kstate & to_compare) const;
 
     /** \brief Function that prints the information of *this*.*/
     void print() const;

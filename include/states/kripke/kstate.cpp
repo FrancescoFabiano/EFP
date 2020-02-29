@@ -103,6 +103,17 @@ bool kstate::operator=(const kstate & to_copy)
 	return true;
 }
 
+bool kstate::operator==(const kstate & to_compare) const
+{
+	if (m_pointed.get_numerical_id() == to_compare.get_pointed().get_numerical_id()) {
+		return true;
+	}
+
+	bisimulation b;
+
+	return b.compare_automata_eq(*this, to_compare);
+}
+
 bool kstate::operator<(const kstate & to_compare) const
 {
 	/*if (m_max_depth < to_compare.get_max_depth()) {
@@ -111,24 +122,27 @@ bool kstate::operator<(const kstate & to_compare) const
 		return false;
 	}*/
 
-	if (m_pointed < to_compare.get_pointed()) {
+	if (m_pointed.get_numerical_id() < to_compare.get_pointed().get_numerical_id()) {
 		return true;
-	} else if (m_pointed > to_compare.get_pointed()) {
+	} else if (m_pointed.get_numerical_id() > to_compare.get_pointed().get_numerical_id()) {
 		return false;
 	}
 
+	bisimulation b;
 
-	if (m_worlds < to_compare.get_worlds()) {
-		return true;
-	} else if (m_worlds > to_compare.get_worlds()) {
-		return false;
-	}
+	return b.compare_automata(*this, to_compare);
+	
+	// if (m_worlds < to_compare.get_worlds()) {
+	// 	return true;
+	// } else if (m_worlds > to_compare.get_worlds()) {
+	// 	return false;
+	// }
 
-	if (m_edges < to_compare.get_edges()) {
-		return true;
-	} else if (m_edges > to_compare.get_edges()) {
-		return false;
-	}
+	// if (m_edges < to_compare.get_edges()) {
+	// 	return true;
+	// } else if (m_edges > to_compare.get_edges()) {
+	// 	return false;
+	// }
 
 	//This are implemented in std
 
@@ -638,6 +652,7 @@ void kstate::calc_min_bisimilar()
 	kworld_vec.reserve(get_worlds().size());
 
 	a = kstate_to_automaton(adj_list, kworld_vec);
+
 	bisimulation b;
 	//std::cout << "\nDEBUG: Printing automa pre-Bisimulation\n";
 	//b.VisAutoma(&a);

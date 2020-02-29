@@ -105,7 +105,7 @@ bool planner<T>::search_BFS(bool results_file)
 	}
 
 	m_search_space.push(initial);
-
+	// visited_states.insert(initial);
 
 	while (!m_search_space.empty()) {
 		popped_state = m_search_space.front();
