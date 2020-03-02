@@ -123,12 +123,14 @@ g observes shout_6;
 
 executable shout_7 if B(a, q), at_7;
 shout_7 announces q;
+a observes shout_7;
 f observes shout_7;
 g observes shout_7;
 h observes shout_7;
 
 executable shout_8 if B(a, q), at_8;
 shout_8 announces q;
+a observes shout_8;
 j observes shout_8;
 g observes shout_8;
 h observes shout_8;

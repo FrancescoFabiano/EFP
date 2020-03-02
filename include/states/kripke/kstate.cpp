@@ -122,15 +122,20 @@ bool kstate::operator<(const kstate & to_compare) const
 		return false;
 	}*/
 
-	if (m_pointed.get_numerical_id() < to_compare.get_pointed().get_numerical_id()) {
-		return true;
-	} else if (m_pointed.get_numerical_id() > to_compare.get_pointed().get_numerical_id()) {
-		return false;
-	}
+	// if (m_pointed.get_numerical_id() < to_compare.get_pointed().get_numerical_id()) {
+	// 	return true;
+	// } else if (m_pointed.get_numerical_id() > to_compare.get_pointed().get_numerical_id()) {
+	// 	return false;
+	// }
 
 	bisimulation b;
+	std::vector<kworld_ptr> kworld_vec;
 
-	return b.compare_automata(*this, to_compare);
+	if (m_edges < to_compare.get_edges()) {
+		return b.compare_automata(*this, to_compare, kworld_vec);
+	} else {
+		return b.compare_automata(to_compare, *this, kworld_vec);
+	}
 	
 	// if (m_worlds < to_compare.get_worlds()) {
 	// 	return true;

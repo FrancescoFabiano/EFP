@@ -152,10 +152,10 @@ public:
     bool MinimizeAutomaPT(automa *A);
     bool MinimizeAutomaFB(automa *A);
 
-    automa* merge_kstate_to_automaton(const kstate & ks1, const kstate & ks2, const std::map<kworld_ptr, kworld_ptr_set> & adj_list1, const std::map<kworld_ptr, kworld_ptr_set> & adj_list2, int & root2) const;
-    automa* merge_automata(const kstate & ks1, const kstate & ks2, int & root2);
-    bool compare_automata(const kstate & ks1, const kstate & ks2);
-    bool compare_automata_eq(const kstate & ks1, const kstate & ks2);
+    automa* merge_kstate_to_automaton(const kstate & ks1, const kstate & ks2, const std::map<kworld_ptr, kworld_ptr_set> & adj_list1, const std::map<kworld_ptr, kworld_ptr_set> & adj_list2, int & root2, std::vector<kworld_ptr> & kworld_vec) const;
+    automa* merge_automata(const kstate & ks1, const kstate & ks2, int & root2, std::vector<kworld_ptr> kworld_vec);
+    bool compare_automata(const kstate & ks1, const kstate & ks2, std::vector<kworld_ptr> kworld_vec);
+    bool compare_automata_eq(const kstate & ks1, const kstate & ks2, std::vector<kworld_ptr> kworld_vec);
 
     bisimulation();
 

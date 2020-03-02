@@ -105,7 +105,7 @@ bool planner<T>::search_BFS(bool results_file)
 	}
 
 	m_search_space.push(initial);
-	// visited_states.insert(initial);
+	visited_states.insert(initial);
 
 	while (!m_search_space.empty()) {
 		popped_state = m_search_space.front();
@@ -213,6 +213,8 @@ template <class T>
 void planner<T>::execute_given_actions(std::vector<std::string>& act_name)
 {
 	check_actions_names(act_name);
+	// DEBUG
+	std::set<T> visited_states;
 
 	bool bisimulation = false;
 	if (domain::get_instance().get_bisimulation() != BIS_NONE) {
@@ -236,7 +238,8 @@ void planner<T>::execute_given_actions(std::vector<std::string>& act_name)
 		state.print_graphviz(bis_postfix);
 
 	}
-
+	// DEBUG
+	visited_states.insert(state);
 
 	std::vector<std::string>::const_iterator it_stset;
 	std::vector<std::string>::const_iterator it_stset2;
@@ -253,6 +256,21 @@ void planner<T>::execute_given_actions(std::vector<std::string>& act_name)
 					}
 					if (domain::get_instance().get_debug()) {
 						state.print_graphviz(bis_postfix);
+					}
+
+					// DEBUG
+					std::string str = "_eq";
+					if (!visited_states.insert(state).second) {
+						for (T tmp : visited_states) {
+							if (!(tmp < state) && !(state < tmp)) {
+								tmp.print_graphviz(str);
+							}
+						}
+						std::cerr << "\nDEBUG: reached already visited state with action " << (*it_acset).get_name() << "\n";
+
+						// if ((*it_acset).get_name() == "shout_8") {
+						// 	state.print_graphviz(bis_postfix);
+						// }
 					}
 
 					if (state.is_goal()) {

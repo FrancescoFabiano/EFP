@@ -1870,7 +1870,7 @@ bool bisimulation::MinimizeAutomaFB(automa *A)
 
 }
 
-automa* bisimulation::merge_kstate_to_automaton(const kstate & ks1, const kstate & ks2, const std::map<kworld_ptr, kworld_ptr_set> & adj_list1, const std::map<kworld_ptr, kworld_ptr_set> & adj_list2, int & root2) const
+automa* bisimulation::merge_kstate_to_automaton(const kstate & ks1, const kstate & ks2, const std::map<kworld_ptr, kworld_ptr_set> & adj_list1, const std::map<kworld_ptr, kworld_ptr_set> & adj_list2, int & root2, std::vector<kworld_ptr> & kworld_vec) const
 {
 
 	std::map<int, int> compact_indices;
@@ -1897,6 +1897,8 @@ automa* bisimulation::merge_kstate_to_automaton(const kstate & ks1, const kstate
 	// The pointed world is set to the index 0. This ensures that, when deleting the bisimilar nodes, the pointed kworld
 	// is always chosen as the first of its block. Therefore, we do not need to update it when converting back to a kstate
 	index_map1[ks1.get_pointed()] = 0;
+	// DEBUG
+	kworld_vec.push_back(ks1.get_pointed());
 	compact_indices[ks1.get_pointed().get_numerical_id()] = 0;
 	Vertex[0].ne = 0;
 
@@ -1905,6 +1907,8 @@ automa* bisimulation::merge_kstate_to_automaton(const kstate & ks1, const kstate
 	for (it_kwps = ks1.get_worlds().begin(); it_kwps != ks1.get_worlds().end(); it_kwps++) {
 		if (!(*it_kwps == ks1.get_pointed())) {
 			index_map1[*it_kwps] = i;
+			// DEBUG
+			kworld_vec.push_back(*it_kwps);
 
 			if (compact_indices.insert({it_kwps->get_numerical_id(), c}).second) {
 				c++;
@@ -1917,20 +1921,24 @@ automa* bisimulation::merge_kstate_to_automaton(const kstate & ks1, const kstate
 	}
 
 	index_map2[ks2.get_pointed()] = root2 = i;
+	// DEBUG
+	kworld_vec.push_back(ks2.get_pointed());
 	Vertex[i].ne = 0;
 	i++;
 
-	// if (compact_indices.insert({ks2.get_pointed().get_numerical_id(), c}).second) {
-	// 	c++;
-	// }
+	if (compact_indices.insert({ks2.get_pointed().get_numerical_id(), c}).second) {
+		c++;
+	}
 
 	for (it_kwps = ks2.get_worlds().begin(); it_kwps != ks2.get_worlds().end(); it_kwps++) {
 		if (!(*it_kwps == ks2.get_pointed())) {
 			index_map2[*it_kwps] = i;
+			// DEBUG
+			kworld_vec.push_back(*it_kwps);
 
 			if (compact_indices.insert({it_kwps->get_numerical_id(), c}).second) {
-				// return nullptr;
-				c++;
+				return nullptr;
+				// c++;
 			}
 
 			Vertex[i].ne = 0;
@@ -2006,7 +2014,7 @@ automa* bisimulation::merge_kstate_to_automaton(const kstate & ks1, const kstate
 	return a;
 }
 
-automa* bisimulation::merge_automata(const kstate & ks1, const kstate & ks2, int & root2)
+automa* bisimulation::merge_automata(const kstate & ks1, const kstate & ks2, int & root2, std::vector<kworld_ptr> kworld_vec)
 {
 	std::map<kworld_ptr, kworld_ptr_set> adj_list1, adj_list2;
 	kedge_ptr_set::const_iterator it_keps;
@@ -2028,7 +2036,7 @@ automa* bisimulation::merge_automata(const kstate & ks1, const kstate & ks2, int
 
 	// std::cerr << "\nDEBUG: Entering merge_kstate_to_automaton...\n";
 
-	return merge_kstate_to_automaton(ks1, ks2, adj_list1, adj_list2, root2);
+	return merge_kstate_to_automaton(ks1, ks2, adj_list1, adj_list2, root2, kworld_vec);
 
 	// int Nvertex = a1->Nvertex + a2->Nvertex;
 	// int Nbehavs = a1->Nbehavs + a2->Nbehavs;
@@ -2053,16 +2061,17 @@ automa* bisimulation::merge_automata(const kstate & ks1, const kstate & ks2, int
 	// a->Vertex = Vertex;
 }
 
-bool bisimulation::compare_automata(const kstate & ks1, const kstate & ks2)
+bool bisimulation::compare_automata(const kstate & ks1, const kstate & ks2, std::vector<kworld_ptr> kworld_vec)
 {
 	int root1 = 0, root2;
 
 	// std::cerr << "\nDEBUG: Entering merge_automata...\n";
-	automa* a = merge_automata(ks1, ks2, root2);
+	automa* a = merge_automata(ks1, ks2, root2, kworld_vec);
 
-	// if (a == nullptr) {
-	// 	return true;
-	// }
+	if (a == nullptr) {
+		// std::cerr << "\nDEBUG: Returned null automaton...\n";
+		return true;
+	}
 
 	// std::cerr << "\nDEBUG: Exited merge_automata...\n";
 	// std::cerr << "\nDEBUG: root2 = " << root2 << "\n";
@@ -2070,6 +2079,10 @@ bool bisimulation::compare_automata(const kstate & ks1, const kstate & ks2)
 	bool ret;
 	
 	if (MinimizeAutomaPT(a)) {
+		kstate tmp = automaton_to_kstate(a, kworld_vec);
+		std::string str = "_merge";
+		tmp.print_graphviz(str);
+
 		// if (eq) {
 		// 	ret = G[root1].block == G[root2].block;
 		// } else {
@@ -2087,12 +2100,12 @@ bool bisimulation::compare_automata(const kstate & ks1, const kstate & ks2)
 	return ret;
 }
 
-bool bisimulation::compare_automata_eq(const kstate & ks1, const kstate & ks2)
+bool bisimulation::compare_automata_eq(const kstate & ks1, const kstate & ks2, std::vector<kworld_ptr> kworld_vec)
 {
 	int root1 = 0, root2;
 
 	// std::cerr << "\nDEBUG: Entering merge_automata...\n";
-	automa* a = merge_automata(ks1, ks2, root2);
+	automa* a = merge_automata(ks1, ks2, root2, kworld_vec);
 
 	// if (a == nullptr) {
 	// 	return true;
