@@ -2,67 +2,44 @@
 % EMP encoding in ASP
 %
 
-% Constants and domain predicates
-#const ONT = 0      % Ontic action
-#const SEN = 1      % Sensing action
-#const ANN = 2      % Announcement action
+% Reachability
 
-#const FOB = 3      % Fully observant agent
-#const POB = 4      % Partially observant agent
-#const OBL = 5      % Oblivious agent
+reaches(S1, W1, S2, W2, AGS) :- edge(S1, W1, S2, W2, AG), contains_ag(AGS, AG).
+reaches(S1, W1, S2, W2, AGS) :- edge(S1, W1, S3, W3, AG), contains_ag(AGS, AG), reaches(S3, W3, S2, W2, AGS).
 
-fluent(1..f).
-agent(1..ag).
-time(1..t).
+% Entailment
 
-world_id(1..w).
-state_id(1..s).
-action_id(1..act).
+formula(F) :- fluent(F).        % A fluent is a formula
+formula(F) :- initially(F).     % An initial condition is a formula
+formula(F) :- goal(F).          % A goal condition is a formula
 
-action_type(ONT;SEN;ANN).
-observability_type(FOB;POB;OBL).
+entails(S, F) :- entails(S, W, F), pointed(S, W).
 
-% ***** Input format *****
+entails(S, W, F     )      :- holds(W, F),                    contains(S, W), fluent(F).
+entails(S, W, not(F))      :- not entails(S, F),              contains(S, W), formula(F).
+entails(S, W, and(F1, F2)) :- entails(S, F1), entails(S, F2), contains(S, W), formula(F1), formula(F2).
+entails(S, W,  or(F1, F2)) :- entails(S, F1),                 contains(S, W), formula(F1), formula(F2).
+entails(S, W,  or(F1, F2)) :-                 entails(S, F2), contains(S, W), formula(F1), formula(F2).
 
-action(ACT, TYPE).              % action_id(ACT), action_type(TYPE)
-obs_relation(ACT, AG, TYPE).    % action_id(ACT), agent(AG), observability_type(TYPE)
+% b operator
+not_entails(S1, W1, b(AG , F)) :- not     entails(S2, W2, F        ), edge(S1, W1, S2, W2, AG), formula(F), agent(AG).
+entails    (S , W , b(AG , F)) :- not not_entails(S , W , b(AG , F)), state(S), world(W), formula(b(AG , F)).
 
-world(W, T).                 % state_id(S), world_id(W), time(T)
-edge(W1, AG, W2, T).         % stete_id(S), world_id(W1), world_id(W2), time(T)
-pi(W, F, T).                    % world_id(W), fluent(F), time(T)
+% e operator
+not_entails(S , W , e(AGS, F)) :- not     entails(S , W , b(AG , F)), state(S), world(W), contains_ag(AGS, AG), formula(b(AG, F)).
+entails    (S , W , e(AGS, F)) :- not not_entails(S , W , e(AGS, F)), state(S), world(W), formula(e(AGS, F)).
 
-% Recursive definition of belief formulas
-% literal(F)           :- fluent(F).
-% literal(not(F))      :- fluent(F).
+% c operator
+not_entails(S1, W1, c(AGS, F)) :- not     entails(S2, W2, e(AGS, F)), reaches(S1, W1, S2, W2, AGS), formula(e(AGS, F)).
+entails    (S , W , c(AGS, F)) :- not not_entails(S , W , c(AGS, F)), state(S), world(W), formula(c(AGS, F)).
 
-% formula(F)           :- literal(F).
-% formula(not(F))      :- formula(F).
-% formula(and(F1, F2)) :- formula(F1), formula(F2).
-% formula( or(F1, F2)) :- formula(F1), formula(F2).
-% formula(  b(AG, F )) :- agent(AG), formula(F).
+% Imposing initial conditions
+% :- not entails(0, F), initially(F).
 
-formula(not(q)).
-formula(and(p, q)).
-formula(c(AGS, and(head, not(opened))).
-
-% Pointed world has id equal to 0
-pointed(S, W, T) :- W = 0, state_id(S), world_id(W), time(T).
-
-entails(S, F     , T) :-     pi(W, F, T), pointed(S, W, T), state_id(S), world_id(W), literal(F)     , time(T).
-entails(S, not(F), T) :- not pi(W, F, T), pointed(S, W, T), state_id(S), world_id(W), literal(not(F)), time(T).
-
-entails(S, not(F)     , T) :- not entails(S, F , T)                   , pointed(S, W, T), state_id(S), world_id(W), formula(not(F))     , time(T).
-entails(S, and(F1, F2), T) :-     entails(S, F1, T), entails(S, F2, T), pointed(S, W, T), state_id(S), world_id(W), formula(and(F1, F2)), time(T).
-entails(S,  or(F1, F2), T) :-     entails(S, F1, T)                   , pointed(S, W, T), state_id(S), world_id(W), formula( or(F1, F2)), time(T).
-entails(S,  or(F1, F2), T) :-                        entails(S, F2, T), pointed(S, W, T), state_id(S), world_id(W), formula( or(F1, F2)), time(T).
-
-not_entails(S, b(AG, F), T) :- not     entails(S, F       , T), edge(S, W1, AG, W2, T), pointed(S, W1, T), state_id(S), world_id(W1), world_id(W2), formula(b(AG, F)), agent(AG), time(T).
-entails    (S, b(AG, F), T) :- not not_entails(S, b(AG, F), T), state_id(S), formula(b(AG, F)), time(T).
-
-
-
-world(W, T+1) :- .
-
+% Imposing final conditions
+% not_entails_goals(S) :- not entails(S, F), goal(F).
+% final_state(S) :- not not_entails_goals(S).
+% :- 0 {final_state(S) : state(S)} 0.
 
 % ***** Initial state *****
 
@@ -70,8 +47,5 @@ world(W, T+1) :- .
 % ***** Transition function *****
 
 % Ontic actions
-
-
-
 % Sensing actions
 % Announcement actions
