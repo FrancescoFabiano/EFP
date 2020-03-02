@@ -213,6 +213,7 @@ void state<T>::print() const
 	//std::cout << "\nHeuristic Value Length: " << get_heuristic_value();
 }
 
+
 template <class T>
 void state<T>::print_graphviz(std::string postfix) const
 {
@@ -255,6 +256,38 @@ void state<T>::print_graphviz(std::string postfix) const
 	m_representation.print_graphviz(graphviz);
 	graphviz << "}";
 	graphviz.close();
-	std::cout << postfix<< " done.";
+	std::cout << postfix << " done.";
 
+}
+
+
+
+
+
+
+//DEBUG
+
+template <class T>
+T state<T>::debug_get_representation()
+{
+	return m_representation;
+}
+
+template <class T>
+void state<T>::min_with_print(state<T> tmp)
+{
+	std::string tmp_name, state_name;
+	if (tmp.get_representation().get_edges() < get_representation().get_edges()) {
+		tmp_name = "_arg_1";
+		state_name = "_arg_2";
+	} else {
+		tmp_name = "_arg_2";
+		state_name = "_arg_1";
+	}
+	tmp.print_graphviz(tmp_name);
+	print_graphviz(state_name);
+	
+	tmp.debug_get_representation().debug_print(get_representation());
+	std::cerr << "\nDEBUG:HERE\n";
+	tmp.print_graphviz("_eq_res");
 }

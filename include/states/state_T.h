@@ -268,5 +268,11 @@ public:
      * @param [in] postfix: The postfix to give to the name of the file (default "").
      */
     void print_graphviz(std::string postfix = "") const;
+
+
+    //DEBUG
+    void min_with_print(state<T> tmp);
+    T debug_get_representation();
+
 };
 

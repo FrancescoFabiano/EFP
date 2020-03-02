@@ -222,15 +222,15 @@ private:
      * @param[in] reached_worlds: the set of all the reached \ref kworld.
      * @param[in] adj_list: the adjacency list of thr \ref kstate.*/
     void get_all_reachable_worlds(const kworld_ptr & kw, kworld_ptr_set & reached_worlds, const std::map<kworld_ptr, kworld_ptr_set> & adj_list) const;
-    
+
     /** \brief Function that transforms *this* into an equivalent automaton.
      * 
-     * @param[in] index_map: a map that associates a unique id to each \ref kworld.
      * @param[in] kworld_vec: the vector of all \ref kworld.
-     * @param[in] compact_indices: we associate to the \ref kworld numerical ids a second kind of numerical ids. These new ids are consecutive numbers (hence, they are compact).
      * 
      * @return the automaton equivalent to *this*.*/
-    const automa kstate_to_automaton(const std::map<kworld_ptr, kworld_ptr_set> & adj_list, std::vector<kworld_ptr> & kworld_vec) const;
+    //     * @param[in] index_map: a map that associates a unique id to each \ref kworld.
+    //     * @param[in] compact_indices: we associate to the \ref kworld numerical ids a second kind of numerical ids. These new ids are consecutive numbers (hence, they are compact).
+    const automa kstate_to_automaton(/*const std::map<kworld_ptr, kworld_ptr_set> & adj_list,*/ std::vector<kworld_ptr> & kworld_vec) const;
     /** \brief Function that transforms the given automaton into an equivalent \ref kstate.
      * 
      * @param[in] a: the automaton to transform.
@@ -606,7 +606,9 @@ public:
      * \todo The action must be executable on *this* otherwise it will return a null_ptr.*/
     kstate compute_succ(const action & act) const;
 
-    /** Function that cleares all the unreachable \ref kworld of *this*.*/
+    /** Function that cleares all the unreachable \ref kworld of *this*
+     * 
+     * @param[in] adj_list: the adjacency list of thr \ref kstate.*/
     void clean_unreachable_kworlds(std::map<kworld_ptr, kworld_ptr_set> & adj_list);
     /** \brief Function that sets *this* as the mimimum \ref kstate that is bisimilar to the current one.
      *
@@ -656,7 +658,9 @@ public:
     template <class T>
     void minus_set(std::set<T> & to_modify, const std::set<T> & factor2) const;
 
-    void DEBUG_add_extra_world();
+    //void DEBUG_add_extra_world();
+    void debug_print(const kstate & to_compare);
+
 };
 
 typedef std::vector<kstate> kstate_set; /**< \brief A set of \ref kstate.*/

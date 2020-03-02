@@ -953,10 +953,10 @@ pstate pstate::execute_announcement(const action & act) const
 	return execute_sensing(act);
 }
 
-
-void pstate::calc_min_bisimilar(){
-			std::cerr << "\nMin bisimilar is not supported for possibilities yet.\n";
-		exit(1);
+void pstate::calc_min_bisimilar()
+{
+	std::cerr << "\nMin bisimilar is not supported for possibilities yet.\n";
+	exit(1);
 }
 
 void pstate::print() const
@@ -1244,4 +1244,18 @@ fluent_formula pstate::get_effects_if_entailed(const effects_map & map, const pw
 		exit(1);
 	}
 	return ret;
+}
+
+//DEBUG
+
+int pstate::get_edges() const
+{
+	std::cerr << "\nYou are playing with debug only options.\n";
+	exit(1);
+}
+
+void pstate::debug_print(pstate tmp)
+{
+	std::cerr << "\nYou are playing with debug only options.\n";
+	exit(1);
 }

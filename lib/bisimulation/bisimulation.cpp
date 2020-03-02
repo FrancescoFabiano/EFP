@@ -1777,25 +1777,25 @@ void bisimulation::FastBisimulationAlgorithm()
 
 void bisimulation::VisAutoma(automa *a)
 {
-  int i, j, k;
-  v_elem *Vertex;
-  int Nvertex, Nbehavs;
+	int i, j, k;
+	v_elem *Vertex;
+	int Nvertex, Nbehavs;
 
 
-  Nvertex = a->Nvertex;
-  Nbehavs = a->Nbehavs;
-  Vertex  = a->Vertex;
+	Nvertex = a->Nvertex;
+	Nbehavs = a->Nbehavs;
+	Vertex = a->Vertex;
 
-  std::printf("Numero Vertici: %d\nNumero behavs: %d\n",Nvertex,Nbehavs);
+	std::printf("Numero Vertici: %d\nNumero behavs: %d\n", Nvertex, Nbehavs);
 
-  std::printf("\n Vertici e relativi archi\n");
-  for (i=0; i<Nvertex; i++) {
-    std::printf("\nNe[%d] = %d\n",i,Vertex[i].ne);
-    for (j=0; j<Vertex[i].ne; j++) {
-      for (k=0; k<Vertex[i].e[j].nbh; k++) std::printf("%d.",Vertex[i].e[j].bh[k]);
-      std::printf(" ->%d\n",Vertex[i].e[j].tv);
-    }
-  }
+	std::printf("\n Vertici e relativi archi\n");
+	for (i = 0; i < Nvertex; i++) {
+		std::printf("\nNe[%d] = %d\n", i, Vertex[i].ne);
+		for (j = 0; j < Vertex[i].ne; j++) {
+			for (k = 0; k < Vertex[i].e[j].nbh; k++) std::printf("%d.", Vertex[i].e[j].bh[k]);
+			std::printf(" ->%d\n", Vertex[i].e[j].tv);
+		}
+	}
 }
 
 //void bisimulation::VisAutoma(automa *a)
@@ -1870,7 +1870,7 @@ bool bisimulation::MinimizeAutomaFB(automa *A)
 
 }
 
-automa* bisimulation::merge_kstate_to_automaton(const kstate & ks1, const kstate & ks2, const std::map<kworld_ptr, kworld_ptr_set> & adj_list1, const std::map<kworld_ptr, kworld_ptr_set> & adj_list2, int & root2, std::vector<kworld_ptr> & kworld_vec) const
+automa* bisimulation::merge_kstate_to_automaton(const kstate & ks1, const kstate & ks2, /*const std::map<kworld_ptr, kworld_ptr_set> & adj_list1, const std::map<kworld_ptr, kworld_ptr_set> & adj_list2,*/ int & root2) const
 {
 
 	std::map<int, int> compact_indices;
@@ -1897,8 +1897,6 @@ automa* bisimulation::merge_kstate_to_automaton(const kstate & ks1, const kstate
 	// The pointed world is set to the index 0. This ensures that, when deleting the bisimilar nodes, the pointed kworld
 	// is always chosen as the first of its block. Therefore, we do not need to update it when converting back to a kstate
 	index_map1[ks1.get_pointed()] = 0;
-	// DEBUG
-	kworld_vec.push_back(ks1.get_pointed());
 	compact_indices[ks1.get_pointed().get_numerical_id()] = 0;
 	Vertex[0].ne = 0;
 
@@ -1908,7 +1906,6 @@ automa* bisimulation::merge_kstate_to_automaton(const kstate & ks1, const kstate
 		if (!(*it_kwps == ks1.get_pointed())) {
 			index_map1[*it_kwps] = i;
 			// DEBUG
-			kworld_vec.push_back(*it_kwps);
 
 			if (compact_indices.insert({it_kwps->get_numerical_id(), c}).second) {
 				c++;
@@ -1921,8 +1918,6 @@ automa* bisimulation::merge_kstate_to_automaton(const kstate & ks1, const kstate
 	}
 
 	index_map2[ks2.get_pointed()] = root2 = i;
-	// DEBUG
-	kworld_vec.push_back(ks2.get_pointed());
 	Vertex[i].ne = 0;
 	i++;
 
@@ -1933,8 +1928,6 @@ automa* bisimulation::merge_kstate_to_automaton(const kstate & ks1, const kstate
 	for (it_kwps = ks2.get_worlds().begin(); it_kwps != ks2.get_worlds().end(); it_kwps++) {
 		if (!(*it_kwps == ks2.get_pointed())) {
 			index_map2[*it_kwps] = i;
-			// DEBUG
-			kworld_vec.push_back(*it_kwps);
 
 			if (compact_indices.insert({it_kwps->get_numerical_id(), c}).second) {
 				return nullptr;
@@ -2014,59 +2007,59 @@ automa* bisimulation::merge_kstate_to_automaton(const kstate & ks1, const kstate
 	return a;
 }
 
-automa* bisimulation::merge_automata(const kstate & ks1, const kstate & ks2, int & root2, std::vector<kworld_ptr> kworld_vec)
-{
-	std::map<kworld_ptr, kworld_ptr_set> adj_list1, adj_list2;
-	kedge_ptr_set::const_iterator it_keps;
+//automa* bisimulation::merge_automata(const kstate & ks1, const kstate & ks2, int & root2)
+//{
+//	//std::map<kworld_ptr, kworld_ptr_set> adj_list1, adj_list2;
+//	kedge_ptr_set::const_iterator it_keps;
+//
+//	/*for (it_keps = ks1.get_edges().begin(); it_keps != ks1.get_edges().end(); it_keps++) {
+//		adj_list1[it_keps->get_from()].insert(it_keps->get_to());
+//	}
+//
+//	for (it_keps = ks2.get_edges().begin(); it_keps != ks2.get_edges().end(); it_keps++) {
+//		adj_list2[it_keps->get_from()].insert(it_keps->get_to());
+//	}*/
+//
+//	// std::cerr << "\nDEBUG: [merge_automata] calculated adj lists...\n";
+//
+//	/**todo: using clean messes up with const qualifier of ks1 and ks2*/
+//
+//	// ks1.clean_unreachable_kworlds(adj_list1);
+//	// ks2.clean_unreachable_kworlds(adj_list2);
+//
+//	// std::cerr << "\nDEBUG: Entering merge_kstate_to_automaton...\n";
+//
+//	return merge_kstate_to_automaton(ks1, ks2,/*adj_list1, adj_list2,*/ root2);
+//
+//	// int Nvertex = a1->Nvertex + a2->Nvertex;
+//	// int Nbehavs = a1->Nbehavs + a2->Nbehavs;
+//	// v_elem *Vertex;
+//
+//	// Vertex = (v_elem *) malloc(sizeof(v_elem) * Nvertex);
+//
+//	// int i, j = 0;
+//
+//	// for (i = 0; i < Nvertex; i++) {
+//	// 	if (j < a1->Nvertex) {
+//	// 		Vertex[i] = a1->Vertex[j];
+//	// 		j = (j + 1) % a1->Nvertex;
+//	// 	} else {
+//	// 		Vertex[i] = a2->Vertex[j++];
+//	// 	}
+//	// }
+//
+//	// a = (automa *) malloc(sizeof(automa));
+//	// a->Nvertex = Nvertex;
+//	// a->Nbehavs = Nbehavs;
+//	// a->Vertex = Vertex;
+//}
 
-	for (it_keps = ks1.get_edges().begin(); it_keps != ks1.get_edges().end(); it_keps++) {
-		adj_list1[it_keps->get_from()].insert(it_keps->get_to());
-	}
-
-	for (it_keps = ks2.get_edges().begin(); it_keps != ks2.get_edges().end(); it_keps++) {
-		adj_list2[it_keps->get_from()].insert(it_keps->get_to());
-	}
-
-	// std::cerr << "\nDEBUG: [merge_automata] calculated adj lists...\n";
-
-	/**todo: using clean messes up with const qualifier of ks1 and ks2*/
-
-	// ks1.clean_unreachable_kworlds(adj_list1);
-	// ks2.clean_unreachable_kworlds(adj_list2);
-
-	// std::cerr << "\nDEBUG: Entering merge_kstate_to_automaton...\n";
-
-	return merge_kstate_to_automaton(ks1, ks2, adj_list1, adj_list2, root2, kworld_vec);
-
-	// int Nvertex = a1->Nvertex + a2->Nvertex;
-	// int Nbehavs = a1->Nbehavs + a2->Nbehavs;
-	// v_elem *Vertex;
-
-	// Vertex = (v_elem *) malloc(sizeof(v_elem) * Nvertex);
-
-	// int i, j = 0;
-
-	// for (i = 0; i < Nvertex; i++) {
-	// 	if (j < a1->Nvertex) {
-	// 		Vertex[i] = a1->Vertex[j];
-	// 		j = (j + 1) % a1->Nvertex;
-	// 	} else {
-	// 		Vertex[i] = a2->Vertex[j++];
-	// 	}
-	// }
-
-	// a = (automa *) malloc(sizeof(automa));
-	// a->Nvertex = Nvertex;
-	// a->Nbehavs = Nbehavs;
-	// a->Vertex = Vertex;
-}
-
-bool bisimulation::compare_automata(const kstate & ks1, const kstate & ks2, std::vector<kworld_ptr> kworld_vec)
+bool bisimulation::compare_automata(const kstate & ks1, const kstate & ks2)
 {
 	int root1 = 0, root2;
 
 	// std::cerr << "\nDEBUG: Entering merge_automata...\n";
-	automa* a = merge_automata(ks1, ks2, root2, kworld_vec);
+	automa* a = merge_kstate_to_automaton(ks1, ks2, root2);
 
 	if (a == nullptr) {
 		// std::cerr << "\nDEBUG: Returned null automaton...\n";
@@ -2077,11 +2070,8 @@ bool bisimulation::compare_automata(const kstate & ks1, const kstate & ks2, std:
 	// std::cerr << "\nDEBUG: root2 = " << root2 << "\n";
 
 	bool ret;
-	
+
 	if (MinimizeAutomaPT(a)) {
-		kstate tmp = automaton_to_kstate(a, kworld_vec);
-		std::string str = "_merge";
-		tmp.print_graphviz(str);
 
 		// if (eq) {
 		// 	ret = G[root1].block == G[root2].block;
@@ -2100,32 +2090,22 @@ bool bisimulation::compare_automata(const kstate & ks1, const kstate & ks2, std:
 	return ret;
 }
 
-bool bisimulation::compare_automata_eq(const kstate & ks1, const kstate & ks2, std::vector<kworld_ptr> kworld_vec)
+bool bisimulation::compare_automata_eq(const kstate & ks1, const kstate & ks2)
 {
 	int root1 = 0, root2;
 
 	// std::cerr << "\nDEBUG: Entering merge_automata...\n";
-	automa* a = merge_automata(ks1, ks2, root2, kworld_vec);
+	automa* a = merge_kstate_to_automaton(ks1, ks2, root2);
 
-	// if (a == nullptr) {
-	// 	return true;
-	// }
+	if (a == nullptr) {
+		return true;
+	}
 
-	// std::cerr << "\nDEBUG: Exited merge_automata...\n";
-	// std::cerr << "\nDEBUG: root2 = " << root2 << "\n";
 
 	bool ret;
-	
-	if (MinimizeAutomaPT(a)) {
-		// if (eq) {
-		// 	ret = G[root1].block == G[root2].block;
-		// } else {
-		// std::cerr << "\nDEBUG: Minimized automaton...\n";
-		// std::cerr << "\nDEBUG: G[root1].block = " << G[root1].block << "\n";
-		// std::cerr << "\nDEBUG: G[root2].block = " << G[root2].block << "\n";
 
+	if (MinimizeAutomaPT(a)) {
 		ret = G[root1].block == G[root2].block;
-		// }
 	} else {
 		ret = false;
 	}
@@ -2141,4 +2121,168 @@ bisimulation::bisimulation()
 	Q = (qPartition *) malloc(sizeof(qPartition) * BIS_MAXINDEX);
 	X = (xPartition *) malloc(sizeof(xPartition) * BIS_MAXINDEX);
 
+}
+
+
+
+//DEBUG
+
+const automa bisimulation::compare_automata_debug(const kstate & ks1, const kstate & ks2, std::vector<kworld_ptr> & kworld_vec)
+{
+	automa* a = merge_kstate_to_automaton_debug(ks1, ks2, kworld_vec);
+	std::cerr << "\nDEBUG:HERE 6\n";
+
+
+	if (MinimizeAutomaPT(a)) {
+		std::cerr << "\nDEBUG:HERE 7\n";
+
+		return *a;
+	} else {
+		std::cerr << "\nFailed Minimization\n";
+		exit(1);
+	}
+}
+
+automa* bisimulation::merge_kstate_to_automaton_debug(const kstate & ks1, const kstate & ks2, std::vector<kworld_ptr> & kworld_vec) const
+{
+
+	std::map<int, int> compact_indices;
+	std::map<kworld_ptr, int> index_map1, index_map2;
+	kbislabel_map label_map1, label_map2; // Map: from -> (to -> ag_set)
+
+	automa *a;
+	int Nvertex = ks1.get_worlds().size() + ks2.get_worlds().size();
+	int ag_set_size = domain::get_instance().get_agents().size();
+	//BIS_ADAPTATION For the loop that identifies the id (We add one edge for each node)
+	v_elem *Vertex;
+
+	Vertex = (v_elem *) malloc(sizeof(v_elem) * Nvertex);
+
+	// Initializating vertices
+	kworld_ptr_set::const_iterator it_kwps;
+	kedge_ptr_set::const_iterator it_keps;
+	kbislabel_map::const_iterator it_klm;
+	bis_label_set::const_iterator it_bislab;
+	std::map<kworld_ptr, bis_label_set>::const_iterator it_kw_bislab;
+
+	//std::cerr << "\nDEBUG: Inizializzazione Edges\n";
+
+	// The pointed world is set to the index 0. This ensures that, when deleting the bisimilar nodes, the pointed kworld
+	// is always chosen as the first of its block. Therefore, we do not need to update it when converting back to a kstate
+	index_map1[ks1.get_pointed()] = 0;
+	compact_indices[ks1.get_pointed().get_numerical_id()] = 0;
+		kworld_vec.push_back(ks1.get_pointed());
+
+	Vertex[0].ne = 0;
+
+	int i = 1, c = 1;
+
+	for (it_kwps = ks1.get_worlds().begin(); it_kwps != ks1.get_worlds().end(); it_kwps++) {
+		if (!(*it_kwps == ks1.get_pointed())) {
+			index_map1[*it_kwps] = i;
+			kworld_vec.push_back(*it_kwps);
+
+			// DEBUG
+
+			if (compact_indices.insert({it_kwps->get_numerical_id(), c}).second) {
+				c++;
+			}
+
+			Vertex[i].ne = 0;
+			i++;
+		}
+		label_map1[*it_kwps][*it_kwps].insert(compact_indices[it_kwps->get_numerical_id()] + ag_set_size);
+	}
+
+	index_map2[ks2.get_pointed()] = i;
+	kworld_vec.push_back(ks2.get_pointed());
+	Vertex[i].ne = 0;
+	i++;
+
+	if (compact_indices.insert({ks2.get_pointed().get_numerical_id(), c}).second) {
+		c++;
+	}
+
+	for (it_kwps = ks2.get_worlds().begin(); it_kwps != ks2.get_worlds().end(); it_kwps++) {
+		if (!(*it_kwps == ks2.get_pointed())) {
+			index_map2[*it_kwps] = i;
+						kworld_vec.push_back(*it_kwps);
+
+
+			if (compact_indices.insert({it_kwps->get_numerical_id(), c}).second) {
+				return nullptr;
+				// c++;
+			}
+
+			Vertex[i].ne = 0;
+			i++;
+		}
+		label_map2[*it_kwps][*it_kwps].insert(compact_indices[it_kwps->get_numerical_id()] + ag_set_size);
+	}
+
+	int bhtabSize = ag_set_size + c;
+
+	for (it_keps = ks1.get_edges().begin(); it_keps != ks1.get_edges().end(); it_keps++) {
+		label_map1[it_keps->get_from()][it_keps->get_to()].insert(it_keps->get_label());
+		Vertex[index_map1[it_keps->get_from()]].ne++;
+	}
+
+	for (it_keps = ks2.get_edges().begin(); it_keps != ks2.get_edges().end(); it_keps++) {
+		label_map2[it_keps->get_from()][it_keps->get_to()].insert(it_keps->get_label());
+		Vertex[index_map2[it_keps->get_from()]].ne++;
+	}
+
+	for (i = 0; i < Nvertex; i++) {
+		Vertex[i].ne++; //Self loop bisimulation
+		Vertex[i].e = (e_elem *) malloc(sizeof(e_elem) * Vertex[i].ne);
+	}
+
+	int from, to, j = 0;
+
+	for (it_klm = label_map1.begin(); it_klm != label_map1.end(); it_klm++) {
+		from = index_map1[it_klm->first]; // For each kworld 'from'
+
+		for (it_kw_bislab = it_klm->second.begin(); it_kw_bislab != it_klm->second.end(); it_kw_bislab++) { // For each edge that reaches the kworld 'to'
+			to = index_map1[it_kw_bislab->first];
+
+			for (it_bislab = it_kw_bislab->second.begin(); it_bislab != it_kw_bislab->second.end(); it_bislab++) { // For each agent 'ag' in the label of the kedge
+				Vertex[from].e[j].nbh = 1; // Let j be the index of the adjacency list of from that stores the kedge (from, to)
+				Vertex[from].e[j].bh = (int *) malloc(sizeof(int)); // Let nbh be the number of agents in such kedge
+				Vertex[from].e[j].tv = to; // Update the value of the reache kworld
+				Vertex[from].e[j].bh[0] = *it_bislab; // Update the value of the label at index k to 'ag'
+
+				j++; // Update the value of the index j
+			}
+		}
+		j = 0; // Reset j
+	}
+
+	j = 0;
+
+	for (it_klm = label_map2.begin(); it_klm != label_map2.end(); it_klm++) {
+		from = index_map2[it_klm->first]; // For each kworld 'from'
+
+		for (it_kw_bislab = it_klm->second.begin(); it_kw_bislab != it_klm->second.end(); it_kw_bislab++) { // For each edge that reaches the kworld 'to'
+			to = index_map2[it_kw_bislab->first];
+
+			for (it_bislab = it_kw_bislab->second.begin(); it_bislab != it_kw_bislab->second.end(); it_bislab++) { // For each agent 'ag' in the label of the kedge
+				Vertex[from].e[j].nbh = 1; // Let j be the index of the adjacency list of from that stores the kedge (from, to)
+				Vertex[from].e[j].bh = (int *) malloc(sizeof(int)); // Let nbh be the number of agents in such kedge
+				Vertex[from].e[j].tv = to; // Update the value of the reache kworld
+				Vertex[from].e[j].bh[0] = *it_bislab; // Update the value of the label at index k to 'ag'
+
+				j++; // Update the value of the index j
+			}
+		}
+		j = 0; // Reset j
+	}
+
+	// Building the automaton
+	int Nbehavs = bhtabSize;
+	a = (automa *) malloc(sizeof(automa));
+	a->Nvertex = Nvertex;
+	a->Nbehavs = Nbehavs;
+	a->Vertex = Vertex;
+
+	return a;
 }

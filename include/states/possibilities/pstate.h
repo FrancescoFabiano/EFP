@@ -558,5 +558,10 @@ public:
 
 
     /*fluent_formula get_sensing_effects_if_entailed(const effects_map & map, const pworld_ptr & start) const;*/
+
+
+    //DEBUG
+    int get_edges() const;
+    void debug_print(pstate tmp);
 };
 

@@ -35,7 +35,7 @@ void planner<T>::print_results(std::chrono::duration<double> elapsed_seconds, T 
 
 			if (domain::get_instance().get_bisimulation() == PaigeTarjan) {
 				result << " and Paige-Tarjan Bisimulation";
-			}else if (domain::get_instance().get_bisimulation() == FastBisimulation) {
+			} else if (domain::get_instance().get_bisimulation() == FastBisimulation) {
 				result << " and Fast Bismulation";
 			}
 
@@ -105,7 +105,9 @@ bool planner<T>::search_BFS(bool results_file)
 	}
 
 	m_search_space.push(initial);
-	visited_states.insert(initial);
+	if (check_visited) {
+		visited_states.insert(initial);
+	}
 
 	while (!m_search_space.empty()) {
 		popped_state = m_search_space.front();
@@ -174,6 +176,10 @@ bool planner<T>::search_heur(bool results_file, heuristics used_heur)
 		elapsed_seconds = end_timing - start_timing;
 		print_results(elapsed_seconds, initial, results_file, false);
 		return true;
+	}
+
+	if (check_visited) {
+		visited_states.insert(initial);
 	}
 	m_heur_search_space.push(initial);
 	while (!m_heur_search_space.empty()) {
@@ -248,7 +254,7 @@ void planner<T>::execute_given_actions(std::vector<std::string>& act_name)
 	for (it_stset = act_name.begin(); it_stset != act_name.end(); it_stset++) {
 		for (it_acset = domain::get_instance().get_actions().begin(); it_acset != domain::get_instance().get_actions().end(); it_acset++) {
 			if ((*it_acset).get_name().compare(*it_stset) == 0) {
-			//	std::cout << "\n\nDEBUG: Executing action " << (*it_acset).get_name() << "\n";
+				//	std::cout << "\n\nDEBUG: Executing action " << (*it_acset).get_name() << "\n";
 				if (state.is_executable(*it_acset)) {
 					state = state.compute_succ(*it_acset);
 					if (bisimulation) {
@@ -259,18 +265,17 @@ void planner<T>::execute_given_actions(std::vector<std::string>& act_name)
 					}
 
 					// DEBUG
-					std::string str = "_eq";
 					if (!visited_states.insert(state).second) {
 						for (T tmp : visited_states) {
-							if (!(tmp < state) && !(state < tmp)) {
-								tmp.print_graphviz(str);
+							if (!(tmp < state) && !(state < tmp) && !domain::get_instance().get_debug()) {
+								state.min_with_print(tmp);
 							}
-						}
-						std::cerr << "\nDEBUG: reached already visited state with action " << (*it_acset).get_name() << "\n";
+							std::cerr << "\nDEBUG: reached already visited state with action " << (*it_acset).get_name() << "\n";
 
-						// if ((*it_acset).get_name() == "shout_8") {
-						// 	state.print_graphviz(bis_postfix);
-						// }
+							// if ((*it_acset).get_name() == "shout_8") {
+							// 	state.print_graphviz(bis_postfix);
+							// }
+						}
 					}
 
 					if (state.is_goal()) {

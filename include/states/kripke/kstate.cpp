@@ -129,14 +129,13 @@ bool kstate::operator<(const kstate & to_compare) const
 	// }
 
 	bisimulation b;
-	std::vector<kworld_ptr> kworld_vec;
 
 	if (m_edges < to_compare.get_edges()) {
-		return b.compare_automata(*this, to_compare, kworld_vec);
+		return b.compare_automata(*this, to_compare);
 	} else {
-		return b.compare_automata(to_compare, *this, kworld_vec);
+		return b.compare_automata(to_compare, *this);
 	}
-	
+
 	// if (m_worlds < to_compare.get_worlds()) {
 	// 	return true;
 	// } else if (m_worlds > to_compare.get_worlds()) {
@@ -427,14 +426,14 @@ void kstate::clean_unreachable_kworlds(std::map<kworld_ptr, kworld_ptr_set> & ad
 	for (it_keps = m_edges.begin(); it_keps != m_edges.end(); it_keps++) {
 		if (reached_worlds.find(it_keps->get_from()) != reached_worlds.end()) {
 			reached_edges.insert(*it_keps);
-		} else {
+		}/* else {
 			adj_list[it_keps->get_from()].erase(it_keps->get_to());
 
 			if (adj_list.at(it_keps->get_from()).size() == 0) {
 				adj_list.erase(it_keps->get_from());
 				//reached_worlds.erase(it_keps->get_from());
 			}
-		}
+		}*/
 	}
 
 	set_worlds(reached_worlds);
@@ -442,7 +441,7 @@ void kstate::clean_unreachable_kworlds(std::map<kworld_ptr, kworld_ptr_set> & ad
 
 }
 
-const automa kstate::kstate_to_automaton(const std::map<kworld_ptr, kworld_ptr_set> & adj_list, std::vector<kworld_ptr> & kworld_vec) const
+const automa kstate::kstate_to_automaton(/*const std::map<kworld_ptr, kworld_ptr_set> & adj_list,*/ std::vector<kworld_ptr> & kworld_vec) const
 {
 
 	std::map<int, int> compact_indices;
@@ -475,7 +474,7 @@ const automa kstate::kstate_to_automaton(const std::map<kworld_ptr, kworld_ptr_s
 	//For the loop that identifies the id
 	//BIS_ADAPTATION For the loop that identifies the id (+1)
 	///@bug: If the pointed has no self-loop to add
-	kworld_ptr_set pointed_adj = adj_list.at(get_pointed());
+	//kworld_ptr_set pointed_adj = adj_list.at(get_pointed());
 
 	Vertex[0].ne = 0; // pointed_adj.size(); // edge_counter[get_pointed()];
 	//	if (pointed_adj.find(get_pointed()) == pointed_adj.end()) {
@@ -616,11 +615,7 @@ void kstate::automaton_to_kstate(const automa & a, const std::vector<kworld_ptr>
 				}
 			}
 		}
-		//@PER_BURI: DECOMMENTA QUI PER VEDERE OGNI VOLTA CHE UN NODO VIENE RIMOSSO DA BISIMULATION
 
-		//		else {
-		//			std::cout << "\nDEBUG: BISIMULATION REMOVED ONE KWORLD";
-		//		}
 	}
 
 
@@ -656,7 +651,7 @@ void kstate::calc_min_bisimilar()
 	automa a;
 	kworld_vec.reserve(get_worlds().size());
 
-	a = kstate_to_automaton(adj_list, kworld_vec);
+	a = kstate_to_automaton(/*adj_list,*/ kworld_vec);
 
 	bisimulation b;
 	//std::cout << "\nDEBUG: Printing automa pre-Bisimulation\n";
@@ -1923,31 +1918,62 @@ fluent_formula kstate::get_effects_if_entailed(const effects_map & map, const kw
 }*/
 
 
-void kstate::DEBUG_add_extra_world()
+//void kstate::DEBUG_add_extra_world()
+//{
+//
+//	kworld_ptr tmp_ptr = *m_worlds.begin();
+//	kworld extra(tmp_ptr.get_fluent_set());
+//	unsigned short depth = tmp_ptr.get_repetition() + 4;
+//	//std::cout << "\n\nDEBUG: Depth: " << depth << "\n\n";
+//	kworld_ptr extra_ptr = add_rep_world(extra, depth);
+//	set_max_depth(get_max_depth() + depth);
+//
+//
+//
+//
+//	kedge_ptr_set::const_iterator it_kep;
+//	for (it_kep = m_edges.begin(); it_kep != m_edges.end(); it_kep++) {
+//		if (it_kep->get_from() == tmp_ptr && !(it_kep->get_to() == tmp_ptr)) {
+//			kedge extra_ed(extra_ptr, it_kep->get_to(), it_kep->get_label());
+//			add_edge(extra_ed);
+//		} else if (it_kep->get_to() == tmp_ptr && !(it_kep->get_from() == tmp_ptr)) {
+//			kedge extra_ed(it_kep->get_from(), extra_ptr, it_kep->get_label());
+//			add_edge(extra_ed);
+//		} else if (it_kep->get_to() == tmp_ptr && it_kep->get_from() == tmp_ptr) {
+//			kedge extra_ed(extra_ptr, extra_ptr, it_kep->get_label());
+//			add_edge(extra_ed);
+//		}
+//	}
+//
+//}
+
+
+
+
+
+
+
+
+//DEBUG
+
+void kstate::debug_print(const kstate & to_compare)
 {
 
-	kworld_ptr tmp_ptr = *m_worlds.begin();
-	kworld extra(tmp_ptr.get_fluent_set());
-	unsigned short depth = tmp_ptr.get_repetition() + 4;
-	//std::cout << "\n\nDEBUG: Depth: " << depth << "\n\n";
-	kworld_ptr extra_ptr = add_rep_world(extra, depth);
-	set_max_depth(get_max_depth() + depth);
+	bisimulation b;
+	std::vector<kworld_ptr> kworld_vec;
+	automa a;
+
+	std::cerr << "\nDEBUG:HERE\n";
 
 
+	if (m_edges < to_compare.get_edges()) {
+		std::cerr << "\nDEBUG:HERE 1\n";
 
+		a = b.compare_automata_debug(*this, to_compare, kworld_vec);
+	} else {
+		std::cerr << "\nDEBUG:HERE 1\n";
 
-	kedge_ptr_set::const_iterator it_kep;
-	for (it_kep = m_edges.begin(); it_kep != m_edges.end(); it_kep++) {
-		if (it_kep->get_from() == tmp_ptr && !(it_kep->get_to() == tmp_ptr)) {
-			kedge extra_ed(extra_ptr, it_kep->get_to(), it_kep->get_label());
-			add_edge(extra_ed);
-		} else if (it_kep->get_to() == tmp_ptr && !(it_kep->get_from() == tmp_ptr)) {
-			kedge extra_ed(it_kep->get_from(), extra_ptr, it_kep->get_label());
-			add_edge(extra_ed);
-		} else if (it_kep->get_to() == tmp_ptr && it_kep->get_from() == tmp_ptr) {
-			kedge extra_ed(extra_ptr, extra_ptr, it_kep->get_label());
-			add_edge(extra_ed);
-		}
+		a = b.compare_automata_debug(to_compare, *this, kworld_vec);
 	}
-
+	automaton_to_kstate(a, kworld_vec);
 }
