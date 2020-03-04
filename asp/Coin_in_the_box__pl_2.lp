@@ -15,12 +15,12 @@
 #const w   = 4.     % for now fixed value (should be 2^f)
 #const s   = 2.     % for now fixed value (should be act^t)
 
-fluent(1..f).
+% fluent(1..f).
 agent(1..ag).
 time(1..t).
 
 world(1..w).
-state(1..s).
+state(0..s).
 % action_id(1..act).
 
 % action_type(ONT;SEN;ANN).
@@ -47,11 +47,11 @@ fluent(has_key_c).
 % agent_set(AGS).
 % contains_ag(AGS, AG).
 
-agent_set(1).   % {a, b, c}
+agent_set(all_agents).   % {a, b, c}
 
-contains_ag(1, 1).
-contains_ag(1, 2).
-contains_ag(1, 3).
+contains_ag(all_agents, 1).
+contains_ag(all_agents, 2).
+contains_ag(all_agents, 3).
 
 % *** FORMULAE ***
 
@@ -89,6 +89,9 @@ formula(neg(looking_a)).
 formula(neg(looking_b)).
 formula(neg(looking_c)).
 
+% formula(b(1, neg(looking_b)).
+% todo: finish
+
 formula(and(b(1, looking_a), and(b(1, neg(looking_b)), and(looking_a, neg(looking_b))))).   % signal_a_b
 formula(and(b(1, looking_a), and(b(1, neg(looking_c)), and(looking_a, neg(looking_c))))).   % signal_a_c
 formula(and(b(2, looking_b), and(b(2, neg(looking_a)), and(looking_b, neg(looking_a))))).   % signal_b_a
@@ -117,7 +120,10 @@ formula(and(b(3, tails), tails)).    % shout_tail_c
 
 % formula(or(opened, tails)).
 
-% formula(b(1, has_key_a)).
+% formula(neg(opened)).
+% formula(b(3, neg(opened))).
+% formula(b(1, b(3, neg(opened)))).
+% formula(b(3, b(1, b(3, neg(opened))))).
 
 % formula(e(1, has_key_a)).
 
@@ -135,29 +141,54 @@ formula(and(b(3, tails), tails)).    % shout_tail_c
 % initially(neg(neg(tails))).
 
 % From initially
-formula(e(1,     has_key_a) ).
-formula(e(1, neg(has_key_b))).
-formula(e(1, neg(has_key_c))).
-formula(e(1, neg(opened   ))).
-formula(e(1,     looking_a) ).
-formula(e(1, neg(looking_b))).
-formula(e(1, neg(looking_c))).
+% formula(e(1,     has_key_a) ).
+% formula(e(1, neg(has_key_b))).
+% formula(e(1, neg(has_key_c))).
+% formula(e(1, neg(opened   ))).
+% formula(e(1,     looking_a) ).
+% formula(e(1, neg(looking_b))).
+% formula(e(1, neg(looking_c))).
 
-formula(c(1,     has_key_a) ).
-formula(c(1, neg(has_key_b))).
-formula(c(1, neg(has_key_c))).
-formula(c(1, neg(opened   ))).
-formula(c(1,     looking_a) ).
-formula(c(1, neg(looking_b))).
-formula(c(1, neg(looking_c))).
+formula(c(all_agents,     has_key_a) ).
+formula(c(all_agents, neg(has_key_b))).
+formula(c(all_agents, neg(has_key_c))).
+formula(c(all_agents, neg(opened   ))).
+formula(c(all_agents,     looking_a) ).
+formula(c(all_agents, neg(looking_b))).
+formula(c(all_agents, neg(looking_c))).
 
-initially(c(1,     has_key_a) ).
-initially(c(1, neg(has_key_b))).
-initially(c(1, neg(has_key_c))).
-initially(c(1, neg(opened   ))).
-initially(c(1,     looking_a) ).
-initially(c(1, neg(looking_b))).
-initially(c(1, neg(looking_c))).
+initially(tails).
+initially(-opened).
+initially(has_key_a).
+initially(-has_key_b).
+initially(-has_key_c).
+initially(looking_a).
+initially(-looking_b).
+initially(-looking_c).
+
+formula(neg(tails)).
+formula(b(1, tails)).
+formula(b(1, neg(tails))).
+% formula(neg(b(1, tails))).
+formula(or(b(1, tails), b(1, neg(tails)))).
+% formula(or(b(1, tails), neg(b(1, tails)))).
+formula(c(all_agents, or(b(1, tails), b(1, neg(tails))))).
+% formula(c(1, or(b(1, tails), neg(b(1, tails))))).
+
+% initially(b(1, tails)).
+% initially(c(all_agents, or(b(1, tails), b(1, neg(tails))))).
+% initially(c(1, b(1, tails))).
+% initially(c(1, or(b(1, tails), neg(b(1, tails))))).
+% initially(or(b(1, tails), b(1, neg(tails)))).
+% initially(b(1, tails)).
+
+initially(c(all_agents,     has_key_a )).
+initially(c(all_agents, neg(has_key_b))).
+initially(c(all_agents, neg(has_key_c))).
+initially(c(all_agents, neg(opened   ))).
+initially(c(all_agents,     looking_a )).
+initially(c(all_agents, neg(looking_b))).
+initially(c(all_agents, neg(looking_c))).
 
 % From goal
 goal(b(1, tails)).
@@ -182,26 +213,26 @@ world(2).    % -tails, -opened, looking_a, -looking_b, -looking_c, has_key_a, -h
 world(3).    %  tails,  opened, looking_a, -looking_b, -looking_c, has_key_a, -has_key_b, -has_key_c
 world(4).    % -tails,  opened, looking_a, -looking_b, -looking_c, has_key_a, -has_key_b, -has_key_c
 
-holds(1, tails     ).   % in world 1 it holds tails
+holds(1, tails    ).   % in world 1 it holds tails
 holds(1, looking_a).   % in world 1 it holds looking_a
 holds(1, has_key_a).   % in world 1 it holds has_key_a
 
 holds(2, looking_a).   % in world 2 it holds looking_a
 holds(2, has_key_a).   % in world 2 it holds has_key_a
 
-% holds(3, tails    ).   % in world 3 it holds tails
-% holds(3, opened   ).   % in world 3 it holds opened
-% holds(3, looking_a).   % in world 3 it holds looking_a
-% holds(3, has_key_a).   % in world 3 it holds has_key_a
+holds(3, tails    ).   % in world 3 it holds tails
+holds(3, opened   ).   % in world 3 it holds opened
+holds(3, looking_a).   % in world 3 it holds looking_a
+holds(3, has_key_a).   % in world 3 it holds has_key_a
 
-% holds(4, opened   ).   % in world 4 it holds opened
-% holds(4, looking_a).   % in world 4 it holds looking_a
-% holds(4, has_key_a).   % in world 4 it holds has_key_a
+holds(4, opened   ).   % in world 4 it holds opened
+holds(4, looking_a).   % in world 4 it holds looking_a
+holds(4, has_key_a).   % in world 4 it holds has_key_a
 
 % Initial state
-contains(1, 1).  % world 1 is present in state 1
-contains(1, 2).  % world 2 is present in state 1
-pointed (1, 1).  % world 1 is pointed in state 1
+% contains(1, 1).  % world 1 is present in state 1
+% contains(1, 2).  % world 2 is present in state 1
+% pointed (1, 1).  % world 1 is pointed in state 1
 
 % open_a
 % contains(2, 1).  % world 0 is present in state 2
@@ -213,20 +244,22 @@ pointed (1, 1).  % world 1 is pointed in state 1
 % *** EDGES ***
 % edge(S1, W1, S2, W2, AG).
 
-% Initial state
-edge(1, 1, 1, 1, 1).   % edge from 1 (state 1) to 1 (state 1) labeled with a (1)
-edge(1, 1, 1, 1, 2).   % edge from 1 (state 1) to 1 (state 1) labeled with b (2)
-edge(1, 1, 1, 1, 3).   % edge from 1 (state 1) to 1 (state 1) labeled with c (3)
-edge(1, 2, 1, 2, 1).   % edge from 2 (state 1) to 2 (state 1) labeled with a (1)
-edge(1, 2, 1, 2, 2).   % edge from 2 (state 1) to 2 (state 1) labeled with b (2)
-edge(1, 2, 1, 2, 3).   % edge from 2 (state 1) to 2 (state 1) labeled with c (3)
+% TODO: controllare se gestiamo correttamente repetition
 
-edge(1, 1, 1, 2, 1).   % edge from 1 (state 1) to 2 (state 1) labeled with a (1)
-edge(1, 1, 1, 2, 2).   % edge from 1 (state 1) to 2 (state 1) labeled with b (2)
-edge(1, 1, 1, 2, 3).   % edge from 1 (state 1) to 2 (state 1) labeled with c (3)
-edge(1, 2, 1, 1, 1).   % edge from 2 (state 1) to 1 (state 1) labeled with a (1)
-edge(1, 2, 1, 1, 2).   % edge from 2 (state 1) to 1 (state 1) labeled with b (2)
-edge(1, 2, 1, 1, 3).   % edge from 2 (state 1) to 1 (state 1) labeled with c (3)
+% Initial state
+% edge(1, 1, 1, 1, 1).   % edge from 1 (state 1) to 1 (state 1) labeled with a (1)
+% edge(1, 1, 1, 1, 2).   % edge from 1 (state 1) to 1 (state 1) labeled with b (2)
+% edge(1, 1, 1, 1, 3).   % edge from 1 (state 1) to 1 (state 1) labeled with c (3)
+% edge(1, 2, 1, 2, 1).   % edge from 2 (state 1) to 2 (state 1) labeled with a (1)
+% edge(1, 2, 1, 2, 2).   % edge from 2 (state 1) to 2 (state 1) labeled with b (2)
+% edge(1, 2, 1, 2, 3).   % edge from 2 (state 1) to 2 (state 1) labeled with c (3)
+
+% edge(1, 1, 1, 2, 1).   % edge from 1 (state 1) to 2 (state 1) labeled with a (1)
+% edge(1, 1, 1, 2, 2).   % edge from 1 (state 1) to 2 (state 1) labeled with b (2)
+% edge(1, 1, 1, 2, 3).   % edge from 1 (state 1) to 2 (state 1) labeled with c (3)
+% edge(1, 2, 1, 1, 1).   % edge from 2 (state 1) to 1 (state 1) labeled with a (1)
+% edge(1, 2, 1, 1, 2).   % edge from 2 (state 1) to 1 (state 1) labeled with b (2)
+% edge(1, 2, 1, 1, 3).   % edge from 2 (state 1) to 1 (state 1) labeled with c (3)
 
 % open_a
 % edge(2, 3, 2, 3, 1).   % edge from 3 (state 2) to 3 (state 2) labeled with a (1)
@@ -238,7 +271,7 @@ edge(1, 2, 1, 1, 3).   % edge from 2 (state 1) to 1 (state 1) labeled with c (3)
 % edge(2, 3, 2, 4, 2).   % edge from 3 (state 2) to 4 (state 2) labeled with b (2)
 % edge(2, 4, 2, 3, 1).   % edge from 4 (state 2) to 3 (state 2) labeled with a (1)
 % edge(2, 4, 2, 3, 2).   % edge from 4 (state 2) to 3 (state 2) labeled with b (2)
-% %
+
 % edge(2, 3, 1, 1, 3).   % edge from 3 (state 2) to 1 (state 1) labeled with c (3)
 % edge(2, 3, 1, 2, 3).   % edge from 3 (state 2) to 2 (state 1) labeled with c (3)
 % edge(2, 4, 1, 1, 3).   % edge from 4 (state 2) to 1 (state 1) labeled with c (3)
