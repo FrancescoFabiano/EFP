@@ -8,19 +8,18 @@
 #const obl = 5.      % Oblivious agent
 
 % Coin in the box instance values
-#const f   = 8.
-#const ag  = 3.     % a = 1, b = 2, c = 3
-#const act = 21.
-#const t   = 5.     % for now fixed value
-#const w   = 4.     % for now fixed value (should be 2^f)
-#const s   = 2.     % for now fixed value (should be act^t)
+#const f    = 8.
+#const ag   = 3.     % a = 1, b = 2, c = 3
+#const act  = 21.
+#const w    = 4.     % for now fixed value (should be 2^f)
+#const maxS = 2.     % for now fixed value (should be act^t)
 
 % fluent(1..f).
 agent(1..ag).
-time(1..t).
+% time(1..t).
 
 world(1..w).
-state(0..s).
+state(0..maxS).
 % action_id(1..act).
 
 % action_type(ONT;SEN;ANN).
@@ -191,7 +190,52 @@ initially(c(all_agents, neg(looking_b))).
 initially(c(all_agents, neg(looking_c))).
 
 % From goal
-goal(b(1, tails)).
+% goal(b(1, tails)).
+formula(b(2, opened)).
+formula(neg(opened)).
+goal(b(2, opened)).
+goal(neg(opened)).
+
+% *** ACTIONS ***
+action(open_a).
+action_type(open_a, ont).
+executable(open_a, and(b(1, has_key_a), has_key_a)).
+causes(open_a, opened).
+
+fully_obs(open_a, 1, true).
+fully_obs(open_a, 2, true).
+fully_obs(open_a, 3, looking_c).
+
+formula(b(1, opened)).
+formula(and(b(1, opened), opened)).
+
+action(close_a).
+action_type(close_a, ont).
+executable(close_a, and(b(1, opened), opened)).
+causes(close_a, -opened).
+
+fully_obs(close_a, 1, true).
+fully_obs(close_a, 2, looking_b).
+fully_obs(close_a, 3, looking_c).
+
+action(open_b).
+action_type(open_b, ont).
+executable(open_b, and(b(2, has_key_b), has_key_b)).
+causes(open_b, opened).
+
+fully_obs(open_b, 1, looking_a).
+fully_obs(open_b, 2, true).
+fully_obs(open_b, 3, looking_c).
+
+action(open_c).
+action_type(open_c, ont).
+executable(open_c, and(b(3, has_key_c), has_key_c)).
+causes(open_c, opened).
+
+fully_obs(open_c, 1, looking_a).
+fully_obs(open_c, 2, looking_b).
+fully_obs(open_c, 3, true).
+
 
 % *** STATES ***
 % state(S).
@@ -205,7 +249,6 @@ state(2).   % open_a
 % *** WORLDS ***
 % world(W).
 % holds(W, F).
-% contains(S, W).
 % pointed(S, W).
 
 world(1).    %  tails, -opened, looking_a, -looking_b, -looking_c, has_key_a, -has_key_b, -has_key_c
