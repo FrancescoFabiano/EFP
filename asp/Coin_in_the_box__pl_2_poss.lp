@@ -8,13 +8,31 @@
 #const obl = 5.      % Oblivious agent
 
 % Coin in the box instance values
-#const w    = 4.     % for now fixed value (should be 2^f)
-#const maxS = 5.     % for now fixed value (should be act^t)
+#const f    = 8.
+#const p    = 11.     % for now fixed value (should be 2^f)
+% #const maxS = 5.     % for now fixed value (should be act^t)
+#const maxT = 5.
 
+#const ags  = 7.     % 2^|{a, b, c}| - 1 (we do not count the empty set)
+#const all_agents = 7.
+
+% fluent(1..f).
 agent(a;b;c).
+time(0..maxT).
 
-world(1..w).
-state(0..maxS).
+agent_set(1..ags).
+
+% world(1..w).
+possibility(1..p).
+% action_id(1..act).
+
+% action_type(ONT;SEN;ANN).
+% observability_type(FOB;POB;OBL).
+
+% ***** Input format *****
+
+% action(ACT, TYPE).              % action_id(ACT), action_type(TYPE)
+% obs_relation(ACT, AG, TYPE).    % action_id(ACT), agent(AG), observability_type(TYPE)
 
 % *** FLUENTS ***
 % fluent(F).
@@ -31,6 +49,21 @@ fluent(has_key_c).
 % *** AGENTS ***
 % agent_set(AGS).
 % contains_ag(AGS, AG).
+
+contains_ag(1, a).
+
+contains_ag(2, b).
+
+contains_ag(3, c).
+
+contains_ag(4, a).
+contains_ag(4, b).
+
+contains_ag(5, a).
+contains_ag(5, c).
+
+contains_ag(6, b).
+contains_ag(6, c).
 
 agent_set(all_agents).   % {a, b, c}
 
@@ -141,7 +174,7 @@ initially(c(all_agents, -looking_c)).
 formula(b(a, -opened)).
 formula(b(b, opened)).
 formula(b(c, opened)).
-formula(-opened).
+formula(opened).
 
 #const goals = 4.
 
@@ -204,7 +237,8 @@ executable(open_c, and(b(c, -opened), -opened)). % and(b(c, has_key_c), has_key_
 causes(open_c, opened).
 
 oblivious(open_c, a).
-oblivious(open_c, b).
+% oblivious(open_c, b).
+fully_obs(open_c, b, true).
 fully_obs(open_c, c, true).
 
 % fully_obs(open_c, a, looking_a).
@@ -212,10 +246,13 @@ fully_obs(open_c, c, true).
 
 
 % *** STATES ***
-% state(S).
+% possibility(S).
 
-state(1).   % initial state
-state(2).   % open_a
+% possibility(1).   % initial possibility
+% possibility(2).   % open_a
+
+% planned(1, 1).    % state 1 is planned at time 1
+% planned(2, 2).    % state 2 is planned at time 2
 
 % *** WORLDS ***
 % world(W).
