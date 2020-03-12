@@ -280,50 +280,37 @@ holds(4, opened   ).   % in world 4 it holds opened
 holds(4, looking_a).   % in world 4 it holds looking_a
 holds(4, has_key_a).   % in world 4 it holds has_key_a
 
-% Initial state
-% contains(1, 1).  % world 1 is present in state 1
-% contains(1, 2).  % world 2 is present in state 1
-% pointed (1, 1).  % world 1 is pointed in state 1
+% Previous states (TEST)
 
-% open_a
-% contains(2, 1).  % world 0 is present in state 2
-% contains(2, 2).  % world 1 is present in state 2
-% contains(2, 3).  % world 2 is present in state 2
-% contains(2, 4).  % world 3 is present in state 2
-% pointed(2, 3).   % world 2 is pointed in state 2
+% possible_world(1,1). possible_world(2,2). % t0
+% possible_world(3,3). possible_world(4,4). % t1
+% possible_world(5,1). possible_world(6,2). % t2
 
-% *** EDGES ***
-% edge(S1, W1, S2, W2, AG).
 
-% TODO: controllare se gestiamo correttamente repetition
+% possible_world(11,4). possible_world(6,3).
 
-% Initial state
-% edge(1, 1, 1, 1, 1).   % edge from 1 (state 1) to 1 (state 1) labeled with a (1)
-% edge(1, 1, 1, 1, 2).   % edge from 1 (state 1) to 1 (state 1) labeled with b (2)
-% edge(1, 1, 1, 1, 3).   % edge from 1 (state 1) to 1 (state 1) labeled with c (3)
-% edge(1, 2, 1, 2, 1).   % edge from 2 (state 1) to 2 (state 1) labeled with a (1)
-% edge(1, 2, 1, 2, 2).   % edge from 2 (state 1) to 2 (state 1) labeled with b (2)
-% edge(1, 2, 1, 2, 3).   % edge from 2 (state 1) to 2 (state 1) labeled with c (3)
+% pointed(0,1).
 
-% edge(1, 1, 1, 2, 1).   % edge from 1 (state 1) to 2 (state 1) labeled with a (1)
-% edge(1, 1, 1, 2, 2).   % edge from 1 (state 1) to 2 (state 1) labeled with b (2)
-% edge(1, 1, 1, 2, 3).   % edge from 1 (state 1) to 2 (state 1) labeled with c (3)
-% edge(1, 2, 1, 1, 1).   % edge from 2 (state 1) to 1 (state 1) labeled with a (1)
-% edge(1, 2, 1, 1, 2).   % edge from 2 (state 1) to 1 (state 1) labeled with b (2)
-% edge(1, 2, 1, 1, 3).   % edge from 2 (state 1) to 1 (state 1) labeled with c (3)
+% believes(1,1,a). believes(1,1,b). believes(1,1,c). believes(2,2,a). believes(2,2,b). believes(2,2,c).
+% believes(1,2,a). believes(1,2,b). believes(1,2,c). believes(2,1,a). believes(2,1,b). believes(2,1,c).
 
-% open_a
-% edge(2, 3, 2, 3, 1).   % edge from 3 (state 2) to 3 (state 2) labeled with a (1)
-% edge(2, 3, 2, 3, 2).   % edge from 3 (state 2) to 3 (state 2) labeled with b (2)
-% edge(2, 4, 2, 4, 1).   % edge from 4 (state 2) to 4 (state 2) labeled with a (1)
-% edge(2, 4, 2, 4, 2).   % edge from 4 (state 2) to 4 (state 2) labeled with b (2)
+% phi(3,1,0,open_a). phi(4,2,0,open_a).
 
-% edge(2, 3, 2, 4, 1).   % edge from 3 (state 2) to 4 (state 2) labeled with a (1)
-% edge(2, 3, 2, 4, 2).   % edge from 3 (state 2) to 4 (state 2) labeled with b (2)
-% edge(2, 4, 2, 3, 1).   % edge from 4 (state 2) to 3 (state 2) labeled with a (1)
-% edge(2, 4, 2, 3, 2).   % edge from 4 (state 2) to 3 (state 2) labeled with b (2)
 
-% edge(2, 3, 1, 1, 3).   % edge from 3 (state 2) to 1 (state 1) labeled with c (3)
-% edge(2, 3, 1, 2, 3).   % edge from 3 (state 2) to 2 (state 1) labeled with c (3)
-% edge(2, 4, 1, 1, 3).   % edge from 4 (state 2) to 1 (state 1) labeled with c (3)
-% edge(2, 4, 1, 2, 3).   % edge from 4 (state 2) to 2 (state 1) labeled with c (3)
+% pointed(1,3).
+
+% believes(3,3,a). believes(3,3,b). believes(4,4,a). believes(4,4,b).
+% believes(3,4,a). believes(3,4,b). believes(4,3,a). believes(4,3,b).
+% believes(3,1,c). believes(3,2,c). believes(4,1,c). believes(4,2,c).
+
+% phi(5,3,1,close_a). phi(6,4,1,close_a).
+
+
+% pointed(2,5).
+
+% believes(5,5,a). believes(6,6,a).
+% believes(5,6,a). believes(6,5,a).
+% believes(5,3,b). believes(5,4,b). believes(6,3,b). believes(6,4,b).
+% believes(5,1,c). believes(5,2,c). believes(6,1,c). believes(6,2,c).
+
+% phi(7,3,2,open_c). phi(11,4,2,open_c). phi(6,1,2,open_c). phi(11,2,2,open_c).

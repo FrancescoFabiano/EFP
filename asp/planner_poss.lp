@@ -30,16 +30,16 @@ entails(P,  or(F1, F2)) :-     entails(P, F1),                 possibility(P), f
 entails(P,  or(F1, F2)) :-                     entails(P, F2), possibility(P), formula(F1), formula(F2).
 
 % b operator
-entails(P1, b(AG , F))  :- 0 { not entails(P2, F) : believes(P1, P2, AG) } 0, possibility(P1), formula(b(AG, F)), formula(F).
+% entails(P1, b(AG , F))  :- 0 { not entails(P2, F) : believes(P1, P2, AG) } 0, possibility(P1), formula(b(AG, F)), formula(F).
 
-% not_entails(P1, b(AG , F)) :- not     entails(P2, F        ), believes(P1, P2, AG), possibility(P2), formula(F), agent(AG).
-% entails    (P , b(AG , F)) :- not not_entails(P , b(AG , F)),                       possibility(P ), formula(b(AG , F)).
+not_entails(P1, b(AG , F)) :- not     entails(P2, F        ), believes(P1, P2, AG), possibility(P2), formula(F), agent(AG).
+entails    (P , b(AG , F)) :- not not_entails(P , b(AG , F)),                       possibility(P ), formula(b(AG , F)).
 
 % c operator
-entails(P1, c(AGS, F))  :- 0 { not entails(P2, F) : reaches(P1, P2, AGS) } 0, possibility(P1), formula(c(AGS, F)), formula(F).
+% entails(P1, c(AGS, F))  :- 0 { not entails(P2, F) : reaches(P1, P2, AGS) } 0, possibility(P1), formula(c(AGS, F)), formula(F).
 
-% not_entails(P1, c(AGS, F)) :- not     entails(P2, F        ), reaches(P1, P2, AGS), possibility(P2), formula(F).
-% entails    (P , c(AGS, F)) :- not not_entails(P , c(AGS, F)),                       possibility(P ), formula(c(AGS, F)).
+not_entails(P1, c(AGS, F)) :- not     entails(P2, F        ), reaches(P1, P2, AGS), possibility(P2), formula(F).
+entails    (P , c(AGS, F)) :- not not_entails(P , c(AGS, F)),                       possibility(P ), formula(c(AGS, F)).
 
 
 
@@ -57,6 +57,7 @@ entails(P1, c(AGS, F))  :- 0 { not entails(P2, F) : reaches(P1, P2, AGS) } 0, po
 no_good_initial_pointed(W) :- not holds(W, F), world(W), initially( F), fluent(F).
 no_good_initial_pointed(W) :-     holds(W, F), world(W), initially(-F), fluent(F).
 
+% pointed(0, 1).
 pointed(0, P) :- possible_initial_world(P, W), not no_good_initial_pointed(W), world(W).
 
 % The initial conditions of form 2. determine the possible worlds of the initial state
@@ -67,8 +68,10 @@ no_good_initial_world(W) :-     holds(W, F), world(W), initially(c(AGS, -F)), ag
 good_initial_world(W) :- not no_good_initial_world(W), world(W).
 
 % We force the initial possibilities to be numbered from 1 to K, where K is the number of the initial possible worlds
+% possible_initial_world(1, W) :- not no_good_initial_pointed(W), world(W).
+
 1 { possible_initial_world(P, W) : possibility(P), P <= K } 1 :- good_initial_world(W), K = { good_initial_world(W1) : world(W1) }.
-possible_world(P1, W) :- possible_initial_world(P1, W).
+possible_world(P, W) :- possible_initial_world(P, W).
 
 % The initial conditions of form 3. filter out some of the agents' beliefs inside the initial state
 not_believes_initially(P1, P2, AG) :- not entails(P1, F),     entails(P2, F), possibility(P1), possibility(P2), initially(c(all_agents, or(b(AG, F), b(AG, -F)))).
@@ -88,17 +91,17 @@ is_fully_obs(T ,AG) :- is_executable(T, ACT), ontic_action(ACT), fully_obs(ACT, 
 is_oblivious(T, AG) :- is_executable(T, ACT), ontic_action(ACT), fully_obs(ACT, AG, OBS), agent(AG), not holds(WS, OBS), pointed(T, PS), possible_world(PS, WS).
 is_oblivious(T, AG) :- is_executable(T, ACT), ontic_action(ACT), oblivious(ACT, AG).
 
-fully_obs_agents(T+1, AGS) :- is_executable(T, ACT), ontic_action(ACT), agent_set(AGS),
+fully_obs_agents(T, AGS) :- is_executable(T, ACT), ontic_action(ACT), agent_set(AGS),
                               0 { is_oblivious(T, AG) :     contains_ag(AGS, AG)            } 0,
                               0 { is_fully_obs(T, AG) : not contains_ag(AGS, AG), agent(AG) } 0.
+
+% not_holds_except(W1, W2, F1) :-     holds(W1, F2), not holds(W2, F2), world(W1), world(W2), fluent(F1), fluent(F2), F1 != F2.
+% not_holds_except(W1, W2, F1) :- not holds(W1, F2),     holds(W2, F2), world(W1), world(W2), fluent(F1), fluent(F2), F1 != F2.
+% holds_except(W1, W2, F) :- not not_holds_except(W1, W2, F), world(W1), world(W2), fluent(F).
 
 holds_except(W1, W2,  F) :- world(W1), world(W2),     fluent(F), W1 != W2,
                             0 { fluent(F2) : F2 != F,     holds(W1, F2), not holds(W2, F2) } 0,
                             0 { fluent(F2) : F2 != F, not holds(W1, F2),     holds(W2, F2) } 0.
-
-% holds_except(W1, W2, -F) :- world(W1), world(W2), not holds(W1, F), fluent(F), W1 != W2,
-%                             0 { fluent(F2) : F2 != F,     holds(W1, F2), not holds(W2, F2) } 0,
-%                             0 { fluent(F2) : F2 != F, not holds(W1, F2),     holds(W2, F2) } 0.
 
 % The predicate holds if P1 = phi_D(P2, ACT) s.t. plan(T, ACT)
 % 0 { phi(P1, P2, T, ACT) : possibility(P1) } 1 :- plan(T, ACT), possibility(P2).
@@ -115,7 +118,13 @@ same_path(FROM1, TO1, FROM2, TO2) :- believes(FROM1, TO1,   AG), believes(FROM2,
 same_path(FROM1, TO1, FROM2, TO2) :- believes(FROM1, FROM3, AG), believes(FROM2, FROM4, AG), FROM1 != FROM3, FROM2 != FROM4,
                                      same_path(FROM3, TO1, FROM4, TO2).
 
-% phi(P1, P2, T, ACT) :- is_executable(T, ACT), ontic_action(ACT), pointed(T+1, P1), pointed(T, P2).
+% number_of_worlds(0, K) :- K = { good_initial_world(W) : world(W) }.
+% number_of_worlds(T, K1 + K2) :- K1 = { reaches(P1, P2, AGS) : pointed(T, P1), possibility(P2), fully_obs_agents(T, AGS) }, number_of_worlds(T-1, K2), T > 0.
+
+% 1 { phi(P1, P2, T, ACT) : possibility(P1), P1 > K, number_of_worlds(T, K) } 1 :- is_executable(T, ACT), ontic_action(ACT), pointed(T, PP), believes(PP, P2, AG), %* P2 >= PP, *% is_fully_obs(T, AG).
+
+% phi(K+1, P2, T, ACT) :- is_executable(T, ACT), ontic_action(ACT), pointed(T, P2), number_of_worlds(T, K).
+% phi(K  , P2, T, ACT) :- is_executable(T, ACT), ontic_action(ACT), pointed(T+1, PP1), pointed(T, PP2), believes(PP2, P2, AG), K = PP1 + (P2 - PP2), is_fully_obs(T, AG).
 
 1 { phi(P1, P2, T, ACT) : possibility(P1), P1 > P2 } 1 :- is_executable(T, ACT), ontic_action(ACT), pointed(T, PP), believes(PP, P2, AG), %* P2 >= PP, *% is_fully_obs(T, AG).
 
@@ -131,21 +140,7 @@ same_path(FROM1, TO1, FROM2, TO2) :- believes(FROM1, FROM3, AG), believes(FROM2,
 %                        pointed(T, PP), reaches(PP, P2, AGS), fully_obs_agents(T, AGS),
 %                        holds_except(W1, W2, -CAUSED), possible_world(P1, W1), possible_world(P2, W2).
 
-% possible_world(P1, W1) :- plan(T, ACT), ontic_action(ACT), causes(ACT,  CAUSED), fluent(CAUSED),
-%                           holds_except(W1, W2,  CAUSED), phi(P1, P2, T, ACT), possible_world(P2, W2).
-
-% possible_world(P2, W2) :- plan(T, ACT), ontic_action(ACT), causes(ACT,  CAUSED), fluent(CAUSED),
-%                           holds_except(W1, W2,  CAUSED), phi(P1, P2, T, ACT), possible_world(P1, W1).
-
-% possible_world(P1, W1) :- plan(T, ACT), ontic_action(ACT), causes(ACT, -CAUSED), fluent(CAUSED),
-%                           holds_except(W1, W2, -CAUSED), phi(P1, P2, T, ACT), possible_world(P2, W2).
-
-% possible_world(P2, W2) :- plan(T, ACT), ontic_action(ACT), causes(ACT, -CAUSED), fluent(CAUSED),
-%                           holds_except(W1, W2, -CAUSED), phi(P1, P2, T, ACT), possible_world(P1, W1).
-
 % ONTIC ACTIONS
-
-% 1 { possible_world(P, W) : world(W) } 1 :- possibility(P).
 
 possible_world(P1, W1) :- is_executable(T, ACT), ontic_action(ACT), causes(ACT,  CAUSED), fluent(CAUSED),
                           holds_except(W1, W2, CAUSED),     holds(W1, CAUSED), phi(P1, P2, T, ACT), possible_world(P2, W2).
@@ -153,43 +148,7 @@ possible_world(P1, W1) :- is_executable(T, ACT), ontic_action(ACT), causes(ACT, 
 possible_world(P1, W1) :- is_executable(T, ACT), ontic_action(ACT), causes(ACT, -CAUSED), fluent(CAUSED),
                           holds_except(W1, W2, CAUSED), not holds(W1, CAUSED), phi(P1, P2, T, ACT), possible_world(P2, W2).
 
-
-% possible_world(P1, W1) :- is_executable(T, ACT), ontic_action(ACT), causes(ACT,  CAUSED), fluent(CAUSED),
-%                           pointed(T, PP), believes(PP, P2, AG), is_fully_obs(T+1, AG),
-%                           holds_except(W1, W2, CAUSED), possible_world(P1, W1), possible_world(P2, W2),     holds(W1, CAUSED).
-
-% possible_world(P1, W1) :- is_executable(T, ACT), ontic_action(ACT), causes(ACT, -CAUSED), fluent(CAUSED),
-%                           pointed(T, PP), believes(PP, P2, AG), is_fully_obs(T+1, AG),
-%                           holds_except(W1, W2, CAUSED), possible_world(P1, W1), possible_world(P2, W2), not holds(W1, CAUSED).
-
-% #minimize{ P : possible_world(P, W) }.
-
 pointed(T+1, P1) :- pointed(T, P2), phi(P1, P2, T, ACT).
-
-% pointed(T+1, P1) :- is_executable(T, ACT), ontic_action(ACT), causes(ACT,  CAUSED), fluent(CAUSED), pointed(T, P2),
-%                     holds_except(W1, W2, CAUSED),     holds(W1, CAUSED), possible_world(P1, W1), possible_world(P2, W2).
-
-% pointed(T+1, P1) :- is_executable(T, ACT), ontic_action(ACT), causes(ACT, -CAUSED), fluent(CAUSED), pointed(T, P2),
-%                     holds_except(W1, W2, CAUSED), not holds(W1, CAUSED), possible_world(P1, W1), possible_world(P2, W2).
-
-% We set the beliefs of the fully observant agents in the new possibilities created by the transition function phi
-
-% TODO: fix the following. Usare questa versione crea believes errati rispetto all'agente b (Secondo output su outputs.lp)
-% believes(P1, P2, AG) :- plan(T, ACT), ontic_action(ACT), phi(P1, P3, T, ACT), phi(P2, P4, T, ACT),
-                        % pointed(T, P3), reaches(P3, P4, AGS), fully_obs_agents(T, ACT, AGS), is_fully_obs(T, ACT, AG).
-                        % pointed(T, P3), believes(P3, P4, AG), is_fully_obs(T, ACT, AG). % TODO: forse è sufficiente believes al posto di reaches??
-
-% TODO: fix the following. Usare questa versione crea believes in più (Terzo output su outputs.lp)
-% believes(P1, P2, AG) :- plan(T, ACT), ontic_action(ACT), phi(P1, P3, T, ACT), phi(P2, P4, T, ACT), believes(P3, P4, AG),
-%                         pointed(T, PP), reaches(PP, P3, AGS), fully_obs_agents(T, AGS), is_fully_obs(T, AG).
-
-% We maintain the beliefs of the oblivious agents by adding edges from the new portion of the state to the old one.
-% believes(P1, P2, AG) :- plan(T, ACT), ontic_action(ACT), phi(P1, P3, T, ACT), believes(P3, P2, AG),
-%                         pointed(T, PP), reaches(PP, P3, AGS), fully_obs_agents(T, AGS), is_oblivious(T, AG). % TODO: CONTROLLA CORRETTEZZA!!! FORSE CI SIAMO
-
-
-
-% ONTIC 2.0
 
 % Caso base: dal nuovo pointed P1 ho un arco verso le possibilities P2 = phi_D(P3, ACT) credute da un fully obs nello stato precedente
 believes(P1, P2, AG) :- is_executable(T, ACT), ontic_action(ACT), pointed(T+1, P1), pointed(T, PP),
@@ -232,15 +191,7 @@ plan(2, open_c).
 
 
 % Test
-% :- plan(T, ACT), not entails(T, EXEC), executable(ACT, EXEC), time(T), formula(EXEC), action(ACT).
-
 :- possible_world(P, W1), possible_world(P, W2), W1 != W2.
-
-% :- plan(T, ACT), ontic_action(ACT), causes(ACT,  CAUSED), fluent(CAUSED), pointed(T, PP), reaches(PP, P1, AGS), fully_obs_agents(T, ACT, AGS), 
-%    possible_world(P1, W1), holds_except(W1, W2, CAUSED), 0 { possible_world(P, W2) : possibility(P) } 0.
-
-% :- plan(T, ACT), ontic_action(ACT), causes(ACT, -CAUSED), fluent(CAUSED), pointed(T, PP), reaches(PP, P1, AGS), fully_obs_agents(T, ACT, AGS), 
-%    possible_world(P1, W1), holds_except(W1, W2, CAUSED), 0 { possible_world(P, W2) : possibility(P) } 0.
 
 % :- 0 { reached_goal(T) : time(T) } 0.
 % :- reached_goal(T1), plan(T2, ACT), T2 >= T1.
@@ -258,7 +209,7 @@ plan(2, open_c).
 #show possible_world/2.
 #show believes/3.
 #show phi/4.
-% #show holds_except/3.
+#show holds_except/3.
 
 #show plan/2.
 % #show reached_goal/1.
