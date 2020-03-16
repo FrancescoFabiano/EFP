@@ -1659,6 +1659,8 @@ void kstate::print_graphviz(std::ostream & graphviz) const
 
 
 	graphviz << "//WORLDS List:" << std::endl;
+
+	kworld_ptr_set::const_iterator it_kpset;
 	std::map<fluent_set, int> map_world_to_index;
 	std::map<unsigned short, char> map_rep_to_name;
 	char found_rep = (char) ((char) domain::get_instance().get_agents().size() + 'A');
@@ -1963,17 +1965,55 @@ void kstate::debug_print(const kstate & to_compare)
 	std::vector<kworld_ptr> kworld_vec;
 	automa a;
 
-	std::cerr << "\nDEBUG:HERE\n";
+	//std::cerr << "\nDEBUG:HERE\n";
 
 
 	if (m_edges < to_compare.get_edges()) {
-		std::cerr << "\nDEBUG:HERE 1\n";
+		//std::cerr << "\nDEBUG:HERE 1\n";
 
 		a = b.compare_automata_debug(*this, to_compare, kworld_vec);
 	} else {
-		std::cerr << "\nDEBUG:HERE 1\n";
+		//std::cerr << "\nDEBUG:HERE 1\n";
 
 		a = b.compare_automata_debug(to_compare, *this, kworld_vec);
 	}
-	automaton_to_kstate(a, kworld_vec);
+	automaton_to_kstate_debug(a, kworld_vec);
+}
+
+void kstate::automaton_to_kstate_debug(const automa & a, std::vector<kworld_ptr> & kworld_vec)
+{
+	kworld_ptr_set worlds;
+	kedge_ptr_set edges;
+	// The pointed world does not change when we calculate the minimum bisimilar state
+	// Hence we do not need to update it
+
+	int i, j, k, label, agents_size = domain::get_instance().get_agents().size();
+
+	for (i = 0; i < a.Nvertex; i++) {
+		if (a.Vertex[i].ne > 0) {
+			kworld_vec[i].set_repetition(i);
+			std::cerr << "\nDEBUG: Analyzing the " << i << "^th world with num_id = " << kworld_vec[i].get_numerical_id() << " and repetition = " << kworld_vec[i].get_repetition() << std::endl;
+			worlds.insert(kworld_vec[i]);
+
+			for (j = 0; j < a.Vertex[i].ne; j++) {
+				for (k = 0; k < a.Vertex[i].e[j].nbh; k++) {
+					label = a.Vertex[i].e[j].bh[k];
+					if (label < agents_size) {
+						
+							kedge_ptr tmp_edge = kstore::get_instance().add_edge(kedge(kworld_vec[i], kworld_vec[a.Vertex[i].e[j].tv], label));
+							edges.insert(tmp_edge);
+							//tmp_edge.print();
+							//std::cerr << "\n";
+						
+					}
+				}
+			}
+		}
+
+	}
+
+	set_pointed(*worlds.begin());
+	
+	set_worlds(worlds);
+	set_edges(edges);
 }

@@ -270,7 +270,7 @@ void planner<T>::execute_given_actions(std::vector<std::string>& act_name)
 							if (!(tmp < state) && !(state < tmp) && !domain::get_instance().get_debug()) {
 								state.min_with_print(tmp);
 							}
-							std::cerr << "\nDEBUG: reached already visited state with action " << (*it_acset).get_name() << "\n";
+							//std::cerr << "\nDEBUG: reached already visited state with action " << (*it_acset).get_name() << "\n";
 
 							// if ((*it_acset).get_name() == "shout_8") {
 							// 	state.print_graphviz(bis_postfix);

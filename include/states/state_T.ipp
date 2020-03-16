@@ -287,7 +287,10 @@ void state<T>::min_with_print(state<T> tmp)
 	tmp.print_graphviz(tmp_name);
 	print_graphviz(state_name);
 	
-	tmp.debug_get_representation().debug_print(get_representation());
-	std::cerr << "\nDEBUG:HERE\n";
+	T tmp_repr = tmp.debug_get_representation();
+	tmp_repr.debug_print(get_representation());
+	//std::cerr << "\nDEBUG:HERE\n";
+	tmp.set_representation(tmp_repr);
+	
 	tmp.print_graphviz("_eq_res");
 }

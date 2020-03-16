@@ -2130,17 +2130,17 @@ bisimulation::bisimulation()
 const automa bisimulation::compare_automata_debug(const kstate & ks1, const kstate & ks2, std::vector<kworld_ptr> & kworld_vec)
 {
 	automa* a = merge_kstate_to_automaton_debug(ks1, ks2, kworld_vec);
-	std::cerr << "\nDEBUG:HERE 6\n";
 
 
-	if (MinimizeAutomaPT(a)) {
-		std::cerr << "\nDEBUG:HERE 7\n";
+		return *a;
 
+	/*if (MinimizeAutomaPT(a)) {
+		//std::cerr << "\nDEBUG:HERE 7\n";
 		return *a;
 	} else {
 		std::cerr << "\nFailed Minimization\n";
 		exit(1);
-	}
+	}*/
 }
 
 automa* bisimulation::merge_kstate_to_automaton_debug(const kstate & ks1, const kstate & ks2, std::vector<kworld_ptr> & kworld_vec) const
@@ -2171,7 +2171,8 @@ automa* bisimulation::merge_kstate_to_automaton_debug(const kstate & ks1, const 
 	// is always chosen as the first of its block. Therefore, we do not need to update it when converting back to a kstate
 	index_map1[ks1.get_pointed()] = 0;
 	compact_indices[ks1.get_pointed().get_numerical_id()] = 0;
-		kworld_vec.push_back(ks1.get_pointed());
+	kworld_vec.push_back(ks1.get_pointed());
+	//std::cerr << "\n\nDEBUG: s1_w" << 0 << " is " << ks1.get_pointed().get_numerical_id();
 
 	Vertex[0].ne = 0;
 
@@ -2183,6 +2184,8 @@ automa* bisimulation::merge_kstate_to_automaton_debug(const kstate & ks1, const 
 			kworld_vec.push_back(*it_kwps);
 
 			// DEBUG
+			//std::cerr << "\nDEBUG: s1_w" << i << " is " << it_kwps->get_numerical_id();
+
 
 			if (compact_indices.insert({it_kwps->get_numerical_id(), c}).second) {
 				c++;
@@ -2206,8 +2209,7 @@ automa* bisimulation::merge_kstate_to_automaton_debug(const kstate & ks1, const 
 	for (it_kwps = ks2.get_worlds().begin(); it_kwps != ks2.get_worlds().end(); it_kwps++) {
 		if (!(*it_kwps == ks2.get_pointed())) {
 			index_map2[*it_kwps] = i;
-						kworld_vec.push_back(*it_kwps);
-
+			kworld_vec.push_back(*it_kwps);
 
 			if (compact_indices.insert({it_kwps->get_numerical_id(), c}).second) {
 				return nullptr;
@@ -2283,6 +2285,5 @@ automa* bisimulation::merge_kstate_to_automaton_debug(const kstate & ks1, const 
 	a->Nvertex = Nvertex;
 	a->Nbehavs = Nbehavs;
 	a->Vertex = Vertex;
-
 	return a;
 }

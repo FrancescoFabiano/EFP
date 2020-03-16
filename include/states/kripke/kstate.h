@@ -660,6 +660,8 @@ public:
 
     //void DEBUG_add_extra_world();
     void debug_print(const kstate & to_compare);
+    void automaton_to_kstate_debug(const automa & a, std::vector<kworld_ptr> & kworld_vec);
+
 
 };
 
