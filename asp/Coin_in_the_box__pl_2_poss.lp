@@ -9,9 +9,9 @@
 
 % Coin in the box instance values
 #const f    = 8.
-#const p    = 11.     % for now fixed value (should be 2^f)
+#const p    = 20.     % for now fixed value (should be 2^f)
 % #const maxS = 5.     % for now fixed value (should be act^t)
-#const maxT = 5.
+#const maxT = 4.
 
 #const ags  = 7.     % 2^|{a, b, c}| - 1 (we do not count the empty set)
 #const all_agents = 7.
@@ -287,14 +287,14 @@ holds(4, has_key_a).   % in world 4 it holds has_key_a
 % possible_world(5,1). possible_world(6,2). % t2
 
 
-% possible_world(11,4). possible_world(6,3).
+% % possible_world(11,4). possible_world(6,3).
 
 % pointed(0,1).
 
 % believes(1,1,a). believes(1,1,b). believes(1,1,c). believes(2,2,a). believes(2,2,b). believes(2,2,c).
 % believes(1,2,a). believes(1,2,b). believes(1,2,c). believes(2,1,a). believes(2,1,b). believes(2,1,c).
 
-% phi(3,1,0,open_a). phi(4,2,0,open_a).
+% phi(3,1,1). phi(4,2,1).
 
 
 % pointed(1,3).
@@ -303,7 +303,7 @@ holds(4, has_key_a).   % in world 4 it holds has_key_a
 % believes(3,4,a). believes(3,4,b). believes(4,3,a). believes(4,3,b).
 % believes(3,1,c). believes(3,2,c). believes(4,1,c). believes(4,2,c).
 
-% phi(5,3,1,close_a). phi(6,4,1,close_a).
+% phi(5,3,2). phi(6,4,2).
 
 
 % pointed(2,5).
@@ -313,4 +313,4 @@ holds(4, has_key_a).   % in world 4 it holds has_key_a
 % believes(5,3,b). believes(5,4,b). believes(6,3,b). believes(6,4,b).
 % believes(5,1,c). believes(5,2,c). believes(6,1,c). believes(6,2,c).
 
-% phi(7,3,2,open_c). phi(11,4,2,open_c). phi(6,1,2,open_c). phi(11,2,2,open_c).
+% phi(7,5,3). phi(8,3,3). phi(9,4,3). phi(10,1,3). phi(11,2,3).
