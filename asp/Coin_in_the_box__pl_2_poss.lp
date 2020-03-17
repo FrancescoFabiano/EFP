@@ -1,38 +1,15 @@
 % Constants and domain predicates
-#const ont = 0.      % Ontic action
-#const sen = 1.      % Sensing action
-#const ann = 2.      % Announcement action
-
-#const fob = 3.      % Fully observant agent
-#const pob = 4.      % Partially observant agent
-#const obl = 5.      % Oblivious agent
-
-% Coin in the box instance values
 #const f    = 8.
 #const p    = 20.     % for now fixed value (should be 2^f)
-% #const maxS = 5.     % for now fixed value (should be act^t)
 #const maxT = 4.
 
 #const ags  = 7.     % 2^|{a, b, c}| - 1 (we do not count the empty set)
 #const all_agents = 7.
 
-% fluent(1..f).
-agent(a;b;c).
-time(0..maxT).
-
-agent_set(1..ags).
-
-% world(1..w).
 possibility(1..p).
-% action_id(1..act).
-
-% action_type(ONT;SEN;ANN).
-% observability_type(FOB;POB;OBL).
-
-% ***** Input format *****
-
-% action(ACT, TYPE).              % action_id(ACT), action_type(TYPE)
-% obs_relation(ACT, AG, TYPE).    % action_id(ACT), agent(AG), observability_type(TYPE)
+time(0..maxT).
+agent(a;b;c).
+agent_set(1..ags).
 
 % *** FLUENTS ***
 % fluent(F).
@@ -106,9 +83,6 @@ formula(and(b(c, opened), and(b(c, looking_c), and(looking_c, opened)))).   % pe
 formula(neg(looking_a)).
 formula(neg(looking_b)).
 formula(neg(looking_c)).
-
-% formula(b(a, neg(looking_b)).
-% todo: finish
 
 formula(and(b(a, looking_a), and(b(a, neg(looking_b)), and(looking_a, neg(looking_b))))).   % signal_a_b
 formula(and(b(a, looking_a), and(b(a, neg(looking_c)), and(looking_a, neg(looking_c))))).   % signal_a_c
@@ -194,7 +168,6 @@ formula(and(b(a, -opened), -opened)).
 formula(and(and(b(a, -opened), -opened), has_key_a)).
 
 ontic_action(open_a).
-% action_type(open_a, ont).
 executable(open_a, and(and(b(a, -opened), -opened), has_key_a)).
 causes(open_a, opened).
 
@@ -208,7 +181,6 @@ formula(b(a, opened)).
 formula(and(b(a, opened), opened)).
 
 ontic_action(close_a).
-% action_type(close_a, ont).
 executable(close_a, and(b(a, opened), opened)).
 causes(close_a, -opened).
 
@@ -219,7 +191,6 @@ oblivious(close_a, c).
 
 % open_b
 % ontic_action(open_b).
-% % action_type(open_b, ont).
 % executable(open_b, and(b(b, has_key_b), has_key_b)).
 % causes(open_b, opened).
 
@@ -232,7 +203,6 @@ formula(b(c, -opened)).
 formula(and(b(c, -opened), -opened)).
 
 ontic_action(open_c).
-% action_type(open_c, ont).
 executable(open_c, and(b(c, -opened), -opened)). % and(b(c, has_key_c), has_key_c)
 causes(open_c, opened).
 
