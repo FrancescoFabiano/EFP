@@ -14,26 +14,22 @@ formula(F) :- fluent(F).        % A fluent is a formula
 
 holds(W, true) :- world(W).
 
-entails(T, P, true  )      :-                                           possibility(T, P).
-entails(T, P,  F    )      :-     holds(W, F), possible_world(T, P, W), world(W), fluent(F).
-entails(T, P, -F    )      :- not holds(W, F), possible_world(T, P, W), world(W), fluent(F).
+entails(T, P, true  )      :-                                           possible_world(T, P, _).
+entails(T, P,  F    )      :-     holds(W, F),                          possible_world(T, P, W), world(W), fluent(F).
+entails(T, P, -F    )      :- not holds(W, F),                          possible_world(T, P, W), world(W), fluent(F).
 
-entails(T, P, neg(F))      :- not entails(T, P, F ),                    possibility(T, P), formula(F).
-entails(T, P, and(F1, F2)) :-     entails(T, P, F1), entails(T, P, F2), possibility(T, P), formula(F1), formula(F2).
-entails(T, P,  or(F1, F2)) :-     entails(T, P, F1),                    possibility(T, P), formula(F1), formula(F2).
-entails(T, P,  or(F1, F2)) :-                        entails(T, P, F2), possibility(T, P), formula(F1), formula(F2).
+entails(T, P, neg(F))      :- not entails(T, P, F ),                    possible_world(T, P, _), formula(F).
+entails(T, P, and(F1, F2)) :-     entails(T, P, F1), entails(T, P, F2), possible_world(T, P, _), formula(F1), formula(F2).
+entails(T, P,  or(F1, F2)) :-     entails(T, P, F1),                    possible_world(T, P, _), formula(F1), formula(F2).
+entails(T, P,  or(F1, F2)) :-                        entails(T, P, F2), possible_world(T, P, _), formula(F1), formula(F2).
 
 % b operator
-% entails(T1, P1, b(AG , F))  :- 0 { not entails(T2, P2, F) : believes(T1, P1, T2, P2, AG), possibility(T2, P2) } 0, possibility(T1, P1), formula(b(AG, F)), formula(F).
-
-not_entails(T1, P1, b(AG , F)) :- not     entails(T2, P2, F        ), believes(T1, P1, T2, P2, AG), possibility(T2, P2), formula(F), agent(AG).
-entails    (T , P , b(AG , F)) :- not not_entails(T , P , b(AG , F)),                               possibility(T , P ), formula(b(AG , F)).
+not_entails(T1, P1, b(AG , F)) :- not     entails(T2, P2, F        ), believes(T1, P1, T2, P2, AG), possible_world(T2, P2, _), formula(F), agent(AG).
+entails    (T , P , b(AG , F)) :- not not_entails(T , P , b(AG , F)),                               possible_world(T , P , _), formula(b(AG , F)).
 
 % c operator
-% entails(P1, c(AGS, F))  :- 0 { not entails(P2, F) : reaches(P1, P2, AGS) } 0, possibility(P1), formula(c(AGS, F)), formula(F).
-
-not_entails(T1, P1, c(AGS, F)) :- not     entails(T2, P2, F        ), reaches(T1, P1, T2, P2, AGS), possibility(T2, P2), formula(F).
-entails    (T , P , c(AGS, F)) :- not not_entails(T , P , c(AGS, F)),                               possibility(T , P ), formula(c(AGS, F)).
+not_entails(T1, P1, c(AGS, F)) :- not     entails(T2, P2, F        ), reaches(T1, P1, T2, P2, AGS), possible_world(T2, P2, _), formula(F).
+entails    (T , P , c(AGS, F)) :- not not_entails(T , P , c(AGS, F)),                               possible_world(T , P , _), formula(c(AGS, F)).
 
 
 
@@ -71,17 +67,22 @@ possible_world(0, P, W) :- possible_initial_world(P, W).
 not_believes_initially(P1, P2, AG) :- not entails(0, P1, F),     entails(0, P2, F), world(P1), world(P2), initially(c(all_agents, or(b(AG, F), b(AG, -F)))).
 not_believes_initially(P1, P2, AG) :-     entails(0, P1, F), not entails(0, P2, F), world(P1), world(P2), initially(c(all_agents, or(b(AG, F), b(AG, -F)))).
 
-believes(0, P1, 0, P2, AG) :- not not_believes_initially(P1, P2, AG), possible_initial_world(P1, W1), possible_initial_world(P2, W2),
-                              not no_good_initial_world(W1), not no_good_initial_world(W2), agent(AG).
+believes(0, P1, 0, P2, AG) :- not not_believes_initially(P1, P2, AG), possible_initial_world(P1, W1), possible_initial_world(P2, W2), agent(AG).
 
 
 % ********** TRANSITION FUNCTION **********
+
+action(ACT) :- ontic_action(ACT).
+% action(ACT) :- sensing_action(ACT).
+% action(ACT) :- announcement_action(ACT).
 
 is_executable(T, ACT) :- plan(T, ACT), pointed(T, P), entails(T, P, EXEC), executable(ACT, EXEC).
 
 is_fully_obs(T ,AG) :- is_executable(T, ACT), ontic_action(ACT), fully_obs(ACT, AG, OBS), agent(AG),     holds(WS, OBS), pointed(T, PS), possible_world(T, PS, WS).
 is_oblivious(T, AG) :- is_executable(T, ACT), ontic_action(ACT), fully_obs(ACT, AG, OBS), agent(AG), not holds(WS, OBS), pointed(T, PS), possible_world(T, PS, WS).
 is_oblivious(T, AG) :- is_executable(T, ACT), ontic_action(ACT), oblivious(ACT, AG).
+
+% ONTIC ACTIONS
 
 apply_ontic(W1, W2, T+1) :- is_executable(T, ACT), ontic_action(ACT), causes(ACT,  CAUSED), fluent(CAUSED),
                             world(W1), world(W2),     holds(W1, CAUSED),
@@ -93,22 +94,18 @@ apply_ontic(W1, W2, T+1) :- is_executable(T, ACT), ontic_action(ACT), causes(ACT
                             0 { fluent(F) : F != CAUSED,     holds(W1, F), not holds(W2, F) } 0,
                             0 { fluent(F) : F != CAUSED, not holds(W1, F),     holds(W2, F) } 0.
 
-% ONTIC ACTIONS
-
-possibility(T, P) :- possible_world(T, P, W), world(W).
-
-pointed(T+1, phi(P)) :- is_executable(T, ACT), ontic_action(ACT), pointed(T, P), possibility(T+1, phi(P)).
+pointed(T+1, phi(P)) :- is_executable(T, ACT), ontic_action(ACT), pointed(T, P), possible_world(T+1, phi(P), _).
 
 possible_world(T+1, phi(P), W1) :- is_executable(T, ACT), ontic_action(ACT), apply_ontic(W1, W2, T+1), pointed(T, P), possible_world(T, P, W2).
 
 possible_world(T+1, phi(P), W1) :- is_executable(T, ACT), ontic_action(ACT), apply_ontic(W1, W2, T+1), pointed(T, PP),
-                                   believes(T, PP, T2, P, AG), possible_world(T2, P, W2), is_fully_obs(T, AG).
+                                   believes(T, PP, T2, P, AG), possible_world(T2, P, _), is_fully_obs(T, AG).
 
 believes(T+1, phi(P1), T+1, phi(P2), AG) :- is_executable(T, ACT), ontic_action(ACT), believes(T1, P1, T2, P2, AG), T1 <= T, T2 <= T,
-                                            is_fully_obs(T, AG), possibility(T1, P1), possibility(T2, P2), possibility(T+1, phi(P1)), possibility(T+1, phi(P2)).
+                                            is_fully_obs(T, AG), possible_world(T1, P1, _), possible_world(T2, P2, _), possible_world(T+1, phi(P1), _), possible_world(T+1, phi(P2), _).
 
 believes(T+1, phi(P1), T2,      P2 , AG) :- is_executable(T, ACT), ontic_action(ACT), believes(T1, P1, T2, P2, AG), T1 <= T, T2 <= T,
-                                            is_oblivious(T, AG), possibility(T1, P1), possibility(T2, P2), possibility(T+1, phi(P1)).
+                                            is_oblivious(T, AG), possible_world(T1, P1, _), possible_world(T2, P2, _), possible_world(T+1, phi(P1), _).
 
 % SENSING ACTIONS
 % ANNOUNCEMENT ACTIONS
@@ -118,17 +115,13 @@ believes(T+1, phi(P1), T2,      P2 , AG) :- is_executable(T, ACT), ontic_action(
 0 { plan(T, ACT) : action(ACT) } 1 :- time(T), T < maxT.
 
 % Define
-action(ACT) :- ontic_action(ACT).
-% action(ACT) :- sensing_action(ACT).
-% action(ACT) :- announcement_action(ACT).
-
 not_reached_goal(0) :- not entails(0, P, F), pointed(0, P), goal(F).
 not_reached_goal(T) :- not entails(T, P, F), pointed(T, P), time(T), T > 0, goal(F).
+
 reached_goal(0) :- not not_reached_goal(0).
 reached_goal(T) :- plan(T-1, ACT), is_executable(T-1, ACT), not not_reached_goal(T), time(T), T > 0.
 
 % Test
-
 :- 0 { reached_goal(T) : time(T) } 0.
 
 #minimize{ T : reached_goal(T) }.
