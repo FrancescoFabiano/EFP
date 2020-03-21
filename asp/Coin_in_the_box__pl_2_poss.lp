@@ -172,7 +172,7 @@ formula(and(and(b(a, -opened), -opened), has_key_a)).
 
 ontic(open_a).
 executable(open_a, and(and(b(a, -opened), -opened), has_key_a)).
-causes(open_a, opened).
+causes(open_a, opened, true).
 
 observes(open_a, a, true).
 observes(open_a, b, true). % looking_b
@@ -185,7 +185,7 @@ formula(and(b(a, opened), opened)).
 
 ontic(close_a).
 executable(close_a, and(b(a, opened), opened)).
-causes(close_a, -opened).
+causes(close_a, -opened, true).
 
 observes(close_a, a, true).
 % observes(close_a, b, true).
@@ -207,7 +207,7 @@ formula(and(b(c, -opened), -opened)).
 
 ontic(open_c).
 executable(open_c, and(b(c, -opened), -opened)). % and(b(c, has_key_c), has_key_c)
-causes(open_c, opened).
+causes(open_c, opened, true).
 
 oblivious(open_c, a).
 % oblivious(open_c, b).
@@ -218,24 +218,15 @@ observes(open_c, c, true).
 % observes(open_c, 2, looking_b).
 
 % peek_c
-% formula(and(b(c,opened), opened)).
+formula(and(b(c,opened), opened)).
 
-% sensing(peek_c).
-% executable(peek_c, and(b(c,opened), opened)).
-% determines(peek_c, tails).
+sensing(peek_c).
+executable(peek_c, and(b(c,opened), opened)).
+determines(peek_c, tails, true).
 
-% observes(peek_c, c, true).
-% aware_of(peek_c, b, true).
-% oblivious(peek_c, a).
-
-% *** STATES ***
-% possibility(S).
-
-% possibility(1).   % initial possibility
-% possibility(2).   % open_a
-
-% planned(1, 1).    % state 1 is planned at time 1
-% planned(2, 2).    % state 2 is planned at time 2
+observes(peek_c, c, true).
+aware_of(peek_c, b, true).
+oblivious(peek_c, a).
 
 % *** WORLDS ***
 % world(W).
