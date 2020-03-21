@@ -21,7 +21,6 @@
 #define VERSION "2.0"
 
 
-/**\todo: Understand this, why out of main?*/
 auto domain_reader = std::make_shared<reader>();
 
 void print_usage(char* prog_name)
@@ -70,9 +69,9 @@ void print_usage(char* prog_name)
 	std::cout << "-act_check @action_check" << std::endl;
 	std::cout << "	Set the type of @action_check for the action execution." << std::endl;
 	std::cout << "	Possible @action_check:" << std::endl;
-	std::cout << "		PW: The executability is checked only on the state but the conditonal effects are cheched in every worlds (Default)." << std::endl;
-	std::cout << "		PP: Both the executability and the conditonal effects are cheched only on the state." << std::endl;
-	std::cout << "		WW: Both the executability and the conditonal effects are cheched in every world." << std::endl;
+	std::cout << "		PW: The executability is checked only on the state but the conditional effects are checked in every worlds (Default)." << std::endl;
+	std::cout << "		PP: Both the executability and the conditional effects are checked only on the state." << std::endl;
+	std::cout << "		WW: Both the executability and the conditional effects are checked in every world." << std::endl;
 
 	/*std::cout << "-ini_build @building_tech" << std::endl;
 	std::cout << "	Set the @building_tech that describes how the initial state will be build." << std::endl;*/
