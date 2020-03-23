@@ -16,10 +16,12 @@ digraph K_structure{
 	node [shape = circle] "3_2_pp2";
 
 //RANKS List:
-	{rank = same; "0_0_1"; "0_0_2"};
-	{rank = same; "1_1_p1"; "1_1_p2"};
-	{rank = same; "2_2_pp1"; "2_2_pp2"};
-	{rank = same; "3_1_p1"; "3_1_p2"; "3_2_pp1"; "3_2_pp2"; "3_3_ppp1"};
+	{rank = 1; "0_0_1"; "0_0_2"};
+	{rank = 2; "1_1_p1"; "1_1_p2"};
+	{rank = 3; "2_2_pp1"; "2_2_pp2"};
+	{rank = 4; "3_1_p1"; "3_1_p2"};
+	{rank = 5; "3_2_pp1"; "3_2_pp2"};
+	{rank = 6; "3_3_ppp1"};
 
 //EDGES List:
 	"0_0_1" -> "0_0_1" [label="a,b,c"];

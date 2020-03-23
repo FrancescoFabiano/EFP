@@ -6,7 +6,7 @@
 import sys
 import re
 from collections import defaultdict
-from sortedcontainers import SortedSet 
+from sortedcontainers import SortedSet, SortedDict
 
 
 def remove_phi(string):
@@ -47,12 +47,12 @@ def generate_world(world, pointed):
 def initialize_rank(world, rank_map):
 	no_phi = generate_world_key(world)
 	splitted = no_phi.split(',')
-	rank_map[splitted[0]] = SortedSet()
+	rank_map[splitted[0]+splitted[1]] = SortedSet()
 	
 def generate_rank(world, rank_map):
 	no_phi = generate_world_key(world)
 	splitted = no_phi.split(',')
-	rank_map[splitted[0]].add('"' + splitted[0] + '_' + splitted[1] + '_' + splitted[2] + '"')
+	rank_map[splitted[0]+splitted[1]].add('"' + splitted[0] + '_' + splitted[1] + '_' + splitted[2] + '"')
 	
 def generate_edge_key(edge):
 	replaced = re.sub('^believes\(', '', edge)
@@ -120,18 +120,20 @@ with open(sys.argv[1]+'.txt', 'r') as n:
 		generate_world(world,pointed) 
 	
 	#RANK
-	rank_map = dict()
+	rank_map = SortedDict()
 	for world in worlds:
 		initialize_rank(world,rank_map)
 		
 	for world in worlds:
 		generate_rank(world,rank_map)
 	
+	counter_rank = 0
 	print("\n//RANKS List:", end ="\n", file = outputfile) 
 	for key,values in rank_map.items():
+		counter_rank+=1
 		print("\t", end ="", file = outputfile) 
 		#print(key, end ="")
-		print('{rank = same; ', end ="", file = outputfile) 
+		print('{rank = ' + str(counter_rank) + '; ', end ="", file = outputfile) 
 		for val in values:
 			print(val, end ="", file = outputfile) 
 			if values.index(val) != len(values)-1:
