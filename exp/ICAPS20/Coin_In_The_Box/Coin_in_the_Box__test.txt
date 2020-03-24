@@ -84,7 +84,7 @@ b observes peek_b;
 
 executable peek_c if B(c,opened), opened;
 peek_c determines tail;
-a aware_of peek_c;
+% a aware_of peek_c;
 b aware_of peek_c;
 % d aware_of peek_c;
 c observes peek_c;

@@ -14,6 +14,7 @@ agent_set(1..ags).
 % *** FLUENTS ***
 % fluent(F).
 
+fluent(true).
 fluent(tails).
 fluent(opened).
 fluent(looking_a).
@@ -148,21 +149,24 @@ initially(c(all_agents, -looking_c)).
 
 % From goal
 % goal(b(a, tails)).
-formula(b(a, -opened)).
-formula(b(b, opened)).
-formula(b(c, opened)).
-formula(opened).
+formula(b(a, tails)).
+formula(b(b, tails)).
+formula(b(c, tails)).
+formula(tails).
 
 #const goals = 4.
 
-goal(b(a, -opened)).
+goal(b(a, tails)).
+goal(b(b, tails)).
+goal(b(c, tails)).
+goal(b(a, opened)).
 goal(b(b, opened)).
 goal(b(c, opened)).
-goal(opened).
+goal(tails).
 
 % *** ACTIONS ***
 
-% formula(true).
+formula(true).
 % open_a
 % formula(and(and(b(a, has_key_a), has_key_a), -opened)).
 formula(-opened).
@@ -206,7 +210,7 @@ formula(b(c, -opened)).
 formula(and(b(c, -opened), -opened)).
 
 ontic(open_c).
-executable(open_c, and(b(c, -opened), -opened)). % and(b(c, has_key_c), has_key_c)
+executable(open_c, b(c, -opened)). % and(b(c, has_key_c), has_key_c)
 causes(open_c, opened, true).
 
 oblivious(open_c, a).
@@ -216,6 +220,17 @@ observes(open_c, c, true).
 
 % observes(open_c, a, looking_a).
 % observes(open_c, 2, looking_b).
+
+% peek_a
+formula(and(b(a,opened), opened)).
+
+sensing(peek_a).
+executable(peek_a, and(b(a,opened), opened)).
+determines(peek_a, tails, true).
+
+observes(peek_a, a, true).
+aware_of(peek_a, b, true).
+oblivious(peek_a, c).
 
 % peek_c
 formula(and(b(c,opened), opened)).
@@ -227,6 +242,19 @@ determines(peek_c, tails, true).
 observes(peek_c, c, true).
 aware_of(peek_c, b, true).
 oblivious(peek_c, a).
+
+% shout_tail_a
+formula(b(a,tails)).
+formula(and(b(a,tails), tails)).
+
+announcement(shout_tail_a).
+
+executable(shout_tail_a, and(b(a,tails), tails)).
+announces(shout_tail_a, tails, true).
+
+observes(shout_tail_a, a, true).
+observes(shout_tail_a, b, true).
+observes(shout_tail_a, c, true).
 
 % *** WORLDS ***
 % world(W).
