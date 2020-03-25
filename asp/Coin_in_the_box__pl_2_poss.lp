@@ -6,7 +6,7 @@
 #const ags  = 7.     % 2^|{a, b, c}| - 1 (we do not count the empty set)
 #const all_agents = 7.
 
-possibility(1..p).
+% possibility(1..p).
 time(0..maxT).
 agent(a;b;c).
 agent_set(1..ags).
@@ -14,7 +14,7 @@ agent_set(1..ags).
 % *** FLUENTS ***
 % fluent(F).
 
-fluent(true).
+% fluent(true).
 fluent(tails).
 fluent(opened).
 fluent(looking_a).
@@ -154,8 +154,6 @@ formula(b(b, tails)).
 formula(b(c, tails)).
 formula(tails).
 
-#const goals = 4.
-
 goal(b(a, tails)).
 goal(b(b, tails)).
 goal(b(c, tails)).
@@ -177,6 +175,7 @@ formula(and(and(b(a, -opened), -opened), has_key_a)).
 ontic(open_a).
 executable(open_a, and(and(b(a, -opened), -opened), has_key_a)).
 causes(open_a, opened, true).
+% causes(open_a, tails, true).
 
 observes(open_a, a, true).
 observes(open_a, b, true). % looking_b
@@ -257,14 +256,14 @@ observes(shout_tail_a, b, true).
 observes(shout_tail_a, c, true).
 
 % *** WORLDS ***
-% world(W).
+% fluent_set(W).
 % holds(W, F).
 % pointed(S, W).
 
-world(1).    %  tails, -opened, looking_a, -looking_b, -looking_c, has_key_a, -has_key_b, -has_key_c
-world(2).    % -tails, -opened, looking_a, -looking_b, -looking_c, has_key_a, -has_key_b, -has_key_c
-world(3).    %  tails,  opened, looking_a, -looking_b, -looking_c, has_key_a, -has_key_b, -has_key_c
-world(4).    % -tails,  opened, looking_a, -looking_b, -looking_c, has_key_a, -has_key_b, -has_key_c
+fluent_set(1).    %  tails, -opened, looking_a, -looking_b, -looking_c, has_key_a, -has_key_b, -has_key_c
+fluent_set(2).    % -tails, -opened, looking_a, -looking_b, -looking_c, has_key_a, -has_key_b, -has_key_c
+fluent_set(3).    %  tails,  opened, looking_a, -looking_b, -looking_c, has_key_a, -has_key_b, -has_key_c
+fluent_set(4).    % -tails,  opened, looking_a, -looking_b, -looking_c, has_key_a, -has_key_b, -has_key_c
 
 holds(1,  tails    ).
 % holds(1, -opened   ).
