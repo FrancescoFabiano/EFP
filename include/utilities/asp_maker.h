@@ -19,6 +19,8 @@ private:
     std::set<std::string> m_already_printed_formulae;
     std::set<std::string> m_already_printed_agents_sets;
     grounder m_grounder;
+    std::string m_all_agents = "";
+
 
     std::string print_ag_set(const agent_set & ags, std::ofstream & to_print);
 
@@ -29,7 +31,7 @@ private:
     std::string print_subformula(const formula_list & fl, std::ofstream & to_print);
 
 
-    void print_fluents(std::ofstream & to_print) const;
+    void print_fluents(std::ofstream & to_print);
     void print_actions(std::ofstream & to_print);
     void print_agents(std::ofstream & to_print) const;
     void print_initially(std::ofstream & to_print);
@@ -37,6 +39,9 @@ private:
 
     void print_all_fluent_set(fluent_set& permutation, unsigned int index, int & permutation_number, std::ofstream & to_print) const;
     void print_worlds(std::ofstream & to_print) const;
+
+    //void minus_set(agent_set & to_modify, const agent_set & factor2) const;
+
 
 public:
     asp_maker();

@@ -4,6 +4,13 @@ asp_maker::asp_maker()
 {
 	m_grounder = domain::get_instance().get_grounder();
 	m_already_printed_formulae.insert("");
+	
+	m_all_agents = "";
+	agent_set::const_iterator it_ags;
+	agent_set agents = domain::get_instance().get_agents();
+	for (it_ags = agents.begin(); it_ags != agents.end(); it_ags++) {
+		m_all_agents += m_grounder.deground_agent(*it_ags);
+	}	
 	m_already_printed_agents_sets.insert("");
 }
 
@@ -15,10 +22,16 @@ std::string asp_maker::print_ag_set(const agent_set & ags, std::ofstream & to_pr
 	for (it_ags = ags.begin(); it_ags != ags.end(); it_ags++) {
 		ret += m_grounder.deground_agent(*it_ags);
 	}
+	
+	if (ret.compare(m_all_agents) == 0)
+		{
+			ret = "all_agents";
+		}
+	
 	if (m_already_printed_agents_sets.insert(ret).second) {
 		to_print << "agent_set(" << ret << ").\n";
 		for (it_ags = ags.begin(); it_ags != ags.end(); it_ags++) {
-			to_print << "contains(" << ret << "," << m_grounder.deground_agent(*it_ags) << ").\n";
+			to_print << "contains_ag(" << ret << "," << m_grounder.deground_agent(*it_ags) << ").\n";
 		}
 	}
 
@@ -182,7 +195,7 @@ void asp_maker::print_all()
 
 }
 
-void asp_maker::print_fluents(std::ofstream & to_print) const
+void asp_maker::print_fluents(std::ofstream & to_print)
 {
 	to_print << "% *** FLUENTS ***\n";
 	fluent_set::const_iterator it_fls;
@@ -190,6 +203,7 @@ void asp_maker::print_fluents(std::ofstream & to_print) const
 	for (it_fls = fluents.begin(); it_fls != fluents.end(); it_fls++) {
 		if (*it_fls % 2 == 0) {
 			to_print << "fluent(" << m_grounder.deground_fluent(*it_fls) << ").\n";
+			print_subformula(*it_fls, to_print);
 		}
 	}
 	to_print << "\n\n";
@@ -204,18 +218,107 @@ void asp_maker::print_actions(std::ofstream & to_print)
 	for (it_acs = actions.begin(); it_acs != actions.end(); it_acs++) {
 		act_name = it_acs->get_name();
 		to_print << "action(" << act_name << ").\n";
+		std::string effect;
+		std::string cond_eff;
+		fluent_formula::const_iterator it_flf;
+		fluent_set::const_iterator it_fls;
+
+		effects_map::const_iterator it_mapeff;
 		switch ( it_acs->get_type() ) {
 		case ONTIC:
-			to_print << "ontic_action(" << act_name << ").\n";
+			to_print << "ontic(" << act_name << ").\n";
+			if (it_acs->get_effects().size() > 0) {
+
+
+				for (it_mapeff = it_acs->get_effects().begin(); it_mapeff != it_acs->get_effects().end(); it_mapeff++) {
+					for (it_flf = it_mapeff->first.begin(); it_flf != it_mapeff->first.end(); it_flf++) {
+						for (it_fls = it_flf->begin(); it_fls != it_flf->end(); it_fls++) {
+
+							effect = print_subformula(*it_fls, to_print);
+							cond_eff = print_subformula(it_mapeff->second, to_print);
+							to_print << "causes(" << act_name << ", ";
+
+							to_print << effect << ", ";
+
+
+
+							if (!cond_eff.empty()) {
+								to_print << cond_eff;
+							} else {
+								to_print << "true";
+							}
+
+							to_print << ").\n";
+						}
+					}
+				}
+			}
+
 			break;
 		case SENSING:
-			to_print << "sensing_action(" << act_name << ").\n";
+			to_print << "sensing(" << act_name << ").\n";
+			if (it_acs->get_effects().size() > 0) {
+
+
+				for (it_mapeff = it_acs->get_effects().begin(); it_mapeff != it_acs->get_effects().end(); it_mapeff++) {
+					for (it_flf = it_mapeff->first.begin(); it_flf != it_mapeff->first.end(); it_flf++) {
+						for (it_fls = it_flf->begin(); it_fls != it_flf->end(); it_fls++) {
+
+							effect = print_subformula(*it_fls, to_print);
+							cond_eff = print_subformula(it_mapeff->second, to_print);
+							to_print << "determines(" << act_name << ", ";
+
+							to_print << effect << ", ";
+
+
+
+							if (!cond_eff.empty()) {
+								to_print << cond_eff;
+							} else {
+								to_print << "true";
+							}
+
+							to_print << ").\n";
+						}
+					}
+				}
+			}
+
+
 			break;
 		case ANNOUNCEMENT:
-			to_print << "announcement_action(" << act_name << ").\n";
+			to_print << "announcement(" << act_name << ").\n";
+
+			if (it_acs->get_effects().size() > 0) {
+
+
+				for (it_mapeff = it_acs->get_effects().begin(); it_mapeff != it_acs->get_effects().end(); it_mapeff++) {
+					for (it_flf = it_mapeff->first.begin(); it_flf != it_mapeff->first.end(); it_flf++) {
+						for (it_fls = it_flf->begin(); it_fls != it_flf->end(); it_fls++) {
+
+							effect = print_subformula(*it_fls, to_print);
+							cond_eff = print_subformula(it_mapeff->second, to_print);
+							to_print << "announces(" << act_name << ", ";
+
+							to_print << effect << ", ";
+
+
+
+							if (!cond_eff.empty()) {
+								to_print << cond_eff;
+							} else {
+								to_print << "true";
+							}
+
+							to_print << ").\n";
+						}
+					}
+				}
+			}
+
 			break;
 		default:
-			to_print << "ontic_action(" << act_name << ").\n";
+			to_print << "ontic(" << act_name << ").\n";
 			break;
 		}
 
@@ -233,12 +336,17 @@ void asp_maker::print_actions(std::ofstream & to_print)
 		}
 
 
+
+		agent_set oblivious = domain::get_instance().get_agents();
+
 		observability_map::const_iterator it_obs;
 		observability_map tmp_map = it_acs->get_fully_observants();
 		for (it_obs = tmp_map.begin(); it_obs != tmp_map.end(); it_obs++) {
 
+			oblivious.erase(it_obs->first);
+
 			std::string obs_conditions = print_subformula(it_obs->second, to_print);
-			to_print << "fully_obs(" << act_name << ", ";
+			to_print << "observes(" << act_name << ", ";
 			to_print << m_grounder.deground_agent(it_obs->first);
 			if (!obs_conditions.empty()) {
 				to_print << ", " << obs_conditions;
@@ -250,14 +358,23 @@ void asp_maker::print_actions(std::ofstream & to_print)
 
 		tmp_map = it_acs->get_partially_observants();
 		for (it_obs = tmp_map.begin(); it_obs != tmp_map.end(); it_obs++) {
+
+			oblivious.erase(it_obs->first);
 			std::string obs_conditions = print_subformula(it_obs->second, to_print);
-			to_print << "partial_obs(" << act_name << ", ";
+			to_print << "aware_of(" << act_name << ", ";
 			to_print << m_grounder.deground_agent(it_obs->first);
 			if (!obs_conditions.empty()) {
 				to_print << ", " << obs_conditions;
 			} else {
 				to_print << ", true";
 			}
+			to_print << ").\n";
+		}
+
+		agent_set::const_iterator it_ags;
+		for (it_ags = oblivious.begin(); it_ags != oblivious.end(); it_ags++) {
+			to_print << "oblivious(" << act_name << ", ";
+			to_print << m_grounder.deground_agent(*it_ags);
 			to_print << ").\n";
 		}
 
@@ -365,3 +482,14 @@ void asp_maker::print_worlds(std::ofstream & to_print) const
 	int fl_number = 1;
 	print_all_fluent_set(permutation, 0, fl_number, to_print);
 }
+
+//
+//void asp_maker::minus_set(agent_set & to_modify, const agent_set & factor2) const
+//{ /**\todo move to helper*/
+//
+//	agent_set::const_iterator it_kwset;
+//	for (it_kwset = factor2.begin(); it_kwset != factor2.end(); it_kwset++) {
+//
+//		to_modify.erase(*it_kwset);
+//	}
+//}
