@@ -16,8 +16,9 @@ class asp_maker
 {
 private:
 
-    std::set<std::string> already_printed_formulae;
-    std::set<std::string> already_printed_agents_sets;
+    std::set<std::string> m_already_printed_formulae;
+    std::set<std::string> m_already_printed_agents_sets;
+    grounder m_grounder;
 
     std::string print_ag_set(const agent_set & ags, std::ofstream & to_print);
 
@@ -38,5 +39,6 @@ private:
     void print_worlds(std::ofstream & to_print) const;
 
 public:
+    asp_maker();
     void print_all();
 };

@@ -12,7 +12,7 @@ agent a,b,c;
 
 
 
-executable open_a if B(a,has_key_a), has_key_a;
+executable open_a;
 open_a causes opened;
 b observes open_a if looking_b;
 c observes open_a if looking_c;

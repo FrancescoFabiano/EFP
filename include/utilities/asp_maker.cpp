@@ -1,17 +1,24 @@
 #include "asp_maker.h"
 
+asp_maker::asp_maker()
+{
+	m_grounder = domain::get_instance().get_grounder();
+	m_already_printed_formulae.insert("");
+	m_already_printed_agents_sets.insert("");
+}
+
 std::string asp_maker::print_ag_set(const agent_set & ags, std::ofstream & to_print)
 {
 	std::string ret = "";
 	agent_set::const_iterator it_ags;
 
 	for (it_ags = ags.begin(); it_ags != ags.end(); it_ags++) {
-		ret += domain::get_instance().get_grounder().deground_agent(*it_ags);
+		ret += m_grounder.deground_agent(*it_ags);
 	}
-	if (already_printed_agents_sets.insert(ret).second) {
+	if (m_already_printed_agents_sets.insert(ret).second) {
 		to_print << "agent_set(" << ret << ").\n";
 		for (it_ags = ags.begin(); it_ags != ags.end(); it_ags++) {
-			to_print << "contains(" << ret << "," << domain::get_instance().get_grounder().deground_agent(*it_ags) << ").\n";
+			to_print << "contains(" << ret << "," << m_grounder.deground_agent(*it_ags) << ").\n";
 		}
 	}
 
@@ -20,9 +27,9 @@ std::string asp_maker::print_ag_set(const agent_set & ags, std::ofstream & to_pr
 
 std::string asp_maker::print_subformula(const fluent & fl, std::ofstream & to_print)
 {
-	std::string ret = domain::get_instance().get_grounder().deground_fluent(fl);
+	std::string ret = m_grounder.deground_fluent(fl);
 
-	if (already_printed_formulae.insert(ret).second) {
+	if (m_already_printed_formulae.insert(ret).second) {
 		to_print << "formula(" << ret << ").\n";
 	}
 	return ret;
@@ -52,7 +59,7 @@ std::string asp_maker::print_subformula(const fluent_set & fluents, std::ofstrea
 		exit(1);
 	}
 
-	if (already_printed_formulae.insert(ret).second) {
+	if (m_already_printed_formulae.insert(ret).second) {
 		to_print << "formula(" << ret << ").\n";
 	}
 	return ret;
@@ -82,7 +89,7 @@ std::string asp_maker::print_subformula(const belief_formula & bf, std::ofstream
 
 	case BELIEF_FORMULA:
 		//ret += parse_formula(bf.get_fluent_formula());
-		ret += "b(" + domain::get_instance().get_grounder().deground_agent(bf.get_agent()) + "," + print_subformula(bf.get_bf1(), to_print) + ")";
+		ret += "b(" + m_grounder.deground_agent(bf.get_agent()) + "," + print_subformula(bf.get_bf1(), to_print) + ")";
 
 		break;
 
@@ -112,9 +119,7 @@ std::string asp_maker::print_subformula(const belief_formula & bf, std::ofstream
 		break;
 	case BF_EMPTY:
 	{
-
-		std::cerr << "Something went wrong in transforming asp for Propositional formula";
-		exit(1);
+		break;
 	}
 	case BF_TYPE_FAIL:
 	default:
@@ -122,7 +127,7 @@ std::string asp_maker::print_subformula(const belief_formula & bf, std::ofstream
 		exit(1);
 	}
 
-	if (already_printed_formulae.insert(ret).second) {
+	if (m_already_printed_formulae.insert(ret).second) {
 		to_print << "formula(" << ret << ").\n";
 	}
 	return ret;
@@ -149,7 +154,7 @@ std::string asp_maker::print_subformula(const formula_list & fl, std::ofstream &
 		exit(1);
 	}
 
-	if (already_printed_formulae.insert(ret).second) {
+	if (m_already_printed_formulae.insert(ret).second) {
 		to_print << "formula(" << ret << ").\n";
 	}
 	return ret;
@@ -158,7 +163,7 @@ std::string asp_maker::print_subformula(const formula_list & fl, std::ofstream &
 void asp_maker::print_all()
 {
 	std::ofstream result;
-	std::string folder = "exp/ASP_encoding/";
+	std::string folder = "out/ASP_encoding/";
 	system(("mkdir -p " + folder).c_str());
 	std::string filename = folder + domain::get_instance().get_name() + ".lp";
 	remove(filename.c_str());
@@ -170,7 +175,7 @@ void asp_maker::print_all()
 	print_initially(result);
 	print_goals(result);
 	print_worlds(result);
-	
+
 	//print_formulae(result);
 
 	result.close();
@@ -184,7 +189,7 @@ void asp_maker::print_fluents(std::ofstream & to_print) const
 	fluent_set fluents = domain::get_instance().get_fluents();
 	for (it_fls = fluents.begin(); it_fls != fluents.end(); it_fls++) {
 		if (*it_fls % 2 == 0) {
-			to_print << "fluent(" << domain::get_instance().get_grounder().deground_fluent(*it_fls) << ").\n";
+			to_print << "fluent(" << m_grounder.deground_fluent(*it_fls) << ").\n";
 		}
 	}
 	to_print << "\n\n";
@@ -218,7 +223,12 @@ void asp_maker::print_actions(std::ofstream & to_print)
 		if (it_acs->get_executability().size() > 0) {
 			std::string ex_conditions = print_subformula(it_acs->get_executability(), to_print);
 			to_print << "executable(" << act_name << ", ";
-			to_print << ex_conditions;
+
+			if (!ex_conditions.empty()) {
+				to_print << ex_conditions;
+			} else {
+				to_print << "true";
+			}
 			to_print << ").\n";
 		}
 
@@ -229,7 +239,7 @@ void asp_maker::print_actions(std::ofstream & to_print)
 
 			std::string obs_conditions = print_subformula(it_obs->second, to_print);
 			to_print << "fully_obs(" << act_name << ", ";
-			to_print << domain::get_instance().get_grounder().deground_agent(it_obs->first);
+			to_print << m_grounder.deground_agent(it_obs->first);
 			if (!obs_conditions.empty()) {
 				to_print << ", " << obs_conditions;
 			} else {
@@ -242,7 +252,7 @@ void asp_maker::print_actions(std::ofstream & to_print)
 		for (it_obs = tmp_map.begin(); it_obs != tmp_map.end(); it_obs++) {
 			std::string obs_conditions = print_subformula(it_obs->second, to_print);
 			to_print << "partial_obs(" << act_name << ", ";
-			to_print << domain::get_instance().get_grounder().deground_agent(it_obs->first);
+			to_print << m_grounder.deground_agent(it_obs->first);
 			if (!obs_conditions.empty()) {
 				to_print << ", " << obs_conditions;
 			} else {
@@ -263,7 +273,7 @@ void asp_maker::print_agents(std::ofstream & to_print) const
 	agent_set::const_iterator it_ags;
 	agent_set agents = domain::get_instance().get_agents();
 	for (it_ags = agents.begin(); it_ags != agents.end(); it_ags++) {
-		to_print << "agent(" << domain::get_instance().get_grounder().deground_agent(*it_ags) << ").\n";
+		to_print << "agent(" << m_grounder.deground_agent(*it_ags) << ").\n";
 	}
 	to_print << "\n\n";
 }
@@ -314,10 +324,21 @@ void asp_maker::print_all_fluent_set(fluent_set& permutation, unsigned int index
 {
 	fluent_set::const_iterator it_fls;
 	if (index / 2 == domain::get_instance().get_fluent_number()) {
-		to_print << "fluent_set(" << permutation_number << ").\n";
+		to_print << "fluent_set(" << permutation_number << ").\t%";
 		for (it_fls = permutation.begin(); it_fls != permutation.end(); it_fls++) {
 			if (*it_fls % 2 == 0) {
-				to_print << "holds(" << permutation_number << ", " << domain::get_instance().get_grounder().deground_fluent(*it_fls) << ").\n";
+				to_print << " ";
+			}
+			to_print << m_grounder.deground_fluent(*it_fls);
+			if (std::next(it_fls, 1) != permutation.end()) {
+				to_print << ", ";
+			}
+		}
+		to_print << "\n";
+
+		for (it_fls = permutation.begin(); it_fls != permutation.end(); it_fls++) {
+			if (*it_fls % 2 == 0) {
+				to_print << "holds(" << permutation_number << ", " << m_grounder.deground_fluent(*it_fls) << ").\n";
 			}
 		}
 		to_print << "\n";
