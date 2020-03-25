@@ -16,6 +16,7 @@
 
 #include "../include/search/planner.ipp"
 #include "../include/utilities/reader.h"
+#include "../include/utilities/asp_maker.h"
 #include "../include/domain/domain.h"
 
 #define VERSION "2.0"
@@ -99,6 +100,10 @@ void print_usage(char* prog_name)
 	std::cout << "-results_file" << std::endl;
 	std::cout << "	Print the plan time in a file to make the tests confrontations easier." << std::endl << std::endl;
 
+	
+	std::cout << "-generate_asp" << std::endl;
+	std::cout << "	Generate a version of the input file for the ASP solver (the c++ planner does not search for a plan)." << std::endl << std::endl;
+
 
 	std::cout << "EXAMPLES:" << std::endl;
 	std::cout << prog_name << " ex.txt -st POSS" << std::endl;
@@ -132,7 +137,7 @@ int main(int argc, char** argv)
 	bool kopt = false;
 	std::vector<std::string> given_actions;
 
-
+	bool generate_asp = false;
 
 	std::cout << "EFP version " << VERSION <<
 		" - Built date: " << BUILT_DATE << std::endl;
@@ -148,6 +153,8 @@ int main(int argc, char** argv)
 			debug = true;
 		} else if (strcmp(argv[i], "-results_file") == 0) {
 			results_file = true;
+		}else if (strcmp(argv[i], "-generate_asp") == 0) {
+			generate_asp = true;
 		}//No case sensitivity
 		else if (strcmp(argv[i], "-ir") == 0) {
 			i++;
@@ -323,7 +330,13 @@ int main(int argc, char** argv)
 	domain::get_instance().set_domain(domain_name, debug, state_struc, kopt, domain_reader, ini_restriction, goal_restriction, is_global_obsv, act_check, check_visited, bisimulation);
 	domain::get_instance().build();
 
-
+	if(generate_asp){
+		
+		asp_maker aspm;
+		aspm.print_all();
+		exit(0);
+	}
+	
 	switch ( state_struc ) {
 	case KRIPKE:
 	{

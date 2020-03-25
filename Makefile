@@ -1,7 +1,7 @@
 # Makefile
 OBJS	=	$(BUILD_DIR)/bison.o $(BUILD_DIR)/lex.o $(BUILD_DIR)/main.o \
 			$(BUILD_DIR)/belief_formula.o $(BUILD_DIR)/proposition.o $(BUILD_DIR)/domain.o \
-			$(BUILD_DIR)/grounder.o $(BUILD_DIR)/printer.o \
+			$(BUILD_DIR)/grounder.o $(BUILD_DIR)/printer.o $(BUILD_DIR)/asp_maker.o \
 			$(BUILD_DIR)/action.o $(BUILD_DIR)/helper.o $(BUILD_DIR)/initially.o \
 			$(BUILD_DIR)/kstore.o \
 			$(BUILD_DIR)/kedge.o $(BUILD_DIR)/kworld.o $(BUILD_DIR)/kstate.o \
@@ -10,7 +10,7 @@ OBJS	=	$(BUILD_DIR)/bison.o $(BUILD_DIR)/lex.o $(BUILD_DIR)/main.o \
 			$(BUILD_DIR)/pstore_opt.o $(BUILD_DIR)/pstate_opt.o \
 			$(BUILD_DIR)/reader.o \
 			$(BUILD_DIR)/heuristics_manager.o $(BUILD_DIR)/satisfied_goals.o \
-						$(BUILD_DIR)/bisimulation.o
+			$(BUILD_DIR)/bisimulation.o
 
 			
 CC	= g++
@@ -122,6 +122,13 @@ $(BUILD_DIR)/helper.o: $(UTILITIES_DIR)/helper.cpp $(UTILITIES_DIR)/helper.h \
 					   $(FORMULA_DIR)/belief_formula.h 
 		$(dir_guard)
 		$(CC) $(CFLAGS) -c $(UTILITIES_DIR)/helper.cpp -o $(BUILD_DIR)/helper.o
+		
+$(BUILD_DIR)/asp_maker.o: $(UTILITIES_DIR)/asp_maker.cpp $(UTILITIES_DIR)/asp_maker.h \
+					   $(UTILITIES_DIR)/define.h $(UTILITIES_DIR)/printer.h \
+					   $(FORMULA_DIR)/belief_formula.h \
+					   $(DOMAIN_DIR)/domain.h
+		$(dir_guard)
+		$(CC) $(CFLAGS) -c $(UTILITIES_DIR)/asp_maker.cpp -o $(BUILD_DIR)/asp_maker.o
 
 ####FORMULAE			
 $(BUILD_DIR)/belief_formula.o: $(FORMULA_DIR)/belief_formula.cpp $(FORMULA_DIR)/belief_formula.h \
