@@ -2,9 +2,9 @@
 
 fluent tail, opened;
 
-action open_a, open_ac, open_b ,open_c; % , open_d;
-action close_a, close_aa, close_b, close_c; % , close_d;
-action peek_a, peek_b, peek_c; % , peek_d;
+action open_a, open_ac, open_b ,open_c;
+action close_a, close_aa, close_b, close_c;
+action peek_a, peek_b, peek_c;
 
 agent a,b,c; % ,d;
 
@@ -14,7 +14,6 @@ executable open_a if B(a,-opened);
 open_a causes opened;
 a observes open_a;
 b observes open_a;
-% c observes open_a;
 
 executable open_ac if B(a,-opened);
 open_ac causes opened;
@@ -24,7 +23,6 @@ c observes open_ac;
 executable close_a if B(a,opened);
 close_a causes -opened;
 a observes close_a;
-% b observes close_a;
 
 executable close_aa if B(a,opened);
 close_aa causes -opened;
@@ -32,11 +30,8 @@ a observes close_aa;
 
 executable open_b if B(b,-opened);
 open_b causes opened;
-% c observes open_b if looking_c;
-% a observes open_b if looking_a;
 a observes open_b;
 b observes open_b;
-% d observes open_b;
 
 executable close_b if B(b,opened);
 close_b causes -opened;
@@ -55,18 +50,6 @@ close_c causes -opened;
 % a observes close_c;
 c observes close_c;
 
-% executable open_d if B(d,-opened);
-% open_d causes opened;
-% a observes open_d if looking_a;
-% b observes open_d if looking_b;
-% % d observes open_d;
-% % b observes open_d;
-% c observes open_d;
-
-% executable close_d if B(d,opened);
-% close_d causes -opened;
-% % a observes close_d;
-% d observes close_d;
 
 executable peek_a if B(a,opened), opened;
 peek_a determines tail;
@@ -88,13 +71,6 @@ peek_c determines tail;
 b aware_of peek_c;
 % d aware_of peek_c;
 c observes peek_c;
-
-% executable peek_d if B(d,opened), opened;
-% peek_c determines tail;
-% a aware_of peek_d;
-% b aware_of peek_d;
-% c aware_of peek_d;
-% d observes peek_d;
 
 initially C([a,b,c],-opened);
 initially tail, -opened;

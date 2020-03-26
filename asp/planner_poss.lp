@@ -10,8 +10,6 @@ reaches(T1, R1, P1, T2, R2, P2, AGS) :- believes(T1, R1, P1, T3, R3, P3, AG), co
 
 % ********** ENTAILMENT **********
 
-formula(F) :- fluent(F).        % A fluent is a formula
-
 holds(W, true) :- fluent_set(W).
 
 entails(T, R, P, true  )      :-                                                 possible_world(T, R, P, _).
@@ -147,33 +145,38 @@ pointed(T+1, T+1, phi(P)) :- is_executable(T, ACT), sensing(ACT), pointed(T, T, 
 
 possible_world(T+1, T +1, phi(P), W ) :- is_executable(T, ACT), sensing(ACT), pointed(T, T, P), possible_world(T, T, P, W).
 
-possible_world(T+1, T2+1, phi(P), W ) :- is_executable(T, ACT), sensing(ACT), determines(ACT, SENSED, _), pointed(T, T, PP), possible_world(T2, R2, P, W),
-                                         believes(T, T, PP, T2, R2, P, AG),     entails(T, T, PP, SENSED),     entails(T2, R2, P, SENSED), is_fully_obs(T, AG).
+possible_world(T+1, T2+1, phi(P), W ) :- is_executable(T, ACT), sensing(ACT), pointed(T, T, PP), possible_world(T2, R2, P, W),
+                                         believes(T, T, PP, T2, R2, P, AG), hold_sensed_effects(T2, R2, P, T), is_fully_obs(T, AG).
 
-possible_world(T+1, T2+1, phi(P), W ) :- is_executable(T, ACT), sensing(ACT), determines(ACT, SENSED, _), pointed(T, T, PP), possible_world(T2, R2, P, W),
-                                         believes(T, T, PP, T2, R2, P, AG), not entails(T, T, PP, SENSED), not entails(T2, R2, P, SENSED), is_fully_obs(T, AG).
+possible_world(T+1, T2+1, phi(P), W ) :- is_executable(T, ACT), sensing(ACT), pointed(T, T, PP), possible_world(T2, R2, P, W),
+                                         believes(T, T, PP, T2, R2, P, AG), is_partial_obs(T, AG).
 
 % This rule makes sure that if there exists an updated possibility phi(P2) such that P2 is reached by P, then also P must be updated
-possible_world(T+1, T1+1, phi(P), W ) :- is_executable(T, ACT), sensing(ACT), pointed(T, T, PP), reaches(T, T, PP, T1, R1, P, all_agents), believes(T1, R1, P, T2, R2, P2, AG),
-                                         possible_world(T+1, T2+1, phi(P2), W2), possible_world(T2, R2, P2, W2), possible_world(T1, R1, P, W), T1 <= T, T2 <= T, R1 < T : is_fully_obs(T, AG).
+possible_world(T+1, T1+1, phi(P), W ) :- is_executable(T, ACT), sensing(ACT), pointed(T, T, PP), reaches(T, T, PP, T1, R1, P, all_agents),
+                                         possible_world(T+1, T2+1, phi(P2), W2), possible_world(T2, R2, P2, W2), possible_world(T1, R1, P, W),
+                                         believes(T1, R1, P, T2, R2, P2, AG), R1 < T, R2 <= T.
 
-% Fully observant (from the pointed possibility)
-believes(T+1, T +1, phi(P1), T+1, T2+1, phi(P2), AG) :- is_executable(T, ACT), sensing(ACT), hold_sensed_effects(T2, R2, P2, T), % determines(ACT, SENSED, _), entails(T+1, T2+1, phi(P2), SENSED),
-                                                        pointed(T, T, P1), believes(T, T, P1, T2, R2, P2, AG), T2 <= T, is_fully_obs(T, AG),
-                                                        possible_world(T2, R2, P2, _), possible_world(T+1, T+1, phi(P1), _), possible_world(T+1, T2+1, phi(P2), _).
-% Partially observant (from the pointed possibility)
-believes(T+1, T +1, phi(P1), T+1, T2+1, phi(P2), AG) :- is_executable(T, ACT), sensing(ACT), pointed(T, T, P1), believes(T, T, P1, T2, R2, P2, AG), T2 <= T, is_partial_obs(T, AG),
-                                                        possible_world(T2, R2, P2, _), possible_world(T+1, T+1, phi(P1), _), possible_world(T+1, T2+1, phi(P2), _).
+% Fully observant agents (sigma, sigma)
+believes(T+1, T1+1, phi(P1), T+1, T2+1, phi(P2), AG) :- is_executable(T, ACT), sensing(ACT), T1 <= T, T2 <= T, is_fully_obs(T, AG),
+                                                        believes(T1, R1, P1, T2, R2, P2, AG), possible_world(T1, R1, P1, _), possible_world(T2, R2, P2, _),
+                                                        possible_world(T+1, T1+1, phi(P1), _), possible_world(T+1, T2+1, phi(P2), _),
+                                                        hold_sensed_effects(T1, R1, P1, T), hold_sensed_effects(T2, R2, P2, T).
 
-% Maintaining the old believes among the updated possibilities (in order to ensure the correct believes for the partially observant agents)
-believes(T+1, T1+1, phi(P1), T+1, T2+1, phi(P2), AG) :- is_executable(T, ACT), sensing(ACT), not pointed(T, T, P1), T2 <= T,
+% Fully observant agents (tau, tau)
+believes(T+1, T1+1, phi(P1), T+1, T2+1, phi(P2), AG) :- is_executable(T, ACT), sensing(ACT), T1 <= T, T2 <= T, is_fully_obs(T, AG),
+                                                        believes(T1, R1, P1, T2, R2, P2, AG), possible_world(T1, R1, P1, _), possible_world(T2, R2, P2, _),
+                                                        possible_world(T+1, T1+1, phi(P1), _), possible_world(T+1, T2+1, phi(P2), _),
+                                                        not hold_sensed_effects(T1, R1, P1, T), not hold_sensed_effects(T2, R2, P2, T).
+
+% Partially observant agents
+believes(T+1, T1+1, phi(P1), T+1, T2+1, phi(P2), AG) :- is_executable(T, ACT), sensing(ACT), T1 <= T, T2 <= T, is_partial_obs(T, AG),
                                                         believes(T1, R1, P1, T2, R2, P2, AG), possible_world(T1, R1, P1, _), possible_world(T2, R2, P2, _),
                                                         possible_world(T+1, T1+1, phi(P1), _), possible_world(T+1, T2+1, phi(P2), _).
 
-% Maintaining the old believes among the old possibilities (in order to ensure the correct believes for the oblivious agents)
+% Oblivious agents
 believes(T+1, T1+1, phi(P1), T2 , R2  ,     P2 , AG) :- is_executable(T, ACT), sensing(ACT), is_oblivious(T, AG), T1 <= T, T2 <= T,
                                                         believes(T1, R1, P1, T2, R2, P2, AG), possible_world(T1, R1, P1, _), possible_world(T2, R2, P2, _),
-                                                        possible_world(T+1, T1+1, phi(P1), _), not possible_world(T+1, T2+1, phi(P2), _).
+                                                        possible_world(T+1, T1+1, phi(P1), _).
 
 % ANNOUNCEMENT ACTIONS
 
@@ -185,45 +188,52 @@ pointed(T+1, T+1, phi(P)) :- is_executable(T, ACT), announcement(ACT), pointed(T
 
 possible_world(T+1, T +1, phi(P), W ) :- is_executable(T, ACT), announcement(ACT), pointed(T, T, P), possible_world(T, T, P, W).
 
-possible_world(T+1, T2+1, phi(P), W ) :- is_executable(T, ACT), announcement(ACT), announces(ACT, ANN, _), pointed(T, T, PP), possible_world(T2, R2, P, W),
+possible_world(T+1, T2+1, phi(P), W ) :- is_executable(T, ACT), announcement(ACT), announces(ACT, ANN, true), pointed(T, T, PP), possible_world(T2, R2, P, W),
                                          believes(T, T, PP, T2, R2, P, AG),     entails(T, T, PP, ANN),     entails(T2, R2, P, ANN), is_fully_obs(T, AG).
 
-possible_world(T+1, T2+1, phi(P), W ) :- is_executable(T, ACT), announcement(ACT), announces(ACT, ANN, _), pointed(T, T, PP), possible_world(T2, R2, P, W),
+possible_world(T+1, T2+1, phi(P), W ) :- is_executable(T, ACT), announcement(ACT), announces(ACT, ANN, true), pointed(T, T, PP), possible_world(T2, R2, P, W),
                                          believes(T, T, PP, T2, R2, P, AG), not entails(T, T, PP, ANN), not entails(T2, R2, P, ANN), is_fully_obs(T, AG).
 
+possible_world(T+1, T2+1, phi(P), W ) :- is_executable(T, ACT), announcement(ACT), pointed(T, T, PP), possible_world(T2, R2, P, W),
+                                         believes(T, T, PP, T2, R2, P, AG), is_partial_obs(T, AG).
+
 % This rule makes sure that if there exists an updated possibility phi(P2) such that P2 is reached by P, then also P must be updated
-possible_world(T+1, T1+1, phi(P), W ) :- is_executable(T, ACT), announcement(ACT), pointed(T, T, PP), reaches(T, T, PP, T1, R1, P, all_agents), believes(T1, R1, P, T2, R2, P2, AG),
-                                         possible_world(T+1, T2+1, phi(P2), W2), possible_world(T2, R2, P2, W2), possible_world(T1, R1, P, W), T1 <= T, T2 <= T, R1 < T : is_fully_obs(T, AG).
+possible_world(T+1, T1+1, phi(P), W ) :- is_executable(T, ACT), announcement(ACT), pointed(T, T, PP), reaches(T, T, PP, T1, R1, P, all_agents),
+                                         possible_world(T+1, T2+1, phi(P2), W2), possible_world(T2, R2, P2, W2), possible_world(T1, R1, P, W),
+                                         believes(T1, R1, P, T2, R2, P2, AG), R1 < T, R2 <= T.
 
-% Fully observant (from the pointed possibility)
-believes(T+1, T +1, phi(P1), T+1, T2+1, phi(P2), AG) :- is_executable(T, ACT), announcement(ACT), announces(ACT, ANN, true), entails(T+1, T2+1, phi(P2), ANN),
-                                                        pointed(T, T, P1), believes(T, T, P1, T2, R2, P2, AG), T2 <= T, is_fully_obs(T, AG),
-                                                        possible_world(T2, R2, P2, _), possible_world(T+1, T+1, phi(P1), _), possible_world(T+1, T2+1, phi(P2), _).
-% Partially observant (from the pointed possibility)
-believes(T+1, T +1, phi(P1), T+1, T2+1, phi(P2), AG) :- is_executable(T, ACT), announcement(ACT), pointed(T, T, P1), believes(T, T, P1, T2, R2, P2, AG), T2 <= T, is_partial_obs(T, AG),
-                                                        possible_world(T2, R2, P2, _), possible_world(T+1, T+1, phi(P1), _), possible_world(T+1, T2+1, phi(P2), _).
+% Fully observant agents (sigma, sigma)
+believes(T+1, T1+1, phi(P1), T+1, T2+1, phi(P2), AG) :- is_executable(T, ACT), announcement(ACT), announces(ACT, ANN, true), T1 <= T, T2 <= T, is_fully_obs(T, AG),
+                                                        believes(T1, R1, P1, T2, R2, P2, AG), possible_world(T1, R1, P1, _), possible_world(T2, R2, P2, _),
+                                                        possible_world(T+1, T1+1, phi(P1), _), possible_world(T+1, T2+1, phi(P2), _),
+                                                        entails(T1, R1, P1, ANN), entails(T2, R2, P2, ANN).
 
-% Maintaining the old believes among the updated possibilities (in order to ensure the correct believes for the partially observant agents)
-believes(T+1, T1+1, phi(P1), T+1, T2+1, phi(P2), AG) :- is_executable(T, ACT), announcement(ACT), not pointed(T, T, P1), T2 <= T,
+% Fully observant agents (tau, tau)
+believes(T+1, T1+1, phi(P1), T+1, T2+1, phi(P2), AG) :- is_executable(T, ACT), announcement(ACT), announces(ACT, ANN, true), T1 <= T, T2 <= T, is_fully_obs(T, AG),
+                                                        believes(T1, R1, P1, T2, R2, P2, AG), possible_world(T1, R1, P1, _), possible_world(T2, R2, P2, _),
+                                                        possible_world(T+1, T1+1, phi(P1), _), possible_world(T+1, T2+1, phi(P2), _),
+                                                        not entails(T1, R1, P1, ANN), not entails(T2, R2, P2, ANN).
+
+% Partially observant agents
+believes(T+1, T1+1, phi(P1), T+1, T2+1, phi(P2), AG) :- is_executable(T, ACT), announcement(ACT), T1 <= T, T2 <= T, is_partial_obs(T, AG),
                                                         believes(T1, R1, P1, T2, R2, P2, AG), possible_world(T1, R1, P1, _), possible_world(T2, R2, P2, _),
                                                         possible_world(T+1, T1+1, phi(P1), _), possible_world(T+1, T2+1, phi(P2), _).
 
-% Maintaining the old believes among the old possibilities (in order to ensure the correct believes for the oblivious agents)
+% Oblivious agents
 believes(T+1, T1+1, phi(P1), T2 , R2  ,     P2 , AG) :- is_executable(T, ACT), announcement(ACT), is_oblivious(T, AG), T1 <= T, T2 <= T,
                                                         believes(T1, R1, P1, T2, R2, P2, AG), possible_world(T1, R1, P1, _), possible_world(T2, R2, P2, _),
-                                                        possible_world(T+1, T1+1, phi(P1), _), not possible_world(T+1, T2+1, phi(P2), _).
+                                                        possible_world(T+1, T1+1, phi(P1), _).
 
 % Generate
 0 { plan(T, ACT) : action(ACT) } 1 :- time(T), T < maxT.
 
-% plan(0, open_a).
-% plan(1, close_a).
-% plan(2, open_c).
-% plan(3, peek_c).
+% plan(0,open_ac).
+% plan(1,peek_c).
 
 % plan(0,open_a).
-% plan(1,peek_a).
-% plan(2,shout_tail_a).
+% plan(1,close_a).
+% plan(2,open_c).
+% plan(3,peek_c).
 
 % Define
 not_reached_goal(0) :- not entails(0, 0, P, F), pointed(0, 0, P), goal(F).
@@ -245,7 +255,7 @@ reached_goal(T) :- plan(T-1, ACT), is_executable(T-1, ACT), time(T), T > 0,
 :- reached_goal(T1), plan(T2, ACT),    T2 >= T1.
 :- reached_goal(T1), reached_goal(T2), T2 >  T1.
 
-#minimize{ T : reached_goal(T) }.
+% #minimize{ T : reached_goal(T) }.
 
 % Display
 
