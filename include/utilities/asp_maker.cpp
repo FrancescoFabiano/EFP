@@ -187,7 +187,7 @@ void asp_maker::print_all()
 	print_actions(result);
 	print_initially(result);
 	print_goals(result);
-	print_worlds(result);
+	// print_worlds(result);
 
 	//print_formulae(result);
 
