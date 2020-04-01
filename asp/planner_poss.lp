@@ -10,9 +10,6 @@ reaches(T1, R1, P1, T2, R2, P2, AGS) :- believes(T1, R1, P1, T3, R3, P3, AG), co
 
 % ********** ENTAILMENT **********
 
-% holds(W, true) :- fluent_set(W).
-
-% entails(T, R, P, true  )      :-                                                 possible_world(T, R, P, _).
 entails(T, R, P,  F    )      :-     holds(T, R, P, W, F),                       possible_world(T, R, P, W), fluent_set(W), fluent(F).
 entails(T, R, P, -F    )      :- not holds(T, R, P, W, F),                       possible_world(T, R, P, W), fluent_set(W), fluent(F).
 
@@ -74,7 +71,7 @@ believes(0, 0, P1, 0, 0, P2, AG) :- not not_believes_initially(P1, P2, AG), poss
 % ********** TRANSITION FUNCTION **********
 
 is_executable(T, ACT) :- plan(T, ACT), action(ACT), pointed(T, T, P), entails(T, T, P, EXEC), executable(ACT, EXEC).
-is_executable(T, ACT) :- plan(T, ACT), action(ACT),                                           executable(ACT, true).
+is_executable(T, ACT) :- plan(T, ACT), action(ACT), pointed(T, T, P),                         executable(ACT, true).
 
 is_executable_effect(T, ACT, T2, R2, P2, CAUSED) :- plan(T, ACT), is_executable(T, ACT), ontic(ACT), causes(ACT, CAUSED, true ), possible_world(T2, R2, P2, _),
                                                     pointed(T, T, PP), is_fully_obs(T+1, AG),                             believes(T, T, PP, T2, R2, P2, AG) : not pointed(T, T, P2).
@@ -223,12 +220,6 @@ possible_world(T+1, T1+1, phi(P), W ) :- is_executable(T, ACT), announcement(ACT
                                          possible_world(T+1, T2+1, phi(P2), W2), possible_world(T2, R2, P2, W2), possible_world(T1, R1, P, W),
                                          believes(T1, R1, P, T2, R2, P2, AG), R1 < T, R2 <= T.
 
-% possible_world(T+1, T1+1, phi(P), W ) :- is_executable(T, ACT), announcement(ACT), pointed(T, T, PP), not pointed(T, T, P), reaches(T, T, PP, T1, R1, P, all_agents),
-%                                          possible_world(T+1, T2+1, phi(P2), W2), possible_world(T2, R2, P2, W2), possible_world(T1, R1, P, W),
-%                                          believes(T1, R1, P, T2, R2, P2, AG), R1 <= T, R2 <= T, is_fully_obs(T+1, AG), not believes(T, T, PP, T2, R2, P2, AG).
-
-% :- possible_world(T, R, P, W), pointed(T, T, PP), not reaches(T, T, PP, T, R, P, all_agents).
-
 holds(T+1, T2+1, phi(P), W, F) :- is_executable(T, ACT), announcement(ACT), possible_world(T+1, T2+1, phi(P), W), possible_world(T2, R2, P, W),
                                   holds(T2, R2, P, W, F), fluent(F), fluent_set(W).
 
@@ -286,10 +277,11 @@ reached_goal(T) :- plan(T-1, ACT), is_executable(T-1, ACT), not not_reached_goal
 %                    0 { goal(F) : pointed(T, T, P), not entails(T, T, P, F) } 0.
 
 % Test
-:- plan(T, ACT), pointed(T, T, P), not entails(T, T, P, EXEC), action(ACT), executable(ACT, EXEC).
+:- is_executable(T, ACT), 0 { pointed(T, T, P) } 0.
+:- plan(T, ACT), pointed(T, T, P), not entails(T, T, P, EXEC), action(ACT), executable(ACT, EXEC), formula(EXEC).
 :- plan(T, ACT), pointed(T, T, P), 0 { is_executable_effect(T, ACT, T, T, P, CAUSED) :     causes(ACT, CAUSED, _) } 0, ontic(ACT).
 :- plan(T, ACT), pointed(T, T, P), 0 { is_executable_effect(T, ACT, T, T, P, SENSED) : determines(ACT, SENSED, _) } 0, sensing(ACT).
-:- plan(T, ACT), pointed(T, T, P), not entails(T, T, P, ANN),                           announces(ACT, ANN   , _)    , announcement(ACT).
+:- plan(T, ACT), pointed(T, T, P), 0 { is_executable_effect(T, ACT, T, T, P, ANN   ) :  announces(ACT, ANN   , _) } 0, announcement(ACT).
 
 % :- possible_world(T1, R1, P1, _), agent(AG), 0 { believes(T1, R1, P1, T2, R2, P2, AG) : possible_world(T2, R2, P2, _) } 0.
 
