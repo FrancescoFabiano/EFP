@@ -109,7 +109,7 @@ std::string asp_maker::print_subformula(const belief_formula & bf, std::ofstream
 	case PROPOSITIONAL_FORMULA:
 		switch ( bf.get_operator() ) {
 		case BF_NOT:
-			ret += "not(" + print_subformula(bf.get_bf1(), to_print) + ")";
+			ret += "neg(" + print_subformula(bf.get_bf1(), to_print) + ")";
 			//return !entails(bf.get_bf1(), world);
 			break;
 		case BF_OR:
