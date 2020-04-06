@@ -1,24 +1,19 @@
 % Constants and domain predicates
-#const ont = 0.      % Ontic action
-#const sen = 1.      % Sensing action
-#const ann = 2.      % Announcement action
+#const f    = 8.
+#const p    = 20.     % for now fixed value (should be 2^f)
+#const maxT = 4.
 
-#const fob = 3.      % Fully observant agent
-#const pob = 4.      % Partially observant agent
-#const obl = 5.      % Oblivious agent
+#const ags  = 7.     % 2^|{a, b, c}| - 1 (we do not count the empty set)
+#const all_agents = 7.
 
-% Coin in the box instance values
-#const w    = 4.     % for now fixed value (should be 2^f)
-#const maxS = 5.     % for now fixed value (should be act^t)
-
+time(0..maxT).
 agent(a;b;c).
-
-world(1..w).
-state(0..maxS).
+agent_set(1..ags).
 
 % *** FLUENTS ***
 % fluent(F).
 
+fluent(true).
 fluent(tails).
 fluent(opened).
 fluent(looking_a).
@@ -31,6 +26,21 @@ fluent(has_key_c).
 % *** AGENTS ***
 % agent_set(AGS).
 % contains_ag(AGS, AG).
+
+contains_ag(1, a).
+
+contains_ag(2, b).
+
+contains_ag(3, c).
+
+contains_ag(4, a).
+contains_ag(4, b).
+
+contains_ag(5, a).
+contains_ag(5, c).
+
+contains_ag(6, b).
+contains_ag(6, c).
 
 agent_set(all_agents).   % {a, b, c}
 
@@ -138,21 +148,24 @@ initially(c(all_agents, -looking_c)).
 
 % From goal
 % goal(b(a, tails)).
-formula(b(a, -opened)).
-formula(b(b, opened)).
-formula(b(c, opened)).
-formula(-opened).
+formula(b(a, tails)).
+formula(b(b, tails)).
+formula(b(c, tails)).
+formula(tails).
 
 #const goals = 4.
 
-goal(b(a, -opened)).
+goal(b(a, tails)).
+goal(b(b, tails)).
+goal(b(c, tails)).
+goal(b(a, opened)).
 goal(b(b, opened)).
 goal(b(c, opened)).
-goal(opened).
+goal(tails).
 
 % *** ACTIONS ***
 
-% formula(true).
+formula(true).
 % open_a
 % formula(and(and(b(a, has_key_a), has_key_a), -opened)).
 formula(-opened).
@@ -160,133 +173,130 @@ formula(b(a, -opened)).
 formula(and(b(a, -opened), -opened)).
 formula(and(and(b(a, -opened), -opened), has_key_a)).
 
-ontic_action(open_a).
-% action_type(open_a, ont).
+ontic(open_a).
 executable(open_a, and(and(b(a, -opened), -opened), has_key_a)).
-causes(open_a, opened).
+causes(open_a, opened, true).
 
-fully_obs(open_a, a, true).
-fully_obs(open_a, b, true). % looking_b
+observes(open_a, a, true).
+observes(open_a, b, true). % looking_b
 oblivious(open_a, c).
-% fully_obs(open_a, c, true). % looking_c
+% observes(open_a, c, true). % looking_c
 
 % close_a
 formula(b(a, opened)).
 formula(and(b(a, opened), opened)).
 
-ontic_action(close_a).
-% action_type(close_a, ont).
+ontic(close_a).
 executable(close_a, and(b(a, opened), opened)).
-causes(close_a, -opened).
+causes(close_a, -opened, true).
 
-fully_obs(close_a, a, true).
-% fully_obs(close_a, b, true).
+observes(close_a, a, true).
+% observes(close_a, b, true).
 oblivious(close_a, b).
 oblivious(close_a, c).
 
 % open_b
-% ontic_action(open_b).
-% % action_type(open_b, ont).
+% ontic(open_b).
 % executable(open_b, and(b(b, has_key_b), has_key_b)).
 % causes(open_b, opened).
 
-% fully_obs(open_b, a, looking_a).
-% fully_obs(open_b, b, true).
-% fully_obs(open_b, c, looking_c).
+% observes(open_b, a, looking_a).
+% observes(open_b, b, true).
+% observes(open_b, c, looking_c).
 
 % open_c
 formula(b(c, -opened)).
 formula(and(b(c, -opened), -opened)).
 
-ontic_action(open_c).
-% action_type(open_c, ont).
-executable(open_c, and(b(c, -opened), -opened)). % and(b(c, has_key_c), has_key_c)
-causes(open_c, opened).
+ontic(open_c).
+executable(open_c, b(c, -opened)). % and(b(c, has_key_c), has_key_c)
+causes(open_c, opened, true).
 
 oblivious(open_c, a).
-oblivious(open_c, b).
-fully_obs(open_c, c, true).
+% oblivious(open_c, b).
+observes(open_c, b, true).
+observes(open_c, c, true).
 
-% fully_obs(open_c, a, looking_a).
-% fully_obs(open_c, 2, looking_b).
+% observes(open_c, a, looking_a).
+% observes(open_c, 2, looking_b).
 
+% peek_a
+formula(and(b(a,opened), opened)).
 
-% *** STATES ***
-% state(S).
+sensing(peek_a).
+executable(peek_a, and(b(a,opened), opened)).
+determines(peek_a, tails, true).
 
-state(1).   % initial state
-state(2).   % open_a
+observes(peek_a, a, true).
+aware_of(peek_a, b, true).
+oblivious(peek_a, c).
+
+% peek_c
+formula(and(b(c,opened), opened)).
+
+sensing(peek_c).
+executable(peek_c, and(b(c,opened), opened)).
+determines(peek_c, tails, true).
+
+observes(peek_c, c, true).
+aware_of(peek_c, b, true).
+oblivious(peek_c, a).
+
+% shout_tail_a
+formula(b(a,tails)).
+formula(and(b(a,tails), tails)).
+
+announcement(shout_tail_a).
+
+executable(shout_tail_a, and(b(a,tails), tails)).
+announces(shout_tail_a, tails, true).
+
+observes(shout_tail_a, a, true).
+observes(shout_tail_a, b, true).
+observes(shout_tail_a, c, true).
 
 % *** WORLDS ***
-% world(W).
+% fluent_set(W).
 % holds(W, F).
 % pointed(S, W).
 
-world(1).    %  tails, -opened, looking_a, -looking_b, -looking_c, has_key_a, -has_key_b, -has_key_c
-world(2).    % -tails, -opened, looking_a, -looking_b, -looking_c, has_key_a, -has_key_b, -has_key_c
-world(3).    %  tails,  opened, looking_a, -looking_b, -looking_c, has_key_a, -has_key_b, -has_key_c
-world(4).    % -tails,  opened, looking_a, -looking_b, -looking_c, has_key_a, -has_key_b, -has_key_c
+fluent_set(1).    %  tails, -opened, looking_a, -looking_b, -looking_c, has_key_a, -has_key_b, -has_key_c
+fluent_set(2).    % -tails, -opened, looking_a, -looking_b, -looking_c, has_key_a, -has_key_b, -has_key_c
+fluent_set(3).    %  tails,  opened, looking_a, -looking_b, -looking_c, has_key_a, -has_key_b, -has_key_c
+fluent_set(4).    % -tails,  opened, looking_a, -looking_b, -looking_c, has_key_a, -has_key_b, -has_key_c
 
-holds(1, tails    ).   % in world 1 it holds tails
-holds(1, looking_a).   % in world 1 it holds looking_a
-holds(1, has_key_a).   % in world 1 it holds has_key_a
+holds(1,  tails    ).
+% holds(1, -opened   ).
+holds(1,  looking_a).
+% holds(1, -looking_b).
+% holds(1, -looking_c).
+holds(1,  has_key_a).
+% holds(1, -has_key_b).
+% holds(1, -has_key_c).
 
-holds(2, looking_a).   % in world 2 it holds looking_a
-holds(2, has_key_a).   % in world 2 it holds has_key_a
+% holds(2, -tails    ).
+% holds(2, -opened   ).
+holds(2,  looking_a).
+% holds(2, -looking_b).
+% holds(2, -looking_c).
+holds(2,  has_key_a).
+% holds(2, -has_key_b).
+% holds(2, -has_key_c).
 
-holds(3, tails    ).   % in world 3 it holds tails
-holds(3, opened   ).   % in world 3 it holds opened
-holds(3, looking_a).   % in world 3 it holds looking_a
-holds(3, has_key_a).   % in world 3 it holds has_key_a
+holds(3,  tails    ).
+holds(3,  opened   ).
+holds(3,  looking_a).
+% holds(3, -looking_b).
+% holds(3, -looking_c).
+holds(3,  has_key_a).
+% holds(3, -has_key_b).
+% holds(3, -has_key_c).
 
-holds(4, opened   ).   % in world 4 it holds opened
-holds(4, looking_a).   % in world 4 it holds looking_a
-holds(4, has_key_a).   % in world 4 it holds has_key_a
-
-% Initial state
-% contains(1, 1).  % world 1 is present in state 1
-% contains(1, 2).  % world 2 is present in state 1
-% pointed (1, 1).  % world 1 is pointed in state 1
-
-% open_a
-% contains(2, 1).  % world 0 is present in state 2
-% contains(2, 2).  % world 1 is present in state 2
-% contains(2, 3).  % world 2 is present in state 2
-% contains(2, 4).  % world 3 is present in state 2
-% pointed(2, 3).   % world 2 is pointed in state 2
-
-% *** EDGES ***
-% edge(S1, W1, S2, W2, AG).
-
-% TODO: controllare se gestiamo correttamente repetition
-
-% Initial state
-% edge(1, 1, 1, 1, 1).   % edge from 1 (state 1) to 1 (state 1) labeled with a (1)
-% edge(1, 1, 1, 1, 2).   % edge from 1 (state 1) to 1 (state 1) labeled with b (2)
-% edge(1, 1, 1, 1, 3).   % edge from 1 (state 1) to 1 (state 1) labeled with c (3)
-% edge(1, 2, 1, 2, 1).   % edge from 2 (state 1) to 2 (state 1) labeled with a (1)
-% edge(1, 2, 1, 2, 2).   % edge from 2 (state 1) to 2 (state 1) labeled with b (2)
-% edge(1, 2, 1, 2, 3).   % edge from 2 (state 1) to 2 (state 1) labeled with c (3)
-
-% edge(1, 1, 1, 2, 1).   % edge from 1 (state 1) to 2 (state 1) labeled with a (1)
-% edge(1, 1, 1, 2, 2).   % edge from 1 (state 1) to 2 (state 1) labeled with b (2)
-% edge(1, 1, 1, 2, 3).   % edge from 1 (state 1) to 2 (state 1) labeled with c (3)
-% edge(1, 2, 1, 1, 1).   % edge from 2 (state 1) to 1 (state 1) labeled with a (1)
-% edge(1, 2, 1, 1, 2).   % edge from 2 (state 1) to 1 (state 1) labeled with b (2)
-% edge(1, 2, 1, 1, 3).   % edge from 2 (state 1) to 1 (state 1) labeled with c (3)
-
-% open_a
-% edge(2, 3, 2, 3, 1).   % edge from 3 (state 2) to 3 (state 2) labeled with a (1)
-% edge(2, 3, 2, 3, 2).   % edge from 3 (state 2) to 3 (state 2) labeled with b (2)
-% edge(2, 4, 2, 4, 1).   % edge from 4 (state 2) to 4 (state 2) labeled with a (1)
-% edge(2, 4, 2, 4, 2).   % edge from 4 (state 2) to 4 (state 2) labeled with b (2)
-
-% edge(2, 3, 2, 4, 1).   % edge from 3 (state 2) to 4 (state 2) labeled with a (1)
-% edge(2, 3, 2, 4, 2).   % edge from 3 (state 2) to 4 (state 2) labeled with b (2)
-% edge(2, 4, 2, 3, 1).   % edge from 4 (state 2) to 3 (state 2) labeled with a (1)
-% edge(2, 4, 2, 3, 2).   % edge from 4 (state 2) to 3 (state 2) labeled with b (2)
-
-% edge(2, 3, 1, 1, 3).   % edge from 3 (state 2) to 1 (state 1) labeled with c (3)
-% edge(2, 3, 1, 2, 3).   % edge from 3 (state 2) to 2 (state 1) labeled with c (3)
-% edge(2, 4, 1, 1, 3).   % edge from 4 (state 2) to 1 (state 1) labeled with c (3)
-% edge(2, 4, 1, 2, 3).   % edge from 4 (state 2) to 2 (state 1) labeled with c (3)
+% holds(4, -tails    ).
+holds(4,  opened   ).
+holds(4,  looking_a).
+% holds(4, -looking_b).
+% holds(4, -looking_c).
+holds(4,  has_key_a).
+% holds(4, -has_key_b).
+% holds(4, -has_key_c).
