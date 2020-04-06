@@ -182,8 +182,26 @@ void asp_maker::print_all()
 	remove(filename.c_str());
 	result.open(filename, std::ofstream::out | std::ofstream::app);
 
+	std::string s = domain::get_instance().get_name();
+	std::regex r(".+__pl_(\\d+)");
+	std::smatch m; 
+	bool found = std::regex_search(s, m, r);
+
+	int maxT = 0;
+	if (found) {
+		maxT = std::stoi(m[1]);
+	}
+
+	result << "#const maxT  = " << maxT << ".\n";
+	result << "#const n_fl  = " << domain::get_instance().get_fluent_number() << ".\n";
+	result << "#const n_ag  = " << domain::get_instance().get_agents().size() << ".\n";
+	result << "#const n_ags = " << exp2(domain::get_instance().get_agents().size())-1 << ".\n\n";
+
+	result << "time(0..maxT).\n\n";
+
 	print_fluents(result);
 	print_agents(result);
+	print_agent_set(result);
 	print_actions(result);
 	print_initially(result);
 	print_goals(result);
@@ -434,6 +452,34 @@ void asp_maker::print_goals(std::ofstream & to_print)
 		to_print << "goal(" << goal_string << ").\n";
 	}
 	to_print << "\n\n";
+}
+
+void asp_maker::print_agent_set(std::ofstream & to_print) const
+{
+	to_print << "% *** AGENT SETS ***\n";
+
+	// agent_set permutation;
+	// int ag_number = 1;
+	// print_all_agent_set(permutation, 0, ag_number, to_print);
+
+	int n = domain::get_instance().get_agents().size(), k, ags = 1;
+
+	to_print << "agent_set(1..n_ags).\n\n";
+
+	for (k = 1; k <=n; k++) {
+		std::string bitmask(k, 1); // K leading 1's
+		bitmask.resize(n, 0); // N-K trailing 0's
+
+		// print integers and permute bitmask
+		do {
+			for (int i = 0; i < n; ++i) // [0..N-1] integers
+			{
+				if (bitmask[i]) to_print << "contains_ag(" << ags << ", " << m_grounder.deground_agent(i) << ").\n";
+			}
+			to_print << "\n";
+			ags++;
+		} while (std::prev_permutation(bitmask.begin(), bitmask.end()));
+	}
 }
 
 /*From https://www.geeksforgeeks.org/generate-all-the-binary-strings-of-n-bits/ since is like generating all the binary numbers.*/
