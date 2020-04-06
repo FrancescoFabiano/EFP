@@ -23,13 +23,13 @@ digraph K_structure{
 	node [shape = circle] "5_16_p2";
 	node [shape = circle] "5_16_p1";
 
-//SUBGRAPH List:
-	subgraph cluster_0{};
-	subgraph cluster_1{};
-	subgraph cluster_2{};
-	subgraph cluster_3{};
-	subgraph cluster_4{};
-	subgraph cluster_5{};
+//SUBGRAPHS List:
+	subgraph cluster_0{"0_0_1"; "0_0_2"};
+	subgraph cluster_1{"1_1_p1"; "1_1_p2"};
+	subgraph cluster_2{"2_3_pp1"; "2_3_pp2"};
+	subgraph cluster_3{"3_7_ppp1"; "3_7_ppp2"};
+	subgraph cluster_4{"4_15_pppp1"; "4_15_pppp2"; "4_8_p1"; "4_8_p2"};
+	subgraph cluster_5{"5_16_p1"; "5_16_p2"; "5_23_pppp1"; "5_24_pp1"; "5_31_ppppp1"};
 
 //RANKS List:
 	{rank = same;"0_0_1"; "0_0_2"};

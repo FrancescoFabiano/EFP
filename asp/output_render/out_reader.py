@@ -137,7 +137,7 @@ with open(sys.argv[1]+'.txt', 'r') as n:
 		initialize_cluster(world,cluster_map)
 		
 	for world in worlds:
-		initialize_cluster(world,cluster_map)
+		generate_cluster(world,cluster_map)
 	
 	counter_cluster = 0
 	print("\n//SUBGRAPHS List:", end ="\n", file = outputfile) 
@@ -147,7 +147,7 @@ with open(sys.argv[1]+'.txt', 'r') as n:
 		#print('{rank = ' + str(counter_rank) + '; ', end ="", file = outputfile) 
 		print('subgraph cluster_'+str(counter_cluster)+ '{', end ="", file = outputfile) 
 		for val in values:
-			print(val, end ="", file = outputfile) 
+			print(val, end ="", file = outputfile)
 			if values.index(val) != len(values)-1:
 				print('; ', end ="", file = outputfile) 
 		print('};', file = outputfile)
