@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-#execution example: "python3 out_reader.py output" --- rember not tu put the txt extension, is considered like that as default
+#execution example: "python3 out_reader.py output" --- rember not to put the txt extension, is considered like that as default
 #after that run "dot -Tpng output.dot >> output.png" or "dot -Tpdf output.dot >> output.pdf"
 
 import sys
@@ -140,7 +140,7 @@ with open(sys.argv[1]+'.txt', 'r') as n:
 		initialize_cluster(world,cluster_map)
 	
 	counter_cluster = 0
-	print("\n//SUBGRAPH List:", end ="\n", file = outputfile) 
+	print("\n//SUBGRAPHS List:", end ="\n", file = outputfile) 
 	for key,values in cluster_map.items():
 		print("\t", end ="", file = outputfile) 
 		#print(key, end ="")
@@ -152,8 +152,6 @@ with open(sys.argv[1]+'.txt', 'r') as n:
 				print('; ', end ="", file = outputfile) 
 		print('};', file = outputfile)
 		counter_cluster+=1
-
-	
 	
 	#RANK
 	rank_map = SortedDict()
@@ -163,10 +161,10 @@ with open(sys.argv[1]+'.txt', 'r') as n:
 	for world in worlds:
 		generate_rank(world,rank_map)
 		
-	counter_rank = 0
+	#counter_rank = 0
 	print("\n//RANKS List:", end ="\n", file = outputfile) 
 	for key,values in rank_map.items():
-		counter_rank+=1
+		#counter_rank+=1
 		print("\t", end ="", file = outputfile) 
 		#print(key, end ="")
 		#print('{rank = ' + str(counter_rank) + '; ', end ="", file = outputfile) 
