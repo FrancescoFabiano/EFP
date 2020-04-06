@@ -11,6 +11,11 @@
 
 #pragma once
 #include "../domain/domain.h"
+#include <math.h>
+#include <algorithm>
+#include <iostream>
+#include <string>
+#include <regex>
 
 class asp_maker
 {
@@ -36,7 +41,8 @@ private:
     void print_agents(std::ofstream & to_print) const;
     void print_initially(std::ofstream & to_print);
     void print_goals(std::ofstream & to_print);
-
+    
+    void print_agent_set(std::ofstream & to_print) const;
     void print_all_fluent_set(fluent_set& permutation, unsigned int index, int & permutation_number, std::ofstream & to_print) const;
     void print_worlds(std::ofstream & to_print) const;
 
