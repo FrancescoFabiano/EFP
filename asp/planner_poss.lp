@@ -361,9 +361,9 @@ reached_goal(T) :- plan(T-1, ACT), is_executable(T-1, ACT), not not_reached_goal
 % #show is_partial_obs/2.
 % #show is_oblivious/2.
 
-% #show pointed/3.
-% #show possible_world/4.
-% #show believes/7.
+#show pointed/3.
+#show possible_world/4.
+#show believes/7.
 
 #show plan/2.
 #show reached_goal/1.

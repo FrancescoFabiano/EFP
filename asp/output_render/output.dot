@@ -1,0 +1,96 @@
+digraph K_structure{
+	rankdir=BT;
+	ranksep=0.75
+	newrank=true;
+	size="8,5;"
+
+//WORLDS List:
+	node [shape = circle] "0_0_1";
+	node [shape = circle] "0_0_2";
+	node [shape = circle] "1_1_p1";
+	node [shape = circle] "1_1_p2";
+	node [shape = circle] "2_3_pp1";
+	node [shape = circle] "2_3_pp2";
+	node [shape = circle] "3_7_ppp1";
+	node [shape = circle] "3_7_ppp2";
+	node [shape = circle] "4_15_pppp1";
+	node [shape = circle] "4_8_p1";
+	node [shape = circle] "4_8_p2";
+	node [shape = circle] "4_15_pppp2";
+	node [shape = doublecircle] "5_31_ppppp1";
+	node [shape = circle] "5_23_pppp1";
+	node [shape = circle] "5_24_pp1";
+	node [shape = circle] "5_16_p2";
+	node [shape = circle] "5_16_p1";
+
+//SUBGRAPH List:
+	subgraph cluster_0{};
+	subgraph cluster_1{};
+	subgraph cluster_2{};
+	subgraph cluster_3{};
+	subgraph cluster_4{};
+	subgraph cluster_5{};
+
+//RANKS List:
+	{rank = same;"0_0_1"; "0_0_2"};
+	{rank = same;"1_1_p1"; "1_1_p2"};
+	{rank = same;"2_3_pp1"; "2_3_pp2"};
+	{rank = same;"3_7_ppp1"; "3_7_ppp2"};
+	{rank = same;"4_15_pppp1"; "4_15_pppp2"};
+	{rank = same;"4_8_p1"; "4_8_p2"};
+	{rank = same;"5_16_p1"; "5_16_p2"};
+	{rank = same;"5_23_pppp1"};
+	{rank = same;"5_24_pp1"};
+	{rank = same;"5_31_ppppp1"};
+
+//EDGES List:
+	"0_0_2" -> "0_0_2" [label="a,b,c"];
+	"0_0_1" -> "0_0_1" [label="a,b,c"];
+	"1_1_p1" -> "0_0_2" [label="b"];
+	"1_1_p1" -> "0_0_1" [label="b"];
+	"1_1_p1" -> "1_1_p1" [label="a,c"];
+	"1_1_p2" -> "0_0_2" [label="b"];
+	"1_1_p2" -> "0_0_1" [label="b"];
+	"1_1_p2" -> "1_1_p2" [label="a,c"];
+	"2_3_pp1" -> "0_0_2" [label="b"];
+	"2_3_pp1" -> "0_0_1" [label="b"];
+	"2_3_pp1" -> "2_3_pp1" [label="a,c"];
+	"2_3_pp2" -> "0_0_2" [label="b"];
+	"2_3_pp2" -> "0_0_1" [label="b"];
+	"2_3_pp2" -> "2_3_pp2" [label="a,c"];
+	"3_7_ppp1" -> "3_7_ppp1" [label="a,c"];
+	"3_7_ppp1" -> "0_0_2" [label="b"];
+	"3_7_ppp1" -> "0_0_1" [label="b"];
+	"3_7_ppp2" -> "0_0_2" [label="b"];
+	"3_7_ppp2" -> "0_0_1" [label="b"];
+	"3_7_ppp2" -> "3_7_ppp2" [label="a,c"];
+	"4_15_pppp1" -> "4_15_pppp1" [label="a"];
+	"4_15_pppp1" -> "3_7_ppp1" [label="c"];
+	"4_8_p1" -> "0_0_2" [label="c"];
+	"4_8_p1" -> "0_0_1" [label="c"];
+	"4_8_p2" -> "0_0_2" [label="c"];
+	"4_8_p2" -> "0_0_1" [label="c"];
+	"4_15_pppp2" -> "3_7_ppp2" [label="c"];
+	"4_15_pppp1" -> "4_8_p1" [label="b"];
+	"4_15_pppp2" -> "4_8_p1" [label="b"];
+	"4_8_p1" -> "4_8_p1" [label="a,b"];
+	"4_15_pppp1" -> "4_8_p2" [label="b"];
+	"4_15_pppp2" -> "4_8_p2" [label="b"];
+	"4_8_p2" -> "4_8_p2" [label="a,b"];
+	"4_15_pppp2" -> "4_15_pppp2" [label="a"];
+	"5_31_ppppp1" -> "5_31_ppppp1" [label="a"];
+	"5_31_ppppp1" -> "5_23_pppp1" [label="c"];
+	"5_23_pppp1" -> "5_23_pppp1" [label="a,c"];
+	"5_16_p2" -> "5_16_p2" [label="a,b,c"];
+	"5_24_pp1" -> "5_16_p1" [label="c"];
+	"5_16_p1" -> "5_16_p1" [label="a,b,c"];
+	"5_23_pppp1" -> "5_16_p1" [label="b"];
+	"5_31_ppppp1" -> "5_24_pp1" [label="b"];
+	"5_24_pp1" -> "5_24_pp1" [label="a,b"];
+	"0_0_1" -> "0_0_2" [dir=both label="a,b,c"];
+	"1_1_p1" -> "1_1_p2" [dir=both label="a,c"];
+	"2_3_pp1" -> "2_3_pp2" [dir=both label="a,c"];
+	"3_7_ppp1" -> "3_7_ppp2" [dir=both label="a"];
+	"4_8_p2" -> "4_8_p1" [dir=both label="a,b"];
+	"4_15_pppp1" -> "4_15_pppp2" [dir=both label="a"];
+}

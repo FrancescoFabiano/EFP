@@ -54,6 +54,16 @@ def generate_rank(world, rank_map):
 	splitted = no_phi.split(',')
 	rank_map[splitted[0]+splitted[1]].add('"' + splitted[0] + '_' + splitted[1] + '_' + splitted[2] + '"')
 	
+def initialize_cluster(world, cluster_map):
+	no_phi = generate_world_key(world)
+	splitted = no_phi.split(',')
+	cluster_map[splitted[0]] = SortedSet()
+	
+def generate_cluster(world, cluster_map):
+	no_phi = generate_world_key(world)
+	splitted = no_phi.split(',')
+	cluster_map[splitted[0]].add('"' + splitted[0] + '_' + splitted[1] + '_' + splitted[2] + '"')
+	
 def generate_edge_key(edge):
 	replaced = re.sub('^believes\(', '', edge)
 	replaced1 = re.sub('\)$', '', replaced)
@@ -101,8 +111,10 @@ n_edge = re.compile('believes\(\S*\)')
 
 
 print('digraph K_structure{',end="\n", file = outputfile) 
-print('\trankdir=BT;',end="\n", file = outputfile) 
-print('\tsize="8,5"',end="\n", file = outputfile) 
+print('\trankdir=BT;',end="\n", file = outputfile)
+print('\tranksep=0.75',end="\n", file = outputfile)
+print('\tnewrank=true;',end="\n", file = outputfile)
+print('\tsize="8,5;"',end="\n", file = outputfile) 
 print('\n//WORLDS List:',end="\n", file = outputfile) 
 
 with open(sys.argv[1]+'.txt', 'r') as n:
@@ -120,20 +132,45 @@ with open(sys.argv[1]+'.txt', 'r') as n:
 		generate_world(world,pointed) 
 	
 	#RANK
+	cluster_map = SortedDict()
+	for world in worlds:
+		initialize_cluster(world,cluster_map)
+		
+	for world in worlds:
+		initialize_cluster(world,cluster_map)
+	
+	counter_cluster = 0
+	print("\n//SUBGRAPH List:", end ="\n", file = outputfile) 
+	for key,values in cluster_map.items():
+		print("\t", end ="", file = outputfile) 
+		#print(key, end ="")
+		#print('{rank = ' + str(counter_rank) + '; ', end ="", file = outputfile) 
+		print('subgraph cluster_'+str(counter_cluster)+ '{', end ="", file = outputfile) 
+		for val in values:
+			print(val, end ="", file = outputfile) 
+			if values.index(val) != len(values)-1:
+				print('; ', end ="", file = outputfile) 
+		print('};', file = outputfile)
+		counter_cluster+=1
+
+	
+	
+	#RANK
 	rank_map = SortedDict()
 	for world in worlds:
 		initialize_rank(world,rank_map)
 		
 	for world in worlds:
 		generate_rank(world,rank_map)
-	
+		
 	counter_rank = 0
 	print("\n//RANKS List:", end ="\n", file = outputfile) 
 	for key,values in rank_map.items():
 		counter_rank+=1
 		print("\t", end ="", file = outputfile) 
 		#print(key, end ="")
-		print('{rank = ' + str(counter_rank) + '; ', end ="", file = outputfile) 
+		#print('{rank = ' + str(counter_rank) + '; ', end ="", file = outputfile) 
+		print('{rank = same;', end ="", file = outputfile) 
 		for val in values:
 			print(val, end ="", file = outputfile) 
 			if values.index(val) != len(values)-1:
