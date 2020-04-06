@@ -363,10 +363,10 @@ possible_world(T+1, R2+MR+1, phi(P), W ) :- is_executable(T, ACT), announcement(
                                          reaches(T, R, PP, T2, R2, P, AGS), 0 { agent(AG) : contains_ag(AGS, AG), not is_fully_obs(T+1, AG) } 0,
                                          hold_announced_effects(T2, R2, P, T).
 
-possible_world(T+1, R2+MR+2, phi(P), W ) :- is_executable(T, ACT), announcement(ACT), pointed(T, R, PP), possible_world(T2, R2, P, W), max_rep(T, MR),
+possible_world(T+1, R2+MR+1, phi(P), W ) :- is_executable(T, ACT), announcement(ACT), pointed(T, R, PP), possible_world(T2, R2, P, W), max_rep(T, MR),
                                          believes(T, R, PP, T2, R2, P, AG), is_partial_obs(T+1, AG).
 
-possible_world(T+1, R2+MR+2, phi(P), W ) :- is_executable(T, ACT), announcement(ACT), pointed(T, R, PP), possible_world(T2, R2, P, W), max_rep(T, MR), not pointed(T, R, P),
+possible_world(T+1, R2+MR+1, phi(P), W ) :- is_executable(T, ACT), announcement(ACT), pointed(T, R, PP), possible_world(T2, R2, P, W), max_rep(T, MR), not pointed(T, R, P),
                                          reaches(T, R, PP, T2, R2, P, AGS), 0 { agent(AG) : contains_ag(AGS, AG), not is_partial_obs(T+1, AG) } 0.
 
 % This rule makes sure that if there exists an updated possibility phi(P2) such that P2 is reached by P, then also P must be updated
@@ -430,7 +430,7 @@ reached_goal(T) :- plan(T-1, ACT), is_executable(T-1, ACT), not not_reached_goal
 
 :- possible_world(T, R, P, W1), possible_world(T, R, P, W2), W1 != W2.
 % :- possible_world(T1, R1, P1, _), agent(AG), 0 { believes(T1, R1, P1, T2, R2, P2, AG) : possible_world(T2, R2, P2, _) } 0.
-:- possible_world(T1, R1, P1, _), agent(AG), 0 { possible_world(T2, R2, P2, _) : believes(T1, R1, P1, T2, R2, P2, AG) } 0.
+% :- possible_world(T1, R1, P1, _), agent(AG), 0 { possible_world(T2, R2, P2, _) : believes(T1, R1, P1, T2, R2, P2, AG) } 0.
 
 % This constraint reduces the Unsat computation time (in clingo output)
 :- plan(T, ACT), pointed(T, R, P), not entails(T, R, P, EXEC), action(ACT), executable(ACT, EXEC), formula(EXEC).
@@ -457,9 +457,9 @@ reached_goal(T) :- plan(T-1, ACT), is_executable(T-1, ACT), not not_reached_goal
 % #show is_partial_obs/2.
 % #show is_oblivious/2.
 
-#show pointed/3.
-#show possible_world/4.
-#show believes/7.
+% #show pointed/3.
+% #show possible_world/4.
+% #show believes/7.
 
 #show plan/2.
 #show reached_goal/1.
