@@ -103,14 +103,14 @@ std::string asp_maker::print_subformula(const belief_formula & bf, std::ofstream
 
 	case FLUENT_FORMULA:
 	{
-		std::cout << "\nDEBUG:FF\n" << std::endl;
+		//std::cout << "\nDEBUG:FF\n" << std::endl;
 		ret += print_subformula(bf.get_fluent_formula(), to_print);
 		break;
 	}
 
 	case BELIEF_FORMULA:
 		//ret += parse_formula(bf.get_fluent_formula());
-		std::cout << "\nDEBUG:BF\n" << std::endl;
+		//std::cout << "\nDEBUG:BF\n" << std::endl;
 		ret += "b(" + m_grounder.deground_agent(bf.get_agent()) + "," + print_subformula(bf.get_bf1(), to_print) + ")";
 
 		break;
@@ -118,17 +118,17 @@ std::string asp_maker::print_subformula(const belief_formula & bf, std::ofstream
 	case PROPOSITIONAL_FORMULA:
 		switch ( bf.get_operator() ) {
 		case BF_NOT:
-			std::cout << "\nDEBUG:NOT\n" << std::endl;
+			//std::cout << "\nDEBUG:NOT\n" << std::endl;
 			ret += "neg(" + print_subformula(bf.get_bf1(), to_print) + ")";
 			//return !entails(bf.get_bf1(), world);
 			break;
 		case BF_OR:
-			std::cout << "\nDEBUG:OR\n" << std::endl;
+			//std::cout << "\nDEBUG:OR\n" << std::endl;
 			ret += "or(" + print_subformula(bf.get_bf1(), to_print) + "," + print_subformula(bf.get_bf2(), to_print) + ")";
 			//return entails(bf.get_bf1(), world) || entails(bf.get_bf2(), world);
 			break;
 		case BF_AND:
-			std::cout << "\nDEBUG:AND\n" << std::endl;
+			//std::cout << "\nDEBUG:AND\n" << std::endl;
 			ret += "and(" + print_subformula(bf.get_bf1(), to_print) + "," + print_subformula(bf.get_bf2(), to_print) + ")";
 
 			//return entails(bf.get_bf1(), world) && entails(bf.get_bf2(), world);
@@ -140,13 +140,13 @@ std::string asp_maker::print_subformula(const belief_formula & bf, std::ofstream
 		}
 		break;
 	case C_FORMULA:
-		std::cout << "\nDEBUG:COMMON\n" << std::endl;
+		//std::cout << "\nDEBUG:COMMON\n" << std::endl;
 		ret += "c(" + print_ag_set(bf.get_group_agents(), to_print) + "," + print_subformula(bf.get_bf1(), to_print) + ")";
 		break;
 	case BF_EMPTY:
 	{
 		//ret += print_subformula(bf.get_bf2(), to_print);
-		//std::cout << "\nDEBUG:HERE\n" << std::endl;
+		////std::cout << "\nDEBUG:HERE\n" << std::endl;
 		break;
 	}
 	case BF_TYPE_FAIL:
@@ -431,7 +431,6 @@ void asp_maker::print_agents(std::ofstream & to_print) const
 void asp_maker::print_initially(std::ofstream & to_print)
 {
 	to_print << "% *** INITIALLY ***\n";
-	std::cout << "% *** INITIALLY ***\n";
 	initially ini_conditions = domain::get_instance().get_initial_description();
 
 	to_print << "\n% ** initial pointed **\n";
@@ -451,8 +450,6 @@ void asp_maker::print_initially(std::ofstream & to_print)
 	for (it_fl = ini_conditions.get_initial_conditions().begin(); it_fl != ini_conditions.get_initial_conditions().end(); it_fl++) {
 		ini_string = print_subformula(*it_fl, to_print);
 		to_print << "initially(" << ini_string << ").\n";
-		std::cout << "END\n\n";
-
 	}
 	to_print << "\n\n";
 }
