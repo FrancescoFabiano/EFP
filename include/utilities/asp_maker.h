@@ -22,6 +22,7 @@ class asp_maker
 private:
 
     std::set<std::string> m_already_printed_formulae;
+    std::set<std::string> m_already_printed_init_sf;
     std::set<std::string> m_already_printed_agents_sets;
     grounder m_grounder;
     std::string m_all_agents = "";
@@ -29,11 +30,13 @@ private:
 
     std::string print_ag_set(const agent_set & ags, std::ofstream & to_print);
 
-    std::string print_subformula(const fluent & fl, std::ofstream & to_print);
-    std::string print_subformula(const fluent_set & fs, std::ofstream & to_print);
-    std::string print_subformula(const fluent_formula & ff, std::ofstream & to_print);
+    std::string print_subformula(const fluent & fl, std::ofstream & to_print, bool init_sf);
+    std::string print_subformula(const fluent_set & fs, std::ofstream & to_print, bool init_sf);
+    std::string print_subformula(const fluent_formula & ff, std::ofstream & to_print, bool init_sf);
     std::string print_subformula(const belief_formula & bf, std::ofstream & to_print);
     std::string print_subformula(const formula_list & fl, std::ofstream & to_print);
+
+    std::string print_subformula_com_kno_ff_ini(const belief_formula & bf, std::ofstream & to_print);
 
 
     void print_fluents(std::ofstream & to_print);
@@ -41,7 +44,7 @@ private:
     void print_agents(std::ofstream & to_print) const;
     void print_initially(std::ofstream & to_print);
     void print_goals(std::ofstream & to_print);
-    
+
     void print_agent_set(std::ofstream & to_print) const;
     void print_all_fluent_set(fluent_set& permutation, unsigned int index, int & permutation_number, std::ofstream & to_print) const;
     void print_worlds(std::ofstream & to_print) const;
