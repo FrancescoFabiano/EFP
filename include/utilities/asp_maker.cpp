@@ -3,8 +3,10 @@
 asp_maker::asp_maker()
 {
 	m_grounder = domain::get_instance().get_grounder();
-	m_already_printed_formulae.insert("");
-	m_already_printed_init_sf.insert("");
+	//m_already_printed_formulae.insert("");
+	//m_already_printed_init_sf.insert("");
+	m_already_printed_predicate.insert("");
+
 
 
 	m_all_agents = "";
@@ -39,23 +41,27 @@ std::string asp_maker::print_ag_set(const agent_set & ags, std::ofstream & to_pr
 	return ret;
 }
 
-std::string asp_maker::print_subformula(const fluent & fl, std::ofstream & to_print, bool init_sf = false)
+std::string asp_maker::print_subformula(const fluent & fl, std::ofstream & to_print, const std::string & predicate)
 {
 	std::string ret = m_grounder.deground_fluent(fl);
 
-	if (!init_sf) {
-		if (m_already_printed_formulae.insert(ret).second) {
-			to_print << "formula(" << ret << ").\n";
-		}
-	} else {
-		if (m_already_printed_init_sf.insert(ret).second) {
-			to_print << "init_sf(" << ret << ").\n";
-		}
+	//	if (!init_sf) {
+	//		if (m_already_printed_formulae.insert(ret).second) {
+	//			to_print << "formula(" << ret << ").\n";
+	//		}
+	//	} else {
+	//		if (m_already_printed_init_sf.insert(ret).second) {
+	//			to_print << "init_sf(" << ret << ").\n";
+	//		}
+	//	}
+	if (m_already_printed_predicate.insert(predicate + ret).second) {
+		to_print << predicate << "(" << ret << ").\n";
 	}
+
 	return ret;
 }
 
-std::string asp_maker::print_subformula(const fluent_set & fluents, std::ofstream & to_print, bool init_sf = false)
+std::string asp_maker::print_subformula(const fluent_set & fluents, std::ofstream & to_print, const std::string & predicate)
 {
 	std::string ret = "";
 
@@ -64,51 +70,55 @@ std::string asp_maker::print_subformula(const fluent_set & fluents, std::ofstrea
 		fluent_set::const_iterator it_fls;
 		for (it_fls = fluents.begin(); it_fls != fluents.end(); it_fls++) {
 			if (std::next(it_fls, 1) != fluents.end()) {
-				ret += "and(" + print_subformula(*it_fls, to_print, init_sf) + ",";
+				ret += "and(" + print_subformula(*it_fls, to_print, predicate) + ",";
 			} else {
-				ret += print_subformula(*it_fls, to_print, init_sf) + ")";
+				ret += print_subformula(*it_fls, to_print, predicate) + ")";
 			}
 			//ret +=")";
 		}
 
 	} else if (fluents.size() == 1) {
-		ret += print_subformula(*fluents.begin(), to_print, init_sf);
+		ret += print_subformula(*fluents.begin(), to_print, predicate);
 		//return ret;
 	} else {
 		std::cerr << "\nError in parsing fluent_set for asp conversion\n";
 		exit(1);
 	}
 
-	if (!init_sf) {
-		if (m_already_printed_formulae.insert(ret).second) {
-			to_print << "formula(" << ret << ").\n";
-		}
-	} else {
-		if (m_already_printed_init_sf.insert(ret).second) {
-			to_print << "init_sf(" << ret << ").\n";
-		}
+	//	if (!init_sf) {
+	//		if (m_already_printed_formulae.insert(ret).second) {
+	//			to_print << "formula(" << ret << ").\n";
+	//		}
+	//	} else {
+	//		if (m_already_printed_init_sf.insert(ret).second) {
+	//			to_print << "init_sf(" << ret << ").\n";
+	//		}
+	//	}
+	if (m_already_printed_predicate.insert(predicate + ret).second) {
+		to_print << predicate << "(" << ret << ").\n";
 	}
 	return ret;
 }
 
-std::string asp_maker::print_subformula(const fluent_formula & ff, std::ofstream & to_print, bool init_sf = false)
+std::string asp_maker::print_subformula(const fluent_formula & ff, std::ofstream & to_print, const std::string & predicate)
 {
 
 	if (ff.size() == 2) {
 		//		std::cerr << "\nError in parsing fluent_formula for asp conversion\n";
 		//		exit(1);
-		return "or(" + print_subformula(*ff.begin(), to_print,init_sf) + "," + print_subformula(*(std::next(ff.begin(), 1)), to_print,init_sf) + ")";
+		return "or(" + print_subformula(*ff.begin(), to_print, predicate) + "," + print_subformula(*(std::next(ff.begin(), 1)), to_print, predicate) + ")";
 		;
 	} else if (ff.size() != 1) {
 		//		std::cerr << "\nError in parsing fluent_formula for asp conversion\n";
 		//		exit(1);
 		return "";
 	}
-	return print_subformula(*ff.begin(), to_print, init_sf);
+	return print_subformula(*ff.begin(), to_print, predicate);
 }
 
-std::string asp_maker::print_subformula(const belief_formula & bf, std::ofstream & to_print)
+std::string asp_maker::print_subformula(const belief_formula & bf, std::ofstream & to_print, const std::string & predicate)
 {
+
 	std::string ret = "";
 
 	switch ( bf.get_formula_type() ) {
@@ -116,14 +126,14 @@ std::string asp_maker::print_subformula(const belief_formula & bf, std::ofstream
 	case FLUENT_FORMULA:
 	{
 		//std::cout << "\nDEBUG:FF\n" << std::endl;
-		ret += print_subformula(bf.get_fluent_formula(), to_print);
+		ret += print_subformula(bf.get_fluent_formula(), to_print, predicate);
 		break;
 	}
 
 	case BELIEF_FORMULA:
 		//ret += parse_formula(bf.get_fluent_formula());
 		//std::cout << "\nDEBUG:BF\n" << std::endl;
-		ret += "b(" + m_grounder.deground_agent(bf.get_agent()) + "," + print_subformula(bf.get_bf1(), to_print) + ")";
+		ret += "b(" + m_grounder.deground_agent(bf.get_agent()) + "," + print_subformula(bf.get_bf1(), to_print, predicate) + ")";
 
 		break;
 
@@ -131,17 +141,17 @@ std::string asp_maker::print_subformula(const belief_formula & bf, std::ofstream
 		switch ( bf.get_operator() ) {
 		case BF_NOT:
 			//std::cout << "\nDEBUG:NOT\n" << std::endl;
-			ret += "neg(" + print_subformula(bf.get_bf1(), to_print) + ")";
+			ret += "neg(" + print_subformula(bf.get_bf1(), to_print, predicate) + ")";
 			//return !entails(bf.get_bf1(), world);
 			break;
 		case BF_OR:
 			//std::cout << "\nDEBUG:OR\n" << std::endl;
-			ret += "or(" + print_subformula(bf.get_bf1(), to_print) + "," + print_subformula(bf.get_bf2(), to_print) + ")";
+			ret += "or(" + print_subformula(bf.get_bf1(), to_print, predicate) + "," + print_subformula(bf.get_bf2(), to_print, predicate) + ")";
 			//return entails(bf.get_bf1(), world) || entails(bf.get_bf2(), world);
 			break;
 		case BF_AND:
 			//std::cout << "\nDEBUG:AND\n" << std::endl;
-			ret += "and(" + print_subformula(bf.get_bf1(), to_print) + "," + print_subformula(bf.get_bf2(), to_print) + ")";
+			ret += "and(" + print_subformula(bf.get_bf1(), to_print, predicate) + "," + print_subformula(bf.get_bf2(), to_print, predicate) + ")";
 
 			//return entails(bf.get_bf1(), world) && entails(bf.get_bf2(), world);
 			break;
@@ -153,7 +163,7 @@ std::string asp_maker::print_subformula(const belief_formula & bf, std::ofstream
 		break;
 	case C_FORMULA:
 		//std::cout << "\nDEBUG:COMMON\n" << std::endl;
-		ret += "c(" + print_ag_set(bf.get_group_agents(), to_print) + "," + print_subformula(bf.get_bf1(), to_print) + ")";
+		ret += "c(" + print_ag_set(bf.get_group_agents(), to_print) + "," + print_subformula(bf.get_bf1(), to_print, predicate) + ")";
 		break;
 	case BF_EMPTY:
 	{
@@ -167,79 +177,79 @@ std::string asp_maker::print_subformula(const belief_formula & bf, std::ofstream
 		exit(1);
 	}
 
-	if (m_already_printed_formulae.insert(ret).second) {
-		to_print << "formula(" << ret << ").\n";
+	if (m_already_printed_predicate.insert(predicate + ret).second) {
+		to_print << predicate << "(" << ret << ").\n";
 	}
 	return ret;
 }
 
-std::string asp_maker::print_subformula_com_kno_ff_ini(const belief_formula & bf, std::ofstream & to_print)
-{
-	std::string ret = "";
+//std::string asp_maker::print_subformula_com_kno_ff_ini(const belief_formula & bf, std::ofstream & to_print)
+//{
+//	std::string ret = "";
+//
+//	switch ( bf.get_formula_type() ) {
+//
+//	case FLUENT_FORMULA:
+//	{
+//		//std::cout << "\nDEBUG:FF\n" << std::endl;
+//		ret += print_subformula(bf.get_fluent_formula(), to_print, true);
+//		break;
+//	}
+//
+//	case BELIEF_FORMULA:
+//		//ret += parse_formula(bf.get_fluent_formula());
+//		//std::cout << "\nDEBUG:BF\n" << std::endl;
+//		ret += "";
+//
+//		break;
+//
+//	case PROPOSITIONAL_FORMULA:
+//		switch ( bf.get_operator() ) {
+//		case BF_NOT:
+//			//std::cout << "\nDEBUG:NOT\n" << std::endl;
+//			ret += "neg(" + print_subformula_com_kno_ff_ini(bf.get_bf1(), to_print) + ")";
+//			//return !entails(bf.get_bf1(), world);
+//			break;
+//		case BF_OR:
+//			//std::cout << "\nDEBUG:OR\n" << std::endl;
+//			ret += "or(" + print_subformula_com_kno_ff_ini(bf.get_bf1(), to_print) + "," + print_subformula_com_kno_ff_ini(bf.get_bf2(), to_print) + ")";
+//			//return entails(bf.get_bf1(), world) || entails(bf.get_bf2(), world);
+//			break;
+//		case BF_AND:
+//			//std::cout << "\nDEBUG:AND\n" << std::endl;
+//			ret += "and(" + print_subformula_com_kno_ff_ini(bf.get_bf1(), to_print) + "," + print_subformula_com_kno_ff_ini(bf.get_bf2(), to_print) + ")";
+//
+//			//return entails(bf.get_bf1(), world) && entails(bf.get_bf2(), world);
+//			break;
+//		case BF_FAIL:
+//		default:
+//			std::cerr << "Something went wrong in transforming asp for Propositional formula";
+//			exit(1);
+//		}
+//		break;
+//	case C_FORMULA:
+//		//std::cout << "\nDEBUG:COMMON\n" << std::endl;
+//		ret += "";
+//		break;
+//	case BF_EMPTY:
+//	{
+//		//ret += print_subformula(bf.get_bf2(), to_print);
+//		////std::cout << "\nDEBUG:HERE\n" << std::endl;
+//		break;
+//	}
+//	case BF_TYPE_FAIL:
+//	default:
+//		std::cerr << "Something went wrong in transforming asp for Propositional formula";
+//		exit(1);
+//	}
+//
+//	if (m_already_printed_init_sf.insert(ret).second) {
+//		to_print << "init_sf(" << ret << ").\n";
+//	}
+//	return ret;
+//}
 
-	switch ( bf.get_formula_type() ) {
-
-	case FLUENT_FORMULA:
-	{
-		//std::cout << "\nDEBUG:FF\n" << std::endl;
-		ret += print_subformula(bf.get_fluent_formula(), to_print, true);
-		break;
-	}
-
-	case BELIEF_FORMULA:
-		//ret += parse_formula(bf.get_fluent_formula());
-		//std::cout << "\nDEBUG:BF\n" << std::endl;
-		ret += "";
-
-		break;
-
-	case PROPOSITIONAL_FORMULA:
-		switch ( bf.get_operator() ) {
-		case BF_NOT:
-			//std::cout << "\nDEBUG:NOT\n" << std::endl;
-			ret += "neg(" + print_subformula_com_kno_ff_ini(bf.get_bf1(), to_print) + ")";
-			//return !entails(bf.get_bf1(), world);
-			break;
-		case BF_OR:
-			//std::cout << "\nDEBUG:OR\n" << std::endl;
-			ret += "or(" + print_subformula_com_kno_ff_ini(bf.get_bf1(), to_print) + "," + print_subformula_com_kno_ff_ini(bf.get_bf2(), to_print) + ")";
-			//return entails(bf.get_bf1(), world) || entails(bf.get_bf2(), world);
-			break;
-		case BF_AND:
-			//std::cout << "\nDEBUG:AND\n" << std::endl;
-			ret += "and(" + print_subformula_com_kno_ff_ini(bf.get_bf1(), to_print) + "," + print_subformula_com_kno_ff_ini(bf.get_bf2(), to_print) + ")";
-
-			//return entails(bf.get_bf1(), world) && entails(bf.get_bf2(), world);
-			break;
-		case BF_FAIL:
-		default:
-			std::cerr << "Something went wrong in transforming asp for Propositional formula";
-			exit(1);
-		}
-		break;
-	case C_FORMULA:
-		//std::cout << "\nDEBUG:COMMON\n" << std::endl;
-		ret += "";
-		break;
-	case BF_EMPTY:
-	{
-		//ret += print_subformula(bf.get_bf2(), to_print);
-		////std::cout << "\nDEBUG:HERE\n" << std::endl;
-		break;
-	}
-	case BF_TYPE_FAIL:
-	default:
-		std::cerr << "Something went wrong in transforming asp for Propositional formula";
-		exit(1);
-	}
-
-	if (m_already_printed_init_sf.insert(ret).second) {
-		to_print << "init_sf(" << ret << ").\n";
-	}
-	return ret;
-}
-
-std::string asp_maker::print_subformula(const formula_list & fl, std::ofstream & to_print)
+std::string asp_maker::print_subformula(const formula_list & fl, std::ofstream & to_print, const std::string & predicate)
 {
 	std::string ret = "";
 
@@ -247,21 +257,21 @@ std::string asp_maker::print_subformula(const formula_list & fl, std::ofstream &
 		formula_list::const_iterator it_fl;
 		for (it_fl = fl.begin(); it_fl != fl.end(); it_fl++) {
 			if (std::next(it_fl, 1) != fl.end()) {
-				ret += "and(" + print_subformula(*it_fl, to_print) + ",";
+				ret += "and(" + print_subformula(*it_fl, to_print, predicate) + ",";
 			} else {
-				ret += print_subformula(*it_fl, to_print) + ")";
+				ret += print_subformula(*it_fl, to_print, predicate) + ")";
 			}
 		}
 	} else if (fl.size() == 1) {
-		ret += print_subformula(*fl.begin(), to_print);
+		ret += print_subformula(*fl.begin(), to_print, predicate);
 		//	return ret;
 	} else {
 		std::cerr << "\nError in parsing fluent_list for asp conversion\n";
 		exit(1);
 	}
 
-	if (m_already_printed_formulae.insert(ret).second) {
-		to_print << "formula(" << ret << ").\n";
+	if (m_already_printed_predicate.insert(predicate + ret).second) {
+		to_print << predicate << "(" << ret << ").\n";
 	}
 	return ret;
 }
@@ -310,11 +320,13 @@ void asp_maker::print_fluents(std::ofstream & to_print)
 {
 	to_print << "% *** FLUENTS ***\n";
 	fluent_set::const_iterator it_fls;
+	std::string predicate = "formula";
 	fluent_set fluents = domain::get_instance().get_fluents();
 	for (it_fls = fluents.begin(); it_fls != fluents.end(); it_fls++) {
 		if (*it_fls % 2 == 0) {
 			to_print << "fluent(" << m_grounder.deground_fluent(*it_fls) << ").\n";
-			print_subformula(*it_fls, to_print);
+			m_already_printed_predicate.insert(predicate);
+			print_subformula(*it_fls, to_print, predicate);
 		}
 	}
 	to_print << "\n\n";
@@ -334,6 +346,14 @@ void asp_maker::print_actions(std::ofstream & to_print)
 		fluent_formula::const_iterator it_flf;
 		fluent_set::const_iterator it_fls;
 
+		std::string predicate1 = "formula";
+		m_already_printed_predicate.insert(predicate1);
+
+		std::string predicate2 = "formula";
+		m_already_printed_predicate.insert(predicate2);
+
+
+
 		effects_map::const_iterator it_mapeff;
 		switch ( it_acs->get_type() ) {
 		case ONTIC:
@@ -345,8 +365,9 @@ void asp_maker::print_actions(std::ofstream & to_print)
 					for (it_flf = it_mapeff->first.begin(); it_flf != it_mapeff->first.end(); it_flf++) {
 						for (it_fls = it_flf->begin(); it_fls != it_flf->end(); it_fls++) {
 
-							effect = print_subformula(*it_fls, to_print);
-							cond_eff = print_subformula(it_mapeff->second, to_print);
+							effect = print_subformula(*it_fls, to_print, predicate1);
+							cond_eff = print_subformula(it_mapeff->second, to_print, predicate2);
+
 							to_print << "causes(" << act_name << ", ";
 
 							to_print << effect << ", ";
@@ -375,8 +396,8 @@ void asp_maker::print_actions(std::ofstream & to_print)
 					for (it_flf = it_mapeff->first.begin(); it_flf != it_mapeff->first.end(); it_flf++) {
 						for (it_fls = it_flf->begin(); it_fls != it_flf->end(); it_fls++) {
 
-							effect = print_subformula(*it_fls, to_print);
-							cond_eff = print_subformula(it_mapeff->second, to_print);
+							effect = print_subformula(*it_fls, to_print, predicate1);
+							cond_eff = print_subformula(it_mapeff->second, to_print, predicate2);
 							to_print << "determines(" << act_name << ", ";
 
 							to_print << effect << ", ";
@@ -407,8 +428,8 @@ void asp_maker::print_actions(std::ofstream & to_print)
 					for (it_flf = it_mapeff->first.begin(); it_flf != it_mapeff->first.end(); it_flf++) {
 						for (it_fls = it_flf->begin(); it_fls != it_flf->end(); it_fls++) {
 
-							effect = print_subformula(*it_fls, to_print);
-							cond_eff = print_subformula(it_mapeff->second, to_print);
+							effect = print_subformula(*it_fls, to_print, predicate1);
+							cond_eff = print_subformula(it_mapeff->second, to_print, predicate2);
 							to_print << "announces(" << act_name << ", ";
 
 							to_print << effect << ", ";
@@ -433,9 +454,12 @@ void asp_maker::print_actions(std::ofstream & to_print)
 			break;
 		}
 
+		std::string predicate3 = "formula";
+		m_already_printed_predicate.insert(predicate3);
+
 		//it_acs->get_executability()
 		if (it_acs->get_executability().size() > 0) {
-			std::string ex_conditions = print_subformula(it_acs->get_executability(), to_print);
+			std::string ex_conditions = print_subformula(it_acs->get_executability(), to_print, predicate3);
 			to_print << "executable(" << act_name << ", ";
 
 			if (!ex_conditions.empty()) {
@@ -448,6 +472,8 @@ void asp_maker::print_actions(std::ofstream & to_print)
 
 
 
+		std::string predicate4 = "formula";
+		m_already_printed_predicate.insert(predicate4);
 		agent_set oblivious = domain::get_instance().get_agents();
 
 		observability_map::const_iterator it_obs;
@@ -456,7 +482,7 @@ void asp_maker::print_actions(std::ofstream & to_print)
 
 			oblivious.erase(it_obs->first);
 
-			std::string obs_conditions = print_subformula(it_obs->second, to_print);
+			std::string obs_conditions = print_subformula(it_obs->second, to_print, predicate4);
 			to_print << "observes(" << act_name << ", ";
 			to_print << m_grounder.deground_agent(it_obs->first);
 			if (!obs_conditions.empty()) {
@@ -471,7 +497,7 @@ void asp_maker::print_actions(std::ofstream & to_print)
 		for (it_obs = tmp_map.begin(); it_obs != tmp_map.end(); it_obs++) {
 
 			oblivious.erase(it_obs->first);
-			std::string obs_conditions = print_subformula(it_obs->second, to_print);
+			std::string obs_conditions = print_subformula(it_obs->second, to_print, predicate4);
 			to_print << "aware_of(" << act_name << ", ";
 			to_print << m_grounder.deground_agent(it_obs->first);
 			if (!obs_conditions.empty()) {
@@ -516,9 +542,17 @@ void asp_maker::print_initially(std::ofstream & to_print)
 	fluent_set::const_iterator it_fs;
 	fluent_set fs = *ini_conditions.get_pointed_world_conditions().begin();
 
+
+	std::string predicate1 = "formula";
+	m_already_printed_predicate.insert(predicate1);
+	std::string predicate2 = "formula";
+	m_already_printed_predicate.insert(predicate2);
+	std::string predicate3 = "init_sf";
+	m_already_printed_predicate.insert(predicate3);
+
 	std::string ini_string;
 	for (it_fs = fs.begin(); it_fs != fs.end(); it_fs++) {
-		ini_string = print_subformula(*it_fs, to_print);
+		ini_string = print_subformula(*it_fs, to_print, predicate1);
 		to_print << "initially(" << ini_string << ").\n";
 	}
 
@@ -526,7 +560,7 @@ void asp_maker::print_initially(std::ofstream & to_print)
 
 	formula_list::const_iterator it_fl;
 	for (it_fl = ini_conditions.get_initial_conditions().begin(); it_fl != ini_conditions.get_initial_conditions().end(); it_fl++) {
-		ini_string = print_subformula(*it_fl, to_print);
+		ini_string = print_subformula(*it_fl, to_print, predicate2);
 		to_print << "initially(" << ini_string << ").\n";
 	}
 	to_print << "\n\n";
@@ -536,7 +570,7 @@ void asp_maker::print_initially(std::ofstream & to_print)
 	for (it_fl = ini_conditions.get_initial_conditions().begin(); it_fl != ini_conditions.get_initial_conditions().end(); it_fl++) {
 		if (it_fl->get_formula_type() == C_FORMULA) {
 			//ini_string = 
-			print_subformula_com_kno_ff_ini(it_fl->get_bf1(), to_print);
+			print_subformula(it_fl->get_bf1(), to_print, predicate3);
 			//if (ini_string.compare("") != 0) {
 			//	to_print << "init_sf(" << ini_string << ").\n";
 			//}
@@ -552,9 +586,12 @@ void asp_maker::print_goals(std::ofstream & to_print)
 	formula_list goals = domain::get_instance().get_goal_description();
 	formula_list::const_iterator it_fl;
 
+	std::string predicate = "formula";
+	m_already_printed_predicate.insert(predicate);
+
 	std::string goal_string;
 	for (it_fl = goals.begin(); it_fl != goals.end(); it_fl++) {
-		goal_string = print_subformula(*it_fl, to_print);
+		goal_string = print_subformula(*it_fl, to_print, predicate);
 		to_print << "goal(" << goal_string << ").\n";
 	}
 	to_print << "\n\n";

@@ -116,39 +116,39 @@ bool kstate::operator==(const kstate & to_compare) const
 
 bool kstate::operator<(const kstate & to_compare) const
 {
-	/*if (m_max_depth < to_compare.get_max_depth()) {
-		return true;
-	} else if (m_max_depth > to_compare.get_max_depth()) {
-		return false;
-	}*/
+//	if (m_max_depth < to_compare.get_max_depth()) {
+//		return true;
+//	} else if (m_max_depth > to_compare.get_max_depth()) {
+//		return false;
+//	}
 
-	// if (m_pointed.get_numerical_id() < to_compare.get_pointed().get_numerical_id()) {
-	// 	return true;
-	// } else if (m_pointed.get_numerical_id() > to_compare.get_pointed().get_numerical_id()) {
-	// 	return false;
-	// }
+	 if (m_pointed.get_numerical_id() < to_compare.get_pointed().get_numerical_id()) {
+	 	return true;
+	 } else if (m_pointed.get_numerical_id() > to_compare.get_pointed().get_numerical_id()) {
+	 	return false;
+	 }
 
-	bisimulation b;
+//	bisimulation b;
+//
+//	if (m_edges < to_compare.get_edges()) {
+//		return b.compare_automata(*this, to_compare);
+//	} else {
+//		return b.compare_automata(to_compare, *this);
+//	}
 
-	if (m_edges < to_compare.get_edges()) {
-		return b.compare_automata(*this, to_compare);
-	} else {
-		return b.compare_automata(to_compare, *this);
-	}
+	 if (m_worlds < to_compare.get_worlds()) {
+	 	return true;
+	 } else if (m_worlds > to_compare.get_worlds()) {
+	 	return false;
+	 }
 
-	// if (m_worlds < to_compare.get_worlds()) {
-	// 	return true;
-	// } else if (m_worlds > to_compare.get_worlds()) {
-	// 	return false;
-	// }
+	 if (m_edges < to_compare.get_edges()) {
+	 	return true;
+	 } else if (m_edges > to_compare.get_edges()) {
+	 	return false;
+	 }
 
-	// if (m_edges < to_compare.get_edges()) {
-	// 	return true;
-	// } else if (m_edges > to_compare.get_edges()) {
-	// 	return false;
-	// }
-
-	//This are implemented in std
+	//These are implemented in std
 
 	//	if (m_worlds.size() < to_compare.get_worlds().size()) {
 	//		return true;

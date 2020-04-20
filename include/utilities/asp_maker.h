@@ -21,8 +21,9 @@ class asp_maker
 {
 private:
 
-    std::set<std::string> m_already_printed_formulae;
-    std::set<std::string> m_already_printed_init_sf;
+    //    std::set<std::string> m_already_printed_formulae;
+    //    std::set<std::string> m_already_printed_init_sf;
+    std::set<std::string> m_already_printed_predicate;
     std::set<std::string> m_already_printed_agents_sets;
     grounder m_grounder;
     std::string m_all_agents = "";
@@ -30,13 +31,13 @@ private:
 
     std::string print_ag_set(const agent_set & ags, std::ofstream & to_print);
 
-    std::string print_subformula(const fluent & fl, std::ofstream & to_print, bool init_sf);
-    std::string print_subformula(const fluent_set & fs, std::ofstream & to_print, bool init_sf);
-    std::string print_subformula(const fluent_formula & ff, std::ofstream & to_print, bool init_sf);
-    std::string print_subformula(const belief_formula & bf, std::ofstream & to_print);
-    std::string print_subformula(const formula_list & fl, std::ofstream & to_print);
+    std::string print_subformula(const fluent & fl, std::ofstream & to_print, const std::string & predicate);
+    std::string print_subformula(const fluent_set & fs, std::ofstream & to_print, const std::string & predicate);
+    std::string print_subformula(const fluent_formula & ff, std::ofstream & to_print, const std::string & predicate);
+    std::string print_subformula(const belief_formula & bf, std::ofstream & to_print, const std::string & predicate);
+    std::string print_subformula(const formula_list & fl, std::ofstream & to_print, const std::string & predicate);
 
-    std::string print_subformula_com_kno_ff_ini(const belief_formula & bf, std::ofstream & to_print);
+    //std::string print_subformula_com_kno_ff_ini(const belief_formula & bf, std::ofstream & to_print);
 
 
     void print_fluents(std::ofstream & to_print);
