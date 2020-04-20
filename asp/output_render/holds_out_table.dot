@@ -1,0 +1,5 @@
+digraph K_structure{
+	rankdir=BT;
+	ranksep=0.75
+	newrank=true;
+	size="8,5;"

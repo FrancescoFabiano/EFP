@@ -11,8 +11,8 @@ from sortedcontainers import SortedSet, SortedDict
 
 def remove_phi(string):
 	replaced = re.sub('phi\(', 'p', string)
-	replaced1 = re.sub('\)', '', replaced)
-	return replaced1
+	replaced = re.sub('\)', '', replaced)
+	return replaced
 
 def generate_pointed(new_pointed):
 	new_pointed = re.sub('^pointed\(', '', new_pointed)
@@ -31,8 +31,8 @@ def last_pointed(new_pointed,pointed):
 	
 def generate_world_key(world):
 	replaced = re.sub('^possible_world\(', '', world)
-	replaced1 = re.sub('\)$', '', replaced)
-	no_phi = remove_phi(replaced1)
+	replaced = re.sub('\)$', '', replaced)
+	no_phi = remove_phi(replaced)
 	return no_phi
 	
 def generate_world(world, pointed):
@@ -53,6 +53,24 @@ def generate_rank(world, rank_map):
 	no_phi = generate_world_key(world)
 	splitted = no_phi.split(',')
 	rank_map[splitted[0]+splitted[1]].add('"' + splitted[0] + '_' + splitted[1] + '_' + splitted[2] + '"')
+	
+def generate_hold_key(hold):
+	replaced = re.sub('^holds\(', '', hold)
+	replaced = re.sub('\)$', '', replaced)
+	no_phi = remove_phi(replaced)
+	return no_phi
+		
+def initialize_fluent_table(hold, fluent_table, key_table):
+	hold_key = generate_hold_key(hold)
+	splitted = hold_key.split(',')
+	fluent_table[splitted[0]+splitted[1]+splitted[2]+splitted[3]] = SortedSet()
+	key_table[splitted[0]+splitted[1]+splitted[2]+splitted[3]] = splitted[0]+'_'+splitted[1]+'_'+splitted[2];
+	
+def generate_fluent_table(hold, fluent_table):
+	hold_key = generate_hold_key(hold)
+	splitted = hold_key.split(',')
+	fluent_table[splitted[0]+splitted[1]+splitted[2]+splitted[3]].add(splitted[4])
+
 	
 def initialize_cluster(world, cluster_map):
 	no_phi = generate_world_key(world)
@@ -91,9 +109,6 @@ def compare_keys(key1,key2,edges_map,edges_map_both):
 		edges_map[key1] = edges_map[key1].difference(edges_map_both[key1])
 		edges_map[key2] = edges_map[key2].difference(edges_map_both[key1])
 
-
-
-
 def check_backforth_edge(edges_map,edges_map_both):
 	for key, values in edges_map.items():
 		for key_nested, values_nested in edges_map.items():
@@ -103,11 +118,20 @@ def check_backforth_edge(edges_map,edges_map_both):
 
 
 outputfile = open(sys.argv[1]+'.dot', 'w') 
+#outputfile_table = open(sys.argv[1]+'_table.dot', 'w')
+#print('digraph K_structure{',end="\n", file = outputfile_table) 
+#print('\trankdir=BT;',end="\n", file = outputfile_table)
+#print('\tranksep=0.75',end="\n", file = outputfile_table)
+#print('\tnewrank=true;',end="\n", file = outputfile_table)
+#print('\tsize="8,5;"',end="\n", file = outputfile_table) 
+
 
 pointed = '0,0,1'
 n_pointed = re.compile('pointed\(\S*\)')
 n_world = re.compile('possible_world\(\S*\)')
 n_edge = re.compile('believes\(\S*\)')
+n_holds = re.compile('holds\(\S*\)')
+n_fluent = re.compile('fluent\(\S*\)')
 
 
 print('digraph K_structure{',end="\n", file = outputfile) 
@@ -208,6 +232,45 @@ with open(sys.argv[1]+'.txt', 'r') as n:
 				if values.index(val) != len(values)-1:
 					print(',', end ="", file = outputfile) 
 			print('"];', file = outputfile) 
+
+#FLUENTS-TABLE
+
+#reading all the fluents for complete table
+	fluents = SortedSet()
+	fluent_predicates = re.findall(n_fluent, n)
+	for fluent_predicate in fluent_predicates:
+		fluent_predicate = re.sub('^fluent\(', '', fluent_predicate)
+		fluent_predicate = re.sub('\)$', '', fluent_predicate)
+		fluents.add(fluent_predicate)
+		
+#table print
+	holds = re.findall(n_holds, n)
+	fluent_table = SortedDict()
+	ft_keys = SortedDict()
+
+	for hold in holds:
+		initialize_fluent_table(hold, fluent_table,ft_keys)
+		
+	for hold in holds:
+		generate_fluent_table(hold, fluent_table)
+		
+	print('\n//WORLDS description Table:\n\tnode [shape = plain]description[label=<\n\t<table border = "0" cellborder = "1" cellspacing = "0" >', end ="\n", file = outputfile)
+	for key,values in fluent_table.items():
+		#counter_rank+=1
+		print("\t\t", end ="", file = outputfile) 
+		#print(key, end ="")
+		#print('{rank = ' + str(counter_rank) + '; ', end ="", file = outputfile) 
+		print('<tr><td>'+ ft_keys[key] + '</td>\t<td>', end ="", file = outputfile)
+		for fluent in fluents:
+			if fluent in fluent_table[key]:
+				print('<font color="#0000ff"> '+fluent + '</font>', end ="", file = outputfile)
+			else:
+				print('<font color="#ff1020">-'+fluent+"</font>", end ="", file = outputfile)
+			if fluents.index(fluent) != len(fluents)-1:
+				print(', ', end ="", file = outputfile) 
+		print('</td></tr>', end ="\n", file = outputfile)
+	print('\t</table>>]',end ="\n", file = outputfile)
+
 print('}', file = outputfile) 
 
 outputfile.close() 

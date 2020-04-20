@@ -1167,6 +1167,7 @@ void pstate::print_graphviz(std::ostream & graphviz) const
 		graphviz << "\" ];\n";
 	}
 
+		std::string color = "<font color=\"#ffffff\">";
 	graphviz << "\n\n//WORLDS description Table:" << std::endl;
 	graphviz << "	node [shape = plain]\n\n";
 	graphviz << "	description[label=<\n";
@@ -1181,7 +1182,9 @@ void pstate::print_graphviz(std::ostream & graphviz) const
 				graphviz << ", ";
 			}
 			print_first = true;
-			graphviz << domain::get_instance().get_grounder().deground_fluent(*it_fs);
+			if((*it_fs)%2 == 0) color = "<font color=\"#0000ff\"> ";
+			else color = "<font color=\"#ff1020\">";
+			graphviz << color << domain::get_instance().get_grounder().deground_fluent(*it_fs) << "</font>";
 		}
 		graphviz << "</td></tr>\n";
 	}
