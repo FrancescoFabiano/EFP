@@ -6,7 +6,7 @@ ARGUMENTS=("$@") # Rebuild the array with rest of arguments
 ASP_PATH="../asp"
 OUT_PATH="../out/asp"
 
-clingo $ASP_PATH/planner_poss.lp --configuration=jumpy $ASP_PATH/$DOMAIN >> $OUT_PATH/output.txt;
+clingo $ASP_PATH/inc.lp $ASP_PATH/planner_single.lp --configuration=jumpy $ASP_PATH/$DOMAIN >> $OUT_PATH/output.txt;
 python3 $ASP_PATH/output_render/out_reader.py $OUT_PATH/output;
 dot -Tpdf $OUT_PATH/output.dot >> $OUT_PATH/output.pdf;
 

@@ -349,7 +349,7 @@ void asp_maker::print_actions(std::ofstream & to_print)
 		std::string predicate1 = "formula";
 		m_already_printed_predicate.insert(predicate1);
 
-		std::string predicate2 = "formula";
+		std::string predicate2 = "ce_formula";
 		m_already_printed_predicate.insert(predicate2);
 
 
@@ -454,12 +454,13 @@ void asp_maker::print_actions(std::ofstream & to_print)
 			break;
 		}
 
-		std::string predicate3 = "formula";
+		std::string predicate3 = "cp_formula";
 		m_already_printed_predicate.insert(predicate3);
 
 		//it_acs->get_executability()
 		if (it_acs->get_executability().size() > 0) {
 			std::string ex_conditions = print_subformula(it_acs->get_executability(), to_print, predicate3);
+			print_subformula(it_acs->get_executability(), to_print, predicate1);
 			to_print << "executable(" << act_name << ", ";
 
 			if (!ex_conditions.empty()) {
@@ -472,7 +473,7 @@ void asp_maker::print_actions(std::ofstream & to_print)
 
 
 
-		std::string predicate4 = "formula";
+		std::string predicate4 = "cp_formula";
 		m_already_printed_predicate.insert(predicate4);
 		agent_set oblivious = domain::get_instance().get_agents();
 
@@ -483,6 +484,7 @@ void asp_maker::print_actions(std::ofstream & to_print)
 			oblivious.erase(it_obs->first);
 
 			std::string obs_conditions = print_subformula(it_obs->second, to_print, predicate4);
+			print_subformula(it_obs->second, to_print, predicate1);
 			to_print << "observes(" << act_name << ", ";
 			to_print << m_grounder.deground_agent(it_obs->first);
 			if (!obs_conditions.empty()) {
@@ -498,6 +500,7 @@ void asp_maker::print_actions(std::ofstream & to_print)
 
 			oblivious.erase(it_obs->first);
 			std::string obs_conditions = print_subformula(it_obs->second, to_print, predicate4);
+			print_subformula(it_obs->second, to_print, predicate1);
 			to_print << "aware_of(" << act_name << ", ";
 			to_print << m_grounder.deground_agent(it_obs->first);
 			if (!obs_conditions.empty()) {
@@ -586,7 +589,7 @@ void asp_maker::print_goals(std::ofstream & to_print)
 	formula_list goals = domain::get_instance().get_goal_description();
 	formula_list::const_iterator it_fl;
 
-	std::string predicate = "formula";
+	std::string predicate = "cp_formula";
 	m_already_printed_predicate.insert(predicate);
 
 	std::string goal_string;
