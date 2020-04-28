@@ -408,7 +408,7 @@ reached_goal(T) :- plan(T-1, ACT), is_executable(T-1, ACT), not not_reached_goal
 :- plan(T, ACT), not is_executable(T, ACT).
 :- plan(T, ACT), pointed(T, R, P), not entails(T, R, P, EXEC), action(ACT), executable(ACT, EXEC), formula(EXEC).
 
-% :- plan(T, ACT), pointed(T, R, P), 0 { is_executable_effect(T, ACT, T, R, P, CAUSED) :     causes(ACT, CAUSED, _) } 0, ontic(ACT).
+:- plan(T, ACT), pointed(T, R, P), 0 { is_executable_effect(T, ACT, T, R, P, CAUSED) :     causes(ACT, CAUSED, _) } 0, ontic(ACT).
 % :- plan(T, ACT), pointed(T, R, P), 0 { is_executable_effect(T, ACT, T, R, P, SENSED) : determines(ACT, SENSED, _) } 0, sensing(ACT).
 % :- plan(T, ACT), pointed(T, R, P), 0 { is_executable_effect(T, ACT, T, R, P, ANN   ) :  announces(ACT, ANN   , _) } 0, announcement(ACT).
 
