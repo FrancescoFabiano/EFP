@@ -454,7 +454,7 @@ void asp_maker::print_actions(std::ofstream & to_print)
 			break;
 		}
 
-		std::string predicate3 = "cp_formula";
+		std::string predicate3 = "formula";
 		m_already_printed_predicate.insert(predicate3);
 
 		//it_acs->get_executability()
@@ -473,7 +473,7 @@ void asp_maker::print_actions(std::ofstream & to_print)
 
 
 
-		std::string predicate4 = "cp_formula";
+		std::string predicate4 = "formula";
 		m_already_printed_predicate.insert(predicate4);
 		agent_set oblivious = domain::get_instance().get_agents();
 
@@ -589,7 +589,7 @@ void asp_maker::print_goals(std::ofstream & to_print)
 	formula_list goals = domain::get_instance().get_goal_description();
 	formula_list::const_iterator it_fl;
 
-	std::string predicate = "cp_formula";
+	std::string predicate = "formula";
 	m_already_printed_predicate.insert(predicate);
 
 	std::string goal_string;
