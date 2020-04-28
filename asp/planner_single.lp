@@ -40,8 +40,8 @@
 % #program step(T).
 
 % reaches/7: P1 reaches P2 with a path that contains only agents inside AGS
-reaches(T, R1, P1, T2, R2, P2, AGS) :- %* T > 0,*% believes(T, R1, P1, T2, R2, P2, AG), contains_ag(AGS, AG).
-reaches(T, R1, P1, T2, R2, P2, AGS) :- %* T > 0,*% believes(T, R1, P1, T3, R3, P3, AG), contains_ag(AGS, AG), reaches(T3, R3, P3, T2, R2, P2, AGS).
+reaches(T1, R1, P1, T2, R2, P2, AGS) :- %* T > 0,*% believes(T1, R1, P1, T2, R2, P2, AG), contains_ag(AGS, AG).
+reaches(T1, R1, P1, T2, R2, P2, AGS) :- %* T > 0,*% believes(T1, R1, P1, T3, R3, P3, AG), contains_ag(AGS, AG), reaches(T3, R3, P3, T2, R2, P2, AGS).
 
 
 % ********** ENTAILMENT **********
@@ -124,7 +124,7 @@ K/2 { not holds(0, 0, W, W, F) : initial_fluent_set(W) } K/2 :- unknown_initiall
 % ***              End              ***
 
 % So far we dealt with (commonly known) fluents. An initial fluent set is "good" if it entails all the fluent formulas F that are initial common knowledge
-good_initial_fluent_set(W) :- initial_fluent_set(W), 0 { initially(c(all_agents, F)) : not entails(0, 0, W, F), initially(c(all_agents, F)), init_sf(F), not literal(F) } 0.
+good_initial_fluent_set(W) :- initial_fluent_set(W), 0 { initially(c(all_agents, F)) : not entails_init(W, F), initially(c(all_agents, F)), init_sf(F), not literal(F) } 0.
 
 % For each good initial fluent set we create a correspoinding possible world
 possible_world(0, 0, W, W) :- good_initial_fluent_set(W).
@@ -186,8 +186,6 @@ is_executable_effect(T, ACT, T2, R2, P2, ANN   ) :- T > 0, plan(T, ACT), is_exec
 is_executable_effect(T, ACT, T2, R2, P2, ANN   ) :- T > 0, plan(T, ACT), is_executable(T, ACT), announcement(ACT), announces(ACT, ANN, EEXEC), possible_world(T2, R2, P2, W2), T2 < T, formula(EEXEC),
                                                     pointed(T-1, R, PP), entails(T2, R2, P2, EEXEC), 0 { agent(AG) : contains_ag(AGS, AG), is_oblivious(T, AG) } 0, reaches(T-1, R, PP, T2, R2, P2, AGS).
 
-% is_fully_obs  (T, AG) :- T = 0, agent(AG).
-
 is_fully_obs  (T, AG) :- T > 0, plan(T, ACT), is_executable(T, ACT), action(ACT),       observes (ACT, AG, true), agent(AG).
 is_partial_obs(T, AG) :- T > 0, plan(T, ACT), is_executable(T, ACT), action(ACT),       aware_of (ACT, AG, true), agent(AG).
 is_oblivious  (T, AG) :- T > 0, plan(T, ACT), is_executable(T, ACT), action(ACT),       oblivious(ACT, AG),       agent(AG).
@@ -202,7 +200,8 @@ is_oblivious  (T, AG) :- T > 0, plan(T, ACT), is_executable(T, ACT), sensing(ACT
 is_oblivious  (T, AG) :- T > 0, plan(T, ACT), is_executable(T, ACT), announcement(ACT), aware_of (ACT, AG, OBS ), agent(AG), not entails(T-1, R, PS, OBS), formula(OBS), pointed(T-1, R, PS).
 
 % The maximum repetition at time T is the repetition of the pointed possibility
-max_rep(T-1, R) :- T > 0, plan(T, ACT), pointed(T-1, R, P), not reached_goal(T).
+max_rep(0, 0).
+max_rep(T, R) :- T > 0, pointed(T, R, P).
 % #show max_rep/2.
 
 % ONTIC ACTIONS
@@ -227,7 +226,7 @@ possible_world(T, R +MR+1, phi(P), phi(W)) :- T > 0, is_executable(T, ACT), onti
 % Then we create the new possibility phi(P). We need this rule since we assume that each fully observant agent knows which agent is fully observant as well.
 % Hence we must update the fluent set of all the possibilities such as P.
 % [To see a pratical example print the representation of the states using Coin in the Box with the actions: plan(0, signal_a_b). plan(1, signal_a_c). plan(2, open_a). The rule generates the possibilities "3_4_p1" and "3_4_p2" ]
-possible_world(T, R2+MR+1, phi(P), phi(W)) :- T > 0, is_executable(T, ACT), ontic(ACT), pointed(T-1, R, PP), possible_world(T2, R2, P, W), max_rep(T-1, MR),
+possible_world(T, R2+MR+1, phi(P), phi(W)) :- T > 0, is_executable(T, ACT), ontic(ACT), pointed(T-1, R, PP), possible_world(T2, R2, P, W), max_rep(T-1, MR), T2 < T,
                                                 reaches(T-1, R, PP, T2, R2, P, AGS), 0 { agent(AG) : contains_ag(AGS, AG), not is_fully_obs(T, AG) } 0. %,
                                                 % 0 { fluent_set(W1): T1 <= T, possible_world(T1, _, _, W1), apply_ontic(W1, T2, R2, P, T) } 0.
 
@@ -311,12 +310,12 @@ possible_world(T, R +MR+1, phi(P), W ) :- T > 0, is_executable(T, ACT), sensing(
 %                                             believes(T, R, PP, T2, R2, P, AG), hold_sensed_effects(T2, R2, P, T), is_fully_obs(T+1, AG).
 
 % As for ontic actions, we do the same for all the possibilities P2 that are reachable by fully-observant-labeled paths
-possible_world(T, R2+MR+1, phi(P), W ) :- T > 0, is_executable(T, ACT), sensing(ACT), pointed(T-1, R, PP), possible_world(T2, R2, P, W), max_rep(T-1, MR),
+possible_world(T, R2+MR+1, phi(P), W ) :- T > 0, is_executable(T, ACT), sensing(ACT), pointed(T-1, R, PP), possible_world(T2, R2, P, W), max_rep(T-1, MR), T2 < T,
                                           reaches(T-1, R, PP, T2, R2, P, AGS), 0 { agent(AG) : contains_ag(AGS, AG), not is_fully_obs(T, AG) } 0,
                                           hold_sensed_effects(T2, R2, P, T).
 
 % If a partially observant agent AG believes P2, then we create the new possibility phi(P2)
-possible_world(T, R2+MR+1, phi(P), W ) :- T > 0, is_executable(T, ACT), sensing(ACT), pointed(T-1, R, PP), possible_world(T2, R2, P, W), max_rep(T-1, MR),
+possible_world(T, R2+MR+1, phi(P), W ) :- T > 0, is_executable(T, ACT), sensing(ACT), pointed(T-1, R, PP), possible_world(T2, R2, P, W), max_rep(T-1, MR), T2 < T,
                                           believes(T-1, R, PP, T2, R2, P, AG), is_partial_obs(T, AG).
 
 % Let P be a possibility that is reachable from the pointed one with a path labeled only with fully/partially observant agents.
@@ -327,12 +326,12 @@ possible_world(T, R2+MR+1, phi(P), W ) :- T > 0, is_executable(T, ACT), sensing(
 % Coin_in_the_Box__pl_6.lp con piano: plan(0, signal_a_b). plan(1, distract_b_a). plan(2, signal_b_c). plan(3, open_a). plan(4, peek_b). plan(5, peek_c).
 % Le ultime due azioni generano due nuove possibility ridondanti: "5_31_ppppp2" e "6_60_pppp1".
 % !!!
-possible_world(T, R2+MR+1, phi(P), W ) :- T > 0, is_executable(T, ACT), sensing(ACT), pointed(T-1, R, PP), possible_world(T1, R1, P1, W1), possible_world(T2, R2, P, W), T2 < T, max_rep(T-1, MR),
+possible_world(T, R2+MR+1, phi(P), W ) :- T > 0, is_executable(T, ACT), sensing(ACT), pointed(T-1, R, PP), possible_world(T1, R1, P1, W1), possible_world(T2, R2, P, W), max_rep(T-1, MR), T1 < T, T2 <= T1,
                                           believes(T-1, R, PP, T1, R1, P1, AG), is_partial_obs(T, AG), reaches(T1, R1, P1, T2, R2, P, AGS), 0 { agent(AG1) : contains_ag(AGS, AG1), is_oblivious(T, AG1) } 0.
 
 % Inertia: since holds depends both on a fluent set W AND a possibility P we must explicitly "copy" in phi(P) the fluents that hold in W
 holds(T, R2+MR+1, phi(P), W, F) :- T > 0, plan(T, ACT), is_executable(T, ACT), sensing(ACT), possible_world(T, R2+MR+1, phi(P), W), possible_world(T2, R2, P, W), T2 < T,
-                                   holds(T2, R2, P, W, F), fluent(F), fluent_set(W), max_rep(T-1, MR).
+                                   holds(T2, R2, P, W, F), fluent(F), fluent_set(W), max_rep(T-1, MR), T2 < T.
 
 
 % Fully observant agents (sigma, sigma): if P1 -- AG --> P2 at time T and AG is fully observant and BOTH P1 and P2 agree with the pointed possibility, then phi(P1) -- AG --> phi(P2) at time T+1
@@ -378,22 +377,22 @@ possible_world(T, R+MR+1, phi(P), W ) :- T > 0, is_executable(T, ACT), announcem
 %                                             believes(T, R, PP, T2, R2, P, AG), hold_announced_effects(T2, R2, P, T), is_fully_obs(T+1, AG).
 
 % As for ontic actions, we do the same for all the possibilities P2 that are reachable by fully-observant-labeled paths
-possible_world(T, R2+MR+1, phi(P), W ) :- T > 0, is_executable(T, ACT), announcement(ACT), pointed(T-1, R, PP), possible_world(T2, R2, P, W), max_rep(T-1, MR),
+possible_world(T, R2+MR+1, phi(P), W ) :- T > 0, is_executable(T, ACT), announcement(ACT), pointed(T-1, R, PP), possible_world(T2, R2, P, W), max_rep(T-1, MR), T2 < T,
                                           reaches(T-1, R, PP, T2, R2, P, AGS), 0 { agent(AG) : contains_ag(AGS, AG), not is_fully_obs(T, AG) } 0,
                                           hold_announced_effects(T2, R2, P, T).
 
 % If a partially observant agent AG believes P2, then we create the new possibility phi(P2)
-possible_world(T, R2+MR+1, phi(P), W ) :- T > 0, is_executable(T, ACT), announcement(ACT), pointed(T-1, R, PP), possible_world(T2, R2, P, W), max_rep(T-1, MR),
+possible_world(T, R2+MR+1, phi(P), W ) :- T > 0, is_executable(T, ACT), announcement(ACT), pointed(T-1, R, PP), possible_world(T2, R2, P, W), max_rep(T-1, MR), T2 < T,
                                           believes(T-1, R, PP, T2, R2, P, AG), is_partial_obs(T, AG).
 
 % Let P be a possibility that is reachable from the pointed one with a path labeled only with fully/partially observant agents.
 % Then we create the new possibility phi(P).
-possible_world(T, R2+MR+1, phi(P), W ) :- T > 0, is_executable(T, ACT), announcement(ACT), pointed(T-1, R, PP), possible_world(T1, R1, P1, W1), possible_world(T2, R2, P, W), max_rep(T-1, MR),
+possible_world(T, R2+MR+1, phi(P), W ) :- T > 0, is_executable(T, ACT), announcement(ACT), pointed(T-1, R, PP), possible_world(T1, R1, P1, W1), possible_world(T2, R2, P, W), max_rep(T-1, MR), T1 < T, T2 <= T1,
                                           believes(T-1, R, PP, T1, R1, P1, AG), is_partial_obs(T, AG), reaches(T1, R1, P1, T2, R2, P, AGS), 0 { agent(AG1) : contains_ag(AGS, AG1), is_oblivious(T, AG1) } 0.
 
 % Inertia: since holds depends both on a fluent set W AND a possibility P we must explicitly "copy" in phi(P) the fluents that hold in W
 holds(T, R2+MR+1, phi(P), W, F) :- T > 0, plan(T, ACT), is_executable(T, ACT), announcement(ACT), possible_world(T, R2+MR+1, phi(P), W), possible_world(T2, R2, P, W),
-                                   holds(T2, R2, P, W, F), fluent(F), fluent_set(W), max_rep(T-1, MR).
+                                   holds(T2, R2, P, W, F), fluent(F), fluent_set(W), max_rep(T-1, MR), T2 < T.
 
 
 % Fully observant agents (sigma, sigma): if P1 -- AG --> P2 at time T and AG is fully observant and BOTH P1 and P2 agree with the pointed possibility, then phi(P1) -- AG --> phi(P2) at time T+1
@@ -418,8 +417,11 @@ believes(T, R1+MR+1, phi(P1), T2, R2     ,     P2 , AG) :- T > 0, is_executable(
                                                            believes(T1, R1, P1, T2, R2, P2, AG), possible_world(T1, R1, P1, W1), possible_world(T2, R2, P2, W2),
                                                            possible_world(T, R1+MR+1, phi(P1), W1), max_rep(T-1, MR).
 
+
 % Generate
-0 { plan(T, ACT) : action(ACT) } 1 :- time(T), T > 0, T <= maxT.
+0 { plan(T, ACT) : action(ACT) } 1 :- time(T), T > 0.
+
+% plan(1,signal_a_c).
 
 % plan(1,open_a).
 % plan(2,peek_a).
@@ -433,9 +435,9 @@ believes(T, R1+MR+1, phi(P1), T2, R2     ,     P2 , AG) :- T > 0, is_executable(
 % plan(3,signal_a_c).
 % plan(4,peek_a).
 
-% plan(1,signal_a_b).
-% plan(2,open_a).
-% plan(3,peek_b).
+plan(1,signal_a_b).
+plan(2,open_a).
+plan(3,peek_b).
 
 % #program base.
 
@@ -451,10 +453,10 @@ not_reached_goal(0) :- not entails(0, 0, P, F), pointed(0, 0, P), goal(F).
 not_reached_goal(T) :- T > 0, not entails(T, R, P, F), pointed(T, R, P), time(T), goal(F).
 
 reached_goal(0)     :- not not_reached_goal(0).
-reached_goal(T)     :- T > 0, plan(T, ACT), is_executable(T, ACT), not not_reached_goal(T), time(T).
+reached_goal(T)     :- T > 0, plan(T, ACT), is_executable(T, ACT), %* 0 { goal(F) : not entails(T, R, P, F), pointed(T, R, P) } 0, *% not not_reached_goal(T), time(T).
 
 % Test
-:- T > 0, is_executable(T, ACT), 0 { pointed(T-1, R, P) } 0, time(T).
+:- T > 0, plan(T, ACT), is_executable(T, ACT), 0 { pointed(T-1, R, P) } 0, time(T).
 :- T > 0, plan(T, ACT), not is_executable(T, ACT).
 :- T > 0, plan(T, ACT), pointed(T-1, R, P), not entails(T-1, R, P, EXEC), action(ACT), executable(ACT, EXEC), formula(EXEC).
 
