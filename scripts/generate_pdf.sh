@@ -4,8 +4,8 @@
 for file in "$@"/*;
 do
    if [ "${file##*.}" = "dot" ]; then
-	  dot -Tpdf "$file" >> "${file%.*}".pdf
-	  dot -Tpng "$file" >> "${file%.*}".png
+	  dot -Tpdf "$file" > "${file%.*}".pdf
+	  dot -Tpng "$file" > "${file%.*}".png
 	  rm "${file%.*}".dot
    fi
 done

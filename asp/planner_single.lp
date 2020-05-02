@@ -3,27 +3,27 @@
 %
 
 % ########## READ ME ##########
-% 
+%
 % Possibili ottimizzazioni da realizzare:
 %  1. Fare in modo che lo stato iniziale sia univoco rimuovendo le varie permutazioni.
-% 
+%
 %  2. Limitare i predicati entails(T, R, P, F) nelle sole possibility P in cui effettivamente è necessario controllare F.
 %     E.g.: formule come executability conditions, goals, observability conditions sono da controllare solo sulla possibility puntata.
-% 
+%
 %  3. Riutilizzare gli indici dei fluent set già presenti a tempo T' <= T quando eseguo un'azione ontic. Le possibility a tempo T+1
 %     dovranno utilizzare "vecchi" fluent set se sono già stati calcolati precedentemente. Altrimenti, si genera il fluent set phi(W).
-% 
+%
 %  4. Eventualmente aggiungere altri constraint.
-% 
+%
 % Esempio di utilizzo da terminale:
 %  1. Per eseguire il modello su un'istanza già generata:
 %       >> clingo planner_poss.lp path/to/domain --configuration=jumpy
 %     Ad esempio:
 %       >> clingo planner_poss.lp ./domains/Coin_in_the_Box__pl_5.lp --configuration=jumpy
-% 
+%
 %  2. Per generare una nuova istanza a partire da un .txt in mA*:
 %       >> ./bin/efp.out path/to/domain -generate_asp
-% 
+%
 %  3. Per generare una rappresentazione grafica degli stati (ricordarsi di decommentare gli statement #show per i predicati pointed, possible_world, believes):
 %       >> ./asp_print path/to/domain
 %
@@ -294,7 +294,7 @@ hold_sensed_effects(T-1, R , P , T) :- T > 0, plan(T, ACT), is_executable(T, ACT
 hold_sensed_effects(T2 , R2, P2, T) :- T > 0, plan(T, ACT), is_executable(T, ACT), sensing(ACT), possible_world(T-1, R, PP, WP), possible_world(T2, R2, P2, W2), T2 < T,
                                        0 { is_executable_effect(T, ACT, T2, R2, P2, SENSED) : determines(ACT, SENSED, EEXEC),     holds(T2, R2, P2, W2, SENSED), not holds(T-1, R, PP, WP, SENSED) } 0,
                                        0 { is_executable_effect(T, ACT, T2, R2, P2, SENSED) : determines(ACT, SENSED, EEXEC), not holds(T2, R2, P2, W2, SENSED),     holds(T-1, R, PP, WP, SENSED) } 0,
-                                       pointed(T-1, R, PP), 0 { agent(AG) : contains_ag(AGS, AG), not is_fully_obs(T, AG) } 0, reaches(T-1, R, PP, T2, R2, P2, AGS).
+                                       pointed(T-1, R, PP), 0 { agent(AG) : contains_ag(AGS, AG), is_oblivious(T, AG) } 0, reaches(T-1, R, PP, T2, R2, P2, AGS).
 
 
 pointed(T, R+MR+1, phi(P)) :- T > 0, is_executable(T, ACT), sensing(ACT), pointed(T-1, R, P), possible_world(T, R+MR+1, phi(P), W), max_rep(T-1, MR).
@@ -363,7 +363,7 @@ hold_announced_effects(T-1, R , P , T) :- T > 0, plan(T, ACT), is_executable(T, 
 hold_announced_effects(T2 , R2, P2, T) :- T > 0, plan(T, ACT), is_executable(T, ACT), announcement(ACT), possible_world(T-1, R, PP, WP), possible_world(T2, R2, P2, W2), T2 < T,
                                           0 { is_executable_effect(T, ACT, T2, R2, P2, ANN) : announces(ACT, ANN, _),     entails(T2, R2, P2, ANN), not entails(T-1, R, PP, ANN) } 0,
                                           0 { is_executable_effect(T, ACT, T2, R2, P2, ANN) : announces(ACT, ANN, _), not entails(T2, R2, P2, ANN),     entails(T-1, R, PP, ANN) } 0,
-                                          pointed(T-1, R, PP), 0 { agent(AG) : contains_ag(AGS, AG), not is_fully_obs(T, AG) } 0, reaches(T-1, R, PP, T2, R2, P2, AGS).
+                                          pointed(T-1, R, PP), 0 { agent(AG) : contains_ag(AGS, AG), is_oblivious(T, AG) } 0, reaches(T-1, R, PP, T2, R2, P2, AGS).
 
 
 pointed(T, R+MR+1, phi(P)) :- T > 0, is_executable(T, ACT), announcement(ACT), pointed(T-1, R, P), possible_world(T, R+MR+1, phi(P), _), max_rep(T-1, MR).
@@ -435,10 +435,6 @@ believes(T, R1+MR+1, phi(P1), T2, R2     ,     P2 , AG) :- T > 0, is_executable(
 % plan(3,signal_a_c).
 % plan(4,peek_a).
 
-plan(1,signal_a_b).
-plan(2,open_a).
-plan(3,peek_b).
-
 % #program base.
 
 
@@ -448,6 +444,16 @@ plan(3,peek_b).
 % #program check(T).
 
 % Define
+
+%plan(0,open_a).
+%plan(1,signal_a_b).
+%plan(2,signal_a_c).
+%plan(3,open_a).
+%plan(4,peek_a).
+%plan(5,peek_b).
+
+
+%reached_goal(4).
 
 not_reached_goal(0) :- not entails(0, 0, P, F), pointed(0, 0, P), goal(F).
 not_reached_goal(T) :- T > 0, not entails(T, R, P, F), pointed(T, R, P), time(T), goal(F).
@@ -479,11 +485,11 @@ reached_goal(T)     :- T > 0, plan(T, ACT), is_executable(T, ACT), %* 0 { goal(F
 % Display
 
 % !!! Uncomment while printing the results !!!
-% #show pointed/3.
-% #show possible_world/4.
-% #show believes/7.
-% #show holds/5.
-% #show fluent/1.
+ #show pointed/3.
+ #show possible_world/4.
+ #show believes/7.
+ #show holds/5.
+ #show fluent/1.
 
 
 
@@ -556,7 +562,7 @@ reached_goal(T)     :- T > 0, plan(T, ACT), is_executable(T, ACT), %* 0 { goal(F
 % entails_cp(T, T1, R1, P1, MF,  F) :-     holds(T1, R1, P1, W1, F), ag_list(MF, L), reaches_ag_list(T, R, P, T1, R1, P1, L), pointed(T, R, P), possible_world(T1, R1, P1, W1), fluent_set(W1), cp_formula(MF), fluent(F).
 % entails_cp(T, T1, R1, P1, MF, -F) :- not holds(T1, R1, P1, W1, F), ag_list(MF, L), reaches_ag_list(T, R, P, T1, R1, P1, L), pointed(T, R, P), possible_world(T1, R1, P1, W1), fluent_set(W1), cp_formula(MF), fluent(F).
 
-% entails_cp(T, T1, R1, P1, neg(F)) :- 
+% entails_cp(T, T1, R1, P1, neg(F)) :-
 
 % reaches_formula(T1, R1, P1, T1, R1, P1, F)           :- possible_world(T1, R1, P1, _), literal(F).
 

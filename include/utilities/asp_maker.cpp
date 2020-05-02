@@ -300,7 +300,7 @@ void asp_maker::print_all()
 	result << "#const n_ag  = " << domain::get_instance().get_agents().size() << ".\n";
 	result << "#const n_ags = " << exp2(domain::get_instance().get_agents().size()) - 1 << ".\n\n";
 
-	result << "time(0..maxT).\n\n";
+	result << "%time(0..maxT).\n\n";
 
 	print_fluents(result);
 	print_agents(result);
