@@ -63,13 +63,13 @@ def generate_hold_key(hold):
 def initialize_fluent_table(hold, fluent_table, key_table):
 	hold_key = generate_hold_key(hold)
 	splitted = hold_key.split(',')
-	fluent_table[splitted[0]+splitted[1]+splitted[2]+splitted[3]] = SortedSet()
-	key_table[splitted[0]+splitted[1]+splitted[2]+splitted[3]] = splitted[0]+'_'+splitted[1]+'_'+splitted[2];
+	fluent_table[splitted[0]+splitted[1]+splitted[2]] = SortedSet()
+	key_table[splitted[0]+splitted[1]+splitted[2]] = splitted[0]+'_'+splitted[1]+'_'+splitted[2];
 	
 def generate_fluent_table(hold, fluent_table):
 	hold_key = generate_hold_key(hold)
 	splitted = hold_key.split(',')
-	fluent_table[splitted[0]+splitted[1]+splitted[2]+splitted[3]].add(splitted[4])
+	fluent_table[splitted[0]+splitted[1]+splitted[2]].add(splitted[3])
 
 	
 def initialize_cluster(world, cluster_map):

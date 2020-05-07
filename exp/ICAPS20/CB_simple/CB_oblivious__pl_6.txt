@@ -50,7 +50,7 @@ c observes peek_up_key_c;
 
 executable peek_a if B(a,opened_a), opened_a;
 peek_a causes tails;
-b observes peek_a;
+%b observes peek_a;
 c observes peek_a;
 a observes peek_a;
 

@@ -6,7 +6,7 @@ def get(val, default):
 
 def main(prg):
     imin  = get(prg.get_const("imin"), 1)
-    imax  = get(prg.get_const("imax"),  6)
+    imax  = prg.get_const("imax")
     istop = get(prg.get_const("istop"), "SAT")
 
     step, ret = 0, None
