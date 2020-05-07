@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#Run with the folder (considered already to in "exp/") that contains the domains in .txt as argument: example for ICAPS20 folder run "scripts/ICAPS20_asp_encoder.sh ICAPS20/"
+#Run with the folder (considered already to in "exp/") that contains the domains in .txt as argument: example for ICAPS20 folder run "scripts/folder_asp_encoder.sh ICAPS20/"
 INPATH="exp/"$@; #Path of the domain
 OUTPATH="out/ASP_encoding/"; #Path of the output
 FOLDER_OUT=$@

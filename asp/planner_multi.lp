@@ -389,9 +389,10 @@ pointed(t, 2*MR+1, phi(P)) :- t > 0, plan(t, ACT), announcement(ACT), pointed(t-
 possible_world(t,  2*MR+1, phi(P)) :- t > 0, plan(t, ACT), announcement(ACT), pointed(t-1, MR, P), possible_world(t-1, MR, P), time(t).
 
 % As for ontic actions, we do the same for all the possibilities P2 that are reachable by fully-observant-labeled paths
+
 possible_world(t, R2+MR+1, phi(P)) :- t > 0, is_executable(t, ACT), announcement(ACT), pointed(t-1, MR, PP), possible_world(T2, R2, P),T2 < t,
                                       reaches(t-1, R, PP, T2, R2, P, AGS), all_fully_obs_ags(t, AGS),
-                                      hold_sensed_effects(T2, R2, P, t), time(t), time(T2).
+                                      hold_announced_effects(T2, R2, P, t), time(t), time(T2).
 
 % If a partially observant agent AG believes P2, then we create the new possibility phi(P2)
 possible_world(t, R2+MR+1, phi(P)) :- t > 0, plan(t, ACT), announcement(ACT), pointed(t-1, MR, PP), possible_world(T2, R2, P), T2 < t,
@@ -411,13 +412,13 @@ holds(t, R2+MR+1, phi(P), F) :- t > 0, plan(t, ACT), announcement(ACT), possible
 believes(t, R1+MR+1, phi(P1), t , R2+MR+1, phi(P2), AG) :- t > 0, plan(t, ACT), announcement(ACT), T1 <= t, T2 <= t, T2 <= T1, is_fully_obs(t, AG),
                                                            believes(T1, R1, P1, T2, R2, P2, AG), possible_world(T1, R1, P1), possible_world(T2, R2, P2),
                                                            possible_world(t, R1+MR+1, phi(P1)), possible_world(t, R2+MR+1, phi(P2)),
-                                                           hold_sensed_effects(T1, R1, P1, t), hold_sensed_effects(T2, R2, P2, t), pointed(t-1, MR, PP), time(t), time(T1), time(T2).
+                                                           hold_announced_effects(T1, R1, P1, t), hold_announced_effects(T2, R2, P2, t), pointed(t-1, MR, PP), time(t), time(T1), time(T2).
 
 % Fully observant agents (tau, tau): if P1 -- AG --> P2 at time t and AG is fully observant and NEITHER P1 nor P2 agree with the pointed possibility, then phi(P1) -- AG --> phi(P2) at time t+1
 believes(t, R1+MR+1, phi(P1), t , R2+MR+1, phi(P2), AG) :- t > 0, plan(t, ACT), announcement(ACT), T1 <= t, T2 <= t, T2 <= T1, is_fully_obs(t, AG),
                                                            believes(T1, R1, P1, T2, R2, P2, AG), possible_world(T1, R1, P1), possible_world(T2, R2, P2),
                                                            possible_world(t, R1+MR+1, phi(P1)), possible_world(t, R2+MR+1, phi(P2)),
-                                                           not hold_sensed_effects(T1, R1, P1, t), not hold_sensed_effects(T2, R2, P2, t), pointed(t-1, MR, PP), time(t), time(T1), time(T2).
+                                                           not hold_announced_effects(T1, R1, P1, t), not hold_announced_effects(T2, R2, P2, t), pointed(t-1, MR, PP), time(t), time(T1), time(T2).
 
 % Partially observant agents: if P1 -- AG --> P2 at time t and AG is partially observant, then phi(P1) -- AG --> phi(P2) at time t+1
 believes(t, R1+MR+1, phi(P1), t , R2+MR+1, phi(P2), AG) :- t > 0, plan(t, ACT), announcement(ACT), T1 <= t, T2 <= t, T2 <= T1, is_partial_obs(t, AG),
@@ -456,9 +457,9 @@ believes(t, R1+MR+1, phi(P1), T2, R2     ,     P2 , AG) :- t > 0, plan(t, ACT), 
 
 % !!! Uncomment while printing the results !!!
 %#show pointed/3.
-%#show possible_world/4.
+%#show possible_world/3.
 %#show believes/7.
-%#show holds/5.
+%#show holds/4.
 %#show fluent/1.
 
 %#show is_executable/2.
