@@ -304,7 +304,7 @@ void asp_maker::print_all()
 
 	print_fluents(result);
 	print_agents(result);
-	print_agent_set(result);
+	// print_agent_set(result);
 	print_actions(result);
 	print_initially(result);
 	print_goals(result);
