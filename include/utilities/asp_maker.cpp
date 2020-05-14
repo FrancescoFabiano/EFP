@@ -573,7 +573,9 @@ void asp_maker::print_initially(std::ofstream & to_print)
 	for (it_fl = ini_conditions.get_initial_conditions().begin(); it_fl != ini_conditions.get_initial_conditions().end(); it_fl++) {
 		if (it_fl->get_formula_type() == C_FORMULA) {
 			//ini_string = 
-			print_subformula(it_fl->get_bf1(), to_print, predicate3);
+			if (it_fl->get_bf1().get_formula_type() == FLUENT_FORMULA) {
+				print_subformula(it_fl->get_bf1(), to_print, predicate3);
+			}
 			//if (ini_string.compare("") != 0) {
 			//	to_print << "init_sf(" << ini_string << ").\n";
 			//}
