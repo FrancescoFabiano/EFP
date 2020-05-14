@@ -2,38 +2,12 @@
 % EMP encoding in ASP
 %
 
-% ########## READ ME ##########
-%
-% Possibili ottimizzazioni da realizzare:
-%  1. Fare in modo che lo stato iniziale sia univoco rimuovendo le varie permutazioni.
-%
-%  2. Limitare i predicati entails(t, R, P, F) nelle sole possibility P in cui effettivamente è necessario controllare F.
-%     E.g.: formule come executability conditions, goals, observability conditions sono da controllare solo sulla possibility puntata.
-%
-%  3. Riutilizzare gli indici dei fluent set già presenti a tempo t' <= t quando eseguo un'azione ontic. Le possibility a tempo t+1
-%     dovranno utilizzare "vecchi" fluent set se sono già stati calcolati precedentemente. Altrimenti, si genera il fluent set phi(W).
-%
-%  4. Eventualmente aggiungere altri constraint.
-%
-% Esempio di utilizzo da terminale:
-%  1. Per eseguire il modello su un'istanza già generata:
-%       >> clingo planner_poss.lp path/to/domain --configuration=jumpy
-%     Ad esempio:
-%       >> clingo planner_poss.lp ./domains/Coin_in_the_Box__pl_5.lp --configuration=jumpy
-%
-%  2. Per generare una nuova istanza a partire da un .txt in mA*:
-%       >> ./bin/efp.out path/to/domain -generate_asp
-%
-%  3. Per generare una rappresentazione grafica degli stati (ricordarsi di decommentare gli statement #show per i predicati pointed, possible_world, believes):
-%       >> ./asp_print path/to/domain
-%
-% ##########   END   ##########
-
 #include <incmode>.
 
 % ********** REACHABILITY **********
 
 #program base.
+
 time(0).
 
 reaches(0, 0, P1, 0, 0, P2, AGS) :- believes(0, 0, P1, 0, 0, P2, AG), contains_ag(AGS, AG),
@@ -45,8 +19,7 @@ reaches(0, 0, P1, 0, 0, P2, AGS) :- believes(0, 0, P1, 0, 0, P2, AG), pointed(0,
 reaches(0, 0, P1, 0, 0, P2, AGS) :- believes(0, 0, P1, 0, 0, P3, AG), contains_ag(AGS, AG), reaches(0, 0, P3, 0, 0, P2, AGS),
                                     possible_world(0, 0, P1), possible_world(0, 0, P2), possible_world(0, 0, P3), agent(AG), agent_set(AGS).
 
-% TODO: provare ad implementare la reachability con DEPTH (nuovo paramentro D --> safe con time(D))
-% Se F è una main modal formula la depth è 0. Come faccio il passo ricorsivo?
+
 #program step(t).
 
 time(t).
@@ -80,6 +53,7 @@ reaches_first_partially_obs(t, T2, R2, P2) :- t > 0, time(t),time(T2), T2 <= t, 
 reaches_first_partially_obs(t, T2, R2, P2) :- t > 0, time(t), time(T1), time(T2), T1 <= t, T2 <= t, possible_world(T1, R1, P1), possible_world(T2, R2, P2),
                                               reaches_first_partially_obs(t, T1, R1, P1), believes(T1, R1, P1, T2, R2, P2, AG), not is_oblivious(t, AG).
 
+
 % ********** ENTAILMENT **********
 
 #program base.
@@ -100,30 +74,30 @@ main_formula(F) :- formula(F),  announces(_, _, F).
 main_formula(F) :- formula(F), goal(F).
 
 % Entailment of initially conditions. We use it to generate the initial state
-entails_init(P,  F    )          :-     holds(0, 0, P, F),                          initial_fluent_set(P), fluent(F), init_sf(F).
-entails_init(P, -F    )          :- not holds(0, 0, P, F),                          initial_fluent_set(P), fluent(F), init_sf(F).
+entails_init(P,  F    )          :-     holds(0, 0, P, F),                          initial_possibility(P), fluent(F), init_sf(F).
+entails_init(P, -F    )          :- not holds(0, 0, P, F),                          initial_possibility(P), fluent(F), init_sf(F).
 
-entails_init(P, neg(F))          :- not entails_init(P, F ),                        initial_fluent_set(P), init_sf(neg(F)),      init_sf(F).
-entails_init(P, and(F1, F2))     :-     entails_init(P, F1), entails_init(P, F2),   initial_fluent_set(P), init_sf(and(F1, F2)), init_sf(F1), init_sf(F2).
-entails_init(P,  or(F1, F2))     :-     entails_init(P, F1),                        initial_fluent_set(P), init_sf( or(F1, F2)), init_sf(F1), init_sf(F2).
-entails_init(P,  or(F1, F2))     :-                          entails_init(P, F2),   initial_fluent_set(P), init_sf( or(F1, F2)), init_sf(F1), init_sf(F2).
+entails_init(P, neg(F))          :- not entails_init(P, F ),                        initial_possibility(P), init_sf(neg(F)),      init_sf(F).
+entails_init(P, and(F1, F2))     :-     entails_init(P, F1), entails_init(P, F2),   initial_possibility(P), init_sf(and(F1, F2)), init_sf(F1), init_sf(F2).
+entails_init(P,  or(F1, F2))     :-     entails_init(P, F1),                        initial_possibility(P), init_sf( or(F1, F2)), init_sf(F1), init_sf(F2).
+entails_init(P,  or(F1, F2))     :-                          entails_init(P, F2),   initial_possibility(P), init_sf( or(F1, F2)), init_sf(F1), init_sf(F2).
 
 % Entailment of all the other formulas w.r.t. the calculated initial state
-entails(0, 0, P,  F    )         :-     holds(0, 0, P, F),                          good_initial_fluent_set(P), possible_world(0, 0, P), fluent(F).
-entails(0, 0, P, -F    )         :- not holds(0, 0, P, F),                          good_initial_fluent_set(P), possible_world(0, 0, P), fluent(F).
+entails(0, 0, P,  F    )         :-     holds(0, 0, P, F),                          good_initial_possibility(P), possible_world(0, 0, P), fluent(F).
+entails(0, 0, P, -F    )         :- not holds(0, 0, P, F),                          good_initial_possibility(P), possible_world(0, 0, P), fluent(F).
 
-entails(0, 0, P, neg(F))         :- not entails(0, 0, P, F ),                       good_initial_fluent_set(P), possible_world(0, 0, P), formula(neg(F)),      formula(F).
-entails(0, 0, P, and(F1, F2))    :-     entails(0, 0, P, F1), entails(0, 0, P, F2), good_initial_fluent_set(P), possible_world(0, 0, P), formula(and(F1, F2)), formula(F1), formula(F2).
-entails(0, 0, P,  or(F1, F2))    :-     entails(0, 0, P, F1),                       good_initial_fluent_set(P), possible_world(0, 0, P), formula( or(F1, F2)), formula(F1), formula(F2).
-entails(0, 0, P,  or(F1, F2))    :-                           entails(0, 0, P, F2), good_initial_fluent_set(P), possible_world(0, 0, P), formula( or(F1, F2)), formula(F1), formula(F2).
+entails(0, 0, P, neg(F))         :- not entails(0, 0, P, F ),                       good_initial_possibility(P), possible_world(0, 0, P), formula(neg(F)),      formula(F).
+entails(0, 0, P, and(F1, F2))    :-     entails(0, 0, P, F1), entails(0, 0, P, F2), good_initial_possibility(P), possible_world(0, 0, P), formula(and(F1, F2)), formula(F1), formula(F2).
+entails(0, 0, P,  or(F1, F2))    :-     entails(0, 0, P, F1),                       good_initial_possibility(P), possible_world(0, 0, P), formula( or(F1, F2)), formula(F1), formula(F2).
+entails(0, 0, P,  or(F1, F2))    :-                           entails(0, 0, P, F2), good_initial_possibility(P), possible_world(0, 0, P), formula( or(F1, F2)), formula(F1), formula(F2).
 
-entails(0, 0, P,   b(AG , F))    :- not not_entails(0, 0, P, b(AG , F)),            good_initial_fluent_set(P), possible_world(0, 0, P), formula(b(AG , F)), formula(F), agent(AG).
-entails(0, 0, P,   c(AGS, F))    :- not not_entails(0, 0, P, c(AGS, F)),            good_initial_fluent_set(P), possible_world(0, 0, P), formula(c(AGS, F)), formula(F), agent_set(AGS).
+entails(0, 0, P,   b(AG , F))    :- not not_entails(0, 0, P, b(AG , F)),            good_initial_possibility(P), possible_world(0, 0, P), formula(b(AG , F)), formula(F), agent(AG).
+entails(0, 0, P,   c(AGS, F))    :- not not_entails(0, 0, P, c(AGS, F)),            good_initial_possibility(P), possible_world(0, 0, P), formula(c(AGS, F)), formula(F), agent_set(AGS).
 
-not_entails(0, 0, P1, b(AG , F)) :- not entails(0, 0, P2, F ), believes(0, 0, P1, 0, 0, P2, AG), good_initial_fluent_set(P1), good_initial_fluent_set(P2),
+not_entails(0, 0, P1, b(AG , F)) :- not entails(0, 0, P2, F ), believes(0, 0, P1, 0, 0, P2, AG), good_initial_possibility(P1), good_initial_possibility(P2),
                                     possible_world(0, 0, P1), possible_world(0, 0, P2), formula(b(AG , F)), formula(F), agent(AG).
 
-not_entails(0, 0, P1, c(AGS, F)) :- not entails(0, 0, P2, F), reaches(0, 0, P1, 0, 0, P2, AGS), good_initial_fluent_set(P1), good_initial_fluent_set(P2),
+not_entails(0, 0, P1, c(AGS, F)) :- not entails(0, 0, P2, F), reaches(0, 0, P1, 0, 0, P2, AGS), good_initial_possibility(P1), good_initial_possibility(P2),
                                     possible_world(0, 0, P1), possible_world(0, 0, P2), formula(c(AGS, F)), formula(F), agent_set(AGS).
 
 
@@ -163,57 +137,57 @@ known_initially(F) :- fluent(F), initially(c(all_agents, -F)).
 
 unknown_initially(F)            :- fluent(F), not known_initially(F).
 initial_state_dimension(2 ** K) :- K = #count { F : fluent(F), unknown_initially(F) }.
-initial_fluent_set(1..K)        :- initial_state_dimension(K).
+initial_possibility(1..K)        :- initial_state_dimension(K).
 
 % The initial conditions of form 1. determine the pointed possibility of the initial state
 % A possibility is pointed if it entails exactly those fluents that hold initially
-not_initial_pointed(P) :- good_initial_fluent_set(P), initially( F), not holds(0, 0, P, F), fluent(F).
-not_initial_pointed(P) :- good_initial_fluent_set(P), initially(-F),     holds(0, 0, P, F), fluent(F).
+not_initial_pointed(P) :- good_initial_possibility(P), initially( F), not holds(0, 0, P, F), fluent(F).
+not_initial_pointed(P) :- good_initial_possibility(P), initially(-F),     holds(0, 0, P, F), fluent(F).
 
-pointed(0, 0, P) :- good_initial_fluent_set(P), not not_initial_pointed(P).
+pointed(0, 0, P) :- good_initial_possibility(P), not not_initial_pointed(P).
 
 % The initial conditions of form 2. determine the possible worlds of the initial state
 % A possibility is good if it entails all the propositional formulas which are COMMONLY KNOWN initially (2.)
-    holds(0, 0, P, F) :- initially(c(all_agents,  F)), initial_fluent_set(P), fluent(F).
-not holds(0, 0, P, F) :- initially(c(all_agents, -F)), initial_fluent_set(P), fluent(F).
+    holds(0, 0, P, F) :- initially(c(all_agents,  F)), initial_possibility(P), fluent(F).
+not holds(0, 0, P, F) :- initially(c(all_agents, -F)), initial_possibility(P), fluent(F).
 
 % We impose that all the initial possibilities have a different fluent set
-K/2 { holds(0, 0, P, F) : initial_fluent_set(P) } K/2 :- unknown_initially(F), initial_state_dimension(K).
+K/2 { holds(0, 0, P, F) : initial_possibility(P) } K/2 :- unknown_initially(F), initial_state_dimension(K).
 
 % All the initial fluent sets must be different
-diffzero(P1, P2) :- initial_fluent_set(P1), initial_fluent_set(P2), holds(0, 0, P1, F), not holds(0, 0, P2, F),
+diffzero(P1, P2) :- initial_possibility(P1), initial_possibility(P2), holds(0, 0, P1, F), not holds(0, 0, P2, F),
                     fluent(F), unknown_initially(F), P1 < P2.
 
-diffzero(P1, P2) :- initial_fluent_set(P1), initial_fluent_set(P2), holds(0, 0, P2, F), not holds(0, 0, P1, F),
+diffzero(P1, P2) :- initial_possibility(P1), initial_possibility(P2), holds(0, 0, P2, F), not holds(0, 0, P1, F),
                     fluent(F), unknown_initially(F), P1 < P2.
 
-:- not diffzero(P1, P2), initial_fluent_set(P1), initial_fluent_set(P2), P1 < P2.
+:- not diffzero(P1, P2), initial_possibility(P1), initial_possibility(P2), P1 < P2.
 
-:- 0 { pointed(0, 0, P) : good_initial_fluent_set(P) } 0.
+:- 0 { pointed(0, 0, P) : good_initial_possibility(P) } 0.
 
 % We impose a complete order on the fluent sets indices W_i w.r.t. their fluents
 :- MF1 = #max { F : fluent(F), unknown_initially(F),     holds(0, 0, P1, F), not holds(0, 0, P2, F) },
    MF2 = #max { F : fluent(F), unknown_initially(F), not holds(0, 0, P1, F),     holds(0, 0, P2, F) },
-   initial_fluent_set(P1), initial_fluent_set(P2), P1 < P2, MF1 > MF2.
+   initial_possibility(P1), initial_possibility(P2), P1 < P2, MF1 > MF2.
 
 % So far we dealt with (commonly known) fluents. An initial fluent set is "good" if it entails all the fluent formulas F that are initial common knowledge
-no_good_initial_fluent_set(P) :- not entails_init(P, F), initially(c(all_agents, F)), init_sf(F), not literal(F), initial_fluent_set(P).
-good_initial_fluent_set(P)    :- initial_fluent_set(P), not no_good_initial_fluent_set(P).
+no_good_initial_possibility(P) :- not entails_init(P, F), initially(c(all_agents, F)), init_sf(F), not literal(F), initial_possibility(P).
+good_initial_possibility(P)    :- initial_possibility(P), not no_good_initial_possibility(P).
 
 % For each good initial fluent set we create a correspoinding possible world
-possible_world(0, 0, P) :- good_initial_fluent_set(P).
+possible_world(0, 0, P) :- good_initial_possibility(P).
 
 % The initial conditions of form 3. filter out some of the agents' beliefs inside the initial state
-not_believes_initially(P1, P2, AG) :- not entails_init(P1, F),     entails_init(P2, F), good_initial_fluent_set(P1), good_initial_fluent_set(P2), P1 != P2, initially(c(all_agents, or(b(AG, F), b(AG, -F)))), formula(F).
-not_believes_initially(P1, P2, AG) :-     entails_init(P1, F), not entails_init(P2, F), good_initial_fluent_set(P1), good_initial_fluent_set(P2), P1 != P2, initially(c(all_agents, or(b(AG, F), b(AG, -F)))), formula(F).
+not_believes_initially(P1, P2, AG) :- not entails(0, 0, P1, F),     entails(0, 0, P2, F), good_initial_possibility(P1), good_initial_possibility(P2), P1 != P2, initially(c(all_agents, or(b(AG, F), b(AG, neg(F))))), fluent(F).
+not_believes_initially(P1, P2, AG) :-     entails(0, 0, P1, F), not entails(0, 0, P2, F), good_initial_possibility(P1), good_initial_possibility(P2), P1 != P2, initially(c(all_agents, or(b(AG, F), b(AG, neg(F))))), fluent(F).
 
 % The initial conditions of form 4. filter out some of the agents' beliefs inside the initial state
-not_believes_initially(P1, P2, AG) :-     entails(0, 0, P1, F),     entails(0, 0, P2, F), good_initial_fluent_set(P1), good_initial_fluent_set(P2), P1 != P2, initially(c(all_agents, neg(and(neg(b(AG, F)), neg(b(AG, -F)))))), formula(F).
-not_believes_initially(P1, P2, AG) :- not entails(0, 0, P1, F), not entails(0, 0, P2, F), good_initial_fluent_set(P1), good_initial_fluent_set(P2), P1 != P2, initially(c(all_agents, neg(and(neg(b(AG, F)), neg(b(AG, -F)))))), formula(F).
+not_believes_initially(P1, P2, AG) :-     entails(0, 0, P1, F),     entails(0, 0, P2, F), good_initial_possibility(P1), good_initial_possibility(P2), P1 != P2, initially(c(all_agents, and(neg(b(AG, F)), neg(b(AG, neg(F)))))), formula(F).
+not_believes_initially(P1, P2, AG) :- not entails(0, 0, P1, F), not entails(0, 0, P2, F), good_initial_possibility(P1), good_initial_possibility(P2), P1 != P2, initially(c(all_agents, and(neg(b(AG, F)), neg(b(AG, neg(F)))))), formula(F).
 
 % believes/7: the agent AG, inside P1, believes P2 to be possible
 believes(0, 0, P1, 0, 0, P2, AG) :- not not_believes_initially(P1, P2, AG), possible_world(0, 0, P1), possible_world(0, 0, P2),
-                                    good_initial_fluent_set(P1), good_initial_fluent_set(P2), agent(AG).
+                                    good_initial_possibility(P1), good_initial_possibility(P2), agent(AG).
 
 
 % ********** TRANSITION FUNCTION **********
@@ -431,7 +405,7 @@ believes(t, R1+MR+1, P1, T2, R2     , P2, AG) :- t > 0, plan(t, ACT), announceme
 1 { plan(t, ACT) : action(ACT) } 1 :- t > 0, time(t).
 
 % Test
-% :- 0 { plan(t, _) } 0.
+:- 0 { plan(t, _) } 0.
 :- t > 0, time(t), plan(t, ACT), not is_executable(t, ACT).
 % :- t > 0, time(t), plan(t, ACT), 0 { pointed(t, _, _) } 0.
 % :- t > 0, plan(t, ACT), pointed(t-1, R, P), 0 { is_executable_effect(t, ACT, t-1, R, P, CAUSED) : causes(ACT, CAUSED, _) } 0, ontic(ACT), time(t).
@@ -453,10 +427,10 @@ plan(0, null) :- query(0).
 #show plan/2.
 
 % !!! Uncomment while printing the results !!!
-%#show pointed/3.
-%#show possible_world/3.
-%#show believes/7.
-%#show holds/4.
+% #show pointed/3.
+% #show possible_world/3.
+% #show believes/7.
+% #show holds/4.
 %#show fluent/1.
 
 
