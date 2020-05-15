@@ -55,8 +55,13 @@ std::string asp_maker::print_subformula(const fluent & fl, std::ofstream & to_pr
 	//		}
 	//	}
 	if (m_already_printed_predicate.insert(predicate + ret).second) {
+//		if (fl % 2 != 0) {
+//			ret.erase(ret.begin());
+//			ret = "neg(" + ret + ")";
+//		}
 		to_print << predicate << "(" << ret << ").\n";
 	}
+
 
 	return ret;
 }

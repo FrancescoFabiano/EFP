@@ -37,13 +37,13 @@ reaches(t, R1, P1, T2, R2, P2, AGS) :- believes(t, R1, P1, T3, R3, P3, AG), time
 
 reaches_no_oblivious(t, T2, R2, P2) :- t > 0, time(t), time(T2), T2 <= t, pointed(t-1, R, P), possible_world(T2, R2, P2),
                                        believes(t-1, R, P, T2, R2, P2, AG), not is_oblivious(t, AG).
-                                       
+
 reaches_no_oblivious(t, T2, R2, P2) :- t > 0, time(t), time(T1), time(T2), T1 <= t, T2 <= t, possible_world(T1, R1, P1), possible_world(T2, R2, P2),
                                        reaches_no_oblivious(t, T1, R1, P1), believes(T1, R1, P1, T2, R2, P2, AG), not is_oblivious(t, AG).
 
 reaches_only_fully_obs(t, T2, R2, P2) :- t > 0, time(t), time(T2), T2 <= t, pointed(t-1, R, P), possible_world(T2, R2, P2),
                                          believes(t-1, R, P, T2, R2, P2, AG), is_fully_obs(t, AG).
-                                       
+
 reaches_only_fully_obs(t, T2, R2, P2) :- t > 0, time(t), time(T1), time(T2), T1 <= t, T2 <= t, possible_world(T1, R1, P1), possible_world(T2, R2, P2),
                                          reaches_only_fully_obs(t, T1, R1, P1), believes(T1, R1, P1, T2, R2, P2, AG), is_fully_obs(t, AG).
 
@@ -425,6 +425,23 @@ plan(0, null) :- query(0).
 % Display
 
 #show plan/2.
+
+%To avoid showing the error "info: atom does not occur in any rule head"
+%#program base.
+%#defined init_sf/1.
+%#defined agent_set/1.
+%#defined contains_ag/2.
+%
+%#defined ontic/1.
+%#defined causes/3.
+%#defined sensing/1.
+%#defined determines/3.
+%#defined announcement/1.
+%#defined announces/3.
+%
+%#defined observes/3.
+%#defined aware_of/3.
+%#defined oblivious/2.
 
 % !!! Uncomment while printing the results !!!
 % #show pointed/3.

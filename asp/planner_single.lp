@@ -28,13 +28,13 @@ reaches(T, R1, P1, T2, R2, P2, AGS) :- believes(T, R1, P1, T3, R3, P3, AG), T > 
 
 reaches_no_oblivious(T, T2, R2, P2) :- T > 0, time(T), time(T2), T2 <= T, pointed(T-1, R, P), possible_world(T2, R2, P2),
                                        believes(T-1, R, P, T2, R2, P2, AG), not is_oblivious(T, AG).
-                                       
+
 reaches_no_oblivious(T, T2, R2, P2) :- T > 0, time(T), time(T1), time(T2), T1 <= T, T2 <= T, possible_world(T1, R1, P1), possible_world(T2, R2, P2),
                                        reaches_no_oblivious(T, T1, R1, P1), believes(T1, R1, P1, T2, R2, P2, AG), not is_oblivious(T, AG).
 
 reaches_only_fully_obs(T, T2, R2, P2) :- T > 0, time(T), time(T2), T2 <= T, pointed(T-1, R, P), possible_world(T2, R2, P2),
                                          believes(T-1, R, P, T2, R2, P2, AG), is_fully_obs(T, AG).
-                                       
+
 reaches_only_fully_obs(T, T2, R2, P2) :- T > 0, time(T), time(T1), time(T2), T1 <= T, T2 <= T, possible_world(T1, R1, P1), possible_world(T2, R2, P2),
                                          reaches_only_fully_obs(T, T1, R1, P1), believes(T1, R1, P1, T2, R2, P2, AG), is_fully_obs(T, AG).
 
@@ -412,6 +412,22 @@ believes(T, R1+MR+1, P1, T2, R2     , P2, AG) :- T > 0, plan(T, ACT), announceme
 
 #show plan/2.
 
+%To avoid showing the error "info: atom does not occur in any rule head"
+%#defined init_sf/1.
+%#defined agent_set/1.
+%#defined contains_ag/2.
+%
+%#defined ontic/1.
+%#defined causes/3.
+%#defined sensing/1.
+%#defined determines/3.
+%#defined announcement/1.
+%#defined announces/3.
+%
+%#defined observes/3.
+%#defined aware_of/3.
+%#defined oblivious/2.
+
 % !!! Uncomment while printing the results !!!
 % #show pointed/3.
 % #show possible_world/3.
@@ -421,7 +437,7 @@ believes(T, R1+MR+1, P1, T2, R2     , P2, AG) :- T > 0, plan(T, ACT), announceme
 
 
 
-% 
+%
 
 % % ********** BISIMULATION ********** (Dovier, ICLP 2015)
 
