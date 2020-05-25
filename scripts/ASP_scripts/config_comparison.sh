@@ -4,11 +4,14 @@
 #	where "exp/paper/CC/CC_2_2_3.txt" is the path to the domain name
 
 
-TIMEOUT="1200m" 
+TIMEOUT="30m" 
 OUT_EXT=".out";
 
+THREADS=4;
 
-configuration=("auto" "frumpy" "jumpy" "tweety" "handy" "crafty" "trendy" "many");
+
+#configuration=("auto" "frumpy" "jumpy" "tweety" "handy" "crafty" "trendy" "many");
+configuration=("frumpy" "many");
 planner_type=("multi" "single") 
 
 for type in "${planner_type[@]}"; do
@@ -23,11 +26,11 @@ for type in "${planner_type[@]}"; do
 
 	for config in "${configuration[@]}"; do
 		
-		echo -e "    	Solving with configuration $config";
-		timeout $TIMEOUT clingo asp/planner_"$type".lp $@ --configuration=$config 0 > findingplan_comparison.tmp
+		echo -e "    		Solving with configuration $config";
+		timeout $TIMEOUT clingo asp/planner_"$type".lp $@ -t $THREADS --configuration=$config > findingplan_comparison.tmp 2> err_file.tmp
 		exit_status=$?;
-		TOPRINT="Configuration ";
-		TOPRINT+="$config "
+		TOPRINT="Configuration $config ";
+		TOPRINT+="with $THREADS Threads ";
 		#TOPRINT+="took "
 
 		
@@ -50,7 +53,9 @@ for type in "${planner_type[@]}"; do
 		mv findingplan_comparison.tmp out/ASP_comparison/findingplan/"$type"/"plans$OUT_EXT"
 
 		
-		sleep 0s;
+		sleep 10s;
 		
 	done;
 done;
+
+rm err_file.tmp;

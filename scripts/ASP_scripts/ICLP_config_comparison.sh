@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #Just Run
-INPATH="exp/ICLP20/tests/"; #Path of the domain
+INPATH="exp/ICLP20/"; #Path of the domain
 OUTPATH="out/ICLP20/configs/"; #Path of the output
 
 OUTPATH_FINDINGPLAN='out/ASP_comparison/findingplan/'
@@ -9,8 +9,8 @@ mkdir -p $OUTPATH
 DOMAIN_EXT=".lp"; # Name of the domain
 OUT_EXT=".out";
 
-ITERATIONS=2;
-MAX_TIME_PER_ITERATION=1200*1;
+ITERATIONS=3;
+MAX_TIME_PER_ITERATION=3600*1;
 
 
 #mv $OUTPATH_FINDINGPLAN $OUTPATH$DOMAIN_NAME$DOMAIN_EXT;

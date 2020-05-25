@@ -173,8 +173,8 @@ not_believes_initially(P1, P2, AG) :- not entails(0, 0, P1, F),     entails(0, 0
 not_believes_initially(P1, P2, AG) :-     entails(0, 0, P1, F), not entails(0, 0, P2, F), good_initial_possibility(P1), good_initial_possibility(P2), P1 != P2, initially(c(all_agents, or(b(AG, F), b(AG, neg(F))))), fluent(F).
 
 % The initial conditions of form 4. filter out some of the agents' beliefs inside the initial state
-not_believes_initially(P1, P2, AG) :-     entails(0, 0, P1, F),     entails(0, 0, P2, F), good_initial_possibility(P1), good_initial_possibility(P2), P1 != P2, initially(c(all_agents, and(neg(b(AG, F)), neg(b(AG, neg(F)))))), formula(F).
-not_believes_initially(P1, P2, AG) :- not entails(0, 0, P1, F), not entails(0, 0, P2, F), good_initial_possibility(P1), good_initial_possibility(P2), P1 != P2, initially(c(all_agents, and(neg(b(AG, F)), neg(b(AG, neg(F)))))), formula(F).
+%not_believes_initially(P1, P2, AG) :-     entails(0, 0, P1, F),     entails(0, 0, P2, F), good_initial_possibility(P1), good_initial_possibility(P2), P1 != P2, initially(c(all_agents, and(neg(b(AG, F)), neg(b(AG, neg(F)))))), formula(F).
+%not_believes_initially(P1, P2, AG) :- not entails(0, 0, P1, F), not entails(0, 0, P2, F), good_initial_possibility(P1), good_initial_possibility(P2), P1 != P2, initially(c(all_agents, and(neg(b(AG, F)), neg(b(AG, neg(F)))))), formula(F).
 
 % believes/7: the agent AG, inside P1, believes P2 to be possible
 believes(0, 0, P1, 0, 0, P2, AG) :- not not_believes_initially(P1, P2, AG), possible_world(0, 0, P1), possible_world(0, 0, P2),

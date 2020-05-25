@@ -44,16 +44,18 @@ def generate_plan(plan, action_map):
 		action_map[str(action_number(act))] = str(action_name(act))
 	
 
-n_answers = re.compile('Answer:.+\s.+reached_goal')
+n_answers = re.compile('Answer:.+\s.+\n')
 outputfile = open(sys.argv[1]+'_sol_correctness.txt', 'w') 
 well_done = re.compile('Well Done, Goal found')
 sol_counter = 1;
 no_errors = True;
+read = False;	
+
 
 #n_answers = re.compile('plan\(\w+,\w+\)\s)+')
 with open(sys.argv[1]+'_out_asp.txt', 'r') as n:
 	n = n.read()
-	
+
 	plans = re.findall(n_answers, n)
 	for plan in plans:
 		action_map = SortedDict()
@@ -69,7 +71,7 @@ with open(sys.argv[1]+'_out_asp.txt', 'r') as n:
 
 		with open('tmp_sol_test.tmp', 'r') as n:
 			n = n.read()
-				
+			read = True;	
 			goals = re.findall(well_done, n)
 			if len(goals) < 1:
 				print('Answer ' + str(sol_counter) + ' is wrong.', end ="\n", file = outputfile)
@@ -79,9 +81,12 @@ with open(sys.argv[1]+'_out_asp.txt', 'r') as n:
 
 				no_errors = False;
 			sol_counter+=1
-				
-	if no_errors:
-		print('Well done, all the answers are correct :)', end ="", file = outputfile)
+		
+	if read:
+		if no_errors:
+			print('Well done, all the answers are correct :)', end ="", file = outputfile)
+	else:
+		print('File not Read', end ="", file = outputfile)
 
 if os.path.exists("tmp_sol_test.tmp"):
 	os.remove("tmp_sol_test.tmp")

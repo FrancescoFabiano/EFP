@@ -182,8 +182,8 @@ not_believes_initially(P1, P2, AG) :- not entails(0, 0, P1, F),     entails(0, 0
 not_believes_initially(P1, P2, AG) :-     entails(0, 0, P1, F), not entails(0, 0, P2, F), good_initial_possibility(P1), good_initial_possibility(P2), P1 != P2, initially(c(all_agents, or(b(AG, F), b(AG, neg(F))))), fluent(F).
 
 % The initial conditions of form 4. filter out some of the agents' beliefs inside the initial state
-not_believes_initially(P1, P2, AG) :-     entails(0, 0, P1, F),     entails(0, 0, P2, F), good_initial_possibility(P1), good_initial_possibility(P2), P1 != P2, initially(c(all_agents, and(neg(b(AG, F)), neg(b(AG, neg(F)))))), formula(F).
-not_believes_initially(P1, P2, AG) :- not entails(0, 0, P1, F), not entails(0, 0, P2, F), good_initial_possibility(P1), good_initial_possibility(P2), P1 != P2, initially(c(all_agents, and(neg(b(AG, F)), neg(b(AG, neg(F)))))), formula(F).
+%not_believes_initially(P1, P2, AG) :-     entails(0, 0, P1, F),     entails(0, 0, P2, F), good_initial_possibility(P1), good_initial_possibility(P2), P1 != P2, initially(c(all_agents, and(neg(b(AG, F)), neg(b(AG, neg(F)))))), formula(F).
+%not_believes_initially(P1, P2, AG) :- not entails(0, 0, P1, F), not entails(0, 0, P2, F), good_initial_possibility(P1), good_initial_possibility(P2), P1 != P2, initially(c(all_agents, and(neg(b(AG, F)), neg(b(AG, neg(F)))))), formula(F).
 
 % believes/7: the agent AG, inside P1, believes P2 to be possible
 believes(0, 0, P1, 0, 0, P2, AG) :- not not_believes_initially(P1, P2, AG), possible_world(0, 0, P1), possible_world(0, 0, P2),
@@ -452,22 +452,21 @@ plan(0, null) :- query(0).
 
 
 
-% #program step(t).
+%* #program step(t).
 
 % % ********** BISIMULATION ********** (Dovier, ICLP 2015)
+% Reflexivity and Symmetry
+bis(t, R1, P1, t , R1, P1) :- t > 0, time(t), possible_world(t, R1, P1).
+bis(t, R1, P1, T2, R2, P2) :- t > 0, time(t), time(T2), T2 <= t, possible_world(t, R1, P1), possible_world(T2, R2, P2), bis(T2, R2, P2, t, R1, P1).
 
-% % Reflexivity and Symmetry
-% bis(t, R1, P1, t , R1, P1) :- t > 0, time(t), possible_world(t, R1, P1).
-% bis(t, R1, P1, T2, R2, P2) :- t > 0, time(t), time(T2), T2 <= t, possible_world(t, R1, P1), possible_world(T2, R2, P2), bis(T2, R2, P2, t, R1, P1).
+% Nondeterministic choice
+{ bis(t, R1, P1, T2, R2, P2) } :- t > 0, time(t), time(T2), T2 < t, possible_world(t, R1, P1), possible_world(T2, R2, P2).
 
-% % Nondeterministic choice
-% { bis(t, R1, P1, T2, R2, P2) } :- t > 0, time(t), time(T2), T2 < t, possible_world(t, R1, P1), possible_world(T2, R2, P2).
+:- time(t), time(T2), time(T3), time(T4), T2 < t, possible_world(t, R1, P1), possible_world(T2, R2, P2), possible_world(T3, R3, P3),
+    bis(t, R1, P1, T2, R2, P2), believes(t, R1, P1, T3, R3, P3, AG), 0 { possible_world(T4, R4, P4) : bis(T3, R3, P3, T4, R4, P4), believes(T2, R2, P2, T4, R4, P4, AG) } 0.
 
-% :- time(t), time(T2), time(T3), time(T4), T2 < t, possible_world(t, R1, P1), possible_world(T2, R2, P2), possible_world(T3, R3, P3),
-%    bis(t, R1, P1, T2, R2, P2), believes(t, R1, P1, T3, R3, P3, AG), 0 { possible_world(T4, R4, P4) : bis(T3, R3, P3, T4, R4, P4), believes(T2, R2, P2, T4, R4, P4, AG) } 0.
+:- time(t), time(T2), T2 < t, possible_world(t, R1, P1), possible_world(T2, R2, P2),
+    bis(t, R1, P1, T2, R2, P2), holds(t, R1, P1, F), not holds(T2, R2, P2, F), fluent(F).
 
-% :- time(t), time(T2), T2 < t, possible_world(t, R1, P1), possible_world(T2, R2, P2),
-%    bis(t, R1, P1, T2, R2, P2), holds(t, R1, P1, F), not holds(T2, R2, P2, F), fluent(F).
-
-% % Visited states
-% :- plan(t, ACT), pointed(t, R1, P1), pointed(T2, R2, P2), T2 < t, bis(t, R1, P1, T2, R2, P2).
+% Visited states
+:- plan(t, ACT), pointed(t, R1, P1), pointed(T2, R2, P2), T2 < t, bis(t, R1, P1, T2, R2, P2). *%
