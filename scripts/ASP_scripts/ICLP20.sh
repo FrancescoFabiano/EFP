@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #Just Run
-INPATH="exp/ICLP20/"; #Path of the domain
+INPATH="exp/ICLP20/Redo/"; #Path of the domain
 OUTPATH="out/ICLP20/configs/"; #Path of the output
 
 OUTPATH_FINDINGPLAN='out/ASP_comparison/findingplan/'

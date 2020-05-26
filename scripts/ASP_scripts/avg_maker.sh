@@ -91,4 +91,7 @@ for type in "${planner_type[@]}"; do
 		echo -e "Done with $(basename $dir)\n"
 	done
 done
+
+rm num.tmp;
+
 echo -e "The end :)"

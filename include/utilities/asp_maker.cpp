@@ -55,10 +55,10 @@ std::string asp_maker::print_subformula(const fluent & fl, std::ofstream & to_pr
 	//		}
 	//	}
 	if (m_already_printed_predicate.insert(predicate + ret).second) {
-//		if (fl % 2 != 0) {
-//			ret.erase(ret.begin());
-//			ret = "neg(" + ret + ")";
-//		}
+		//		if (fl % 2 != 0) {
+		//			ret.erase(ret.begin());
+		//			ret = "neg(" + ret + ")";
+		//		}
 		to_print << predicate << "(" << ret << ").\n";
 	}
 
@@ -69,15 +69,19 @@ std::string asp_maker::print_subformula(const fluent & fl, std::ofstream & to_pr
 std::string asp_maker::print_subformula(const fluent_set & fluents, std::ofstream & to_print, const std::string & predicate)
 {
 	std::string ret = "";
-
+	int counter = 0;
 	if (fluents.size() > 1) {
 
 		fluent_set::const_iterator it_fls;
 		for (it_fls = fluents.begin(); it_fls != fluents.end(); it_fls++) {
 			if (std::next(it_fls, 1) != fluents.end()) {
 				ret += "and(" + print_subformula(*it_fls, to_print, predicate) + ",";
+				counter++;
 			} else {
-				ret += print_subformula(*it_fls, to_print, predicate) + ")";
+				ret += print_subformula(*it_fls, to_print, predicate);
+				for (int k = 0; k < counter; k++) {
+					ret += ")";
+				}
 			}
 			//ret +=")";
 		}
@@ -108,17 +112,51 @@ std::string asp_maker::print_subformula(const fluent_set & fluents, std::ofstrea
 std::string asp_maker::print_subformula(const fluent_formula & ff, std::ofstream & to_print, const std::string & predicate)
 {
 
-	if (ff.size() == 2) {
-		//		std::cerr << "\nError in parsing fluent_formula for asp conversion\n";
-		//		exit(1);
-		return "or(" + print_subformula(*ff.begin(), to_print, predicate) + "," + print_subformula(*(std::next(ff.begin(), 1)), to_print, predicate) + ")";
-		;
-	} else if (ff.size() != 1) {
-		//		std::cerr << "\nError in parsing fluent_formula for asp conversion\n";
-		//		exit(1);
+	std::string ret = "";
+	int counter = 0;
+
+	if (ff.size() > 1) {
+
+		fluent_formula::const_iterator it_fls;
+		for (it_fls = ff.begin(); it_fls != ff.end(); it_fls++) {
+			if (std::next(it_fls, 1) != ff.end()) {
+				ret += "or(" + print_subformula(*it_fls, to_print, predicate) + ",";
+				counter++;
+			} else {
+				ret += print_subformula(*it_fls, to_print, predicate);
+				//+ ")";
+				for (int k = 0; k < counter; k++) {
+					ret += ")";
+				}
+			}
+			//ret +=")";
+		}
+
+	} else if (ff.size() == 1) {
+		ret += print_subformula(*ff.begin(), to_print, predicate);
+		//return ret;
+	} else {
 		return "";
 	}
-	return print_subformula(*ff.begin(), to_print, predicate);
+
+
+	//	if (ff.size() == 3) {
+	//		//		std::cerr << "\nError in parsing fluent_formula for asp conversion\n";
+	//		//		exit(1);
+	//		return "or(" + print_subformula(*ff.begin(), to_print, predicate) + ", or(" + print_subformula(*(std::next(ff.begin(), 1)), to_print, predicate) + ", " + print_subformula(*(std::next(ff.begin(), 2)), to_print, predicate) + "))";
+	//		;
+	//	}
+	//	else if (ff.size() == 2) {
+	//		//		std::cerr << "\nError in parsing fluent_formula for asp conversion\n";
+	//		//		exit(1);
+	//		return "or(" + print_subformula(*ff.begin(), to_print, predicate) + "," + print_subformula(*(std::next(ff.begin(), 1)), to_print, predicate) + ")";
+	//		;
+	//	} else if (ff.size() != 1) {
+	//		//		std::cerr << "\nError in parsing fluent_formula for asp conversion\n";
+	//		//		exit(1);
+	//		return "";
+	//	}
+	return ret; //print_subformula(*ff.begin(), to_print, predicate);
 }
 
 std::string asp_maker::print_subformula(const belief_formula & bf, std::ofstream & to_print, const std::string & predicate)
@@ -579,7 +617,8 @@ void asp_maker::print_initially(std::ofstream & to_print)
 		if (it_fl->get_formula_type() == C_FORMULA) {
 			//ini_string = 
 			if (it_fl->get_bf1().get_formula_type() == FLUENT_FORMULA) {
-				print_subformula(it_fl->get_bf1(), to_print, predicate3);
+				ini_string = print_subformula(it_fl->get_bf1(), to_print, predicate3);
+				//to_print << "init_sf(" << ini_string << ").\n";
 			}
 			//if (ini_string.compare("") != 0) {
 			//	to_print << "init_sf(" << ini_string << ").\n";
