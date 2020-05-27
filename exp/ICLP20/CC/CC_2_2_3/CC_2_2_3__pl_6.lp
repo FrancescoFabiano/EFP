@@ -80,9 +80,9 @@ formula(-at_a_2).
 causes(left_a, -at_a_2, at_a_2).
 formula(-at_a_3).
 causes(left_a, -at_a_3, at_a_3).
-formula(neg(at_a_1)).
 formula(-at_a_1).
 formula(b(a,-at_a_1)).
+formula(neg(at_a_1)).
 formula(and(neg(at_a_1),b(a,-at_a_1))).
 executable(left_a, and(neg(at_a_1),b(a,-at_a_1))).
 observes(left_a, a, true).
@@ -99,9 +99,9 @@ formula(-at_b_2).
 causes(left_b, -at_b_2, at_b_2).
 formula(-at_b_3).
 causes(left_b, -at_b_3, at_b_3).
+formula(neg(at_b_1)).
 formula(-at_b_1).
 formula(b(b,-at_b_1)).
-formula(neg(at_b_1)).
 formula(and(b(b,-at_b_1),neg(at_b_1))).
 executable(left_b, and(b(b,-at_b_1),neg(at_b_1))).
 observes(left_b, a, true).
@@ -115,8 +115,8 @@ causes(right_a, -at_a_1, at_a_1).
 causes(right_a, at_a_2, at_a_1).
 causes(right_a, -at_a_2, at_a_2).
 causes(right_a, at_a_3, at_a_2).
-formula(b(a,-at_a_3)).
 formula(neg(at_a_3)).
+formula(b(a,-at_a_3)).
 formula(and(b(a,-at_a_3),neg(at_a_3))).
 executable(right_a, and(b(a,-at_a_3),neg(at_a_3))).
 observes(right_a, a, true).
@@ -130,8 +130,8 @@ causes(right_b, -at_b_1, at_b_1).
 causes(right_b, at_b_2, at_b_1).
 causes(right_b, -at_b_2, at_b_2).
 causes(right_b, at_b_3, at_b_2).
-formula(b(b,-at_b_3)).
 formula(neg(at_b_3)).
+formula(b(b,-at_b_3)).
 formula(and(b(b,-at_b_3),neg(at_b_3))).
 executable(right_b, and(b(b,-at_b_3),neg(at_b_3))).
 observes(right_b, a, true).

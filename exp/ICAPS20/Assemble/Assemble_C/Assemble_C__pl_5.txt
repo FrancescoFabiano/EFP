@@ -24,7 +24,7 @@ tell_a announces qualify_b;
 a observes tell_a;
 b observes tell_a;
 
-executable act_assemble if B(a, B(b, qualify_a)), B(b,B(a, qualify_b));
+executable act_assemble if C([a,b], qualify_a), C([a,b], qualify_b);
 act_assemble causes assemble;
 a observes act_assemble;
 b observes act_assemble;

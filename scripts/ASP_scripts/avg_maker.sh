@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 #Just Run
-RESPATH="out/ICLP20/configs/";
+RESPATH="ICLP_res/";
 DOMAIN_EXT=".out"; # Name of the domain
 configuration=("frumpy" "many");
-planner_type=("multi" "single") 
+planner_type=("multi_bis" "multi" "single") 
 
 
 #mv $OUTPATH_FINDINGPLAN $OUTPATH$DOMAIN_NAME$DOMAIN_EXT;
