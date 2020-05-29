@@ -420,7 +420,7 @@ believes(t, R1+MR+1, P1, T2, R2     , P2, AG) :- t > 0, plan(t, ACT), announceme
 #program check(t).
 
 plan(0, null) :- query(0).
-%:- not entails(t, R, P, F), pointed(t, R, P), goal(F), formula(F), query(t).
+:- not entails(t, R, P, F), pointed(t, R, P), goal(F), formula(F), query(t).
 %plan(1,left_a).
 %:- not entails(0, R, P, F), pointed(0, R, P), goal(F), formula(F).
 % Display
@@ -445,11 +445,11 @@ plan(0, null) :- query(0).
 %#defined oblivious/2.
 
 % !!! Uncomment while printing the results !!!
-#show pointed/3.
-#show possible_world/3.
-#show believes/7.
-#show holds/4.
-#show fluent/1.
+%#show pointed/3.
+%#show possible_world/3.
+%#show believes/7.
+%#show holds/4.
+%#show fluent/1.
 
 
 

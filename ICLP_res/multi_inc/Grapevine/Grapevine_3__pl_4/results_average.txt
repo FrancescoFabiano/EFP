@@ -1,0 +1,18 @@
+MANY  
+Total: 		4.258
+Solving: 	1.316
+CPU: 		8.019
+
+Grounding: 	2.245 	(Ground: 2.220 , PreProces: .025 )
+Reasoning: 	2.013
+ 
+
+
+FRUMPY   
+Total: 		2.517
+Solving: 	1.040
+CPU: 		5.558
+
+Grounding: 	1.023 	(Ground: .996 , PreProces: .026 )
+Reasoning: 	1.493
+ 

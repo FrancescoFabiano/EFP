@@ -27,13 +27,13 @@ for type in "${planner_type[@]}"; do
 						echo -n -e '\n'$(basename $dirNest)"-$type" >> "$RESPATH/graphres.csv";
 						#mv $OUTPATH_FINDINGPLAN"$(basename $file)" $OUTPATH"$(basename $dir)"/"$(basename $file)"
 						while read line; do
-						#if [[$line = "EFP"*]]; then
+							#if [[$line = "EFP"*]]; then
 							[ -z "$line" ] && continue;
-						    if [[ $line == *"TIMED-OUT"* ]]; then
-									num=",9999.99";
-								else
-									num=",${line##* }";
-									num=${num%?};
+							if [[ $line == *"TIMED-OUT"* ]]; then
+								num=",9999.99";
+							else
+								num=",${line##* }";
+								num=${num%?};
 							fi
 							echo -n $num >> "$RESPATH/graphres.csv";
 						done < $file;

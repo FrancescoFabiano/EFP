@@ -1,0 +1,12 @@
+MANY  
+Total:		267.858
+Solving:	114.443
+CPU:		528.886
+ 
+
+
+FRUMPY   
+Total:		4378.273
+Solving:	4270.130
+CPU:		7007.334
+ 

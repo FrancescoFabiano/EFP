@@ -7,7 +7,7 @@ ASP_PATH="../../asp"
 OUT_PATH="../../out/asp"
 DOMAIN_PATH="../../exp/ICLP20/"
 
-clingo $ASP_PATH/inc.lp $ASP_PATH/planner_multi.lp $DOMAIN_PATH/$DOMAIN > $OUT_PATH/output.txt;
+clingo $ASP_PATH/planner_multi.lp $DOMAIN_PATH/$DOMAIN > $OUT_PATH/output.txt;
 python3 $ASP_PATH/output_render/out_reader.py $OUT_PATH/output;
 dot -Tpdf $OUT_PATH/output.dot > $OUT_PATH/output.pdf;
 

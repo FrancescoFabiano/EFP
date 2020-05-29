@@ -1,0 +1,18 @@
+MANY  
+Total: 		9999.990
+Solving: 	9999.990
+CPU: 		9999.990
+
+Grounding: 	0 	(Ground: 9999.990 , PreProces: -9999.990 )
+Reasoning: 	9999.990
+ 
+
+
+FRUMPY   
+Total: 		9999.990
+Solving: 	9999.990
+CPU: 		9999.990
+
+Grounding: 	0 	(Ground: 9999.990 , PreProces: -9999.990 )
+Reasoning: 	9999.990
+ 
