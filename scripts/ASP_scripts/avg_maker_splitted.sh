@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #Just Run
-RESPATH="ICLP_res/multi_inc/";
+RESPATH="results/ICLP_res/multi_inc/";
 DOMAIN_EXT=".out"; # Name of the domain
 configuration=("frumpy" "many");
 SCALE=3;
@@ -119,7 +119,7 @@ for dir in $RESPATH*; do
 			fi;
 		done;
 	fi;
-	echo -e "\nDone with $(basename $dir)\n"
+	echo -e "\tDone with $(basename $dir)\n"
 done
 
 rm num.tmp;

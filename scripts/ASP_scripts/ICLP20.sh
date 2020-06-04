@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #Just Run
-INPATH="exp/ICLP20/Redo/"; #Path of the domain
+INPATH="exp/ICLP20/"; #Path of the domain
 OUTPATH="out/ICLP20/configs/"; #Path of the output
 
 OUTPATH_FINDINGPLAN='out/ASP_comparison/findingplan/'
@@ -19,7 +19,7 @@ echo -e "\nExecution of planner_asp in all the folders in" $INPATH "\n"
 for dir in $INPATH*; do
   if [ -d "$dir" ]; then
 
-    echo -e "Currently working on the $(basename $dir) directory";
+    echo -e "\tCurrently working on the $(basename $dir) directory";
     #mkdir -p $OUTPATH"$(basename $dir)"
 
     for file in $(find "$dir"/ -type f -name *$DOMAIN_EXT); do
@@ -27,7 +27,7 @@ for dir in $INPATH*; do
       mkdir -p $OUTPATH"single"/"$(basename $dir)"/"$(basename ${file%%.*})"/"for_average"
 
 
-      echo -e "    Solving the instance $(basename ${file%%.*})";
+      echo -e "\t\tSolving the instance $(basename ${file%%.*})";
       i="1";
       while [[ $i -le $ITERATIONS ]]; do
         start=$SECONDS;
@@ -53,6 +53,6 @@ for dir in $INPATH*; do
 
     done
   fi
-  echo -e "Done with $(basename $dir)\n"
+  echo -e "\tDone with $(basename $dir)\n"
 done
 echo -e "The end :)"

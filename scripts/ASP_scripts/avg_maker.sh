@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #Just Run
-RESPATH1="ICLP_res/";
+RESPATH1="results/ICLP_res/";
 DOMAIN_EXT=".out"; # Name of the domain
 configuration=("frumpy" "many");
 planner_type=("multi_bis" "multi" "single");
