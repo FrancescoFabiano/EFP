@@ -93,14 +93,14 @@ void action::add_effect(const fluent_formula& effect, const belief_formula &cond
 	m_effects.insert(effects_map::value_type(effect, condition));
 }
 
-void action::add_fully_observant(agent fully, const fluent_formula &condition)
+void action::add_fully_observant(agent fully, const belief_formula &condition)
 {
 	////Parameter Passing ok because is map::value_type and it makes copy
 
 	m_fully_observants.insert(observability_map::value_type(fully, condition));
 }
 
-void action::add_partially_observant(agent partial, const fluent_formula &condition)
+void action::add_partially_observant(agent partial, const belief_formula &condition)
 {
 	m_partially_observants.insert(observability_map::value_type(partial, condition));
 }
@@ -126,6 +126,12 @@ void action::add_proposition(proposition & prop)
 		set_type(ANNOUNCEMENT);
 		add_effect(prop.get_action_effect(), prop.get_executability_conditions());
 		break;
+	/***************DOXASTIC REASONING***************/
+	case LIES:
+		set_type(LIES);
+		add_effect(prop.get_action_effect(), prop.get_executability_conditions());
+		break;
+	/***************END DOXASTIC***************/
 
 	case OBSERVANCE:
 		set_type(NOTSET);
@@ -194,13 +200,16 @@ void action::print() const
 	observability_map::const_iterator it_obsmap;
 	for (it_obsmap = m_fully_observants.begin(); it_obsmap != m_fully_observants.end(); ++it_obsmap) {
 		std::cout << " | " << grounder.deground_agent(it_obsmap->first) << " if ";
-		printer::get_instance().print_list(it_obsmap->second);
+		//printer::get_instance().print_list(it_obsmap->second);
+		it_obsmap->second.print();
+
 	}
 
 	std::cout << "\n	Partially Observant:";
 	for (it_obsmap = m_partially_observants.begin(); it_obsmap != m_partially_observants.end(); ++it_obsmap) {
 		std::cout << " | " << grounder.deground_agent(it_obsmap->first) << " if ";
-		printer::get_instance().print_list(it_obsmap->second);
+		//printer::get_instance().print_list(it_obsmap->second);
+		it_obsmap->second.print();
 	}
 	std::cout << std::endl;
 

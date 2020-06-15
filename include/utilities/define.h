@@ -179,7 +179,7 @@ class belief_formula;
 typedef std::list<belief_formula> formula_list; /**< \brief A CNF formula of \ref belief_formula.
                                                  *
                                                  * Each element of the formula is a \ref belief_formula.*/
-typedef std::map<agent, fluent_formula> observability_map; /**< \brief Used to express the obsverbability conditions.
+typedef std::map<agent, belief_formula> observability_map; /**< \brief Used to express the obsverbability conditions.
                                 * 
                                 * Each element associates an \ref agent to the observability conditions for an \ref action.*/
 //Associate each effect the condition

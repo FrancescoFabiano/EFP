@@ -38,6 +38,7 @@ comment %.*$
 "C" {return C;}
 "E" {return E;}
 "D" {return D;}
+"lies" {return LIE;}
 
 
 "[" {return LEFT_BRAC;}

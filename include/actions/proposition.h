@@ -39,6 +39,9 @@ enum proposition_type
     OBSERVANCE, /**< \brief Used when the proposition specifies the full observability conditions of an action -- *ag* **observes** *act* */
     AWARENESS, /**< \brief Used when the proposition specifies the partial observability conditions of an action -- *ag* **aware** *act* */
     NOTSET, /**< \brief Default case.*/
+    /***************DOXASTIC REASONING***************/
+    LIES,
+    /***************END DOXASTIC***************/
 };
 
 class proposition
@@ -53,10 +56,10 @@ private:
     /** If *this* is \ref OBSERVANCE or \ref AWARENESS the relative \ref agent is stored here.*/
     std::string m_agent;
     /** \brief If *this* is \ref OBSERVANCE or \ref AWARENESS the \ref fluent_formula condition for the observability is stored here (not grounded).*/
-    string_set_set m_observability_conditions;
+    belief_formula m_observability_conditions;
     /** \brief If *this* is \ref ONTIC, \ref SENSING or \ref ANNOUNCEMENT the \ref belief_formula condition for the act is stored here.*/
     belief_formula m_executability_conditions;
- 
+
 
 
 public:
@@ -80,14 +83,14 @@ public:
     /** Getter of the field \ref m_observability_conditions grounded.
      * 
      * @return the grounded value of \ref m_observability_conditions.*/
-    fluent_formula get_observability_conditions();
+    belief_formula get_observability_conditions();
     /** Getter of the field \ref m_executability_conditions grounded.
      * 
      * @return the grounded value of \ref m_executability_conditions.*/
     belief_formula get_executability_conditions();
-    
-    
-       /** Setter for the field \ref m_type.
+
+
+    /** Setter for the field \ref m_type.
      * 
      * @param[in] to_set: the value to assign to \ref m_type.*/
     void set_type(proposition_type to_set);
@@ -95,17 +98,17 @@ public:
      * 
      * @param[in] to_set: the value to assign to \ref m_action_name.*/
     void set_action_name(std::string to_set);
-    
-    
+
+
     /** Setter for the field \ref m_action_effect.
      * 
      * @param[in] to_set: the value to assign to \ref m_action_effect.*/
     void set_action_effect(const string_set_set & to_set);
-     /** Function that adds an action effect to \ref m_action_effect.
+    /** Function that adds an action effect to \ref m_action_effect.
      * 
      * @param[in] to_add: the value to add to \ref m_action_effect.*/
     void add_action_effect(const string_set & to_add);
-    
+
     /** Setter for the field \ref m_agent.
      * 
      * @param[in] to_set: the value to assign to \ref m_agent.*/
@@ -113,7 +116,7 @@ public:
     /** Setter for the field \ref m_observability_conditions.
      * 
      * @param[in] to_set: the value to assign to \ref m_observability_conditions.*/
-    void set_observability_conditions(const string_set_set & to_set);
+    void set_observability_conditions(const belief_formula & to_set);
     /** Setter for the field \ref m_executability_conditions.
      * 
      * @param[in] to_set: the value to assign to \ref m_executability_conditions.*/

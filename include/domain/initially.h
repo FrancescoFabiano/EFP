@@ -41,6 +41,12 @@ private:
      * @return false: if \p to_check doesn't respect \ref m_ini_restriction.*/
     bool check_restriction(const belief_formula & to_check);
 
+    /**
+     * \brief The set of \ref fluent know by formulae of the type C([ags], f).
+     */
+    fluent_set m_initially_known_fluents;
+
+
 public:
 
     /** \brief  Constructor without parameters.
@@ -88,6 +94,12 @@ public:
      * 
      * \todo is return type ok?*/
     const formula_list& get_initial_conditions() const;
+
+    /**
+     * \brief getter for the field m_initially_known_fluents.
+     * 
+     * @return the field m_initially_known_fluents.*/
+    const fluent_set& get_initially_known_fluents() const;
 
     /** \brief Setter for the field \ref m_ff_forS5.
      * 

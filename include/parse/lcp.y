@@ -62,6 +62,7 @@ extern std::shared_ptr<reader> domain_reader;
 %token C
 %token E
 %token D
+%token LIE
 
 %type <str_val> id
 %type <str_val> constant
@@ -109,6 +110,10 @@ extern std::shared_ptr<reader> domain_reader;
 %type <prop> observance
 %type <prop> announcement
 %type <prop_list> domain
+/***************DOXASTIC REASONING***************/
+%type <prop> lie
+/***************END DOXASTIC***************/
+
 %%
 
 input:		
@@ -510,9 +515,21 @@ action ANNOUNCES formula SEMICOLON
   $$->set_action_effect(*$3);
 };
 
+/***************DOXASTIC REASONING***************/
+/* lie condition */
+lie:
+action LIE formula SEMICOLON
+{
+  $$ = new proposition;
+  $$->set_type(LIES);
+  $$->set_action_name(*$1);
+  $$->set_action_effect(*$3);
+};
+/***************END DOXASTIC***************/
+
 /* awareness condition */
 awareness:
-agent AWAREOF action if_part_fluent SEMICOLON
+agent AWAREOF action if_part_bf SEMICOLON
 {
   $$ = new proposition;
   $$->set_type(AWARENESS);
@@ -523,7 +540,7 @@ agent AWAREOF action if_part_fluent SEMICOLON
 
 /* observance condition */
 observance:
-agent OBSERVES action if_part_fluent SEMICOLON
+agent OBSERVES action if_part_bf SEMICOLON
 {
   $$ = new proposition;
   $$->set_type(OBSERVANCE);
@@ -582,6 +599,13 @@ awareness
 {
   $$ = $1;
 }
+/***************DOXASTIC REASONING***************/
+|
+lie
+{
+  $$ = $1;
+}
+/***************END DOXASTIC***************/
 ;
 
 /* domain */

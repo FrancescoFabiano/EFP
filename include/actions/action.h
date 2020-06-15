@@ -68,12 +68,12 @@ private:
      *
      * @param[in] ag: The \ref agent that its fully observant of this if \p condition.
      * @param[in] condition: The condition for \p ag to be fully_observant of *this*.*/
-    void add_fully_observant(agent ag, const fluent_formula& condition);
+    void add_fully_observant(agent ag, const belief_formula& condition);
     /* \brief Function that adds a fully_observant \ref agent (with its conditions) to *this*.
      *
      * @param[in] ag: The \ref agent that its fully observant of this if \p condition.
      * @param[in] condition: The condition for \p ag to be fully_observant of *this*.*/
-    void add_partially_observant(agent ag, const fluent_formula& condition);
+    void add_partially_observant(agent ag, const belief_formula& condition);
 
 public:
     /**\brief Constructor without parameters.*/

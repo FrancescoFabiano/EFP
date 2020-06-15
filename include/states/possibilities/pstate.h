@@ -240,9 +240,10 @@ private:
      * All the other ones are stored in \ref pstore for future uses.
      * 
      * @param[out] permutation: the permutation in construction.
-     * @param[in] index: the index of the \ref fluent to add.*/
+     * @param[in] index: the index of the \ref fluent to add.
+     * @param[in] index: the set of initialky known \ref fluent to reduce the possible permutations.*/
 
-    void generate_initial_pworlds(fluent_set& permutation, int index);
+    void generate_initial_pworlds(fluent_set& permutation, int index, const fluent_set & initially_known);
     /** \brief Function check if the \ref pworld respect the initial conditions and adds it to *this* if it does.
      *  
      * The function checks if the \ref pworld created by \ref generate_initial_pworlds(fluent_set&, int)
@@ -558,6 +559,12 @@ public:
 
 
     /*fluent_formula get_sensing_effects_if_entailed(const effects_map & map, const pworld_ptr & start) const;*/
+
+    /***************DOXASTIC REASONING***************/
+    pworld_ptr execute_announcement_helper_dox(const fluent_formula &effects, pstate &ret, const pworld_ptr &current_pw, transition_map &calculated, agent_set &partially_obs_agents, agent_set &oblivious_obs_agents, bool previous_entailment) const;
+    pstate execute_announcement_dox(const action & act) const;
+    /***************END DOXASTIC***************/
+
 
 
     //DEBUG

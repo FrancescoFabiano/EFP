@@ -31,9 +31,10 @@ agent proposition::get_agent()
 	return domain::get_instance().get_grounder().ground_agent(m_agent);
 }
 
-fluent_formula proposition::get_observability_conditions()
+belief_formula proposition::get_observability_conditions()
 {
-	return domain::get_instance().get_grounder().ground_fluent(m_observability_conditions);
+	m_observability_conditions.ground();
+	return m_observability_conditions;
 }
 
 belief_formula proposition::get_executability_conditions()
@@ -67,7 +68,7 @@ void proposition::set_agent(std::string to_set)
 	m_agent = to_set;
 }
 
-void proposition::set_observability_conditions(const string_set_set & to_set)
+void proposition::set_observability_conditions(const belief_formula & to_set)
 {
 	m_observability_conditions = to_set;
 }

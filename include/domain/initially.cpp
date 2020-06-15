@@ -9,6 +9,7 @@
 #include <iostream>
 
 #include "initially.h"
+#include "../utilities/printer.h"
 
 initially::initially()
 {
@@ -217,6 +218,15 @@ void initially::set_ff_forS5()
 				case FLUENT_FORMULA:
 				{
 					ret = helper::and_ff(ret, tmp.get_fluent_formula());
+					fluent_formula tmp_ff = tmp.get_fluent_formula();
+					if (tmp_ff.size() == 1) {
+						fluent_set tmp_fs = *tmp_ff.begin();
+						fluent_set::const_iterator it_fs_tmp;
+						for (it_fs_tmp = tmp_fs.begin(); it_fs_tmp != tmp_fs.end(); it_fs_tmp++) {
+							m_initially_known_fluents.insert(*it_fs_tmp);
+							//std::cerr << "\nDEBUG: "<< *it_fs_tmp << std::endl;
+						}
+						}
 					break;
 				}
 					//C(B(i,*phi*))
@@ -256,4 +266,9 @@ void initially::set_ff_forS5()
 		//So if called twice is still correct
 		m_ff_forS5 = ret;
 	}
+}
+
+const fluent_set & initially::get_initially_known_fluents() const
+{
+	return m_initially_known_fluents;
 }
