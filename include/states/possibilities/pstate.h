@@ -561,7 +561,7 @@ public:
     /*fluent_formula get_sensing_effects_if_entailed(const effects_map & map, const pworld_ptr & start) const;*/
 
     /***************DOXASTIC REASONING***************/
-    pworld_ptr execute_announcement_helper_dox(const fluent_formula &effects, pstate &ret, const pworld_ptr &current_pw, transition_map &calculated, agent_set &partially_obs_agents, agent_set &oblivious_obs_agents, bool previous_entailment) const;
+    pworld_ptr execute_announcement_helper_dox(const fluent_formula &effects, pstate &ret, const pworld_ptr &current_pw, transition_map &calculated, agent_set &partially_obs_agents, agent_set &oblivious_obs_agents, bool reached_by_fully, bool & implications) const;
     pstate execute_announcement_dox(const action & act) const;
     /***************END DOXASTIC***************/
 

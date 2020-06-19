@@ -77,6 +77,7 @@ bool planner<T>::search_BFS(bool results_file)
 	if (domain::get_instance().get_bisimulation() != BIS_NONE) {
 		bisimulation = true;
 	}
+	bisimulation = false;
 	std::set<T> visited_states;
 
 	auto start_timing = std::chrono::system_clock::now();
@@ -109,6 +110,7 @@ bool planner<T>::search_BFS(bool results_file)
 		visited_states.insert(initial);
 	}
 
+	//int count = 1;
 	while (!m_search_space.empty()) {
 		popped_state = m_search_space.front();
 		m_search_space.pop();
@@ -130,9 +132,15 @@ bool planner<T>::search_BFS(bool results_file)
 				if (!check_visited || visited_states.insert(tmp_state).second) {
 					m_search_space.push(tmp_state);
 				}
+			} /*else {
+				if (tmp_state.get_plan_length() == count) {
+					std::cerr << "\nDEBUG: Plan length is " << count;
+					count++;
+				}
+			}*/
 
-			}
 		}
+
 	}
 	std::cout << "\nNo plan found for this goal.\n";
 	return false;

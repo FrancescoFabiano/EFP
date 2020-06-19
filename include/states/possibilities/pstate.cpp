@@ -121,6 +121,7 @@ bool pstate::operator<(const pstate & to_compare) const
 			}
 			it_pwmap2++;
 		}
+		it_tramap2++;
 	}
 	return false;
 }
@@ -443,8 +444,8 @@ void pstate::build_initial_prune()
 	 * Creation of all the \ref fluent combinations. All the consistent ones are added to \ref pstore.*/
 	fluent_set permutation;
 	initially ini_conditions = domain::get_instance().get_initial_description();
-//	std::cerr << "\nDEBUG: Initially known fluents: ";
-//	printer::get_instance().print_list(domain::get_instance().get_grounder().deground_fluent(ini_conditions.get_initially_known_fluents()));
+	//	std::cerr << "\nDEBUG: Initially known fluents: ";
+	//	printer::get_instance().print_list(domain::get_instance().get_grounder().deground_fluent(ini_conditions.get_initially_known_fluents()));
 	generate_initial_pworlds(permutation, 0, ini_conditions.get_initially_known_fluents());
 
 
@@ -464,11 +465,11 @@ void pstate::generate_initial_pworlds(fluent_set& permutation, int index, const 
 	}
 	fluent_set permutation_2 = permutation;
 	//Add the \ref fluent in positive version
-	if (initially_known.find(index+1) == initially_known.end()){
+	if (initially_known.find(index + 1) == initially_known.end()) {
 		permutation.insert(index);
 		generate_initial_pworlds(permutation, index + 2, initially_known);
 	}
-	if(initially_known.find(index) == initially_known.end()){
+	if (initially_known.find(index) == initially_known.end()) {
 		permutation_2.insert(index + 1);
 		generate_initial_pworlds(permutation_2, index + 2, initially_known);
 	}
@@ -843,7 +844,7 @@ pworld_ptr pstate::execute_sensing_announcement_helper(const fluent_formula &eff
 			bool is_fully_obs = !is_oblivious_obs && !is_partially_obs;
 
 			for (it_pws = it_pwm->second.begin(); it_pws != it_pwm->second.end(); it_pws++) {
-				if (oblivious_obs_agents.find(ag) != oblivious_obs_agents.end()) { // If we are dealing with an OBLIVIOUS agent we maintain its beliefs as they were
+				if (is_oblivious_obs) { // If we are dealing with an OBLIVIOUS agent we maintain its beliefs as they were
 					auto maintained_pworld = ret.get_worlds().find(*it_pws);
 
 					if (maintained_pworld != ret.get_worlds().end()) {
@@ -1177,7 +1178,7 @@ void pstate::print_graphviz(std::ostream & graphviz) const
 		graphviz << "\" ];\n";
 	}
 
-		std::string color = "<font color=\"#ffffff\">";
+	std::string color = "<font color=\"#ffffff\">";
 	graphviz << "\n\n//WORLDS description Table:" << std::endl;
 	graphviz << "	node [shape = plain]\n\n";
 	graphviz << "	description[label=<\n";
@@ -1192,7 +1193,7 @@ void pstate::print_graphviz(std::ostream & graphviz) const
 				graphviz << ", ";
 			}
 			print_first = true;
-			if((*it_fs)%2 == 0) color = "<font color=\"#0000ff\"> ";
+			if ((*it_fs) % 2 == 0) color = "<font color=\"#0000ff\"> ";
 			else color = "<font color=\"#ff1020\">";
 			graphviz << color << domain::get_instance().get_grounder().deground_fluent(*it_fs) << "</font>";
 		}
@@ -1261,7 +1262,7 @@ fluent_formula pstate::get_effects_if_entailed(const effects_map & map, const pw
 
 /***************DOXASTIC REASONING***************/
 
-pworld_ptr pstate::execute_announcement_helper_dox(const fluent_formula &effects, pstate &ret, const pworld_ptr &current_pw, transition_map &calculated, agent_set &partially_obs_agents, agent_set &oblivious_obs_agents, bool pointed_entailment) const
+pworld_ptr pstate::execute_announcement_helper_dox(const fluent_formula &effects, pstate &ret, const pworld_ptr &current_pw, transition_map &calculated, agent_set &partially_obs_agents, agent_set &oblivious_obs_agents, bool reached_by_fully, bool & implications) const
 {
 	pworld_ptr new_pw = ret.add_rep_world(pworld(current_pw.get_fluent_set()), current_pw.get_repetition()); // We add the corresponding pworld in ret
 	calculated.insert(transition_map::value_type(current_pw, new_pw)); // And we update the calculated map
@@ -1280,7 +1281,32 @@ pworld_ptr pstate::execute_announcement_helper_dox(const fluent_formula &effects
 			bool is_fully_obs = !is_oblivious_obs && !is_partially_obs;
 
 			for (it_pws = it_pwm->second.begin(); it_pws != it_pwm->second.end(); it_pws++) {
-				if (oblivious_obs_agents.find(ag) != oblivious_obs_agents.end()) { // If we are dealing with an OBLIVIOUS agent we maintain its beliefs as they were
+
+				if (is_partially_obs) {
+					pworld_ptr_set tmp_set = get_B_reachable_worlds(ag, *it_pws);
+					pworld_ptr_set::const_iterator it_tmp;
+					bool tmp_ent1 = false;
+					bool tmp_ent2 = false;
+
+					for (it_tmp = tmp_set.begin(); it_tmp != tmp_set.end();) {
+						if (entails(effects, *it_tmp)) {
+							tmp_ent1 = true;
+						} else {
+							tmp_ent2 = true;
+						}
+
+						if (tmp_ent1 && tmp_ent2) {
+							is_fully_obs = true;
+							implications = true;
+							is_partially_obs = false;
+							it_tmp = tmp_set.end();
+						} else {
+							it_tmp++;
+						}
+					}
+				}
+
+				if (is_oblivious_obs) { // If we are dealing with an OBLIVIOUS agent we maintain its beliefs as they were
 					auto maintained_pworld = ret.get_worlds().find(*it_pws);
 
 					if (maintained_pworld != ret.get_worlds().end()) {
@@ -1291,8 +1317,10 @@ pworld_ptr pstate::execute_announcement_helper_dox(const fluent_formula &effects
 					//fluent_formula effects = get_effects_if_entailed(act.get_effects(), get_pointed());
 					//bool ent = act.get_type() == SENSING ? entails(effects, *it_pws) == entails(effects, get_pointed()) : entails(effects, *it_pws);
 
-					bool is_consistent_belief = is_partially_obs || // If "ag" is PARTIALLY OBS, we always add an edge; If "ag" is FULLY OBS, we add an edge if he believes that "calculated" may be true (i.e., when "ent" holds) XOR
-						(is_fully_obs && (entails(effects, *it_pws) == pointed_entailment)); // if a PARTIALLY OBS agent believes that "ag" thinks that "calculated" may be true (i.e., when "previous_entailment" holds)
+
+					bool is_consistent_belief = ((!reached_by_fully && is_partially_obs) ||
+						(reached_by_fully && is_partially_obs && (entails(effects, *it_pws))) ||
+						(is_fully_obs && (entails(effects, *it_pws)))); // if a PARTIALLY OBS agent believes that "ag" thinks that "calculated" may be true (i.e., when "previous_entailment" holds)
 
 					if (calculated_pworld != calculated.end()) { // If we already calculated the transition function for this pworld
 						if (is_consistent_belief) {
@@ -1300,8 +1328,7 @@ pworld_ptr pstate::execute_announcement_helper_dox(const fluent_formula &effects
 						}
 					} else { // If we did not already calculate the transition function
 						if (is_consistent_belief) { // We calculate it if it would result in a consistent belief...
-
-							pworld_ptr believed_pw = execute_announcement_helper_dox(effects, ret, *it_pws, calculated, partially_obs_agents, oblivious_obs_agents, pointed_entailment);
+							pworld_ptr believed_pw = execute_announcement_helper_dox(effects, ret, *it_pws, calculated, partially_obs_agents, oblivious_obs_agents, (reached_by_fully || is_fully_obs),implications);
 							ret.add_edge(new_pw, believed_pw, ag);
 						}
 					}
@@ -1312,10 +1339,9 @@ pworld_ptr pstate::execute_announcement_helper_dox(const fluent_formula &effects
 	return new_pw;
 }
 
-
 pstate pstate::execute_announcement_dox(const action & act) const
 {
-		pstate ret;
+	pstate ret;
 
 	//This finds all the worlds that are reachable from the initial state following
 	//the edges labeled with fully observant agents.
@@ -1336,8 +1362,19 @@ pstate pstate::execute_announcement_dox(const action & act) const
 
 	fluent_formula effects = get_effects_if_entailed(act.get_effects(), get_pointed());
 
-	pworld_ptr new_pointed = execute_announcement_helper_dox(effects, ret, get_pointed(), calculated, partially_obs_agents, oblivious_obs_agents, !entails(effects));
+	bool implications = true;
+	if(fully_obs_agents.size() == 0)
+	{
+		implications = false;
+	}
+	
+	pworld_ptr new_pointed = execute_announcement_helper_dox(effects, ret, get_pointed(), calculated, partially_obs_agents, oblivious_obs_agents, false, implications);
 	ret.set_pointed(new_pointed); // Updating the pointed world
+	
+	if (!implications)
+	{
+		ret = *this;
+	}
 
 	return ret;
 }
@@ -1347,11 +1384,12 @@ pstate pstate::execute_announcement_dox(const action & act) const
 
 int pstate::get_edges() const
 {
-	std::cerr << "\nYou are playing with debug only options.\n";
+	std::cerr << "\nYou are playing with debug only options-1.\n";
 	exit(1);
 }
+
 void pstate::debug_print(pstate tmp)
 {
-	std::cerr << "\nYou are playing with debug only options.\n";
+	std::cerr << "\nYou are playing with debug only options-2.\n";
 	exit(1);
 }
