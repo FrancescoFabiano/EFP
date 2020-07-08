@@ -28,6 +28,5 @@ TIMEOUT="30m";
     echo $'\n' >> out/EFP_comparison/findingplan/"${@##*/}";
 
     sleep 10s;
-done;
-
+    
 rm findingplan_comparison.tmp;
