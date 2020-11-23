@@ -143,6 +143,7 @@ bool state<T>::entails(const formula_list & to_check) const
 	//formula_list expresses CNF formula
 	formula_list::const_iterator it_fl;
 	for (it_fl = to_check.begin(); it_fl != to_check.end(); it_fl++) {
+
 		if (!m_representation.entails(*it_fl)) {
 			return false;
 		}
@@ -158,6 +159,23 @@ void state<T>::build_initial()
 	m_representation.build_initial();
 	set_plan_length(0);
 	//set_heuristic_value(get_representation().compute_heuristic_value());
+}
+
+template <class T>
+fluent_set state<T>::compute_succ2(const action & act) const
+{
+    state<T> ret;
+    //if (is_executable(act)) {
+    ret.set_representation(get_representation().compute_succ(act));
+    ret.set_executed_actions(get_executed_actions());
+    ret.add_executed_action(act);
+
+    pworld_ptr repr = ret.get_representation();
+    fluent_set repr_set = repr.get_fluent_set();
+    ret.set_plan_length(get_plan_length() + 1);
+
+
+    return repr_set;
 }
 
 template <class T>

@@ -20,6 +20,8 @@
 #include "../utilities/define.h"
 #include "../utilities/reader.h"
 #include "../actions/action.h"
+#include <boost/shared_ptr.hpp>
+#include <boost/make_shared.hpp>
 
 class domain
 {
@@ -40,7 +42,7 @@ private:
      * The same object is used in the **main** class.
      * 
      * \todo Can be std::unique_ptr<reader>.*/
-    std::shared_ptr<reader> m_reader;
+    boost::shared_ptr<reader> m_reader;
     /** \brief A \ref grounder object used to store the name of the information.
      * 
      * This is the \ref grounder obj used across the solver to ground and
@@ -125,7 +127,7 @@ public:
      * @param[in] act_check: the \ref action_check to assign to \ref m_act_check.
      * @param[in] check_visited: If the \ref search process should check for already visited_states.
      * @param[in] bisimulation: If the \ref states are reduced in size with bisimulation.*/
-    void set_domain(std::string name, bool debug, state_type stype, bool k_opt, std::shared_ptr<reader> reader, domain_restriction ini_res, domain_restriction goal_res, bool is_global_obsv, action_check act_check, bool check_visited, bis_type bisimulation);
+    void set_domain(std::string name, bool debug, state_type stype, bool k_opt, boost::shared_ptr<reader> reader, domain_restriction ini_res, domain_restriction goal_res, bool is_global_obsv, action_check act_check, bool check_visited, bis_type bisimulation);
 
     /** \brief Function that builds all the domain information.
      *
@@ -152,6 +154,9 @@ public:
      *
      * @return the number of \ref fluent.*/
     unsigned int get_fluent_number();
+
+    unsigned int get_size_fluent();
+
     /** \brief Getter of the field \ref m_actions.
      *
      * @return the ref to \ref m_actions.*/

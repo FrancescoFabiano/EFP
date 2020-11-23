@@ -34,10 +34,10 @@ comment %.*$
 "announces" {return ANNOUNCES;}
 "initially" {return INIT;}
 "goal" {return GOAL;}
-"B" {return B;}
-"C" {return C;}
-"E" {return E;}
-"D" {return D;}
+"B" {return MB;}
+"C" {return MC;}
+"E" {return ME;}
+"D" {return MD;}
 "dox_announces" {return LIE;}
 
 

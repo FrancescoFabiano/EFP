@@ -6,13 +6,13 @@
  * \author Francesco Fabiano.
  * \date September 14, 2019
  */
-
+#include <boost/dynamic_bitset.hpp>
 #include "pworld.h"
 
 #include "pstore.h"
 
 #include <stdexcept>
-
+#include "../../utilities/helper.h"
 pworld::pworld()
 {
 }
@@ -30,16 +30,47 @@ pworld::pworld(const pworld & world)
 	set_id();
 }
 
+boost::dynamic_bitset<> concatStringDyn( const boost::dynamic_bitset<>& bs1,const boost::dynamic_bitset<>& bs2)
+{
+    std::string s1;
+    std::string s2;
+
+    to_string(bs1,s1);
+    to_string(bs2,s2);
+    boost::dynamic_bitset<> res(s1+s2);
+    return res;
+}
+
+boost::dynamic_bitset<> concatOperatorsDyn( const boost::dynamic_bitset<>& bs1,const boost::dynamic_bitset<>& bs2)
+{
+    boost::dynamic_bitset<> bs1Copy(bs1);
+    boost::dynamic_bitset<> bs2Copy(bs2);
+    size_t totalSize=bs1.size()+bs2.size();
+    bs1Copy.resize(totalSize);
+    bs2Copy.resize(totalSize);
+    bs1Copy<<=bs2.size();
+    bs1Copy|=bs2Copy;
+    return bs1Copy;
+}
+
+boost::dynamic_bitset<> concatLoopDyn( const boost::dynamic_bitset<>& bs1,const boost::dynamic_bitset<>& bs2)
+{
+    boost::dynamic_bitset<> res(bs1);
+    res.resize(bs1.size()+bs2.size());
+    size_t bs1Size=bs1.size();
+
+    for(size_t i=0;i<bs2.size();i++)
+        res[i+bs1Size]=bs2[i];
+    return res;
+}
+
 pworld_id pworld::hash_fluents_into_id(const fluent_set& fl)
 {
-	pworld_id ret;
-	fluent_set::const_iterator it_fl;
-	for (it_fl = fl.begin(); it_fl != fl.end(); it_fl++) {
-		ret.append(std::to_string(*it_fl) + "-");
-	}
-	//Remove last "-" that is useless
-	//ret.pop_back();
-	return ret;
+    fluent_set fl2 = fl;
+    std::size_t hash;
+    hash = boost::hash_range(fl2.begin(),fl2.end());
+    return hash;
+
 }
 
 pworld_id pworld::hash_fluents_into_id()
@@ -66,14 +97,14 @@ bool pworld::consistent(const fluent_set & to_check)
 	for (it_flset = to_check.begin(); it_flset != to_check.end(); it_flset++) {
 		/* If the pointed fluent is in modulo 2 it means is the positive and if
 		 * its successor (the negative version) is in the set then is not consistent.*/
-		if ((*it_flset) % 2 == 0) {
+		if (it_flset->test(it_flset->size()-1)) {
 			//The std::set has is elements ordered so we can just check its successor.
 			it_flset_tmp = it_flset;
 			it_flset_tmp++;
 		}
 		if (it_flset_tmp != to_check.end()) {
-			if (*it_flset_tmp == ((*it_flset) + 1)) {
-				std::cout << "\nCheck: " << *it_flset_tmp << " and " << (*it_flset) + 1 << std::endl;
+			if (it_flset_tmp == ++((it_flset))) {
+				std::cout << "\nCheck: " << *it_flset_tmp << " and " << (*(++it_flset)) << std::endl;
 				return false;
 			}
 		}
@@ -141,14 +172,16 @@ bool pworld::entails(const fluent_formula & to_check) const
 
 bool pworld::operator<(const pworld& to_compare) const
 {
-	if (m_id.compare(to_compare.get_id()) < 0)
+
+	if (m_id < to_compare.get_id())
 		return true;
+
 	return false;
 }
 
 bool pworld::operator>(const pworld& to_compare) const
 {
-	if (m_id.compare(to_compare.get_id()) > 0)
+	if (m_id > (to_compare.get_id()))
 		return true;
 	return false;
 }
@@ -237,7 +270,10 @@ pworld_id pworld_ptr::get_fluent_based_id() const
 pworld_id pworld_ptr::get_id() const
 {
 	if (m_ptr != nullptr) {
-		return(get_ptr()->get_id()).append(std::to_string(get_repetition()));
+	    pworld_id id = (get_ptr()->get_id());
+
+	    //moltiplico * 10 id + get_repetion() TODO test con shift 
+        return boost::hash_value((10*id)+get_repetition());
 	}
 	std::cerr << "\nError in creating a pworld_ptr\n";
 	exit(1);
@@ -271,7 +307,7 @@ bool pworld_ptr::entails(const fluent_formula & to_check) const
 
 bool pworld_ptr::operator<(const pworld_ptr & to_compare) const
 {
-	if (get_id().compare(to_compare.get_id()) < 0) {
+	if (get_id() < (to_compare.get_id())) {
 		return true;
 	}
 	return false;
@@ -279,7 +315,7 @@ bool pworld_ptr::operator<(const pworld_ptr & to_compare) const
 
 bool pworld_ptr::operator>(const pworld_ptr & to_compare) const
 {
-	if (get_id().compare(to_compare.get_id()) > 0) {
+	if (get_id() > to_compare.get_id()) {
 		return true;
 	}
 	return false;

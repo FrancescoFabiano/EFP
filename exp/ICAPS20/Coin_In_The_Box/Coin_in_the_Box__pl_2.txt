@@ -10,7 +10,7 @@ action shout_tail_a, shout_tail_b, shout_tail_c;
 
 agent a,b,c;
 
-
+%
 
 executable open_a;
 open_a causes opened;

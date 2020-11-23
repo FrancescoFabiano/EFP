@@ -20,6 +20,7 @@
 #include <stack>
 #include <memory>
 #include <list>
+#include <boost/dynamic_bitset.hpp>
 
 
 
@@ -41,7 +42,7 @@ typedef std::set<string_set> string_set_set; /**< \brief A representation of a f
 /****************************************************************
  * Domain Related
  ****************************************************************/
-typedef unsigned short fluent; /**< \brief A representation of a fluent through an unique id (short).
+typedef boost::dynamic_bitset<> fluent; /**< \brief A representation of a fluent through an unique id (short).
                                 * 
                                 * This representation is derived by applying \ref grounder::ground_fluent(const std::string&) const
                                 * to the elements of \ref reader::m_fluents.
@@ -65,14 +66,14 @@ typedef std::set<fluent_set> fluent_formula; /**< \brief A representation of a f
                                       * \todo How the set of fluent has < implemented?
                                       * Each element of the set is a \ref fluent_set*/
 
-typedef unsigned short agent; /**< \brief A representation of an agent through an unique id (short).
+typedef boost::dynamic_bitset<> agent; /**< \brief A representation of an agent through an unique id (short).
                                       *
                                       *  This representation is derived by applying \ref grounder::ground_agent(const std::string&) const
                                       * to the element of \ref reader::m_agents.*/
 typedef std::set<agent> agent_set; /**< \brief A set of \ref agent.*/
 typedef std::vector<agent> agent_list; /**< \brief A list of \ref agent.*/
 
-typedef unsigned short action_id; /**< \brief The unique id (short) associated with each action.
+typedef boost::dynamic_bitset<> action_id; /**< \brief The unique id (short) associated with each action.
                                       *
                                       *  This id is derived by applying \ref grounder::ground_action(const std::string&) const
                                       * to the element of \ref reader::m_actions.*/
@@ -103,6 +104,8 @@ typedef std::map<action_id, std::string> reverse_action_name_map; /**< \brief Th
 enum heuristics
 {
     NO_H, /**< Breadth first search is executed*/
+    NO_H_DFS, /**DFS*/
+    DFS_ITER, /**DFS iterativa in profondità*/
     L_PG, /**< A planning graph is used to calculate the distance of each state from the goal.
                     * 
                     * For now for every state is computed a planning graph and then the lenght of it is returned.
@@ -122,7 +125,10 @@ enum heuristics
     SUBGOALS, /**< For each state is calculate dthe number of (found or) missing subgoals
                     * 
                     * The group operator C is splitted in more belief_formulae.*/
+    E_PG, /** Planning graph with complete idea of planning in epistemic states
+            ***/
 };
+
 
 enum bis_type
 {
@@ -275,7 +281,7 @@ typedef std::map<kworld_ptr, std::map<kworld_ptr, bis_label_set>> kbislabel_map;
 
 /*****************Possibilities*****************/
 class pworld;
-typedef std::string pworld_id; /**< \brief The id of a \ref pworld in a \ref pstate.
+typedef std::size_t pworld_id; /**< \brief The id of a \ref pworld in a \ref pstate.
                                 *
                                 * The id is calculated through an hash (pworld::hash_fluents_into_id()) of the info of the \ref pworld.
                                 *

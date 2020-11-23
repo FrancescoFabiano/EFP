@@ -1,0 +1,665 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="BranchesTreeState">
+    <expand>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="LOCAL_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:origin" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+    </expand>
+    <select />
+  </component>
+  <component name="CMakeRunConfigurationManager" shouldGenerate="true" shouldDeleteObsolete="true">
+    <generated />
+  </component>
+  <component name="CMakeSettings">
+    <configurations>
+      <configuration PROFILE_NAME="Debug" CONFIG_NAME="Debug" />
+    </configurations>
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="47a0f7b1-a30f-4cdc-a3d2-50f5c2b307d7" name="Default Changelist" comment="Modifiche necessarie per poter effettuare la ricerca della soluzione tramite una DFS iterativa (in corso)">
+      <change beforePath="$PROJECT_DIR$/EFP_ICAPS_old/lcp.output" beforeDir="false" afterPath="$PROJECT_DIR$/EFP_ICAPS_old/lcp.output" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/EFP_ICAPS_old/lcp.tab.c" beforeDir="false" afterPath="$PROJECT_DIR$/EFP_ICAPS_old/lcp.tab.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/EFP_ICAPS_old/lcp.tab.h" beforeDir="false" afterPath="$PROJECT_DIR$/EFP_ICAPS_old/lcp.tab.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/EFP_ICAPS_old/lex.c" beforeDir="false" afterPath="$PROJECT_DIR$/EFP_ICAPS_old/lex.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/EFP_ICAPS_old/lex.yy.c" beforeDir="false" afterPath="$PROJECT_DIR$/EFP_ICAPS_old/lex.yy.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/EFP_ICAPS_old/tok.h" beforeDir="false" afterPath="$PROJECT_DIR$/EFP_ICAPS_old/tok.h" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ClangdSettings">
+    <option name="clangTidyViaClangd" value="false" />
+    <option name="formatViaClangd" value="false" />
+  </component>
+  <component name="ExportToHTMLSettings">
+    <option name="OUTPUT_DIRECTORY" value="$PROJECT_DIR$/exportToHTML" />
+  </component>
+  <component name="ExternalProjectsData">
+    <projectState path="$PROJECT_DIR$">
+      <ProjectState />
+    </projectState>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="ab61acce887ff722cd58df8ed7eac60e955dcfd6" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="SET_USER_NAME_GLOBALLY" value="false" />
+  </component>
+  <component name="MakefileLocalSettings">
+    <option name="availableProjects">
+      <map>
+        <entry>
+          <key>
+            <ExternalProjectPojo>
+              <option name="name" value="EFP" />
+              <option name="path" value="$PROJECT_DIR$" />
+            </ExternalProjectPojo>
+          </key>
+          <value>
+            <list>
+              <ExternalProjectPojo>
+                <option name="name" value="EFP" />
+                <option name="path" value="$PROJECT_DIR$" />
+              </ExternalProjectPojo>
+            </list>
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="projectSyncType">
+      <map>
+        <entry key="$PROJECT_DIR$" value="RE_IMPORT" />
+      </map>
+    </option>
+  </component>
+  <component name="ProjectId" id="1hBeI28g3zrONO0htbs2pPGIjcE" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="cf.first.check.clang-format" value="false" />
+    <property name="com.intellij.ide.scratch.LRUPopupBuilder$1/New Scratch File" value="ObjectiveC" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="nodejs_package_manager_path" value="npm" />
+    <property name="restartRequiresConfirmation" value="false" />
+    <property name="settings.editor.selected.configurable" value="dynamic.analysis.tools.profiler" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Custom Build Application.ExecuteOnly">
+    <configuration name="BuildAndExecute" type="CLionExternalRunConfiguration" factoryName="Application" PROGRAM_PARAMS="$PROJECT_DIR$/exp/ICAPS20/Coin_In_The_Box/Coin_in_the_Box__pl_2.txt -st POSS  " REDIRECT_INPUT="false" WORKING_DIR="file://$PROJECT_DIR$" PASS_PARENT_ENVS_2="true" PROJECT_NAME="EFP" TARGET_NAME="DebugFinaly!" CONFIG_NAME="DebugFinaly!" RUN_PATH="$PROJECT_DIR$/bin/efp.out">
+      <method v="2">
+        <option name="RunConfigurationTask" enabled="true" run_configuration_name="MakeFile" run_configuration_type="MAKEFILE_TARGET_RUN_CONFIGURATION" />
+      </method>
+    </configuration>
+    <configuration name="ExecuteOnly" type="CLionExternalRunConfiguration" factoryName="Application" PROGRAM_PARAMS="$PROJECT_DIR$/exp/ICAPS20/CC/CC_2_2_4/CC_2_2_4__pl_5.txt -st POSS -h NO_H_DFS -debug" REDIRECT_INPUT="false" WORKING_DIR="file://$PROJECT_DIR$" PASS_PARENT_ENVS_2="true" PROJECT_NAME="EFP" TARGET_NAME="DebugFinaly!" CONFIG_NAME="DebugFinaly!" RUN_PATH="$PROJECT_DIR$/bin/efp.out">
+      <method v="2" />
+    </configuration>
+    <configuration default="true" type="CLionNativeAppRunConfigurationType" REDIRECT_INPUT="false" WORKING_DIR="file://$PROJECT_DIR$" PASS_PARENT_ENVS_2="true" PROJECT_NAME="EFP" TARGET_NAME="all" CONFIG_NAME="all" version="1">
+      <method v="2">
+        <option name="CLION.COMPOUND.BUILD" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="all" type="CLionNativeAppRunConfigurationType" nameIsGenerated="true" REDIRECT_INPUT="false" WORKING_DIR="file://$PROJECT_DIR$" PASS_PARENT_ENVS_2="true" PROJECT_NAME="EFP" TARGET_NAME="all" CONFIG_NAME="all" version="1">
+      <method v="2">
+        <option name="RunConfigurationTask" enabled="true" run_configuration_name="MakeFile" run_configuration_type="MAKEFILE_TARGET_RUN_CONFIGURATION" />
+      </method>
+    </configuration>
+    <configuration default="true" type="GradleAppRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" PASS_PARENT_ENVS_2="true">
+      <method v="2">
+        <option name="com.jetbrains.cidr.cpp.gradle.execution.GradleNativeBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="MakeFile" type="MAKEFILE_TARGET_RUN_CONFIGURATION" factoryName="Makefile">
+      <makefile filename="$PROJECT_DIR$/Makefile" target="all" workingDirectory="$PROJECT_DIR$" arguments="">
+        <envs />
+      </makefile>
+      <method v="2" />
+    </configuration>
+    <list>
+      <item itemvalue="Custom Build Application.ExecuteOnly" />
+      <item itemvalue="Custom Build Application.BuildAndExecute" />
+      <item itemvalue="Makefile.MakeFile" />
+      <item itemvalue="Makefile Application.all" />
+    </list>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="47a0f7b1-a30f-4cdc-a3d2-50f5c2b307d7" name="Default Changelist" comment="" />
+      <created>1599488829240</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1599488829240</updated>
+      <workItem from="1599488830552" duration="4666000" />
+      <workItem from="1599573229264" duration="20978000" />
+      <workItem from="1600087851737" duration="8843000" />
+      <workItem from="1600266478195" duration="9134000" />
+      <workItem from="1600693433242" duration="17196000" />
+      <workItem from="1601297317755" duration="8866000" />
+      <workItem from="1602171986937" duration="20000" />
+    </task>
+    <task id="LOCAL-00001" summary="Modifica reader per la gestione dell'assert per lo shared_ptr, rimossi include non utilizzati, partenza con la modifica della struttura dati, Predispsoto Progetto CLion, Compilazione via MakeFile, Abilitando Debug a runTime ed Exec come progetto custom.">
+      <created>1599492363189</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1599492363189</updated>
+    </task>
+    <task id="LOCAL-00002" summary="Abilitat di default in questa version le stampe di debug a true.">
+      <created>1599492472579</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1599492472579</updated>
+    </task>
+    <task id="LOCAL-00003" summary="Cambiando di utilizzo per lo shared_ptr da libreria standard a libreria boost, rimosso possibile errore in compilazione che causava un assert della libreria standard. Domain modificato utilizzando boost">
+      <created>1599492984076</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1599492984076</updated>
+    </task>
+    <task id="LOCAL-00004" summary="Reinserito variabile BUILT_DATE generate da riga di comando">
+      <created>1599573424745</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1599573424745</updated>
+    </task>
+    <task id="LOCAL-00005" summary="Modifica MakeFile originale e creata copia di backup, inziale implementazione per gli agent attraverso i dynamic_bitset di boost, commentati ragionamenti per il solver.">
+      <created>1599575560404</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1599575560404</updated>
+    </task>
+    <task id="LOCAL-00006" summary="Modifica in coroso helper, modifica pstate, pstore, pworld in corso per gestire i dyanmic bitset">
+      <created>1599583270493</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1599583270493</updated>
+    </task>
+    <task id="LOCAL-00007" summary="Fix, operatori, rimozione funzione inutile nell'helper per la gestione dei bitset">
+      <created>1599662578791</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1599662578791</updated>
+    </task>
+    <task id="LOCAL-00008" summary="Ulteriori modifiche pworld.cpp">
+      <created>1599663146672</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1599663146672</updated>
+    </task>
+    <task id="LOCAL-00009" summary="Modifiche finali gestione fluenti e agenti in bitset">
+      <created>1599664854140</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1599664854140</updated>
+    </task>
+    <task id="LOCAL-00010" summary="Rimozione cout inutile">
+      <created>1599666607715</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1599666607715</updated>
+    </task>
+    <task id="LOCAL-00011" summary="Modifiche per le azioni">
+      <created>1599900627546</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1599900627546</updated>
+    </task>
+    <task id="LOCAL-00012" summary="ottenimento quante azioni ho inutilmente">
+      <created>1599903519666</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1599903519666</updated>
+    </task>
+    <task id="LOCAL-00013" summary="modifica &quot;inutile&quot;">
+      <created>1599903725029</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1599903725029</updated>
+    </task>
+    <task id="LOCAL-00014" summary="Rimossi commenti durante la build dei file">
+      <created>1599903968063</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1599903968063</updated>
+    </task>
+    <task id="LOCAL-00015" summary="Aggiunto commenti e stampe cout, problema errore nella copia di una belief formula quando è contenuta la definizone di una azione, analisi bug in corso">
+      <created>1600088099396</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1600088099396</updated>
+    </task>
+    <task id="LOCAL-00016" summary="modifica definizione nel parser e lexer">
+      <created>1600089211017</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1600089211017</updated>
+    </task>
+    <task id="LOCAL-00017" summary="Modifica file parser e lexer, bugfix causato dalla libreria esterna di boost">
+      <created>1600089629384</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1600089629384</updated>
+    </task>
+    <task id="LOCAL-00018" summary="Aggiunta funzione nell'helper da un numero al minimo numero di bit necessari per rappresentarlo. Modifica build fluenti, i fluenti ora sono positivi e cambia soltanto il bit più significativo">
+      <created>1600092554992</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1600092554992</updated>
+    </task>
+    <task id="LOCAL-00019" summary="Modifica domain per la gestione, bugfix ottenimento puntatore al ptr">
+      <created>1600093700583</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1600093700583</updated>
+    </task>
+    <task id="LOCAL-00020" summary="Modifiche in corso e fix errori durante la generazione dei puntatori ai mondi, genero i mondi iniziali non più con indici ma con i bitset">
+      <created>1600269044647</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1600269044647</updated>
+    </task>
+    <task id="LOCAL-00021" summary="Fix errore durante la generazione del mondo inziale, inziale imprve della performance rilevato.">
+      <created>1600355131193</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1600355131193</updated>
+    </task>
+    <task id="LOCAL-00022" summary="Rimozione cout inutili">
+      <created>1600694797850</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1600694797851</updated>
+    </task>
+    <task id="LOCAL-00023" summary="Aggiunta cartella con i file di progetto per debuggare attraverso CLion">
+      <created>1600698901003</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1600698901003</updated>
+    </task>
+    <task id="LOCAL-00024" summary="Aggiunta GUIDA per Francesco per aprire il progetto debugabbile a runtime">
+      <created>1600699164264</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1600699164264</updated>
+    </task>
+    <task id="LOCAL-00025" summary="Aggiunta GUIDA per Francesco per aprire il progetto debugabbile a modifiche14:39 in call con francesco">
+      <created>1600778396802</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1600778396802</updated>
+    </task>
+    <task id="LOCAL-00026" summary="Modifica creazione id del mondo">
+      <created>1601038406830</created>
+      <option name="number" value="00026" />
+      <option name="presentableId" value="LOCAL-00026" />
+      <option name="project" value="LOCAL" />
+      <updated>1601038406830</updated>
+    </task>
+    <task id="LOCAL-00027" summary="Riabilitato debug a false, modifica e rimozione cout inutili utilizzati durante il debug">
+      <created>1601042151464</created>
+      <option name="number" value="00027" />
+      <option name="presentableId" value="LOCAL-00027" />
+      <option name="project" value="LOCAL" />
+      <updated>1601042151464</updated>
+    </task>
+    <task id="LOCAL-00028" summary="Riabilitato debug a false, modifica e rimozione cout inutili utilizzati durante il debug">
+      <created>1601303012151</created>
+      <option name="number" value="00028" />
+      <option name="presentableId" value="LOCAL-00028" />
+      <option name="project" value="LOCAL" />
+      <updated>1601303012151</updated>
+    </task>
+    <task id="LOCAL-00029" summary="Miglioria per la ricerca utilizzando hash, la versione con i bitset rallentava in quanto la genarazione degli id precedentemente concatenando i bitset precava del tempo utile.">
+      <created>1601303209333</created>
+      <option name="number" value="00029" />
+      <option name="presentableId" value="LOCAL-00029" />
+      <option name="project" value="LOCAL" />
+      <updated>1601303209333</updated>
+    </task>
+    <task id="LOCAL-00030" summary="rimozione variabile non usata">
+      <created>1601327145643</created>
+      <option name="number" value="00030" />
+      <option name="presentableId" value="LOCAL-00030" />
+      <option name="project" value="LOCAL" />
+      <updated>1601327145643</updated>
+    </task>
+    <task id="LOCAL-00031" summary="Fix utilizzo solo i bit necessari per gli agenti e non spreco spazio in ram">
+      <created>1601327398752</created>
+      <option name="number" value="00031" />
+      <option name="presentableId" value="LOCAL-00031" />
+      <option name="project" value="LOCAL" />
+      <updated>1601327398752</updated>
+    </task>
+    <task id="LOCAL-00032" summary="Modifiche necessarie per poter effettuare la ricerca della soluzione tramite una DFS iterativa (in corso)">
+      <created>1601358401054</created>
+      <option name="number" value="00032" />
+      <option name="presentableId" value="LOCAL-00032" />
+      <option name="project" value="LOCAL" />
+      <updated>1601358401054</updated>
+    </task>
+    <option name="localTasksCounter" value="33" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="oldMeFiltersMigrated" value="true" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Fix, operatori, rimozione funzione inutile nell'helper per la gestione dei bitset" />
+    <MESSAGE value="Ulteriori modifiche pworld.cpp" />
+    <MESSAGE value="Modifiche finali gestione fluenti e agenti in bitset" />
+    <MESSAGE value="Rimozione cout inutile" />
+    <MESSAGE value="Modifiche per le azioni" />
+    <MESSAGE value="ottenimento quante azioni ho inutilmente" />
+    <MESSAGE value="modifica &quot;inutile&quot;" />
+    <MESSAGE value="Rimossi commenti durante la build dei file" />
+    <MESSAGE value="Aggiunto commenti e stampe cout, problema errore nella copia di una belief formula quando è contenuta la definizone di una azione, analisi bug in corso" />
+    <MESSAGE value="modifica definizione nel parser e lexer" />
+    <MESSAGE value="Modifica file parser e lexer, bugfix causato dalla libreria esterna di boost" />
+    <MESSAGE value="Aggiunta funzione nell'helper da un numero al minimo numero di bit necessari per rappresentarlo. Modifica build fluenti, i fluenti ora sono positivi e cambia soltanto il bit più significativo" />
+    <MESSAGE value="Modifica domain per la gestione, bugfix ottenimento puntatore al ptr" />
+    <MESSAGE value="Modifiche in corso e fix errori durante la generazione dei puntatori ai mondi, genero i mondi iniziali non più con indici ma con i bitset" />
+    <MESSAGE value="Fix errore durante la generazione del mondo inziale, inziale imprve della performance rilevato." />
+    <MESSAGE value="Rimozione cout inutili" />
+    <MESSAGE value="Aggiunta cartella con i file di progetto per debuggare attraverso CLion" />
+    <MESSAGE value="Aggiunta GUIDA per Francesco per aprire il progetto debugabbile a runtime" />
+    <MESSAGE value="Aggiunta GUIDA per Francesco per aprire il progetto debugabbile a modifiche14:39 in call con francesco" />
+    <MESSAGE value="Modifica creazione id del mondo" />
+    <MESSAGE value="Riabilitato debug a false, modifica e rimozione cout inutili utilizzati durante il debug" />
+    <MESSAGE value="Miglioria per la ricerca utilizzando hash, la versione con i bitset rallentava in quanto la genarazione degli id precedentemente concatenando i bitset precava del tempo utile." />
+    <MESSAGE value="rimozione variabile non usata" />
+    <MESSAGE value="Fix utilizzo solo i bit necessari per gli agenti e non spreco spazio in ram" />
+    <MESSAGE value="Modifiche necessarie per poter effettuare la ricerca della soluzione tramite una DFS iterativa (in corso)" />
+    <option name="LAST_COMMIT_MESSAGE" value="Modifiche necessarie per poter effettuare la ricerca della soluzione tramite una DFS iterativa (in corso)" />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="0" y="23" width="1071" height="725" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1601329598244">
+      <screen x="0" y="23" width="1280" height="725" />
+    </state>
+    <state x="0" y="37" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1280.800@0.0.1280.800" timestamp="1600357053414" />
+    <state x="0" y="23" width="1071" height="725" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.23.1280.725@0.23.1280.725" timestamp="1601329598244" />
+    <state x="334" y="195" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1599575456095">
+      <screen x="0" y="23" width="1280" height="725" />
+    </state>
+    <state x="334" y="195" key="#com.intellij.fileTypes.FileTypeChooser/0.23.1280.725@0.23.1280.725" timestamp="1599575456095" />
+    <state x="383" y="227" key="#com.intellij.ide.actions.ChooseComponentsToExportDialog" timestamp="1600698662804">
+      <screen x="0" y="23" width="1280" height="725" />
+    </state>
+    <state x="383" y="227" key="#com.intellij.ide.actions.ChooseComponentsToExportDialog/0.23.1280.725@0.23.1280.725" timestamp="1600698662804" />
+    <state x="361" y="155" key="#com.intellij.tools.ToolEditorDialog" timestamp="1600698508535">
+      <screen x="0" y="23" width="1280" height="725" />
+    </state>
+    <state x="361" y="155" key="#com.intellij.tools.ToolEditorDialog/0.23.1280.725@0.23.1280.725" timestamp="1600698508535" />
+    <state width="536" height="515" key="DebuggerActiveHint" timestamp="1601329035560">
+      <screen x="0" y="23" width="1280" height="725" />
+    </state>
+    <state width="536" height="515" key="DebuggerActiveHint/0.0.1280.800@0.0.1280.800" timestamp="1600354151162" />
+    <state width="536" height="515" key="DebuggerActiveHint/0.23.1280.725@0.23.1280.725" timestamp="1601329035560" />
+    <state width="1238" height="238" key="GridCell.Tab.0.bottom" timestamp="1601472425114">
+      <screen x="0" y="23" width="1280" height="725" />
+    </state>
+    <state width="1238" height="343" key="GridCell.Tab.0.bottom/0.0.1280.800@0.0.1280.800" timestamp="1600362951141" />
+    <state width="1238" height="238" key="GridCell.Tab.0.bottom/0.23.1280.725@0.23.1280.725" timestamp="1601472425114" />
+    <state width="1238" height="238" key="GridCell.Tab.0.center" timestamp="1601472425114">
+      <screen x="0" y="23" width="1280" height="725" />
+    </state>
+    <state width="1238" height="343" key="GridCell.Tab.0.center/0.0.1280.800@0.0.1280.800" timestamp="1600362951139" />
+    <state width="1238" height="210" key="GridCell.Tab.0.center/0.0.1280.800@0.23.1280.725" timestamp="1599571861548" />
+    <state width="1238" height="238" key="GridCell.Tab.0.center/0.23.1280.725@0.23.1280.725" timestamp="1601472425114" />
+    <state width="1238" height="238" key="GridCell.Tab.0.left" timestamp="1601472425113">
+      <screen x="0" y="23" width="1280" height="725" />
+    </state>
+    <state width="1238" height="343" key="GridCell.Tab.0.left/0.0.1280.800@0.0.1280.800" timestamp="1600362951137" />
+    <state width="1238" height="238" key="GridCell.Tab.0.left/0.23.1280.725@0.23.1280.725" timestamp="1601472425113" />
+    <state width="1238" height="238" key="GridCell.Tab.0.right" timestamp="1601472425114">
+      <screen x="0" y="23" width="1280" height="725" />
+    </state>
+    <state width="1238" height="343" key="GridCell.Tab.0.right/0.0.1280.800@0.0.1280.800" timestamp="1600362951140" />
+    <state width="1238" height="238" key="GridCell.Tab.0.right/0.23.1280.725@0.23.1280.725" timestamp="1601472425114" />
+    <state width="1238" height="228" key="GridCell.Tab.1.bottom" timestamp="1601472425086">
+      <screen x="0" y="23" width="1280" height="725" />
+    </state>
+    <state width="1238" height="204" key="GridCell.Tab.1.bottom/0.0.1280.800@0.0.1280.800" timestamp="1600356961068" />
+    <state width="1238" height="228" key="GridCell.Tab.1.bottom/0.23.1280.725@0.23.1280.725" timestamp="1601472425086" />
+    <state width="1238" height="228" key="GridCell.Tab.1.center" timestamp="1601472425085">
+      <screen x="0" y="23" width="1280" height="725" />
+    </state>
+    <state width="1238" height="204" key="GridCell.Tab.1.center/0.0.1280.800@0.0.1280.800" timestamp="1600356961066" />
+    <state width="1238" height="228" key="GridCell.Tab.1.center/0.23.1280.725@0.23.1280.725" timestamp="1601472425085" />
+    <state width="1238" height="228" key="GridCell.Tab.1.left" timestamp="1601472425085">
+      <screen x="0" y="23" width="1280" height="725" />
+    </state>
+    <state width="1238" height="204" key="GridCell.Tab.1.left/0.0.1280.800@0.0.1280.800" timestamp="1600356961065" />
+    <state width="1238" height="228" key="GridCell.Tab.1.left/0.23.1280.725@0.23.1280.725" timestamp="1601472425085" />
+    <state width="1238" height="228" key="GridCell.Tab.1.right" timestamp="1601472425086">
+      <screen x="0" y="23" width="1280" height="725" />
+    </state>
+    <state width="1238" height="204" key="GridCell.Tab.1.right/0.0.1280.800@0.0.1280.800" timestamp="1600356961067" />
+    <state width="1238" height="228" key="GridCell.Tab.1.right/0.23.1280.725@0.23.1280.725" timestamp="1601472425086" />
+    <state x="426" y="122" key="RollbackChangesDialog" timestamp="1599903358556">
+      <screen x="0" y="23" width="1280" height="725" />
+    </state>
+    <state x="426" y="109" key="RollbackChangesDialog/0.0.1280.800@0.0.1280.800" timestamp="1599491048396" />
+    <state x="426" y="122" key="RollbackChangesDialog/0.23.1280.725@0.23.1280.725" timestamp="1599903358556" />
+    <state x="141" y="25" key="SettingsEditor" timestamp="1601040981002">
+      <screen x="0" y="23" width="1280" height="725" />
+    </state>
+    <state x="141" y="25" key="SettingsEditor/0.23.1280.725@0.23.1280.725" timestamp="1601040981002" />
+    <state x="437" y="305" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1600694545529">
+      <screen x="0" y="23" width="1280" height="725" />
+    </state>
+    <state x="437" y="305" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.23.1280.725@0.23.1280.725" timestamp="1600694545529" />
+    <state x="534" y="139" key="com.intellij.tools.ToolSelectDialog.dimensionServiceKey" timestamp="1600698509870">
+      <screen x="0" y="23" width="1280" height="725" />
+    </state>
+    <state x="534" y="139" key="com.intellij.tools.ToolSelectDialog.dimensionServiceKey/0.23.1280.725@0.23.1280.725" timestamp="1600698509870" />
+    <state x="180" y="121" key="com.intellij.xdebugger.impl.breakpoints.ui.BreakpointsDialogFactory$2" timestamp="1601300660280">
+      <screen x="0" y="23" width="1280" height="725" />
+    </state>
+    <state x="180" y="108" key="com.intellij.xdebugger.impl.breakpoints.ui.BreakpointsDialogFactory$2/0.0.1280.800@0.0.1280.800" timestamp="1600355050522" />
+    <state x="180" y="121" key="com.intellij.xdebugger.impl.breakpoints.ui.BreakpointsDialogFactory$2/0.23.1280.725@0.23.1280.725" timestamp="1601300660280" />
+    <state x="341" y="23" width="598" height="725" key="find.popup" timestamp="1601328491416">
+      <screen x="0" y="23" width="1280" height="725" />
+    </state>
+    <state x="341" y="23" width="598" height="725" key="find.popup/0.23.1280.725@0.23.1280.725" timestamp="1601328491416" />
+    <state x="328" y="296" width="624" height="192" key="makefile.clean.confirm.dialog" timestamp="1599488833446">
+      <screen x="0" y="23" width="1280" height="725" />
+    </state>
+    <state x="328" y="296" width="624" height="192" key="makefile.clean.confirm.dialog/0.23.1280.725@0.23.1280.725" timestamp="1599488833446" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/include/formulae/belief_formula.cpp</url>
+          <line>583</line>
+          <option name="timeStamp" value="41" />
+        </line-breakpoint>
+        <line-breakpoint type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/include/formulae/belief_formula.cpp</url>
+          <line>120</line>
+          <option name="timeStamp" value="53" />
+        </line-breakpoint>
+        <line-breakpoint type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/include/domain/domain.cpp</url>
+          <line>288</line>
+          <option name="timeStamp" value="92" />
+        </line-breakpoint>
+        <line-breakpoint type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/include/states/possibilities/pworld.cpp</url>
+          <line>266</line>
+          <option name="timeStamp" value="94" />
+        </line-breakpoint>
+        <line-breakpoint type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/include/states/possibilities/pworld.cpp</url>
+          <line>276</line>
+          <option name="timeStamp" value="95" />
+        </line-breakpoint>
+        <line-breakpoint type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/include/states/possibilities/pworld.cpp</url>
+          <line>200</line>
+          <option name="timeStamp" value="101" />
+        </line-breakpoint>
+        <line-breakpoint type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/include/states/possibilities/pstate.cpp</url>
+          <line>568</line>
+          <option name="timeStamp" value="152" />
+        </line-breakpoint>
+        <line-breakpoint type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/include/states/possibilities/pstate.cpp</url>
+          <line>224</line>
+          <option name="timeStamp" value="162" />
+        </line-breakpoint>
+        <line-breakpoint type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/EFP_ICAPS_old/planner.cpp</url>
+          <line>40</line>
+          <option name="timeStamp" value="172" />
+        </line-breakpoint>
+        <line-breakpoint type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/include/states/possibilities/pstate.cpp</url>
+          <line>561</line>
+          <option name="timeStamp" value="176" />
+        </line-breakpoint>
+        <line-breakpoint type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/include/states/possibilities/pstate.cpp</url>
+          <line>546</line>
+          <option name="timeStamp" value="177" />
+        </line-breakpoint>
+        <line-breakpoint type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/include/states/possibilities/pstate.cpp</url>
+          <line>637</line>
+          <option name="timeStamp" value="193" />
+        </line-breakpoint>
+        <line-breakpoint type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/include/utilities/helper.cpp</url>
+          <line>124</line>
+          <option name="timeStamp" value="194" />
+        </line-breakpoint>
+        <line-breakpoint type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/include/utilities/helper.cpp</url>
+          <line>119</line>
+          <option name="timeStamp" value="195" />
+        </line-breakpoint>
+        <line-breakpoint type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/include/utilities/helper.cpp</url>
+          <line>133</line>
+          <option name="timeStamp" value="196" />
+        </line-breakpoint>
+        <line-breakpoint type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/include/utilities/helper.cpp</url>
+          <line>136</line>
+          <option name="timeStamp" value="197" />
+        </line-breakpoint>
+        <line-breakpoint type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/include/utilities/helper.cpp</url>
+          <line>138</line>
+          <option name="timeStamp" value="198" />
+        </line-breakpoint>
+        <line-breakpoint type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/include/utilities/helper.cpp</url>
+          <line>144</line>
+          <option name="timeStamp" value="199" />
+        </line-breakpoint>
+        <line-breakpoint type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/include/states/possibilities/pstate.cpp</url>
+          <line>511</line>
+          <option name="timeStamp" value="215" />
+        </line-breakpoint>
+        <line-breakpoint type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/include/states/possibilities/pworld.cpp</url>
+          <line>325</line>
+          <option name="timeStamp" value="218" />
+        </line-breakpoint>
+        <line-breakpoint type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/include/states/possibilities/pworld.cpp</url>
+          <line>316</line>
+          <option name="timeStamp" value="219" />
+        </line-breakpoint>
+        <line-breakpoint type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/include/states/possibilities/pworld.cpp</url>
+          <line>107</line>
+          <option name="timeStamp" value="222" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/include/search/planner.ipp</url>
+          <line>204</line>
+          <option name="timeStamp" value="227" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/include/search/planner.ipp</url>
+          <line>205</line>
+          <option name="timeStamp" value="228" />
+        </line-breakpoint>
+      </breakpoints>
+      <default-breakpoints>
+        <breakpoint type="python-exception">
+          <properties notifyOnTerminate="true" exception="BaseException">
+            <option name="notifyOnTerminate" value="true" />
+          </properties>
+        </breakpoint>
+      </default-breakpoints>
+    </breakpoint-manager>
+  </component>
+</project>

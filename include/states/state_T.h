@@ -235,6 +235,7 @@ public:
      * \bug Is not supposed to override the method but it does.*/
     state<T> compute_succ(const action & act) const;
 
+    fluent_set compute_succ2(const action & act) const;
 
     /** \brief Function that determines the mimimum \ref e-state that is bisimilar to the current one.
      *

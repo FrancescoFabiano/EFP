@@ -2,9 +2,11 @@
 
 ## Goal
 Realize a scalable Epistemic Forward Planner that bases its concept on different states representations such as:
-- [x] *Kripke structure*
+- [ ] *Kripke structure*
 - [x] *possibilities*
 - [ ] *OBDDs*
+
+Temporally disabled Kripke and OBDD
 
 ## Current situation:
 Implemented EFP v. 2.0 that uses templatic e-States representations with relative templatic transition function.
@@ -18,6 +20,7 @@ Moreover the planner admits templatic heuristics usage.
 At the moment we implemented:
 - a complete (yet inefficient) version of the *Epistemic planning graph* introduced in (Le et al. 2018);
 - *number of satisfied goals* that possibly expands the original goal for a better scalability.
+- BFS, DFS and DFS Iterative
 
   
 ## Future works and some ideas
@@ -61,6 +64,9 @@ At the moment we implemented:
 - The repository also includes several scripts to help in the testing/debugging process. These are located inside the folder *scripts*.
 - All the utilized beanchmark are preserved in the folder *exp*.
 - The folder *ICAPS_EFP_OLD* contains EFP v. 1.0 (introduced in (Le et al. 2018)) for comparison and testing.
+- The repository contains DockerFile for create container and images to compile and run
+- The repository include project settings and various profile to works on ide (CLion), profiles available: Build, Build Clean, Execute, Execute and Build
+- Now can debug at run time with debugger (Clion), profiling with CLion profiler integrated (Callstack, Memory, CPU usage and More)
 
 #### Bibliography
 Baral, C.; Gelfond, G.; Pontelli, E.; and Son, T. C. 2015.

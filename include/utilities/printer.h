@@ -20,7 +20,6 @@
 
 #include "../domain/grounder.h"
 #include "../formulae/belief_formula.h"
-#include "../states/kripke/kworld.h"
 #include "../states/possibilities/pworld.h"
 
 class printer
@@ -89,9 +88,9 @@ public:
     void print_list(const formula_list& to_print);
 
     /** \brief Function used to print all the \ref kworld_ptr inside \p to_print.
-     * 
+     *
      * @param[in] to_print: the \ref kworld_ptr_set to be printed.*/
-    void print_list(const kworld_ptr_set& to_print);
+  //  void print_list(const kworld_ptr_set& to_print);
 
     /** \brief Function used to print all the \ref kworld_ptr inside \p to_print.
      * 
