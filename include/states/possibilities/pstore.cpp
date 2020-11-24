@@ -28,14 +28,18 @@ const pworld_ptr pstore::add_world(const pworld & to_add)
 
 
 
-	/*// \bug No need to create the pworld pp or the iterator.
-	 * pworld_set::iterator it_pwset;
-	 * it_pwset = std::get<0>(m_created_worlds.insert(to_add));
-	 * pworld pp = *it_kpset;
-	 * return std::shared_ptr<const pworld>(&pp);*/
+	// \bug No need to create the pworld pp or the iterator.
+	/*  pworld_set::iterator it_pwset;
+	  it_pwset = std::get<0>(m_created_worlds.insert(to_add));
+	  //pworld pp = *it_kpset;
+	  return std::shared_ptr<const pworld>(&pp);*/
 
 	//return std::shared_ptr<const pworld>(&(*(std::get<0>(m_created_worlds.insert(to_add)))));
-	auto tmp_ptr = std::make_shared<const pworld>(*(std::get<0>(m_created_worlds.insert(to_add))));
+	//return std::make_shared<const pworld>(*(std::get<0>(m_created_worlds.insert(to_add))));
 	//*tmp_ptr = tmp;
-	return tmp_ptr;
+	//return tmp_ptr;
+
+    auto tmp_ptr = std::make_shared<const pworld>(*(std::get<0>(m_created_worlds.insert(to_add))));
+    //*tmp_ptr = tmp;
+    return tmp_ptr;
 }

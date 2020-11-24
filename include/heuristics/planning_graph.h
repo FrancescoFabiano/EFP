@@ -22,7 +22,8 @@
 #include "../states/possibilities/pstate.h"
 #include "../formulae/belief_formula.h"
 #include "../domain/domain.h"
-
+#include <utility>
+#include <boost/dynamic_bitset.hpp>
 /**
  * \class pg_action_level
  * \brief Class that implements an action level of the planning graph.
@@ -34,6 +35,8 @@
  * \author Francesco Fabiano.
  * \date September 24, 2019
  */
+
+
 
 class pg_action_level
 {
@@ -120,6 +123,8 @@ private:
     //Maybe make it templatic
     /*\brief The set of the e-States contained in *this**/
     std::set<T> m_eStates;
+    std::set<fluent> m_fluentSet;
+    std::set<std::pair<belief_formula,bool>> m_pairBeliefBool;
     /*\brief The depth of *this*, which state layer is*/
     unsigned short m_depth = 0;
 
@@ -130,7 +135,8 @@ private:
      * @param[in] eStates: The eState of the level where to check for the belief formula entailment.
      * @param[in] bf: The belief formula to check for entailment.
      */
-    bool pg_entailment(const std::set<T> & eStates, const belief_formula & bf) const;
+
+    bool pg_entailment( const std::set<std::pair<belief_formula,bool>> & pairBeliefBool, const belief_formula & bf) const;
 
     /*Function that checks satisfaction of a CNF of belief_formula given an epistemic state level's eStates.
      *
@@ -139,7 +145,7 @@ private:
      * @param[in] eStates: The eState of the level where to check for the formula entailment.
      * @param[in] fl: The CNF of belief_formula to check for entailment.
      */
-    bool pg_entailment(const std::set<T> & eStates, const formula_list & fl) const;
+    bool pg_entailment(const std::set<std::pair<belief_formula,bool>> & pairBeliefBool, const formula_list & fl) const;
 
 
 public:
@@ -159,6 +165,9 @@ public:
      */
     pg_state_level(const std::set<T> & eStates, unsigned short depth);
 
+    pg_state_level(const std::set<std::pair<belief_formula,bool>> & pairBeliefBool, const std::set<fluent> & fluentSet);
+
+    pg_state_level(const std::set<std::pair<belief_formula,bool>> & pairBeliefBool, const std::set<fluent> & fluentSet, unsigned short depth);
     /*Setter of the field m_eStates
      *
      * @param[in] eStates: the value to assign to m_eStates. 
@@ -170,12 +179,16 @@ public:
      */
     const std::set<T>& get_eStates() const;
 
+    void set_pair_belief_bool(const std::set<std::pair<belief_formula,bool>> & pairBeliefBool);
+    void set_fluent_set(const std::set<fluent> & fluentSet);
+
     /*Function that add a single eState to *this*
      *
      * @param[in] eState: the eState to add to m_eStates if not present.
      */
     bool add_eState(const T & eState);
 
+    bool add_fluent(const fluent & fluent);
     /*Setter of the field m_depth
      *
      * @param[in] depth: the value to assign to m_depth. 
@@ -186,6 +199,10 @@ public:
      * @return: the value to assign to m_depth. 
      */
     unsigned short get_depth() const;
+
+    const std::set<std::pair<belief_formula,bool>> & get_pair_belief_bool() const;
+
+    const std::set<fluent> & get_fluent_set() const;
 
     /*Function that checks satisfaction of a belief_formula on *this*.
      * 
@@ -261,6 +278,14 @@ private:
      * @param[out] converted_bf: The (converted) fluents to yet be entailed by the planning graph.
      */
     void pg_build_classical(std::vector<belief_formula> & converted_bf);
+
+    /*
+     *
+     * */
+    void pg_build_initially(std::list<belief_formula> & converted_bf);
+    void pg_build_grounded();
+    //void pg_build_grounded(std::vector<belief_formula> & converted_bf);
+
     /*Function that returns the list of fluents and belief formulae that represent the fluent of the conversion to classical planning
      * 
      * @param[in] nesting: the max depth of belief_formula to consider fluents in the conversion to classical planning (1 as default).
@@ -268,6 +293,7 @@ private:
      */
     std::vector<belief_formula> list_bf_classical(unsigned short nesting = 1);
 
+    std::list<belief_formula> list_bf_grounded(unsigned short nesting,const std::list<belief_formula>& goal_formula);
     /**The recursive function to generate the various nested fluents for classical conversion
      *
      * @param[in] nesting: The max_depth of the generated subgoals.
@@ -276,6 +302,7 @@ private:
      * @param[out] ret: The list of already generated fluents in which to add the new ones. 
      */
     void make_nested_bf_classical(unsigned short nesting, unsigned short depth, belief_formula & to_explore, std::vector<belief_formula> & ret);
+    void make_nested_bf_classical2(unsigned short nesting, unsigned short depth, belief_formula & to_explore, std::list<belief_formula> & ret);
 
     /*Function add the next (depth + 1) state layer to m_state_levels
      *

@@ -34,6 +34,10 @@ public:
      * @return the negation of \p to_negate.*/
     static fluent negate_fluent(const fluent to_negate);
 
+    static bool is_negate(const fluent f);
+
+
+
     /** \brief Function to merge the results of an \ref ONTIC \ref action with a world description.
      *   
      * @param[in] effect: part of the effect of an \ref ONTIC \ref action in CNF form.
@@ -101,6 +105,10 @@ public:
      * 
      * @return the description of the world after \p effect has been applied to \p world_description.*/
     static fluent_set ontic_exec(const fluent_formula& effect, const fluent_set& world_description);
+
+    static int lenght_to_power_two(int length);
+
+
 };
 
 

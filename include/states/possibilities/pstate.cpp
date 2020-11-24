@@ -9,7 +9,7 @@
 
 #include <iostream>
 #include <tuple>
-
+#include <boost/dynamic_bitset.hpp>
 
 #include "pstate.h"
 #include "../../domain/domain.h"
@@ -335,6 +335,8 @@ const pworld_ptr_set pstate::get_C_reachable_worlds(const agent_set & ags, const
 	return ret;
 }
 
+
+
 const pworld_ptr_set pstate::get_D_reachable_worlds(const agent_set & ags, const pworld_ptr & world) const
 {
 	/**@bug: Notion of D-Reachable is correct (page 24 of Reasoning about Knowledge)*/
@@ -349,9 +351,9 @@ const pworld_ptr_set pstate::get_D_reachable_worlds(const agent_set & ags, const
 		pworld_ptr_set::const_iterator it_pwset2 = to_intersect.begin();
 		while ((it_pwset1 != ret.end()) && (it_pwset2 != to_intersect.end())) {
 
-			if ((*it_pwset1 < *it_pwset2) && ((*it_pwset1).get_fluent_based_id().compare((*it_pwset2).get_fluent_based_id()) != 0)) {
+			if ((*it_pwset1 < *it_pwset2) && (((*it_pwset1).get_fluent_based_id()) ==((*it_pwset2).get_fluent_based_id()))) {
 				ret.erase(it_pwset1++);
-			} else if ((*it_pwset2 < *it_pwset1) && ((*it_pwset1).get_fluent_based_id().compare((*it_pwset2).get_fluent_based_id()) != 0)) {
+			} else if ((*it_pwset2 < *it_pwset1) && ((((*it_pwset1).get_fluent_based_id()) ==((*it_pwset2).get_fluent_based_id())))){
 				++it_pwset2;
 			} else { // *it_pwset1 == *it_pwset2
 				++it_pwset1;
@@ -456,23 +458,35 @@ void pstate::build_initial_prune()
 /*From https://www.geeksforgeeks.org/generate-all-the-binary-strings-of-n-bits/ since is like generating all the binary numbers.*/
 void pstate::generate_initial_pworlds(fluent_set& permutation, int index, const fluent_set & initially_known)
 {
+    //todo non usare indici ma bitset prima positivo fluent poi negativo
 	int fluent_number = domain::get_instance().get_fluent_number();
-	if (index / 2 == fluent_number) {
+
+	int bit_size = (domain::get_instance().get_size_fluent());
+
+	if (index  == fluent_number) {
 		pworld to_add(permutation);
 		add_initial_pworld(to_add);
 
 		return;
 	}
+
 	fluent_set permutation_2 = permutation;
 	//Add the \ref fluent in positive version
-	if (initially_known.find(index + 1) == initially_known.end()) {
-		permutation.insert(index);
-		generate_initial_pworlds(permutation, index + 2, initially_known);
-	}
-	if (initially_known.find(index) == initially_known.end()) {
-		permutation_2.insert(index + 1);
-		generate_initial_pworlds(permutation_2, index + 2, initially_known);
-	}
+	boost::dynamic_bitset<> bitSetToFindPositve(bit_size,index);
+    boost::dynamic_bitset<> bitSetToFindNegative(bit_size,index);
+    bitSetToFindNegative.set(bitSetToFindPositve.size() - 1, 1);
+    bitSetToFindPositve.set(bitSetToFindPositve.size()-1,0);
+
+
+    if (initially_known.find(bitSetToFindNegative) == initially_known.end()) {
+        permutation.insert(bitSetToFindPositve);
+        generate_initial_pworlds(permutation, index + 1, initially_known);
+    }
+    if (initially_known.find(bitSetToFindPositve) == initially_known.end()) {
+        permutation_2.insert(bitSetToFindNegative);
+        generate_initial_pworlds(permutation_2, index + 1, initially_known);
+    }
+
 }
 
 void pstate::add_initial_pworld(const pworld & possible_add)
@@ -495,6 +509,7 @@ void pstate::add_initial_pworld(const pworld & possible_add)
 				std::cout << std::endl;*/
 			}
 		} else {
+		    //std::cout << "error non generata una permeutazione uguale ad un altra" << std::endl;
 			//Already generated so we save it on pstore
 			pstore::get_instance().add_world(possible_add);
 		}
@@ -531,13 +546,14 @@ void pstate::generate_initial_pedges()
 	/*This for add to *this* all the possible edges.*/
 	for (it_pwps_1 = m_worlds.begin(); it_pwps_1 != m_worlds.end(); it_pwps_1++) {
 		for (it_pwps_2 = it_pwps_1; it_pwps_2 != m_worlds.end(); it_pwps_2++) {
-			for (unsigned int i = 0; i < domain::get_instance().get_agents().size(); i++) {
-				pwptr_tmp1 = *it_pwps_1;
-				pwptr_tmp2 = *it_pwps_2;
+            for (auto agent : domain::get_instance().get_agents())
+            {
+                pwptr_tmp1 = *it_pwps_1;
+                pwptr_tmp2 = *it_pwps_2;
+                add_edge(pwptr_tmp1, pwptr_tmp2, agent);
+                add_edge(pwptr_tmp2, pwptr_tmp1, agent);
 
-				add_edge(pwptr_tmp1, pwptr_tmp2, i);
-				add_edge(pwptr_tmp2, pwptr_tmp1, i);
-			}
+            }
 		}
 	}
 
@@ -1295,7 +1311,7 @@ void pstate::print_graphviz(std::ostream & graphviz) const
 				graphviz << ", ";
 			}
 			print_first = true;
-			if ((*it_fs) % 2 == 0) color = "<font color=\"#0000ff\"> ";
+			if (helper::is_negate(*it_fs)) color = "<font color=\"#0000ff\"> ";
 			else color = "<font color=\"#ff1020\">";
 			graphviz << color << domain::get_instance().get_grounder().deground_fluent(*it_fs) << "</font>";
 		}

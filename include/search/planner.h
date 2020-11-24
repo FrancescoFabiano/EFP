@@ -44,6 +44,9 @@ private:
     std::queue< T > m_search_space;
     std::priority_queue<T, std::vector<T>, compare_heuristic<T> > m_heur_search_space;
 
+    /**Queue for DFS**/
+    std::stack<T> m_search_space_DFS;
+
     /**Function that searches on m_search_space using BFS on all the actions.
      * 
      * @param[in] results_file: if true print the plan time in a file to easy the confrontation with the old version.
@@ -51,6 +54,11 @@ private:
      * @return false otherwise.*/
     bool search_BFS(bool results_file);
 
+    bool search_DFS(bool results_file);
+
+    //ricerca con dfs iterativa che scandisce a livelli la ricerca in profondita, maxDepth è il massimo cammino in profonidtà e step di quanto ad ogni giro incrementiamo
+    //i nostri step in profondità
+    bool search_IterativeDFS(bool results_file,int maxDepth_, int step_);
 
     /**Function that searches on m_search_space using Best First Search.
      * 
@@ -69,7 +77,7 @@ public:
      * @param[in] results_file: if true print the plan time in a file to easy the confrontation with the old version.
      * @param[in] used_heur: used to determine if any heuristic has to be used and which one.
      * @return true if a plan is found.*/
-    bool search(bool results_file, heuristics used_heur);
+    bool search(bool results_file, heuristics used_heur, int max_depth, int step_);
 
     /**Function print out the solution time.
      * 

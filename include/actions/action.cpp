@@ -136,7 +136,7 @@ void action::add_proposition(proposition & prop)
 	case OBSERVANCE:
 		set_type(NOTSET);
 		add_fully_observant(prop.get_agent(), prop.get_observability_conditions());
-		break;
+ 		break;
 
 	case AWARENESS:
 		set_type(NOTSET);

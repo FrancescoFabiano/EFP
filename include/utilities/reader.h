@@ -26,7 +26,8 @@
 #include "../actions/proposition.h"
 
 class reader
-{    
+{
+
 public:
     /** \brief Name of all the fluents (only positive) in the domain.*/
     string_set m_fluents;
@@ -57,6 +58,8 @@ public:
      * and store the information into the fields of the \ref reader class. 
      * @return The same int value returned from the parsing process.*/
     int read();
+
+    reader();
 
 
     /** \brief Function used to print all the information stored inside the reader object.*/

@@ -3,10 +3,14 @@ OBJS	=	$(BUILD_DIR)/bison.o $(BUILD_DIR)/lex.o $(BUILD_DIR)/main.o \
 			$(BUILD_DIR)/belief_formula.o $(BUILD_DIR)/proposition.o $(BUILD_DIR)/domain.o \
 			$(BUILD_DIR)/grounder.o $(BUILD_DIR)/printer.o $(BUILD_DIR)/asp_maker.o \
 			$(BUILD_DIR)/action.o $(BUILD_DIR)/helper.o $(BUILD_DIR)/initially.o \
+			$(BUILD_DIR)/kstore.o \
+			$(BUILD_DIR)/kedge.o $(BUILD_DIR)/kworld.o $(BUILD_DIR)/kstate.o \
 			$(BUILD_DIR)/pstore.o \
 			$(BUILD_DIR)/pworld.o $(BUILD_DIR)/pstate.o \
+			$(BUILD_DIR)/pstore_opt.o $(BUILD_DIR)/pstate_opt.o \
 			$(BUILD_DIR)/reader.o \
-			$(BUILD_DIR)/heuristics_manager.o $(BUILD_DIR)/satisfied_goals.o
+			$(BUILD_DIR)/heuristics_manager.o $(BUILD_DIR)/satisfied_goals.o \
+			$(BUILD_DIR)/bisimulation.o
 
 
 CC	= g++
@@ -41,7 +45,7 @@ FORMULA_DIR = $(INCLUDE_DIR)/formulae
 HEURISTIC_DIR = $(INCLUDE_DIR)/heuristics
 PARSE_DIR = $(INCLUDE_DIR)/parse
 STATES_DIR = $(INCLUDE_DIR)/states
-
+S_KRIPE_DIR = $(STATES_DIR)/kripke
 S_POSSIBILITY_DIR = $(STATES_DIR)/possibilities
 S_POSSIBILITY_OPT_DIR = $(STATES_DIR)/possibilities_opt
 UTILITIES_DIR = $(INCLUDE_DIR)/utilities
@@ -54,7 +58,7 @@ OUT_DIR = out
 $(BIN_DIR)/efp.out: $(OBJS)
 		$(dir_guard)
 		$(CC) $(CFLAGS) $(OBJS) -o $(BIN_DIR)/efp.out -ll
-		
+
 #-----------------------------------PARSE FILES-----------------------------------#
 
 
@@ -85,18 +89,18 @@ $(BUILD_DIR)/main.o:	$(SRC_DIR)/main.cpp \
 						$(DOMAIN_DIR)/domain.h \
 						$(SEARCH_DIR)/planner.h $(SEARCH_DIR)/planner.ipp \
 						$(HEURISTIC_DIR)/heuristics_manager.h $(HEURISTIC_DIR)/heuristics_template.ipp\
-						$(STATES_DIR)/state_T.h $(STATES_DIR)/state_T.ipp 
+						$(STATES_DIR)/state_T.h $(STATES_DIR)/state_T.ipp
 		$(dir_guard)
 		echo "#define BUILT_DATE \"`date`\"" > $(BUILD_DIR)/built_date
 		cat $(BUILD_DIR)/built_date $(SRC_DIR)/main.cpp > $(BUILD_DIR)/main.temp.cpp
 		$(CC) $(CFLAGS) -c $(BUILD_DIR)/main.temp.cpp -o $(BUILD_DIR)/main.o
 		rm $(BUILD_DIR)/main.temp.cpp
-		
+
 #-----------------------------------LIBRARY FILES-----------------------------------#
 $(BUILD_DIR)/bisimulation.o: $(BISIMULATION_DIR)/bisimulation.cpp $(BISIMULATION_DIR)/bisimulation.h
 		$(dir_guard)
 		$(CC) $(CFLAGS) -c $(BISIMULATION_DIR)/bisimulation.cpp -o $(BUILD_DIR)/bisimulation.o
-		
+
 #-----------------------------------INCLUDE FILES-----------------------------------#
 ####UTILITIES
 $(BUILD_DIR)/printer.o: $(UTILITIES_DIR)/printer.cpp $(UTILITIES_DIR)/printer.h \
@@ -105,7 +109,7 @@ $(BUILD_DIR)/printer.o: $(UTILITIES_DIR)/printer.cpp $(UTILITIES_DIR)/printer.h 
 						$(DOMAIN_DIR)/grounder.h
 		$(dir_guard)
 		$(CC) $(CFLAGS) -c $(UTILITIES_DIR)/printer.cpp -o $(BUILD_DIR)/printer.o
-		
+
 $(BUILD_DIR)/reader.o: $(UTILITIES_DIR)/reader.cpp $(UTILITIES_DIR)/reader.h \
 					   $(UTILITIES_DIR)/define.h $(UTILITIES_DIR)/printer.h \
 					   $(FORMULA_DIR)/belief_formula.h \
@@ -115,10 +119,10 @@ $(BUILD_DIR)/reader.o: $(UTILITIES_DIR)/reader.cpp $(UTILITIES_DIR)/reader.h \
 
 $(BUILD_DIR)/helper.o: $(UTILITIES_DIR)/helper.cpp $(UTILITIES_DIR)/helper.h \
 					   $(UTILITIES_DIR)/define.h $(UTILITIES_DIR)/printer.h \
-					   $(FORMULA_DIR)/belief_formula.h 
+					   $(FORMULA_DIR)/belief_formula.h
 		$(dir_guard)
 		$(CC) $(CFLAGS) -c $(UTILITIES_DIR)/helper.cpp -o $(BUILD_DIR)/helper.o
-		
+
 $(BUILD_DIR)/asp_maker.o: $(UTILITIES_DIR)/asp_maker.cpp $(UTILITIES_DIR)/asp_maker.h \
 					   $(UTILITIES_DIR)/define.h $(UTILITIES_DIR)/printer.h \
 					   $(FORMULA_DIR)/belief_formula.h \
@@ -126,14 +130,14 @@ $(BUILD_DIR)/asp_maker.o: $(UTILITIES_DIR)/asp_maker.cpp $(UTILITIES_DIR)/asp_ma
 		$(dir_guard)
 		$(CC) $(CFLAGS) -c $(UTILITIES_DIR)/asp_maker.cpp -o $(BUILD_DIR)/asp_maker.o
 
-####FORMULAE			
+####FORMULAE
 $(BUILD_DIR)/belief_formula.o: $(FORMULA_DIR)/belief_formula.cpp $(FORMULA_DIR)/belief_formula.h \
 							   $(DOMAIN_DIR)/grounder.h \
 							   $(UTILITIES_DIR)/define.h
 		$(dir_guard)
 		$(CC) $(CFLAGS) -c $(FORMULA_DIR)/belief_formula.cpp -o $(BUILD_DIR)/belief_formula.o
 
-####SEARCH		
+####SEARCH
 #$(BUILD_DIR)/planner.o: $(SEARCH_DIR)/planner.cpp $(SEARCH_DIR)/planner.h \
 #					    $(STATES_DIR)/state_T.h $(STATES_DIR)/state_T.ipp \
 #						$(DOMAIN_DIR)/domain.h
@@ -148,13 +152,13 @@ $(BUILD_DIR)/action.o: $(ACTION_DIR)/action.cpp $(ACTION_DIR)/action.h \
 					   $(UTILITIES_DIR)/define.h
 		$(dir_guard)
 		$(CC) $(CFLAGS) -c $(ACTION_DIR)/action.cpp -o $(BUILD_DIR)/action.o
-		
+
 $(BUILD_DIR)/proposition.o: $(ACTION_DIR)/proposition.cpp $(ACTION_DIR)/proposition.h \
 							$(FORMULA_DIR)/belief_formula.h \
 							$(UTILITIES_DIR)/define.h $(UTILITIES_DIR)/printer.h
 		$(dir_guard)
 		$(CC) $(CFLAGS) -c $(ACTION_DIR)/proposition.cpp -o $(BUILD_DIR)/proposition.o
-			
+
 ####STATES
 #$(BUILD_DIR)/state_T.o: $(STATES_DIR)/state_T.cpp $(STATES_DIR)/state_T.h \
 #					    $(ACTION_DIR)/action.h \
@@ -169,16 +173,49 @@ $(BUILD_DIR)/heuristics_manager.o: $(HEURISTIC_DIR)/heuristics_manager.cpp $(HEU
 								   $(HEURISTIC_DIR)/satisfied_goals.h \
 								   $(HEURISTIC_DIR)/planning_graph.h $(HEURISTIC_DIR)/planning_graph.ipp
 		$(dir_guard)
-		$(CC) $(CFLAGS) -c $(HEURISTIC_DIR)/heuristics_manager.cpp -o $(BUILD_DIR)/heuristics_manager.o 
+		$(CC) $(CFLAGS) -c $(HEURISTIC_DIR)/heuristics_manager.cpp -o $(BUILD_DIR)/heuristics_manager.o
 
 $(BUILD_DIR)/satisfied_goals.o: $(HEURISTIC_DIR)/satisfied_goals.cpp $(HEURISTIC_DIR)/satisfied_goals.h \
 								$(UTILITIES_DIR)/define.h \
 								$(FORMULA_DIR)/belief_formula.h
 		$(dir_guard)
 		$(CC) $(CFLAGS) -c $(HEURISTIC_DIR)/satisfied_goals.cpp -o $(BUILD_DIR)/satisfied_goals.o
+#$(BUILD_DIR)/planning_graph.o: $(HEURISTIC_DIR)/planning_graph.cpp $(HEURISTIC_DIR)/planning_graph.h \
+#					   $(S_KRIPE_DIR)/kstate \
+#					   $(ACTION_DIR)/action.h \
+#					   $(FORMULA_DIR)/belief_formula.h \
+#					   $(UTILITIES_DIR)/define.h
+#		$(dir_guard)
+#		$(CC) $(CFLAGS) -c $(S_KRIPE_DIR)/planning_graph.cpp -o $(BUILD_DIR)/planning_graph.o
 
 
+##KRIPKE STATES
+$(BUILD_DIR)/kstate.o: $(S_KRIPE_DIR)/kstate.cpp $(S_KRIPE_DIR)/kstate.h \
+					   $(S_KRIPE_DIR)/kworld.h $(S_KRIPE_DIR)/kedge.h $(S_KRIPE_DIR)/kstore.h \
+					   $(ACTION_DIR)/action.h \
+					   $(DOMAIN_DIR)/initially.h \
+					   $(UTILITIES_DIR)/helper.h \
+					   $(UTILITIES_DIR)/define.h \
+					   $(BISIMULATION_DIR)/bisimulation.h
+		$(dir_guard)
+		$(CC) $(CFLAGS) -c $(S_KRIPE_DIR)/kstate.cpp -o $(BUILD_DIR)/kstate.o
 
+$(BUILD_DIR)/kworld.o: $(S_KRIPE_DIR)/kworld.cpp $(S_KRIPE_DIR)/kworld.h \
+					   $(UTILITIES_DIR)/printer.h $(UTILITIES_DIR)/define.h
+		$(dir_guard)
+		$(CC) $(CFLAGS) -c $(S_KRIPE_DIR)/kworld.cpp -o $(BUILD_DIR)/kworld.o
+
+$(BUILD_DIR)/kedge.o: $(S_KRIPE_DIR)/kedge.cpp $(S_KRIPE_DIR)/kedge.h \
+					  $(S_KRIPE_DIR)/kworld.h \
+					  $(UTILITIES_DIR)/define.h
+		$(dir_guard)
+		$(CC) $(CFLAGS) -c $(S_KRIPE_DIR)/kedge.cpp -o $(BUILD_DIR)/kedge.o
+
+$(BUILD_DIR)/kstore.o: $(S_KRIPE_DIR)/kstore.cpp $(S_KRIPE_DIR)/kstore.h \
+					   $(S_KRIPE_DIR)/kworld.h $(S_KRIPE_DIR)/kedge.h \
+					   $(UTILITIES_DIR)/define.h
+		$(dir_guard)
+		$(CC) $(CFLAGS) -c $(S_KRIPE_DIR)/kstore.cpp -o $(BUILD_DIR)/kstore.o
 
 ##POSSIBILITIES STATES
 $(BUILD_DIR)/pstate.o: $(S_POSSIBILITY_DIR)/pstate.cpp $(S_POSSIBILITY_DIR)/pstate.h \
@@ -200,8 +237,8 @@ $(BUILD_DIR)/pstore.o: $(S_POSSIBILITY_DIR)/pstore.cpp $(S_POSSIBILITY_DIR)/psto
 					   $(UTILITIES_DIR)/define.h
 		$(dir_guard)
 		$(CC) $(CFLAGS) -c $(S_POSSIBILITY_DIR)/pstore.cpp -o $(BUILD_DIR)/pstore.o
-		
-#The optimized version		
+
+#The optimized version
 $(BUILD_DIR)/pstate_opt.o: $(S_POSSIBILITY_OPT_DIR)/pstate_opt.cpp $(S_POSSIBILITY_OPT_DIR)/pstate_opt.h \
 					   $(S_POSSIBILITY_OPT_DIR)/pstore_opt.h \
 					   $(ACTION_DIR)/action.h \
@@ -224,12 +261,12 @@ $(BUILD_DIR)/initially.o: $(DOMAIN_DIR)/initially.cpp $(DOMAIN_DIR)/initially.h 
 						  $(UTILITIES_DIR)/define.h
 		$(dir_guard)
 		$(CC) $(CFLAGS) -c $(DOMAIN_DIR)/initially.cpp -o $(BUILD_DIR)/initially.o
-			
+
 $(BUILD_DIR)/grounder.o: $(DOMAIN_DIR)/grounder.cpp $(DOMAIN_DIR)/grounder.h \
 						 $(UTILITIES_DIR)/define.h $(UTILITIES_DIR)/printer.h
 		$(dir_guard)
 		$(CC) $(CFLAGS) -c $(DOMAIN_DIR)/grounder.cpp -o $(BUILD_DIR)/grounder.o
-			
+
 $(BUILD_DIR)/domain.o: $(DOMAIN_DIR)/domain.cpp $(DOMAIN_DIR)/domain.h \
 					   $(DOMAIN_DIR)/initially.h $(DOMAIN_DIR)/grounder.h \
 					   $(UTILITIES_DIR)/reader.h $(UTILITIES_DIR)/define.h \
@@ -244,13 +281,13 @@ doxygen:
 	$(MAKE)
 	mkdir -p $(DOXYGEN_DIR)/Docs
 	cd $(DOXYGEN_DIR)/ && doxygen efp-doxygen
-	
+
 doc:
 	$(MAKE) doxygen
 
 clean_build:
 	rm -f -r $(BIN_DIR) $(BUILD_DIR)
-	
+
 clean_out:
 	rm -f -r $(OUT_DIR) *tmp
 
@@ -261,15 +298,15 @@ clear:
 fresh:
 	$(MAKE) clear
 	rm -f -r $(DOXYGEN_DIR)/Docs
-	
+
 old:
 	cd EFP_ICAPS_old/ && $(MAKE) clean
 	cd EFP_ICAPS_old/ && $(MAKE)
-	
+
 all:
-	$(MAKE) 
+	$(MAKE)
 	$(MAKE) doxygen
 	$(MAKE) old
-	
+
 clean:
 	$(MAKE) clean_build

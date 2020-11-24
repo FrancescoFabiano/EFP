@@ -7,16 +7,29 @@
  */
 
 #include "helper.h"
-
+#include  <math.h>
 fluent helper::negate_fluent(const fluent f)
 {
-	if (f % 2 == 0) {
-		return(f + 1);
-	} else {
-		return(f - 1);
-	}
+    fluent fluent_negated = f;
 
+    if (f[f.size()-1] == 0) {
+        fluent_negated.set(f.size()-1,1);
+	} else {
+        fluent_negated.set(f.size()-1,0);
+	}
+    return fluent_negated;
 }
+
+bool helper::is_negate(const fluent f)
+{
+    if (f[f.size()-1] == 0) {
+        return false;
+    } else {
+        return true;
+    }
+}
+
+
 
 bool helper::is_consistent(const fluent_set &fl1, const fluent_set& fl2)
 {
@@ -157,6 +170,10 @@ fluent_set helper::ontic_exec(const fluent_formula& effect, const fluent_set& wo
 		std::cerr << "\nEmpty action effect.\n";
 		exit(1);
 	}
+}
+
+int helper::lenght_to_power_two(int length){
+    return ceil(log2(length));
 }
 
 /* Using the std::set == operator

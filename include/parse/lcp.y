@@ -58,10 +58,10 @@ extern std::shared_ptr<reader> domain_reader;
 %token INIT
 %token GOAL
 %token AGENT
-%token B
-%token C
-%token E
-%token D
+%token MB
+%token MC
+%token ME
+%token MD
 %token LIE
 
 %type <str_val> id
@@ -385,7 +385,7 @@ formula{
     $$->set_string_fluent_formula(*$1);
 }
 |
-B LEFT_PAREN agent COMMA belief_formula RIGHT_PAREN {
+MB LEFT_PAREN agent COMMA belief_formula RIGHT_PAREN {
    $$ = new belief_formula;
    $$->set_formula_type(BELIEF_FORMULA);
    $$->set_string_agent(*$3);
@@ -422,21 +422,21 @@ LEFT_PAREN belief_formula RIGHT_PAREN{
     $$->set_bf1(*$2);
 }
 |
-E LEFT_PAREN LEFT_BRAC agent_list RIGHT_BRAC COMMA belief_formula RIGHT_PAREN {
+ME LEFT_PAREN LEFT_BRAC agent_list RIGHT_BRAC COMMA belief_formula RIGHT_PAREN {
    $$ = new belief_formula;
    $$->set_formula_type(E_FORMULA);
    $$->set_string_group_agents(*$4);
    $$->set_bf1(*$7);
 }
 |
-C LEFT_PAREN LEFT_BRAC agent_list RIGHT_BRAC COMMA belief_formula RIGHT_PAREN {
+MC LEFT_PAREN LEFT_BRAC agent_list RIGHT_BRAC COMMA belief_formula RIGHT_PAREN {
    $$ = new belief_formula;
    $$->set_formula_type(C_FORMULA);
    $$->set_string_group_agents(*$4);
    $$->set_bf1(*$7);
 }
 |
-D LEFT_PAREN LEFT_BRAC agent_list RIGHT_BRAC COMMA belief_formula RIGHT_PAREN {
+MD LEFT_PAREN LEFT_BRAC agent_list RIGHT_BRAC COMMA belief_formula RIGHT_PAREN {
    $$ = new belief_formula;
    $$->set_formula_type(D_FORMULA);
    $$->set_string_group_agents(*$4);

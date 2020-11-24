@@ -110,7 +110,7 @@ void printer::print_list(const formula_list& to_print)
 	}
 }
 
-void printer::print_list(const kworld_ptr_set& to_print)
+/*void printer::print_list(const kworld_ptr_set& to_print)
 {
 	bool first_print = true;
 	kworld_ptr_set::const_iterator it_sll;
@@ -123,7 +123,7 @@ void printer::print_list(const kworld_ptr_set& to_print)
 		first_print = false;
 		std::cout << it_sll->get_id();
 	}
-}
+}*/
 
 void printer::print_list(const pworld_ptr_set& to_print)
 {
