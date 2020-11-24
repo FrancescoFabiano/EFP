@@ -511,6 +511,19 @@ public:
      * \todo The action must be executable on *this* otherwise it will return a null_ptr.*/
     pstate compute_succ(const action & act) const;
 
+    /** \brief sub-Function of \ref compute_succ that checks if the successor respects the epistemic properties after an \ref action execution.
+     * 
+     * For the moment this is only applied to sensing/announcement
+     * 
+     * 
+     * @param fully: the set of fully observant w.r.t. *this* e-state update.
+     * @param partially: the set of partially observant w.r.t. *this* e-state update.
+     * @param effects: the effects of the action execution on *this*.
+     * @param updated: the e-state after the action execution.
+     * @return true: \p *this* respects all the properties.
+     * @return false: \p *this* does not respect all the properties.*/
+    bool check_properties(const agent_set & fully, const agent_set & partially, const fluent_formula & effects, const pstate & updated) const;
+
     /** \brief Function that makes *this* the mimimum \ref poss that is bisimilar to the current one.
      *
      * Not yet implemented.*/

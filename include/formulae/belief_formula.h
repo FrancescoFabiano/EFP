@@ -125,10 +125,6 @@ private:
      * - if *this* is \ref C_FORMULA, i.e., C(**ags**, *phi*), \ref m_group_agents contains **ags**;
      * - If *this* is \ref D_FORMULA, i.e., E(**ags**, *phi*), \ref m_group_agents contains **ags**.*/
     agent_set m_group_agents;
-    /** \brief Setter for the field \ref m_group_agents.
-     *
-     * @param[in] to_set: the \ref agent_set object to copy in \ref m_group_agents.*/
-    void set_group_agents(const agent_set& to_set);
 
 
     /*-******RECOURSIVE FIELDs (private SETTER (for the reading part) and GETTER public)*************-*/
@@ -194,6 +190,11 @@ public:
      *
      * @param[in] to_set: the \ref agent object to copy in \ref m_agent.*/
     void set_agent(agent to_set);
+
+    /** \brief Setter for the field \ref m_group_agents.
+     *
+     * @param[in] to_set: the \ref agent_set object to copy in \ref m_group_agents.*/
+    void set_group_agents(const agent_set& to_set);
 
     /** \brief Setter of the field \ref m_string_agent.
      * 
@@ -287,6 +288,10 @@ public:
      * 
      * \todo Call on costruction from outside, maybe a static function in \ref grounder.*/
     void ground();
+
+    /** \brief Function that degrounds the fields of *this*.*/
+    void deground();
+
 
     /** \brief The equal operator for\ref belief_formula.
      * 

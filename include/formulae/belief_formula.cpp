@@ -35,7 +35,7 @@ void belief_formula::set_formula_type(bf_type to_set)
 bf_type belief_formula::get_formula_type() const
 {
 	if (m_formula_type == BF_TYPE_FAIL) {
-		std::cerr << "Error in reading a belief_formula ";
+		std::cerr << "\nError in reading a belief_formula ";
 		std::cerr << "(bf_type not setted properly).";
 		std::cerr << std::endl;
 		exit(1);
@@ -64,7 +64,7 @@ void belief_formula::set_fluent_formula_from_fluent(fluent to_set)
 const fluent_formula & belief_formula::get_fluent_formula() const
 {
 	if (m_fluent_formula.size() < 1) {
-		std::cerr << "Error in reading a belief_formula, it must be grounded ";
+		std::cerr << "\nError in reading a belief_formula, it must be grounded ";
 		std::cerr << "(fluent_formula not grounded).";
 		std::cerr << std::endl;
 		exit(1);
@@ -80,7 +80,7 @@ void belief_formula::set_agent(agent to_set)
 agent belief_formula::get_agent() const
 {
 	if (!m_is_grounded) {
-		std::cerr << "Error in reading a belief_formula, it must be grounded";
+		std::cerr << "\nError in reading a belief_formula, it must be grounded";
 		std::cerr << "(agent not grounded).";
 		std::cerr << std::endl;
 		exit(1);
@@ -91,7 +91,7 @@ agent belief_formula::get_agent() const
 const belief_formula & belief_formula::get_bf1() const
 {
 	if (m_bf1 == nullptr) {
-		std::cerr << "Error in declaring a belief_formula ";
+		std::cerr << "\nError in declaring a belief_formula ";
 		std::cerr << "a nested belief formula has not been declared.";
 		std::cerr << std::endl;
 		exit(1);
@@ -102,7 +102,7 @@ const belief_formula & belief_formula::get_bf1() const
 const belief_formula & belief_formula::get_bf2() const
 {
 	if (m_bf2 == nullptr) {
-		std::cerr << "Error in declaring a belief_formula ";
+		std::cerr << "\nError in declaring a belief_formula ";
 		std::cerr << "a second nested belief formula has not been declared.";
 		std::cerr << std::endl;
 		exit(1);
@@ -118,7 +118,7 @@ void belief_formula::set_operator(bf_operator to_set)
 bf_operator belief_formula::get_operator() const
 {
 	if (m_formula_type == BF_TYPE_FAIL) {
-		std::cerr << "Error in reading a belief_formula";
+		std::cerr << "\nError in reading a belief_formula";
 		std::cerr << "(bf_operator not setted properly).";
 		std::cerr << std::endl;
 		exit(1);
@@ -129,7 +129,7 @@ bf_operator belief_formula::get_operator() const
 void belief_formula::set_group_agents(const agent_set & to_set)
 {
 	if (to_set.size() < 1) {
-		std::cerr << "Error in declaring a belief_formula ";
+		std::cerr << "\nError in declaring a belief_formula ";
 		std::cerr << "there must be at least one agent for group formulae.";
 		std::cerr << std::endl;
 		exit(1);
@@ -140,7 +140,7 @@ void belief_formula::set_group_agents(const agent_set & to_set)
 const agent_set & belief_formula::get_group_agents() const
 {
 	if (!m_is_grounded) {
-		std::cerr << "Error in reading a belief_formula, it must be grounded";
+		std::cerr << "\nError in reading a belief_formula, it must be grounded";
 		std::cerr << " (agent_group not grounded).";
 		std::cerr << std::endl;
 		exit(1);
@@ -167,7 +167,7 @@ const string_set & belief_formula::get_string_group_agents() const
 void belief_formula::set_string_fluent_formula(const string_set_set & to_set)
 {
 	/*if (to_set.size() < 0) {
-		std::cerr << "Error in reading a belief_formula,";
+		std::cerr << "\nError in reading a belief_formula,";
 		std::cerr << " the string formula cannot be empty.";
 		std::cerr << std::endl;
 		exit(1);
@@ -185,8 +185,8 @@ void belief_formula::set_string_agent(std::string to_set)
 void belief_formula::set_string_group_agents(const string_set & to_set)
 {
 	if (to_set.size() < 1) {
-		std::cerr << "Error in reading a belief_formula,";
-		std::cerr << " the set of agents cannot be empty.";
+		std::cerr << "\nError in reading a belief_formula";
+		std::cerr << ": the set of agents cannot be empty.";
 		std::cerr << std::endl;
 		exit(1);
 	}
@@ -427,6 +427,53 @@ void belief_formula::ground()
 
 }
 
+
+void belief_formula::deground()
+{
+
+	//std::cout << "\nDEBUG: ground bf..." << std::endl;
+
+	grounder gr = domain::get_instance().get_grounder();
+		switch ( m_formula_type ) {
+
+		case FLUENT_FORMULA:
+
+			set_string_fluent_formula(gr.deground_fluent(get_fluent_formula()));
+			//m_fluent_formula = gr.ground_fluent(m_string_fluent_formula);
+			break;
+
+		case BELIEF_FORMULA:
+
+			set_string_agent(gr.deground_agent(get_agent()));
+			//m_agent = gr.ground_agent(m_string_agent_op);
+			m_bf1->deground();
+			break;
+
+		case E_FORMULA:
+		case C_FORMULA:
+		case D_FORMULA:
+			set_string_group_agents(gr.deground_agents(get_group_agents()));
+			//m_group_agents = gr.ground_agent(m_string_group_agents);
+			m_bf1->deground();
+			break;
+
+		case PROPOSITIONAL_FORMULA:
+			m_bf1->deground();
+			if (m_operator == BF_AND || m_operator == BF_OR) {
+				m_bf2->deground();
+			}
+			break;
+		case BF_EMPTY:
+			break;
+		case BF_TYPE_FAIL:
+		default:
+			std::cerr << "\n Unknown belief_formula type.";
+			exit(1);
+			break;
+		}
+}
+
+
 bool belief_formula::operator==(const belief_formula & to_compare) const
 {
 
@@ -556,7 +603,7 @@ bool belief_formula::operator=(const belief_formula & to_copy)
 		case BF_FAIL:
 		default:
 		{
-			std::cerr << "Error in copying a belief_formula ";
+			std::cerr << "\nError in copying a belief_formula ";
 			std::cerr << std::endl;
 			exit(1);
 			break;
@@ -584,7 +631,7 @@ bool belief_formula::operator=(const belief_formula & to_copy)
 	case BF_TYPE_FAIL:
 	default:
 	{
-		std::cerr << "Error in copying a belief_formula ";
+		std::cerr << "\nError in copying a belief_formula ";
 		std::cerr << std::endl;
 		exit(1);
 		break;
@@ -647,7 +694,7 @@ bool belief_formula::operator<(const belief_formula& to_compare) const
 				case BF_FAIL:
 				default:
 				{
-					std::cerr << "Error in comparing belief_formulae";
+					std::cerr << "\nError in comparing belief_formulae";
 					std::cerr << std::endl;
 					exit(1);
 					break;
@@ -675,7 +722,7 @@ bool belief_formula::operator<(const belief_formula& to_compare) const
 		case BF_TYPE_FAIL:
 		default:
 		{
-			std::cerr << "Error in comparing belief_formulae";
+			std::cerr << "\nError in comparing belief_formulae";
 			std::cerr << std::endl;
 			exit(1);
 			break;

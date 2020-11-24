@@ -711,8 +711,8 @@ pstate pstate::compute_succ(const action & act) const
 	}
 	default:
 	{
-		std::cerr << "Error in executing an action: ";
-		std::cerr << "the type of the action is not defined correctly";
+		std::cerr << "Error in executing an action: " << act.get_name();
+		std::cerr << " the type of the action is not defined correctly1";
 		std::cerr << std::endl;
 		exit(1);
 
@@ -930,7 +930,109 @@ pstate pstate::execute_sensing(const action & act) const
 	pworld_ptr new_pointed = execute_sensing_announcement_helper(effects, ret, get_pointed(), calculated, partially_obs_agents, oblivious_obs_agents, entails(effects));
 	ret.set_pointed(new_pointed); // Updating the pointed world
 
+	if (!check_properties(fully_obs_agents, partially_obs_agents, effects, ret)) {
+		std::cerr << "\nDEBUG: Some properties are not respected\n\n";
+		exit(1);
+	}
+
 	return ret;
+}
+
+bool pstate::check_properties(const agent_set & fully, const agent_set & partially, const fluent_formula & effects, const pstate & updated) const
+{
+
+	if (fully.size() > 0) {
+		/************Formulae Building************/
+		/******Formulae containing the effects of the sensing******/
+		belief_formula effects_formula;
+		effects_formula.set_formula_type(FLUENT_FORMULA);
+		effects_formula.set_fluent_formula(effects);
+		effects_formula.set_is_grounded(true);
+		effects_formula.deground();
+
+
+		/******First Property C(Fully, eff)******/
+		belief_formula property1;
+		property1.set_group_agents(fully);
+		property1.set_formula_type(C_FORMULA);
+		property1.set_bf1(effects_formula);
+		property1.set_is_grounded(true);
+		property1.deground();
+
+
+
+		if (!updated.entails(property1)) {
+			std::cerr << "\nDEBUG: First property not respected";
+			return false;
+		}
+
+
+
+		if (partially.size() > 0) {
+			/******Second Property C(P, (C(Fully,eff) | C(Fully, -eff)))******/
+			belief_formula inner_nested2, nested2, disjunction, property2;
+			//First nested formula is equal to First Property C(Fully, eff)
+			//Second nested formula C(Fully, -f) is comprised of two layer (the NOT and C)
+			inner_nested2.set_group_agents(fully);
+			inner_nested2.set_formula_type(C_FORMULA);
+			inner_nested2.set_bf1(effects_formula);
+			inner_nested2.set_is_grounded(true);
+			inner_nested2.deground();
+
+
+			nested2.set_formula_type(PROPOSITIONAL_FORMULA);
+			nested2.set_operator(BF_NOT);
+			nested2.set_bf1(inner_nested2);
+			nested2.set_is_grounded(true);
+			nested2.deground();
+
+
+			//The disjunction (C(Fully,eff) | C(Fully, -eff)) is made with property1 and nested2
+			disjunction.set_formula_type(PROPOSITIONAL_FORMULA);
+			disjunction.set_operator(BF_OR);
+			disjunction.set_bf1(property1);
+			disjunction.set_bf2(nested2);
+			disjunction.set_is_grounded(true);
+			disjunction.deground();
+
+
+			//Finally we can construct the second property
+			property2.set_group_agents(partially);
+			property2.set_formula_type(C_FORMULA);
+			property2.set_bf1(disjunction);
+			property2.set_is_grounded(true);
+			property2.deground();
+
+
+			
+
+			/******Third Property C(F, C(P, (C(Fully,eff) | C(Fully, -eff))))******/
+			//This formula is just C(Fully, property2)
+			belief_formula property3;
+			property3.set_group_agents(fully);
+			property3.set_formula_type(C_FORMULA);
+			property3.set_bf1(property2);
+			
+			property3.set_is_grounded(true);
+			
+			property3.deground();
+
+
+			if (!updated.entails(property2)) {
+				std::cerr << "\nDEBUG: Second property not respected in the formula: ";
+				property2.print_deground();
+				return false;
+			}
+
+			if (!updated.entails(property3)) {
+				std::cerr << "\nDEBUG: Third property not respected in the formula: ";
+				property3.print_deground();
+				return false;
+			}
+		}
+	}
+
+	return true;
 }
 
 pstate pstate::execute_announcement(const action & act) const
@@ -1328,7 +1430,7 @@ pworld_ptr pstate::execute_announcement_helper_dox(const fluent_formula &effects
 						}
 					} else { // If we did not already calculate the transition function
 						if (is_consistent_belief) { // We calculate it if it would result in a consistent belief...
-							pworld_ptr believed_pw = execute_announcement_helper_dox(effects, ret, *it_pws, calculated, partially_obs_agents, oblivious_obs_agents, (reached_by_fully || is_fully_obs),implications);
+							pworld_ptr believed_pw = execute_announcement_helper_dox(effects, ret, *it_pws, calculated, partially_obs_agents, oblivious_obs_agents, (reached_by_fully || is_fully_obs), implications);
 							ret.add_edge(new_pw, believed_pw, ag);
 						}
 					}
@@ -1363,16 +1465,14 @@ pstate pstate::execute_announcement_dox(const action & act) const
 	fluent_formula effects = get_effects_if_entailed(act.get_effects(), get_pointed());
 
 	bool implications = true;
-	if(fully_obs_agents.size() == 0)
-	{
+	if (fully_obs_agents.size() == 0) {
 		implications = false;
 	}
-	
+
 	pworld_ptr new_pointed = execute_announcement_helper_dox(effects, ret, get_pointed(), calculated, partially_obs_agents, oblivious_obs_agents, false, implications);
 	ret.set_pointed(new_pointed); // Updating the pointed world
-	
-	if (!implications)
-	{
+
+	if (!implications) {
 		ret = *this;
 	}
 

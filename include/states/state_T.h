@@ -221,7 +221,7 @@ public:
     bool is_goal() const;
 
 
-    /** \brief Function that compute the successor of *this* given an \ref action.
+    /** \brief Function that computes the successor of *this* given an \ref action.
      * 
      * The actual implementation is left to the specific state-representation (\ref m_representation).
      * 

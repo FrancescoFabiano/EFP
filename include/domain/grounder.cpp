@@ -204,6 +204,18 @@ std::string grounder::deground_agent(agent x) const
 	exit(1);
 }
 
+string_set grounder::deground_agents(const agent_set & x) const
+{
+	agent_set::iterator it;
+	string_set y;
+
+	for (it = x.begin(); it != x.end(); it++) {
+		y.insert(deground_agent(*it));
+	}
+	
+	return y;
+}
+
 std::string grounder::deground_action(action_id x) const
 {
 	reverse_action_name_map::const_iterator p = r_action_name_map.find(x);

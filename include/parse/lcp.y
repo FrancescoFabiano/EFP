@@ -507,12 +507,14 @@ action DETERMINE fluent_det_list SEMICOLON
 
 /* announcement condition */
 announcement:
-action ANNOUNCES formula SEMICOLON
+action ANNOUNCES formula if_part_bf SEMICOLON
 {
   $$ = new proposition;
   $$->set_type(ANNOUNCEMENT);
   $$->set_action_name(*$1);
   $$->set_action_effect(*$3);
+  $$->set_executability_conditions(*$4);
+
 };
 
 /***************DOXASTIC REASONING***************/
@@ -549,7 +551,7 @@ agent OBSERVES action if_part_bf SEMICOLON
   $$->set_observability_conditions(*$4);
 };
 
-/* imposibility condition 
+/* impossibility condition 
 impossibility:
 IMPOSSIBLE action if_part SEMICOLON
 {

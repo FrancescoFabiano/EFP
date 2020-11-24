@@ -196,6 +196,14 @@ public:
      * @return: the name of \p to_deground.*/
     std::string deground_agent(agent to_deground) const;
 
+    /** \brief Function that given an \ref agent_set grounded value returns the set of names. 
+     * 
+     * The function reads the field \ref r_agent_map.
+     *
+     * @param[in] to_deground: the \ref agent_set names to deground.
+     * @return: the set with the names of \p to_deground.*/
+    string_set deground_agents(const agent_set & to_deground) const;
+
     /** \brief Function that given an \ref action grounded value returns its name. 
      * 
      * The function reads the field \ref r_action_name_map.
