@@ -9,7 +9,7 @@ Realize a scalable Epistemic Forward Planner that bases its concept on different
 Temporally disabled Kripke and OBDD
 
 ## Current situation:
-Implemented EFP v. 2.0 that uses templatic e-States representations with relative templatic transition function.
+Implemented EFP v. 2.1 that uses templatic e-States representations with relative templatic transition function and data structure based on bit.
 The planner is based on several scientific pubblications where are described the different semantics and tranisition functions.
 In particular we have the following configurations:
 - **eState:** *Kripke Structures*; **transition function:** *event based updates---mA<sup>\*</sup>* (Baral et al. 2015, Le et al. 2018);
@@ -47,6 +47,7 @@ At the moment we implemented:
 - bison
 - texlive-font-utils
 - graphviz
+- boost
 
 ### Usage
 - **make**: to compile the planner.
