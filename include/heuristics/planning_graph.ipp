@@ -688,7 +688,7 @@ void planning_graph<T>::pg_build_grounded()//std::vector<belief_formula> & conve
                 //controllo nella belief formula falsa
                 if(!iter2->second){
 
-                    //ottengo le condizioni di eseguibilità? in relatà è gia eseguita quinid non ha senso
+                    //ottengo le condizioni di eseguibilità? in relatà è gia eseguita quinid non ha senso (?)
                     //it_actset->get_executability();
 
                     //ottengo gli effetti della azione che dovrò inserire
@@ -699,11 +699,11 @@ void planning_graph<T>::pg_build_grounded()//std::vector<belief_formula> & conve
 
                     //controllo ora se una la belief formula è stata generata
                     //prendo belief formula ancora a false
-                    //controllo che l'azione di quale fluente si occupa e guardo se il fluente è uguale
-                    //guardo effettuo azione è e dalla beleif controllo  nei ari aggenti cosa succede e aggiungo le nuove belieff
+                    //controllo che l'azione di quale fluente si occupa di essa e controllo se il fluente è uguale
+                    //guardo effetto azione e dalla beleif controllo  nei vari agenti cosa succede nel caso aggiungo le nuove belief formula
                     //agente può essere oblivious partilayy e completo li creo tutti
                     //se mi blocco dal dominio prendo tutte le belief formla con nesting <= 2 es B(a,B(b,F)) agente a sa che agente b sa f
-                    //se ho tre B o più mi fermo
+                    //se ho tre B o più mi fermo e stress test
                     //todo
                 }
             }
@@ -794,8 +794,7 @@ std::list<belief_formula> planning_graph<T>::list_bf_grounded(unsigned short nes
 
     for(iter_initially = initially_fluent_set.begin(); iter_initially!=initially_fluent_set.end();iter_initially++)
     {
-        //todo inserire initally
-
+        //TODO CHECK
         belief_formula pg_c_bf;
         pg_c_bf.set_formula_type(FLUENT_FORMULA);
         pg_c_bf.set_fluent_formula_from_fluent(*iter_initially);

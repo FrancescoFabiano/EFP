@@ -54,6 +54,7 @@ private:
      * @return false otherwise.*/
     bool search_BFS(bool results_file);
 
+    //ricerca con DFS
     bool search_DFS(bool results_file);
 
     //ricerca con dfs iterativa che scandisce a livelli la ricerca in profondita, maxDepth è il massimo cammino in profonidtà e step di quanto ad ogni giro incrementiamo
