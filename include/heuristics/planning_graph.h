@@ -282,7 +282,8 @@ private:
     /*
      *
      * */
-    void pg_build_initially(std::list<belief_formula> & converted_bf);
+    void pg_build_initially(std::list<belief_formula> & converted_bf, std::list<belief_formula> & goal);
+
     void pg_build_grounded();
     //void pg_build_grounded(std::vector<belief_formula> & converted_bf);
 
@@ -293,7 +294,7 @@ private:
      */
     std::vector<belief_formula> list_bf_classical(unsigned short nesting = 1);
 
-    std::list<belief_formula> list_bf_grounded(unsigned short nesting,const std::list<belief_formula>& goal_formula);
+    std::list<belief_formula> list_bf_grounded(unsigned short nesting=1); //,const std::list<belief_formula>& goal_formula);
     /**The recursive function to generate the various nested fluents for classical conversion
      *
      * @param[in] nesting: The max_depth of the generated subgoals.
