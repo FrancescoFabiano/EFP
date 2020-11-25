@@ -597,7 +597,11 @@ void planning_graph<T>::pg_build_initially(std::list<belief_formula> & converted
     add_state_level(s_level_next);
 
     //prendo tutte le componeenti delle azioni belief formula nella descrizione del dominio e sono tutte a false
+    //aggiungere i controlli che se all'inizio ho qualche initialy che mi ferma la computazione per inconsistenza
+    //oppure controllo che sono già al goal.
+    //TODO
 
+    //ottenuto quinid i goal tutti a false e gli initially e i fluenti pg_build_grounded del dominio posso procedere
     pg_build_grounded();
 }
 
@@ -605,15 +609,9 @@ void planning_graph<T>::pg_build_initially(std::list<belief_formula> & converted
 template <class T>
 void planning_graph<T>::pg_build_grounded()//std::vector<belief_formula> & converted_bf) //aggiungere come parametri la lista iniziale delle belief formula e dei fluentset
 {
-    //aggiungo a fuori
-    //aggiungo a tutte le belief formule false all'inizo
-    //aggiungo e contorllo all'inizo se il belief formula sono vere all'inzio
-    /*std::set<std::pair<belief_formula,bool>> m_pairBeliefBool;
-    int n = converted_bf.size();
-    for(int i = 0; i < n; i++ )
-    {
-        m_pairBeliefBool.insert(std::make_pair(converted_bf,true));
-    }*/
+
+    //aggiungere se sono già nel goal o meno casomai continuo forse conviene effettuarlo prima di qui.
+
     pg_state_level<T> s_level_curr = m_state_levels.back();
     pg_action_level a_level_curr;
     a_level_curr.set_depth(get_length());
@@ -706,6 +704,7 @@ void planning_graph<T>::pg_build_grounded()//std::vector<belief_formula> & conve
                     //agente può essere oblivious partilayy e completo li creo tutti
                     //se mi blocco dal dominio prendo tutte le belief formla con nesting <= 2 es B(a,B(b,F)) agente a sa che agente b sa f
                     //se ho tre B o più mi fermo
+                    //todo
                 }
             }
 
@@ -754,8 +753,7 @@ void planning_graph<T>::pg_build_grounded()//std::vector<belief_formula> & conve
         return;
     } else {
         pg_build_grounded();
-
-        // nuova chiamata
+        return;
     }
 }
 
@@ -817,7 +815,7 @@ std::list<belief_formula> planning_graph<T>::list_bf_grounded(unsigned short nes
         make_nested_bf_classical2(nesting, 0, pg_c_bf, ret);
     }
 
-    //goal
+    //goal non serve farlo qui.
    /* std::list<belief_formula> goals = domain::get_instance().get_goal_description();
     //std::copy (goals_vector.begin(), goals_vector.end(), std::back_inserter(ret));
 
