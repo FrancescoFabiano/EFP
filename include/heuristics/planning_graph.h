@@ -279,13 +279,12 @@ private:
      */
     void pg_build_classical(std::vector<belief_formula> & converted_bf);
 
-    /*
-     *
-     * */
+    //planning graph epistemic new implementation
     void pg_build_initially(std::list<belief_formula> & converted_bf, std::list<belief_formula> & goal);
-
     void pg_build_grounded();
-    //void pg_build_grounded(std::vector<belief_formula> & converted_bf);
+    std::list<belief_formula> list_bf_grounded(unsigned short nesting=1); //,const std::list<belief_formula>& goal_formula);
+    void make_nested_bf_classical2(unsigned short nesting, unsigned short depth, belief_formula & to_explore, std::list<belief_formula> & ret);
+    //
 
     /*Function that returns the list of fluents and belief formulae that represent the fluent of the conversion to classical planning
      * 
@@ -294,7 +293,6 @@ private:
      */
     std::vector<belief_formula> list_bf_classical(unsigned short nesting = 1);
 
-    std::list<belief_formula> list_bf_grounded(unsigned short nesting=1); //,const std::list<belief_formula>& goal_formula);
     /**The recursive function to generate the various nested fluents for classical conversion
      *
      * @param[in] nesting: The max_depth of the generated subgoals.
@@ -303,7 +301,6 @@ private:
      * @param[out] ret: The list of already generated fluents in which to add the new ones. 
      */
     void make_nested_bf_classical(unsigned short nesting, unsigned short depth, belief_formula & to_explore, std::vector<belief_formula> & ret);
-    void make_nested_bf_classical2(unsigned short nesting, unsigned short depth, belief_formula & to_explore, std::list<belief_formula> & ret);
 
     /*Function add the next (depth + 1) state layer to m_state_levels
      *

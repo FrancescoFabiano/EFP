@@ -78,6 +78,7 @@ bool planner<T>::search(bool results_file, heuristics used_heur, int max_depth, 
 		return search_heur(results_file, used_heur);
 	}
 
+	//non arrivo mai qui.
 	return false;
 }
 
@@ -124,7 +125,6 @@ bool planner<T>::search_BFS(bool results_file)
 		visited_states.insert(initial);
 	}
 
-	//int count = 1;
 	while (!m_search_space.empty()) {
 		popped_state = m_search_space.front();
 		m_search_space.pop();
@@ -184,7 +184,6 @@ bool planner<T>::search_IterativeDFS(bool results_file, int maxDepth_, int step_
         initial.calc_min_bisimilar();
     }
 
-    //aggiungere parametri da cmd
     int maxDepth = maxDepth_;
     int step = step_;
 
@@ -246,7 +245,7 @@ bool planner<T>::search_IterativeDFS(bool results_file, int maxDepth_, int step_
 
         }
     }
-
+    //anche qui non ci arrivo mai con il while true
     std::cout << "\nNo plan found for this goal.\n";
     return false;
 }
