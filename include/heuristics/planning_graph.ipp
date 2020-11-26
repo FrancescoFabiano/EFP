@@ -787,7 +787,7 @@ std::list<belief_formula> planning_graph<T>::list_bf_grounded(unsigned short nes
 
     //initially
 
-    std::list<belief_formula> initially = domain::get_instance().get_initial_description().get_initial_conditions().;
+    std::list<belief_formula> initially = domain::get_instance().get_initial_description().get_initial_conditions();
     fluent_set initially_fluent_set = domain::get_instance().get_initial_description().get_initially_known_fluents();
 
     fluent_set::iterator iter_initially;
