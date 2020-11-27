@@ -280,10 +280,12 @@ private:
     void pg_build_classical(std::vector<belief_formula> & converted_bf);
 
     //planning graph epistemic new implementation
-    void pg_build_initially(std::list<belief_formula> & converted_bf, std::list<belief_formula> & goal);
+    void pg_build_initially(std::list<belief_formula> & goal);
     void pg_build_grounded();
-    std::list<belief_formula> list_bf_grounded(unsigned short nesting=1); //,const std::list<belief_formula>& goal_formula);
-    void make_nested_bf_classical2(unsigned short nesting, unsigned short depth, belief_formula & to_explore, std::list<belief_formula> & ret);
+
+    std::list<belief_formula> list_bf_grounded(const belief_formula & belief_forms);
+    //std::list<belief_formula> list_bf_grounded(unsigned short nesting=1); //,const std::list<belief_formula>& goal_formula);
+    void make_nested_bf_classical2(unsigned short nesting, unsigned short depth,const belief_formula & to_explore, std::list<belief_formula> & ret);
     //
 
     /*Function that returns the list of fluents and belief formulae that represent the fluent of the conversion to classical planning

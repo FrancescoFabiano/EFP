@@ -353,8 +353,8 @@ planning_graph<T>::planning_graph(const T& state_init, const formula_list & goal
 		}
 	}*/
 
-    std::list<belief_formula> to_initially = list_bf_grounded();
-    pg_build_initially(to_initially, m_goal);
+
+    pg_build_initially(m_goal);
 
 
 
@@ -376,8 +376,8 @@ planning_graph<T>::planning_graph(const T& state_init, const formula_list & goal
 			//pg_build_classical(to_explore);
 
 			//TODO
-            std::list<belief_formula> to_initially = list_bf_grounded();
-            pg_build_initially(to_initially, goal);
+
+            pg_build_initially(goal);
 
 		}
 
@@ -543,18 +543,18 @@ void planning_graph<T>::pg_build()
 }
 
 template <class T>
-void planning_graph<T>::pg_build_initially(std::list<belief_formula> & converted_bf, std::list<belief_formula> & goal) //aggiungere come parametri la lista iniziale delle belief formula e dei fluentset
+void planning_graph<T>::pg_build_initially(std::list<belief_formula> & goal) //aggiungere come parametri la lista iniziale delle belief formula e dei fluentset
 {
     std:: cout << "pg_build_initially" <<std::endl;
     std::set<std::pair<belief_formula, bool>> m_pairBeliefBool;
-    int n = converted_bf.size();
+   // int n = converted_bf.size();
     std::list<belief_formula>::iterator iter;
     //belif formule initliay corrette e quelle del dominio vere all'inizio
-    for(iter = converted_bf.begin(); iter != converted_bf.end(); iter++ )
+    /*for(iter = converted_bf.begin(); iter != converted_bf.end(); iter++ )
     {
         std::pair <belief_formula,bool> bar = std::make_pair(*iter,true);
         m_pairBeliefBool.insert(bar);
-    }
+    }*/
 
     //belief formule goal false
     std::list<belief_formula>::iterator iterGoal;
@@ -581,8 +581,15 @@ void planning_graph<T>::pg_build_initially(std::list<belief_formula> & converted
         for(iter_action_formulas = list_action_formula.begin();iter_action_formulas != list_action_formula.end();iter_action_formulas++)
         {
             //aggiungo le condizioni di eseguibilità delle belief formula inizialmente a false
-            std::pair <belief_formula,bool> bar = std::make_pair(*iter_action_formulas,false);
-            m_pairBeliefBool.insert(bar);
+            //std::pair <belief_formula,bool> bar = std::make_pair(*iter_action_formulas,false);
+            //m_pairBeliefBool.insert(bar);
+            std::list<belief_formula> formula_list_bf_action = list_bf_grounded(*iter_action_formulas);
+            std::list<belief_formula>::iterator it_list_action;
+            for(it_list_action = formula_list_bf_action.begin(); it_list_action!=formula_list_bf_action.end();it_list_action++)
+            {
+                std::pair <belief_formula,bool> bar = std::make_pair(*it_list_action,false);
+                m_pairBeliefBool.insert(bar);
+            }
         }
 
        /* if (s_level_curr.pg_executable(*it_actset)) {
@@ -833,51 +840,17 @@ std::vector<belief_formula> planning_graph<T>::list_bf_classical(unsigned short 
 }
 
 template <class T>
-std::list<belief_formula> planning_graph<T>::list_bf_grounded(unsigned short nesting)//,const std::list<belief_formula> & goal)
+std::list<belief_formula> planning_graph<T>::list_bf_grounded(const belief_formula & belief_forms)//,const std::list<belief_formula> & goal)
 {
     std:: cout << "list_bf_grounded" <<std::endl;
     std::list<belief_formula> ret;
-    fluent_set::const_iterator it_fl;
 
-    //initially
-
-    std::list<belief_formula> initially = domain::get_instance().get_initial_description().get_initial_conditions();
-    fluent_set initially_fluent_set = domain::get_instance().get_initial_description().get_initially_known_fluents();
-
-    fluent_set::iterator iter_initially;
-
-    for(iter_initially = initially_fluent_set.begin(); iter_initially!=initially_fluent_set.end();iter_initially++)
+    if(!belief_forms.get_is_grounded())
     {
-        //TODO CHECK
-        belief_formula pg_c_bf;
-        pg_c_bf.set_formula_type(FLUENT_FORMULA);
-        pg_c_bf.set_fluent_formula_from_fluent(*iter_initially);
-        pg_c_bf.set_is_grounded(true);
-        ret.push_back(pg_c_bf);
-        make_nested_bf_classical2(nesting, 0, pg_c_bf, ret);
+       // make_nested_bf_classical2(2, 0,  belief_forms, ret);
+
+        ret.push_back(neg_pg_c_bf);
     }
-
-    /*fluent_set fluents = domain::get_instance().get_fluents();
-    for (it_fl = fluents.begin(); it_fl != fluents.end(); it_fl++) {
-        /*f*/
-       /* belief_formula pg_c_bf;
-        pg_c_bf.set_formula_type(FLUENT_FORMULA);
-        pg_c_bf.set_fluent_formula_from_fluent(*it_fl);
-        pg_c_bf.set_is_grounded(true);
-        ret.push_back(pg_c_bf);
-        make_nested_bf_classical2(nesting, 0, pg_c_bf, ret);*/
-   /* }*/
-
-    //goal non serve farlo qui.
-   /* std::list<belief_formula> goals = domain::get_instance().get_goal_description();
-    //std::copy (goals_vector.begin(), goals_vector.end(), std::back_inserter(ret));
-
-    std::list<belief_formula>::iterator iter_goals;
-    for(iter_goals = goals.begin(); iter_goals!=goals.end();iter_goals++)
-    {
-        //TODO inserire goals
-       // ret.push_back(&goals);
-    }*/
     std:: cout << "finish_list_bf_grounded" <<std::endl;
     return ret;
 
@@ -921,8 +894,8 @@ void planning_graph<T>::make_nested_bf_classical(unsigned short nesting, unsigne
 
 
 
-template <class T>
-void planning_graph<T>::make_nested_bf_classical2(unsigned short nesting, unsigned short depth, belief_formula & to_explore, std::list<belief_formula> & ret)
+template <class T>//forse non serve
+void planning_graph<T>::make_nested_bf_classical2(unsigned short nesting, unsigned short depth,const belief_formula & to_explore, std::list<belief_formula> & ret)
 {
     agent_set::const_iterator it_agset;
     for (it_agset = domain::get_instance().get_agents().begin(); it_agset != domain::get_instance().get_agents().end(); it_agset++) {
@@ -948,7 +921,6 @@ void planning_graph<T>::make_nested_bf_classical2(unsigned short nesting, unsign
             if (nesting > (depth + 1)) {
                 make_nested_bf_classical2(nesting, (depth + 1), pg_c_bf, ret);
                 make_nested_bf_classical2(nesting, (depth + 1), neg_pg_c_bf, ret);
-
             }
 
             /*\todo Add common knowledge etc?*/
