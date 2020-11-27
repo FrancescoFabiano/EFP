@@ -569,11 +569,23 @@ void planning_graph<T>::pg_build_initially(std::list<belief_formula> & converted
     if (m_action_levels.size() > 0) {
         a_level_curr = m_action_levels.back();
     }
+
+    //aggiunto oltre allo stato azione aggiunto tutte le condizioni di eseguibilità dell'azione a false nelle belief formula
     action_set::iterator it_actset;
+    std::list<belief_formula>::iterator iter_action_formulas;
     for (it_actset = m_never_executed.begin(); it_actset != m_never_executed.end();) {
         if (s_level_curr.pg_executable(*it_actset)) {
             a_level_curr.add_action(*it_actset);
             it_actset = m_never_executed.erase(it_actset);
+
+
+            std::list<belief_formula> list_action_formula= it_actset->get_executability();
+            for(iter_action_formulas = list_action_formula.begin();iter_action_formulas != list_action_formula.end();iter_action_formulas++)
+            {
+                //aggiungo le condizioni di eseguibilità delle belief formula inizialmente a false
+                std::pair <belief_formula,bool> bar = std::make_pair(*iter_action_formulas,false);
+                m_pairBeliefBool.insert(bar);
+            }
         } else {
             it_actset++;
         }
@@ -588,7 +600,7 @@ void planning_graph<T>::pg_build_initially(std::list<belief_formula> & converted
     set_length(get_length() + 1);
 
     s_level_curr.set_pair_belief_bool(m_pairBeliefBool);
-    //aggiungo i fluenti iniziali
+    //aggiungo i fluenti iniziali initialy
     s_level_curr.add_fluent(domain::get_instance().get_initial_description().get_initially_known_fluents());
     //The no-op is done with the copy
     pg_state_level<T> s_level_next = s_level_curr;
@@ -597,6 +609,7 @@ void planning_graph<T>::pg_build_initially(std::list<belief_formula> & converted
     add_state_level(s_level_next);
 
     //prendo tutte le componeenti delle azioni belief formula nella descrizione del dominio e sono tutte a false
+
     //aggiungere i controlli che se all'inizio ho qualche initialy che mi ferma la computazione per inconsistenza
     //oppure controllo che sono già al goal.
     //TODO
