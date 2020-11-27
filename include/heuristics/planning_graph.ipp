@@ -326,7 +326,7 @@ planning_graph<T>::planning_graph(const T& state_init, const formula_list & goal
 	/*\*****START PLANNING GRAPH TIME MEASURE*******
 	auto start_pg_build = std::chrono::system_clock::now();
 	 *\******END PLANNING GRAPH TIME MEASURE********/
-
+    std::cout << "start"<< std::endl;
 
 	set_goal(goal);
 	pg_state_level<T> pg_init;
@@ -336,7 +336,6 @@ planning_graph<T>::planning_graph(const T& state_init, const formula_list & goal
 	set_length(0);
 	set_sum(0);
 
-
 	bool goal_reached = true;
 	formula_list::const_iterator it_fl;
 
@@ -344,7 +343,7 @@ planning_graph<T>::planning_graph(const T& state_init, const formula_list & goal
 	auto start_pg_goal_ini = std::chrono::system_clock::now();
 	 *\******END PLANNING GRAPH TIME MEASURE********/
 
-	for (it_fl = m_goal.begin(); it_fl != m_goal.end();) {
+	/*for (it_fl = m_goal.begin(); it_fl != m_goal.end();) {
 		if (m_state_levels.back().pg_entailment(*it_fl)) {
 			it_fl = m_goal.erase(it_fl);
 
@@ -352,36 +351,40 @@ planning_graph<T>::planning_graph(const T& state_init, const formula_list & goal
 			goal_reached = false;
 			it_fl++;
 		}
-	}
+	}*/
+
+    std::list<belief_formula> to_initially = list_bf_grounded();
+    pg_build_initially(to_initially, m_goal);
 
 
 
-	/*\*****START PLANNING GRAPH TIME MEASURE*******
-	auto end_pg_goal_ini = std::chrono::system_clock::now();
-	std::chrono::duration<double> pg_goal_ini_time = end_pg_goal_ini - start_pg_goal_ini;
-	t1 = std::chrono::milliseconds::zero();
-	t2 = std::chrono::milliseconds::zero();
-	t3 = std::chrono::milliseconds::zero();
-	t4 = std::chrono::milliseconds::zero();
-	 *\******END PLANNING GRAPH TIME MEASURE********/
 
-	if (!goal_reached) {
+    /*\*****START PLANNING GRAPH TIME MEASURE*******
+    auto end_pg_goal_ini = std::chrono::system_clock::now();
+    std::chrono::duration<double> pg_goal_ini_time = end_pg_goal_ini - start_pg_goal_ini;
+    t1 = std::chrono::milliseconds::zero();
+    t2 = std::chrono::milliseconds::zero();
+    t3 = std::chrono::milliseconds::zero();
+    t4 = std::chrono::milliseconds::zero();
+     *\******END PLANNING GRAPH TIME MEASURE********/
+
+	/*if (!goal_reached) {
 		if (!is_single) {
 			pg_build();
 		} else {
-			std::vector<belief_formula> to_explore = list_bf_classical();
-			pg_build_classical(to_explore);
+			//std::vector<belief_formula> to_explore = list_bf_classical();
+			//pg_build_classical(to_explore);
 
 			//TODO
-//            std::list<belief_formula> to_initially = list_bf_grounded();
-  //          pg_build_initially(to_initially, goal);
+            std::list<belief_formula> to_initially = list_bf_grounded();
+            pg_build_initially(to_initially, goal);
 
 		}
 
 	} else {
 		std::cerr << "\nBUILDING: The given state is goal\n";
 		exit(1);
-	}
+	}*/
 
 
 
@@ -542,7 +545,7 @@ void planning_graph<T>::pg_build()
 template <class T>
 void planning_graph<T>::pg_build_initially(std::list<belief_formula> & converted_bf, std::list<belief_formula> & goal) //aggiungere come parametri la lista iniziale delle belief formula e dei fluentset
 {
-
+    std:: cout << "pg_build_initially" <<std::endl;
     std::set<std::pair<belief_formula, bool>> m_pairBeliefBool;
     int n = converted_bf.size();
     std::list<belief_formula>::iterator iter;
@@ -555,7 +558,7 @@ void planning_graph<T>::pg_build_initially(std::list<belief_formula> & converted
 
     //belief formule goal false
     std::list<belief_formula>::iterator iterGoal;
-    for(iterGoal = goal.begin(); iterGoal != goal.end(); iter++ )
+    for(iterGoal = goal.begin(); iterGoal != goal.end(); iterGoal++ )
     {
         std::pair <belief_formula,bool> bar = std::make_pair(*iterGoal,false);
         m_pairBeliefBool.insert(bar);
@@ -573,8 +576,16 @@ void planning_graph<T>::pg_build_initially(std::list<belief_formula> & converted
     //aggiunto oltre allo stato azione aggiunto tutte le condizioni di eseguibilità dell'azione a false nelle belief formula
     action_set::iterator it_actset;
     std::list<belief_formula>::iterator iter_action_formulas;
-    for (it_actset = m_never_executed.begin(); it_actset != m_never_executed.end();) {
-        if (s_level_curr.pg_executable(*it_actset)) {
+    for (it_actset = m_never_executed.begin(); it_actset != m_never_executed.end();it_actset++) {
+        std::list<belief_formula> list_action_formula= it_actset->get_executability();
+        for(iter_action_formulas = list_action_formula.begin();iter_action_formulas != list_action_formula.end();iter_action_formulas++)
+        {
+            //aggiungo le condizioni di eseguibilità delle belief formula inizialmente a false
+            std::pair <belief_formula,bool> bar = std::make_pair(*iter_action_formulas,false);
+            m_pairBeliefBool.insert(bar);
+        }
+
+       /* if (s_level_curr.pg_executable(*it_actset)) {
             a_level_curr.add_action(*it_actset);
             it_actset = m_never_executed.erase(it_actset);
 
@@ -588,7 +599,7 @@ void planning_graph<T>::pg_build_initially(std::list<belief_formula> & converted
             }
         } else {
             it_actset++;
-        }
+        }*/
     }
     /*\*****START PLANNING GRAPH TIME MEASURE*******
     auto end = std::chrono::system_clock::now();
@@ -601,7 +612,13 @@ void planning_graph<T>::pg_build_initially(std::list<belief_formula> & converted
 
     s_level_curr.set_pair_belief_bool(m_pairBeliefBool);
     //aggiungo i fluenti iniziali initialy
-    s_level_curr.add_fluent(domain::get_instance().get_initial_description().get_initially_known_fluents());
+    fluent_set initialy_fluent = domain::get_instance().get_initial_description().get_initially_known_fluents();
+    fluent_set::iterator iter_fluent_init;
+    for(iter_fluent_init = initialy_fluent.begin(); iter_fluent_init !=initialy_fluent.end(); iter_fluent_init++ )
+    {
+        s_level_curr.add_fluent(*iter_fluent_init);
+    }
+
     //The no-op is done with the copy
     pg_state_level<T> s_level_next = s_level_curr;
     s_level_next.set_depth(get_length());
@@ -614,8 +631,31 @@ void planning_graph<T>::pg_build_initially(std::list<belief_formula> & converted
     //oppure controllo che sono già al goal.
     //TODO
 
+    print_state(s_level_curr.get_pair_belief_bool(),s_level_curr.get_fluent_set());
     //ottenuto quinid i goal tutti a false e gli initially e i fluenti pg_build_grounded del dominio posso procedere
-    pg_build_grounded();
+    //pg_build_grounded();
+    std:: cout << "pg_build_initially" <<std::endl;
+}
+
+
+void print_state( std::set<std::pair<belief_formula, bool>> m_pair_belief_bool, std::set<fluent> m_fluentSet)
+{
+    std::cout << "-----------------------------" << std::endl;
+    std::cout << "Print belief and fluent: " << std::endl;
+    std::set<fluent>::iterator iter_fluent;
+    for(iter_fluent = m_fluentSet.begin(); iter_fluent != m_fluentSet.end(); iter_fluent++)
+    {
+        std::cout << "Fluent:" << domain::get_instance().get_grounder().deground_fluent(*iter_fluent) << std::endl;
+    }
+
+    std::set<std::pair<belief_formula, bool>> ::iterator iter_pair_belief;
+    for(iter_pair_belief = m_pair_belief_bool.begin(); iter_pair_belief != m_pair_belief_bool.end(); iter_pair_belief++)
+    {
+        std::cout << "Belief: ";
+        (iter_pair_belief->first).print();
+        std::cout <<  " Value: "<< iter_pair_belief->second << std::endl;
+    }
+    std::cout << "-----------------------------" << std::endl;
 }
 
 
@@ -795,6 +835,7 @@ std::vector<belief_formula> planning_graph<T>::list_bf_classical(unsigned short 
 template <class T>
 std::list<belief_formula> planning_graph<T>::list_bf_grounded(unsigned short nesting)//,const std::list<belief_formula> & goal)
 {
+    std:: cout << "list_bf_grounded" <<std::endl;
     std::list<belief_formula> ret;
     fluent_set::const_iterator it_fl;
 
@@ -816,16 +857,16 @@ std::list<belief_formula> planning_graph<T>::list_bf_grounded(unsigned short nes
         make_nested_bf_classical2(nesting, 0, pg_c_bf, ret);
     }
 
-    fluent_set fluents = domain::get_instance().get_fluents();
+    /*fluent_set fluents = domain::get_instance().get_fluents();
     for (it_fl = fluents.begin(); it_fl != fluents.end(); it_fl++) {
         /*f*/
-        belief_formula pg_c_bf;
+       /* belief_formula pg_c_bf;
         pg_c_bf.set_formula_type(FLUENT_FORMULA);
         pg_c_bf.set_fluent_formula_from_fluent(*it_fl);
         pg_c_bf.set_is_grounded(true);
         ret.push_back(pg_c_bf);
-        make_nested_bf_classical2(nesting, 0, pg_c_bf, ret);
-    }
+        make_nested_bf_classical2(nesting, 0, pg_c_bf, ret);*/
+   /* }*/
 
     //goal non serve farlo qui.
    /* std::list<belief_formula> goals = domain::get_instance().get_goal_description();
@@ -837,7 +878,7 @@ std::list<belief_formula> planning_graph<T>::list_bf_grounded(unsigned short nes
         //TODO inserire goals
        // ret.push_back(&goals);
     }*/
-
+    std:: cout << "finish_list_bf_grounded" <<std::endl;
     return ret;
 
 }
