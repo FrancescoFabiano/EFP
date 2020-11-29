@@ -578,12 +578,16 @@ void planning_graph<T>::pg_build_initially(std::list<belief_formula> & goal) //a
     std::list<belief_formula>::iterator iter_action_formulas;
     for (it_actset = m_never_executed.begin(); it_actset != m_never_executed.end();it_actset++) {
         std::list<belief_formula> list_action_formula= it_actset->get_executability();
+        std:: cout << "action" <<std::endl;
+
         for(iter_action_formulas = list_action_formula.begin();iter_action_formulas != list_action_formula.end();iter_action_formulas++)
         {
+            std:: cout <<"x:"<<std::endl;
             //aggiungo le condizioni di eseguibilità delle belief formula inizialmente a false
             //std::pair <belief_formula,bool> bar = std::make_pair(*iter_action_formulas,false);
             //m_pairBeliefBool.insert(bar);
-            std::list<belief_formula> formula_list_bf_action = list_bf_grounded(*iter_action_formulas);
+            std::list<belief_formula> formula_list_bf_action;
+            list_bf_grounded(*iter_action_formulas,formula_list_bf_action);
             std::list<belief_formula>::iterator it_list_action;
             for(it_list_action = formula_list_bf_action.begin(); it_list_action!=formula_list_bf_action.end();it_list_action++)
             {
@@ -625,6 +629,8 @@ void planning_graph<T>::pg_build_initially(std::list<belief_formula> & goal) //a
     {
         s_level_curr.add_fluent(*iter_fluent_init);
     }
+
+    fluent_set initialy_fluent2 = domain::get_instance().get_initial_description().get_initial_conditions();
 
     //The no-op is done with the copy
     pg_state_level<T> s_level_next = s_level_curr;
@@ -840,19 +846,55 @@ std::vector<belief_formula> planning_graph<T>::list_bf_classical(unsigned short 
 }
 
 template <class T>
-std::list<belief_formula> planning_graph<T>::list_bf_grounded(const belief_formula & belief_forms)//,const std::list<belief_formula> & goal)
+void planning_graph<T>::list_bf_grounded(const belief_formula & belief_forms, std::list<belief_formula> &ret)//,const std::list<belief_formula> & goal)
 {
     std:: cout << "list_bf_grounded" <<std::endl;
-    std::list<belief_formula> ret;
+    (belief_forms).print();
+    std::cout << "type: " << belief_forms.get_formula_type() <<std::endl;
+    std::cout << BELIEF_FORMULA << PROPOSITIONAL_FORMULA <<std::endl;
 
-    if(!belief_forms.get_is_grounded())
-    {
-       // make_nested_bf_classical2(2, 0,  belief_forms, ret);
+    bf_operator m_operator = belief_forms.get_operator();
 
-        ret.push_back(neg_pg_c_bf);
+    switch ( belief_forms.get_formula_type() ) {
+
+        case FLUENT_FORMULA:
+            break;
+        case BELIEF_FORMULA:
+            ret.push_back(belief_forms);
+            break;
+        case D_FORMULA:
+            break;
+
+        case C_FORMULA:
+            break;
+
+        case PROPOSITIONAL_FORMULA:
+            if (m_operator == BF_FAIL) {
+                std::cerr << "\n ERROR IN DELCARATION\n.";
+                exit(1);
+            }
+            else{
+                if ((&(belief_forms.get_bf1())) != nullptr) {
+                    std::cout << 1<< std::endl;
+                    belief_forms.get_bf1().print();
+                    list_bf_grounded(belief_forms.get_bf1(),ret);
+                }
+                if ((&(belief_forms.get_bf2())) != nullptr) {
+                    std::cout << 2 << std::endl;
+                    belief_forms.get_bf2().print();
+                    list_bf_grounded(belief_forms.get_bf2(),ret);
+                }
+            }
+            break;
+        case BF_EMPTY:
+            break;
+        case BF_TYPE_FAIL:
+        default:
+            break;
+
     }
     std:: cout << "finish_list_bf_grounded" <<std::endl;
-    return ret;
+    //return ret;
 
 }
 
