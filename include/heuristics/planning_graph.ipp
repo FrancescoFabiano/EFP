@@ -577,24 +577,26 @@ void planning_graph<T>::pg_build_initially(std::list<belief_formula> & goal) //a
     action_set::iterator it_actset;
     std::list<belief_formula>::iterator iter_action_formulas;
     for (it_actset = m_never_executed.begin(); it_actset != m_never_executed.end();it_actset++) {
-        std::list<belief_formula> list_action_formula= it_actset->get_executability();
-        std:: cout << "action" <<std::endl;
+        std::list<belief_formula> list_action_formula = it_actset->get_executability();
+        //std::cout << "action" << std::endl;
 
-        for(iter_action_formulas = list_action_formula.begin();iter_action_formulas != list_action_formula.end();iter_action_formulas++)
-        {
-            std:: cout <<"x:"<<std::endl;
+        for (iter_action_formulas = list_action_formula.begin();
+             iter_action_formulas != list_action_formula.end(); iter_action_formulas++) {
+           // std::cout << "x:" << std::endl;
             //aggiungo le condizioni di eseguibilità delle belief formula inizialmente a false
             //std::pair <belief_formula,bool> bar = std::make_pair(*iter_action_formulas,false);
             //m_pairBeliefBool.insert(bar);
             std::list<belief_formula> formula_list_bf_action;
-            list_bf_grounded(*iter_action_formulas,formula_list_bf_action);
+            list_bf_grounded(*iter_action_formulas, formula_list_bf_action);
             std::list<belief_formula>::iterator it_list_action;
-            for(it_list_action = formula_list_bf_action.begin(); it_list_action!=formula_list_bf_action.end();it_list_action++)
-            {
-                std::pair <belief_formula,bool> bar = std::make_pair(*it_list_action,false);
+            for (it_list_action = formula_list_bf_action.begin();
+                 it_list_action != formula_list_bf_action.end(); it_list_action++) {
+                std::pair<belief_formula, bool> bar = std::make_pair(*it_list_action, false);
                 m_pairBeliefBool.insert(bar);
             }
         }
+
+    }
 
        /* if (s_level_curr.pg_executable(*it_actset)) {
             a_level_curr.add_action(*it_actset);
@@ -611,7 +613,7 @@ void planning_graph<T>::pg_build_initially(std::list<belief_formula> & goal) //a
         } else {
             it_actset++;
         }*/
-    }
+
     /*\*****START PLANNING GRAPH TIME MEASURE*******
     auto end = std::chrono::system_clock::now();
     t1 += end - start;
@@ -630,13 +632,13 @@ void planning_graph<T>::pg_build_initially(std::list<belief_formula> & goal) //a
         s_level_curr.add_fluent(*iter_fluent_init);
     }
 
-    fluent_set initialy_fluent2 = domain::get_instance().get_initial_description().get_initial_conditions();
-
     //The no-op is done with the copy
-    pg_state_level<T> s_level_next = s_level_curr;
-    s_level_next.set_depth(get_length());
+   // pg_state_level<T> s_level_next = s_level_curr;
+    //s_level_next.set_depth(get_length());
+    //add_state_level(s_level_next);
+    s_level_curr.set_depth(get_length());
 
-    add_state_level(s_level_next);
+    add_state_level(s_level_curr);
 
     //prendo tutte le componeenti delle azioni belief formula nella descrizione del dominio e sono tutte a false
 
@@ -647,7 +649,7 @@ void planning_graph<T>::pg_build_initially(std::list<belief_formula> & goal) //a
     print_state(s_level_curr.get_pair_belief_bool(),s_level_curr.get_fluent_set());
     //ottenuto quinid i goal tutti a false e gli initially e i fluenti pg_build_grounded del dominio posso procedere
     //pg_build_grounded();
-    std:: cout << "pg_build_initially" <<std::endl;
+    std:: cout << "pg_build_initially fine" <<std::endl;
 }
 
 
