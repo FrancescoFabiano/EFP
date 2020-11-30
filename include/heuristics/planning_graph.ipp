@@ -545,6 +545,7 @@ void planning_graph<T>::pg_build()
 template <class T>
 void planning_graph<T>::pg_build_initially(std::list<belief_formula> & goal) //aggiungere come parametri la lista iniziale delle belief formula e dei fluentset
 {
+
     std:: cout << "pg_build_initially" <<std::endl;
     std::set<std::pair<belief_formula, bool>> m_pairBeliefBool;
    // int n = converted_bf.size();
@@ -566,6 +567,7 @@ void planning_graph<T>::pg_build_initially(std::list<belief_formula> & goal) //a
 
 
     pg_state_level<T> s_level_curr = m_state_levels.back();
+
     pg_action_level a_level_curr;
     a_level_curr.set_depth(get_length());
 
@@ -578,14 +580,11 @@ void planning_graph<T>::pg_build_initially(std::list<belief_formula> & goal) //a
     std::list<belief_formula>::iterator iter_action_formulas;
     for (it_actset = m_never_executed.begin(); it_actset != m_never_executed.end();it_actset++) {
         std::list<belief_formula> list_action_formula = it_actset->get_executability();
-        //std::cout << "action" << std::endl;
 
         for (iter_action_formulas = list_action_formula.begin();
              iter_action_formulas != list_action_formula.end(); iter_action_formulas++) {
-           // std::cout << "x:" << std::endl;
+
             //aggiungo le condizioni di eseguibilità delle belief formula inizialmente a false
-            //std::pair <belief_formula,bool> bar = std::make_pair(*iter_action_formulas,false);
-            //m_pairBeliefBool.insert(bar);
             std::list<belief_formula> formula_list_bf_action;
             list_bf_grounded(*iter_action_formulas, formula_list_bf_action);
             std::list<belief_formula>::iterator it_list_action;
@@ -629,9 +628,28 @@ void planning_graph<T>::pg_build_initially(std::list<belief_formula> & goal) //a
     fluent_set::iterator iter_fluent_init;
     for(iter_fluent_init = initialy_fluent.begin(); iter_fluent_init !=initialy_fluent.end(); iter_fluent_init++ )
     {
+        std::cout << domain::get_instance().get_grounder().deground_fluent(*iter_fluent_init) << std::endl;
         s_level_curr.add_fluent(*iter_fluent_init);
     }
 
+    std::cout << "POINTED WORLD FLUENT\n" << std::endl;
+
+    fluent_formula setF =domain::get_instance().get_initial_description().get_pointed_world_conditions();
+
+    fluent_formula::iterator iter_fluent_init2;
+    std::cout << "iter\n" << std::endl;
+    for(iter_fluent_init2 = setF.begin(); iter_fluent_init2 != setF.end(); iter_fluent_init2++)
+    {
+        //brutto...
+        string_set z = domain::get_instance().get_grounder().deground_fluent(*iter_fluent_init2);
+        for(string_set::iterator iterx= z.begin(); iterx!=z.end() ;iterx++)
+        {
+            fluent fl = domain::get_instance().get_grounder().ground_fluent(*iterx);
+            s_level_curr.add_fluent(fl);
+            std::cout <<"fluente:" << *iterx <<std::endl;
+        }
+    }
+    std::cout << "WORLDEMD\n" << std::endl;
     //The no-op is done with the copy
    // pg_state_level<T> s_level_next = s_level_curr;
     //s_level_next.set_depth(get_length());
