@@ -40,6 +40,9 @@ nbproject/
 readme_old
 .vscode/
 compile_commands.json
+.idea/
+.idea/*
+.idea_original/
 
 # Doxygen
 Doxygen/Docs/
