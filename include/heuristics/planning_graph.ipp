@@ -1298,8 +1298,21 @@ bool planning_graph<T>::check_belief_formula(const belief_formula & belief_form_
     switch ( belief_form_to_check.get_formula_type() ) {
 
         case FLUENT_FORMULA:
-            if(belief_initially.get_group_agents() == agents)
+            std::cout  << "\nINIT"<<std::endl;
+            for(agent_set::iterator agentIter =belief_initially.get_group_agents().begin();agentIter!=belief_initially.get_group_agents().end();agentIter++){
+                std::cout << *agentIter << "-"<<std::endl;
+            }
+            std::cout  << "\n"<<std::endl;
+            std::cout  << "\nCurrent"<<std::endl;
+            for(agent_set::iterator agentIter =agents.begin();agentIter!=agents.end();agentIter++){
+                std::cout << *agentIter << "-"<<std::endl;
+            }
+            if (std::includes(belief_initially.get_group_agents().begin(), belief_initially.get_group_agents().end(),
+                              agents.begin(), agents.end()))
+            {
+               // std::cout << "agents is a subset of set_one" << std::endl;
                 return true;
+            }
             else
                 return false;
             break;
