@@ -588,10 +588,16 @@ void planning_graph<T>::pg_build_initially(std::list<belief_formula> & goal) //a
             std::list<belief_formula> formula_list_bf_action;
             list_bf_grounded(*iter_action_formulas, formula_list_bf_action);
             std::list<belief_formula>::iterator it_list_action;
+
             for (it_list_action = formula_list_bf_action.begin();
                  it_list_action != formula_list_bf_action.end(); it_list_action++) {
                 std::pair<belief_formula, bool> bar = std::make_pair(*it_list_action, false);
                 m_pairBeliefBool.insert(bar);
+                std::cout <<"-----\nBelief False\n----" << std::endl;
+                it_list_action->print();
+                std::cout <<"-----\nEND\n----" << std::endl;
+                add_belief_false(*it_list_action);
+                //aggiungo belief in false
             }
         }
 
@@ -632,24 +638,42 @@ void planning_graph<T>::pg_build_initially(std::list<belief_formula> & goal) //a
         s_level_curr.add_fluent(*iter_fluent_init);
     }
 
-    std::cout << "POINTED WORLD FLUENT\n" << std::endl;
+   // std::cout << "POINTED WORLD FLUENT\n" << std::endl;
 
     fluent_formula setF =domain::get_instance().get_initial_description().get_pointed_world_conditions();
 
     fluent_formula::iterator iter_fluent_init2;
-    std::cout << "iter\n" << std::endl;
+   // std::cout << "iter\n" << std::endl;
     for(iter_fluent_init2 = setF.begin(); iter_fluent_init2 != setF.end(); iter_fluent_init2++)
     {
         //brutto...
-        string_set z = domain::get_instance().get_grounder().deground_fluent(*iter_fluent_init2);
+        fluent_set::iterator iter_fluent_init3;
+        for(iter_fluent_init3 = iter_fluent_init2->begin(); iter_fluent_init3 != iter_fluent_init2->end();iter_fluent_init3++)
+        {
+            s_level_curr.add_fluent(*iter_fluent_init3);
+        }
+        /*string_set z = domain::get_instance().get_grounder().deground_fluent(*iter_fluent_init2);
         for(string_set::iterator iterx= z.begin(); iterx!=z.end() ;iterx++)
         {
             fluent fl = domain::get_instance().get_grounder().ground_fluent(*iterx);
             s_level_curr.add_fluent(fl);
             std::cout <<"fluente:" << *iterx <<std::endl;
-        }
+        }*/
     }
-    std::cout << "WORLDEMD\n" << std::endl;
+    //std::cout << "WORLDEMD\n" << std::endl;
+
+    //add belief formule initially
+    std::list<belief_formula>::iterator belief_formule_initially;
+    std::list<belief_formula> initially_belief_formule = domain::get_instance().get_initial_description().get_initial_conditions();
+    for(belief_formule_initially= initially_belief_formule.begin();belief_formule_initially !=initially_belief_formule.end();belief_formule_initially++)
+    {
+        std::pair<belief_formula, bool> bar = std::make_pair(*belief_formule_initially, true);
+        m_pairBeliefBool.insert(bar);
+
+    }
+    s_level_curr.set_pair_belief_bool(m_pairBeliefBool);
+
+   // domain::get_instance().get_initial_description().get_pointed_world_conditions()
     //The no-op is done with the copy
    // pg_state_level<T> s_level_next = s_level_curr;
     //s_level_next.set_depth(get_length());
@@ -664,12 +688,19 @@ void planning_graph<T>::pg_build_initially(std::list<belief_formula> & goal) //a
     //oppure controllo che sono già al goal.
     //TODO
 
+
+
     print_state(s_level_curr.get_pair_belief_bool(),s_level_curr.get_fluent_set());
     //ottenuto quinid i goal tutti a false e gli initially e i fluenti pg_build_grounded del dominio posso procedere
     //pg_build_grounded();
     std:: cout << "pg_build_initially fine" <<std::endl;
 }
 
+template <class T>
+void planning_graph<T>::add_belief_false(belief_formula & formula)
+{
+    m_belief_formula_false.insert(formula);
+}
 
 void print_state( std::set<std::pair<belief_formula, bool>> m_pair_belief_bool, std::set<fluent> m_fluentSet)
 {
@@ -689,7 +720,10 @@ void print_state( std::set<std::pair<belief_formula, bool>> m_pair_belief_bool, 
         std::cout <<  " Value: "<< iter_pair_belief->second << std::endl;
     }
     std::cout << "-----------------------------" << std::endl;
+    std::cout << "Print belief false: " << std::endl;
+
 }
+
 
 
 template <class T>
@@ -868,10 +902,10 @@ std::vector<belief_formula> planning_graph<T>::list_bf_classical(unsigned short 
 template <class T>
 void planning_graph<T>::list_bf_grounded(const belief_formula & belief_forms, std::list<belief_formula> &ret)//,const std::list<belief_formula> & goal)
 {
-    std:: cout << "list_bf_grounded" <<std::endl;
-    (belief_forms).print();
-    std::cout << "type: " << belief_forms.get_formula_type() <<std::endl;
-    std::cout << BELIEF_FORMULA << PROPOSITIONAL_FORMULA <<std::endl;
+  //  std:: cout << "list_bf_grounded" <<std::endl;
+   // (belief_forms).print();
+   // std::cout << "type: " << belief_forms.get_formula_type() <<std::endl;
+  //  std::cout << BELIEF_FORMULA << PROPOSITIONAL_FORMULA <<std::endl;
 
     bf_operator m_operator = belief_forms.get_operator();
 
@@ -886,6 +920,7 @@ void planning_graph<T>::list_bf_grounded(const belief_formula & belief_forms, st
             break;
 
         case C_FORMULA:
+            ret.push_back(belief_forms);
             break;
 
         case PROPOSITIONAL_FORMULA:
@@ -895,12 +930,12 @@ void planning_graph<T>::list_bf_grounded(const belief_formula & belief_forms, st
             }
             else{
                 if ((&(belief_forms.get_bf1())) != nullptr) {
-                    std::cout << 1<< std::endl;
+                   // std::cout << 1<< std::endl;
                     belief_forms.get_bf1().print();
                     list_bf_grounded(belief_forms.get_bf1(),ret);
                 }
                 if ((&(belief_forms.get_bf2())) != nullptr) {
-                    std::cout << 2 << std::endl;
+                   // std::cout << 2 << std::endl;
                     belief_forms.get_bf2().print();
                     list_bf_grounded(belief_forms.get_bf2(),ret);
                 }
@@ -913,7 +948,7 @@ void planning_graph<T>::list_bf_grounded(const belief_formula & belief_forms, st
             break;
 
     }
-    std:: cout << "finish_list_bf_grounded" <<std::endl;
+   // std:: cout << "finish_list_bf_grounded" <<std::endl;
     //return ret;
 
 }

@@ -45,11 +45,13 @@ protected:
     //Use ptr
     /*\brief The set of executable actions in the relative \ref pg_state_level*/
     action_set m_actions;
+
     /*\brief The depth of the action level*/
     unsigned short m_depth = 0;
 
 public:
     /*Constructor of this that calls the standard constructors for each field and set the depth to 0*/
+
     pg_action_level();
     /*Constructor of this that set the depth to 0 and m_actions
      *
@@ -95,7 +97,6 @@ public:
      * @param[in]to_assign: The object to copy in *this* */
     bool operator=(const pg_action_level& to_assign);
 
-
     //printing
     /* A printing function
      */
@@ -125,6 +126,7 @@ private:
     std::set<T> m_eStates;
     std::set<fluent> m_fluentSet;
     std::set<std::pair<belief_formula,bool>> m_pairBeliefBool;
+
     /*\brief The depth of *this*, which state layer is*/
     unsigned short m_depth = 0;
 
@@ -263,6 +265,9 @@ private:
     /*\brief The set of action never executed in the planning_graph for optimization*/
     action_set m_never_executed;
 
+
+    std::set<belief_formula> m_belief_formula_false;
+
     /*Setter of the field m_satisfiable
      *
      * @param[in] sat: the value to assign to m_satisfiable. 
@@ -364,6 +369,10 @@ public:
      * @return: the value to assigned to m_bfs_score. 
      */
     const pg_bfs_score & get_bfs_score();
+
+    void add_belief_false(belief_formula & formula);
+    void remove_belief_formula_false(const belief_formula & formula);
+
 
     /*const pg_worlds_score & get_worlds_score();
     const pg_bfs_score & get_bfs_score(); FOR FUTURE USE*/
