@@ -671,6 +671,26 @@ void planning_graph<T>::pg_build_initially(std::list<belief_formula> & goal) //a
         std::pair<belief_formula, bool> bar = std::make_pair(*belief_formule_initially, true);
         m_pairBeliefBool.insert(bar);
 
+        std::set<belief_formula>::iterator belief_false;
+        for(belief_false = m_belief_formula_false.begin();belief_false!=m_belief_formula_false.end();belief_false++)
+        {
+            //prendo belief false controllo su quale fluent usa
+            //cerco le belief formule initilay che usano quel fluente
+            if(get_fluent_from_formula(*belief_false)==get_fluent_from_formula(*belief_formule_initially)){
+                //controllo se il fluente ha lo stesso valore altrimenti mi fermo
+                //se uguale controllo se la belief formula che controllo sia una
+                //catena di belief formule dove ogni agente delle belief formule appartiene
+                //alla agent_set della belief formula initilaly
+                agent_set agents;
+                bool result = check_belief_formula(*belief_false,*belief_formule_initially,agents);
+                if(result)
+                {
+                    std::pair<belief_formula, bool> bar = std::make_pair(*belief_false, true);
+                    m_pairBeliefBool.insert(bar);
+                    m_belief_formula_false.erase(belief_false);
+                }
+            }
+        }
     }
     s_level_curr.set_pair_belief_bool(m_pairBeliefBool);
 
@@ -687,9 +707,6 @@ void planning_graph<T>::pg_build_initially(std::list<belief_formula> & goal) //a
 
     //aggiungere i controlli che se all'inizio ho qualche initialy che mi ferma la computazione per inconsistenza
     //oppure controllo che sono già al goal.
-    //TODO
-
-
 
     print_state(s_level_curr.get_pair_belief_bool(),s_level_curr.get_fluent_set());
     //ottenuto quinid i goal tutti a false e gli initially e i fluenti pg_build_grounded del dominio posso procedere
@@ -954,6 +971,56 @@ void planning_graph<T>::list_bf_grounded(const belief_formula & belief_forms, st
 
 }
 
+template <class T>
+belief_formula planning_graph<T>::get_fluent_from_formula( const belief_formula & belief_forms)//,const std::list<belief_formula> & goal)
+{
+    //  std:: cout << "list_bf_grounded" <<std::endl;
+    // (belief_forms).print();
+    // std::cout << "type: " << belief_forms.get_formula_type() <<std::endl;
+    //  std::cout << BELIEF_FORMULA << PROPOSITIONAL_FORMULA <<std::endl;
+
+    bf_operator m_operator = belief_forms.get_operator();
+
+    switch ( belief_forms.get_formula_type() ) {
+
+        case FLUENT_FORMULA:
+            return belief_forms;
+            break;
+        case BELIEF_FORMULA:
+            return get_fluent_from_formula(belief_forms.get_bf1());
+            break;
+        case D_FORMULA:
+            break;
+
+        case C_FORMULA:
+            return get_fluent_from_formula(belief_forms.get_bf1());
+            break;
+
+        case PROPOSITIONAL_FORMULA:
+            if (m_operator == BF_FAIL) {
+                std::cerr << "\n ERROR IN DELCARATION\n.";
+                exit(1);
+            }
+            else{
+                if ((&(belief_forms.get_bf1())) != nullptr) {
+                    return get_fluent_from_formula(belief_forms.get_bf1());
+                }
+                if ((&(belief_forms.get_bf2())) != nullptr) {
+                    return get_fluent_from_formula(belief_forms.get_bf2());
+                }
+            }
+            break;
+        case BF_EMPTY:
+            break;
+        case BF_TYPE_FAIL:
+        default:
+            break;
+
+    }
+    // std:: cout << "finish_list_bf_grounded" <<std::endl;
+    //return ret;
+
+}
 
 template <class T>
 void planning_graph<T>::make_nested_bf_classical(unsigned short nesting, unsigned short depth, belief_formula & to_explore, std::vector<belief_formula> & ret)
@@ -1220,6 +1287,75 @@ template <class T>
 void planning_graph<T>::set_goal(const formula_list & goal)
 {
 	m_goal = goal;
+}
+
+
+template <class T>
+bool planning_graph<T>::check_belief_formula(const belief_formula & belief_form_to_check,belief_formula & belief_initially, agent_set agents)
+{
+    bf_operator m_operator = belief_form_to_check.get_operator();
+
+    switch ( belief_form_to_check.get_formula_type() ) {
+
+        case FLUENT_FORMULA:
+            if(belief_initially.get_group_agents() == agents)
+                return true;
+            else
+                return false;
+            break;
+        case BELIEF_FORMULA:
+                agents.insert(belief_form_to_check.get_agent());
+                return check_belief_formula(belief_form_to_check.get_bf1(),belief_initially,agents);
+            break;
+        case D_FORMULA:
+            break;
+
+        case C_FORMULA:
+            for(agent_set::iterator agents_iter =belief_form_to_check.get_group_agents().begin();agents_iter!=belief_form_to_check.get_group_agents().end();agents_iter++)
+            {
+                agents.insert(*agents_iter);
+            }
+            return check_belief_formula(belief_form_to_check.get_bf1(),belief_initially,agents);
+            break;
+        case PROPOSITIONAL_FORMULA:
+            if (m_operator == BF_FAIL) {
+                std::cerr << "\n ERROR IN CHECK FORMULA\n.";
+                exit(1);
+            }
+            else{
+                if (m_operator == BF_NOT)
+                {
+                    agents.insert(belief_form_to_check.get_bf1().get_agent());
+                   return !check_belief_formula(belief_form_to_check.get_bf1(),belief_initially,agents);
+                }
+
+                else if (m_operator == BF_AND)
+                {
+                    agent_set agents2 = agents;
+                    agents.insert(belief_form_to_check.get_bf1().get_agent());
+                    agents2.insert(belief_form_to_check.get_bf2().get_agent());
+                    return check_belief_formula(belief_form_to_check.get_bf1(),belief_initially,agents) &&
+                           check_belief_formula(belief_form_to_check.get_bf2(),belief_initially,agents2);
+
+                }
+                else if (m_operator == BF_OR)
+                {
+                    agent_set agents2 = agents;
+                    agents.insert(belief_form_to_check.get_bf1().get_agent());
+                    agents2.insert(belief_form_to_check.get_bf2().get_agent());
+                    return check_belief_formula(belief_form_to_check.get_bf1(),belief_initially,agents) ||
+                            check_belief_formula(belief_form_to_check.get_bf2(),belief_initially,agents2);
+                }
+            }
+            break;
+        case BF_EMPTY:
+            break;
+        case BF_TYPE_FAIL:
+            return false;
+        default:
+            break;
+
+    }
 }
 
 /*template <class T>
