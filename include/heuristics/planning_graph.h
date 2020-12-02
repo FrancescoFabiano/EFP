@@ -292,7 +292,9 @@ private:
     //std::list<belief_formula> list_bf_grounded(unsigned short nesting=1); //,const std::list<belief_formula>& goal_formula);
     void make_nested_bf_classical2(unsigned short nesting, unsigned short depth,const belief_formula & to_explore, std::list<belief_formula> & ret);
     //
-    bool check_belief_formula(const belief_formula & belief_form_to_check,belief_formula & belief_initially, agent_set agents);
+    bool check_belief_formula(belief_formula  belief_form_to_check,belief_formula  belief_initially, agent_set agents);
+
+    bool check_goal();//pg_state_level<T> current_state);
 
     /*Function that returns the list of fluents and belief formulae that represent the fluent of the conversion to classical planning
      * 

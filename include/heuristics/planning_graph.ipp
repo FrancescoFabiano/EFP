@@ -546,16 +546,10 @@ template <class T>
 void planning_graph<T>::pg_build_initially(std::list<belief_formula> & goal) //aggiungere come parametri la lista iniziale delle belief formula e dei fluentset
 {
 
-    std:: cout << "pg_build_initially" <<std::endl;
+  //  std:: cout << "pg_build_initially" <<std::endl;
     std::set<std::pair<belief_formula, bool>> m_pairBeliefBool;
-   // int n = converted_bf.size();
+
     std::list<belief_formula>::iterator iter;
-    //belif formule initliay corrette e quelle del dominio vere all'inizio
-    /*for(iter = converted_bf.begin(); iter != converted_bf.end(); iter++ )
-    {
-        std::pair <belief_formula,bool> bar = std::make_pair(*iter,true);
-        m_pairBeliefBool.insert(bar);
-    }*/
 
     //belief formule goal false
     std::list<belief_formula>::iterator iterGoal;
@@ -594,11 +588,11 @@ void planning_graph<T>::pg_build_initially(std::list<belief_formula> & goal) //a
                  it_list_action != formula_list_bf_action.end(); it_list_action++) {
                 std::pair<belief_formula, bool> bar = std::make_pair(*it_list_action, false);
                 m_pairBeliefBool.insert(bar);
-                std::cout <<"\n*-----\nBelief False\n----*\n" << std::endl;
+             //   std::cout <<"\n*-----\nBelief False\n----*\n" << std::endl;
                 it_list_action->print();
-                std::cout <<"\n*-----\nEND\n----*\n" << std::endl;
+              //  std::cout <<"\n*-----\nEND\n----*\n" << std::endl;
                 add_belief_false(*it_list_action);
-                //aggiungo belief in false
+
             }
         }
 
@@ -630,40 +624,31 @@ void planning_graph<T>::pg_build_initially(std::list<belief_formula> & goal) //a
     set_length(get_length() + 1);
 
     s_level_curr.set_pair_belief_bool(m_pairBeliefBool);
-    //aggiungo i fluenti iniziali initialy
+
+    //aggiungo fluenti veri all'inizio
     fluent_set initialy_fluent = domain::get_instance().get_initial_description().get_initially_known_fluents();
     fluent_set::iterator iter_fluent_init;
     for(iter_fluent_init = initialy_fluent.begin(); iter_fluent_init !=initialy_fluent.end(); iter_fluent_init++ )
     {
-        //std::cout << domain::get_instance().get_grounder().deground_fluent(*iter_fluent_init) << std::endl;
         s_level_curr.add_fluent(*iter_fluent_init);
     }
 
-   // std::cout << "POINTED WORLD FLUENT\n" << std::endl;
-
+    //aggiungo fluenti mondo iniziale
     fluent_formula setF =domain::get_instance().get_initial_description().get_pointed_world_conditions();
 
     fluent_formula::iterator iter_fluent_init2;
-   // std::cout << "iter\n" << std::endl;
+
     for(iter_fluent_init2 = setF.begin(); iter_fluent_init2 != setF.end(); iter_fluent_init2++)
     {
-        //brutto...
         fluent_set::iterator iter_fluent_init3;
         for(iter_fluent_init3 = iter_fluent_init2->begin(); iter_fluent_init3 != iter_fluent_init2->end();iter_fluent_init3++)
         {
             s_level_curr.add_fluent(*iter_fluent_init3);
         }
-        /*string_set z = domain::get_instance().get_grounder().deground_fluent(*iter_fluent_init2);
-        for(string_set::iterator iterx= z.begin(); iterx!=z.end() ;iterx++)
-        {
-            fluent fl = domain::get_instance().get_grounder().ground_fluent(*iterx);
-            s_level_curr.add_fluent(fl);
-            std::cout <<"fluente:" << *iterx <<std::endl;
-        }*/
     }
-    //std::cout << "WORLDEMD\n" << std::endl;
 
-    //add belief formule initially
+
+    //aggiungo belief formule initially
     std::list<belief_formula>::iterator belief_formule_initially;
     std::list<belief_formula> initially_belief_formule = domain::get_instance().get_initial_description().get_initial_conditions();
     for(belief_formule_initially= initially_belief_formule.begin();belief_formule_initially !=initially_belief_formule.end();belief_formule_initially++)
@@ -694,11 +679,6 @@ void planning_graph<T>::pg_build_initially(std::list<belief_formula> & goal) //a
     }
     s_level_curr.set_pair_belief_bool(m_pairBeliefBool);
 
-   // domain::get_instance().get_initial_description().get_pointed_world_conditions()
-    //The no-op is done with the copy
-   // pg_state_level<T> s_level_next = s_level_curr;
-    //s_level_next.set_depth(get_length());
-    //add_state_level(s_level_next);
     s_level_curr.set_depth(get_length());
 
     add_state_level(s_level_curr);
@@ -708,10 +688,15 @@ void planning_graph<T>::pg_build_initially(std::list<belief_formula> & goal) //a
     //aggiungere i controlli che se all'inizio ho qualche initialy che mi ferma la computazione per inconsistenza
     //oppure controllo che sono già al goal.
 
+    bool isGoal = check_goal();
+    if(isGoal) {
+        std::cout << "\nInitially is already the goal\n" << std::endl;
+    }
     print_state(s_level_curr.get_pair_belief_bool(),s_level_curr.get_fluent_set());
-    //ottenuto quinid i goal tutti a false e gli initially e i fluenti pg_build_grounded del dominio posso procedere
+
+    //std:: cout << "pg_build_initially fine" <<std::endl;
+
     //pg_build_grounded();
-    std:: cout << "pg_build_initially fine" <<std::endl;
 }
 
 template <class T>
@@ -742,7 +727,28 @@ void print_state( std::set<std::pair<belief_formula, bool>> m_pair_belief_bool, 
 
 }
 
+template <class T>
+bool planning_graph<T>::check_goal()//pg_state_level<T> current_state)
+{
+    std::list<belief_formula> ret_goal;
+    //controllo per tutti i possibili goal che non ho belief formule non soddisfatte se ne trovo uno ritorno falso
+    for( std::list<belief_formula>::iterator iter_belief_goal=m_goal.begin();iter_belief_goal!=m_goal.end();iter_belief_goal++)
+    {
+        list_bf_grounded(*iter_belief_goal,ret_goal);
+        for( std::set<belief_formula>::iterator iter_fl = m_belief_formula_false.begin(); iter_fl != m_belief_formula_false.end();iter_fl++)
+        {
+            std::cout << "DEBUG CHECK:" << std::endl;
+            (iter_fl)->print() ;
+            (iter_belief_goal)->print() ;
+            if(*iter_fl == *iter_belief_goal)
+            {
+                return false;
+            }
+        }
+    }
 
+    return true;
+}
 
 template <class T>
 void planning_graph<T>::pg_build_grounded()//std::vector<belief_formula> & converted_bf) //aggiungere come parametri la lista iniziale delle belief formula e dei fluentset
@@ -1291,7 +1297,7 @@ void planning_graph<T>::set_goal(const formula_list & goal)
 
 
 template <class T>
-bool planning_graph<T>::check_belief_formula(const belief_formula & belief_form_to_check,belief_formula & belief_initially, agent_set agents)
+bool planning_graph<T>::check_belief_formula( belief_formula  belief_form_to_check,belief_formula  belief_initially, agent_set agents)
 {
     bf_operator m_operator = belief_form_to_check.get_operator();
 
@@ -1367,7 +1373,6 @@ bool planning_graph<T>::check_belief_formula(const belief_formula & belief_form_
             return false;
         default:
             break;
-
     }
 }
 
