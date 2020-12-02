@@ -563,6 +563,7 @@ void planning_graph<T>::pg_build_initially(std::list<belief_formula> & goal) //a
     {
         std::pair <belief_formula,bool> bar = std::make_pair(*iterGoal,false);
         m_pairBeliefBool.insert(bar);
+        add_belief_false(*iterGoal);
     }
 
 
@@ -593,9 +594,9 @@ void planning_graph<T>::pg_build_initially(std::list<belief_formula> & goal) //a
                  it_list_action != formula_list_bf_action.end(); it_list_action++) {
                 std::pair<belief_formula, bool> bar = std::make_pair(*it_list_action, false);
                 m_pairBeliefBool.insert(bar);
-                std::cout <<"-----\nBelief False\n----" << std::endl;
+                std::cout <<"\n*-----\nBelief False\n----*\n" << std::endl;
                 it_list_action->print();
-                std::cout <<"-----\nEND\n----" << std::endl;
+                std::cout <<"\n*-----\nEND\n----*\n" << std::endl;
                 add_belief_false(*it_list_action);
                 //aggiungo belief in false
             }
@@ -634,7 +635,7 @@ void planning_graph<T>::pg_build_initially(std::list<belief_formula> & goal) //a
     fluent_set::iterator iter_fluent_init;
     for(iter_fluent_init = initialy_fluent.begin(); iter_fluent_init !=initialy_fluent.end(); iter_fluent_init++ )
     {
-        std::cout << domain::get_instance().get_grounder().deground_fluent(*iter_fluent_init) << std::endl;
+        //std::cout << domain::get_instance().get_grounder().deground_fluent(*iter_fluent_init) << std::endl;
         s_level_curr.add_fluent(*iter_fluent_init);
     }
 
