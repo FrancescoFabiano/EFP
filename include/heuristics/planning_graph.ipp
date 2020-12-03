@@ -326,7 +326,7 @@ planning_graph<T>::planning_graph(const T& state_init, const formula_list & goal
 	/*\*****START PLANNING GRAPH TIME MEASURE*******
 	auto start_pg_build = std::chrono::system_clock::now();
 	 *\******END PLANNING GRAPH TIME MEASURE********/
-    std::cout << "start"<< std::endl;
+    //std::cout << "start"<< std::endl;
 
 	set_goal(goal);
 	pg_state_level<T> pg_init;
@@ -737,9 +737,9 @@ bool planning_graph<T>::check_goal()//pg_state_level<T> current_state)
         list_bf_grounded(*iter_belief_goal,ret_goal);
         for( std::set<belief_formula>::iterator iter_fl = m_belief_formula_false.begin(); iter_fl != m_belief_formula_false.end();iter_fl++)
         {
-            std::cout << "DEBUG CHECK:" << std::endl;
-            (iter_fl)->print() ;
-            (iter_belief_goal)->print() ;
+            //std::cout << "\nDEBUG CHECK:\n" << std::endl;
+            //(iter_fl)->print() ;
+            //(iter_belief_goal)->print() ;
             if(*iter_fl == *iter_belief_goal)
             {
                 return false;
@@ -1304,19 +1304,10 @@ bool planning_graph<T>::check_belief_formula( belief_formula  belief_form_to_che
     switch ( belief_form_to_check.get_formula_type() ) {
 
         case FLUENT_FORMULA:
-            std::cout  << "\nINIT"<<std::endl;
-            for(agent_set::iterator agentIter =belief_initially.get_group_agents().begin();agentIter!=belief_initially.get_group_agents().end();agentIter++){
-                std::cout << *agentIter << "-"<<std::endl;
-            }
-            std::cout  << "\n"<<std::endl;
-            std::cout  << "\nCurrent"<<std::endl;
-            for(agent_set::iterator agentIter =agents.begin();agentIter!=agents.end();agentIter++){
-                std::cout << *agentIter << "-"<<std::endl;
-            }
             if (std::includes(belief_initially.get_group_agents().begin(), belief_initially.get_group_agents().end(),
                               agents.begin(), agents.end()))
             {
-               // std::cout << "agents is a subset of set_one" << std::endl;
+                //std::cout << "DEBUG agents is a subset of belief_initially agents" << std::endl;
                 return true;
             }
             else
