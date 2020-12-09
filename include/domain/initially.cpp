@@ -87,8 +87,8 @@ bool initially::check_restriction(const belief_formula & bf) //Apply the restric
 				//C(B(i,*phi*) \ref BF_OR B(i,-*phi*))
 				//Check if C ( x1 **OR** x2 )
 				if (tmp.get_operator() == BF_OR) {
-
 					//Check if **x1** and **x2** are B(i,phi) and B(i,-phi)
+					
 					ret = helper::check_Bff_notBff(tmp.get_bf1(), tmp.get_bf2(), nullptr);
 				} else if (tmp.get_operator() == BF_AND) { //C(-B(i,*phi*) \ref BF_AND -B(i,-*phi*))
 					//Check if C ( x1 **AND** x2 )

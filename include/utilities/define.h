@@ -129,7 +129,7 @@ enum heuristics
             ***/
 };
 
-
+/** \brief The possible types of bisimulation algorithms.*/
 enum bis_type
 {
     BIS_NONE, /**< No Bisimulation is used*/
@@ -177,6 +177,7 @@ enum action_check
     EXE_POINTED__COND_WORLD, /**< \brief The executionability is checked only on the state but the conditional effects are checked in every worlds.*/
     EXE_WORLD__COND_WORLD/**< \brief Both the executability and the conditional effects are checked in every world.*/
 };
+
 
 /****************************************************************
  * Actions Related
@@ -348,6 +349,27 @@ typedef std::map<agent, pstate_opt_ptr_set> pedges_opt; /**< \brief A map betwee
                                                        * remember that each possibility is a state itself.
                                                        *
                                                        * @see pstate_opt.*/
+
+/****************** Agent's Attitudes related *******************/
+
+/** \brief The list of the possible agents' attitude.*/
+enum agents_attitudes
+{
+    //Partially Agents' Attitudes
+    P_KEEPER, /** represents the set of those agents that will Keep their beliefs after the epistemic action.*/
+    P_INSECURE, /** represents the set of those agents that are Insecure about their beliefs and,
+                 * after the action, will not know the value of the fluent even if they knew it before*/
+
+    //Fully Agents' Attitudes  
+    F_TRUSTY, /**represents the Trusty agents that will believe what has been announced/sensed and
+             * update their beliefs accordingly.*/
+    F_MISTRUSTY, /**represents the Mistrusty agents that believe the opposite of what has been annnounced/sensed.*/
+    F_UNTRUSTY, /**agents that formalizes the will not change their beliefs about the world no matter
+                 * what the announcement/sensing says.*/
+    F_STUBBORN, /**represents the Stubborn agents that will maintain their beliefs on f if they already know it.
+                * If they do not know it they will update their belief.*/
+    attitudesEnd
+};
 
 /****************** Bisimulation *******************/
 

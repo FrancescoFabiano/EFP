@@ -52,8 +52,7 @@ private:
     /*All the useful info of the domain are store here:
      m_fluents -> all the fluents;
      m_actions -> all the actions 
-     m_agents -> all the agents.
-     */
+     m_agents -> all the agents.*/
     /** \brief Set containing all the (grounded) \ref fluent of the domain.*/
     fluent_set m_fluents;
     /** \brief Set containing all the \ref action (with effects, conditions, obsv etc.) of the domain.*/

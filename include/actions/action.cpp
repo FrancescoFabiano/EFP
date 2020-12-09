@@ -34,6 +34,16 @@ void action::set_name(const std::string & name)
 	m_name = name;
 }
 
+agent action::get_executor() const
+{
+	return m_executor;
+}
+
+void action::set_executor(agent executor)
+{
+	m_executor = executor;
+}
+
 action_id action::get_id() const
 {
 	return m_id;
@@ -126,17 +136,17 @@ void action::add_proposition(proposition & prop)
 		set_type(ANNOUNCEMENT);
 		add_effect(prop.get_action_effect(), prop.get_executability_conditions());
 		break;
-	/***************DOXASTIC REASONING***************/
+		/***************DOXASTIC REASONING***************/
 	case LIES:
 		set_type(LIES);
 		add_effect(prop.get_action_effect(), prop.get_executability_conditions());
 		break;
-	/***************END DOXASTIC***************/
+		/***************END DOXASTIC***************/
 
 	case OBSERVANCE:
 		set_type(NOTSET);
 		add_fully_observant(prop.get_agent(), prop.get_observability_conditions());
- 		break;
+		break;
 
 	case AWARENESS:
 		set_type(NOTSET);

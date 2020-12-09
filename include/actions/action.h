@@ -30,6 +30,8 @@ private:
      * This is calculated with \ref grounder.
      */
     action_id m_id;
+    /** \brief The agent that execute the action.     */
+    agent m_executor;
     /**
      * \brief The \ref proposition_type of the of *this*.
      * 
@@ -90,6 +92,14 @@ public:
      *
      * @param[in] name: the value to assign to \ref m_name.*/
     void set_name(const std::string & name);
+
+    /* \brief Getter of the field \ref m_executor.*/
+    agent get_executor() const;
+    /* \brief Setter of the field \ref m_executor.
+     *
+     * @param[in] executor: the value to assign to \ref m_executor.*/
+    void set_executor(agent executor);
+
     /* \brief Getter of the field \ref m_id.*/
 
     action_id get_id() const;
