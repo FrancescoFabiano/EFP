@@ -152,7 +152,7 @@ pg_state_level<T>::pg_state_level(const std::set<T> & eStates)
 }
 
 template <class T>
-pg_state_level<T>::pg_state_level(const std::set<std::pair<belief_formula,bool>> & pairBeliefBool, const std::set<fluent> & fluentSet)
+pg_state_level<T>::pg_state_level(const std::map<belief_formula,bool> & pairBeliefBool, const std::set<fluent> & fluentSet)
 {
 
     set_pair_belief_bool(pairBeliefBool);
@@ -162,7 +162,7 @@ pg_state_level<T>::pg_state_level(const std::set<std::pair<belief_formula,bool>>
 }
 
 template <class T>
-pg_state_level<T>::pg_state_level(const std::set<std::pair<belief_formula,bool>> & pairBeliefBool, const std::set<fluent> & fluentSet, unsigned short depth)
+pg_state_level<T>::pg_state_level(const std::map<belief_formula,bool> & pairBeliefBool, const std::set<fluent> & fluentSet, unsigned short depth)
 {
 
     set_pair_belief_bool(pairBeliefBool);
@@ -189,7 +189,7 @@ void pg_state_level<T>::set_eStates(const std::set<T> & eStates)
 }
 
 template <class T>
-void pg_state_level<T>::set_pair_belief_bool(const std::set<std::pair<belief_formula,bool>> & pairBeliefBool)
+void pg_state_level<T>::set_pair_belief_bool(const std::map<belief_formula,bool> & pairBeliefBool)
 {
 
     m_pairBeliefBool = pairBeliefBool;
@@ -233,7 +233,7 @@ const std::set<T>& pg_state_level<T>::get_eStates() const
 	return m_eStates;
 }
 template <class T>
-const std::set<std::pair<belief_formula,bool>> & pg_state_level<T>::get_pair_belief_bool() const
+const std::map<belief_formula,bool> & pg_state_level<T>::get_pair_belief_bool() const
 {
     return m_pairBeliefBool;
 }
@@ -248,17 +248,17 @@ const std::set<fluent>& pg_state_level<T>::get_fluent_set() const
 //check satisfaction of a belief formula given an epistemic_model_list level (i.e., eNodes)
 
 template <class T>
-bool pg_state_level<T>::pg_entailment(const std::set<std::pair<belief_formula,bool>> & pairBeliefBool, const belief_formula & bf) const
+bool pg_state_level<T>::pg_entailment(const std::map<belief_formula,bool> & pairBeliefBool, const belief_formula & bf) const
 {
-	typename std::set<std::pair<belief_formula,bool>>::const_iterator it_kstset;
+	typename std::map<belief_formula,bool>::const_iterator it_kstset;
 	std::pair<belief_formula,bool> pairFalse = std::make_pair(bf,false);
     std::pair<belief_formula,bool> pairTrue = std::make_pair(bf,true);
 
-    if(  pairBeliefBool.find(pairTrue) != pairBeliefBool.end() )
+    if(  pairBeliefBool.find(bf) != pairBeliefBool.end() )
     {
         return true;
     }
-    else if (pairBeliefBool.find(pairFalse) != pairBeliefBool.end()){
+    else if (pairBeliefBool.find(bf) != pairBeliefBool.end()){
         return false;
     }
     else
@@ -277,7 +277,7 @@ bool pg_state_level<T>::pg_entailment(const belief_formula & bf) const
 }
 
 template <class T>
-bool pg_state_level<T>::pg_entailment(const std::set<std::pair<belief_formula,bool>> & pairBeliefBool, const formula_list & fl) const
+bool pg_state_level<T>::pg_entailment(const std::map<belief_formula,bool> & pairBeliefBool, const formula_list & fl) const
 {
 
 	formula_list::const_iterator it_fl;
@@ -547,7 +547,7 @@ void planning_graph<T>::pg_build_initially(std::list<belief_formula> & goal) //a
 {
 
   //  std:: cout << "pg_build_initially" <<std::endl;
-    std::set<std::pair<belief_formula, bool>> m_pairBeliefBool;
+    std::map<belief_formula, bool> m_pairBeliefBool;
 
     std::list<belief_formula>::iterator iter;
 
@@ -657,7 +657,7 @@ void planning_graph<T>::pg_build_initially(std::list<belief_formula> & goal) //a
         m_pairBeliefBool.insert(bar);
 
         std::set<belief_formula>::iterator belief_false;
-        for(belief_false = m_belief_formula_false.begin();belief_false!=m_belief_formula_false.end();belief_false++)
+        for(belief_false = m_belief_formula_false.begin();belief_false!=m_belief_formula_false.end();)
         {
             //prendo belief false controllo su quale fluent usa
             //cerco le belief formule initilay che usano quel fluente
@@ -670,10 +670,18 @@ void planning_graph<T>::pg_build_initially(std::list<belief_formula> & goal) //a
                 bool result = check_belief_formula(*belief_false,*belief_formule_initially,agents);
                 if(result)
                 {
-                    std::pair<belief_formula, bool> bar = std::make_pair(*belief_false, true);
-                    m_pairBeliefBool.insert(bar);
-                    m_belief_formula_false.erase(belief_false);
+
+                    m_pairBeliefBool.find(*belief_false)->second = true;
+                    belief_false = m_belief_formula_false.erase(belief_false);
                 }
+                else
+                {
+                    belief_false++;
+                }
+            }
+            else
+            {
+                belief_false++;
             }
         }
     }
@@ -705,7 +713,7 @@ void planning_graph<T>::add_belief_false(belief_formula & formula)
     m_belief_formula_false.insert(formula);
 }
 
-void print_state( std::set<std::pair<belief_formula, bool>> m_pair_belief_bool, std::set<fluent> m_fluentSet)
+void print_state( std::map<belief_formula, bool> m_pair_belief_bool, std::set<fluent> m_fluentSet)
 {
     std::cout << "-----------------------------" << std::endl;
     std::cout << "Print belief and fluent: " << std::endl;
@@ -715,8 +723,8 @@ void print_state( std::set<std::pair<belief_formula, bool>> m_pair_belief_bool, 
         std::cout << "Fluent:" << domain::get_instance().get_grounder().deground_fluent(*iter_fluent) << std::endl;
     }
 
-    std::set<std::pair<belief_formula, bool>> ::iterator iter_pair_belief;
-    for(iter_pair_belief = m_pair_belief_bool.begin(); iter_pair_belief != m_pair_belief_bool.end(); iter_pair_belief++)
+    auto iter_pair_belief = m_pair_belief_bool.begin();
+    for(; iter_pair_belief != m_pair_belief_bool.end(); iter_pair_belief++)
     {
         std::cout << "Belief: ";
         (iter_pair_belief->first).print();
@@ -728,18 +736,18 @@ void print_state( std::set<std::pair<belief_formula, bool>> m_pair_belief_bool, 
 }
 
 template <class T>
-bool planning_graph<T>::check_goal()//pg_state_level<T> current_state)
+bool planning_graph<T>::check_goal() const//pg_state_level<T> current_state)
 {
-    std::list<belief_formula> ret_goal;
+    formula_list ret_goal;
+    formula_list::const_iterator iter_belief_goal;
+    std::set<belief_formula>::const_iterator iter_fl;
     //controllo per tutti i possibili goal che non ho belief formule non soddisfatte se ne trovo uno ritorno falso
-    for( std::list<belief_formula>::iterator iter_belief_goal=m_goal.begin();iter_belief_goal!=m_goal.end();iter_belief_goal++)
+    for( iter_belief_goal=m_goal.begin();iter_belief_goal!=m_goal.end();iter_belief_goal++)
     {
         list_bf_grounded(*iter_belief_goal,ret_goal);
-        for( std::set<belief_formula>::iterator iter_fl = m_belief_formula_false.begin(); iter_fl != m_belief_formula_false.end();iter_fl++)
+
+        for(  iter_fl = m_belief_formula_false.begin(); iter_fl != m_belief_formula_false.end();iter_fl++)
         {
-            //std::cout << "\nDEBUG CHECK:\n" << std::endl;
-            //(iter_fl)->print() ;
-            //(iter_belief_goal)->print() ;
             if(*iter_fl == *iter_belief_goal)
             {
                 return false;
@@ -825,8 +833,8 @@ void planning_graph<T>::pg_build_grounded()//std::vector<belief_formula> & conve
                 s_level_next.add_fluent(iter);
             }
 
-            std::set<std::pair<belief_formula,bool>> tmp_state_pair_belief_bool = tmp_state.get_pair_belief_bool();
-            std::set<std::pair<belief_formula,bool>>::iterator iter2;
+            std::map<belief_formula,bool> tmp_state_pair_belief_bool = tmp_state.get_pair_belief_bool();
+            std::map<belief_formula,bool>::iterator iter2;
             for(iter2 = tmp_state_pair_belief_bool.begin(); iter2 != tmp_state_pair_belief_bool.end();iter2++)
             {
                 //controllo nella belief formula falsa
@@ -924,7 +932,7 @@ std::vector<belief_formula> planning_graph<T>::list_bf_classical(unsigned short 
 }
 
 template <class T>
-void planning_graph<T>::list_bf_grounded(const belief_formula & belief_forms, std::list<belief_formula> &ret)//,const std::list<belief_formula> & goal)
+void planning_graph<T>::list_bf_grounded(const belief_formula & belief_forms, formula_list & ret) const//,const std::list<belief_formula> & goal)
 {
   //  std:: cout << "list_bf_grounded" <<std::endl;
    // (belief_forms).print();
@@ -978,7 +986,7 @@ void planning_graph<T>::list_bf_grounded(const belief_formula & belief_forms, st
 }
 
 template <class T>
-belief_formula planning_graph<T>::get_fluent_from_formula( const belief_formula & belief_forms)//,const std::list<belief_formula> & goal)
+const belief_formula & planning_graph<T>::get_fluent_from_formula( const belief_formula & belief_forms) const//,const std::list<belief_formula> & goal)
 {
     //  std:: cout << "list_bf_grounded" <<std::endl;
     // (belief_forms).print();
@@ -1023,6 +1031,9 @@ belief_formula planning_graph<T>::get_fluent_from_formula( const belief_formula 
             break;
 
     }
+
+    std::cerr << "Error something wrong with get_fluent_from_formula" << std::endl;
+    exit(-1);
     // std:: cout << "finish_list_bf_grounded" <<std::endl;
     //return ret;
 
@@ -1297,7 +1308,7 @@ void planning_graph<T>::set_goal(const formula_list & goal)
 
 
 template <class T>
-bool planning_graph<T>::check_belief_formula( belief_formula  belief_form_to_check,belief_formula  belief_initially, agent_set agents)
+bool planning_graph<T>::check_belief_formula(const belief_formula & belief_form_to_check, const belief_formula & belief_initially,  agent_set & agents) const
 {
     bf_operator m_operator = belief_form_to_check.get_operator();
 
