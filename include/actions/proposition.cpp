@@ -99,6 +99,9 @@ void proposition::print() const
 	case AWARENESS:
 		std::cout << m_agent << " aware of " << m_action_name;
 		break;
+	case EXECUTOR:
+		std::cout << m_agent << " executor of " << m_action_name;
+		break;
 	default: /* static */
 		break;
 	}

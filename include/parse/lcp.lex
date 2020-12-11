@@ -25,6 +25,7 @@ comment %.*$
 "action" {return ACTION;}
 "agent" {return AGENT;}
 "if" {return IF;}
+"executes" {return AGEXEC;}
 "causes" {return CAUSES;}
 "executable" {return EXECUTABLE;}
 "impossible" {return IMPOSSIBLE;}

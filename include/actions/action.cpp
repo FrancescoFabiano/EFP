@@ -137,6 +137,11 @@ void action::add_proposition(proposition & prop)
 		add_effect(prop.get_action_effect(), prop.get_executability_conditions());
 		break;
 		/***************DOXASTIC REASONING***************/
+	case EXECUTOR:
+		set_type(NOTSET);
+		//@TODO:What if there is more than one? Then CNF or DNF
+		set_executor(prop.get_agent());
+		break;
 	case LIES:
 		set_type(LIES);
 		add_effect(prop.get_action_effect(), prop.get_executability_conditions());
@@ -188,6 +193,7 @@ void action::print() const
 	std::cout << "\nAction " << get_name() << ":" << std::endl;
 	std::cout << "	ID: " << get_id() << ":" << std::endl;
 	std::cout << "	Type: " << get_type() << std::endl;
+	
 	std::cout << "	Executability:";
 	formula_list::const_iterator it_fl;
 	for (it_fl = m_executability.begin(); it_fl != m_executability.end(); ++it_fl) {

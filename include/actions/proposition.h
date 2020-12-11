@@ -38,6 +38,7 @@ enum proposition_type
     ANNOUNCEMENT, /**< \brief Used when the proposition specifies the effects of a announcement action -- *act* **annaunces** *ff* */
     OBSERVANCE, /**< \brief Used when the proposition specifies the full observability conditions of an action -- *ag* **observes** *act* */
     AWARENESS, /**< \brief Used when the proposition specifies the partial observability conditions of an action -- *ag* **aware** *act* */
+    EXECUTOR, /**< \brief Used when the proposition specifies the executor of an action -- *ag* **executor** *act* */
     NOTSET, /**< \brief Default case.*/
     /***************DOXASTIC REASONING***************/
     LIES,

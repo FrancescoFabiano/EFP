@@ -176,23 +176,23 @@ void domain::build_fluents()
     int bit_size = helper::lenght_to_power_two(m_reader->m_fluents.size());
  //todo prende numero fluenti*2 e generare i bit necessari
 	for (it_fluents = m_reader->m_fluents.begin();
-		it_fluents != m_reader->m_fluents.end(); it_fluents++) {
+	it_fluents != m_reader->m_fluents.end(); it_fluents++) {
         boost::dynamic_bitset<> fluentReal(bit_size+1,i);
         fluentReal.set(fluentReal.size()-1,0);
         domain_fluent_map.insert(fluent_map::value_type(*it_fluents, fluentReal));
         m_fluents.insert(fluentReal);
 
-		if (m_debug) {
-			std::cout << "Literal " << *it_fluents << " is "  <<" " << fluentReal << std::endl;
-		}
+	if (m_debug) {
+		std::cout << "Literal " << *it_fluents << " is "  <<" " << fluentReal << std::endl;
+	}
 
         boost::dynamic_bitset<> fluent_negate_real(bit_size+1,i);
         fluent_negate_real.set(fluent_negate_real.size()-1,1);
-		domain_fluent_map.insert(fluent_map::value_type(NEGATION_SYMBOL + *it_fluents, fluent_negate_real));
-		m_fluents.insert(fluent_negate_real);
-		i++;
-		if (m_debug) {
-			std::cout << "Literal not " << *it_fluents << " is " << (i - 1) << " "<<fluent_negate_real << std::endl;
+	domain_fluent_map.insert(fluent_map::value_type(NEGATION_SYMBOL + *it_fluents, fluent_negate_real));
+	m_fluents.insert(fluent_negate_real);
+	i++;
+	if (m_debug) {
+		std::cout << "Literal not " << *it_fluents << " is " << (i - 1) << " "<<fluent_negate_real << std::endl;
 		}
 	}
 	m_grounder.set_fluent_map(domain_fluent_map);

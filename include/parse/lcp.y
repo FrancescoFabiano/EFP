@@ -55,6 +55,7 @@ extern std::shared_ptr<reader> domain_reader;
 %token AWAREOF
 %token OBSERVES
 %token ANNOUNCES
+%token AGEXEC
 %token INIT
 %token GOAL
 %token AGENT
@@ -109,6 +110,7 @@ extern std::shared_ptr<reader> domain_reader;
 %type <prop> awareness
 %type <prop> observance
 %type <prop> announcement
+%type <prop> executing
 %type <prop_list> domain
 /***************DOXASTIC REASONING***************/
 %type <prop> lie
@@ -517,6 +519,8 @@ action ANNOUNCES formula if_part_bf SEMICOLON
 
 };
 
+
+
 /***************DOXASTIC REASONING***************/
 /* lie condition */
 lie:
@@ -551,6 +555,15 @@ agent OBSERVES action if_part_bf SEMICOLON
   $$->set_observability_conditions(*$4);
 };
 
+/* executing */
+executing:
+agent AGEXEC action SEMICOLON
+{
+  $$ = new proposition;
+  $$->set_type(EXECUTOR);
+  $$->set_action_name(*$3);				
+  $$->set_agent(*$1);
+ };
 /* impossibility condition 
 impossibility:
 IMPOSSIBLE action if_part SEMICOLON
@@ -598,6 +611,11 @@ observance
 }
 |
 awareness
+{
+  $$ = $1;
+}
+|
+executing
 {
   $$ = $1;
 }
@@ -848,7 +866,7 @@ string_set_set negate_form(string_set_set input){
 
   string_set_set output;
 
-  //turn all the “or�? statements to “and�? statements
+  //turn all the otr statements to and statements
    for(it1 = input.begin(); it1 != input.end(); it1++){
       temp = negate_or(*it1);
       list3.insert(temp);
