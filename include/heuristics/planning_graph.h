@@ -125,7 +125,7 @@ private:
     /*\brief The set of the e-States contained in *this**/
     std::set<T> m_eStates;
     std::set<fluent> m_fluentSet;
-    std::set<std::pair<belief_formula,bool>> m_pairBeliefBool;
+    std::map<belief_formula,bool> m_pairBeliefBool;
 
     /*\brief The depth of *this*, which state layer is*/
     unsigned short m_depth = 0;
@@ -138,7 +138,7 @@ private:
      * @param[in] bf: The belief formula to check for entailment.
      */
 
-    bool pg_entailment( const std::set<std::pair<belief_formula,bool>> & pairBeliefBool, const belief_formula & bf) const;
+    bool pg_entailment( const std::map<belief_formula,bool> & pairBeliefBool, const belief_formula & bf) const;
 
     /*Function that checks satisfaction of a CNF of belief_formula given an epistemic state level's eStates.
      *
@@ -147,7 +147,7 @@ private:
      * @param[in] eStates: The eState of the level where to check for the formula entailment.
      * @param[in] fl: The CNF of belief_formula to check for entailment.
      */
-    bool pg_entailment(const std::set<std::pair<belief_formula,bool>> & pairBeliefBool, const formula_list & fl) const;
+    bool pg_entailment(const std::map<belief_formula,bool> & pairBeliefBool, const formula_list & fl) const;
 
 
 public:
@@ -167,9 +167,9 @@ public:
      */
     pg_state_level(const std::set<T> & eStates, unsigned short depth);
 
-    pg_state_level(const std::set<std::pair<belief_formula,bool>> & pairBeliefBool, const std::set<fluent> & fluentSet);
+    pg_state_level(const std::map<belief_formula,bool> & pairBeliefBool, const std::set<fluent> & fluentSet);
 
-    pg_state_level(const std::set<std::pair<belief_formula,bool>> & pairBeliefBool, const std::set<fluent> & fluentSet, unsigned short depth);
+    pg_state_level(const std::map<belief_formula,bool> & pairBeliefBool, const std::set<fluent> & fluentSet, unsigned short depth);
     /*Setter of the field m_eStates
      *
      * @param[in] eStates: the value to assign to m_eStates. 
@@ -181,7 +181,7 @@ public:
      */
     const std::set<T>& get_eStates() const;
 
-    void set_pair_belief_bool(const std::set<std::pair<belief_formula,bool>> & pairBeliefBool);
+    void set_pair_belief_bool(const std::map<belief_formula,bool> & pairBeliefBool);
     void set_fluent_set(const std::set<fluent> & fluentSet);
 
     /*Function that add a single eState to *this*
@@ -202,7 +202,7 @@ public:
      */
     unsigned short get_depth() const;
 
-    const std::set<std::pair<belief_formula,bool>> & get_pair_belief_bool() const;
+    const std::map<belief_formula,bool> & get_pair_belief_bool() const;
 
     const std::set<fluent> & get_fluent_set() const;
 
@@ -288,13 +288,12 @@ private:
     void pg_build_initially(std::list<belief_formula> & goal);
     void pg_build_grounded();
 
-    void list_bf_grounded(const belief_formula & belief_forms, std::list<belief_formula> & ret);
+    void list_bf_grounded(const belief_formula & belief_forms, std::list<belief_formula> & ret) const;
     //std::list<belief_formula> list_bf_grounded(unsigned short nesting=1); //,const std::list<belief_formula>& goal_formula);
     void make_nested_bf_classical2(unsigned short nesting, unsigned short depth,const belief_formula & to_explore, std::list<belief_formula> & ret);
     //
-    bool check_belief_formula(belief_formula  belief_form_to_check,belief_formula  belief_initially, agent_set agents);
-
-    bool check_goal();//pg_state_level<T> current_state);
+    bool check_belief_formula(const belief_formula & belief_form_to_check, const belief_formula & belief_initially,  agent_set & agents) const;
+    bool check_goal() const;//pg_state_level<T> current_state);
 
     /*Function that returns the list of fluents and belief formulae that represent the fluent of the conversion to classical planning
      * 
@@ -376,7 +375,7 @@ public:
     void add_belief_false(belief_formula & formula);
     void remove_belief_formula_false(const belief_formula & formula);
 
-    belief_formula get_fluent_from_formula(const belief_formula & belief_forms);
+    const belief_formula & get_fluent_from_formula(const belief_formula & belief_forms) const;
 
 
     /*const pg_worlds_score & get_worlds_score();
