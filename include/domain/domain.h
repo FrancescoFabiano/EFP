@@ -20,6 +20,7 @@
 #include "../utilities/define.h"
 #include "../utilities/reader.h"
 #include "../actions/action.h"
+#include "attitudes_table.h"
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
 
@@ -67,6 +68,9 @@ private:
     /** \brief The formula that describes the goal.*/
     formula_list m_goal_description;
 
+    /** \brief The map that contains the attitudes of the agents.*/
+    attitudes_table m_attitudes;
+
     /** \brief If the \ref action consider a global visibility frame for their execution.*/
     bool m_is_global_obsv;
     /** \brief The \ref action_check used in *this*.*/
@@ -83,6 +87,10 @@ private:
 
     /** \brief Function that from the file stores the \ref action information.*/
     void build_actions();
+
+    /** \brief Function that from the file stores the \ref attitude information.*/
+    void build_attitudes();
+
     /** \brief Function that adds to the right \ref action each \ref proposition.*/
     void build_propositions();
 
@@ -160,6 +168,12 @@ public:
      *
      * @return the ref to \ref m_actions.*/
     const action_set & get_actions();
+
+    /** \brief Getter of the field \ref m_attitudes.
+     *
+     * @return the ref to \ref m_attitudes.*/
+    const attitudes_table & get_attitudes();
+
     /** \brief Getter of the field \ref m_agents.
      *
      * @return the ref to \ref m_agents.*/

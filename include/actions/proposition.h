@@ -72,23 +72,23 @@ public:
     /** Getter of the field \ref m_action_name.
      * 
      * @return the value of \ref m_action_name.*/
-    std::string get_action_name() const;
+    const std::string & get_action_name() const;
     /** Getter of the field \ref m_action_effect grounded.
      * 
      * @return the grounded value of \ref m_action_effect.*/
-    fluent_formula get_action_effect();
+    fluent_formula get_action_effect() const;
     /** Getter of the field \ref m_agent grounded.
      * 
      * @return the grounded value of \ref m_agent.*/
-    agent get_agent();
+    agent get_agent() const;
     /** Getter of the field \ref m_observability_conditions grounded.
      * 
      * @return the grounded value of \ref m_observability_conditions.*/
-    belief_formula get_observability_conditions();
+    const belief_formula & get_observability_conditions() const;
     /** Getter of the field \ref m_executability_conditions grounded.
      * 
      * @return the grounded value of \ref m_executability_conditions.*/
-    belief_formula get_executability_conditions();
+    const belief_formula & get_executability_conditions() const;
 
 
     /** Setter for the field \ref m_type.
@@ -98,7 +98,7 @@ public:
     /** Setter for the field \ref m_action_name.
      * 
      * @param[in] to_set: the value to assign to \ref m_action_name.*/
-    void set_action_name(std::string to_set);
+    void set_action_name(const std::string & to_set);
 
 
     /** Setter for the field \ref m_action_effect.
@@ -113,7 +113,7 @@ public:
     /** Setter for the field \ref m_agent.
      * 
      * @param[in] to_set: the value to assign to \ref m_agent.*/
-    void set_agent(std::string to_set);
+    void set_agent(const std::string & to_set);
     /** Setter for the field \ref m_observability_conditions.
      * 
      * @param[in] to_set: the value to assign to \ref m_observability_conditions.*/

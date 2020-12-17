@@ -3,6 +3,7 @@ OBJS	=	$(BUILD_DIR)/bison.o $(BUILD_DIR)/lex.o $(BUILD_DIR)/main.o \
 			$(BUILD_DIR)/belief_formula.o $(BUILD_DIR)/proposition.o $(BUILD_DIR)/domain.o \
 			$(BUILD_DIR)/grounder.o $(BUILD_DIR)/printer.o $(BUILD_DIR)/asp_maker.o \
 			$(BUILD_DIR)/action.o $(BUILD_DIR)/helper.o $(BUILD_DIR)/initially.o \
+			$(BUILD_DIR)/attitude.o $(BUILD_DIR)/attitudes_table.o \
 			$(BUILD_DIR)/pstore.o \
 			$(BUILD_DIR)/pworld.o $(BUILD_DIR)/pstate.o \
 			$(BUILD_DIR)/reader.o \
@@ -109,6 +110,7 @@ $(BUILD_DIR)/printer.o: $(UTILITIES_DIR)/printer.cpp $(UTILITIES_DIR)/printer.h 
 $(BUILD_DIR)/reader.o: $(UTILITIES_DIR)/reader.cpp $(UTILITIES_DIR)/reader.h \
 					   $(UTILITIES_DIR)/define.h $(UTILITIES_DIR)/printer.h \
 					   $(FORMULA_DIR)/belief_formula.h \
+					   $(DOMAIN_DIR)/attitude.h \
 					   $(ACTION_DIR)/proposition.h
 		$(dir_guard)
 		$(CC) $(CFLAGS) -c $(UTILITIES_DIR)/reader.cpp -o $(BUILD_DIR)/reader.o
@@ -154,6 +156,20 @@ $(BUILD_DIR)/proposition.o: $(ACTION_DIR)/proposition.cpp $(ACTION_DIR)/proposit
 							$(UTILITIES_DIR)/define.h $(UTILITIES_DIR)/printer.h
 		$(dir_guard)
 		$(CC) $(CFLAGS) -c $(ACTION_DIR)/proposition.cpp -o $(BUILD_DIR)/proposition.o
+		
+		
+####ACTIONS
+$(BUILD_DIR)/attitude.o: $(DOMAIN_DIR)/attitude.cpp $(DOMAIN_DIR)/attitude.h \
+					   $(DOMAIN_DIR)/domain.h \
+					   $(FORMULA_DIR)/belief_formula.h \
+					   $(UTILITIES_DIR)/define.h
+		$(dir_guard)
+		$(CC) $(CFLAGS) -c $(DOMAIN_DIR)/attitude.cpp -o $(BUILD_DIR)/attitude.o
+		
+$(BUILD_DIR)/attitudes_table.o: $(DOMAIN_DIR)/attitudes_table.cpp $(DOMAIN_DIR)/attitudes_table.h \
+							$(DOMAIN_DIR)/attitude.h
+		$(dir_guard)
+		$(CC) $(CFLAGS) -c $(DOMAIN_DIR)/attitudes_table.cpp -o $(BUILD_DIR)/attitudes_table.o
 			
 ####STATES
 #$(BUILD_DIR)/state_T.o: $(STATES_DIR)/state_T.cpp $(STATES_DIR)/state_T.h \
@@ -233,6 +249,7 @@ $(BUILD_DIR)/grounder.o: $(DOMAIN_DIR)/grounder.cpp $(DOMAIN_DIR)/grounder.h \
 $(BUILD_DIR)/domain.o: $(DOMAIN_DIR)/domain.cpp $(DOMAIN_DIR)/domain.h \
 					   $(DOMAIN_DIR)/initially.h $(DOMAIN_DIR)/grounder.h \
 					   $(UTILITIES_DIR)/reader.h $(UTILITIES_DIR)/define.h \
+					   $(DOMAIN_DIR)/attitudes_table.h \
 					   $(ACTION_DIR)/action.h
 		$(dir_guard)
 		$(CC) $(CFLAGS) -c $(DOMAIN_DIR)/domain.cpp -o $(BUILD_DIR)/domain.o

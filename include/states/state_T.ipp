@@ -164,18 +164,18 @@ void state<T>::build_initial()
 template <class T>
 fluent_set state<T>::compute_succ2(const action & act) const
 {
-    state<T> ret;
-    //if (is_executable(act)) {
-    ret.set_representation(get_representation().compute_succ(act));
-    ret.set_executed_actions(get_executed_actions());
-    ret.add_executed_action(act);
+	state<T> ret;
+	//if (is_executable(act)) {
+	ret.set_representation(get_representation().compute_succ(act));
+	ret.set_executed_actions(get_executed_actions());
+	ret.add_executed_action(act);
 
-    pworld_ptr repr = ret.get_representation();
-    fluent_set repr_set = repr.get_fluent_set();
-    ret.set_plan_length(get_plan_length() + 1);
+	pworld_ptr repr = ret.get_representation();
+	fluent_set repr_set = repr.get_fluent_set();
+	ret.set_plan_length(get_plan_length() + 1);
 
 
-    return repr_set;
+	return repr_set;
 }
 
 template <class T>
@@ -231,7 +231,6 @@ void state<T>::print() const
 	//std::cout << "\nHeuristic Value Length: " << get_heuristic_value();
 }
 
-
 template <class T>
 void state<T>::print_graphviz(std::string postfix) const
 {
@@ -278,7 +277,64 @@ void state<T>::print_graphviz(std::string postfix) const
 
 }
 
+template <class T>
+agents_attitudes state<T>::get_attitude(agent m_agent, agent executor, const attitudes_map & table, bool is_fully) const
+{
+	attitudes_map::iterator it_ext = table.find(m_agent);
+	if (it_ext != table.end()) {
+		auto it_mid = it_ext->second.find(executor);
+		if (it_mid != it_ext->second.end()) {
+			auto it_int = it_mid->second.begin();
+			for (; it_int != it_mid->second.end(); it_int++) {
+				//Check if this work.
+				if (entails(it_int->second)) {
+					return it_int->first;
+				}
+			}
+		}
+	}
+	if (is_fully) {
+		return F_TRUSTY;
+	}
+	return P_KEEPER;
 
+	//	std::cerr << "\nError: Some attitude declaration is missing, the agent has not any attitude specified.";
+	//	exit(1);
+
+}
+
+template <class T>
+const std::map<agent, agents_attitudes> & state<T>::get_attitudes(agent executor, const attitudes_map & table, bool is_fully) const
+{
+	agent_set tot_ags = domain::get_instance().get_agents();
+	agent_set::const_iterator it_ag;
+
+
+	std::map<agent, agents_attitudes> ret;
+	for (it_ag = tot_ags.begin(); it_ag != tot_ags.end(); it_ag++) {
+		if (*it_ag != executor) {
+			ret.insert(std::pair<agent, agents_attitudes>(*it_ag, get_attitude(*it_ag, executor, table, is_fully)));
+		}
+	}
+
+	return ret;
+
+
+}
+
+template <class T>
+const std::map<agent, agents_attitudes> & state<T>::get_F_attitudes(agent executor) const
+{
+
+	get_attitudes(executor, domain::get_instance().get_attitudes().get_F_attitudes(), true);
+
+}
+
+template <class T>
+const std::map<agent, agents_attitudes> & state<T>::get_P_attitudes(agent executor) const
+{
+	get_attitudes(executor, domain::get_instance().get_attitudes().get_P_attitudes(), false);
+}
 
 
 
@@ -304,11 +360,11 @@ void state<T>::min_with_print(state<T> tmp)
 	}
 	tmp.print_graphviz(tmp_name);
 	print_graphviz(state_name);
-	
+
 	T tmp_repr = tmp.debug_get_representation();
 	tmp_repr.debug_print(get_representation());
 	//std::cerr << "\nDEBUG:HERE\n";
 	tmp.set_representation(tmp_repr);
-	
+
 	tmp.print_graphviz("_eq_res");
 }

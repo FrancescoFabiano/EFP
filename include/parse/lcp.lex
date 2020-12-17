@@ -6,6 +6,8 @@
 #include "../include/utilities/define.h"
 #include "../include/actions/proposition.h"
 #include "../include/formulae/belief_formula.h"
+#include "../include/domain/attitude.h"
+
 #include "tok.h"
 
 int yyerror(const char* s);
@@ -27,6 +29,7 @@ comment %.*$
 "if" {return IF;}
 "executes" {return AGEXEC;}
 "causes" {return CAUSES;}
+"attitudes_wrt" {return ATTITUDES;}
 "executable" {return EXECUTABLE;}
 "impossible" {return IMPOSSIBLE;}
 "determines" {return DETERMINE;}

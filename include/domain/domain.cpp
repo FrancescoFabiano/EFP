@@ -8,6 +8,7 @@
  */
 #include "domain.h"
 #include <boost/dynamic_bitset.hpp>
+
 domain::domain()
 {
 }
@@ -17,8 +18,6 @@ domain& domain::get_instance()
 	static domain instance;
 	return instance;
 }
-
-
 
 void domain::set_domain(std::string name, bool debug, state_type stype, bool k_opt, boost::shared_ptr<reader> reader, domain_restriction ini_res, domain_restriction goal_res, bool is_global_obsv, action_check act_check, bool check_visited, bis_type bisimulation)
 {
@@ -62,13 +61,18 @@ unsigned int domain::get_fluent_number()
 
 unsigned int domain::get_size_fluent()
 {
-    auto fluent_first = m_fluents.begin();
-    return (fluent_first->size());
+	auto fluent_first = m_fluents.begin();
+	return(fluent_first->size());
 }
 
 const action_set & domain::get_actions()
 {
 	return m_actions;
+}
+
+const attitudes_table & domain::get_attitudes()
+{
+	return m_attitudes;
 }
 
 const agent_set & domain::get_agents()
@@ -123,15 +127,17 @@ bis_type domain::get_bisimulation()
 
 void domain::build()
 {
-    //std::cout << "Agenti" <<std::endl;
+	//std::cout << "Agenti" <<std::endl;
 	build_agents();
-    //std::cout << "Fluenti" <<std::endl;
+	//std::cout << "Fluenti" <<std::endl;
 	build_fluents();
-   // std::cout << "Azioni" <<std::endl;
+	// std::cout << "Azioni" <<std::endl;
 	build_actions();
-    //std::cout << "Initilly" <<std::endl;
+	//std::cout << "Initilly" <<std::endl;
 	build_initially();
-   // std::cout << "Goal" <<std::endl;
+	//
+	build_attitudes();
+	// std::cout << "Goal" <<std::endl;
 	build_goal();
 }
 
@@ -147,12 +153,11 @@ void domain::build_agents()
 
 	//ottengo il numero degli agenti e inizio a generare un bitset dinamico con n bit
 	//posizione x se bit a 1 esiste un agente altrimenti 0.
-    int agents_length = helper::lenght_to_power_two(m_reader->m_agents.size());
+	int agents_length = helper::lenght_to_power_two(m_reader->m_agents.size());
 
 
-    for (it_agents = m_reader->m_agents.begin(); it_agents != m_reader->m_agents.end(); it_agents++)
-    {
-        boost::dynamic_bitset<> agent(agents_length,i);
+	for (it_agents = m_reader->m_agents.begin(); it_agents != m_reader->m_agents.end(); it_agents++) {
+		boost::dynamic_bitset<> agent(agents_length, i);
 		domain_agent_map.insert(agent_map::value_type(*it_agents, agent));
 		m_agents.insert(agent);
 		if (m_debug) {
@@ -173,26 +178,26 @@ void domain::build_fluents()
 	std::cout << "\nBuilding fluent literals..." << std::endl;
 	string_set::const_iterator it_fluents;
 	int i = 0;
-    int bit_size = helper::lenght_to_power_two(m_reader->m_fluents.size());
- //todo prende numero fluenti*2 e generare i bit necessari
+	int bit_size = helper::lenght_to_power_two(m_reader->m_fluents.size());
+	//todo prende numero fluenti*2 e generare i bit necessari
 	for (it_fluents = m_reader->m_fluents.begin();
-	it_fluents != m_reader->m_fluents.end(); it_fluents++) {
-        boost::dynamic_bitset<> fluentReal(bit_size+1,i);
-        fluentReal.set(fluentReal.size()-1,0);
-        domain_fluent_map.insert(fluent_map::value_type(*it_fluents, fluentReal));
-        m_fluents.insert(fluentReal);
+		it_fluents != m_reader->m_fluents.end(); it_fluents++) {
+		boost::dynamic_bitset<> fluentReal(bit_size + 1, i);
+		fluentReal.set(fluentReal.size() - 1, 0);
+		domain_fluent_map.insert(fluent_map::value_type(*it_fluents, fluentReal));
+		m_fluents.insert(fluentReal);
 
-	if (m_debug) {
-		std::cout << "Literal " << *it_fluents << " is "  <<" " << fluentReal << std::endl;
-	}
+		if (m_debug) {
+			std::cout << "Literal " << *it_fluents << " is " << " " << fluentReal << std::endl;
+		}
 
-        boost::dynamic_bitset<> fluent_negate_real(bit_size+1,i);
-        fluent_negate_real.set(fluent_negate_real.size()-1,1);
-	domain_fluent_map.insert(fluent_map::value_type(NEGATION_SYMBOL + *it_fluents, fluent_negate_real));
-	m_fluents.insert(fluent_negate_real);
-	i++;
-	if (m_debug) {
-		std::cout << "Literal not " << *it_fluents << " is " << (i - 1) << " "<<fluent_negate_real << std::endl;
+		boost::dynamic_bitset<> fluent_negate_real(bit_size + 1, i);
+		fluent_negate_real.set(fluent_negate_real.size() - 1, 1);
+		domain_fluent_map.insert(fluent_map::value_type(NEGATION_SYMBOL + *it_fluents, fluent_negate_real));
+		m_fluents.insert(fluent_negate_real);
+		i++;
+		if (m_debug) {
+			std::cout << "Literal not " << *it_fluents << " is " << (i - 1) << " " << fluent_negate_real << std::endl;
 		}
 	}
 	m_grounder.set_fluent_map(domain_fluent_map);
@@ -209,10 +214,10 @@ void domain::build_actions()
 	string_set::const_iterator it_actions_name;
 	int i = 0;
 	int numberOfActions = m_reader->m_actions.size();
-    int bit_size = helper::lenght_to_power_two(numberOfActions);
+	int bit_size = helper::lenght_to_power_two(numberOfActions);
 	for (it_actions_name = m_reader->m_actions.begin();
 		it_actions_name != m_reader->m_actions.end(); it_actions_name++) {
-        boost::dynamic_bitset<> action_bitset(bit_size,i);
+		boost::dynamic_bitset<> action_bitset(bit_size, i);
 		action tmp_action(*it_actions_name, action_bitset);
 		domain_action_name_map.insert(action_name_map::value_type(*it_actions_name, action_bitset));
 		i++;
@@ -245,47 +250,69 @@ void domain::build_propositions()
 	std::cout << "\nAdding propositions to actions..." << std::endl;
 	proposition_list::iterator it_prop;
 	action_id action_to_modify;
-    for (it_prop = m_reader->m_propositions.begin();
-         it_prop != m_reader->m_propositions.end(); it_prop++) {
-
-
-        action_to_modify = m_grounder.ground_action(it_prop->get_action_name());
-
-        //To change remove and add the updated --> @TODO: find better like queue
-
-        for (std::set<action>::iterator actionsList = m_actions.begin();
-             actionsList != m_actions.end(); actionsList++) {
-            action_id actionTemp = action_to_modify;
-            actionTemp.set(actionTemp.size()-1,0);
-            if ( m_actions.size()  >  actionTemp.to_ulong() && actionsList->get_id() == action_to_modify) {
-
-                action_set::iterator it_action_set = actionsList;
-                action tmp = *it_action_set;
-                tmp.add_proposition(*it_prop);
-                m_actions.erase(it_action_set);
-                m_actions.insert(tmp);
-                break;
-            }
-        }
-
-        /*
-         *
-         *
-         * 	for (it_prop = m_reader->m_propositions.begin();
+	for (it_prop = m_reader->m_propositions.begin();
 		it_prop != m_reader->m_propositions.end(); it_prop++) {
 
+
 		action_to_modify = m_grounder.ground_action(it_prop->get_action_name());
-		if (m_actions.size() > action_to_modify) {
-			//To change remove and add the updated --> @TODO: find better like queue
-			action_set::iterator it_action_set = std::next(m_actions.begin(), action_to_modify);
-			action tmp = *it_action_set;
-			tmp.add_proposition(*it_prop);
-			m_actions.erase(it_action_set);
-			m_actions.insert(tmp);
+
+		//To change remove and add the updated --> @TODO: find better like queue
+
+		for (std::set<action>::iterator actionsList = m_actions.begin();
+			actionsList != m_actions.end(); actionsList++) {
+			action_id actionTemp = action_to_modify;
+			actionTemp.set(actionTemp.size() - 1, 0);
+			if (m_actions.size() > actionTemp.to_ulong() && actionsList->get_id() == action_to_modify) {
+
+				action_set::iterator it_action_set = actionsList;
+				action tmp = *it_action_set;
+				tmp.add_proposition(*it_prop);
+				m_actions.erase(it_action_set);
+				m_actions.insert(tmp);
+				break;
+			}
+		}
+
+		/*
+		 *
+		 *
+		 * 	for (it_prop = m_reader->m_propositions.begin();
+			it_prop != m_reader->m_propositions.end(); it_prop++) {
+
+			action_to_modify = m_grounder.ground_action(it_prop->get_action_name());
+			if (m_actions.size() > action_to_modify) {
+				//To change remove and add the updated --> @TODO: find better like queue
+				action_set::iterator it_action_set = std::next(m_actions.begin(), action_to_modify);
+				action tmp = *it_action_set;
+				tmp.add_proposition(*it_prop);
+				m_actions.erase(it_action_set);
+				m_actions.insert(tmp);
+			}
+		}
+		 * */
+	}
+}
+
+void domain::build_attitudes()
+{
+
+		std::cout << "\nBuilding attitudes table..." << std::endl;
+
+	
+	m_attitudes.set_attitudes_table(get_agents(), *(get_fluents().begin()));
+	auto it_attitudes = m_reader->m_attitudes.begin();
+	for (; it_attitudes != m_reader->m_attitudes.end(); it_attitudes++) {
+		m_attitudes.add_attitude(*it_attitudes);
+	}
+
+	if (m_debug) {
+		std::cout << "\nPrinting complete attitudes list..." << std::endl;
+		auto it_attitudes_p = m_reader->m_attitudes.begin();
+		for (; it_attitudes_p != m_reader->m_attitudes.end(); it_attitudes_p++) {
+			it_attitudes_p->print();
 		}
 	}
-         * */
-    }
+
 }
 
 void domain::build_initially()

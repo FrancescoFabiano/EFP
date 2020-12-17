@@ -26,6 +26,8 @@ extern std::shared_ptr<reader> domain_reader;
   proposition_list* prop_list;
   belief_formula* bf;
   formula_list* init_nodes;
+  attitude* att;
+  attitudes_list* att_list;
 }
 
 %start	input 
@@ -50,6 +52,7 @@ extern std::shared_ptr<reader> domain_reader;
 %token IF
 %token CAUSES
 %token EXECUTABLE
+%token ATTITUDES
 %token IMPOSSIBLE
 %token DETERMINE
 %token AWAREOF
@@ -116,6 +119,9 @@ extern std::shared_ptr<reader> domain_reader;
 %type <prop> lie
 /***************END DOXASTIC***************/
 
+
+%type <att> attitude
+%type <att_list> attitude_table
 %%
 
 input:		
@@ -126,6 +132,7 @@ agent_decls
 domain 
 init_spec 
 goal_spec
+attitude_table
  { 
   domain_reader->m_fluents = *$1;
   domain_reader->m_actions = *$2;
@@ -133,6 +140,7 @@ goal_spec
   domain_reader->m_propositions = *$4;
   domain_reader->m_bf_initially = *$5;
   domain_reader->m_bf_goal = *$6;
+domain_reader->m_attitudes = *$7;
 }
 ;
 
@@ -635,6 +643,32 @@ domain:
   $$ = new proposition_list;
 }
 | domain proposition
+{
+  $$ = $1;
+  $1->push_back(*$2);
+}
+;
+
+
+
+/* attitudes */
+attitude:
+agent ATTITUDES agent id if_part_bf SEMICOLON
+{
+  $$ = new attitude;
+  $$->set_agent(*$1);
+  $$->set_executor(*$3);
+  $$->set_type(*$4);
+  $$->set_attitude_conditions(*$5);
+ };
+
+/* att_list */
+attitude_table:
+/* empty */
+{
+  $$ = new attitudes_list;
+}
+| attitude_table attitude
 {
   $$ = $1;
   $1->push_back(*$2);

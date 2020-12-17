@@ -16,30 +16,28 @@ proposition_type proposition::get_type() const
 	return m_type;
 }
 
-std::string proposition::get_action_name() const
+const std::string & proposition::get_action_name() const
 {
 	return m_action_name;
 }
 
-fluent_formula proposition::get_action_effect()
+fluent_formula proposition::get_action_effect() const
 {
 	return domain::get_instance().get_grounder().ground_fluent(m_action_effect);
 }
 
-agent proposition::get_agent()
+agent proposition::get_agent() const
 {
 	return domain::get_instance().get_grounder().ground_agent(m_agent);
 }
 
-belief_formula proposition::get_observability_conditions()
+const belief_formula & proposition::get_observability_conditions() const
 {
-	m_observability_conditions.ground();
 	return m_observability_conditions;
 }
 
-belief_formula proposition::get_executability_conditions()
+const belief_formula & proposition::get_executability_conditions() const
 {
-	m_executability_conditions.ground();
 	return m_executability_conditions;
 }
 
@@ -48,7 +46,7 @@ void proposition::set_type(proposition_type to_set)
 	m_type = to_set;
 }
 
-void proposition::set_action_name(std::string to_set)
+void proposition::set_action_name(const std::string & to_set)
 {
 	m_action_name = to_set;
 }
@@ -63,7 +61,7 @@ void proposition::set_action_effect(const string_set_set & to_set)
 	m_action_effect = to_set;
 }
 
-void proposition::set_agent(std::string to_set)
+void proposition::set_agent(const std::string & to_set)
 {
 	m_agent = to_set;
 }
@@ -76,6 +74,7 @@ void proposition::set_observability_conditions(const belief_formula & to_set)
 void proposition::set_executability_conditions(const belief_formula & to_set)
 {
 	m_executability_conditions = to_set;
+	m_executability_conditions.ground();
 }
 
 void proposition::print() const

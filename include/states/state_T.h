@@ -31,6 +31,7 @@
 #include "../formulae/belief_formula.h"
 #include "../actions/action.h"
 #include "../domain/initially.h"
+#include "../domain/attitudes_table.h"
 
 /**
  * @tparam T:
@@ -82,6 +83,30 @@ private:
      *     
      * @param[in] to_set: the m_representation to assign to \ref m_representation.*/
     void set_representation(const T & to_set);
+
+
+
+    /**Function that add retrieve the fully_obs attitude for \ref m_agent w.r.t \ref executor and the current state
+     *
+     * @param[in] m_agent: the agent of whom we want to discover the attitude.
+     * @param[in] executor: the agent with respects with \ref m_agent has \ref attitude.
+     * @param[in] curr: the state where the attitude's conditions are checked.
+     * @param[in] table: the map where to check the attitude_condition (fully or partially).
+     * @param[in] is_fully: a boolean that says whether is a fully_obs agent or not.
+     * @return: the attitude that the agent has
+     */
+    agents_attitudes get_attitude(agent m_agent, agent executor, const attitudes_map & table, bool is_fully) const;
+
+
+    /**Function that add retrieve the partially_obs attitude w.r.t \ref executor and the current state
+     *
+     * @param[in] executor: the agent executing the action.
+     * @param[in] curr: the state where the attitude's conditions are checked.
+     * @param[in] table: the map where to check the attitude_condition (fully or partially).
+     * @param[in] is_fully: a boolean that says whether is a fully_obs agent or not.
+     * @return: the attitudes that the agents have
+     */
+    const std::map<agent, agents_attitudes> & get_attitudes(agent executor, const attitudes_map & table, bool is_fully) const;
 
 public:
     /** \brief Constructor without parameters.
@@ -270,6 +295,22 @@ public:
      */
     void print_graphviz(std::string postfix = "") const;
 
+
+    /**Function that add retrieve the fully_obs attitude w.r.t \ref executor and the current state
+     *
+     * @param[in] executor: the agent executing the action.
+     * @param[in] curr: the state where the attitude's conditions are checked.
+     * @return: the fully_obs attitudes that the agents have
+     */
+    const std::map<agent, agents_attitudes> & get_F_attitudes(agent executor) const;
+
+    /**Function that add retrieve the partially_obs attitude w.r.t \ref executor and the current state
+     *
+     * @param[in] executor: the agent executing the action.
+     * @param[in] curr: the state where the attitude's conditions are checked.
+     * @return: the partially_obs attitudes that the agents have
+     */
+    const std::map<agent, agents_attitudes> & get_P_attitudes(agent executor) const;
 
     //DEBUG
     void min_with_print(state<T> tmp);

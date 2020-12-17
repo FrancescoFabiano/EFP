@@ -88,6 +88,16 @@ void reader::print() const
 		it_porplist->print();
 		std::cout << std::endl;
 	}
+	
+	
+	//Printing of all the proposition with the \ref proposition functions
+	std::cout << "ATTITUDES" << std::endl;
+	std::cout << "----------------------------" << std::endl;
+	auto it_attlist = m_attitudes.begin();
+	for (; it_attlist != m_attitudes.end(); it_attlist++) {
+		it_attlist->print();
+		std::cout << std::endl;
+	}
 
 	//Printing of all the proposition with the \ref belief_formula functions
 	formula_list::const_iterator it_formlist;

@@ -15,12 +15,12 @@
 
 #pragma once
 
-#include <vector>
+#include "attitude.h"
+#include "../utilities/define.h"
 
-typedef std::map<agent, std::map<agent, std::map<agents_attitudes, formula_list>>> attitudes_map;
+typedef std::map<agent, std::map<agent, std::map<agents_attitudes, belief_formula>>> attitudes_map;
 
-template <class T>
-class
+class attitudes_table
 {
 private:
 
@@ -49,52 +49,7 @@ private:
      * @param[in] attitude_condition: the condition that the state must require for the agent to have the attitude.
      * @param[in] table: the map where to add the attitudes (fully or partially).
      */
-    void add_attitudes(agent m_agent, agent executor, agents_attitudes attitude, const formula_list & attitude_condition, attitudes_map table);
-
-
-    /**Function that add retrieve the fully_obs attitude for \ref m_agent w.r.t \ref executor and the current state
-     *
-     * @param[in] m_agent: the agent of whom we want to discover the attitude.
-     * @param[in] executor: the agent with respects with \ref m_agent has \ref attitude.
-     * @param[in] curr: the state where the attitude's conditions are checked.
-     * @param[in] table: the map where to check the attitude_condition (fully or partially).
-     * @return: the attitude that the agent has
-     */
-    agents_attitudes get_attitude(agent m_agent, agent executor, const state<T> & curr, const attitudes_map & table) const;
-
-    /*Function that add retrieve the fully_obs attitude for \ref m_agent w.r.t \ref executor and the current state
-     *
-     * @param[in] m_agent: the agent of whom we want to discover the attitude.
-     * @param[in] executor: the agent with respects with \ref m_agent has \ref attitude.
-     * @param[in] curr: the state where the attitude's conditions are checked.
-     * @return: the attitude that the agent has
-     */
-    // agents_attitudes get_F_attitude(agent m_agent, agent executor, const state<T> & curr) const;
-
-    /*Function that add retrieve the partially_obs attitude for \ref m_agent w.r.t \ref executor and the current state
-     *
-     * @param[in] m_agent: the agent of whom we want to discover the attitude.
-     * @param[in] executor: the agent with respects with \ref m_agent has \ref attitude.
-     * @param[in] curr: the state where the attitude's conditions are checked.
-     * @return: the attitude that the agent has
-     */
-    //  agents_attitudes get_P_attitude(agent m_agent, agent executor, const state<T> & curr) const;
-
-
-    /**Function that add retrieve the partially_obs attitude w.r.t \ref executor and the current state
-     *
-     * @param[in] executor: the agent executing the action.
-     * @param[in] curr: the state where the attitude's conditions are checked.
-     * @param[in] table: the map where to check the attitude_condition (fully or partially).
-     * @return: the attitudes that the agents have
-     */
-    const std::map<agent, agents_attitudes> & get_attitudes(agent executor, const state<T> & curr, const attitudes_map & table) const;
-
-
-
-public:
-    /**Class constructor that initializes the maps*/
-    attitudes_table();
+    void add_attitudes(agent m_agent, agent executor, agents_attitudes attitude, const belief_formula & attitude_condition, attitudes_map & table);
 
     /**Function that add the fully_obs attitude for \ref m_agent w.r.t, \ref executor when \ref attitude_condition is met
      * @param[in] m_agent: the agent of whom we want to analyze the attitude.
@@ -102,7 +57,7 @@ public:
      * @param[in] attitude: the \ref attitude that the agent will have w.r.t. \ref executor when \ref attitude_condition is met.
      * @param[in] attitude_condition: the condition that the state must require for the agent to have the attitude.
      */
-    void add_F_attitudes(agent m_agent, agent executor, agents_attitudes attitude, const formula_list & attitude_condition);
+    void add_F_attitudes(agent m_agent, agent executor, agents_attitudes attitude, const belief_formula & attitude_condition);
 
     /**Function that add the partially_obs attitude for \ref m_agent w.r.t, \ref executor when \ref attitude_condition is met
      *
@@ -111,21 +66,30 @@ public:
      * @param[in] attitude: the \ref attitude that the agent will have w.r.t. \ref executor when \ref attitude_condition is met.
      * @param[in] attitude_condition: the condition that the state must require for the agent to have the attitude.
      */
-    void add_P_attitudes(agent m_agent, agent executor, agents_attitudes attitude, const formula_list & attitude_condition);
+    void add_P_attitudes(agent m_agent, agent executor, agents_attitudes attitude, const belief_formula & attitude_condition);
 
-    /**Function that add retrieve the fully_obs attitude w.r.t \ref executor and the current state
-     *
-     * @param[in] executor: the agent executing the action.
-     * @param[in] curr: the state where the attitude's conditions are checked.
-     * @return: the fully_obs attitudes that the agents have
+public:
+    /**Class that initialize the internal maps with default values
+     * 
+     * @param[in] tot_ags: the set of all the agents from the domain.
+     * @param[in] f1: the first fluent of the domain.
      */
-    const std::map<agent, agents_attitudes> & get_F_attitudes(agent executor, const state<T> & curr) const;
+    void set_attitudes_table(const agent_set & tot_ags, const fluent & f1);
 
-    /**Function that add retrieve the partially_obs attitude w.r.t \ref executor and the current state
-     *
-     * @param[in] executor: the agent executing the action.
-     * @param[in] curr: the state where the attitude's conditions are checked.
-     * @return: the partially_obs attitudes that the agents have
+    /**Function that add the an attitude
+     * @param[in] att: the attitude to add to *this*.
      */
-    const std::map<agent, agents_attitudes> & get_P_attitudes(agent executor, const state<T> & curr) const;
+    void add_attitude(const attitude & att);
+
+    /*Getter of the field \ref m_F_attitude_wrt_exec
+     * 
+     * @return: the field \ref m_F_attitude_wrt_exec
+     */
+    const attitudes_map & get_F_attitudes() const;
+
+    /*Getter of the field \ref m_P_attitude_wrt_exec
+     * 
+     * @return: the field \ref m_P_attitude_wrt_exec
+     */
+    const attitudes_map & get_P_attitudes() const;
 };
