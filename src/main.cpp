@@ -422,14 +422,15 @@ void generate_domain(char** argv)
 	domain_name = domain_name.substr(domain_name.find_last_of("\\/") + 1);
 	domain_name = domain_name.substr(0, domain_name.find_last_of("."));
 
+
 	//timer.start(READ_TIMER);
 	domain_reader->read();
 	//	if (debug) {
 	//		domain_reader->print();
 	//	}
-
 	//Domain building
 	domain::get_instance().set_domain(domain_name, debug, state_struc, kopt, domain_reader, ini_restriction, goal_restriction, is_global_obsv, act_check, check_visited, bisimulation);
+
 	domain::get_instance().build();
 }
 
@@ -453,12 +454,12 @@ int main(int argc, char** argv)
 
 	//manage and prepare arguments for the planner
 	manage_arguments(argc, argv);
-
 	//check eventualy problem on input file and generate domain
 	generate_domain(argv);
 
 	//check generation asp	
 	generate_asp_encoding();
+	
 
 	//launch search planner
 	launch_search(state_struc,execute_given_actions,results_file,used_heur,given_actions, max_depth, step);

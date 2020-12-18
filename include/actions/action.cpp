@@ -124,17 +124,17 @@ void action::add_proposition(proposition & prop)
 		//Add action to the the list (name as identifier, then set id) then update the conditions and the awareness of the action so it's complete)
 	case ONTIC:
 		set_type(ONTIC);
-		add_effect(prop.get_action_effect(), prop.get_executability_conditions());
+		add_effect(prop.get_action_effect(), prop.get_grounded_executability_conditions());
 		break;
 
 	case SENSING:
 		set_type(SENSING);
-		add_effect(prop.get_action_effect(), prop.get_executability_conditions());
+		add_effect(prop.get_action_effect(), prop.get_grounded_executability_conditions());
 		break;
 
 	case ANNOUNCEMENT:
 		set_type(ANNOUNCEMENT);
-		add_effect(prop.get_action_effect(), prop.get_executability_conditions());
+		add_effect(prop.get_action_effect(), prop.get_grounded_executability_conditions());
 		break;
 		/***************DOXASTIC REASONING***************/
 	case EXECUTOR:
@@ -144,24 +144,24 @@ void action::add_proposition(proposition & prop)
 		break;
 	case LIES:
 		set_type(LIES);
-		add_effect(prop.get_action_effect(), prop.get_executability_conditions());
+		add_effect(prop.get_action_effect(), prop.get_grounded_executability_conditions());
 		break;
 		/***************END DOXASTIC***************/
 
 	case OBSERVANCE:
 		set_type(NOTSET);
-		add_fully_observant(prop.get_agent(), prop.get_observability_conditions());
+		add_fully_observant(prop.get_agent(), prop.get_grounded_observability_conditions());
 		break;
 
 	case AWARENESS:
 		set_type(NOTSET);
-		add_partially_observant(prop.get_agent(), prop.get_observability_conditions());
+		add_partially_observant(prop.get_agent(), prop.get_grounded_observability_conditions());
 		break;
 
 	case EXECUTABILITY:
 		set_type(NOTSET);
 		//@TODO:What if there is more than one? Then CNF or DNF
-		add_executability(prop.get_executability_conditions());
+		add_executability(prop.get_grounded_executability_conditions());
 		break;
 	default:
 		break;

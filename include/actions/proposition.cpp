@@ -41,6 +41,19 @@ const belief_formula & proposition::get_executability_conditions() const
 	return m_executability_conditions;
 }
 
+
+const belief_formula & proposition::get_grounded_observability_conditions()
+{
+	m_observability_conditions.ground();
+	return m_observability_conditions;
+}
+
+const belief_formula & proposition::get_grounded_executability_conditions()
+{
+	m_executability_conditions.ground();
+	return m_executability_conditions;
+}
+
 void proposition::set_type(proposition_type to_set)
 {
 	m_type = to_set;
@@ -74,7 +87,7 @@ void proposition::set_observability_conditions(const belief_formula & to_set)
 void proposition::set_executability_conditions(const belief_formula & to_set)
 {
 	m_executability_conditions = to_set;
-	m_executability_conditions.ground();
+	//m_executability_conditions.ground();
 }
 
 void proposition::print() const

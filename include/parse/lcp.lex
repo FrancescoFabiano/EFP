@@ -29,7 +29,7 @@ comment %.*$
 "if" {return IF;}
 "executes" {return AGEXEC;}
 "causes" {return CAUSES;}
-"attitudes_wrt" {return ATTITUDES;}
+"attitude" {return ATTITUDES;}
 "executable" {return EXECUTABLE;}
 "impossible" {return IMPOSSIBLE;}
 "determines" {return DETERMINE;}

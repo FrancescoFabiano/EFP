@@ -126,7 +126,7 @@ agent grounder::ground_agent(const std::string& x) const
 	if (p != m_agent_map.end()) {
 		return(p->second);
 	}
-
+	
 	std::cerr << "ERROR: Agent " << x << " is undeclared." << std::endl;
 	exit(1);
 }

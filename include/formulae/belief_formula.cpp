@@ -207,6 +207,13 @@ void belief_formula::set_bf2(const belief_formula & to_set)
 
 void belief_formula::print() const
 {
+	
+	if (!m_is_grounded) {
+		std::cerr << "\nError in reading a belief_formula, it must be grounded";
+		std::cerr << std::endl;
+		exit(1);
+	}
+	
 	switch ( m_formula_type ) {
 
 	case FLUENT_FORMULA:

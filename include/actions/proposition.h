@@ -81,14 +81,24 @@ public:
      * 
      * @return the grounded value of \ref m_agent.*/
     agent get_agent() const;
-    /** Getter of the field \ref m_observability_conditions grounded.
+    /** Getter of the field \ref m_observability_conditions.
      * 
      * @return the grounded value of \ref m_observability_conditions.*/
     const belief_formula & get_observability_conditions() const;
-    /** Getter of the field \ref m_executability_conditions grounded.
+    /** Getter of the field \ref m_executability_conditions.
      * 
      * @return the grounded value of \ref m_executability_conditions.*/
     const belief_formula & get_executability_conditions() const;
+
+    /** Getter of the field \ref m_observability_conditions grounded.
+     * 
+     * @return the grounded value of \ref m_observability_conditions.*/
+    const belief_formula & get_grounded_observability_conditions();
+
+    /** Getter of the field \ref m_executability_conditions grounded.
+     * 
+     * @return the grounded value of \ref m_executability_conditions.*/
+    const belief_formula & get_grounded_executability_conditions();
 
 
     /** Setter for the field \ref m_type.

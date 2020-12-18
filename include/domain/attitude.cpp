@@ -40,6 +40,7 @@ agent attitude::get_agent() const
 
 agent attitude::get_executor() const
 {
+			std::cerr << "ERROR: Here\n\n";
 	return domain::get_instance().get_grounder().ground_agent(m_executor);
 }
 

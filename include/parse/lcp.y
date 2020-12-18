@@ -140,7 +140,7 @@ attitude_table
   domain_reader->m_propositions = *$4;
   domain_reader->m_bf_initially = *$5;
   domain_reader->m_bf_goal = *$6;
-domain_reader->m_attitudes = *$7;
+  domain_reader->m_attitudes = *$7;
 }
 ;
 

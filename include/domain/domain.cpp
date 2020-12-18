@@ -155,7 +155,6 @@ void domain::build_agents()
 	//posizione x se bit a 1 esiste un agente altrimenti 0.
 	int agents_length = helper::lenght_to_power_two(m_reader->m_agents.size());
 
-
 	for (it_agents = m_reader->m_agents.begin(); it_agents != m_reader->m_agents.end(); it_agents++) {
 		boost::dynamic_bitset<> agent(agents_length, i);
 		domain_agent_map.insert(agent_map::value_type(*it_agents, agent));

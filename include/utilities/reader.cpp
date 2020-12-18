@@ -89,7 +89,6 @@ void reader::print() const
 		std::cout << std::endl;
 	}
 	
-	
 	//Printing of all the proposition with the \ref proposition functions
 	std::cout << "ATTITUDES" << std::endl;
 	std::cout << "----------------------------" << std::endl;
