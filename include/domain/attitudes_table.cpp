@@ -1,8 +1,9 @@
 #include "attitudes_table.h"
 #include "../utilities/helper.h"
+#include "domain.h"
 #include <utility>  
 
-void attitudes_table::set_attitudes_table(const agent_set & tot_ags, const fluent & f1)
+void attitudes_table::set_attitudes_table(const agent_set & tot_ags, fluent f1)
 {
 	//agent_set tot_ags= domain::get_instance().get_agents();
 	agent_set::const_iterator it_ag;
@@ -17,16 +18,17 @@ void attitudes_table::set_attitudes_table(const agent_set & tot_ags, const fluen
 
 	//The formula is "fluent_number_1 and -fluent_number_1" which is always false
 	fluent_set true_fs;
-	fluent_set false_fs;
 
 	true_fs.insert(f1);
-	false_fs.insert(f1_negated);
-	
+	true_fs.insert(f1_negated);
+
 	false_ff.insert(true_fs);
-	false_ff.insert(false_fs);
 
 	false_bf.set_formula_type(FLUENT_FORMULA);
 	false_bf.set_fluent_formula(false_ff);
+	false_bf.set_is_grounded(true);
+		false_bf.deground();
+
 	//Maybe add ground/deground
 
 	//Empty is true
@@ -48,7 +50,7 @@ void attitudes_table::set_attitudes_table(const agent_set & tot_ags, const fluen
 						//if (i == P_KEEPER) {
 						//	map_intP.insert(std::pair<agents_attitudes, belief_formula>(i, true_fl));
 						//} else {
-						map_intP.insert(std::make_pair(static_cast<agents_attitudes>(i), false_bf));
+						map_intP.insert(std::make_pair(static_cast<agents_attitudes> (i), false_bf));
 						//}
 
 					} else {
@@ -56,7 +58,7 @@ void attitudes_table::set_attitudes_table(const agent_set & tot_ags, const fluen
 						//if (i == F_TRUSTY) {
 						//	map_intF.insert(std::pair<agents_attitudes, belief_formula>(i, true_fl));
 						//} else {
-						map_intF.insert(std::make_pair(static_cast<agents_attitudes>(i), false_bf));
+						map_intF.insert(std::make_pair(static_cast<agents_attitudes> (i), false_bf));
 						//}
 					}
 
@@ -67,6 +69,8 @@ void attitudes_table::set_attitudes_table(const agent_set & tot_ags, const fluen
 		}
 		m_P_attitude_wrt_exec.insert(std::make_pair(*it_ag, map_midP));
 		m_F_attitude_wrt_exec.insert(std::make_pair(*it_ag, map_midF));
+		map_midF.clear();
+		map_midP.clear();
 	}
 }
 
@@ -106,7 +110,7 @@ void attitudes_table::add_attitudes(agent m_agent, agent executor, agents_attitu
 	}
 }
 
-void attitudes_table::add_attitude(const attitude & att)
+void attitudes_table::add_attitude(attitude & att)
 {
 	if (att.get_type() < F_TRUSTY) {
 		add_P_attitudes(att.get_agent(), att.get_executor(), att.get_type(), att.get_attitude_conditions());
@@ -115,7 +119,34 @@ void attitudes_table::add_attitude(const attitude & att)
 	}
 }
 
+void attitudes_table::print() const
+{
+	std::cout << "\n\n**************Attitudes Table**************\n";
 
+	std::cout << "\n**Fully Observant's Table**\n";
+	print_table(m_F_attitude_wrt_exec);
+
+	std::cout << "\n\n**Partially Observant's Table**\n";
+	print_table(m_P_attitude_wrt_exec);
+}
+
+void attitudes_table::print_table(const attitudes_map & table) const
+{
+	auto it_att0 = table.begin();
+	for (; it_att0 != table.end(); it_att0++) {
+		std::cout << "\n\n\tAttitudes of agent " << domain::get_instance().get_grounder().deground_agent(it_att0->first) << ":";
+		auto it_att1 = it_att0->second.begin();
+		for (; it_att1 != it_att0->second.end(); it_att1++) {
+			std::cout << "\n\t\tExecutor: " << domain::get_instance().get_grounder().deground_agent(it_att1->first);
+			auto it_att2 = it_att1->second.begin();
+			for (; it_att2 != it_att1->second.end(); it_att2++) {
+				std::cout << "\n\t\t\tAttitude: " << (it_att2->first);
+				std::cout << " if: ";
+				it_att2->second.print();
+			}
+		}
+	}
+}
 
 /**@todo: Make the following methods Templatic w.r.t. the State*/
 /*agents_attitudes attitudes_table::get_attitude(agent m_agent, agent executor, const pstate & curr, const attitudes_map & table, bool is_fully) const

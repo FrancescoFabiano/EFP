@@ -23,15 +23,13 @@ class attitude
 {
 private:
     /** The \ref agents_attitudes of this.*/
-    std::string m_type;
+    agents_attitudes m_type;
     /** The agent for which is specified the attitude.*/
     std::string m_agent;
     /** The agent w.r.t. \ref m_agents has the \ref m_type attitude if the conditions are met.*/
     std::string m_executor;
     /** The condition for the attitude to be true.*/
     belief_formula m_attitude_conditions;
-
-
 
 public:
 
@@ -43,7 +41,7 @@ public:
     /** Getter of the field \ref m_type.
      * 
      * @return the value of \ref m_type.*/
-    const std::string & get_string_type() const;
+    std::string get_string_type() const;
     /** Getter of the field \ref m_agent grounded.
      * 
      * @return the grounded value of \ref m_agent.*/
@@ -57,13 +55,18 @@ public:
     /** Getter of the field \ref m_attitude_conditions grounded.
      * 
      * @return the grounded value of \ref m_attitude_conditions.*/
-    const belief_formula & get_attitude_conditions() const;
+    const belief_formula & get_attitude_conditions();
 
+
+    /** Getter of the field \ref m_attitude_conditions.
+     * 
+     * @return the value of \ref m_attitude_conditions.*/
+    const belief_formula & get_original_attitude_conditions() const;
 
     /** Setter for the field \ref m_type.
      * 
      * @param[in] to_set: the value to assign to \ref m_type.*/
-    void set_type(const std::string & to_set);
+    void set_type(agents_attitudes to_set);
 
     /** Setter for the field \ref m_agent.
      * 
@@ -81,7 +84,7 @@ public:
 
 
     /** \brief Function that print *this*.*/
-    void print() const;
+    void print(const belief_formula & cond) const;
 
     /** \brief The = operator.
      *   

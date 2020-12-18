@@ -68,18 +68,20 @@ private:
      */
     void add_P_attitudes(agent m_agent, agent executor, agents_attitudes attitude, const belief_formula & attitude_condition);
 
+
+    void print_table(const attitudes_map & table) const;
 public:
     /**Class that initialize the internal maps with default values
      * 
      * @param[in] tot_ags: the set of all the agents from the domain.
      * @param[in] f1: the first fluent of the domain.
      */
-    void set_attitudes_table(const agent_set & tot_ags, const fluent & f1);
+    void set_attitudes_table(const agent_set & tot_ags, fluent f1);
 
     /**Function that add the an attitude
      * @param[in] att: the attitude to add to *this*.
      */
-    void add_attitude(const attitude & att);
+    void add_attitude(attitude & att);
 
     /*Getter of the field \ref m_F_attitude_wrt_exec
      * 
@@ -92,4 +94,6 @@ public:
      * @return: the field \ref m_P_attitude_wrt_exec
      */
     const attitudes_map & get_P_attitudes() const;
+
+    void print() const;
 };

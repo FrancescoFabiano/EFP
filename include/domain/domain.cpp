@@ -297,7 +297,7 @@ void domain::build_attitudes()
 
 		std::cout << "\nBuilding attitudes table..." << std::endl;
 
-	
+		std::cout << "************************************Fluent is " << *(get_fluents().begin());
 	m_attitudes.set_attitudes_table(get_agents(), *(get_fluents().begin()));
 	auto it_attitudes = m_reader->m_attitudes.begin();
 	for (; it_attitudes != m_reader->m_attitudes.end(); it_attitudes++) {
@@ -308,7 +308,10 @@ void domain::build_attitudes()
 		std::cout << "\nPrinting complete attitudes list..." << std::endl;
 		auto it_attitudes_p = m_reader->m_attitudes.begin();
 		for (; it_attitudes_p != m_reader->m_attitudes.end(); it_attitudes_p++) {
-			it_attitudes_p->print();
+			belief_formula att_tmp = it_attitudes_p->get_original_attitude_conditions();
+			att_tmp.ground();
+			it_attitudes_p->print(att_tmp);
+			std::cout << std::endl;
 		}
 	}
 

@@ -11,26 +11,28 @@
 
 agents_attitudes attitude::get_type() const
 {
-	if (m_type.compare("P_KEEPER") == 0) {
-		return P_KEEPER;
-	} else if (m_type.compare("P_INSECURE") == 0) {
-		return P_INSECURE;
-	} else if (m_type.compare("F_TRUSTY") == 0) {
-		return F_TRUSTY;
-	} else if (m_type.compare("F_MISTRUSTY") == 0) {
-		return F_MISTRUSTY;
-	} else if (m_type.compare("F_UNTRUSTY") == 0) {
-		return F_UNTRUSTY;
-	} else if (m_type.compare("F_STUBBORN") == 0) {
-		return F_STUBBORN;
-	} else {
-		return P_KEEPER;
-	}
+	return m_type;
 }
 
-const std::string & attitude::get_string_type() const
+std::string attitude::get_string_type() const
 {
-	return m_type;
+
+	switch ( m_type ) {
+	case P_KEEPER:
+		return "P_KEEPER";
+	case P_INSECURE:
+		return "P_INSECURE";
+	case F_TRUSTY:
+		return "F_TRUSTY";
+	case F_MISTRUSTY:
+		return "F_MISTRUSTY";
+	case F_UNTRUSTY:
+		return "F_UNTRUSTY";
+	case F_STUBBORN:
+		return "F_STUBBORN";
+	default:
+		return "P_KEEPER";
+	}
 }
 
 agent attitude::get_agent() const
@@ -40,16 +42,21 @@ agent attitude::get_agent() const
 
 agent attitude::get_executor() const
 {
-			std::cerr << "ERROR: Here\n\n";
 	return domain::get_instance().get_grounder().ground_agent(m_executor);
 }
 
-const belief_formula & attitude::get_attitude_conditions() const
+const belief_formula & attitude::get_attitude_conditions()
+{
+	m_attitude_conditions.ground();
+	return m_attitude_conditions;
+}
+
+const belief_formula & attitude::get_original_attitude_conditions() const
 {
 	return m_attitude_conditions;
 }
 
-void attitude::set_type(const std::string & to_set)
+void attitude::set_type(agents_attitudes to_set)
 {
 	m_type = to_set;
 }
@@ -57,31 +64,33 @@ void attitude::set_type(const std::string & to_set)
 void attitude::set_agent(const std::string & to_set)
 {
 	m_agent = to_set;
+
 }
 
 void attitude::set_executor(const std::string & to_set)
 {
 	m_executor = to_set;
+
 }
 
 void attitude::set_attitude_conditions(const belief_formula & to_set)
 {
 	m_attitude_conditions = to_set;
-	m_attitude_conditions.ground();
 
 }
 
-void attitude::print() const
+void attitude::print(const belief_formula & cond) const
 {
-	std::cout << m_agent << " has attitude " << m_type << " when " << m_executor << " is the executor of the action if ";
-	get_attitude_conditions().print();
+	std::cout << m_agent << " has attitude " << get_string_type() << " when " << m_executor << " is the executor of the action if ";
+	cond.print();
 }
 
-bool attitude::operator=(const attitude& to_copy){
+bool attitude::operator=(const attitude& to_copy)
+{
 	m_agent = domain::get_instance().get_grounder().deground_agent(to_copy.get_agent());
 	m_executor = domain::get_instance().get_grounder().deground_agent(to_copy.get_executor());
-	m_type = to_copy.get_string_type();
-	m_attitude_conditions = to_copy.get_attitude_conditions();
-	
+	m_type = to_copy.get_type();
+	m_attitude_conditions = to_copy.get_original_attitude_conditions();
+
 	return true;
 }

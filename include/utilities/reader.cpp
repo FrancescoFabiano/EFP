@@ -94,7 +94,9 @@ void reader::print() const
 	std::cout << "----------------------------" << std::endl;
 	auto it_attlist = m_attitudes.begin();
 	for (; it_attlist != m_attitudes.end(); it_attlist++) {
-		it_attlist->print();
+		belief_formula att_tmp = it_attlist->get_original_attitude_conditions();
+			att_tmp.ground();
+		it_attlist->print(att_tmp);
 		std::cout << std::endl;
 	}
 

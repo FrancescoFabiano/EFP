@@ -10,13 +10,12 @@ action shout_tail_a, shout_tail_b, shout_tail_c;
 
 agent a,b,c;
 
-a attitude_wrt b F_TRUSTY if B(a, looking_b);
-%a attitude_wrt b F_MISTRUSTY if B(a, looking_b);
-%a attitude_wrt b F_UNTRUSTY if looking_b;
-%a attitude_wrt b F_STUBBORN;
-
-%a attitude_wrt b P_KEEPER if B(a, looking_b);
-%a attitude_wrt b P_INSECURE;
+has_attitude a wrt b f_trusty if B(a, looking_b), looking_b;
+has_attitude a wrt b f_mistrusty if B(a, looking_b);
+has_attitude a wrt b f_untrusty if looking_b;
+has_attitude a wrt b f_stubborn if looking_a;
+has_attitude a wrt b p_keeper if B(a, looking_b);
+has_attitude a wrt b p_insecure;
 
 
 executable open_a;

@@ -52,7 +52,6 @@ extern std::shared_ptr<reader> domain_reader;
 %token IF
 %token CAUSES
 %token EXECUTABLE
-%token ATTITUDES
 %token IMPOSSIBLE
 %token DETERMINE
 %token AWAREOF
@@ -67,6 +66,16 @@ extern std::shared_ptr<reader> domain_reader;
 %token ME
 %token MD
 %token LIE
+
+%token ATTITUDES
+%token WRT
+%token TRUSTY
+%token MISTRUSTY
+%token UNTRUSTY
+%token STUBBORN
+%token KEEPER
+%token INSECURE
+
 
 %type <str_val> id
 %type <str_val> constant
@@ -121,26 +130,33 @@ extern std::shared_ptr<reader> domain_reader;
 
 
 %type <att> attitude
+%type <att> trusty
+%type <att> mistrusty
+%type <att> untrusty
+%type <att> stubborn
+%type <att> keeper
+%type <att> insecure
 %type <att_list> attitude_table
-%%
 
+
+%%
 input:		
 |
 fluent_decls 
 action_decls
 agent_decls 
+attitude_table
 domain 
 init_spec 
 goal_spec
-attitude_table
  { 
   domain_reader->m_fluents = *$1;
   domain_reader->m_actions = *$2;
   domain_reader->m_agents = *$3;
-  domain_reader->m_propositions = *$4;
-  domain_reader->m_bf_initially = *$5;
-  domain_reader->m_bf_goal = *$6;
-  domain_reader->m_attitudes = *$7;
+  domain_reader->m_attitudes = *$4;
+  domain_reader->m_propositions = *$5;
+  domain_reader->m_bf_initially = *$6;
+  domain_reader->m_bf_goal = *$7;
 }
 ;
 
@@ -651,16 +667,101 @@ domain:
 
 
 
-/* attitudes */
-attitude:
-agent ATTITUDES agent id if_part_bf SEMICOLON
+/***************************************************** ATTITUDES *****************************************************/
+trusty:
+ATTITUDES agent WRT agent TRUSTY if_part_bf SEMICOLON
 {
   $$ = new attitude;
-  $$->set_agent(*$1);
-  $$->set_executor(*$3);
-  $$->set_type(*$4);
-  $$->set_attitude_conditions(*$5);
+  $$->set_agent(*$2);
+  $$->set_executor(*$4);
+  $$->set_type(F_TRUSTY);
+  $$->set_attitude_conditions(*$6);
  };
+
+mistrusty:
+ATTITUDES agent WRT agent MISTRUSTY if_part_bf SEMICOLON
+{
+  $$ = new attitude;
+  $$->set_agent(*$2);
+  $$->set_executor(*$4);
+  $$->set_type(F_MISTRUSTY);
+  $$->set_attitude_conditions(*$6);
+ };
+
+untrusty:
+ATTITUDES agent WRT agent UNTRUSTY if_part_bf SEMICOLON
+{
+  $$ = new attitude;
+  $$->set_agent(*$2);
+  $$->set_executor(*$4);
+  $$->set_type(F_UNTRUSTY);
+  $$->set_attitude_conditions(*$6);
+ };
+
+stubborn:
+ATTITUDES agent WRT agent STUBBORN if_part_bf SEMICOLON
+{
+  $$ = new attitude;
+  $$->set_agent(*$2);
+  $$->set_executor(*$4);
+  $$->set_type(F_STUBBORN);
+  $$->set_attitude_conditions(*$6);
+ };
+
+keeper:
+ATTITUDES agent WRT agent KEEPER if_part_bf SEMICOLON
+{
+  $$ = new attitude;
+  $$->set_agent(*$2);
+  $$->set_executor(*$4);
+  $$->set_type(P_KEEPER);
+  $$->set_attitude_conditions(*$6);
+ }
+
+insecure:
+ATTITUDES agent WRT agent INSECURE if_part_bf SEMICOLON
+{
+  $$ = new attitude;
+  $$->set_agent(*$2);
+  $$->set_executor(*$4);
+  $$->set_type(P_INSECURE);
+  $$->set_attitude_conditions(*$6);
+ };
+
+
+/* attitudes */
+attitude:
+trusty
+{
+  $$ = $1;
+}
+|
+mistrusty
+{
+  $$ = $1;
+}
+|
+untrusty
+{
+  $$ = $1;
+}
+|
+stubborn
+{
+  $$ = $1;
+}
+|
+keeper
+{
+  $$ = $1;
+}
+|
+insecure
+{
+  $$ = $1;
+};
+
+
 
 /* att_list */
 attitude_table:
@@ -674,6 +775,11 @@ attitude_table:
   $1->push_back(*$2);
 }
 ;
+
+
+
+/***************************************************** END ATTITUDES *****************************************************/
+
 
 /* init */
 init:
