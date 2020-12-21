@@ -293,6 +293,7 @@ private:
     void make_nested_bf_classical2(unsigned short nesting, unsigned short depth,const belief_formula & to_explore, std::list<belief_formula> & ret);
     //
     bool check_belief_formula(const belief_formula & belief_form_to_check, const belief_formula & belief_initially,  agent_set & agents) const;
+
     bool check_goal() const;//pg_state_level<T> current_state);
 
     /*Function that returns the list of fluents and belief formulae that represent the fluent of the conversion to classical planning
@@ -321,6 +322,12 @@ private:
      * @param[in] a_level: The level to add to m_action_levels.
      */
     void add_action_level(const pg_action_level & a_level);
+
+
+    bool check_action(const action & act, agent_set & agents) const;
+
+    bool check_ontic_action(const action & act, agent_set & agents) const;
+    bool check_sensing_announcement_action(const action & act, agent_set & agents) const;
 
 public:
 
