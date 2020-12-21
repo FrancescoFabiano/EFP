@@ -335,8 +335,6 @@ const pworld_ptr_set pstate::get_C_reachable_worlds(const agent_set & ags, const
 	return ret;
 }
 
-
-
 const pworld_ptr_set pstate::get_D_reachable_worlds(const agent_set & ags, const pworld_ptr & world) const
 {
 	/**@bug: Notion of D-Reachable is correct (page 24 of Reasoning about Knowledge)*/
@@ -351,9 +349,9 @@ const pworld_ptr_set pstate::get_D_reachable_worlds(const agent_set & ags, const
 		pworld_ptr_set::const_iterator it_pwset2 = to_intersect.begin();
 		while ((it_pwset1 != ret.end()) && (it_pwset2 != to_intersect.end())) {
 
-			if ((*it_pwset1 < *it_pwset2) && (((*it_pwset1).get_fluent_based_id()) ==((*it_pwset2).get_fluent_based_id()))) {
+			if ((*it_pwset1 < *it_pwset2) && (((*it_pwset1).get_fluent_based_id()) == ((*it_pwset2).get_fluent_based_id()))) {
 				ret.erase(it_pwset1++);
-			} else if ((*it_pwset2 < *it_pwset1) && ((((*it_pwset1).get_fluent_based_id()) ==((*it_pwset2).get_fluent_based_id())))){
+			} else if ((*it_pwset2 < *it_pwset1) && ((((*it_pwset1).get_fluent_based_id()) == ((*it_pwset2).get_fluent_based_id())))) {
 				++it_pwset2;
 			} else { // *it_pwset1 == *it_pwset2
 				++it_pwset1;
@@ -458,12 +456,12 @@ void pstate::build_initial_prune()
 /*From https://www.geeksforgeeks.org/generate-all-the-binary-strings-of-n-bits/ since is like generating all the binary numbers.*/
 void pstate::generate_initial_pworlds(fluent_set& permutation, int index, const fluent_set & initially_known)
 {
-    //todo non usare indici ma bitset prima positivo fluent poi negativo
+	//todo non usare indici ma bitset prima positivo fluent poi negativo
 	int fluent_number = domain::get_instance().get_fluent_number();
 
 	int bit_size = (domain::get_instance().get_size_fluent());
 
-	if (index  == fluent_number) {
+	if (index == fluent_number) {
 		pworld to_add(permutation);
 		add_initial_pworld(to_add);
 
@@ -472,20 +470,20 @@ void pstate::generate_initial_pworlds(fluent_set& permutation, int index, const 
 
 	fluent_set permutation_2 = permutation;
 	//Add the \ref fluent in positive version
-	boost::dynamic_bitset<> bitSetToFindPositve(bit_size,index);
-    boost::dynamic_bitset<> bitSetToFindNegative(bit_size,index);
-    bitSetToFindNegative.set(bitSetToFindPositve.size() - 1, 1);
-    bitSetToFindPositve.set(bitSetToFindPositve.size()-1,0);
+	boost::dynamic_bitset<> bitSetToFindPositve(bit_size, index);
+	boost::dynamic_bitset<> bitSetToFindNegative(bit_size, index);
+	bitSetToFindNegative.set(bitSetToFindPositve.size() - 1, 1);
+	bitSetToFindPositve.set(bitSetToFindPositve.size() - 1, 0);
 
 
-    if (initially_known.find(bitSetToFindNegative) == initially_known.end()) {
-        permutation.insert(bitSetToFindPositve);
-        generate_initial_pworlds(permutation, index + 1, initially_known);
-    }
-    if (initially_known.find(bitSetToFindPositve) == initially_known.end()) {
-        permutation_2.insert(bitSetToFindNegative);
-        generate_initial_pworlds(permutation_2, index + 1, initially_known);
-    }
+	if (initially_known.find(bitSetToFindNegative) == initially_known.end()) {
+		permutation.insert(bitSetToFindPositve);
+		generate_initial_pworlds(permutation, index + 1, initially_known);
+	}
+	if (initially_known.find(bitSetToFindPositve) == initially_known.end()) {
+		permutation_2.insert(bitSetToFindNegative);
+		generate_initial_pworlds(permutation_2, index + 1, initially_known);
+	}
 
 }
 
@@ -509,7 +507,7 @@ void pstate::add_initial_pworld(const pworld & possible_add)
 				std::cout << std::endl;*/
 			}
 		} else {
-		    //std::cout << "error non generata una permeutazione uguale ad un altra" << std::endl;
+			//std::cout << "error non generata una permeutazione uguale ad un altra" << std::endl;
 			//Already generated so we save it on pstore
 			pstore::get_instance().add_world(possible_add);
 		}
@@ -546,14 +544,13 @@ void pstate::generate_initial_pedges()
 	/*This for add to *this* all the possible edges.*/
 	for (it_pwps_1 = m_worlds.begin(); it_pwps_1 != m_worlds.end(); it_pwps_1++) {
 		for (it_pwps_2 = it_pwps_1; it_pwps_2 != m_worlds.end(); it_pwps_2++) {
-            for (auto agent : domain::get_instance().get_agents())
-            {
-                pwptr_tmp1 = *it_pwps_1;
-                pwptr_tmp2 = *it_pwps_2;
-                add_edge(pwptr_tmp1, pwptr_tmp2, agent);
-                add_edge(pwptr_tmp2, pwptr_tmp1, agent);
+			for (auto agent : domain::get_instance().get_agents()) {
+				pwptr_tmp1 = *it_pwps_1;
+				pwptr_tmp2 = *it_pwps_2;
+				add_edge(pwptr_tmp1, pwptr_tmp2, agent);
+				add_edge(pwptr_tmp2, pwptr_tmp1, agent);
 
-            }
+			}
 		}
 	}
 
@@ -841,6 +838,28 @@ pworld_ptr pstate::execute_ontic_helper(const action &act, pstate &ret, const pw
 	return new_pw;
 }
 
+pstate pstate::execute_ontic(const action & act) const
+{
+	pstate ret;
+
+	//This finds all the worlds that are reachable from the initial state following
+	//the edges labeled with fully observant agents.
+	agent_set agents = domain::get_instance().get_agents();
+	agent_set fully_obs_agents = get_agents_if_entailed(act.get_fully_observants(), get_pointed());
+
+	agent_set oblivious_obs_agents = agents;
+	minus_set(oblivious_obs_agents, fully_obs_agents);
+
+	transition_map calculated; // A map that links the pworlds of *this* to the corresponding ones of ret
+	maintain_oblivious_believed_pworlds(ret, oblivious_obs_agents);
+
+	pworld_ptr new_pointed = execute_ontic_helper(act, ret, get_pointed(), calculated, oblivious_obs_agents);
+	ret.set_pointed(new_pointed); // Updating the pointed world
+	//std::cerr << "\nDEBUG: Out ONTIC " << act.get_name();
+
+	return ret;
+}
+
 pworld_ptr pstate::execute_sensing_announcement_helper(const fluent_formula &effects, pstate &ret, const pworld_ptr &current_pw, transition_map &calculated, agent_set &partially_obs_agents, agent_set &oblivious_obs_agents, bool previous_entailment) const
 {
 	pworld_ptr new_pw = ret.add_rep_world(pworld(current_pw.get_fluent_set()), current_pw.get_repetition()); // We add the corresponding pworld in ret
@@ -898,28 +917,6 @@ pworld_ptr pstate::execute_sensing_announcement_helper(const fluent_formula &eff
 	return new_pw;
 }
 
-pstate pstate::execute_ontic(const action & act) const
-{
-	pstate ret;
-
-	//This finds all the worlds that are reachable from the initial state following
-	//the edges labeled with fully observant agents.
-	agent_set agents = domain::get_instance().get_agents();
-	agent_set fully_obs_agents = get_agents_if_entailed(act.get_fully_observants(), get_pointed());
-
-	agent_set oblivious_obs_agents = agents;
-	minus_set(oblivious_obs_agents, fully_obs_agents);
-
-	transition_map calculated; // A map that links the pworlds of *this* to the corresponding ones of ret
-	maintain_oblivious_believed_pworlds(ret, oblivious_obs_agents);
-
-	pworld_ptr new_pointed = execute_ontic_helper(act, ret, get_pointed(), calculated, oblivious_obs_agents);
-	ret.set_pointed(new_pointed); // Updating the pointed world
-	//std::cerr << "\nDEBUG: Out ONTIC " << act.get_name();
-
-	return ret;
-}
-
 pstate pstate::execute_sensing(const action & act) const
 {
 	pstate ret;
@@ -946,12 +943,43 @@ pstate pstate::execute_sensing(const action & act) const
 	pworld_ptr new_pointed = execute_sensing_announcement_helper(effects, ret, get_pointed(), calculated, partially_obs_agents, oblivious_obs_agents, entails(effects));
 	ret.set_pointed(new_pointed); // Updating the pointed world
 
-	if (!check_properties(fully_obs_agents, partially_obs_agents, effects, ret)) {
+	/*if (!check_properties(fully_obs_agents, partially_obs_agents, effects, ret)) {
 		std::cerr << "\nDEBUG: Some properties are not respected\n\n";
 		exit(1);
-	}
+	}*/
 
 	return ret;
+}
+
+pstate pstate::execute_announcement(const action & act) const
+{
+	//	pstate ret;
+	//
+	//	//This finds all the worlds that are reachable from the initial state following
+	//	//the edges labeled with fully observant agents.
+	//	agent_set agents = domain::get_instance().get_agents();
+	//	agent_set fully_obs_agents = get_agents_if_entailed(act.get_fully_observants(), get_pointed());
+	//	agent_set partially_obs_agents = get_agents_if_entailed(act.get_partially_observants(), get_pointed());
+	//
+	//	agent_set oblivious_obs_agents = agents;
+	//	minus_set(oblivious_obs_agents, fully_obs_agents);
+	//	minus_set(oblivious_obs_agents, partially_obs_agents);
+	//
+	//	if (!oblivious_obs_agents.empty()) {
+	//		ret.set_max_depth(get_max_depth() + 1);
+	//	}
+	//
+	//	transition_map calculated; // A map that links the pworlds of *this* to the corresponding ones of ret
+	//	maintain_oblivious_believed_pworlds(ret, oblivious_obs_agents);
+	//
+	//	fluent_formula effects = get_effects_if_entailed(act.get_effects(), get_pointed());
+	//
+	//	pworld_ptr new_pointed = execute_sensing_announcement_helper(act, ret, get_pointed(), calculated, partially_obs_agents, oblivious_obs_agents, entails(effects));
+	//	ret.set_pointed(new_pointed); // Updating the pointed world
+	//
+	//	return ret;
+
+	return execute_sensing(act);
 }
 
 bool pstate::check_properties(const agent_set & fully, const agent_set & partially, const fluent_formula & effects, const pstate & updated) const
@@ -1020,7 +1048,7 @@ bool pstate::check_properties(const agent_set & fully, const agent_set & partial
 			property2.deground();
 
 
-			
+
 
 			/******Third Property C(F, C(P, (C(Fully,eff) | C(Fully, -eff))))******/
 			//This formula is just C(Fully, property2)
@@ -1028,9 +1056,9 @@ bool pstate::check_properties(const agent_set & fully, const agent_set & partial
 			property3.set_group_agents(fully);
 			property3.set_formula_type(C_FORMULA);
 			property3.set_bf1(property2);
-			
+
 			property3.set_is_grounded(true);
-			
+
 			property3.deground();
 
 
@@ -1049,37 +1077,6 @@ bool pstate::check_properties(const agent_set & fully, const agent_set & partial
 	}
 
 	return true;
-}
-
-pstate pstate::execute_announcement(const action & act) const
-{
-	//	pstate ret;
-	//
-	//	//This finds all the worlds that are reachable from the initial state following
-	//	//the edges labeled with fully observant agents.
-	//	agent_set agents = domain::get_instance().get_agents();
-	//	agent_set fully_obs_agents = get_agents_if_entailed(act.get_fully_observants(), get_pointed());
-	//	agent_set partially_obs_agents = get_agents_if_entailed(act.get_partially_observants(), get_pointed());
-	//
-	//	agent_set oblivious_obs_agents = agents;
-	//	minus_set(oblivious_obs_agents, fully_obs_agents);
-	//	minus_set(oblivious_obs_agents, partially_obs_agents);
-	//
-	//	if (!oblivious_obs_agents.empty()) {
-	//		ret.set_max_depth(get_max_depth() + 1);
-	//	}
-	//
-	//	transition_map calculated; // A map that links the pworlds of *this* to the corresponding ones of ret
-	//	maintain_oblivious_believed_pworlds(ret, oblivious_obs_agents);
-	//
-	//	fluent_formula effects = get_effects_if_entailed(act.get_effects(), get_pointed());
-	//
-	//	pworld_ptr new_pointed = execute_sensing_announcement_helper(act, ret, get_pointed(), calculated, partially_obs_agents, oblivious_obs_agents, entails(effects));
-	//	ret.set_pointed(new_pointed); // Updating the pointed world
-	//
-	//	return ret;
-
-	return execute_sensing(act);
 }
 
 void pstate::calc_min_bisimilar()
@@ -1322,61 +1319,131 @@ void pstate::print_graphviz(std::ostream & graphviz) const
 
 }
 
-/******************************MOVE TO HELPER*********************************/
+/***************ATTITUDES REASONING***************/
 
-template <class T>
-void pstate::sum_set(std::set<T> & to_modify, const std::set<T> & factor2) const
+pworld_ptr pstate::execute_sensing_announcement_helper_att(const fluent_formula &effects, pstate &ret, const pworld_ptr &current_pw, transition_map &calculated, agent_set &partially_obs_agents, agent_set &oblivious_obs_agents, const single_attitudes_map & fully_att, const single_attitudes_map & part_att, bool previous_entailment) const
 {
-	/**\todo move to helper*/
-	typename std::set<T>::const_iterator it_kwset;
-	for (it_kwset = factor2.begin(); it_kwset != factor2.end(); it_kwset++) {
+	pworld_ptr new_pw = ret.add_rep_world(pworld(current_pw.get_fluent_set()), current_pw.get_repetition()); // We add the corresponding pworld in ret
+	calculated.insert(transition_map::value_type(current_pw, new_pw)); // And we update the calculated map
 
-		to_modify.insert(*it_kwset);
-	}
-}
+	auto it_pwtm = get_beliefs().find(current_pw);
 
-template <class T>
-void pstate::minus_set(std::set<T> & to_modify, const std::set<T> & factor2) const
-{ /**\todo move to helper*/
+	if (it_pwtm != get_beliefs().end()) {
+		pworld_map::const_iterator it_pwm;
+		pworld_ptr_set::const_iterator it_pws;
 
-	typename std::set<T>::const_iterator it_kwset;
-	for (it_kwset = factor2.begin(); it_kwset != factor2.end(); it_kwset++) {
+		for (it_pwm = it_pwtm->second.begin(); it_pwm != it_pwtm->second.end(); it_pwm++) {
+			agent ag = it_pwm->first;
 
-		to_modify.erase(*it_kwset);
-	}
-}
+			bool is_oblivious_obs = oblivious_obs_agents.find(ag) != oblivious_obs_agents.end();
+			bool is_partially_obs = partially_obs_agents.find(ag) != partially_obs_agents.end();
+			bool is_fully_obs = !is_oblivious_obs && !is_partially_obs;
 
-agent_set pstate::get_agents_if_entailed(const observability_map& map, const pworld_ptr & start) const
-{ /**\todo move to helper*/
+			for (it_pws = it_pwm->second.begin(); it_pws != it_pwm->second.end(); it_pws++) {
+				if (is_oblivious_obs) { // If we are dealing with an OBLIVIOUS agent we maintain its beliefs as they were
+					auto maintained_pworld = ret.get_worlds().find(*it_pws);
 
-	agent_set ret;
-	observability_map::const_iterator it_map;
-	for (it_map = map.begin(); it_map != map.end(); it_map++) {
-		if (entails(it_map->second, start)) {
+					if (maintained_pworld != ret.get_worlds().end()) {
+						ret.add_edge(new_pw, *it_pws, ag);
+					}
+				} else { // Otherwise, if we have a FULLY/PARTIALLY observant agent
+					auto calculated_pworld = calculated.find(*it_pws);
+					//fluent_formula effects = get_effects_if_entailed(act.get_effects(), get_pointed());
+					//bool ent = act.get_type() == SENSING ? entails(effects, *it_pws) == entails(effects, get_pointed()) : entails(effects, *it_pws);
+					bool ent = entails(effects, *it_pws); // == entails(effects, get_pointed());
 
-			ret.insert(it_map->first);
+
+					bool is_consistent_belief = is_partially_obs || // If "ag" is PARTIALLY OBS, we always add an edge; If "ag" is FULLY OBS, we add an edge if he believes that "calculated" may be true (i.e., when "ent" holds) XOR
+						(is_fully_obs && (ent == previous_entailment)); // if a PARTIALLY OBS agent believes that "ag" thinks that "calculated" may be true (i.e., when "previous_entailment" holds)
+
+					if (calculated_pworld != calculated.end()) { // If we already calculated the transition function for this pworld
+						if (is_consistent_belief) {
+							ret.add_edge(new_pw, calculated_pworld->second, ag);
+						}
+					} else { // If we did not already calculate the transition function
+						if (is_consistent_belief) { // We calculate it if it would result in a consistent belief...
+
+							pworld_ptr believed_pw = execute_sensing_announcement_helper(effects, ret, *it_pws, calculated, partially_obs_agents, oblivious_obs_agents, ent);
+							ret.add_edge(new_pw, believed_pw, ag);
+						}
+						//						else if (is_partially_obs && (ent != previous_entailment)) { // ...and when it does not entail the action effects, but a PARTIALLY OBS agent believes that it may be true
+						//							pworld_ptr believed_pw_neg = execute_sensing_announcement_helper(act, ret, *it_pws, calculated, partially_obs_agents, oblivious_obs_agents, ent);
+						//							ret.add_edge(new_pw, believed_pw_neg, ag);
+						//						}
+					}
+				}
+			}
 		}
 	}
-	return ret;
+	return new_pw;
 }
 
-fluent_formula pstate::get_effects_if_entailed(const effects_map & map, const pworld_ptr & start) const
-{ /**\todo move to helper*/
+pstate pstate::execute_sensing_att(const action & act) const
+{
+	pstate ret;
 
-	fluent_formula ret;
-	effects_map::const_iterator it_map;
-	for (it_map = map.begin(); it_map != map.end(); it_map++) {
-		if (entails(it_map->second, start)) {
-			ret = helper::and_ff(ret, it_map->first);
-		}
+	//This finds all the worlds that are reachable from the initial state following
+	//the edges labeled with fully observant agents.
+	agent_set agents = domain::get_instance().get_agents();
+	agent_set fully_obs_agents = get_agents_if_entailed(act.get_fully_observants(), get_pointed());
+	agent_set partially_obs_agents = get_agents_if_entailed(act.get_partially_observants(), get_pointed());
+
+	agent_set oblivious_obs_agents = agents;
+	minus_set(oblivious_obs_agents, fully_obs_agents);
+	minus_set(oblivious_obs_agents, partially_obs_agents);
+
+	if (!oblivious_obs_agents.empty()) {
+		ret.set_max_depth(get_max_depth() + 1);
 	}
-	if (ret.size() > 1) {
 
-		std::cerr << "\nNon determinism in action effect is not supported-1.\n";
+	transition_map calculated; // A map that links the pworlds of *this* to the corresponding ones of ret
+	maintain_oblivious_believed_pworlds(ret, oblivious_obs_agents);
+
+	fluent_formula effects = get_effects_if_entailed(act.get_effects(), get_pointed());
+
+	pworld_ptr new_pointed = execute_sensing_announcement_helper(effects, ret, get_pointed(), calculated, partially_obs_agents, oblivious_obs_agents, entails(effects));
+	ret.set_pointed(new_pointed); // Updating the pointed world
+
+	/*if (!check_properties(fully_obs_agents, partially_obs_agents, effects, ret)) {
+		std::cerr << "\nDEBUG: Some properties are not respected\n\n";
 		exit(1);
-	}
+	}*/
+
 	return ret;
 }
+
+pstate pstate::execute_announcement_att(const action & act) const
+{
+	//	pstate ret;
+	//
+	//	//This finds all the worlds that are reachable from the initial state following
+	//	//the edges labeled with fully observant agents.
+	//	agent_set agents = domain::get_instance().get_agents();
+	//	agent_set fully_obs_agents = get_agents_if_entailed(act.get_fully_observants(), get_pointed());
+	//	agent_set partially_obs_agents = get_agents_if_entailed(act.get_partially_observants(), get_pointed());
+	//
+	//	agent_set oblivious_obs_agents = agents;
+	//	minus_set(oblivious_obs_agents, fully_obs_agents);
+	//	minus_set(oblivious_obs_agents, partially_obs_agents);
+	//
+	//	if (!oblivious_obs_agents.empty()) {
+	//		ret.set_max_depth(get_max_depth() + 1);
+	//	}
+	//
+	//	transition_map calculated; // A map that links the pworlds of *this* to the corresponding ones of ret
+	//	maintain_oblivious_believed_pworlds(ret, oblivious_obs_agents);
+	//
+	//	fluent_formula effects = get_effects_if_entailed(act.get_effects(), get_pointed());
+	//
+	//	pworld_ptr new_pointed = execute_sensing_announcement_helper(act, ret, get_pointed(), calculated, partially_obs_agents, oblivious_obs_agents, entails(effects));
+	//	ret.set_pointed(new_pointed); // Updating the pointed world
+	//
+	//	return ret;
+
+	return execute_sensing(act);
+}
+
+/***************END ATTITUDES REASONING***************/
 
 /***************DOXASTIC REASONING***************/
 
@@ -1496,7 +1563,65 @@ pstate pstate::execute_announcement_dox(const action & act) const
 }
 
 /***************END DOXASTIC***************/
-//DEBUG
+
+/******************************MOVE TO HELPER*********************************/
+
+template <class T>
+void pstate::sum_set(std::set<T> & to_modify, const std::set<T> & factor2) const
+{
+	/**\todo move to helper*/
+	typename std::set<T>::const_iterator it_kwset;
+	for (it_kwset = factor2.begin(); it_kwset != factor2.end(); it_kwset++) {
+
+		to_modify.insert(*it_kwset);
+	}
+}
+
+template <class T>
+void pstate::minus_set(std::set<T> & to_modify, const std::set<T> & factor2) const
+{ /**\todo move to helper*/
+
+	typename std::set<T>::const_iterator it_kwset;
+	for (it_kwset = factor2.begin(); it_kwset != factor2.end(); it_kwset++) {
+
+		to_modify.erase(*it_kwset);
+	}
+}
+
+agent_set pstate::get_agents_if_entailed(const observability_map& map, const pworld_ptr & start) const
+{ /**\todo move to helper*/
+
+	agent_set ret;
+	observability_map::const_iterator it_map;
+	for (it_map = map.begin(); it_map != map.end(); it_map++) {
+		if (entails(it_map->second, start)) {
+
+			ret.insert(it_map->first);
+		}
+	}
+	return ret;
+}
+
+fluent_formula pstate::get_effects_if_entailed(const effects_map & map, const pworld_ptr & start) const
+{ /**\todo move to helper*/
+
+	fluent_formula ret;
+	effects_map::const_iterator it_map;
+	for (it_map = map.begin(); it_map != map.end(); it_map++) {
+		if (entails(it_map->second, start)) {
+			ret = helper::and_ff(ret, it_map->first);
+		}
+	}
+	if (ret.size() > 1) {
+
+		std::cerr << "\nNon determinism in action effect is not supported-1.\n";
+		exit(1);
+	}
+	return ret;
+}
+
+/******************************END MOVE TO HELPER*********************************/
+
 
 int pstate::get_edges() const
 {

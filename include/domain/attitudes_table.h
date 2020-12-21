@@ -18,7 +18,8 @@
 #include "attitude.h"
 #include "../utilities/define.h"
 
-typedef std::map<agent, std::map<agent, std::map<agents_attitudes, belief_formula>>> attitudes_map;
+typedef std::map<agent, agents_attitudes> single_attitudes_map;
+typedef std::map<agent, std::map<agent, std::map<agents_attitudes, belief_formula>>> complete_attitudes_map;
 
 class attitudes_table
 {
@@ -31,7 +32,7 @@ private:
      * 
      * The order is the following: F_TRUSTY, F_MISTRUSTY, F_UNTRUSTY, F_STUBBORN
      */
-    attitudes_map m_F_attitude_wrt_exec;
+    complete_attitudes_map m_F_attitude_wrt_exec;
 
     /**A map that contains the partially_observants attitudes of m_agent when the exe_agent is the executor.
      * 
@@ -40,7 +41,7 @@ private:
      * 
      * The order is the following: P_KEEPER, P_INSECURE
      */
-    attitudes_map m_P_attitude_wrt_exec;
+    complete_attitudes_map m_P_attitude_wrt_exec;
 
     /**Function that add the attitude for \ref m_agent w.r.t, \ref executor and an \ref attitude_condition to meet
      * @param[in] m_agent: the agent of whom we want to analyze the attitude.
@@ -49,7 +50,7 @@ private:
      * @param[in] attitude_condition: the condition that the state must require for the agent to have the attitude.
      * @param[in] table: the map where to add the attitudes (fully or partially).
      */
-    void add_attitudes(agent m_agent, agent executor, agents_attitudes attitude, const belief_formula & attitude_condition, attitudes_map & table);
+    void add_attitudes(agent m_agent, agent executor, agents_attitudes attitude, const belief_formula & attitude_condition, complete_attitudes_map & table);
 
     /**Function that add the fully_obs attitude for \ref m_agent w.r.t, \ref executor when \ref attitude_condition is met
      * @param[in] m_agent: the agent of whom we want to analyze the attitude.
@@ -69,7 +70,7 @@ private:
     void add_P_attitudes(agent m_agent, agent executor, agents_attitudes attitude, const belief_formula & attitude_condition);
 
 
-    void print_table(const attitudes_map & table) const;
+    void print_table(const complete_attitudes_map & table) const;
 public:
     /**Class that initialize the internal maps with default values
      * 
@@ -87,13 +88,13 @@ public:
      * 
      * @return: the field \ref m_F_attitude_wrt_exec
      */
-    const attitudes_map & get_F_attitudes() const;
+    const complete_attitudes_map & get_F_attitudes() const;
 
     /*Getter of the field \ref m_P_attitude_wrt_exec
      * 
      * @return: the field \ref m_P_attitude_wrt_exec
      */
-    const attitudes_map & get_P_attitudes() const;
+    const complete_attitudes_map & get_P_attitudes() const;
 
     void print() const;
 };

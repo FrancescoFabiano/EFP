@@ -461,7 +461,7 @@ int main(int argc, char** argv)
 	generate_asp_encoding();
 	
 
-	domain::get_instance().get_attitudes().print();
+	//domain::get_instance().get_attitudes().print();
 	
 	//launch search planner
 	launch_search(state_struc,execute_given_actions,results_file,used_heur,given_actions, max_depth, step);

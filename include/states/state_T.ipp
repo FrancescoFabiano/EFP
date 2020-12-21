@@ -278,9 +278,9 @@ void state<T>::print_graphviz(std::string postfix) const
 }
 
 template <class T>
-agents_attitudes state<T>::get_attitude(agent m_agent, agent executor, const attitudes_map & table, bool is_fully) const
+agents_attitudes state<T>::get_attitude(agent m_agent, agent executor, const complete_attitudes_map & table, bool is_fully) const
 {
-	attitudes_map::iterator it_ext = table.find(m_agent);
+	auto it_ext = table.find(m_agent);
 	if (it_ext != table.end()) {
 		auto it_mid = it_ext->second.find(executor);
 		if (it_mid != it_ext->second.end()) {
@@ -304,13 +304,13 @@ agents_attitudes state<T>::get_attitude(agent m_agent, agent executor, const att
 }
 
 template <class T>
-const std::map<agent, agents_attitudes> & state<T>::get_attitudes(agent executor, const attitudes_map & table, bool is_fully) const
+single_attitudes_map state<T>::get_attitudes(agent executor, const complete_attitudes_map & table, bool is_fully) const
 {
 	agent_set tot_ags = domain::get_instance().get_agents();
 	agent_set::const_iterator it_ag;
 
 
-	std::map<agent, agents_attitudes> ret;
+	single_attitudes_map ret;
 	for (it_ag = tot_ags.begin(); it_ag != tot_ags.end(); it_ag++) {
 		if (*it_ag != executor) {
 			ret.insert(std::pair<agent, agents_attitudes>(*it_ag, get_attitude(*it_ag, executor, table, is_fully)));
@@ -323,17 +323,17 @@ const std::map<agent, agents_attitudes> & state<T>::get_attitudes(agent executor
 }
 
 template <class T>
-const std::map<agent, agents_attitudes> & state<T>::get_F_attitudes(agent executor) const
+single_attitudes_map state<T>::get_F_attitudes(agent executor) const
 {
 
-	get_attitudes(executor, domain::get_instance().get_attitudes().get_F_attitudes(), true);
+	return get_attitudes(executor, domain::get_instance().get_attitudes().get_F_attitudes(), true);
 
 }
 
 template <class T>
-const std::map<agent, agents_attitudes> & state<T>::get_P_attitudes(agent executor) const
+single_attitudes_map state<T>::get_P_attitudes(agent executor) const
 {
-	get_attitudes(executor, domain::get_instance().get_attitudes().get_P_attitudes(), false);
+	return get_attitudes(executor, domain::get_instance().get_attitudes().get_P_attitudes(), false);
 }
 
 

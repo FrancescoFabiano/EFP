@@ -53,11 +53,9 @@ void planner<T>::print_results(std::chrono::duration<double> elapsed_seconds, T 
 		}
 		result << "completed the search in " << elapsed_seconds.count() << "\n";
 		result.close();
+	} else {
+		std::cout << "\ncompleted the search in " << elapsed_seconds.count() << "\n";
 	}
-	else
-    {
-       std::cout << "\ncompleted the search in " << elapsed_seconds.count() << "\n";
-    }
 }
 
 template <class T>
@@ -65,16 +63,11 @@ bool planner<T>::search(bool results_file, heuristics used_heur, int max_depth, 
 {
 	if (used_heur == NO_H) {
 		return search_BFS(results_file);
-	}
-	else if(used_heur == NO_H_DFS)
-    {
-        return search_DFS(results_file);
-    }
-	else if(used_heur == DFS_ITER)
-    {
-	    return search_IterativeDFS(results_file,max_depth, step_);
-    }
-	else {
+	} else if (used_heur == NO_H_DFS) {
+		return search_DFS(results_file);
+	} else if (used_heur == DFS_ITER) {
+		return search_IterativeDFS(results_file, max_depth, step_);
+	} else {
 		return search_heur(results_file, used_heur);
 	}
 
@@ -162,167 +155,161 @@ bool planner<T>::search_BFS(bool results_file)
 	return false;
 }
 
-
-
 template <class T>
 bool planner<T>::search_IterativeDFS(bool results_file, int maxDepth_, int step_)
 {
-    //stack di supporto per i risultati della ricerca.
-    std::stack<T> supportSearch;
-    T initial;
+	//stack di supporto per i risultati della ricerca.
+	std::stack<T> supportSearch;
+	T initial;
 
-    bool bisimulation = false;
-    if (domain::get_instance().get_bisimulation() != BIS_NONE) {
-        bisimulation = true;
-    }
-    bisimulation = false;
-    std::set<T> visited_states;
+	bool bisimulation = false;
+	if (domain::get_instance().get_bisimulation() != BIS_NONE) {
+		bisimulation = true;
+	}
+	bisimulation = false;
+	std::set<T> visited_states;
 
-    auto start_timing = std::chrono::system_clock::now();
-    initial.build_initial();
-    if (bisimulation) {
-        initial.calc_min_bisimilar();
-    }
+	auto start_timing = std::chrono::system_clock::now();
+	initial.build_initial();
+	if (bisimulation) {
+		initial.calc_min_bisimilar();
+	}
 
-    int maxDepth = maxDepth_;
-    int step = step_;
+	int maxDepth = maxDepth_;
+	int step = step_;
 
-    auto end_timing = std::chrono::system_clock::now();
-    std::chrono::duration<double> elapsed_seconds = end_timing - start_timing;
+	auto end_timing = std::chrono::system_clock::now();
+	std::chrono::duration<double> elapsed_seconds = end_timing - start_timing;
 
-    std::cout << "\nInitial Built in " << elapsed_seconds.count() << " seconds\n";
+	std::cout << "\nInitial Built in " << elapsed_seconds.count() << " seconds\n";
 
-    action_set actions = domain::get_instance().get_actions();
-    action_set::const_iterator it_acset;
-    T popped_state,popped_state2;
-    T tmp_state;
-    action tmp_action;
+	action_set actions = domain::get_instance().get_actions();
+	action_set::const_iterator it_acset;
+	T popped_state, popped_state2;
+	T tmp_state;
+	action tmp_action;
 
-    start_timing = std::chrono::system_clock::now();
-    if (initial.is_goal()) {
-        end_timing = std::chrono::system_clock::now();
-        elapsed_seconds = end_timing - start_timing;
-        print_results(elapsed_seconds, initial, results_file, false);
+	start_timing = std::chrono::system_clock::now();
+	if (initial.is_goal()) {
+		end_timing = std::chrono::system_clock::now();
+		elapsed_seconds = end_timing - start_timing;
+		print_results(elapsed_seconds, initial, results_file, false);
 
-        return true;
-    }
+		return true;
+	}
 
-    m_search_space_DFS.push(initial);
-    visited_states.insert(initial);
+	m_search_space_DFS.push(initial);
+	visited_states.insert(initial);
 
-    while (true) {
-        m_search_space_DFS.push(initial);
-        maxDepth += step;
-        visited_states.clear();
-        visited_states.insert(initial);
+	while (true) {
+		m_search_space_DFS.push(initial);
+		maxDepth += step;
+		visited_states.clear();
+		visited_states.insert(initial);
 
-        while(!m_search_space_DFS.empty())
-        {
-            popped_state = m_search_space_DFS.top();
-            m_search_space_DFS.pop();
-            for (it_acset = actions.begin(); it_acset != actions.end(); it_acset++) {
-                tmp_action = *it_acset;
-                if (popped_state.is_executable(tmp_action)) {
-                    tmp_state = popped_state.compute_succ(tmp_action);
-                    //tmp_state.print();
-                    if (bisimulation) {
-                        tmp_state.calc_min_bisimilar();
-                    }
-                    if (tmp_state.is_goal()) {
-                        end_timing = std::chrono::system_clock::now();
-                        elapsed_seconds = end_timing - start_timing;
-                        print_results(elapsed_seconds, tmp_state, results_file, false);
-                        return true;
-                    }
+		while (!m_search_space_DFS.empty()) {
+			popped_state = m_search_space_DFS.top();
+			m_search_space_DFS.pop();
+			for (it_acset = actions.begin(); it_acset != actions.end(); it_acset++) {
+				tmp_action = *it_acset;
+				if (popped_state.is_executable(tmp_action)) {
+					tmp_state = popped_state.compute_succ(tmp_action);
+					//tmp_state.print();
+					if (bisimulation) {
+						tmp_state.calc_min_bisimilar();
+					}
+					if (tmp_state.is_goal()) {
+						end_timing = std::chrono::system_clock::now();
+						elapsed_seconds = end_timing - start_timing;
+						print_results(elapsed_seconds, tmp_state, results_file, false);
+						return true;
+					}
 
-                    if (visited_states.insert(tmp_state).second) {
-                        if (tmp_state.get_plan_length() < maxDepth) {
-                            m_search_space_DFS.push(tmp_state);
-                        }
-                    }
-                }
-            }
+					if (visited_states.insert(tmp_state).second) {
+						if (tmp_state.get_plan_length() < maxDepth) {
+							m_search_space_DFS.push(tmp_state);
+						}
+					}
+				}
+			}
 
-        }
-    }
-    //anche qui non ci arrivo mai con il while true
-    std::cout << "\nNo plan found for this goal.\n";
-    return false;
+		}
+	}
+	//anche qui non ci arrivo mai con il while true
+	std::cout << "\nNo plan found for this goal.\n";
+	return false;
 }
-
 
 template <class T>
 bool planner<T>::search_DFS(bool results_file)
 {
-    T initial;
+	T initial;
 
-    bool bisimulation = false;
-    if (domain::get_instance().get_bisimulation() != BIS_NONE) {
-        bisimulation = true;
-    }
-    bisimulation = false;
-    std::set<T> visited_states;
+	bool bisimulation = false;
+	if (domain::get_instance().get_bisimulation() != BIS_NONE) {
+		bisimulation = true;
+	}
+	bisimulation = false;
+	std::set<T> visited_states;
 
-    auto start_timing = std::chrono::system_clock::now();
-    initial.build_initial();
-    if (bisimulation) {
-        initial.calc_min_bisimilar();
-    }
+	auto start_timing = std::chrono::system_clock::now();
+	initial.build_initial();
+	if (bisimulation) {
+		initial.calc_min_bisimilar();
+	}
 
-    auto end_timing = std::chrono::system_clock::now();
-    std::chrono::duration<double> elapsed_seconds = end_timing - start_timing;
+	auto end_timing = std::chrono::system_clock::now();
+	std::chrono::duration<double> elapsed_seconds = end_timing - start_timing;
 
-    std::cout << "\nInitial Built in " << elapsed_seconds.count() << " seconds\n";
+	std::cout << "\nInitial Built in " << elapsed_seconds.count() << " seconds\n";
 
-    action_set actions = domain::get_instance().get_actions();
-    action_set::const_iterator it_acset;
-    T popped_state,popped_state2;
-    T tmp_state;
-    action tmp_action;
+	action_set actions = domain::get_instance().get_actions();
+	action_set::const_iterator it_acset;
+	T popped_state, popped_state2;
+	T tmp_state;
+	action tmp_action;
 
-    start_timing = std::chrono::system_clock::now();
-    if (initial.is_goal()) {
-        end_timing = std::chrono::system_clock::now();
-        elapsed_seconds = end_timing - start_timing;
-        print_results(elapsed_seconds, initial, results_file, false);
+	start_timing = std::chrono::system_clock::now();
+	if (initial.is_goal()) {
+		end_timing = std::chrono::system_clock::now();
+		elapsed_seconds = end_timing - start_timing;
+		print_results(elapsed_seconds, initial, results_file, false);
 
-        return true;
-    }
+		return true;
+	}
 
-    m_search_space_DFS.push(initial);
-    visited_states.insert(initial);
-    while (!m_search_space_DFS.empty()) {
-        popped_state = m_search_space_DFS.top();
-        m_search_space_DFS.pop();
+	m_search_space_DFS.push(initial);
+	visited_states.insert(initial);
+	while (!m_search_space_DFS.empty()) {
+		popped_state = m_search_space_DFS.top();
+		m_search_space_DFS.pop();
 
-        //esecuzione azioni
-        for (it_acset = actions.begin(); it_acset != actions.end(); it_acset++) {
-            tmp_action = *it_acset;
-            if (popped_state.is_executable(tmp_action)) {
-                tmp_state = popped_state.compute_succ(tmp_action);
-                //tmp_state.print();
-                if (bisimulation) {
-                    tmp_state.calc_min_bisimilar();
-                }
-                if (tmp_state.is_goal()) {
-                    end_timing = std::chrono::system_clock::now();
-                    elapsed_seconds = end_timing - start_timing;
-                    print_results(elapsed_seconds, tmp_state, results_file, false);
-                    return true;
-                }
+		//esecuzione azioni
+		for (it_acset = actions.begin(); it_acset != actions.end(); it_acset++) {
+			tmp_action = *it_acset;
+			if (popped_state.is_executable(tmp_action)) {
+				tmp_state = popped_state.compute_succ(tmp_action);
+				//tmp_state.print();
+				if (bisimulation) {
+					tmp_state.calc_min_bisimilar();
+				}
+				if (tmp_state.is_goal()) {
+					end_timing = std::chrono::system_clock::now();
+					elapsed_seconds = end_timing - start_timing;
+					print_results(elapsed_seconds, tmp_state, results_file, false);
+					return true;
+				}
 
-                if(visited_states.insert(tmp_state).second)
-                {
-                    m_search_space_DFS.push(tmp_state);
-                }
-            }
+				if (visited_states.insert(tmp_state).second) {
+					m_search_space_DFS.push(tmp_state);
+				}
+			}
 
-        }
-    }
-    std::cout << "\nNo plan found for this goal.\n";
-    return false;
+		}
+	}
+	std::cout << "\nNo plan found for this goal.\n";
+	return false;
 }
-
 
 template <class T>
 bool planner<T>::search_heur(bool results_file, heuristics used_heur)
@@ -441,6 +428,14 @@ void planner<T>::execute_given_actions(std::vector<std::string>& act_name)
 		for (it_acset = domain::get_instance().get_actions().begin(); it_acset != domain::get_instance().get_actions().end(); it_acset++) {
 			if ((*it_acset).get_name().compare(*it_stset) == 0) {
 
+				/*auto attitudes = state.get_F_attitudes(*(domain::get_instance().get_agents().begin()));
+				auto attitudes_it = attitudes.begin();
+
+				std::cout << "\n\nF table\n";
+				for (; attitudes_it != attitudes.end(); attitudes_it++) {
+					std::cout << "Agent " << domain::get_instance().get_grounder().deground_agent(attitudes_it->first) << " has attitude " << attitudes_it->second;
+					std::cout << std::endl;
+				}*/
 				if (state.is_executable(*it_acset)) {
 					state = state.compute_succ(*it_acset);
 					if (bisimulation) {
@@ -456,6 +451,7 @@ void planner<T>::execute_given_actions(std::vector<std::string>& act_name)
 							if (!(tmp < state) && !(state < tmp) && !domain::get_instance().get_debug()) {
 								state.min_with_print(tmp);
 							}
+
 							//std::cerr << "\nDEBUG: reached already visited state with action " << (*it_acset).get_name() << "\n";
 
 							// if ((*it_acset).get_name() == "shout_8") {

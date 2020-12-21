@@ -295,9 +295,7 @@ void domain::build_propositions()
 void domain::build_attitudes()
 {
 
-		std::cout << "\nBuilding attitudes table..." << std::endl;
-
-		std::cout << "************************************Fluent is " << *(get_fluents().begin());
+	std::cout << "\nBuilding attitudes table..." << std::endl;
 	m_attitudes.set_attitudes_table(get_agents(), *(get_fluents().begin()));
 	auto it_attitudes = m_reader->m_attitudes.begin();
 	for (; it_attitudes != m_reader->m_attitudes.end(); it_attitudes++) {

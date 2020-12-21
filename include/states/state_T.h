@@ -95,7 +95,7 @@ private:
      * @param[in] is_fully: a boolean that says whether is a fully_obs agent or not.
      * @return: the attitude that the agent has
      */
-    agents_attitudes get_attitude(agent m_agent, agent executor, const attitudes_map & table, bool is_fully) const;
+    agents_attitudes get_attitude(agent m_agent, agent executor, const complete_attitudes_map & table, bool is_fully) const;
 
 
     /**Function that add retrieve the partially_obs attitude w.r.t \ref executor and the current state
@@ -106,7 +106,7 @@ private:
      * @param[in] is_fully: a boolean that says whether is a fully_obs agent or not.
      * @return: the attitudes that the agents have
      */
-    const std::map<agent, agents_attitudes> & get_attitudes(agent executor, const attitudes_map & table, bool is_fully) const;
+    single_attitudes_map get_attitudes(agent executor, const complete_attitudes_map & table, bool is_fully) const;
 
 public:
     /** \brief Constructor without parameters.
@@ -302,7 +302,7 @@ public:
      * @param[in] curr: the state where the attitude's conditions are checked.
      * @return: the fully_obs attitudes that the agents have
      */
-    const std::map<agent, agents_attitudes> & get_F_attitudes(agent executor) const;
+    single_attitudes_map get_F_attitudes(agent executor) const;
 
     /**Function that add retrieve the partially_obs attitude w.r.t \ref executor and the current state
      *
@@ -310,7 +310,7 @@ public:
      * @param[in] curr: the state where the attitude's conditions are checked.
      * @return: the partially_obs attitudes that the agents have
      */
-    const std::map<agent, agents_attitudes> & get_P_attitudes(agent executor) const;
+    single_attitudes_map get_P_attitudes(agent executor) const;
 
     //DEBUG
     void min_with_print(state<T> tmp);

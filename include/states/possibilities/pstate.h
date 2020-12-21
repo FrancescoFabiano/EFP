@@ -21,6 +21,7 @@
 #include "../../utilities/define.h"
 #include "../../domain/initially.h"
 #include "../../actions/action.h"
+#include "../../domain/attitudes_table.h"
 
 class pstate
 {
@@ -358,6 +359,42 @@ private:
      * @param[in] act: the \ref ANNOUNCEMENT action to be applied on *this*.
      * @return the \ref pstate that results after the execution.*/
     pstate execute_announcement(const action &act) const;
+
+
+    /** \brief Function that applies the transition function for a \ref SENSING \ref action effect on *this* implementing the possibilities semantic with attitudes.
+     *
+     * This new function is introduced as it won't look at the pointed world to extrapolate the truth value (we have non-consistent belief)
+     * The transition function is applied accordingly to mA^rho. Check the paper IJCAI 21 for more information.
+     *
+     * @see action.
+     *
+     * @param[in] act: the \ref SENSING action to be applied on *this*.
+     * @return the \ref pstate that results after the execution.*/
+    pstate execute_sensing_att(const action &act) const;
+    /** \brief Function that applies the transition function for a \ref ANNOUNCEMENT \ref action effect on *this* implementing the possibilities semantic with attitudes.
+     *
+     * This new function is introduced as it won't look at the pointed world to extrapolate the truth value (we have non-consistent belief)
+     * The transition function is applied accordingly to mA^rho. Check the paper IJCAI 21 for more information.
+     *
+     * @see action.
+     *
+     * @param[in] act: the \ref ANNOUNCEMENT action to be applied on *this*.
+     * @return the \ref pstate that results after the execution.*/
+    pstate execute_announcement_att(const action &act) const;
+
+    /** \brief Function that recursively calculates the \ref pworld resulting from the transition function with attitudes.
+     *
+     * @param[in] effects: the effects of the \ref SENSING/\ref ANNOUNCEMENT \ref action to be applied on *this*.
+     * @param[in] ret: the \ref pstate resulting from the \ref action.
+     * @param[in] current_pw: the world being currently calculated.
+     * @param[in] calculated: a map that keeps track of the results of the transition function.
+     * @param[in] partially_obs_agents: the partially observant \ref agent set.
+     * @param[in] oblivious_obs_agents: the oblivious \ref agent set.
+     * @param[in] fully_att: map that contains the attitudes of the fully observant wrt to the action execution
+     * @param[in] part_att: map that contains the attitudes of the partially observant wrt to the action execution
+     * @param[in] previous_entailment: the value of the coming state entailment (if first is pointed).
+     * @return the \ref pworld resulting from the application of the transition function on "current_pw".*/
+    pworld_ptr execute_sensing_announcement_helper_att(const fluent_formula &effects, pstate &ret, const pworld_ptr &current_pw, transition_map &calculated, agent_set &partially_obs_agents, agent_set &oblivious_obs_agents, const single_attitudes_map & fully_att, const single_attitudes_map & part_att, bool previous_entailment) const;
 
 public:
 

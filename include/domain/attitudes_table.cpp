@@ -74,12 +74,12 @@ void attitudes_table::set_attitudes_table(const agent_set & tot_ags, fluent f1)
 	}
 }
 
-const attitudes_map & attitudes_table::get_F_attitudes() const
+const complete_attitudes_map & attitudes_table::get_F_attitudes() const
 {
 	return m_F_attitude_wrt_exec;
 }
 
-const attitudes_map & attitudes_table::get_P_attitudes() const
+const complete_attitudes_map & attitudes_table::get_P_attitudes() const
 {
 	return m_P_attitude_wrt_exec;
 }
@@ -95,7 +95,7 @@ void attitudes_table::add_P_attitudes(agent m_agent, agent executor, agents_atti
 	add_attitudes(m_agent, executor, attitude, attitude_condition, m_P_attitude_wrt_exec);
 }
 
-void attitudes_table::add_attitudes(agent m_agent, agent executor, agents_attitudes attitude, const belief_formula & attitude_condition, attitudes_map & table)
+void attitudes_table::add_attitudes(agent m_agent, agent executor, agents_attitudes attitude, const belief_formula & attitude_condition, complete_attitudes_map & table)
 {
 	auto it_ext = table.find(m_agent);
 	if (it_ext != table.end()) {
@@ -130,7 +130,7 @@ void attitudes_table::print() const
 	print_table(m_P_attitude_wrt_exec);
 }
 
-void attitudes_table::print_table(const attitudes_map & table) const
+void attitudes_table::print_table(const complete_attitudes_map & table) const
 {
 	auto it_att0 = table.begin();
 	for (; it_att0 != table.end(); it_att0++) {
@@ -147,59 +147,3 @@ void attitudes_table::print_table(const attitudes_map & table) const
 		}
 	}
 }
-
-/**@todo: Make the following methods Templatic w.r.t. the State*/
-/*agents_attitudes attitudes_table::get_attitude(agent m_agent, agent executor, const pstate & curr, const attitudes_map & table, bool is_fully) const
-{
-    attitudes_map::iterator it_ext = table.find(m_agent);
-    if (it_ext != table.end()) {
-	std::map<agent, std::map<agents_attitudes, belief_formula>>::iterator it_mid = it_ext->second.find(executor);
-	if (it_mid != it_ext->second.end()) {
-	    std::map<agents_attitudes, belief_formula>::const_iterator it_int;
-	    for (it_int = it_mid->second.begin(); it_int != it_mid->second.end(); it_int++) {
-		//Check if this work.
-		if (curr.entails(it_int->second)) {
-		    return it_int->first;
-		}
-	    }
-	}
-    }
-    if (is_fully) {
-	return F_TRUSTY;
-    }
-    return P_KEEPER;
-
-    //	std::cerr << "\nError: Some attitude declaration is missing, the agent has not any attitude specified.";
-    //	exit(1);
-
-}
-
-const std::map<agent, agents_attitudes> & attitudes_table::get_attitudes(agent executor, const pstate & curr, const attitudes_map & table, bool is_fully) const
-{
-    agent_set tot_ags = domain::get_instance().get_agents();
-    agent_set::const_iterator it_ag;
-
-
-    std::map<agent, agents_attitudes> ret;
-    for (it_ag = tot_ags.begin(); it_ag != tot_ags.end(); it_ag++) {
-	if (*it_ag != executor) {
-	    ret.insert(std::pair<agent, agents_attitudes>(*it_ag, get_attitude(*it_ag, executor, curr, table, is_fully)));
-	}
-    }
-
-    return ret;
-
-
-}
-
-const std::map<agent, agents_attitudes> & attitudes_table::get_F_attitudes(agent executor, const pstate & curr) const
-{
-    get_attitudes(agent executor, const pstate & curr, m_F_attitude_wrt_exec, true);
-
-}
-
-const std::map<agent, agents_attitudes> & attitudes_table::get_P_attitudes(agent executor, const pstate & curr) const
-{
-    get_attitudes(agent executor, const pstate & curr, m_P_attitude_wrt_exec, false);
-
-}*/

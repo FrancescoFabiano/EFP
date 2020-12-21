@@ -17,6 +17,8 @@ has_attitude a wrt b f_stubborn if looking_a;
 has_attitude a wrt b p_keeper if B(a, looking_b);
 has_attitude a wrt b p_insecure;
 
+has_attitude b wrt a f_untrusty if B(a, -looking_b), -looking_b;
+has_attitude c wrt a f_mistrusty if B(a, -looking_b);
 
 executable open_a;
 open_a causes opened;
