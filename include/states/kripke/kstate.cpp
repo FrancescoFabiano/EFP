@@ -1016,7 +1016,7 @@ void kstate::add_ret_ontic_worlds_internal(const kworld_ptr & start, kworld_ptr_
 	//std::cout << "\n\n*************************" << act.get_name() << "*************************\n";
 	//Formula in helper that deals with the fluent_formula
 	for (it_eff = effects.begin(); it_eff != effects.end(); it_eff++) {
-		world_description = helper::ontic_exec(*it_eff, world_description);
+		helper::apply_effect(*it_eff, world_description);
 	}
 
 	//Insert into a map the pair <old_world, new_world>.
@@ -1099,7 +1099,7 @@ void kstate::add_ste_worlds(kstate &ret, const kworld_ptr &kw, kstate_map &kmap,
 			fluent_formula effects = get_effects_if_entailed(act.get_effects(), kw);
 			if (effects.size() > 0) {
 				for (it_eff = effects.begin(); it_eff != effects.end(); it_eff++) {
-					world_description = helper::ontic_exec(*it_eff, world_description);
+					helper::apply_effect(*it_eff, world_description);
 				}
 
 				if (world_description != kw.get_fluent_set()) {

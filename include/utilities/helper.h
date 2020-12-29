@@ -34,17 +34,31 @@ public:
      * @return the negation of \p to_negate.*/
     static fluent negate_fluent(const fluent to_negate);
 
+    /** \brief Function that returns the positive version of a given \ref fluent.
+     * 
+     * @param[in] to_normalize: the \ref fluent to normalize
+     * 
+     * @return the normalized of fluent.*/
+    static fluent normalize_fluent(const fluent to_normalize);
+
     static bool is_negate(const fluent f);
 
 
 
+
+    /** \brief Function to set the truth value of a fluent in a world description.
+     *   
+     * @param[in] effect: the fluent to set.
+     * @param[out] world_description: the \ref fluent_set contained inside a single world to modify.*/
+    static void apply_effect(fluent effect, fluent_set& world_description);
+
     /** \brief Function to merge the results of an \ref ONTIC \ref action with a world description.
      *   
      * @param[in] effect: part of the effect of an \ref ONTIC \ref action in CNF form.
-     * @param[in] world_description: the \ref fluent_set contained inside a single world.
+     * @param[out] world_description: the \ref fluent_set contained inside a single world.
      * 
      * @return the description of the world after \p effect has been applied to \p world_description.*/
-    static fluent_set ontic_exec(const fluent_set& effect, const fluent_set& world_description);
+    static void apply_effect(const fluent_set& effect, fluent_set& world_description);
 
     /* Set has == operator
      * \brief Function that checks if two \ref fluent_set are the same.
@@ -98,13 +112,13 @@ public:
 
     /** \brief Function that check that the \ref ONTIC effect doesn't have uncertainty (OR).
      * 
-     * The it calls ontic_exec(const fluent_set&, const fluent_set&);
+     * Then it calls apply_effect(const fluent_set&, const fluent_set&);
      *   
      * @param[in] effect: the effect of an \ref ONTIC \ref action.
      * @param[out] world_description: the description of the world after \p effect has been applied to \p world_description.
      * 
      * @return the description of the world after \p effect has been applied to \p world_description.*/
-    static fluent_set ontic_exec(const fluent_formula& effect, const fluent_set& world_description);
+    static void apply_effect(const fluent_formula& effect, fluent_set& world_description);
 
     static int lenght_to_power_two(int length);
 

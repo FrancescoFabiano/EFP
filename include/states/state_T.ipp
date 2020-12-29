@@ -277,63 +277,20 @@ void state<T>::print_graphviz(std::string postfix) const
 
 }
 
-template <class T>
-agents_attitudes state<T>::get_attitude(agent m_agent, agent executor, const complete_attitudes_map & table, bool is_fully) const
-{
-	auto it_ext = table.find(m_agent);
-	if (it_ext != table.end()) {
-		auto it_mid = it_ext->second.find(executor);
-		if (it_mid != it_ext->second.end()) {
-			auto it_int = it_mid->second.begin();
-			for (; it_int != it_mid->second.end(); it_int++) {
-				//Check if this work.
-				if (entails(it_int->second)) {
-					return it_int->first;
-				}
-			}
-		}
-	}
-	if (is_fully) {
-		return F_TRUSTY;
-	}
-	return P_KEEPER;
-
-	//	std::cerr << "\nError: Some attitude declaration is missing, the agent has not any attitude specified.";
-	//	exit(1);
-
-}
-
-template <class T>
-single_attitudes_map state<T>::get_attitudes(agent executor, const complete_attitudes_map & table, bool is_fully) const
-{
-	agent_set tot_ags = domain::get_instance().get_agents();
-	agent_set::const_iterator it_ag;
-
-
-	single_attitudes_map ret;
-	for (it_ag = tot_ags.begin(); it_ag != tot_ags.end(); it_ag++) {
-		if (*it_ag != executor) {
-			ret.insert(std::pair<agent, agents_attitudes>(*it_ag, get_attitude(*it_ag, executor, table, is_fully)));
-		}
-	}
-
-	return ret;
-
-
-}
 
 template <class T>
 single_attitudes_map state<T>::get_F_attitudes(agent executor) const
 {
 
-	return get_attitudes(executor, domain::get_instance().get_attitudes().get_F_attitudes(), true);
+	return get_representation().get_F_attitudes();
 
 }
 
 template <class T>
 single_attitudes_map state<T>::get_P_attitudes(agent executor) const
 {
-	return get_attitudes(executor, domain::get_instance().get_attitudes().get_P_attitudes(), false);
+	return get_representation().get_P_attitudes();
+		//get_attitudes(executor, domain::get_instance().get_attitudes().get_P_attitudes(), false);
 }
 
 

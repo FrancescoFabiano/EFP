@@ -396,6 +396,56 @@ private:
      * @return the \ref pworld resulting from the application of the transition function on "current_pw".*/
     pworld_ptr execute_sensing_announcement_helper_att(const fluent_formula &effects, pstate &ret, const pworld_ptr &current_pw, transition_map &calculated, agent_set &partially_obs_agents, agent_set &oblivious_obs_agents, const single_attitudes_map & fully_att, const single_attitudes_map & part_att, bool previous_entailment) const;
 
+
+    /**Function that add retrieve the fully_obs attitude for \ref m_agent w.r.t \ref executor and the current state
+     *
+     * @param[in] m_agent: the agent of whom we want to discover the attitude.
+     * @param[in] executor: the agent with respects with \ref m_agent has \ref attitude.
+     * @param[in] table: the map where to check the attitude_condition (fully or partially).
+     * @param[in] is_fully: a boolean that says whether is a fully_obs agent or not.
+     * @return: the attitude that the agent has
+     */
+    agents_attitudes get_attitude(agent m_agent, agent executor, const complete_attitudes_map & table, bool is_fully) const;
+
+
+    /**Function that add retrieve the partially_obs attitude w.r.t \ref executor and the current state
+     *
+     * @param[in] executor: the agent executing the action.
+     * @param[in] agent_set: the set of agents whom we need the attitudes.
+     * @param[in] table: the map where to check the attitude_condition (fully or partially).
+     * @param[in] is_fully: a boolean that says whether is a fully_obs agent or not.
+     * @return: the attitudes that the agents have
+     */
+    single_attitudes_map get_attitudes(agent executor, const agent_set & fully_observant, const complete_attitudes_map & table, bool is_fully) const;
+
+    /**Function that add retrieve the fully_obs attitude w.r.t \ref executor and the current state
+     *
+     * @param[in] executor: the agent executing the action.
+     * @param[in] fully_observant: the set of the fully observant agents.
+     * @return: the fully_obs attitudes that the agents have
+     */
+    single_attitudes_map get_F_attitudes(agent executor, const agent_set & fully_observant) const;
+
+    /**Function that add retrieve the partially_obs attitude w.r.t \ref executor and the current state
+     *
+     * @param[in] executor: the agent executing the action.
+     * @param[in] partially_observant: the set of the partially observant agents.
+     * @return: the partially_obs attitudes that the agents have
+     */
+    single_attitudes_map get_P_attitudes(agent executor, const agent_set & partially_observant) const;
+
+
+    pworld_ptr phi_attitudes(agent executor, fluent announced_f, pstate &ret, const pworld_ptr &current_pw, transition_map &calculated, const single_attitudes_map & attitudes) const;
+
+    pworld_ptr K_attitudes(fluent announced_f, pstate &ret, const pworld_ptr &current_pw, transition_map &calculated, const single_attitudes_map & attitudes) const;
+
+    pworld_ptr I_attitudes(fluent announced_f, pstate &ret, const pworld_ptr &current_pw, transition_map &calculated, const single_attitudes_map & attitudes) const;
+
+    pworld_ptr T_attitudes(fluent announced_f, pstate &ret, const pworld_ptr &current_pw, transition_map &calculated, const single_attitudes_map & attitudes, bool is_trusty) const;
+
+    pworld_ptr U_attitudes(fluent announced_f, bool ann_f_truth_value, pstate &ret, const pworld_ptr &current_pw, transition_map &calculated, const single_attitudes_map & attitudes) const;
+
+    pworld_ptr chi_attitudes(fluent announced_f, bool ann_f_truth_value, pstate &ret, const pworld_ptr &current_pw, transition_map &calculated, const single_attitudes_map & attitudes, bool trusty_chi) const;
 public:
 
     /** \brief Setter of the field \ref m_worlds.
@@ -606,6 +656,8 @@ public:
      * @param[in] factor2: the set to remove from \p to_modify.*/
     template <class T>
     void minus_set(std::set<T> & to_modify, const std::set<T> & factor2) const;
+
+
 
 
     /*fluent_formula get_sensing_effects_if_entailed(const effects_map & map, const pworld_ptr & start) const;*/

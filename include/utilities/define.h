@@ -368,7 +368,8 @@ enum agents_attitudes
                  * what the announcement/sensing says.*/
     F_STUBBORN, /**represents the Stubborn agents that will maintain their beliefs on f if they already know it.
                 * If they do not know it they will update their belief.*/
-    attitudesEnd
+    oblivious_att, /**represents the oblivious agents, to simplify the switch in the transition function.*/
+    executor_att /**represents the executing agent, to simplify the switch in the transition function.*/
 };
 
 /****************** Bisimulation *******************/

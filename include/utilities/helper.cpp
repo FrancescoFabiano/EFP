@@ -8,28 +8,41 @@
 
 #include "helper.h"
 #include  <math.h>
+
 fluent helper::negate_fluent(const fluent f)
 {
-    fluent fluent_negated = f;
+	fluent fluent_negated = f;
 
-    if (f[f.size()-1] == 0) {
-        fluent_negated.set(f.size()-1,1);
+	if (f[f.size() - 1] == 0) {
+		fluent_negated.set(f.size() - 1, 1);
 	} else {
-        fluent_negated.set(f.size()-1,0);
+		fluent_negated.set(f.size() - 1, 0);
 	}
-    return fluent_negated;
+	return fluent_negated;
+}
+
+/** \brief Function that returns the positive version of a given \ref fluent.
+ * 
+ * @param[in] to_normalize: the \ref fluent to normalize
+ * 
+ * @return the normalized of fluent.*/
+fluent helper::normalize_fluent(const fluent to_normalize)
+{
+	if (is_negate(to_normalize)) {
+		return negate_fluent(to_normalize);
+	} else {
+		return to_normalize;
+	}
 }
 
 bool helper::is_negate(const fluent f)
 {
-    if (f[f.size()-1] == 0) {
-        return false;
-    } else {
-        return true;
-    }
+	if (f[f.size() - 1] == 0) {
+		return false;
+	} else {
+		return true;
+	}
 }
-
-
 
 bool helper::is_consistent(const fluent_set &fl1, const fluent_set& fl2)
 {
@@ -145,22 +158,27 @@ bool helper::check_Bff_notBff(const belief_formula& to_check_1, const belief_for
 	return false;
 }
 
-fluent_set helper::ontic_exec(const fluent_set& effect, const fluent_set& world_description)
-{ ///\todo The return should be const fluent_set & for efficency? Or move?
-	fluent_set ret = world_description;
-	fluent_set::const_iterator it_fs;
-	for (it_fs = effect.begin(); it_fs != effect.end(); it_fs++) {
-		ret.erase(negate_fluent(*it_fs));
-		ret.insert(*it_fs);
-	}
-	return ret;
+void helper::apply_effect(fluent effect, fluent_set& world_description)
+{
+
+	world_description.erase(negate_fluent(effect));
+	world_description.insert(effect);
+
 }
 
-fluent_set helper::ontic_exec(const fluent_formula& effect, const fluent_set& world_description)
-{ ///\todo The return should be const fluent_set & for efficency? Or move?
+void helper::apply_effect(const fluent_set& effect, fluent_set& world_description)
+{
+	fluent_set::const_iterator it_fs;
+	for (it_fs = effect.begin(); it_fs != effect.end(); it_fs++) {
+		apply_effect(*it_fs, world_description);
+	}
+}
+
+void helper::apply_effect(const fluent_formula& effect, fluent_set& world_description)
+{
 	//Because of non_determinism
 	if (effect.size() != 1) {
-		return ontic_exec(*(effect.begin()), world_description);
+		return apply_effect(*(effect.begin()), world_description);
 
 	} else {
 		if (effect.size() > 1) {
@@ -172,8 +190,9 @@ fluent_set helper::ontic_exec(const fluent_formula& effect, const fluent_set& wo
 	}
 }
 
-int helper::lenght_to_power_two(int length){
-    return ceil(log2(length));
+int helper::lenght_to_power_two(int length)
+{
+	return ceil(log2(length));
 }
 
 /* Using the std::set == operator
