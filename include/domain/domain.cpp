@@ -19,7 +19,7 @@ domain& domain::get_instance()
 	return instance;
 }
 
-void domain::set_domain(std::string name, bool debug, state_type stype, bool k_opt, boost::shared_ptr<reader> reader, domain_restriction ini_res, domain_restriction goal_res, bool is_global_obsv, action_check act_check, bool check_visited, bis_type bisimulation)
+void domain::set_domain(std::string name, bool debug, state_type stype, bool k_opt, boost::shared_ptr<reader> reader, domain_restriction ini_res, domain_restriction goal_res, bool is_global_obsv, action_check act_check, bool check_visited, bis_type bisimulation, bool has_attitudes)
 {
 	m_name = name;
 	m_debug = debug;
@@ -32,6 +32,7 @@ void domain::set_domain(std::string name, bool debug, state_type stype, bool k_o
 	m_act_check = act_check;
 	m_check_visited = check_visited;
 	m_bisimulation = bisimulation;
+	m_has_attitudes = has_attitudes;
 }
 
 const state_type & domain::get_stype()
@@ -93,6 +94,11 @@ bool domain::get_debug()
 bool domain::check_visited()
 {
 	return m_check_visited;
+}
+
+bool domain::has_attitudes()
+{
+	return m_has_attitudes;
 }
 
 std::string domain::get_name()

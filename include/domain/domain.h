@@ -79,6 +79,8 @@ private:
     bool m_check_visited;
     /** \brief If the \ref states are reduced in size with bisimulation and with which algorithm*/
     bis_type m_bisimulation;
+    /** \brief If we are considering the updatede semantics with attitudes or not.*/
+    bool m_has_attitudes;
 
     /** \brief Function that from the file stores the \ref agent information.*/
     void build_agents();
@@ -133,8 +135,9 @@ public:
      * @param[in] is_global_obsv: the \ref domain_restriction to assign to \ref m_is_global_obsv.
      * @param[in] act_check: the \ref action_check to assign to \ref m_act_check.
      * @param[in] check_visited: If the \ref search process should check for already visited_states.
-     * @param[in] bisimulation: If the \ref states are reduced in size with bisimulation.*/
-    void set_domain(std::string name, bool debug, state_type stype, bool k_opt, boost::shared_ptr<reader> reader, domain_restriction ini_res, domain_restriction goal_res, bool is_global_obsv, action_check act_check, bool check_visited, bis_type bisimulation);
+     * @param[in] bisimulation: If the \ref states are reduced in size with bisimulation.
+     * @param[in] has_attitudes: True if we are considering the updated semantics with attitudes.*/
+    void set_domain(std::string name, bool debug, state_type stype, bool k_opt, boost::shared_ptr<reader> reader, domain_restriction ini_res, domain_restriction goal_res, bool is_global_obsv, action_check act_check, bool check_visited, bis_type bisimulation, bool has_attitudes);
 
     /** \brief Function that builds all the domain information.
      *
@@ -191,6 +194,11 @@ public:
      *
      * @return the field \ref m_check_visited.*/
     bool check_visited();
+
+    /** \brief Getter of the field \ref m_has_attitudes.
+     *
+     * @return the field \ref m_has_attitudes.*/
+    bool has_attitudes();
     /** \brief Getter of the field \ref m_name.
      *
      * @return the field \ref m_name.*/

@@ -372,6 +372,37 @@ enum agents_attitudes
     executor_att /**represents the executing agent, to simplify the switch in the transition function.*/
 };
 
+enum sub_functionIndex
+{
+    PHI_func,
+    K_func,
+    I_func,
+    T_func,
+    M_func,
+    TRUE_U_func,
+    FALSE_U_func,
+    S_func,
+    TRUE_CHI_func,
+    FALSE_CHI_func
+};
+
+struct comp
+{
+
+    template<typename T>
+    bool operator()(const T &l, const T &r) const
+    {
+        if (l.first == r.first)
+            return l.second > r.second;
+
+        return l.first < r.first;
+    }
+};
+
+typedef std::map<std::pair<pworld_ptr, sub_functionIndex>, pworld_ptr, comp> transition_map_att; /**< \brief A map that keeps track of the results of the transition function when attitudes are involved.
+                                                          *
+                                                          * @see pworld and pstate.*/
+
 /****************** Bisimulation *******************/
 
 class bisimulation;

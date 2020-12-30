@@ -435,17 +435,17 @@ private:
     single_attitudes_map get_P_attitudes(agent executor, const agent_set & partially_observant) const;
 
 
-    pworld_ptr phi_attitudes(agent executor, fluent announced_f, pstate &ret, const pworld_ptr &current_pw, transition_map &calculated, const single_attitudes_map & attitudes) const;
+    pworld_ptr phi_attitudes(agent executor, fluent announced_f, pstate &ret, const pworld_ptr &current_pw, transition_map_att &calculated, const single_attitudes_map & attitudes) const;
 
-    pworld_ptr K_attitudes(fluent announced_f, pstate &ret, const pworld_ptr &current_pw, transition_map &calculated, const single_attitudes_map & attitudes) const;
+    pworld_ptr K_attitudes(fluent announced_f, pstate &ret, const pworld_ptr &current_pw, transition_map_att &calculated, const single_attitudes_map & attitudes) const;
 
-    pworld_ptr I_attitudes(fluent announced_f, pstate &ret, const pworld_ptr &current_pw, transition_map &calculated, const single_attitudes_map & attitudes) const;
+    pworld_ptr I_attitudes(fluent announced_f, pstate &ret, const pworld_ptr &current_pw, transition_map_att &calculated, const single_attitudes_map & attitudes) const;
 
-    pworld_ptr T_attitudes(fluent announced_f, pstate &ret, const pworld_ptr &current_pw, transition_map &calculated, const single_attitudes_map & attitudes, bool is_trusty) const;
+    pworld_ptr T_attitudes(fluent announced_f, pstate &ret, const pworld_ptr &current_pw, transition_map_att &calculated, const single_attitudes_map & attitudes, bool is_trusty) const;
 
-    pworld_ptr U_attitudes(fluent announced_f, bool ann_f_truth_value, pstate &ret, const pworld_ptr &current_pw, transition_map &calculated, const single_attitudes_map & attitudes) const;
+    pworld_ptr U_attitudes(fluent announced_f, bool ann_f_truth_value, pstate &ret, const pworld_ptr &current_pw, transition_map_att &calculated, const single_attitudes_map & attitudes) const;
 
-    pworld_ptr chi_attitudes(fluent announced_f, bool ann_f_truth_value, pstate &ret, const pworld_ptr &current_pw, transition_map &calculated, const single_attitudes_map & attitudes, bool trusty_chi) const;
+    pworld_ptr chi_attitudes(fluent announced_f, bool ann_f_truth_value, pstate &ret, const pworld_ptr &current_pw, transition_map_att &calculated, const single_attitudes_map & attitudes, bool trusty_chi) const;
 public:
 
     /** \brief Setter of the field \ref m_worlds.
