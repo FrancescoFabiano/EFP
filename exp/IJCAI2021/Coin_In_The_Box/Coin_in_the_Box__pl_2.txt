@@ -43,7 +43,8 @@ c observes open_c;
 
 
 executable peek_a if B(a,opened), B(a,looking_a), looking_a, opened;
-peek_a determines tail;
+peek_a determines tail if tail;
+peek_a determines -tail if -tail;
 b observes peek_a if looking_b;
 c observes peek_a if looking_c;
 a observes peek_a;

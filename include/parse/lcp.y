@@ -522,23 +522,24 @@ EXECUTABLE action if_part_bf SEMICOLON
 
 /* determines condition */
 determine:
-action DETERMINE fluent_det_list SEMICOLON
+action DETERMINE literal_list if_part_bf SEMICOLON
 {
   $$ = new proposition;
   $$->set_type(SENSING);
   $$->set_action_name(*$1);
   //@TODO:Effect_Conversion | previously   $$->m_action_effect = *$3;
   $$->add_action_effect(*$3);
+  $$->set_executability_conditions(*$4);
 };
 
 /* announcement condition */
 announcement:
-action ANNOUNCES formula if_part_bf SEMICOLON
+action ANNOUNCES literal_list if_part_bf SEMICOLON
 {
   $$ = new proposition;
   $$->set_type(ANNOUNCEMENT);
   $$->set_action_name(*$1);
-  $$->set_action_effect(*$3);
+  $$->add_action_effect(*$3);
   $$->set_executability_conditions(*$4);
 
 };
