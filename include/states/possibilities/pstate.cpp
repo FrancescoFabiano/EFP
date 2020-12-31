@@ -1386,7 +1386,7 @@ pworld_ptr pstate::phi_attitudes(agent executor, fluent announced_f, pstate &ret
 	//Phi does not change the value of the fluent (In theory only pointed world)
 	pworld_ptr new_pw = ret.add_rep_world(pworld(current_pw.get_fluent_set()), current_pw.get_repetition()); // We add the corresponding pworld in ret
 	calculated.insert(transition_map_att::value_type(std::make_pair(current_pw, PHI_func), new_pw)); // And we update the calculated map
-
+	//printer::get_instance().print_map_att(calculated);
 
 	//We use this for the lies
 	single_attitudes_map modified_diagonal_table = attitudes;
@@ -1395,15 +1395,15 @@ pworld_ptr pstate::phi_attitudes(agent executor, fluent announced_f, pstate &ret
 	auto it_atti = attitudes.begin();
 
 	/*\************TO SIMPLIFY SET THE ANNOUNCER ATTITUDES DIRECTLY WHEN THE SUBFUNCTIONS (BEFORE CHI) ARE CALLED********************/
-	//std::cerr << "DEBUG: Reached PHI 2\n";
+	////std::cerr << "DEBUG: Reached PHI 2\n";
 
 
 	for (; it_atti != attitudes.end(); it_atti++) {
-		//std::cerr << "DEBUG: Reached PHI 3\n";
+		////std::cerr << "DEBUG: Reached PHI 3\n";
 
 		agent ag = it_atti->first;
-		std::cerr << "DEBUG: Reached PHI with ag: " << domain::get_instance().get_grounder().deground_agent(ag);
-		std::cerr << " and world " << current_pw.get_id() << "\n";
+		//std::cerr << "DEBUG: Reached PHI with ag: " << domain::get_instance().get_grounder().deground_agent(ag);
+		//std::cerr << " and world " << current_pw.get_id() << "\n";
 
 		switch ( attitudes.find(ag)->second ) {
 
@@ -1422,9 +1422,9 @@ pworld_ptr pstate::phi_attitudes(agent executor, fluent announced_f, pstate &ret
 		}
 		case F_TRUSTY:
 		{
-			//std::cerr << "DEBUG: Reached PHI 5 with ag: " << domain::get_instance().get_grounder().deground_agent(ag) << "\n";
+			////std::cerr << "DEBUG: Reached PHI 5 with ag: " << domain::get_instance().get_grounder().deground_agent(ag) << "\n";
 			modified_diagonal_table.find(executor)->second = executor_att;
-			//std::cerr << "DEBUG: Reached PHI 6 with ag: " << domain::get_instance().get_grounder().deground_agent(ag) << " and executor: " << domain::get_instance().get_grounder().deground_agent(executor) << "\n";
+			////std::cerr << "DEBUG: Reached PHI 6 with ag: " << domain::get_instance().get_grounder().deground_agent(ag) << " and executor: " << domain::get_instance().get_grounder().deground_agent(executor) << "\n";
 			T_attitudes(announced_f, ret, current_pw, calculated, modified_diagonal_table, true);
 			break;
 		}
@@ -1484,10 +1484,11 @@ pworld_ptr pstate::K_attitudes(fluent announced_f, pstate &ret, const pworld_ptr
 
 	if (it_pwtm != get_beliefs().end()) {
 		auto it_pwm = it_pwtm->second.begin();
-		auto it_pws = it_pwm->second.begin();
 
 		for (; it_pwm != it_pwtm->second.end(); it_pwm++) {
 			agent ag = it_pwm->first;
+			auto it_pws = it_pwm->second.begin();
+
 
 			curr_attitude = attitudes.find(ag)->second;
 
@@ -1594,14 +1595,15 @@ pworld_ptr pstate::I_attitudes(fluent announced_f, pstate &ret, const pworld_ptr
 	agents_attitudes curr_attitude;
 	transition_map_att::const_iterator calculated_pworld;
 
-		auto it_pwtm = get_beliefs().find(current_pw);
+	auto it_pwtm = get_beliefs().find(current_pw);
 
 	if (it_pwtm != get_beliefs().end()) {
 		auto it_pwm = it_pwtm->second.begin();
-		auto it_pws = it_pwm->second.begin();
 
 		for (; it_pwm != it_pwtm->second.end(); it_pwm++) {
 			agent ag = it_pwm->first;
+			auto it_pws = it_pwm->second.begin();
+
 			curr_attitude = attitudes.find(ag)->second;
 			switch ( curr_attitude ) {
 			case P_KEEPER:
@@ -1707,7 +1709,7 @@ pworld_ptr pstate::I_attitudes(fluent announced_f, pstate &ret, const pworld_ptr
 pworld_ptr pstate::T_attitudes(fluent announced_f, pstate &ret, const pworld_ptr &current_pw, transition_map_att &calculated, const single_attitudes_map & attitudes, bool is_trusty) const
 {
 
-	//	std::cerr << "\nDEBUG: Reached T 1\n";
+	//std::cerr << "\nDEBUG: Reached T 1\n";
 
 
 	//K does not change the value of the fluent (In theory only pointed world)
@@ -1719,19 +1721,20 @@ pworld_ptr pstate::T_attitudes(fluent announced_f, pstate &ret, const pworld_ptr
 	bool f_truth_value = !(helper::is_negate(announced_f));
 	announced_f = helper::normalize_fluent(announced_f);
 
-	//std::cerr << "DEBUG: Reached T 2\n";
+	////std::cerr << "DEBUG: Reached T 2\n";
 
 	pworld_ptr to_add;
-		sub_functionIndex sf_i;
+	sub_functionIndex sf_i;
 
 	transition_map_att::const_iterator calculated_pworld;
 
 	if (it_pwtm != get_beliefs().end()) {
 		auto it_pwm = it_pwtm->second.begin();
-		auto it_pws = it_pwm->second.begin();
 
 		for (; it_pwm != it_pwtm->second.end(); it_pwm++) {
 			agent ag = it_pwm->first;
+			auto it_pws = it_pwm->second.begin();
+
 			agents_attitudes curr_attitude = attitudes.find(ag)->second;
 
 			//We use an if then else to reuse this function for both trusty and mistrusty
@@ -1825,7 +1828,7 @@ pworld_ptr pstate::T_attitudes(fluent announced_f, pstate &ret, const pworld_ptr
 pworld_ptr pstate::U_attitudes(fluent announced_f, bool f_truth_value, pstate &ret, const pworld_ptr &current_pw, transition_map_att &calculated, const single_attitudes_map & attitudes) const
 {
 	//K does not change the value of the fluent (In theory only pointed world)
-	
+
 	sub_functionIndex sf_i;
 	if (f_truth_value) {
 		sf_i = TRUE_U_func;
@@ -1833,7 +1836,7 @@ pworld_ptr pstate::U_attitudes(fluent announced_f, bool f_truth_value, pstate &r
 		sf_i = FALSE_U_func;
 
 	}
-	
+
 	pworld_ptr new_pw = ret.add_rep_world(pworld(current_pw.get_fluent_set()), current_pw.get_repetition()); // We add the corresponding pworld in ret
 	calculated.insert(transition_map_att::value_type(std::make_pair(current_pw, sf_i), new_pw)); // And we update the calculated map
 
@@ -1845,10 +1848,11 @@ pworld_ptr pstate::U_attitudes(fluent announced_f, bool f_truth_value, pstate &r
 
 	if (it_pwtm != get_beliefs().end()) {
 		auto it_pwm = it_pwtm->second.begin();
-		auto it_pws = it_pwm->second.begin();
 
 		for (; it_pwm != it_pwtm->second.end(); it_pwm++) {
 			agent ag = it_pwm->first;
+			auto it_pws = it_pwm->second.begin();
+
 			switch ( attitudes.find(ag) -> second ) {
 			case P_KEEPER:
 			{
@@ -1955,7 +1959,7 @@ pworld_ptr pstate::U_attitudes(fluent announced_f, bool f_truth_value, pstate &r
 
 pworld_ptr pstate::chi_attitudes(fluent announced_f, bool f_truth_value, pstate &ret, const pworld_ptr &current_pw, transition_map_att &calculated, const single_attitudes_map & attitudes, bool is_trusty) const
 {
-	std::cerr << "\nDEBUG: Reached CHI 1\n";
+	//std::cerr << "\nDEBUG: Reached CHI 1\n";
 
 	//Chi changes the value of the fluent
 	fluent_set updated_pwfs = current_pw.get_fluent_set();
@@ -1975,6 +1979,7 @@ pworld_ptr pstate::chi_attitudes(fluent announced_f, bool f_truth_value, pstate 
 	pworld_ptr new_pw = ret.add_rep_world(pworld(updated_pwfs), current_pw.get_repetition()); // We add the corresponding pworld in ret
 	calculated.insert(transition_map_att::value_type(std::make_pair(current_pw, sf_i), new_pw)); // And we update the calculated map
 
+
 	auto it_pwtm = get_beliefs().find(current_pw);
 
 	pworld_ptr to_add;
@@ -1982,11 +1987,15 @@ pworld_ptr pstate::chi_attitudes(fluent announced_f, bool f_truth_value, pstate 
 
 	if (it_pwtm != get_beliefs().end()) {
 		auto it_pwm = it_pwtm->second.begin();
-		auto it_pws = it_pwm->second.begin();
 
 		for (; it_pwm != it_pwtm->second.end(); it_pwm++) {
+
+			auto it_pws = it_pwm->second.begin();
+
 			agent ag = it_pwm->first;
 			agents_attitudes curr_attitude = attitudes.find(ag)->second;
+			////std::cerr << "DEBUG: Reached CHI 2 with ag: " << domain::get_instance().get_grounder().deground_agent(ag) << "\n";
+
 
 			//We use an if then else to reuse this function for both trusty and mistrusty			
 			if (curr_attitude == P_KEEPER) {
@@ -2000,28 +2009,35 @@ pworld_ptr pstate::chi_attitudes(fluent announced_f, bool f_truth_value, pstate 
 					I_attitudes(announced_f, ret, current_pw, calculated, attitudes);
 				}
 			} else if (curr_attitude == F_TRUSTY || (curr_attitude == executor_att && is_trusty)) {
-				std::cerr << "DEBUG: Reached CHI 6 with ag: " << domain::get_instance().get_grounder().deground_agent(ag) << "\n";
-
+				//std::cerr << "DEBUG: Reached CHI 3 with ag: " << domain::get_instance().get_grounder().deground_agent(ag) << "\n";
 				for (; it_pws != it_pwm->second.end(); it_pws++) {
+					//std::cerr << "DEBUG: Reached CHI 4 with ag: " << domain::get_instance().get_grounder().deground_agent(ag) << "\n";
 					if (f_truth_value) {
 						sf_i = TRUE_CHI_func;
 					} else {
 						sf_i = FALSE_CHI_func;
 					}
+					//					//std::cerr << "DEBUG: Reached CHI 6 with ag: " << domain::get_instance().get_grounder().deground_agent(ag) << "\n";
 					calculated_pworld = calculated.find(std::make_pair(*it_pws, sf_i));
 					if (calculated_pworld != calculated.end()) {
+						//std::cerr << "DEBUG: Reached CHI 4.1 with ag: " << domain::get_instance().get_grounder().deground_agent(ag) << "\n";
 						to_add = calculated_pworld->second;
+						//std::cerr << "DEBUG: Reached CHI 5.1 with ag: " << domain::get_instance().get_grounder().deground_agent(ag) << "\n";
 					} else {
 						if (is_trusty) {
+							//std::cerr << "DEBUG: Reached CHI 4.2 with ag: " << domain::get_instance().get_grounder().deground_agent(ag) << "\n";
 							to_add = chi_attitudes(announced_f, f_truth_value, ret, *it_pws, calculated, attitudes, true);
+							//std::cerr << "DEBUG: Reached CHI 5.2 with ag: " << domain::get_instance().get_grounder().deground_agent(ag) << "\n";
 						} else {
+							//std::cerr << "DEBUG: Reached CHI 4.3 with ag: " << domain::get_instance().get_grounder().deground_agent(ag) << "\n";
 							to_add = chi_attitudes(announced_f, !f_truth_value, ret, *it_pws, calculated, attitudes, true);
+							//std::cerr << "DEBUG: Reached CHI 5.3 with ag: " << domain::get_instance().get_grounder().deground_agent(ag) << "\n";
 						}
 					}
 					ret.add_edge(new_pw, to_add, ag);
 				}
 			} else if (curr_attitude == F_MISTRUSTY || (curr_attitude == executor_att && !is_trusty)) {
-				std::cerr << "DEBUG: Reached CHI 7 with ag: " << domain::get_instance().get_grounder().deground_agent(ag) << "\n";
+				//std::cerr << "DEBUG: Reached CHI 7 with ag: " << domain::get_instance().get_grounder().deground_agent(ag) << "\n";
 
 				for (; it_pws != it_pwm->second.end(); it_pws++) {
 					if (f_truth_value) {
@@ -2065,7 +2081,7 @@ pworld_ptr pstate::chi_attitudes(fluent announced_f, bool f_truth_value, pstate 
 				exit(1);
 			}/* Oblivious Agents.*/
 			else {
-				std::cerr << "DEBUG: Reached CHI 9 with ag: " << domain::get_instance().get_grounder().deground_agent(ag) << "\n";
+				//std::cerr << "DEBUG: Reached CHI 9 with ag: " << domain::get_instance().get_grounder().deground_agent(ag) << "\n";
 
 				for (; it_pws != it_pwm->second.end(); it_pws++) {
 					// If we are dealing with an OBLIVIOUS agent we maintain its beliefs as they were
@@ -2084,7 +2100,7 @@ pworld_ptr pstate::chi_attitudes(fluent announced_f, bool f_truth_value, pstate 
 
 pstate pstate::execute_sensing_att(const action & act) const
 {
-	//std::cerr << "\nDEBUG: Reached Sensing 1\n";
+	////std::cerr << "\nDEBUG: Reached Sensing 1\n";
 	pstate ret;
 
 	//This finds all the worlds that are reachable from the initial state following
@@ -2103,7 +2119,7 @@ pstate pstate::execute_sensing_att(const action & act) const
 	auto it_ags = fully_obs_agents.begin();
 	//We set all the fully observant to be trusty
 	for (; it_ags != fully_obs_agents.end(); it_ags++) {
-		//	std::cerr << "DEBUG: Reached Sensing F\n";
+		//	//std::cerr << "DEBUG: Reached Sensing F\n";
 
 		attitudes.insert(std::make_pair(*it_ags, F_TRUSTY));
 	}
@@ -2112,7 +2128,7 @@ pstate pstate::execute_sensing_att(const action & act) const
 	//We set all the partially observant to be keeper
 	it_ags = partially_obs_agents.begin();
 	for (; it_ags != partially_obs_agents.end(); it_ags++) {
-		//	std::cerr << "DEBUG: Reached Sensing P\n";
+		//	//std::cerr << "DEBUG: Reached Sensing P\n";
 
 		attitudes.insert(std::make_pair(*it_ags, P_KEEPER));
 	}
@@ -2121,7 +2137,7 @@ pstate pstate::execute_sensing_att(const action & act) const
 		ret.set_max_depth(get_max_depth() + 1);
 		auto it_obl = oblivious_obs_agents.begin();
 		for (; it_obl != oblivious_obs_agents.end(); it_obl++) {
-			//		std::cerr << "DEBUG: Reached Sensing O\n";
+			//		//std::cerr << "DEBUG: Reached Sensing O\n";
 
 			//We use "oblivious_att" to encode the oblivious agents
 			attitudes.insert(std::make_pair(*it_obl, oblivious_att));
@@ -2133,18 +2149,18 @@ pstate pstate::execute_sensing_att(const action & act) const
 
 	fluent_formula effects = get_effects_if_entailed(act.get_effects(), get_pointed());
 
-	//std::cerr << "DEBUG: Reached Sensing 2\n";
+	////std::cerr << "DEBUG: Reached Sensing 2\n";
 
 
 	if (effects.size() == 1) {
 		if (effects.begin()->size() == 1) {
-			//	std::cerr << "DEBUG: Reached Sensing 3\n";
+			//	//std::cerr << "DEBUG: Reached Sensing 3\n";
 
 			fluent single_eff = *(effects.begin()->begin());
-			//	std::cerr << "DEBUG: Reached Sensing 4\n";
+			//	//std::cerr << "DEBUG: Reached Sensing 4\n";
 
 			pworld_ptr new_pointed = phi_attitudes(*(fully_obs_agents.begin()), single_eff, ret, get_pointed(), calculated, attitudes);
-			//	std::cerr << "DEBUG: Reached Sensing 5\n";
+			//	//std::cerr << "DEBUG: Reached Sensing 5\n";
 
 			ret.set_pointed(new_pointed); // Updating the pointed world
 
@@ -2408,3 +2424,5 @@ void pstate::debug_print(pstate tmp)
 	std::cerr << "\nYou are playing with debug only options-2.\n";
 	exit(1);
 }
+
+

@@ -25,7 +25,7 @@ void printer::set_grounder(const grounder & gr)
 	setted_grounder = true;
 }
 
-void printer::print_list(const string_set& to_print)
+void printer::print_list(const string_set& to_print) const
 {
 	bool first_print = true;
 
@@ -40,7 +40,7 @@ void printer::print_list(const string_set& to_print)
 	}
 }
 
-void printer::print_list(const string_set_set& to_print)
+void printer::print_list(const string_set_set& to_print) const
 {
 	bool first_print = true;
 	string_set_set::const_iterator it_sll;
@@ -56,7 +56,7 @@ void printer::print_list(const string_set_set& to_print)
 	}
 }
 
-void printer::print_list(const fluent_set& to_print)
+void printer::print_list(const fluent_set& to_print) const
 {
 	if (setted_grounder) {
 		print_list(m_grounder.deground_fluent(to_print));
@@ -75,7 +75,7 @@ void printer::print_list(const fluent_set& to_print)
 	}
 }
 
-void printer::print_list(const fluent_formula& to_print)
+void printer::print_list(const fluent_formula& to_print) const
 {
 	if (setted_grounder) {
 		print_list(m_grounder.deground_fluent(to_print));
@@ -95,7 +95,7 @@ void printer::print_list(const fluent_formula& to_print)
 	}
 }
 
-void printer::print_list(const formula_list& to_print)
+void printer::print_list(const formula_list& to_print) const
 {
 	bool first_print = true;
 	formula_list::const_iterator it_sll;
@@ -125,7 +125,7 @@ void printer::print_list(const formula_list& to_print)
 	}
 }*/
 
-void printer::print_list(const pworld_ptr_set& to_print)
+void printer::print_list(const pworld_ptr_set& to_print) const
 {
 	bool first_print = true;
 	pworld_ptr_set::const_iterator it_sll;
@@ -140,7 +140,7 @@ void printer::print_list(const pworld_ptr_set& to_print)
 	}
 }
 
-void printer::print_list(const action_id_list& to_print)
+void printer::print_list(const action_id_list& to_print) const
 {
 	bool first_print = true;
 	action_id_list::const_iterator it_sll;
@@ -160,7 +160,7 @@ void printer::print_list(const action_id_list& to_print)
 	}
 }
 
-void printer::print_list_ag(const agent_set& to_print)
+void printer::print_list_ag(const agent_set& to_print) const
 {
 	bool first_print = true;
 	agent_set::const_iterator it_sll;
@@ -178,4 +178,29 @@ void printer::print_list_ag(const agent_set& to_print)
 			std::cout << *it_sll;
 		}
 	}
+}
+
+void printer::print_map_att(const transition_map_att& to_print) const
+{
+
+	std::cout << "\n*******Printing the attitudes transition map*******\n";
+	auto it_mapatt = to_print.begin();
+	//Iterate on the \p to_print and print its content using ::to_print(const string_set&) seprated by a OR to represent a DNF.
+
+	for (; it_mapatt != to_print.end(); it_mapatt++) {
+		auto pair = it_mapatt->first;
+		pworld_ptr ptr1 = pair.first;
+		pworld_id id1 =  ptr1.get_id();
+		
+		pworld_ptr ptr2 = it_mapatt->second;
+		pworld_id id2 =  ptr2.get_id();
+		
+		std::cout << "\t The world: " << id1;
+		std::cout << " updated following " << pair.second;
+		std::cout << " results in the world " << id2;
+		std::cout << std::endl;
+	}
+
+	std::cout << "*********************DONE*********************\n\n";
+
 }
