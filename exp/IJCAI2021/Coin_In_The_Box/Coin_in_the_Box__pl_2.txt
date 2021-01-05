@@ -14,11 +14,11 @@ has_attitude a wrt a f_trusty;
 has_attitude a wrt b f_trusty;
 has_attitude a wrt c f_trusty;
 
-has_attitude b wrt a f_untrusty;
+has_attitude b wrt a f_trusty;
 has_attitude b wrt b f_mistrusty;
 has_attitude b wrt c f_trusty;
 
-has_attitude c wrt a f_trusty;
+has_attitude c wrt a f_mistrusty;
 has_attitude c wrt b f_mistrusty;
 has_attitude c wrt c f_trusty;
 
@@ -128,7 +128,8 @@ b observes distract_c_b;
 
 
 executable shout_tail_a if B(a,tail), tail;
-shout_tail_a announces tail;
+shout_tail_a announces tail if tail;
+shout_tail_a announces -tail if -tail;
 a executes shout_tail_a;
 a observes shout_tail_a;
 b observes shout_tail_a;
@@ -155,13 +156,13 @@ initially C([a,b,c],has_key_a);
 initially C([a,b,c],-has_key_b);
 initially C([a,b,c],-has_key_c);
 initially C([a,b,c],opened);
-%initially C([a,b,c],-B(a,tail) , -B(a,(-tail));
+initially C([a,b,c],tail);
 %initially C([a,b,c],-B(b,tail) , -B(b,(-tail));
 %initially C([a,b,c],-B(c,tail) , -B(c,(-tail));
 initially C([a,b,c], looking_a);
-initially C([a,b,c], -looking_b);
-initially C([a,b,c], -looking_c);
-initially tail, has_key_a, -has_key_b, -has_key_c, opened, looking_a, -looking_b, -looking_c;
+initially C([a,b,c], looking_b);
+initially C([a,b,c], looking_c);
+initially tail, has_key_a, -has_key_b, -has_key_c, opened, looking_a, looking_b, looking_c;
 %initially C([a,b,c],B(a,tail));
 
 % 2 actions

@@ -273,7 +273,7 @@ pworld_id pworld_ptr::get_id() const
 	    pworld_id id = (get_ptr()->get_id());
 
 	    //moltiplico * 10 id + get_repetion() TODO test con shift 
-        return boost::hash_value((10*id)+get_repetition());
+        return boost::hash_value((1000*id)+get_repetition());
 	}
 	std::cerr << "\nError in creating a pworld_ptr\n";
 	exit(1);
@@ -282,6 +282,11 @@ pworld_id pworld_ptr::get_id() const
 void pworld_ptr::set_repetition(unsigned short to_set)
 {
 	m_repetition = to_set;
+}
+
+void pworld_ptr::increase_repetition(unsigned short to_increase)
+{
+	m_repetition = m_repetition + to_increase;
 }
 
 unsigned short pworld_ptr::get_repetition() const
