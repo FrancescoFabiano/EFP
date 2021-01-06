@@ -445,7 +445,7 @@ private:
 
     //   pworld_ptr U_attitudes(fluent announced_f, bool ann_f_truth_value, pstate &ret, const pworld_ptr &current_pw, transition_map_att &calculated, const single_attitudes_map & attitudes) const;
 
-    pworld_ptr chi_attitudes(fluent announced_f, bool ann_f_truth_value, pstate &ret, const pworld_ptr &current_pw, transition_map_att &calculated, const single_attitudes_map & attitudes, bool trusty_chi, unsigned short update_rep = 0, agent executor = agent()) const;
+    pworld_ptr chi_attitudes(fluent announced_f, bool ann_f_truth_value, pstate &ret, const pworld_ptr &current_pw, transition_map_att &calculated, const single_attitudes_map & attitudes, bool trusty_chi, unsigned short update_rep = 0, agent executor = agent(), bool different_trust = false) const;
 public:
 
     /** \brief Setter of the field \ref m_worlds.

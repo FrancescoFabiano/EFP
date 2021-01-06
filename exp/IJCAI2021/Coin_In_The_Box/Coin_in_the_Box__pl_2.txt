@@ -46,7 +46,7 @@ executable peek_a if B(a,opened), B(a,looking_a), looking_a, opened;
 peek_a determines tail if tail;
 peek_a determines -tail if -tail;
 b observes peek_a if looking_b;
-c observes peek_a if looking_c;
+%c observes peek_a if looking_c;
 a observes peek_a;
 
 executable peek_b if B(b,opened), B(b,looking_b), looking_b, opened;
@@ -156,7 +156,7 @@ initially C([a,b,c],has_key_a);
 initially C([a,b,c],-has_key_b);
 initially C([a,b,c],-has_key_c);
 initially C([a,b,c],opened);
-initially C([a,b,c],tail);
+%initially C([a,b,c],tail);
 %initially C([a,b,c],-B(b,tail) , -B(b,(-tail));
 %initially C([a,b,c],-B(c,tail) , -B(c,(-tail));
 initially C([a,b,c], looking_a);
