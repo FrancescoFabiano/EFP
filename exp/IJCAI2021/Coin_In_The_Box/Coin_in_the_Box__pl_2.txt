@@ -16,9 +16,11 @@ has_attitude b wrt a f_trusty;
 has_attitude b wrt b f_mistrusty;
 has_attitude b wrt c f_trusty;
 
-has_attitude c wrt a f_mistrusty;
+has_attitude c wrt a f_untrusty;
 has_attitude c wrt b f_mistrusty;
 has_attitude c wrt c f_trusty;
+has_attitude c wrt a p_insecure;
+
 
 executable open_a;
 open_a causes opened;
@@ -31,7 +33,7 @@ executable peek_a if B(a,opened), B(a,looking_a), looking_a, opened;
 peek_a determines tail if tail;
 peek_a determines -tail if -tail;
 b observes peek_a if looking_b;
-%c observes peek_a if looking_c;
+c observes peek_a if looking_c;
 a observes peek_a;
 
 
@@ -39,9 +41,9 @@ a observes peek_a;
 executable shout_tail_a;
 shout_tail_a announces tail if tail;
 shout_tail_a announces -tail if -tail;
-c executes shout_tail_a;
+a executes shout_tail_a;
 a observes shout_tail_a;
-%b observes shout_tail_a;
+b observes shout_tail_a;
 c observes shout_tail_a;
 
 
@@ -53,6 +55,7 @@ initially C([a,b,c],opened);
 %initially C([a,b,c],tail);
 %initially C([a,b,c],-B(b,tail) , -B(b,(-tail));
 %initially C([a,b,c],-B(c,tail) , -B(c,(-tail));
+initially C([a,b,c],B(a,tail) | B(a,(-tail)));
 initially C([a,b,c], looking_a);
 initially C([a,b,c], looking_b);
 initially C([a,b,c], looking_c);
