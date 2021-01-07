@@ -256,10 +256,10 @@ public:
      * @param[in] repetition: the value to give to \ref m_repetition.*/
     void set_repetition(unsigned short repetition);
 
-    /** \brief Function that increases the value for the field \ref m_repetition.
+    /* \brief Function that increases the value for the field \ref m_repetition.
      * 
      * @param[in] increase: the value to add to \ref m_repetition.*/
-    void increase_repetition(unsigned short increase);
+    //void increase_repetition(unsigned short increase);
 
     /** \brief Getter of the field \ref m_repetition.
      * 
