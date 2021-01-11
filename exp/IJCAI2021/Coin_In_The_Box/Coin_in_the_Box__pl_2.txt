@@ -8,7 +8,7 @@ action shout_tail_a;
 
 agent a,b,c;
 
-has_attitude a wrt a f_trusty;
+has_attitude a wrt a f_untrusty;
 has_attitude a wrt b f_trusty;
 has_attitude a wrt c f_trusty;
 
@@ -39,8 +39,8 @@ a observes peek_a;
 
 
 executable shout_tail_a;
-shout_tail_a announces tail if tail;
-shout_tail_a announces -tail if -tail;
+shout_tail_a announces -tail if tail;
+shout_tail_a announces tail if -tail;
 a executes shout_tail_a;
 a observes shout_tail_a;
 b observes shout_tail_a;
