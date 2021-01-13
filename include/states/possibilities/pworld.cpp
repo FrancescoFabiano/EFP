@@ -279,6 +279,18 @@ pworld_id pworld_ptr::get_id() const
 	exit(1);
 }
 
+
+pworld_id pworld_ptr::get_numerical_id() const
+{
+	if (m_ptr != nullptr) {
+	    pworld_id id = (get_ptr()->get_id());
+
+        return boost::hash_value(id);
+	}
+	std::cerr << "\nError in creating a pworld_ptr\n";
+	exit(1);
+}
+
 void pworld_ptr::set_repetition(unsigned short to_set)
 {
 	m_repetition = to_set;

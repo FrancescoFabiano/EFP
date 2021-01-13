@@ -1402,10 +1402,12 @@ bool planning_graph<T>::check_action(const action & act, agent_set & agents) con
 template <class T>
 bool planning_graph<T>::check_ontic_action(const action & act, agent_set & agents) const
 {
-    std::cout << "ONTIC:" domain::get_grounder().deground_action(act) << "\n" <<std::endl;
+	return true;
+	 /*
+   // std::cout << "ONTIC:" << domain::get_grounder().deground_action(act) << "\n" <<std::endl;
     switch ( act.) {
 
-        /*case FLUENT_FORMULA:
+       case FLUENT_FORMULA:
             if (std::includes(belief_initially.get_group_agents().begin(), belief_initially.get_group_agents().end(),
                               agents.begin(), agents.end()))
             {
@@ -1463,12 +1465,12 @@ bool planning_graph<T>::check_ontic_action(const action & act, agent_set & agent
         case BF_EMPTY:
             break;
         case BF_TYPE_FAIL:
-            return false;*/
+            return false;
         default:
             break;
     }
 
-    return false;
+    return false;*/
 
 }
 

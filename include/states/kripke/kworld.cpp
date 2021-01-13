@@ -10,6 +10,7 @@
 #include "kworld.h"
 
 #include "kstore.h"
+#include "include/utilities/helper.h"
 
 #include <stdexcept>
 
@@ -62,9 +63,8 @@ unsigned int kworld::hash_fluents_into_numerical_id(const fluent_set& fl)
 	std::string ret;
 	fluent_set::const_iterator it_fl;
 	for (it_fl = fl.begin(); it_fl != fl.end(); it_fl++) {
-		ret.append(std::to_string(1 - (*it_fl % 2)));
+		ret.append(std::to_string(helper.is_negate(*it_fl)));
 	}
-
 	return std::stoi(ret, 0, 2);
 }
 

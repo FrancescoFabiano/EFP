@@ -14,7 +14,7 @@ has_attitude a wrt c f_trusty;
 has_attitude b wrt a f_trusty;
 has_attitude b wrt c f_trusty;
 
-has_attitude c wrt a f_trusty;
+has_attitude c wrt a f_mistrusty;
 has_attitude c wrt b f_mistrusty;
 has_attitude c wrt a p_insecure;
 
@@ -36,8 +36,8 @@ a observes peek_a;
 
 
 executable shout_tail_a;
-shout_tail_a announces -tail if tail;
-shout_tail_a announces tail if -tail;
+shout_tail_a announces tail if tail;
+shout_tail_a announces -tail if -tail;
 a executes shout_tail_a;
 a observes shout_tail_a;
 b observes shout_tail_a;

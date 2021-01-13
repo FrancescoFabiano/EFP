@@ -7,7 +7,8 @@ OBJS	=	$(BUILD_DIR)/bison.o $(BUILD_DIR)/lex.o $(BUILD_DIR)/main.o \
 			$(BUILD_DIR)/pstore.o \
 			$(BUILD_DIR)/pworld.o $(BUILD_DIR)/pstate.o \
 			$(BUILD_DIR)/reader.o \
-			$(BUILD_DIR)/heuristics_manager.o $(BUILD_DIR)/satisfied_goals.o
+			$(BUILD_DIR)/heuristics_manager.o $(BUILD_DIR)/satisfied_goals.o \
+			$(BUILD_DIR)/bisimulation.o
 
 
 CC	= g++

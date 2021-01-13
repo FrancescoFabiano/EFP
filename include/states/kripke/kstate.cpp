@@ -532,7 +532,6 @@ const automa kstate::kstate_to_automaton(/*const std::map<kworld_ptr, kworld_ptr
 		Vertex[i].ne++; //Self loop bisimulation
 		Vertex[i].e = (e_elem *) malloc(sizeof(e_elem) * Vertex[i].ne);
 		i++;
-
 	}
 
 	//std::cerr << "\nDEBUG: Fine Inizializzazione Vertex\n";

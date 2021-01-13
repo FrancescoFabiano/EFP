@@ -22,6 +22,7 @@
 #include "../../domain/initially.h"
 #include "../../actions/action.h"
 #include "../../domain/attitudes_table.h"
+#include "../../../lib/bisimulation/bisimulation.h"
 
 class pstate
 {
@@ -446,6 +447,18 @@ private:
     pworld_ptr U_attitudes(fluent announced_f, bool ann_f_truth_value, pstate &ret, const pworld_ptr &current_pw, transition_map_att &calculated, const single_attitudes_map & attitudes, bool is_trusty, agent executor = agent()) const;
 
     pworld_ptr chi_attitudes(fluent announced_f, bool ann_f_truth_value, pstate &ret, const pworld_ptr &current_pw, transition_map_att &calculated, const single_attitudes_map & attitudes, bool trusty_chi) const;
+
+
+
+
+    void get_all_reachable_worlds(const pworld_ptr & pw, pworld_ptr_set & reached_worlds, pworld_transitive_map & reached_edges) const;
+
+    void clean_unreachable_pworlds();
+
+    const automa pstate_to_automaton(std::vector<pworld_ptr> & pworld_vec, const std::map<agent, bis_label> & agent_to_label) const;
+
+    void automaton_to_pstate(const automa & a, const std::vector<pworld_ptr> & pworld_vec, const std::map<bis_label, agent> & label_to_agent);
+
 public:
 
     /** \brief Setter of the field \ref m_worlds.

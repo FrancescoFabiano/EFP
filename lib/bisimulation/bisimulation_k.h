@@ -23,6 +23,8 @@
 
 #include "../../include/domain/domain.h"
 #include "../../include/utilities/define.h"
+#include "../../include/states/kripke/kworld.h"
+#include "../../include/states/kripke/kstate.h"
 
 //STRUCTURE DECLARATION
 //index is the type of the implicit pointers to the array
@@ -81,7 +83,7 @@ private:
     BIS_indexType b1List, b_1List, dList; //starting pointers of the lists above
 
     //  std::map<kworld_ptr, int> m_index_map; // From kworld to int
-    // std::vector<kworld_ptr> m_kworld_vec; // Vector of all kworld_ptr
+    std::vector<kworld_ptr> m_kworld_vec; // Vector of all kworld_ptr
     std::map<int, int> m_compact_indices;
 
     //from  PaigeTarjan
@@ -150,5 +152,16 @@ public:
     bool MinimizeAutomaPT(automa *A);
     bool MinimizeAutomaFB(automa *A);
 
+    automa* merge_kstate_to_automaton(const kstate & ks1, const kstate & ks2, int & root2) const;
+    //automa* merge_automata(const kstate & ks1, const kstate & ks2, int & root2);
+    bool compare_automata(const kstate & ks1, const kstate & ks2);
+    bool compare_automata_eq(const kstate & ks1, const kstate & ks2);
+
     bisimulation();
+
+    //DEBUG
+    const automa compare_automata_debug(const kstate & ks1, const kstate & ks2, std::vector<kworld_ptr> & kworld_vec);
+    automa* merge_kstate_to_automaton_debug(const kstate & ks1, const kstate & ks2, std::vector<kworld_ptr> & kworld_vec) const;
+
+
 };

@@ -201,6 +201,8 @@ void state<T>::calc_min_bisimilar()
 {
 	//std::cerr << "\nDEBUG: ENTRATO IN STATE<T> BISIMULATION\n";
 	m_representation.calc_min_bisimilar();
+	//		std::cerr << "\nDEBUG: DONE BIS\n" << std::flush;
+
 	//std::cerr << "\nDEBUG: FINE STATE<T> BISIMULATION\n";
 
 }
@@ -277,7 +279,6 @@ void state<T>::print_graphviz(std::string postfix) const
 
 }
 
-
 template <class T>
 single_attitudes_map state<T>::get_F_attitudes(agent executor) const
 {
@@ -290,7 +291,7 @@ template <class T>
 single_attitudes_map state<T>::get_P_attitudes(agent executor) const
 {
 	return get_representation().get_P_attitudes();
-		//get_attitudes(executor, domain::get_instance().get_attitudes().get_P_attitudes(), false);
+	//get_attitudes(executor, domain::get_instance().get_attitudes().get_P_attitudes(), false);
 }
 
 

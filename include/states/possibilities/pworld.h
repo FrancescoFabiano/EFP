@@ -276,6 +276,12 @@ public:
      * @return the \ref pworld_id that is the id of the \ref pworld pointed by \ref m_ptr + \ref m_repetition.*/
     pworld_id get_id() const;
 
+    /** \brief Function that return the field m_id of \ref pworld.
+     *     
+     * @return the \ref pworld_id that is the id of the \ref pworld pointed by \ref m_ptr.*/
+    pworld_id get_numerical_id() const;
+
+
     /** \brief Function that return the field m_id of the pointed \ref pworld.
      *     
      * @return the \ref pworld_id that is the id of the \ref pworld pointed by \ref m_ptr.*/

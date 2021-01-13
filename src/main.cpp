@@ -39,7 +39,7 @@ bool check_visited = false;
 bool has_attitudes = false;
 bis_type bisimulation = BIS_NONE;
 heuristics used_heur = NO_H;
-state_type state_struc = KRIPKE; //default
+state_type state_struc = POSSIBILITIES; //default
 domain_restriction ini_restriction = S5; //default
 domain_restriction goal_restriction = NONE; //default
 action_check act_check = EXE_POINTED__COND_WORLD; //default
@@ -213,21 +213,26 @@ void manage_arguments(int argc, char** argv)
 		else if (strcmp(argv[i], "-st") == 0) {
 			i++;
 			if (i >= argc) {
-				std::cerr << "-st needs specification (KRIPKE, KRIPKE_OPT, POSS, OBDD)." << std::endl;
+				std::cerr << "-st needs specification (POSS, KRIPKE, KRIPKE_OPT, OBDD)." << std::endl;
 				exit(1);
-			} else if (strcmp(argv[i], "KRIPKE") == 0) {
-				std::cout << "The States are represented with Kripke structures. (Default)" << std::endl;
+			} else if (strcmp(argv[i], "POSS") == 0) {
+				std::cout << "The States are represented with Possibilities (NWF-SET).  (Default)" << std::endl;
+				state_struc = POSSIBILITIES;
+			} 
+			else if (strcmp(argv[i], "KRIPKE") == 0) {
+				std::cout << "The States are represented with Kripke structures." << std::endl;
 				state_struc = KRIPKE; //default
 				kopt = false;
+				std::cerr << "Kripke Structures implementation is a little bit behind. We will back online in a bit :)" << std::endl;
+				exit(1);
 			} else if (strcmp(argv[i], "KRIPKE_OPT") == 0) {
 				std::cout
 					<< "KRIPKE_OPT: The States are represented with Kripke structures and the transition function is optimized"
 					<< std::endl;
 				state_struc = KRIPKE;
 				kopt = true;
-			} else if (strcmp(argv[i], "POSS") == 0) {
-				std::cout << "The States are represented with Possibilities (NWF-SET)." << std::endl;
-				state_struc = POSSIBILITIES;
+				std::cerr << "Kripke Structures implementation is a little bit behind. We will back online in a bit :)" << std::endl;
+				exit(1);
 			} else if (strcmp(argv[i], "OBDD") == 0) {
 				std::cout << "The States are represented with OBDDs." << std::endl;
 				state_struc = OBDD;

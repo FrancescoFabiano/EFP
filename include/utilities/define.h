@@ -275,10 +275,6 @@ typedef std::set<kworld_ptr> kworld_ptr_set; /**< \brief A set of \ref kworld_pt
 
 typedef std::map<std::pair<kworld_ptr, event_type>, kworld_ptr> kstate_map;
 
-typedef unsigned short bis_label;
-typedef std::set<bis_label> bis_label_set;
-
-typedef std::map<kworld_ptr, std::map<kworld_ptr, bis_label_set>> kbislabel_map;
 
 /*****************Possibilities*****************/
 class pworld;
@@ -351,6 +347,17 @@ typedef std::map<agent, pstate_opt_ptr_set> pedges_opt; /**< \brief A map betwee
                                                        * @see pstate_opt.*/
 
 /****************** Agent's Attitudes related *******************/
+
+
+/****************** Bisimulation *******************/
+
+typedef unsigned short bis_label;
+typedef std::set<bis_label> bis_label_set;
+
+typedef std::map<kworld_ptr, std::map<kworld_ptr, bis_label_set>> kbislabel_map;
+typedef std::map<pworld_ptr, std::map<pworld_ptr, bis_label_set>> pbislabel_map;
+
+/****************** Bisimulation *******************/
 
 /** \brief The list of the possible agents' attitude.*/
 enum agents_attitudes
