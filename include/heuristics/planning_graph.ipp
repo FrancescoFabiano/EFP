@@ -1378,6 +1378,105 @@ bool planning_graph<T>::check_belief_formula(const belief_formula & belief_form_
     }
 }
 
+template <class T>
+bool planning_graph<T>::check_action(const action & act, agent_set & agents) const
+{
+    switch(act.get_type())
+    {
+        case ONTIC:
+            return check_ontic_action(act, agents);
+            break;
+        case EXECUTABILITY:
+
+            break;
+        case SENSING:
+            return check_sensing_announcement_action(act, agents);
+            break;
+        case ANNOUNCEMENT:
+            return check_sensing_announcement_action(act, agents);
+            break;
+        default: break;
+    }
+}
+
+template <class T>
+bool planning_graph<T>::check_ontic_action(const action & act, agent_set & agents) const
+{
+    std::cout << "ONTIC:" domain::get_grounder().deground_action(act) << "\n" <<std::endl;
+    switch ( act.) {
+
+        /*case FLUENT_FORMULA:
+            if (std::includes(belief_initially.get_group_agents().begin(), belief_initially.get_group_agents().end(),
+                              agents.begin(), agents.end()))
+            {
+                //std::cout << "DEBUG agents is a subset of belief_initially agents" << std::endl;
+                return true;
+            }
+            else
+                return false;
+            break;
+        case BELIEF_FORMULA:
+            agents.insert(belief_form_to_check.get_agent());
+            return check_belief_formula(belief_form_to_check.get_bf1(),belief_initially,agents);
+            break;
+        case D_FORMULA:
+            break;
+
+        case C_FORMULA:
+            for(agent_set::iterator agents_iter =belief_form_to_check.get_group_agents().begin();agents_iter!=belief_form_to_check.get_group_agents().end();agents_iter++)
+            {
+                agents.insert(*agents_iter);
+            }
+            return check_belief_formula(belief_form_to_check.get_bf1(),belief_initially,agents);
+            break;
+        case PROPOSITIONAL_FORMULA:
+            if (m_operator == BF_FAIL) {
+                std::cerr << "\n ERROR IN CHECK FORMULA\n.";
+                exit(1);
+            }
+            else{
+                if (m_operator == BF_NOT)
+                {
+                    agents.insert(belief_form_to_check.get_bf1().get_agent());
+                    return !check_belief_formula(belief_form_to_check.get_bf1(),belief_initially,agents);
+                }
+
+                else if (m_operator == BF_AND)
+                {
+                    agent_set agents2 = agents;
+                    agents.insert(belief_form_to_check.get_bf1().get_agent());
+                    agents2.insert(belief_form_to_check.get_bf2().get_agent());
+                    return check_belief_formula(belief_form_to_check.get_bf1(),belief_initially,agents) &&
+                           check_belief_formula(belief_form_to_check.get_bf2(),belief_initially,agents2);
+
+                }
+                else if (m_operator == BF_OR)
+                {
+                    agent_set agents2 = agents;
+                    agents.insert(belief_form_to_check.get_bf1().get_agent());
+                    agents2.insert(belief_form_to_check.get_bf2().get_agent());
+                    return check_belief_formula(belief_form_to_check.get_bf1(),belief_initially,agents) ||
+                           check_belief_formula(belief_form_to_check.get_bf2(),belief_initially,agents2);
+                }
+            }
+            break;
+        case BF_EMPTY:
+            break;
+        case BF_TYPE_FAIL:
+            return false;*/
+        default:
+            break;
+    }
+
+    return false;
+
+}
+
+template <class T>
+bool planning_graph<T>::check_sensing_announcement_action(const action & act, agent_set & agents) const
+{
+    return false;
+}
 /*template <class T>
 const pg_worlds_score & planning_graph<T>::get_worlds_score()
 {
