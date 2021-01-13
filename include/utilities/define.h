@@ -383,7 +383,8 @@ enum sub_functionIndex
     FALSE_U_func,
     S_func,
     TRUE_CHI_func,
-    FALSE_CHI_func
+    FALSE_CHI_func,
+    exec_FUNC
 };
 
 struct comp

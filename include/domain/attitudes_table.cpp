@@ -27,7 +27,7 @@ void attitudes_table::set_attitudes_table(const agent_set & tot_ags, fluent f1)
 	false_bf.set_formula_type(FLUENT_FORMULA);
 	false_bf.set_fluent_formula(false_ff);
 	false_bf.set_is_grounded(true);
-		false_bf.deground();
+	false_bf.deground();
 
 	//Maybe add ground/deground
 
@@ -42,7 +42,7 @@ void attitudes_table::set_attitudes_table(const agent_set & tot_ags, fluent f1)
 	//This for loop initialize all the attitudes to be false
 	for (it_ag = tot_ags.begin(); it_ag != tot_ags.end(); it_ag++) {
 		for (it_internal_ag = tot_ags.begin(); it_internal_ag != tot_ags.end(); it_internal_ag++) {
-			//if (*it_internal_ag != *it_ag) {
+			if (*it_internal_ag != *it_ag) {
 				for (int i = P_KEEPER; i != oblivious_att; i++) {
 
 					if (i < F_TRUSTY) {
@@ -65,7 +65,7 @@ void attitudes_table::set_attitudes_table(const agent_set & tot_ags, fluent f1)
 				}
 				map_midP.insert(std::make_pair(*it_internal_ag, map_intP));
 				map_midF.insert(std::make_pair(*it_internal_ag, map_intF));
-			//}
+			}
 		}
 		m_P_attitude_wrt_exec.insert(std::make_pair(*it_ag, map_midP));
 		m_F_attitude_wrt_exec.insert(std::make_pair(*it_ag, map_midF));

@@ -8,17 +8,14 @@ action shout_tail_a;
 
 agent a,b,c;
 
-has_attitude a wrt a f_untrusty;
 has_attitude a wrt b f_trusty;
 has_attitude a wrt c f_trusty;
 
 has_attitude b wrt a f_trusty;
-has_attitude b wrt b f_mistrusty;
 has_attitude b wrt c f_trusty;
 
-has_attitude c wrt a f_untrusty;
+has_attitude c wrt a f_trusty;
 has_attitude c wrt b f_mistrusty;
-has_attitude c wrt c f_trusty;
 has_attitude c wrt a p_insecure;
 
 
@@ -33,7 +30,7 @@ executable peek_a if B(a,opened), B(a,looking_a), looking_a, opened;
 peek_a determines tail if tail;
 peek_a determines -tail if -tail;
 b observes peek_a if looking_b;
-c observes peek_a if looking_c;
+c aware_of peek_a if looking_c;
 a observes peek_a;
 
 
@@ -52,7 +49,7 @@ initially C([a,b,c],has_key_a);
 initially C([a,b,c],-has_key_b);
 initially C([a,b,c],-has_key_c);
 initially C([a,b,c],opened);
-%initially C([a,b,c],tail);
+initially C([a,b,c],tail);
 %initially C([a,b,c],-B(b,tail) , -B(b,(-tail));
 %initially C([a,b,c],-B(c,tail) , -B(c,(-tail));
 initially C([a,b,c],B(a,tail) | B(a,(-tail)));
