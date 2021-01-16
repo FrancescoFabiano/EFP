@@ -407,7 +407,7 @@ struct comp
     }
 };
 
-typedef std::map<std::pair<pworld_ptr, sub_functionIndex>, pworld_ptr, comp> transition_map_att; /**< \brief A map that keeps track of the results of the transition function when attitudes are involved.
+typedef std::map<std::pair< std::pair<pworld_ptr, unsigned short>, sub_functionIndex>, pworld_ptr, comp> transition_map_att; /**< \brief A map that keeps track of the results of the transition function when attitudes are involved.
                                                           *
                                                           * @see pworld and pstate.*/
 

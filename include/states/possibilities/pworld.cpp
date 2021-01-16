@@ -296,11 +296,11 @@ void pworld_ptr::set_repetition(unsigned short to_set)
 	m_repetition = to_set;
 }
 
-/*void pworld_ptr::increase_repetition(unsigned short to_increase)
+void pworld_ptr::increase_repetition(unsigned short to_increase)
 {
 	m_repetition = m_repetition + to_increase;
 	//m_repetition = m_repetition;
-}*/
+}
 
 unsigned short pworld_ptr::get_repetition() const
 {

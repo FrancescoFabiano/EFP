@@ -189,7 +189,7 @@ void printer::print_map_att(const transition_map_att& to_print) const
 
 	for (; it_mapatt != to_print.end(); it_mapatt++) {
 		auto pair = it_mapatt->first;
-		pworld_ptr ptr1 = pair.first;
+		pworld_ptr ptr1 = pair.first.first;
 		pworld_id id1 =  ptr1.get_id();
 		
 		pworld_ptr ptr2 = it_mapatt->second;
