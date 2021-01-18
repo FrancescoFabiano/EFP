@@ -459,6 +459,8 @@ private:
 
     void automaton_to_pstate(const automa & a, const std::vector<pworld_ptr> & pworld_vec, const std::map<bis_label, agent> & label_to_agent);
 
+    //  bool check_reached(agent ag, const pworld_ptr & start, const pworld_ptr & end) const;
+
 public:
 
     /** \brief Setter of the field \ref m_worlds.

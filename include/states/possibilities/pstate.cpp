@@ -1523,16 +1523,14 @@ pworld_ptr pstate::phi_attitudes(fluent announced_f, pstate &ret, const pworld_p
 				case oblivious_att:
 				default:
 				{
-					auto it_pwtm = get_beliefs().find(current_pw);
-					auto it_pwm = it_pwtm->second.begin();
-					auto it_pws = it_pwm->second.begin();
+					
 					for (; it_pws != it_pwm->second.end(); it_pws++) {
 						// If we are dealing with an OBLIVIOUS agent we maintain its beliefs as they were
-						auto maintained_pworld = ret.get_worlds().find(*it_pws);
+						//auto maintained_pworld = ret.get_worlds().find(*it_pws);
 
-						if (maintained_pworld != ret.get_worlds().end()) {
+						//if (maintained_pworld != ret.get_worlds().end()) {
 							ret.add_edge(new_pw, *it_pws, ag);
-						}
+						//}
 					}
 					break;
 				}
@@ -1648,11 +1646,11 @@ pworld_ptr pstate::K_attitudes(fluent announced_f, pstate &ret, const pworld_ptr
 			{
 				for (; it_pws != it_pwm->second.end(); it_pws++) {
 					// If we are dealing with an OBLIVIOUS agent we maintain its beliefs as they were
-					auto maintained_pworld = ret.get_worlds().find(*it_pws);
+					//auto maintained_pworld = ret.get_worlds().find(*it_pws);
 
-					if (maintained_pworld != ret.get_worlds().end()) {
+					//if (maintained_pworld != ret.get_worlds().end()) {
 						ret.add_edge(new_pw, *it_pws, ag);
-					}
+					//}
 				}
 				break;
 			}
@@ -1779,11 +1777,11 @@ pworld_ptr pstate::I_attitudes(fluent announced_f, pstate &ret, const pworld_ptr
 			{
 				for (; it_pws != it_pwm->second.end(); it_pws++) {
 					// If we are dealing with an OBLIVIOUS agent we maintain its beliefs as they were
-					auto maintained_pworld = ret.get_worlds().find(*it_pws);
+					//auto maintained_pworld = ret.get_worlds().find(*it_pws);
 
-					if (maintained_pworld != ret.get_worlds().end()) {
+					//if (maintained_pworld != ret.get_worlds().end()) {
 						ret.add_edge(new_pw, *it_pws, ag);
-					}
+					//}
 				}
 				break;
 			}
@@ -2140,11 +2138,11 @@ pworld_ptr pstate::U_attitudes(fluent announced_f, bool f_truth_value, pstate &r
 				{
 					for (; it_pws != it_pwm->second.end(); it_pws++) {
 						// If we are dealing with an OBLIVIOUS agent we maintain its beliefs as they were
-						auto maintained_pworld = ret.get_worlds().find(*it_pws);
+						//auto maintained_pworld = ret.get_worlds().find(*it_pws);
 
-						if (maintained_pworld != ret.get_worlds().end()) {
-							ret.add_edge(new_pw, *it_pws, ag);
-						}
+					//if (maintained_pworld != ret.get_worlds().end()) {
+						ret.add_edge(new_pw, *it_pws, ag);
+					//}
 					}
 					break;
 				}
@@ -2290,13 +2288,13 @@ pworld_ptr pstate::chi_attitudes(fluent announced_f, bool f_truth_value, pstate 
 
 				for (; it_pws != it_pwm->second.end(); it_pws++) {
 					// If we are dealing with an OBLIVIOUS agent we maintain its beliefs as they were
-					auto maintained_pworld = ret.get_worlds().find(*it_pws);
+					//auto maintained_pworld = ret.get_worlds().find(*it_pws);
 
-					if (maintained_pworld != ret.get_worlds().end()) {
+					//if (maintained_pworld != ret.get_worlds().end()) {
 						if (new_pw.entails(announced_f) == current_pw.entails(announced_f)) {
 							ret.add_edge(new_pw, *it_pws, ag);
 						}
-					}
+					//}
 				}
 			}
 		}
