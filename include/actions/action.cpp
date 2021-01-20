@@ -180,6 +180,7 @@ bool action::operator=(const action& act)
 	m_type = act.get_type();
 
 	m_executability = act.get_executability();
+	m_executor = act.get_executor();
 	m_fully_observants = act.get_fully_observants();
 	m_partially_observants = act.get_partially_observants();
 	m_effects = act.get_effects();
