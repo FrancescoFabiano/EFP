@@ -36,4 +36,4 @@ initially C([l,m,r,s,c],B(c,tails) | B(c,(-tails)));
 initially tails;
 
 % 2 actions
-goal B(l,tails);
+goal B(r,B(c,tails));

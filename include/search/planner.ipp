@@ -61,6 +61,7 @@ void planner<T>::print_results(std::chrono::duration<double> elapsed_seconds, T 
 template <class T>
 bool planner<T>::search(bool results_file, heuristics used_heur, int max_depth, int step_)
 {
+	
 	if (used_heur == NO_H) {
 		return search_BFS(results_file);
 	} else if (used_heur == NO_H_DFS) {
@@ -117,11 +118,13 @@ bool planner<T>::search_BFS(bool results_file)
 	if (check_visited) {
 		visited_states.insert(initial);
 	}
+	
+	int count = 0;
 
 	while (!m_search_space.empty()) {
 		popped_state = m_search_space.front();
 		m_search_space.pop();
-
+		std::cerr << "\nDEBUG: Plan length is " << popped_state.get_plan_length();
 		for (it_acset = actions.begin(); it_acset != actions.end(); it_acset++) {
 			tmp_action = *it_acset;
 
