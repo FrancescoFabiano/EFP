@@ -65,6 +65,7 @@ initially C([a,b,c,d], (B(a,secret) | B(a,(-secret))));
 
 %Goal Length: 4
 %Plan: right_b, fib, left_b, share
-goal B(c, (-secret)), B(b, (secret));
+goal B(c, (-secret));
+goal B(b, (secret));
 goal B(c, B(a, (secret)));
-%goal B(c, B(b, (secret)));
+goal B(c, B(b, (secret)));

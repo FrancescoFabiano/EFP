@@ -1456,14 +1456,17 @@ pworld_ptr pstate::phi_attitudes(fluent announced_f, pstate &ret, const pworld_p
 					} else {
 						sf_i = FALSE_CHI_func;
 					}
-					calculated_pworld = calculated.find(std::make_pair(std::make_pair(current_pw, 0), sf_i));
-					if (calculated_pworld != calculated.end()) {
-						to_add = calculated_pworld->second;
-					} else {
-						to_add = chi_attitudes(announced_f, f_truth_value, ret, current_pw, calculated, attitudes, true, 1);
-					}
-					ret.add_edge(new_pw, to_add, ag);
+					for (; it_pws != it_pwm->second.end(); it_pws++) {
 
+						calculated_pworld = calculated.find(std::make_pair(std::make_pair(*it_pws, 0), sf_i));
+						if (calculated_pworld != calculated.end()) {
+							to_add = calculated_pworld->second;
+						} else {
+							to_add = chi_attitudes(announced_f, f_truth_value, ret, *it_pws, calculated, attitudes, true, 1);
+						}
+						ret.add_edge(new_pw, to_add, ag);
+
+					}
 					break;
 
 				}
@@ -1479,13 +1482,16 @@ pworld_ptr pstate::phi_attitudes(fluent announced_f, pstate &ret, const pworld_p
 					} else {
 						sf_i = FALSE_CHI_func;
 					}
-					calculated_pworld = calculated.find(std::make_pair(std::make_pair(current_pw, 0), sf_i));
-					if (calculated_pworld != calculated.end()) {
-						to_add = calculated_pworld->second;
-					} else {
-						to_add = chi_attitudes(announced_f, !f_truth_value, ret, current_pw, calculated, attitudes, false, 1);
+					for (; it_pws != it_pwm->second.end(); it_pws++) {
+
+						calculated_pworld = calculated.find(std::make_pair(std::make_pair(*it_pws, 0), sf_i));
+						if (calculated_pworld != calculated.end()) {
+							to_add = calculated_pworld->second;
+						} else {
+							to_add = chi_attitudes(announced_f, !f_truth_value, ret, *it_pws, calculated, attitudes, false, 1);
+						}
+						ret.add_edge(new_pw, to_add, ag);
 					}
-					ret.add_edge(new_pw, to_add, ag);
 					break;
 
 				}
@@ -2034,16 +2040,18 @@ pworld_ptr pstate::U_attitudes(fluent announced_f, bool f_truth_value, pstate &r
 					if (increase_rep != 2) {
 						incr_arg = 1;
 					}
-					calculated_pworld = calculated.find(std::make_pair(std::make_pair(current_pw, incr_arg), sf_i));
-					if (calculated_pworld != calculated.end()) {
-						to_add = calculated_pworld->second;
-					} else {
-						to_add = chi_attitudes(announced_f, f_truth_value, ret, current_pw, calculated, attitudes, true, incr_arg);
-					}
-					if (increase_rep != 2) {
-						ret.add_edge(new_pw, to_add, ag);
-					}
+					for (; it_pws != it_pwm->second.end(); it_pws++) {
+						calculated_pworld = calculated.find(std::make_pair(std::make_pair(*it_pws, incr_arg), sf_i));
+						if (calculated_pworld != calculated.end()) {
+							to_add = calculated_pworld->second;
+						} else {
+							to_add = chi_attitudes(announced_f, f_truth_value, ret, *it_pws, calculated, attitudes, true, incr_arg);
+						}
+						if (increase_rep != 2) {
+							ret.add_edge(new_pw, to_add, ag);
+						}
 
+					}
 					break;
 
 				}
@@ -2074,15 +2082,18 @@ pworld_ptr pstate::U_attitudes(fluent announced_f, bool f_truth_value, pstate &r
 					if (increase_rep != 2) {
 						incr_arg = 1;
 					}
-					calculated_pworld = calculated.find(std::make_pair(std::make_pair(current_pw, incr_arg), sf_i));
-					if (calculated_pworld != calculated.end()) {
-						to_add = calculated_pworld->second;
-					} else {
-						to_add = chi_attitudes(announced_f, !f_truth_value, ret, current_pw, calculated, attitudes, false, incr_arg);
-					}
+					for (; it_pws != it_pwm->second.end(); it_pws++) {
 
-					if (increase_rep != 2) {
-						ret.add_edge(new_pw, to_add, ag);
+						calculated_pworld = calculated.find(std::make_pair(std::make_pair(*it_pws, incr_arg), sf_i));
+						if (calculated_pworld != calculated.end()) {
+							to_add = calculated_pworld->second;
+						} else {
+							to_add = chi_attitudes(announced_f, !f_truth_value, ret, *it_pws, calculated, attitudes, false, incr_arg);
+						}
+
+						if (increase_rep != 2) {
+							ret.add_edge(new_pw, to_add, ag);
+						}
 					}
 					break;
 				}
