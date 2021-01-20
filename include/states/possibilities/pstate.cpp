@@ -1500,7 +1500,18 @@ pworld_ptr pstate::phi_attitudes(fluent announced_f, pstate &ret, const pworld_p
 				case F_UNTRUSTY:
 				{
 					if (ag == executor) {
-						to_add = U_attitudes(announced_f, f_truth_value, ret, current_pw, calculated, modified_diagonal_table, 0, executor);
+
+						for (; it_pws != it_pwm->second.end(); it_pws++) {
+							calculated_pworld = calculated.find(std::make_pair(std::make_pair(*it_pws, 0), exec_FUNC));
+							if (calculated_pworld != calculated.end()) {
+								to_add = calculated_pworld->second;
+							} else {
+								to_add = U_attitudes(announced_f, f_truth_value, ret, *it_pws, calculated, modified_diagonal_table, 0, executor);
+							}
+							ret.add_edge(new_pw, to_add, ag);
+						}
+
+
 					} else {
 
 						if (f_truth_value) {
@@ -1965,13 +1976,21 @@ pworld_ptr pstate::U_attitudes(fluent announced_f, bool f_truth_value, pstate &r
 	} else {
 		sf_i = FALSE_U_func;
 	}
-
-	unsigned short incr_arg = increase_rep;
+	
+	
+	
 
 
 	pworld_ptr new_pw = ret.add_rep_world(pworld(current_pw.get_fluent_set()), current_pw.get_repetition() + increase_rep); // We add the corresponding pworld in ret
 	calculated.insert(transition_map_att::value_type(std::make_pair(std::make_pair(current_pw, increase_rep), sf_i), new_pw)); // And we update the calculated map
 
+	if (increase_rep == 0)
+	{
+		increase_rep = 1;
+	}
+		unsigned short incr_arg = increase_rep;
+
+	
 	/*if (!executor.empty()) {
 		increase_rep = 1;
 	}*/
@@ -1988,21 +2007,21 @@ pworld_ptr pstate::U_attitudes(fluent announced_f, bool f_truth_value, pstate &r
 			agent ag = it_pwm->first;
 			auto it_pws = it_pwm->second.begin();
 			agents_attitudes curr_att;
-			if (!executor.empty()) {
-				if (ag == executor) {
-					increase_rep = 0;
-					sf_i = exec_FUNC;
-					for (; it_pws != it_pwm->second.end(); it_pws++) {
+			//	if (!executor.empty()) {
+			if (ag == executor) {
+				//increase_rep = 0;
+				sf_i = exec_FUNC;
+				for (; it_pws != it_pwm->second.end(); it_pws++) {
 
-						calculated_pworld = calculated.find(std::make_pair(std::make_pair(*it_pws, 0), sf_i));
-						if (calculated_pworld != calculated.end()) {
-							to_add = calculated_pworld->second;
-						} else {
-							to_add = U_attitudes(announced_f, f_truth_value, ret, *it_pws, calculated, attitudes, 0, executor);
-						}
-						ret.add_edge(new_pw, to_add, ag);
+					calculated_pworld = calculated.find(std::make_pair(std::make_pair(*it_pws, 0), sf_i));
+					if (calculated_pworld != calculated.end()) {
+						to_add = calculated_pworld->second;
+					} else {
+						to_add = U_attitudes(announced_f, f_truth_value, ret, *it_pws, calculated, attitudes, 0, executor);
 					}
+					ret.add_edge(new_pw, to_add, ag);
 				}
+				//	}
 			} else {
 
 				curr_att = attitudes.find(ag) -> second;
@@ -2051,7 +2070,6 @@ pworld_ptr pstate::U_attitudes(fluent announced_f, bool f_truth_value, pstate &r
 						if (increase_rep != 2) {
 							ret.add_edge(new_pw, to_add, ag);
 						}
-
 					}
 					break;
 
@@ -2466,6 +2484,7 @@ pstate pstate::execute_announcement_att(const action & act) const
 	for (; it_att != F_attitudes.end(); it_att++) {
 		//tmp_att = it_att->second;
 		attitudes.insert(std::make_pair(it_att->first, it_att->second));
+	//	std::cerr << "\nDEBUG: Agent " << domain::get_instance().get_grounder().deground_agent(it_att->first) << " has attitude " << it_att->second << " wrt " << domain::get_instance().get_grounder().deground_agent(executor);
 		/*switch ( tmp_att ) {
 
 		case F_TRUSTY:

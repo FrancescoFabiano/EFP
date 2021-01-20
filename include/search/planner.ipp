@@ -119,12 +119,10 @@ bool planner<T>::search_BFS(bool results_file)
 		visited_states.insert(initial);
 	}
 	
-	int count = 0;
-
 	while (!m_search_space.empty()) {
 		popped_state = m_search_space.front();
 		m_search_space.pop();
-		std::cerr << "\nDEBUG: Plan length is " << popped_state.get_plan_length();
+		//std::cerr << "\nDEBUG: Plan length is " << popped_state.get_plan_length();
 		for (it_acset = actions.begin(); it_acset != actions.end(); it_acset++) {
 			tmp_action = *it_acset;
 
