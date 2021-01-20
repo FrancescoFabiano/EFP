@@ -1093,6 +1093,7 @@ void pstate::print() const
 	std::cout << std::endl;
 	std::cout << "The Pointed World has id ";
 	printer::get_instance().print_list(get_pointed().get_fluent_set());
+	std::cout << "-" << get_pointed().get_repetition();
 	std::cout << std::endl;
 	std::cout << "*******************************************************************" << std::endl;
 
