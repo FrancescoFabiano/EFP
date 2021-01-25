@@ -285,7 +285,7 @@ private:
     void pg_build_classical(std::vector<belief_formula> & converted_bf);
 
     //planning graph epistemic new implementation
-    void pg_build_initially(std::list<belief_formula> & goal);
+    bool pg_build_initially(std::list<belief_formula> & goal);
     void pg_build_grounded();
 
     void list_bf_grounded(const belief_formula & belief_forms, std::list<belief_formula> & ret) const;
@@ -293,7 +293,7 @@ private:
     void make_nested_bf_classical2(unsigned short nesting, unsigned short depth,const belief_formula & to_explore, std::list<belief_formula> & ret);
     //
     bool check_belief_formula(const belief_formula & belief_form_to_check, const belief_formula & belief_initially,  agent_set & agents) const;
-
+    bool check_belief_formula_action();
     bool check_goal() const;//pg_state_level<T> current_state);
 
     /*Function that returns the list of fluents and belief formulae that represent the fluent of the conversion to classical planning
@@ -324,10 +324,10 @@ private:
     void add_action_level(const pg_action_level & a_level);
 
 
-    bool check_action(const action & act, agent_set & agents) const;
+    pg_state_level<T> check_action(const action & act, pg_state_level<T> & current_state) ;
 
-    bool check_ontic_action(const action & act, agent_set & agents) const;
-    bool check_sensing_announcement_action(const action & act, agent_set & agents) const;
+    pg_state_level<T> check_ontic_action(const action & act, pg_state_level<T> & current_state) ;
+    pg_state_level<T> check_sensing_announcement_action(const action & act, pg_state_level<T> & current_state) ;
 
 public:
 

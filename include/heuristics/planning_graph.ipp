@@ -353,9 +353,31 @@ planning_graph<T>::planning_graph(const T& state_init, const formula_list & goal
 		}
 	}*/
 
+    //inizializzazione planning graph
+    bool initial_is_goal = pg_build_initially(m_goal);
+    if(!initial_is_goal)
+    {
+        pg_action_level action_level = m_action_levels.back();
+        /*for(; action_iterator != m_action_levels.end();action_iterator++ )
+        {*/
+            action_set actions_in_level = action_level.get_actions();
+            action_set::iterator actions_in_level_iterator = actions_in_level.begin();
+            for(;actions_in_level_iterator!=actions_in_level.end(); actions_in_level_iterator++)
+            {
+                if (!m_state_levels.empty())
+                {
+                    auto current_state = m_state_levels.back();
+                    agent_set agents;
+                    check_action(*actions_in_level_iterator, agents );
+                }
 
-    pg_build_initially(m_goal);
+            }
 
+       /* }*/
+
+    }
+    /*start ricerca
+     * */
 
 
 
@@ -543,7 +565,7 @@ void planning_graph<T>::pg_build()
 }
 
 template <class T>
-void planning_graph<T>::pg_build_initially(std::list<belief_formula> & goal) //aggiungere come parametri la lista iniziale delle belief formula e dei fluentset
+bool planning_graph<T>::pg_build_initially(std::list<belief_formula> & goal) //aggiungere come parametri la lista iniziale delle belief formula e dei fluentset
 {
 
   //  std:: cout << "pg_build_initially" <<std::endl;
@@ -575,7 +597,9 @@ void planning_graph<T>::pg_build_initially(std::list<belief_formula> & goal) //a
     std::list<belief_formula>::iterator iter_action_formulas;
     for (it_actset = m_never_executed.begin(); it_actset != m_never_executed.end();it_actset++) {
         std::list<belief_formula> list_action_formula = it_actset->get_executability();
-
+        //aggiungo azioni al livello azione TODO da fare qui? all'inzio???
+        a_level_curr.add_action(*it_actset);
+        ///
         for (iter_action_formulas = list_action_formula.begin();
              iter_action_formulas != list_action_formula.end(); iter_action_formulas++) {
 
@@ -691,16 +715,22 @@ void planning_graph<T>::pg_build_initially(std::list<belief_formula> & goal) //a
 
     add_state_level(s_level_curr);
 
+
+
     //prendo tutte le componeenti delle azioni belief formula nella descrizione del dominio e sono tutte a false
 
     //aggiungere i controlli che se all'inizio ho qualche initialy che mi ferma la computazione per inconsistenza
     //oppure controllo che sono già al goal.
 
     bool isGoal = check_goal();
+    print_state(s_level_curr.get_pair_belief_bool(),s_level_curr.get_fluent_set());
     if(isGoal) {
         std::cout << "\nInitially is already the goal\n" << std::endl;
+        return true;
     }
-    print_state(s_level_curr.get_pair_belief_bool(),s_level_curr.get_fluent_set());
+
+    return false;
+
 
     //std:: cout << "pg_build_initially fine" <<std::endl;
 
@@ -1306,6 +1336,11 @@ void planning_graph<T>::set_goal(const formula_list & goal)
 	m_goal = goal;
 }
 
+template <class T>
+bool planning_graph<T>::check_belief_formula_action(const belief_formula & belief_form_to_check, const belief_formula & belief_initially,  agent_set & agents) const
+{
+    return true;
+}
 
 template <class T>
 bool planning_graph<T>::check_belief_formula(const belief_formula & belief_form_to_check, const belief_formula & belief_initially,  agent_set & agents) const
@@ -1379,105 +1414,98 @@ bool planning_graph<T>::check_belief_formula(const belief_formula & belief_form_
 }
 
 template <class T>
-bool planning_graph<T>::check_action(const action & act, agent_set & agents) const
+pg_state_level<T> planning_graph<T>::check_action(const action & act, pg_state_level<T> & current_state)
 {
     switch(act.get_type())
     {
         case ONTIC:
-            return check_ontic_action(act, agents);
+            return check_ontic_action(act, current_state);
             break;
         case EXECUTABILITY:
 
             break;
         case SENSING:
-            return check_sensing_announcement_action(act, agents);
+            return check_sensing_announcement_action(act, current_state);
             break;
         case ANNOUNCEMENT:
-            return check_sensing_announcement_action(act, agents);
+            return check_sensing_announcement_action(act, current_state);
             break;
         default: break;
     }
 }
 
 template <class T>
-bool planning_graph<T>::check_ontic_action(const action & act, agent_set & agents) const
+pg_state_level<T> planning_graph<T>::check_ontic_action(const action & act, pg_state_level<T> & current_state)
 {
-	return true;
-	 /*
-   // std::cout << "ONTIC:" << domain::get_grounder().deground_action(act) << "\n" <<std::endl;
-    switch ( act.) {
 
-       case FLUENT_FORMULA:
-            if (std::includes(belief_initially.get_group_agents().begin(), belief_initially.get_group_agents().end(),
-                              agents.begin(), agents.end()))
+       pg_state_level<T> new_state_level = current_state;
+
+        std::list<belief_formula> list_action_formula = act.get_executability();
+        std::list<belief_formula>::iterator iter_action_formulas;
+        //controllo che le condizioni siano sodisfatte quindi devono essere vere altrimenti non posso eseguire l'azione.
+        for (iter_action_formulas = list_action_formula.begin();
+             iter_action_formulas != list_action_formula.end(); iter_action_formulas++) {
+
+            //ottengo le belief formula delle eseguibilità della azione
+            std::list<belief_formula> formula_list_bf_action;
+            list_bf_grounded(*iter_action_formulas, formula_list_bf_action);
+            std::list<belief_formula>::iterator it_list_action;
+
+            bool can_exec = true;
+            //ottenute le belief formule
+            for (it_list_action = formula_list_bf_action.begin();
+                 it_list_action != formula_list_bf_action.end(); it_list_action++) {
+                //controllo che siano a vero altrimenti non posso eseguirla nello stato corrente
+                //nel plannin graph so sempre quali beleif formule sono ancora false.
+                // contenute in m_belief_formula_false
+                //current_state.get_pair_belief_bool()
+                if(!(new_state_level.get_pair_belief_bool()).find(it_list_action)->second)
+                {
+                    can_exec = false;
+                    break;
+                }
+                //se ho passato tutto senza problemi posso andare avanti
+                //check e metto can_exec = false se una condizione non è valida
+
+            }
+
+            //condizioni di eseguibilità ok posso eseguire
+            if(can_exec)
             {
-                //std::cout << "DEBUG agents is a subset of belief_initially agents" << std::endl;
-                return true;
-            }
-            else
-                return false;
-            break;
-        case BELIEF_FORMULA:
-            agents.insert(belief_form_to_check.get_agent());
-            return check_belief_formula(belief_form_to_check.get_bf1(),belief_initially,agents);
-            break;
-        case D_FORMULA:
-            break;
+                //ottengo partially e fully observant degli agenti
+                observability_map partially_observant_map = act.get_partially_observants();
+                observability_map fully_observant_map = act.get_fully_observants();
+                agent_set agents;
 
-        case C_FORMULA:
-            for(agent_set::iterator agents_iter =belief_form_to_check.get_group_agents().begin();agents_iter!=belief_form_to_check.get_group_agents().end();agents_iter++)
-            {
-                agents.insert(*agents_iter);
-            }
-            return check_belief_formula(belief_form_to_check.get_bf1(),belief_initially,agents);
-            break;
-        case PROPOSITIONAL_FORMULA:
-            if (m_operator == BF_FAIL) {
-                std::cerr << "\n ERROR IN CHECK FORMULA\n.";
-                exit(1);
-            }
-            else{
-                if (m_operator == BF_NOT)
-                {
-                    agents.insert(belief_form_to_check.get_bf1().get_agent());
-                    return !check_belief_formula(belief_form_to_check.get_bf1(),belief_initially,agents);
-                }
+                //ottengo inoltre gli effetti che causa l'azione e devo aggiungerli al mio stato ivello nuovo
+                effects_map effects_map = act.get_effects();
+                //controllo l'esecuzione e gli effetti della esecuzione della azione corrente.
 
-                else if (m_operator == BF_AND)
+                bool result = check_belief_formula_action();
+                if(result)    //se tutto ok devo rimuovere l'azione da quelle false e ripartire
                 {
-                    agent_set agents2 = agents;
-                    agents.insert(belief_form_to_check.get_bf1().get_agent());
-                    agents2.insert(belief_form_to_check.get_bf2().get_agent());
-                    return check_belief_formula(belief_form_to_check.get_bf1(),belief_initially,agents) &&
-                           check_belief_formula(belief_form_to_check.get_bf2(),belief_initially,agents2);
+                    //TODO in teoria dovre rimuovere ogni belief formula a false
+                    //FORSE meglio fare nel check_belief_formula_action
+                    //devo aggiornare il nuovo stato livello ora e in teoria ricaricare tutte le azioni nel nuovo stato azione..
+
 
                 }
-                else if (m_operator == BF_OR)
-                {
-                    agent_set agents2 = agents;
-                    agents.insert(belief_form_to_check.get_bf1().get_agent());
-                    agents2.insert(belief_form_to_check.get_bf2().get_agent());
-                    return check_belief_formula(belief_form_to_check.get_bf1(),belief_initially,agents) ||
-                           check_belief_formula(belief_form_to_check.get_bf2(),belief_initially,agents2);
-                }
             }
-            break;
-        case BF_EMPTY:
-            break;
-        case BF_TYPE_FAIL:
-            return false;
-        default:
-            break;
     }
 
-    return false;*/
+
+	return new_state_level;
 
 }
 
 template <class T>
-bool planning_graph<T>::check_sensing_announcement_action(const action & act, agent_set & agents) const
+pg_state_level<T>planning_graph<T>::check_sensing_announcement_action(const action & act, pg_state_level<T> & current_state)
 {
-    return false;
+    pg_state_level<T> new_state_level;
+
+
+
+    return new_state_level;
 }
 /*template <class T>
 const pg_worlds_score & planning_graph<T>::get_worlds_score()
