@@ -384,7 +384,7 @@ public:
 
     const belief_formula & get_fluent_from_formula(const belief_formula & belief_forms) const;
 
-
+    void print_belief_info(const belief_formula & belief_forms);
     /*const pg_worlds_score & get_worlds_score();
     const pg_bfs_score & get_bfs_score(); FOR FUTURE USE*/
 };

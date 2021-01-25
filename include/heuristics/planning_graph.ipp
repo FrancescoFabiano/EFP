@@ -368,7 +368,7 @@ planning_graph<T>::planning_graph(const T& state_init, const formula_list & goal
                 {
                     auto current_state = m_state_levels.back();
                     agent_set agents;
-                    check_action(*actions_in_level_iterator, current_state );
+                    check_action(*actions_in_level_iterator, *current_state );
                 }
 
             }
@@ -743,6 +743,59 @@ void planning_graph<T>::add_belief_false(belief_formula & formula)
     m_belief_formula_false.insert(formula);
 }
 
+
+const void print_belief_info(const belief_formula & belief_form_to_check)
+{
+    bf_operator m_operator = belief_form_to_check.get_operator();
+    switch ( belief_form_to_check.get_formula_type() ) {
+
+        case FLUENT_FORMULA:
+            belief_form_to_check.print();
+            break;
+        case BELIEF_FORMULA:
+            print_belief_info(belief_form_to_check.get_bf1());
+            break;
+        case D_FORMULA:
+            break;
+
+        case C_FORMULA:
+
+            print_belief_info(belief_form_to_check.get_bf1());
+            break;
+        case PROPOSITIONAL_FORMULA:
+            if (m_operator == BF_FAIL) {
+                std::cerr << "\n ERROR IN CHECK FORMULA\n.";
+                exit(1);
+            }
+            else{
+                if (m_operator == BF_NOT)
+                {
+                    print_belief_info(belief_form_to_check.get_bf1());
+
+                }
+
+                else if (m_operator == BF_AND)
+                {
+                    print_belief_info(belief_form_to_check.get_bf1());
+                    print_belief_info(belief_form_to_check.get_bf2());
+
+                }
+                else if (m_operator == BF_OR)
+                {
+                    print_belief_info(belief_form_to_check.get_bf1());
+                    print_belief_info(belief_form_to_check.get_bf2());
+                }
+            }
+            break;
+        case BF_EMPTY:
+            break;
+        case BF_TYPE_FAIL:
+            break;
+        default:
+            break;
+    }
+}
+
 void print_state( std::map<belief_formula, bool> m_pair_belief_bool, std::set<fluent> m_fluentSet)
 {
     std::cout << "-----------------------------" << std::endl;
@@ -759,6 +812,11 @@ void print_state( std::map<belief_formula, bool> m_pair_belief_bool, std::set<fl
         std::cout << "Belief: ";
         (iter_pair_belief->first).print();
         std::cout <<  " Value: "<< iter_pair_belief->second << std::endl;
+
+        if(!iter_pair_belief->second)
+        {
+            print_belief_info(iter_pair_belief->first);
+        }
     }
     std::cout << "-----------------------------" << std::endl;
     std::cout << "Print belief false: " << std::endl;
