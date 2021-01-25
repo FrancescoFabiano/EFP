@@ -368,7 +368,7 @@ planning_graph<T>::planning_graph(const T& state_init, const formula_list & goal
                 {
                     auto current_state = m_state_levels.back();
                     agent_set agents;
-                    check_action(*actions_in_level_iterator, agents );
+                    check_action(*actions_in_level_iterator, current_state );
                 }
 
             }
