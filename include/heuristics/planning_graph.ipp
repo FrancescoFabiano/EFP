@@ -1337,7 +1337,7 @@ void planning_graph<T>::set_goal(const formula_list & goal)
 }
 
 template <class T>
-bool planning_graph<T>::check_belief_formula_action(const belief_formula & belief_form_to_check, const belief_formula & belief_initially,  agent_set & agents) const
+bool planning_graph<T>::check_belief_formula_action()
 {
     return true;
 }
