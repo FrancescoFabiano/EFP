@@ -827,12 +827,12 @@ void  planning_graph<T>::print_belief_info(const belief_formula & belief_form_to
     switch ( belief_form_to_check.get_formula_type() ) {
 
         case FLUENT_FORMULA:
-            std::cout <<"\n";
+            std::cout <<"***";
             belief_form_to_check.print();
 
             break;
         case BELIEF_FORMULA:
-            std::cout <<"\n";
+            std::cout <<"--";
             print_belief_info(belief_form_to_check.get_bf1());
 
             break;
@@ -840,7 +840,7 @@ void  planning_graph<T>::print_belief_info(const belief_formula & belief_form_to
             break;
 
         case C_FORMULA:
-            std::cout <<"\n";
+            std::cout <<"-C-";
             print_belief_info(belief_form_to_check.get_bf1());
 
             break;
@@ -853,25 +853,25 @@ void  planning_graph<T>::print_belief_info(const belief_formula & belief_form_to
             else{
                 if (m_operator == BF_NOT)
                 {
-                    std::cout <<"\n";
+                    std::cout <<"--not-";
                     print_belief_info(belief_form_to_check.get_bf1());
-                    std::cout <<"\n";
+
                 }
 
                 else if (m_operator == BF_AND)
-                {std::cout <<"\n";
+                {std::cout <<"--and-- ";
                     print_belief_info(belief_form_to_check.get_bf1());
-                    std::cout <<"\n";
+                    std::cout <<"AND ";
                     print_belief_info(belief_form_to_check.get_bf2());
                     std::cout <<"\n";
                 }
                 else if (m_operator == BF_OR)
                 {
-                    std::cout <<"\n";
+                    std::cout <<"--or-- ";
                     print_belief_info(belief_form_to_check.get_bf1());
-                    std::cout <<"\n";
+                    std::cout <<"OR";
                     print_belief_info(belief_form_to_check.get_bf2());
-                    std::cout <<"\n";
+                    std::cout <<"--";
                 }
             }
             break;
@@ -1512,7 +1512,7 @@ bool planning_graph<T>::check_belief_formula_same_fluent( const belief_formula  
             else{
                 if (m_operator == BF_NOT)
                 {
-                    return check_belief_formula_same_fluent(bf.get_bf1(),fluent_formula);
+                    return !check_belief_formula_same_fluent(bf.get_bf1(),fluent_formula);
 
                 }
 
@@ -1706,25 +1706,41 @@ pg_state_level<T> planning_graph<T>::check_ontic_action(const action & act, pg_s
 
                 }
                 std::cout <<"*******______*****";
-                std::cout <<"DEBUG\n:effetto azione\n";
+                std::cout <<"\nDEBUG\n:effetto azione\n";
                 (printer::get_instance()).print_list(fluent_effect);
 
                 std::cout <<"\n*******______*****\n";
                 for(auto belief_false_iter = m_belief_formula_false.begin();belief_false_iter!= m_belief_formula_false.end();belief_false_iter++)
                 {
+
                     if(check_belief_formula_same_fluent(*belief_false_iter,fluent_effect))
                     {
+                        std::cout <<"\nPRINT AGENT BELIEF" << std::endl;
                         agent_set agents;
                         print_belief_info_agents_chain(*belief_false_iter, agents);
-                        std::cout << "DEBUG:Catena Agenti\n"<<std::endl;
+
                         for(auto curr_agent_iter = agents.begin(); curr_agent_iter!= agents.end();curr_agent_iter++)
                         {
-                            std::cout << domain::get_instance().get_grounder().deground_agent(*curr_agent_iter) << "\n";
+                            std::cout << domain::get_instance().get_grounder().deground_agent(*curr_agent_iter) << " - ";
 
                         }
+                        std::cout << "\n";
+
+
                     }
                 }
+                //fully observant check degli agenti
+                std::cout <<"fully obs\n";
+                for( auto fully = fully_observant_map.begin();fully!=fully_observant_map.end();fully++)
+                {
+                    std::cout << "\nKey Agent: " ;
+                    std::cout << domain::get_instance().get_grounder().deground_agent(fully->first) << " - ";
 
+
+                    std::cout << "- Value: " ;
+                    print_belief_info (fully->second);
+                }
+                std::cout <<"finish fully obs\n";
             }
     }
 
@@ -1738,9 +1754,133 @@ pg_state_level<T> planning_graph<T>::check_ontic_action(const action & act, pg_s
 template <class T>
 pg_state_level<T>planning_graph<T>::check_sensing_announcement_action(const action & act, pg_state_level<T> & current_state)
 {
-    pg_state_level<T> new_state_level;
+    std::cout << "\nSENSING/ANNOUNCMENT ACTION \n";
+    pg_state_level<T> new_state_level = current_state;
+
+    std::list<belief_formula> list_action_formula = act.get_executability();
+    std::list<belief_formula>::iterator iter_action_formulas;
+    //controllo che le condizioni siano sodisfatte quindi devono essere vere altrimenti non posso eseguire l'azione.
+    for (iter_action_formulas = list_action_formula.begin();
+         iter_action_formulas != list_action_formula.end(); iter_action_formulas++) {
+
+        //ottengo le belief formula delle eseguibilità della azione
+        std::list<belief_formula> formula_list_bf_action;
+        list_bf_grounded(*iter_action_formulas, formula_list_bf_action);
+        std::list<belief_formula>::iterator it_list_action;
+
+        bool can_exec = true;
+        //ottenute le belief formule
+        for (it_list_action = formula_list_bf_action.begin();
+             it_list_action != formula_list_bf_action.end(); it_list_action++) {
+            //controllo che siano a vero altrimenti non posso eseguirla nello stato corrente
+            //nel plannin graph so sempre quali beleif formule sono ancora false.
+            // contenute in m_belief_formula_false
+            //current_state.get_pair_belief_bool()
+            std::map<belief_formula,bool> map = (new_state_level.get_pair_belief_bool());
+            if(!(map.find(*it_list_action))->second)
+            {
+                can_exec = false;
+                break;
+            }
+            //se ho passato tutto senza problemi posso andare avanti
+            //check e metto can_exec = false se una condizione non è valida
+
+        }
+
+        //condizioni di eseguibilità ok posso eseguire
+        if(can_exec)
+        {
+
+            //ottengo partially e fully observant degli agenti
+            /*observability_map partially_observant_map = act.get_partially_observants();
+            observability_map fully_observant_map = act.get_fully_observants();
+            agent_set agents;
+
+            //ottengo inoltre gli effetti che causa l'azione e devo aggiungerli al mio stato ivello nuovo
+            effects_map effects_map = act.get_effects();
+            //controllo l'esecuzione e gli effetti della esecuzione della azione corrente.
+
+            bool result = check_belief_formula_action();
+            if(result)    //se tutto ok devo rimuovere l'azione da quelle false e ripartire
+            {
+                //TODO in teoria dovre rimuovere ogni belief formula a false
+                //FORSE meglio fare nel check_belief_formula_action
+                //devo aggiornare il nuovo stato livello ora e in teoria ricaricare tutte le azioni nel nuovo stato azione..
 
 
+            }*/
+
+            //prendo l'azione estree gli effetti che avvengono e aggiorno
+            //prendo lista belief a false e guardo l'effetto della belief riguarda lo stesso fluente dell'effetto
+            //dell'azione, e la lista degli agenti nella belief formula
+            //estraggo i set correti di partially, fully e oblivius
+            //stampo un messagio
+
+            observability_map partially_observant_map = act.get_partially_observants();//vuoto per le ontic
+            observability_map fully_observant_map = act.get_fully_observants();
+            effects_map effects_map = act.get_effects();
+            fluent_formula fluent_effect;
+            for (auto effect = effects_map.begin();
+                 effect != effects_map.end(); ++effect)
+            {
+                fluent_effect = effect->first;
+
+
+            }
+            std::cout <<"*******______*****";
+            std::cout <<"DEBUG\n:effetto azione\n";
+            (printer::get_instance()).print_list(fluent_effect);
+
+            std::cout <<"\n*******______*****\n";
+            for(auto belief_false_iter = m_belief_formula_false.begin();belief_false_iter!= m_belief_formula_false.end();belief_false_iter++)
+            {
+
+                if(check_belief_formula_same_fluent(*belief_false_iter,fluent_effect))
+                {
+                    std::cout <<"\nPRINT AGENT BELIEF" << std::endl;
+                    agent_set agents;
+                    print_belief_info_agents_chain(*belief_false_iter, agents);
+
+                    for(auto curr_agent_iter = agents.begin(); curr_agent_iter!= agents.end();curr_agent_iter++)
+                    {
+                        std::cout << domain::get_instance().get_grounder().deground_agent(*curr_agent_iter) << " - ";
+
+                    }
+                    std::cout << "\n";
+
+
+                }
+            }
+            //fully observant check degli agenti
+            std::cout <<"fully obs\n";
+            for( auto fully = fully_observant_map.begin();fully!=fully_observant_map.end();fully++)
+            {
+                std::cout << "\nKey Agent: " ;
+                std::cout << domain::get_instance().get_grounder().deground_agent(fully->first) << " - ";
+
+
+                std::cout << "- Value: " ;
+                print_belief_info (fully->second);
+            }
+            std::cout <<"finish fully obs\n";
+
+            //fully observant check degli agenti
+            std::cout <<"\npartial obs\n";
+            for( auto partial = partially_observant_map.begin();partial!=partially_observant_map.end();partial++)
+            {
+                std::cout << "\nKey Agent: " ;
+                std::cout << domain::get_instance().get_grounder().deground_agent(partial->first) << " - ";
+
+
+                std::cout << "- Value: " ;
+                print_belief_info (partial->second);
+            }
+            std::cout <<"\nfinish partial obs\n";
+        }
+    }
+
+
+    return new_state_level;
 
     return new_state_level;
 }
