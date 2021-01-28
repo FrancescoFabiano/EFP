@@ -294,6 +294,8 @@ private:
     //
     bool check_belief_formula(const belief_formula & belief_form_to_check, const belief_formula & belief_initially,  agent_set & agents) const;
     bool check_belief_formula_action();
+    bool check_belief_formula_same_fluent(const belief_formula bf,fluent_formula  fluent_formula);
+
     bool check_goal() const;//pg_state_level<T> current_state);
 
     /*Function that returns the list of fluents and belief formulae that represent the fluent of the conversion to classical planning
@@ -383,8 +385,8 @@ public:
     void remove_belief_formula_false(const belief_formula & formula);
 
     const belief_formula & get_fluent_from_formula(const belief_formula & belief_forms) const;
-
-    void print_belief_info(const belief_formula & belief_forms);
+    void print_belief_info(const belief_formula & formula);
+    void print_belief_info_agents_chain(const belief_formula & formula,agent_set & agents);
     /*const pg_worlds_score & get_worlds_score();
     const pg_bfs_score & get_bfs_score(); FOR FUTURE USE*/
 };

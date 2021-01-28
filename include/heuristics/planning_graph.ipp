@@ -10,6 +10,7 @@
 
 #include "planning_graph.h"
 #include "../domain/domain.h"
+#include "../utilities/printer.h"
 //pg_eState::pg_eState()
 //{
 //	set_action(-1);
@@ -368,7 +369,7 @@ planning_graph<T>::planning_graph(const T& state_init, const formula_list & goal
                 {
                     auto current_state = m_state_levels.back();
                     agent_set agents;
-                    check_action(*actions_in_level_iterator, *current_state );
+                    check_action(*actions_in_level_iterator, current_state );
                 }
 
             }
@@ -744,25 +745,36 @@ void planning_graph<T>::add_belief_false(belief_formula & formula)
 }
 
 
-const void print_belief_info(const belief_formula & belief_form_to_check)
+template <class T>
+void  planning_graph<T>::print_belief_info_agents_chain(const belief_formula & belief_form_to_check, agent_set & agents)
 {
-    bf_operator m_operator = belief_form_to_check.get_operator();
+
+    auto m_operator =belief_form_to_check.get_operator();
     switch ( belief_form_to_check.get_formula_type() ) {
 
         case FLUENT_FORMULA:
-            belief_form_to_check.print();
+
             break;
         case BELIEF_FORMULA:
-            print_belief_info(belief_form_to_check.get_bf1());
+
+            agents.insert(belief_form_to_check.get_agent());
+            print_belief_info_agents_chain(belief_form_to_check.get_bf1(),agents);
+
             break;
         case D_FORMULA:
             break;
 
         case C_FORMULA:
 
-            print_belief_info(belief_form_to_check.get_bf1());
+            for(agent_set::iterator agents_iter =belief_form_to_check.get_group_agents().begin();agents_iter!=belief_form_to_check.get_group_agents().end();agents_iter++)
+            {
+                agents.insert(*agents_iter);
+            }
+            print_belief_info_agents_chain(belief_form_to_check.get_bf1(),agents);
+
             break;
         case PROPOSITIONAL_FORMULA:
+
             if (m_operator == BF_FAIL) {
                 std::cerr << "\n ERROR IN CHECK FORMULA\n.";
                 exit(1);
@@ -770,20 +782,96 @@ const void print_belief_info(const belief_formula & belief_form_to_check)
             else{
                 if (m_operator == BF_NOT)
                 {
-                    print_belief_info(belief_form_to_check.get_bf1());
+
+                    agents.insert(belief_form_to_check.get_agent());
+                    print_belief_info_agents_chain(belief_form_to_check.get_bf1(),agents);
 
                 }
 
                 else if (m_operator == BF_AND)
                 {
-                    print_belief_info(belief_form_to_check.get_bf1());
-                    print_belief_info(belief_form_to_check.get_bf2());
+                    agents.insert(belief_form_to_check.get_bf1().get_agent());
+                    agents.insert(belief_form_to_check.get_bf2().get_agent());
+                    print_belief_info_agents_chain(belief_form_to_check.get_bf1(),agents);
+
+                    print_belief_info_agents_chain(belief_form_to_check.get_bf2(),agents);
 
                 }
                 else if (m_operator == BF_OR)
                 {
+                    agents.insert(belief_form_to_check.get_bf1().get_agent());
+                    agents.insert(belief_form_to_check.get_bf2().get_agent());
+
+
+                    print_belief_info_agents_chain(belief_form_to_check.get_bf1(),agents);
+
+                    print_belief_info_agents_chain(belief_form_to_check.get_bf2(),agents);
+
+                }
+            }
+            break;
+        case BF_EMPTY:
+            break;
+        case BF_TYPE_FAIL:
+            break;
+        default:
+            break;
+    }
+}
+
+template <class T>
+void  planning_graph<T>::print_belief_info(const belief_formula & belief_form_to_check)
+{
+
+    auto m_operator =belief_form_to_check.get_operator();
+    switch ( belief_form_to_check.get_formula_type() ) {
+
+        case FLUENT_FORMULA:
+            std::cout <<"\n";
+            belief_form_to_check.print();
+
+            break;
+        case BELIEF_FORMULA:
+            std::cout <<"\n";
+            print_belief_info(belief_form_to_check.get_bf1());
+
+            break;
+        case D_FORMULA:
+            break;
+
+        case C_FORMULA:
+            std::cout <<"\n";
+            print_belief_info(belief_form_to_check.get_bf1());
+
+            break;
+        case PROPOSITIONAL_FORMULA:
+
+            if (m_operator == BF_FAIL) {
+                std::cerr << "\n ERROR IN CHECK FORMULA\n.";
+                exit(1);
+            }
+            else{
+                if (m_operator == BF_NOT)
+                {
+                    std::cout <<"\n";
                     print_belief_info(belief_form_to_check.get_bf1());
+                    std::cout <<"\n";
+                }
+
+                else if (m_operator == BF_AND)
+                {std::cout <<"\n";
+                    print_belief_info(belief_form_to_check.get_bf1());
+                    std::cout <<"\n";
                     print_belief_info(belief_form_to_check.get_bf2());
+                    std::cout <<"\n";
+                }
+                else if (m_operator == BF_OR)
+                {
+                    std::cout <<"\n";
+                    print_belief_info(belief_form_to_check.get_bf1());
+                    std::cout <<"\n";
+                    print_belief_info(belief_form_to_check.get_bf2());
+                    std::cout <<"\n";
                 }
             }
             break;
@@ -813,10 +901,6 @@ void print_state( std::map<belief_formula, bool> m_pair_belief_bool, std::set<fl
         (iter_pair_belief->first).print();
         std::cout <<  " Value: "<< iter_pair_belief->second << std::endl;
 
-        if(!iter_pair_belief->second)
-        {
-            print_belief_info(iter_pair_belief->first);
-        }
     }
     std::cout << "-----------------------------" << std::endl;
     std::cout << "Print belief false: " << std::endl;
@@ -1401,6 +1485,59 @@ bool planning_graph<T>::check_belief_formula_action()
 }
 
 template <class T>
+bool planning_graph<T>::check_belief_formula_same_fluent( const belief_formula  bf,fluent_formula  fluent_formula)
+{
+    auto m_operator =bf.get_operator();
+    switch ( bf.get_formula_type() ) {
+
+        case FLUENT_FORMULA:
+                return bf.get_fluent_formula() == fluent_formula;
+            break;
+        case BELIEF_FORMULA:
+            return check_belief_formula_same_fluent(bf.get_bf1(),fluent_formula);
+            break;
+        case D_FORMULA:
+            break;
+
+        case C_FORMULA:
+
+            return check_belief_formula_same_fluent(bf.get_bf1(),fluent_formula);
+            break;
+        case PROPOSITIONAL_FORMULA:
+
+            if (m_operator == BF_FAIL) {
+                std::cerr << "\n ERROR IN CHECK FORMULA\n.";
+                exit(1);
+            }
+            else{
+                if (m_operator == BF_NOT)
+                {
+                    return check_belief_formula_same_fluent(bf.get_bf1(),fluent_formula);
+
+                }
+
+                else if (m_operator == BF_AND)
+                {
+                    return check_belief_formula_same_fluent(bf.get_bf1(),fluent_formula) &&    check_belief_formula_same_fluent(bf.get_bf2(),fluent_formula);
+
+                }
+                else if (m_operator == BF_OR)
+                {
+                    return check_belief_formula_same_fluent(bf.get_bf1(),fluent_formula) ||    check_belief_formula_same_fluent(bf.get_bf2(),fluent_formula);
+                }
+            }
+            break;
+        case BF_EMPTY:
+            break;
+        case BF_TYPE_FAIL:
+            return false;
+            break;
+        default:
+            break;
+    }
+}
+
+template <class T>
 bool planning_graph<T>::check_belief_formula(const belief_formula & belief_form_to_check, const belief_formula & belief_initially,  agent_set & agents) const
 {
     bf_operator m_operator = belief_form_to_check.get_operator();
@@ -1517,7 +1654,8 @@ pg_state_level<T> planning_graph<T>::check_ontic_action(const action & act, pg_s
                 //nel plannin graph so sempre quali beleif formule sono ancora false.
                 // contenute in m_belief_formula_false
                 //current_state.get_pair_belief_bool()
-                if(!(new_state_level.get_pair_belief_bool()).find(it_list_action)->second)
+                std::map<belief_formula,bool> map = (new_state_level.get_pair_belief_bool());
+                if(!(map.find(*it_list_action))->second)
                 {
                     can_exec = false;
                     break;
@@ -1530,8 +1668,9 @@ pg_state_level<T> planning_graph<T>::check_ontic_action(const action & act, pg_s
             //condizioni di eseguibilità ok posso eseguire
             if(can_exec)
             {
+
                 //ottengo partially e fully observant degli agenti
-                observability_map partially_observant_map = act.get_partially_observants();
+                /*observability_map partially_observant_map = act.get_partially_observants();
                 observability_map fully_observant_map = act.get_fully_observants();
                 agent_set agents;
 
@@ -1547,7 +1686,45 @@ pg_state_level<T> planning_graph<T>::check_ontic_action(const action & act, pg_s
                     //devo aggiornare il nuovo stato livello ora e in teoria ricaricare tutte le azioni nel nuovo stato azione..
 
 
+                }*/
+
+                //prendo l'azione estree gli effetti che avvengono e aggiorno
+                //prendo lista belief a false e guardo l'effetto della belief riguarda lo stesso fluente dell'effetto
+                //dell'azione, e la lista degli agenti nella belief formula
+                //estraggo i set correti di partially, fully e oblivius
+                //stampo un messagio
+
+                observability_map partially_observant_map = act.get_partially_observants();//vuoto per le ontic
+                observability_map fully_observant_map = act.get_fully_observants();
+                effects_map effects_map = act.get_effects();
+                fluent_formula fluent_effect;
+                for (auto effect = effects_map.begin();
+                     effect != effects_map.end(); ++effect)
+                {
+                    fluent_effect = effect->first;
+
+
                 }
+                std::cout <<"*******______*****";
+                std::cout <<"DEBUG\n:effetto azione\n";
+                (printer::get_instance()).print_list(fluent_effect);
+
+                std::cout <<"\n*******______*****\n";
+                for(auto belief_false_iter = m_belief_formula_false.begin();belief_false_iter!= m_belief_formula_false.end();belief_false_iter++)
+                {
+                    if(check_belief_formula_same_fluent(*belief_false_iter,fluent_effect))
+                    {
+                        agent_set agents;
+                        print_belief_info_agents_chain(*belief_false_iter, agents);
+                        std::cout << "DEBUG:Catena Agenti\n"<<std::endl;
+                        for(auto curr_agent_iter = agents.begin(); curr_agent_iter!= agents.end();curr_agent_iter++)
+                        {
+                            std::cout << domain::get_instance().get_grounder().deground_agent(*curr_agent_iter) << "\n";
+
+                        }
+                    }
+                }
+
             }
     }
 
@@ -1555,6 +1732,8 @@ pg_state_level<T> planning_graph<T>::check_ontic_action(const action & act, pg_s
 	return new_state_level;
 
 }
+
+
 
 template <class T>
 pg_state_level<T>planning_graph<T>::check_sensing_announcement_action(const action & act, pg_state_level<T> & current_state)
