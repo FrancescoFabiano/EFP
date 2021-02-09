@@ -1491,6 +1491,14 @@ bool planning_graph<T>::check_belief_formula_same_fluent( const belief_formula  
     switch ( bf.get_formula_type() ) {
 
         case FLUENT_FORMULA:
+            //TODO  ritorno truee se un elemento di bg._get_fluent_formula() sia contenuto in fluent_formula
+            //bf.get_fluent_formula() sottoinsimee di fluent_formula
+            // es se uno tail e uno not tail deve essere considerato
+            //oltre all sottoinisieme devo normalizzare il fluente devono metterli tutti positivi e controllarli
+            //funzione in helper::normalize fluent
+            //normalizzio bg.get_fluent_formula()
+            //fluent_formla normalizzo prima di lanciare la funzione
+            //ritorno ture se un elemento di bg._get_fluent_formula sia contenuto in fluent_formula
                 return bf.get_fluent_formula() == fluent_formula;
             break;
         case BELIEF_FORMULA:
@@ -1512,13 +1520,12 @@ bool planning_graph<T>::check_belief_formula_same_fluent( const belief_formula  
             else{
                 if (m_operator == BF_NOT)
                 {
-                    return !check_belief_formula_same_fluent(bf.get_bf1(),fluent_formula);
-
+                    return check_belief_formula_same_fluent(bf.get_bf1(),fluent_formula);
                 }
 
                 else if (m_operator == BF_AND)
                 {
-                    return check_belief_formula_same_fluent(bf.get_bf1(),fluent_formula) &&    check_belief_formula_same_fluent(bf.get_bf2(),fluent_formula);
+                    return check_belief_formula_same_fluent(bf.get_bf1(),fluent_formula) ||    check_belief_formula_same_fluent(bf.get_bf2(),fluent_formula);
 
                 }
                 else if (m_operator == BF_OR)
@@ -1705,7 +1712,7 @@ pg_state_level<T> planning_graph<T>::check_ontic_action(const action & act, pg_s
 
 
                 }
-                std::cout <<"*******______*****";
+                std::cout <<"\n*******______*****";
                 std::cout <<"\nDEBUG\n:effetto azione\n";
                 (printer::get_instance()).print_list(fluent_effect);
 
@@ -1726,7 +1733,20 @@ pg_state_level<T> planning_graph<T>::check_ontic_action(const action & act, pg_s
                         }
                         std::cout << "\n";
 
+                        //TODO
+                        //beleif formula è fluent_formula (tail) diventa vero se l'azione eseguita è una ontic e l'effeto e il tail
+                        //se not tail e ho tail belief rimane falsa
+                        //prendo azione e belief e ed effetto se stesso
+                        //ontic cambia la belief, controllo se l'effetto è uguale metto che la formula deve diventare vero
+                        //belief semplice o C, controllo azione, agente
+                        //oblivius
+                        //fully
+                        //partial
+                        //belief and or e not basta che chiamo & su and || or su or e not su not
 
+                        //se la belief formual e considerano e stessi fluenti
+                        //allora la belief formula può diventare true
+                        //poi controllo in base al tipo di belief
                     }
                 }
                 //fully observant check degli agenti
@@ -1827,7 +1847,7 @@ pg_state_level<T>planning_graph<T>::check_sensing_announcement_action(const acti
 
 
             }
-            std::cout <<"*******______*****";
+            std::cout <<"\n*******______*****";
             std::cout <<"DEBUG\n:effetto azione\n";
             (printer::get_instance()).print_list(fluent_effect);
 
@@ -1847,8 +1867,6 @@ pg_state_level<T>planning_graph<T>::check_sensing_announcement_action(const acti
 
                     }
                     std::cout << "\n";
-
-
                 }
             }
             //fully observant check degli agenti
