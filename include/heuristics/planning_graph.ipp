@@ -1499,7 +1499,7 @@ bool planning_graph<T>::check_belief_formula_same_fluent( const belief_formula  
             //normalizzio bg.get_fluent_formula()
             //fluent_formla normalizzo prima di lanciare la funzione
             //ritorno ture se un elemento di bg._get_fluent_formula sia contenuto in fluent_formula
-            const set<fluent> formula = bf.get_fluent_formula();
+            /*std::set<fluent_set> formula = bf.get_fluent_formula();
             auto fluent_formula_iter = fluent_formula.begin();
             auto bf_get_fluent_formula_iter = formula.begin();
             for(;bf_get_fluent_formula_iter != formula.end();bf_get_fluent_formula_iter++){
@@ -1516,10 +1516,10 @@ bool planning_graph<T>::check_belief_formula_same_fluent( const belief_formula  
                                 return true;
                             }
                         }
-                    }*/
+                    }
 
                 }
-            }
+            }*/
             return false;
            // return includes(fluent_formula.begin(), fluent_formula.end(),bf.get_fluent_formula().begin(), bf.get_fluent_formula().end());
             break;
