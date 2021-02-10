@@ -1499,16 +1499,25 @@ bool planning_graph<T>::check_belief_formula_same_fluent( const belief_formula  
             //normalizzio bg.get_fluent_formula()
             //fluent_formla normalizzo prima di lanciare la funzione
             //ritorno ture se un elemento di bg._get_fluent_formula sia contenuto in fluent_formula
-
+            const set<fluent> formula = bf.get_fluent_formula();
             auto fluent_formula_iter = fluent_formula.begin();
-            auto bf_get_fluent_formula_iter = bf.get_fluent_formula().begin();
-            for(;bf_get_fluent_formula_iter != bf.get_fluent_formula().end();bf_get_fluent_formula_iter++){
+            auto bf_get_fluent_formula_iter = formula.begin();
+            for(;bf_get_fluent_formula_iter != formula.end();bf_get_fluent_formula_iter++){
                 for(;fluent_formula_iter!=fluent_formula.end();fluent_formula_iter++)
                 {
-                    if(helper::normalize_fluent(bf_get_fluent_formula_iter) == helper::normalize_fluent(fluent_formula_iter))
+                    fluent_set::iterator fluent_set_bf_get_fluent_formula_iter = bf_get_fluent_formula_iter->begin();
+                    /*for(; fluentset_bf_get_fluent_formula_iter != bf_get_fluent_formula_iter->end(), fluentset_bf_get_fluent_formula_iter++)
                     {
-                        return true;
-                    }
+                       /* fluent_set::iterator fluent_set_fluent_formula_iter = fluent_formula_iter->begin();
+                        for(; fluentset_fluent_formula_iter != fluent_formula_iter->end(),fluentset_fluent_formula_iter++ )
+                        {
+                            if(helper::normalize_fluent(fluentset_bf_get_fluent_formula_iter) == helper::normalize_fluent(fluentset_fluent_formula_iter))
+                            {
+                                return true;
+                            }
+                        }
+                    }*/
+
                 }
             }
             return false;
