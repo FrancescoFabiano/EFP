@@ -15,15 +15,14 @@
 
 #pragma once
 
+#include <utility>
+
+
 #include "../utilities/define.h"
 #include "../actions/action.h"
-#include "../states/state_T.h"
-#include "../states/kripke/kstate.h"
-#include "../states/possibilities/pstate.h"
 #include "../formulae/belief_formula.h"
 #include "../domain/domain.h"
-#include <utility>
-#include <boost/dynamic_bitset.hpp>
+
 /**
  * \class pg_action_level
  * \brief Class that implements an action level of the planning graph.
@@ -116,95 +115,130 @@ public:
  * \date September 24, 2019
  */
 
-template <class T>
+typedef std::map<fluent, bool> pg_f_map;
+typedef std::map<belief_formula, bool> pg_bf_map;
+
 class pg_state_level
 {
 private:
-    //Is a class of pointer, not much memory required
-    //Maybe make it templatic
-    /*\brief The set of the e-States contained in *this**/
-    std::set<T> m_eStates;
-    std::set<fluent> m_fluentSet;
-    std::map<belief_formula,bool> m_pairBeliefBool;
 
-    /*\brief The depth of *this*, which state layer is*/
+    /*\brief The map that associates each "grounded" \ref fluent to TRUE or FALSE**/
+    pg_f_map m_pg_f_map;
+    /*\brief The map that associates each "grounded" \ref belief_formula to TRUE or FALSE**/
+    pg_bf_map m_pg_bf_map;
+
+    /*\brief The depth of *this* (which state layer it is)*/
     unsigned short m_depth = 0;
 
-    /*Function that checks satisfaction of a belief formula given an epistemic state level's eStates.
+
+    /*Setter of the field m_pg_f_map
      *
-     * A belief formula is entailed when is entailed by at least one eState in the level.
-     * 
-     * @param[in] eStates: The eState of the level where to check for the belief formula entailment.
-     * @param[in] bf: The belief formula to check for entailment.
+     * @param[in] to_set: the value to assign to m_pg_f_map. 
      */
+    void set_f_map(const pg_f_map & to_set);
 
-    bool pg_entailment( const std::map<belief_formula,bool> & pairBeliefBool, const belief_formula & bf) const;
-
-    /*Function that checks satisfaction of a CNF of belief_formula given an epistemic state level's eStates.
+    /*Setter of the field m_pg_bf_map
      *
-     * A formula_list formula is entailed all its component are entailed by at least one eState in the level.
-     * 
-     * @param[in] eStates: The eState of the level where to check for the formula entailment.
-     * @param[in] fl: The CNF of belief_formula to check for entailment.
+     * @param[in] to_set: the value to assign to m_pg_bf_map. 
      */
-    bool pg_entailment(const std::map<belief_formula,bool> & pairBeliefBool, const formula_list & fl) const;
+    void set_bf_map(const pg_bf_map & to_set);
 
+
+    /*Function that return the truth value of a fluent in *this*
+     *
+     * @param[in] key: the key of the pair.
+     * @return: the value of the pair with key \ref key.
+     */
+    bool get_fluent_tvalue(const fluent & key) const;
+
+    /*Function that return the truth value of a belief_formula in *this*
+     *
+     * @param[in] key: the key of the pair.
+     *   @return: the value of the pair with key \ref key.
+     */
+    bool get_bf_tvalue(const belief_formula & key) const;
+
+    void build_init_f_map();
+
+    void build_init_bf_map();
+
+    void insert_subformula_bf(const formula_list & fl, bool tvalue);
+
+    void insert_subformula_bf(const belief_formula & bf, bool tvalue);
+
+    void get_base_fluents(const belief_formula & bf, fluent_set & bf_base_fluents);
+
+    bool exec_ontic(const action & act, const pg_state_level & predecessor, bformula_set & false_bf);
+
+    bool exec_epistemic(const action & act, const pg_state_level & predecessor, bformula_set & false_bf);
+
+    bool apply_ontic_effects(const belief_formula & bf, bformula_set & fl, const agent_set & fully, bool & modified_pg);
+
+    bool apply_epistemic_effects(fluent effect, const belief_formula & bf, bformula_set & fl, const agent_set & fully, const agent_set & partially, bool & modified_pg, unsigned short vis_cond);
 
 public:
-    /*Constructor that sets the depth to 0 and call the standard constructor for the other fields
-     */
+
+    //*Constructor that sets the depth to 0 and correctly initialize the maps*/
     pg_state_level();
-    /*Constructor of this that set the depth = 0 and m_eStates.
+
+    /*Constructor of this that set the depth and the maps.
      *
-     * @param[in] eStates: the value to assign to m_eStates. 
+     * @param[in] f_map: the map with the fluents' truth values. 
+     * @param[in] bf_map: the map with the belief_formulas' truth values. 
      * @param[in] depth: the value to assign to m_depth. 
      */
-    pg_state_level(const std::set<T> & eStates);
-    /*Constructor of this that set the depth and m_eStates
+    pg_state_level(const pg_f_map & f_map, const pg_bf_map & bf_map, unsigned short depth);
+
+
+    /*Getter of the field m_pg_f_map
      *
-     * @param[in] eStates: the value to assign to m_eStates. 
-     * @param[in] depth: the value to assign to m_depth. 
+     * @return: the value to of m_pg_f_map. 
      */
-    pg_state_level(const std::set<T> & eStates, unsigned short depth);
+    const pg_f_map & get_f_map() const;
 
-    pg_state_level(const std::map<belief_formula,bool> & pairBeliefBool, const std::set<fluent> & fluentSet);
-
-    pg_state_level(const std::map<belief_formula,bool> & pairBeliefBool, const std::set<fluent> & fluentSet, unsigned short depth);
-    /*Setter of the field m_eStates
+    /*Getter of the field m_pg_bf_map
      *
-     * @param[in] eStates: the value to assign to m_eStates. 
+     * @return: the value to of m_pg_bf_map. 
      */
-    void set_eStates(const std::set<T> & eStates);
-    /*Getter of the field m_eStates
+    const pg_bf_map & get_bf_map() const;
+
+    /*Getter of the field m_depth
      *
-     * @return: the value to assign to m_eStates. 
+     * @return: the value to of m_depth. 
      */
-    const std::set<T>& get_eStates() const;
+    unsigned short get_depth() const;
 
-    void set_pair_belief_bool(const std::map<belief_formula,bool> & pairBeliefBool);
-    void set_fluent_set(const std::set<fluent> & fluentSet);
-
-    /*Function that add a single eState to *this*
-     *
-     * @param[in] eState: the eState to add to m_eStates if not present.
-     */
-    bool add_eState(const T & eState);
-
-    bool add_fluent(const fluent & fluent);
     /*Setter of the field m_depth
      *
      * @param[in] depth: the value to assign to m_depth. 
      */
-    void set_depth(unsigned short depth);
-    /*Getter of the field m_depth
+    void set_depth(unsigned short to_set);
+
+
+
+    /*Function that modifies a pair fluent,bool in the field m_pg_f_map
      *
-     * @return: the value to assign to m_depth. 
+     * @param[in] key: the key of the pair.
+     * @param[in] value: the value of the pair.
      */
-    unsigned short get_depth() const;
+    void modify_fluent_tvalue(const fluent & key, bool value);
 
-    const std::map<belief_formula,bool> & get_pair_belief_bool() const;
+    /*Function that modifies a pair belief_formula,bool in the field m_pg_bf_map
+     *
+     * @param[in] key: the key of the pair.
+     * @param[in] value: the value of the pair.
+     */
+    void modify_bf_tvalue(const belief_formula & key, bool value);
 
-    const std::set<fluent> & get_fluent_set() const;
+
+    /*Function that checks satisfaction of a fluent on *this*.
+     * 
+     * @param[in] f: The fluent to check for entailment.
+     * 
+     * @return: true if the fluent is entailed.
+     * @return: false otherwise.
+     */
+    bool pg_entailment(const fluent & f) const;
 
     /*Function that checks satisfaction of a belief_formula on *this*.
      * 
@@ -230,25 +264,28 @@ public:
      */
     bool pg_executable(const action & act) const;
 
+    bool compute_succ(const action & act, const pg_state_level & predecessor, bformula_set & false_bf);
+
     /*The = operator
      * 
      * @param[in]to_assign: The object to copy in *this* */
     bool operator=(const pg_state_level& to_assign);
 };
 
+
+
 /*\**********************************************************************
  class: planning_graph
  ************************************************************************/
 //typedef std::map<fluent_set, unsigned short> pg_worlds_score; FOR FUTURE USE
 
-template <class T>
 class planning_graph
 {
 private:
     /*\brief The list of \ref pg_state_level that represents the state levels of the planning_graph*/
-    std::vector< pg_state_level<T> > m_state_levels;
+    std::vector< pg_state_level > m_state_levels;
     /*\brief The list of \ref pg_action_level that represents the action levels of the planning_graph*/
-    std::vector<pg_action_level> m_action_levels;
+    std::vector< pg_action_level > m_action_levels;
 
     /*\brief The length of the planning_graph -- used after the goal is reached*/
     unsigned short m_pg_length = 0;
@@ -266,7 +303,7 @@ private:
     action_set m_never_executed;
 
 
-    std::set<belief_formula> m_belief_formula_false;
+    bformula_set m_belief_formula_false;
 
     /*Setter of the field m_satisfiable
      *
@@ -275,71 +312,36 @@ private:
     void set_satisfiable(bool sat);
     /*The main function that build the planning_graph layer by layer until the goal is found or the planning_graph is saturated*/
     void pg_build();
-    /*The main function that build the planning_graph layer by layer until the goal is found or the planning_graph is saturated
-     *
-     * This function also check for every level which fluents or belief formula are entailed.
-     * It is a sort of conversion to classical planning with grounding of finite nesting belief formula and common knowledge
-     * 
-     * @param[out] converted_bf: The (converted) fluents to yet be entailed by the planning graph.
-     */
-    void pg_build_classical(std::vector<belief_formula> & converted_bf);
-
-    //planning graph epistemic new implementation
-    bool pg_build_initially(std::list<belief_formula> & goal);
-    void pg_build_grounded();
-
-    void list_bf_grounded(const belief_formula & belief_forms, std::list<belief_formula> & ret) const;
-    //std::list<belief_formula> list_bf_grounded(unsigned short nesting=1); //,const std::list<belief_formula>& goal_formula);
-    void make_nested_bf_classical2(unsigned short nesting, unsigned short depth,const belief_formula & to_explore, std::list<belief_formula> & ret);
-    //
-    bool check_belief_formula(const belief_formula & belief_form_to_check, const belief_formula & belief_initially,  agent_set & agents) const;
-    bool check_belief_formula_action();
-    bool check_belief_formula_same_fluent(const belief_formula bf,fluent_formula  fluent_formula);
-
-    bool check_goal() const;//pg_state_level<T> current_state);
-
-    /*Function that returns the list of fluents and belief formulae that represent the fluent of the conversion to classical planning
-     * 
-     * @param[in] nesting: the max depth of belief_formula to consider fluents in the conversion to classical planning (1 as default).
-     * @return: A vector (not a set to avoid unnecessary sorting and comparison) that contains all the belief_formulae as fluents.
-     */
-    std::vector<belief_formula> list_bf_classical(unsigned short nesting = 1);
-
-    /**The recursive function to generate the various nested fluents for classical conversion
-     *
-     * @param[in] nesting: The max_depth of the generated subgoals.
-     * @param[in] depth: The depth of the currently generating subgoal.
-     * @param[in] to_explore: The belief formula from which generate the next fluents.
-     * @param[out] ret: The list of already generated fluents in which to add the new ones. 
-     */
-    void make_nested_bf_classical(unsigned short nesting, unsigned short depth, belief_formula & to_explore, std::vector<belief_formula> & ret);
-
     /*Function add the next (depth + 1) state layer to m_state_levels
      *
      * @param[in] s_level: The level to add to m_state_levels.
      */
-    void add_state_level(const pg_state_level<T> & s_level);
+    void add_state_level(const pg_state_level & s_level);
     /*Function add the next (depth + 1) action layer to m_actions_levels
      * 
      * @param[in] a_level: The level to add to m_action_levels.
      */
     void add_action_level(const pg_action_level & a_level);
 
-
-    pg_state_level<T> check_action(const action & act, pg_state_level<T> & current_state) ;
-
-    pg_state_level<T> check_ontic_action(const action & act, pg_state_level<T> & current_state) ;
-    pg_state_level<T> check_sensing_announcement_action(const action & act, pg_state_level<T> & current_state) ;
-
 public:
 
     /*Constructor of *this* that set the intial state level and the goal from the domain
-     *
-     * @param[in] pg_init: the initial state to set as initial level (Only one because no conformant at the moment). 
-     * @param[in] goal: the (possibly enhanced) goal description to set in m_goal.
-     * @param[in] is_single: if the planning graph is constructed for each state (false) or just once to extrapolate info (true).
      */
-    planning_graph(const T& pg_init, const formula_list & goal, bool is_single = false);
+    planning_graph();
+
+    /*Constructor of *this* that set the intial state level from the domain and the goal as given
+     * 
+     * @param[in] goal: The formula_list that describes the given goals.
+     */
+    planning_graph(const formula_list & goal);
+
+    /*Function used by the constructors to properly initialize the various fields of the planning graph
+     * 
+     * @param[in] goal: The formula_list that describes the given goals.
+     */
+    void init(const formula_list & goal);
+
+
 
     /*Setter of the field m_length
      *
@@ -356,6 +358,8 @@ public:
      * @param[in] goal: the value to assign to m_goal. 
      */
     void set_goal(const formula_list & goal);
+
+
 
     /*Function that tells if the planning graph can satisfy the domain.
      *
@@ -380,13 +384,6 @@ public:
      * @return: the value to assigned to m_bfs_score. 
      */
     const pg_bfs_score & get_bfs_score();
-
-    void add_belief_false(belief_formula & formula);
-    void remove_belief_formula_false(const belief_formula & formula);
-
-    const belief_formula & get_fluent_from_formula(const belief_formula & belief_forms) const;
-    void print_belief_info(const belief_formula & formula);
-    void print_belief_info_agents_chain(const belief_formula & formula,agent_set & agents);
     /*const pg_worlds_score & get_worlds_score();
     const pg_bfs_score & get_bfs_score(); FOR FUTURE USE*/
 };

@@ -122,6 +122,8 @@ public:
 
     static int lenght_to_power_two(int length);
 
+    static bool fluentset_empty_intersection(const fluent_set & set1, const fluent_set & set2);
+    static bool fluentset_negated_empty_intersection(const fluent_set & set1, const fluent_set & set2);
 
 };
 

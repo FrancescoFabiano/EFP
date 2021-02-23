@@ -23,7 +23,6 @@
 #include "../heuristics/heuristics_manager.h"
 //THIS IS BECAUSE IS A TEMPLATIC CLASS AND IT IS A DEPENDECY
 #include "../states/state_T.ipp"
-#include "../heuristics/planning_graph.ipp"
 
 /** \brief Class used as comparator for the priority queue.*/
 template <class T>
@@ -59,7 +58,7 @@ private:
 
     //ricerca con dfs iterativa che scandisce a livelli la ricerca in profondita, maxDepth è il massimo cammino in profonidtà e step di quanto ad ogni giro incrementiamo
     //i nostri step in profondità
-    bool search_IterativeDFS(bool results_file,int maxDepth_, int step_);
+    bool search_IterativeDFS(bool results_file, int maxDepth_, int step_);
 
     /**Function that searches on m_search_space using Best First Search.
      * 

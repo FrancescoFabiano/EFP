@@ -22,9 +22,9 @@ fluent helper::negate_fluent(const fluent f)
 }
 
 /** \brief Function that returns the positive version of a given \ref fluent.
- * 
+ *
  * @param[in] to_normalize: the \ref fluent to normalize
- * 
+ *
  * @return the normalized of fluent.*/
 fluent helper::normalize_fluent(const fluent to_normalize)
 {
@@ -195,6 +195,39 @@ int helper::lenght_to_power_two(int length)
 	return ceil(log2(length));
 }
 
+bool helper::fluentset_empty_intersection(const fluent_set & set1, const fluent_set & set2)
+{
+	auto first1 = set1.begin();
+	auto first2 = set2.begin();
+	auto last1 = set1.end();
+	auto last2 = set2.end();
+
+	while (first1 != last1 && first2 != last2) {
+		if (*first1<*first2) ++first1;
+		else if (*first2<*first1) ++first2;
+		else {
+			return false;
+		}
+	}
+	return true;
+}
+
+bool helper::fluentset_negated_empty_intersection(const fluent_set & set1, const fluent_set & set2)
+{
+	auto first2 = set2.begin();
+	fluent f1, negated_f1;
+
+	for (auto it_fs1 = set1.begin(); it_fs1 != set1.end(); ++it_fs1) {
+		f1 = *it_fs1;
+		negated_f1 = negate_fluent(f1);
+		for (auto it_fs2 = set2.begin(); it_fs2 != set2.end(); ++it_fs2) {
+			if (f1 == *first2 || negated_f1 == *first2) {
+				return false;
+			}
+		}
+	}
+	return true;
+}
 /* Using the std::set == operator
 static bool helper::is_the_same_ff(const fluent_set& to_check_1, const fluent_set& to_check_2)
 {

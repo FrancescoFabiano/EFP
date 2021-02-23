@@ -7,7 +7,7 @@ OBJS	=	$(BUILD_DIR)/bison.o $(BUILD_DIR)/lex.o $(BUILD_DIR)/main.o \
 			$(BUILD_DIR)/pstore.o \
 			$(BUILD_DIR)/pworld.o $(BUILD_DIR)/pstate.o \
 			$(BUILD_DIR)/reader.o \
-			$(BUILD_DIR)/heuristics_manager.o $(BUILD_DIR)/satisfied_goals.o \
+			$(BUILD_DIR)/heuristics_manager.o $(BUILD_DIR)/satisfied_goals.o $(BUILD_DIR)/planning_graph.o \
 			$(BUILD_DIR)/bisimulation.o
 
 
@@ -184,7 +184,7 @@ $(BUILD_DIR)/attitudes_table.o: $(DOMAIN_DIR)/attitudes_table.cpp $(DOMAIN_DIR)/
 $(BUILD_DIR)/heuristics_manager.o: $(HEURISTIC_DIR)/heuristics_manager.cpp $(HEURISTIC_DIR)/heuristics_manager.h \
 								   $(UTILITIES_DIR)/define.h \
 								   $(HEURISTIC_DIR)/satisfied_goals.h \
-								   $(HEURISTIC_DIR)/planning_graph.h $(HEURISTIC_DIR)/planning_graph.ipp
+								   $(HEURISTIC_DIR)/planning_graph.h $(HEURISTIC_DIR)/planning_graph.cpp
 		$(dir_guard)
 		$(CC) $(CFLAGS) -c $(HEURISTIC_DIR)/heuristics_manager.cpp -o $(BUILD_DIR)/heuristics_manager.o 
 
@@ -193,6 +193,14 @@ $(BUILD_DIR)/satisfied_goals.o: $(HEURISTIC_DIR)/satisfied_goals.cpp $(HEURISTIC
 								$(FORMULA_DIR)/belief_formula.h
 		$(dir_guard)
 		$(CC) $(CFLAGS) -c $(HEURISTIC_DIR)/satisfied_goals.cpp -o $(BUILD_DIR)/satisfied_goals.o
+		
+$(BUILD_DIR)/planning_graph.o: $(HEURISTIC_DIR)/planning_graph.cpp $(HEURISTIC_DIR)/planning_graph.h \
+								$(UTILITIES_DIR)/define.h \
+								$(FORMULA_DIR)/belief_formula.h \
+								$(ACTION_DIR)/action.h \
+								$(DOMAIN_DIR)/domain.h
+		$(dir_guard)
+		$(CC) $(CFLAGS) -c $(HEURISTIC_DIR)/planning_graph.cpp -o $(BUILD_DIR)/planning_graph.o
 
 
 

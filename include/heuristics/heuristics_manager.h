@@ -15,6 +15,7 @@
 #include "../utilities/define.h"
 #include "../domain/domain.h"
 #include "satisfied_goals.h"
+#include "planning_graph.h"
 
 class heuristics_manager
 {
@@ -57,10 +58,8 @@ private:
 public:
     /** \brief Class constructor that uses the chosen heuristic to perform the operation
      * 
-     * @param[in] used_heur: Which heuristic has to be used.
-     * @param[in] ini_eState: The initial_state used for C_PG*/
-    template <class T>
-    heuristics_manager(heuristics used_heur, const T & ini_eState);
+     * @param[in] used_heur: Which heuristic has to be used.*/
+    heuristics_manager(heuristics used_heur);
     /** \brief The function that compute heuristic value
      * 
      * @param[out] eState: The state to update with the calculated heuristic value.*/
