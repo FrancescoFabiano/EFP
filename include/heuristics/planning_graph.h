@@ -449,4 +449,6 @@ public:
     const pg_f_map & get_f_scores() const;
 
     const pg_bf_map & get_bf_scores() const;
+
+    void print() const;
 };
