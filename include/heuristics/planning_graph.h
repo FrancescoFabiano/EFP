@@ -115,8 +115,8 @@ public:
  * \date September 24, 2019
  */
 
-typedef std::map<fluent, bool> pg_f_map;
-typedef std::map<belief_formula, bool> pg_bf_map;
+typedef std::map<fluent, short> pg_f_map;
+typedef std::map<belief_formula, short> pg_bf_map;
 
 class pg_state_level
 {
@@ -149,22 +149,36 @@ private:
      * @param[in] key: the key of the pair.
      * @return: the value of the pair with key \ref key.
      */
-    bool get_fluent_tvalue(const fluent & key) const;
+    short get_fluent_value(const fluent & key) const;
 
     /*Function that return the truth value of a belief_formula in *this*
      *
      * @param[in] key: the key of the pair.
      *   @return: the value of the pair with key \ref key.
      */
-    bool get_bf_tvalue(const belief_formula & key) const;
+    short get_bf_value(const belief_formula & key) const;
 
     void build_init_f_map();
 
     void build_init_bf_map();
 
-    void insert_subformula_bf(const formula_list & fl, bool tvalue);
+    void insert_subformula_bf(const formula_list & fl, short value);
 
-    void insert_subformula_bf(const belief_formula & bf, bool tvalue);
+    void insert_subformula_bf(const belief_formula & bf, short value);
+
+
+    template <class T>
+    void build_init_f_map(T & eState);
+
+    template <class T>
+    void build_init_bf_map(T & eState);
+
+    template <class T>
+    void insert_subformula_bf(const formula_list & fl, T & eState);
+
+    template <class T>
+    void insert_subformula_bf(const belief_formula & bf, T & eState);
+
 
     void get_base_fluents(const belief_formula & bf, fluent_set & bf_base_fluents);
 
@@ -180,6 +194,15 @@ public:
 
     //*Constructor that sets the depth to 0 and correctly initialize the maps*/
     pg_state_level();
+
+    pg_state_level(const pg_state_level & to_assign);
+
+    //*Constructor that sets the depth to 0 and correctly initialize the maps*/
+    void initialize();
+
+    template <class T>
+    void initialize(T & eState);
+
 
     /*Constructor of this that set the depth and the maps.
      *
@@ -221,14 +244,14 @@ public:
      * @param[in] key: the key of the pair.
      * @param[in] value: the value of the pair.
      */
-    void modify_fluent_tvalue(const fluent & key, bool value);
+    void modify_fluent_value(const fluent & key, short value);
 
     /*Function that modifies a pair belief_formula,bool in the field m_pg_bf_map
      *
      * @param[in] key: the key of the pair.
      * @param[in] value: the value of the pair.
      */
-    void modify_bf_tvalue(const belief_formula & key, bool value);
+    void modify_bf_value(const belief_formula & key, short value);
 
 
     /*Function that checks satisfaction of a fluent on *this*.
@@ -266,10 +289,15 @@ public:
 
     bool compute_succ(const action & act, const pg_state_level & predecessor, bformula_set & false_bf);
 
+    short get_score_from_depth() const;
+
+
     /*The = operator
      * 
      * @param[in]to_assign: The object to copy in *this* */
     bool operator=(const pg_state_level& to_assign);
+    void set_pg_state_level(const pg_state_level & to_assign);
+
 };
 
 
@@ -325,21 +353,44 @@ private:
 
 public:
 
-    /*Constructor of *this* that set the intial state level and the goal from the domain
+    /*Constructor of *this* that set the initial state level and the goal from the domain
+     * 
+     * This version should be used when a single planning graph is created from the initial state
      */
     planning_graph();
 
-    /*Constructor of *this* that set the intial state level from the domain and the goal as given
+    /*Constructor of *this* that set the initial state level from the domain and the goal as given
      * 
+     *  This version should be used when a single planning graph is created from the initial state
      * @param[in] goal: The formula_list that describes the given goals.
      */
     planning_graph(const formula_list & goal);
 
+
+    planning_graph(const planning_graph & pg);
+
+
+
+    /*Constructor of *this* that set the initial state level from  a given eState and the goal from the domain
+     * 
+     * @param[in] eState: The initial eState from which we should extract the first state level.
+     */
+    template <class T>
+    planning_graph(T & eState);
+
+    /*Constructor of *this* that set the initial state level from a given eState and goal description
+     * @param[in] goal: The formula_list that describes the given goals.
+     * @param[in] eState: The initial eState from which we should extract the first state level.
+     */
+    template <class T>
+    planning_graph(const formula_list & goal, T & eState);
+
     /*Function used by the constructors to properly initialize the various fields of the planning graph
      * 
      * @param[in] goal: The formula_list that describes the given goals.
+     * @param[in] pg_init: the initial State level.
      */
-    void init(const formula_list & goal);
+    void init(const formula_list & goal, const pg_state_level & pg_init);
 
 
 
@@ -366,24 +417,36 @@ public:
      * @return: True if a solution is found with the planning graph. 
      * @return: False otherwise. 
      */
-    bool is_satisfiable();
+    bool is_satisfiable() const;
 
     /*Getter of the field m_length
      *
      * @return: the value to assigned to m_length. 
      */
-    unsigned short get_length();
+    unsigned short get_length() const;
     /*Getter of the field m_sum
      *
      * @return: the value to assigned to m_sum. 
      */
-    unsigned short get_sum();
+    unsigned short get_sum() const;
 
     /*Getter of the field m_bfs_score
      *
      * @return: the value to assigned to m_bfs_score. 
      */
-    const pg_bfs_score & get_bfs_score();
-    /*const pg_worlds_score & get_worlds_score();
-    const pg_bfs_score & get_bfs_score(); FOR FUTURE USE*/
+    //  const pg_bfs_score & get_bfs_score();
+    const std::vector< pg_state_level > & get_state_levels() const;
+    const std::vector< pg_action_level > & get_action_levels() const;
+
+    const formula_list & get_goal() const;
+    const action_set & get_never_executed() const;
+    const bformula_set & get_belief_formula_false() const;
+
+
+    void set_pg(const planning_graph & to_assign);
+    bool operator=(const planning_graph & to_assign);
+
+    const pg_f_map & get_f_scores() const;
+
+    const pg_bf_map & get_bf_scores() const;
 };

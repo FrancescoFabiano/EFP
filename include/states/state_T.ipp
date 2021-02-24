@@ -120,6 +120,12 @@ void state<T>::set_representation(const T & to_set)
 }
 
 template <class T>
+bool state<T>::entails(const fluent & to_check) const
+{
+	return m_representation.entails(to_check);
+}
+
+template <class T>
 bool state<T>::entails(const fluent_set & to_check) const
 {
 	return m_representation.entails(to_check);

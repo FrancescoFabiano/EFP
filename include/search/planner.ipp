@@ -561,3 +561,4 @@ void planner<T>::check_actions_names(std::vector<std::string>& act_name)
 
 /*\ IMPLEMENTATION OF OTHER TEMPLATIC FUNCTIONS INSTANCIATED WITH A TEMPLATIC STATE*/
 #include "../heuristics/heuristics_template.ipp"
+#include "../heuristics/planning_graph_template.ipp"

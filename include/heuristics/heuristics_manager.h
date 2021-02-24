@@ -24,8 +24,10 @@ private:
     heuristics m_used_heur;
     /*The goal description, possibly expanded to exploit the heuristic even more*/
     formula_list m_goals;
+    pg_f_map m_fluents_score;
+    pg_bf_map m_bf_score;
     /*A map which contains the value of each "grounded" bf w.r.t. the classical planning graph.*/
-    pg_bfs_score m_bf_score;
+    // pg_bfs_score m_bf_score;
 
 
     /** \brief Function that expands the group formulae to have more sub_goals
@@ -97,43 +99,3 @@ public:
      * @return false: otherwise.*/
     bool operator=(const heuristics_manager& to_copy);
 };
-
-//template <class T>
-//void heuristics_manager::set_heuristic_value(T & eState)
-//{
-//
-//    switch (m_used_heur) {
-//    case L_PG:
-//    {
-//        //		planning_graph<T> pg(eState, m_goals);
-//        //		if (pg.is_satisfiable()) {
-//        //			eState.set_heuristic_value(pg.get_length());
-//        //		} else {
-//        //			eState.set_heuristic_value(-1);
-//        //		}
-//        break;
-//    }
-//    case S_PG:
-//    {
-//        //		planning_graph<T> pg(eState, m_goals);
-//        //
-//        //		if (pg.is_satisfiable()) {
-//        //			eState.set_heuristic_value(pg.get_sum());
-//        //		} else {
-//        //			eState.set_heuristic_value(-1);
-//        //		}
-//        break;
-//    }
-//    case SUBGOALS:
-//    {
-//        eState.set_heuristic_value(satisfied_goals::get_instance().get_unsatisfied_goals(eState));
-//        break;
-//    }
-//    default:
-//    {
-//        std::cerr << "\nWrong Heuristic Selection\n";
-//        exit(1);
-//    }
-//
-//    }
-//}

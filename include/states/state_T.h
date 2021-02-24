@@ -128,6 +128,23 @@ public:
      * @return the m_representation of *this*.*/
     const T & get_representation() const;
 
+
+    /** \brief Function that checks if *this* entails a \ref fluent.
+     * 
+     * The actual entailment is left to the specific state-representation (\ref m_representation).
+     * 
+     * @see kstate
+     * 
+     * @param to_check: the \ref fluent to check if is entailed by *this*.
+     * 
+     * @return true if \p to_check is entailed by *this*.
+     * @return false if \p -to_check is entailed by *this*.
+     * 
+     * \todo add in see also the other state m_representations.
+     * 
+     * \bug Is not supposed to override the method but it does.*/
+    bool entails(const fluent & to_check) const;
+
     /** \brief Function that checks if *this* entails a conjunctive set of \ref fluent.
      * 
      * The actual entailment is left to the specific state-representation (\ref m_representation).

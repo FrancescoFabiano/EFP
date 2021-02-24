@@ -82,9 +82,18 @@ void pg_action_level::print() const
 
 pg_state_level::pg_state_level()
 {
+	set_depth(0);
+}
+
+void pg_state_level::initialize()
+{
 	build_init_f_map();
 	build_init_bf_map();
-	set_depth(0);
+}
+
+pg_state_level::pg_state_level(const pg_state_level & to_assign)
+{
+	set_pg_state_level(to_assign);
 }
 
 pg_state_level::pg_state_level(const pg_f_map & f_map, const pg_bf_map & bf_map, unsigned short depth)
@@ -98,32 +107,32 @@ void pg_state_level::build_init_f_map()
 {
 	fluent_set initialy_fluent = domain::get_instance().get_initial_description().get_initially_known_fluents();
 	for (auto it_fls_ini = initialy_fluent.begin(); it_fls_ini != initialy_fluent.end(); it_fls_ini++) {
-		m_pg_f_map.insert(std::pair<fluent, bool>(*it_fls_ini, true));
+		m_pg_f_map.insert(std::pair<fluent, short>(*it_fls_ini, 0));
 	}
 
 	fluent_set fluents = domain::get_instance().get_fluents();
 	for (auto it_fls = fluents.begin(); it_fls != fluents.end(); it_fls++) {
 		//It only inserts if the pair was not there before
-		m_pg_f_map.insert(std::pair<fluent, bool>(*it_fls, false));
+		m_pg_f_map.insert(std::pair<fluent, short>(*it_fls, -1));
 	}
 }
 
-void pg_state_level::insert_subformula_bf(const formula_list & fl, bool tvalue)
+void pg_state_level::insert_subformula_bf(const formula_list & fl, short value)
 {
 	for (auto it_fl = fl.begin(); it_fl != fl.end(); it_fl++) {
-		insert_subformula_bf(*it_fl, tvalue);
+		insert_subformula_bf(*it_fl, value);
 	}
 }
 
-void pg_state_level::insert_subformula_bf(const belief_formula & bf, bool tvalue)
+void pg_state_level::insert_subformula_bf(const belief_formula & bf, short value)
 {
 	//We set all the subformulas to be TRUE for initially. Maybe it is wrong
 	//Maybe we don't need the subformulas at all
 	switch ( bf.get_formula_type() ) {
 
 	case BELIEF_FORMULA:
-		if (m_pg_bf_map.insert(std::pair < belief_formula, bool>(bf, tvalue)).second) {
-			insert_subformula_bf(bf.get_bf1(), tvalue);
+		if (m_pg_bf_map.insert(std::pair < belief_formula, short>(bf, value)).second) {
+			insert_subformula_bf(bf.get_bf1(), value);
 		}
 		break;
 
@@ -131,20 +140,20 @@ void pg_state_level::insert_subformula_bf(const belief_formula & bf, bool tvalue
 		switch ( bf.get_operator() ) {
 		case BF_NOT:
 			//HERE ALWAYS TRUE BECAUSE IS MONOTONIC NOW
-			if (m_pg_bf_map.insert(std::pair < belief_formula, bool>(bf, true)).second) {
-				insert_subformula_bf(bf.get_bf1(), tvalue);
+			if (m_pg_bf_map.insert(std::pair < belief_formula, short>(bf, 0)).second) {
+				insert_subformula_bf(bf.get_bf1(), value);
 			}
 			break;
 		case BF_OR:
-			if (m_pg_bf_map.insert(std::pair < belief_formula, bool>(bf, tvalue)).second) {
-				insert_subformula_bf(bf.get_bf1(), tvalue);
-				insert_subformula_bf(bf.get_bf2(), tvalue);
+			if (m_pg_bf_map.insert(std::pair < belief_formula, short>(bf, value)).second) {
+				insert_subformula_bf(bf.get_bf1(), value);
+				insert_subformula_bf(bf.get_bf2(), value);
 			}
 			break;
 		case BF_AND:
-			if (m_pg_bf_map.insert(std::pair < belief_formula, bool>(bf, tvalue)).second) {
-				insert_subformula_bf(bf.get_bf1(), tvalue);
-				insert_subformula_bf(bf.get_bf2(), tvalue);
+			if (m_pg_bf_map.insert(std::pair < belief_formula, short>(bf, value)).second) {
+				insert_subformula_bf(bf.get_bf1(), value);
+				insert_subformula_bf(bf.get_bf2(), value);
 			}
 			break;
 		case BF_FAIL:
@@ -154,8 +163,8 @@ void pg_state_level::insert_subformula_bf(const belief_formula & bf, bool tvalue
 		}
 		break;
 	case C_FORMULA:
-		if (m_pg_bf_map.insert(std::pair < belief_formula, bool>(bf, tvalue)).second) {
-			insert_subformula_bf(bf.get_bf1(), tvalue);
+		if (m_pg_bf_map.insert(std::pair < belief_formula, short>(bf, value)).second) {
+			insert_subformula_bf(bf.get_bf1(), value);
 		}
 		break;
 	case FLUENT_FORMULA:
@@ -175,7 +184,7 @@ void pg_state_level::build_init_bf_map()
 	//The one to set to TRUE
 	auto ini_conditions = domain::get_instance().get_initial_description().get_initial_conditions();
 	for (auto it_fl = ini_conditions.begin(); it_fl != ini_conditions.end(); it_fl++) {
-		insert_subformula_bf(*it_fl, true);
+		insert_subformula_bf(*it_fl, 0);
 	}
 
 	action_set actions = domain::get_instance().get_actions();
@@ -183,22 +192,22 @@ void pg_state_level::build_init_bf_map()
 
 		for (auto it_mapeff = it_acs->get_effects().begin(); it_mapeff != it_acs->get_effects().end(); it_mapeff++) {
 			//if (it_mapeff->second.size() > 0) {
-			insert_subformula_bf(it_mapeff->second, false);
+			insert_subformula_bf(it_mapeff->second, -1);
 			//}
 		}
 
 		if (it_acs->get_executability().size() > 0) {
-			insert_subformula_bf(it_acs->get_executability(), false);
+			insert_subformula_bf(it_acs->get_executability(), -1);
 		}
 
 		for (auto it_full_obs = it_acs->get_fully_observants().begin(); it_full_obs != it_acs->get_fully_observants().end(); it_full_obs++) {
 			//if (it_full_obs->second.size() > 0) {
-			insert_subformula_bf(it_full_obs->second, false);
+			insert_subformula_bf(it_full_obs->second, -1);
 			//}
 		}
 		for (auto it_part_obs = it_acs->get_partially_observants().begin(); it_part_obs != it_acs->get_partially_observants().end(); it_part_obs++) {
 			//if (it_part_obs->second.size() > 0) {
-			insert_subformula_bf(it_part_obs->second, false);
+			insert_subformula_bf(it_part_obs->second, -1);
 			//}
 		}
 	}
@@ -220,12 +229,12 @@ void pg_state_level::set_depth(unsigned short to_set)
 	m_depth = to_set;
 }
 
-bool pg_state_level::get_fluent_tvalue(const fluent & key) const
+short pg_state_level::get_fluent_value(const fluent & key) const
 {
 	return m_pg_f_map.at(key);
 }
 
-bool pg_state_level::get_bf_tvalue(const belief_formula & key) const
+short pg_state_level::get_bf_value(const belief_formula & key) const
 {
 	return m_pg_bf_map.at(key);
 }
@@ -245,24 +254,33 @@ unsigned short pg_state_level::get_depth() const
 	return m_depth;
 }
 
-void pg_state_level::modify_fluent_tvalue(const fluent & key, bool value)
+short pg_state_level::get_score_from_depth() const
 {
-	m_pg_f_map[key] = value;
+	return m_depth;
 }
 
-void pg_state_level::modify_bf_tvalue(const belief_formula & key, bool value)
+void pg_state_level::modify_fluent_value(const fluent & key, short value)
 {
-	m_pg_bf_map[key] = value;
+	if (m_pg_f_map.at(key) < 0) {
+		m_pg_f_map[key] = value;
+	}
+}
+
+void pg_state_level::modify_bf_value(const belief_formula & key, short value)
+{
+	if (m_pg_bf_map.at(key) < 0) {
+		m_pg_bf_map[key] = value;
+	}
 }
 
 bool pg_state_level::pg_entailment(const fluent & f) const
 {
-	return get_fluent_tvalue(f);
+	return get_fluent_value(f) >= 0;
 }
 
 bool pg_state_level::pg_entailment(const belief_formula & bf) const
 {
-	return get_bf_tvalue(bf);
+	return get_bf_value(bf) >= 0;
 }
 
 bool pg_state_level::pg_entailment(const formula_list & fl) const
@@ -362,9 +380,9 @@ bool pg_state_level::exec_ontic(const action & act, const pg_state_level & prede
 				fs_temp = *ff_temp.begin();
 				for (auto it_eff = fs_temp.begin(); it_eff != fs_temp.end(); it_eff++) {
 					f_tmp = *it_eff;
-					if (!get_fluent_tvalue(f_tmp)) {
+					if (!pg_entailment(f_tmp)) {
 						modified_pg = true;
-						modify_fluent_tvalue(f_tmp, true);
+						modify_fluent_value(f_tmp, get_score_from_depth());
 					}
 					verified_fluents.insert(f_tmp);
 				}
@@ -463,7 +481,7 @@ bool pg_state_level::exec_epistemic(const action & act, const pg_state_level & p
 
 bool pg_state_level::apply_ontic_effects(const belief_formula & bf, bformula_set & fl, const agent_set & fully, bool & modified_pg)
 {
-	if (get_bf_tvalue(bf)) {
+	if (pg_entailment(bf)) {
 		return true;
 	}
 
@@ -500,11 +518,11 @@ bool pg_state_level::apply_ontic_effects(const belief_formula & bf, bformula_set
 			//We are "generous". Maybe it is necessary to check if the chain is of fully every time.
 			if (apply_ontic_effects(bf.get_bf1(), fl, fully, modified_pg)) {
 				//Alreaady checked at the beginning
-				//if (!get_bf_tvalue(bf))
+				//if (!get_bf_value(bf))
 				//{
 				modified_pg = true;
 				//}
-				modify_bf_tvalue(bf, true);
+				modify_bf_value(bf, get_score_from_depth());
 				fl.erase(bf);
 				return true;
 			}
@@ -524,7 +542,7 @@ bool pg_state_level::apply_ontic_effects(const belief_formula & bf, bformula_set
 		{
 			if (apply_ontic_effects(bf.get_bf1(), fl, fully, modified_pg) || apply_ontic_effects(bf.get_bf2(), fl, fully, modified_pg)) {
 				modified_pg = true;
-				modify_bf_tvalue(bf, true);
+				modify_bf_value(bf, get_score_from_depth());
 				fl.erase(bf);
 				return true;
 			}
@@ -534,7 +552,7 @@ bool pg_state_level::apply_ontic_effects(const belief_formula & bf, bformula_set
 		{
 			if (apply_ontic_effects(bf.get_bf1(), fl, fully, modified_pg) && apply_ontic_effects(bf.get_bf2(), fl, fully, modified_pg)) {
 				modified_pg = true;
-				modify_bf_tvalue(bf, true);
+				modify_bf_value(bf, get_score_from_depth());
 				fl.erase(bf);
 				return true;
 			}
@@ -559,7 +577,7 @@ bool pg_state_level::apply_ontic_effects(const belief_formula & bf, bformula_set
 		//We are "generous". Maybe it is necessary to check if the chain is of fully every time.
 		if (apply_ontic_effects(bf.get_bf1(), fl, fully, modified_pg)) {
 			modified_pg = true;
-			modify_bf_tvalue(bf, true);
+			modify_bf_value(bf, get_score_from_depth());
 			fl.erase(bf);
 			return true;
 		}
@@ -582,7 +600,7 @@ bool pg_state_level::apply_ontic_effects(const belief_formula & bf, bformula_set
 
 bool pg_state_level::apply_epistemic_effects(fluent effect, const belief_formula & bf, bformula_set & fl, const agent_set & fully, const agent_set & partially, bool & modified_pg, unsigned short vis_cond)
 {
-	if (get_bf_tvalue(bf)) {
+	if (pg_entailment(bf)) {
 		return true;
 	}
 
@@ -632,7 +650,7 @@ bool pg_state_level::apply_epistemic_effects(fluent effect, const belief_formula
 			}
 			if (apply_epistemic_effects(effect, bf.get_bf1(), fl, fully, partially, modified_pg, temp_vis_cond)) {
 				modified_pg = true;
-				modify_bf_tvalue(bf, true);
+				modify_bf_value(bf, get_score_from_depth());
 				fl.erase(bf);
 				tmp_ret1 = true;
 			}
@@ -640,7 +658,7 @@ bool pg_state_level::apply_epistemic_effects(fluent effect, const belief_formula
 		if (partially.find(bf.get_agent()) != partially.end()) {
 			if (apply_epistemic_effects(effect, bf.get_bf1(), fl, fully, partially, modified_pg, 2)) {
 				modified_pg = true;
-				modify_bf_tvalue(bf, true);
+				modify_bf_value(bf, get_score_from_depth());
 				fl.erase(bf);
 				tmp_ret1 = false;
 			}
@@ -660,7 +678,7 @@ bool pg_state_level::apply_epistemic_effects(fluent effect, const belief_formula
 			if (apply_epistemic_effects(effect, bf.get_bf1(), fl, fully, partially, modified_pg, vis_cond)
 				|| apply_epistemic_effects(effect, bf.get_bf2(), fl, fully, partially, modified_pg, vis_cond)) {
 				modified_pg = true;
-				modify_bf_tvalue(bf, true);
+				modify_bf_value(bf, get_score_from_depth());
 				fl.erase(bf);
 				return true;
 			}
@@ -671,7 +689,7 @@ bool pg_state_level::apply_epistemic_effects(fluent effect, const belief_formula
 			if (apply_epistemic_effects(effect, bf.get_bf1(), fl, fully, partially, modified_pg, vis_cond)
 				&& apply_epistemic_effects(effect, bf.get_bf2(), fl, fully, partially, modified_pg, vis_cond)) {
 				modified_pg = true;
-				modify_bf_tvalue(bf, true);
+				modify_bf_value(bf, get_score_from_depth());
 				fl.erase(bf);
 				return true;
 			}
@@ -707,7 +725,7 @@ bool pg_state_level::apply_epistemic_effects(fluent effect, const belief_formula
 			}
 			if (apply_epistemic_effects(effect, bf.get_bf1(), fl, fully, partially, modified_pg, temp_vis_cond)) {
 				modified_pg = true;
-				modify_bf_tvalue(bf, true);
+				modify_bf_value(bf, get_score_from_depth());
 				fl.erase(bf);
 				tmp_ret1 = true;
 			}
@@ -717,7 +735,7 @@ bool pg_state_level::apply_epistemic_effects(fluent effect, const belief_formula
 			//We are "generous". Maybe it is necessary to check if the chain is of fully every time.
 			if (apply_epistemic_effects(effect, bf.get_bf1(), fl, fully, partially, modified_pg, 2)) {
 				modified_pg = true;
-				modify_bf_tvalue(bf, true);
+				modify_bf_value(bf, get_score_from_depth());
 				fl.erase(bf);
 				tmp_ret2 = true;
 			}
@@ -743,13 +761,16 @@ bool pg_state_level::apply_epistemic_effects(fluent effect, const belief_formula
 
 bool pg_state_level::operator=(const pg_state_level & to_assign)
 {
-	set_f_map(to_assign.get_f_map());
-	set_bf_map(to_assign.get_bf_map());
-	set_depth(to_assign.get_depth());
-
+	set_pg_state_level(to_assign);
 	return true;
 }
 
+void pg_state_level::set_pg_state_level(const pg_state_level & to_assign)
+{
+	set_f_map(to_assign.get_f_map());
+	set_bf_map(to_assign.get_bf_map());
+	set_depth(to_assign.get_depth());
+}
 
 
 
@@ -762,15 +783,24 @@ std::chrono::duration<double> t1, t2, t3, t4;
 
 planning_graph::planning_graph()
 {
-	init(domain::get_instance().get_goal_description());
+	pg_state_level pg_init;
+	pg_init.initialize();
+	init(domain::get_instance().get_goal_description(), pg_init);
+}
+
+planning_graph::planning_graph(const planning_graph & pg)
+{
+	set_pg(pg);
 }
 
 planning_graph::planning_graph(const formula_list & goal)
 {
-	init(goal);
+	pg_state_level pg_init;
+	pg_init.initialize();
+	init(goal, pg_init);
 }
 
-void planning_graph::init(const formula_list & goal)
+void planning_graph::init(const formula_list & goal, const pg_state_level & pg_init)
 {
 	/*\*****START PLANNING GRAPH TIME MEASURE*******
 	auto start_pg_build = std::chrono::system_clock::now();
@@ -778,7 +808,6 @@ void planning_graph::init(const formula_list & goal)
 	//std::cout << "start"<< std::endl;
 
 	set_goal(goal);
-	pg_state_level pg_init;
 	m_state_levels.push_back(pg_init);
 	m_never_executed = domain::get_instance().get_actions();
 	set_length(0);
@@ -809,11 +838,11 @@ void planning_graph::init(const formula_list & goal)
 	 *\******END PLANNING GRAPH TIME MEASURE********/
 
 	if (not_goal) {
-	//	if (!is_single) {
-			pg_build();
-	//	} else {
-	//		pg_build_initially(goal);
-	//	}
+		//	if (!is_single) {
+		pg_build();
+		//	} else {
+		//		pg_build_initially(goal);
+		//	}
 	} else {
 
 		set_satisfiable(true);
@@ -841,7 +870,7 @@ void planning_graph::set_satisfiable(bool sat)
 	m_satisfiable = sat;
 }
 
-bool planning_graph::is_satisfiable()
+bool planning_graph::is_satisfiable() const
 {
 
 	return m_satisfiable;
@@ -849,7 +878,8 @@ bool planning_graph::is_satisfiable()
 
 void planning_graph::pg_build()
 {
-	pg_state_level s_level_curr = m_state_levels.back();
+	pg_state_level s_level_curr;
+	s_level_curr = m_state_levels.back();
 	pg_action_level a_level_curr;
 	a_level_curr.set_depth(get_length());
 
@@ -879,7 +909,8 @@ void planning_graph::pg_build()
 	set_length(get_length() + 1);
 
 	//The no-op is done with the copy
-	pg_state_level s_level_next = s_level_curr;
+	pg_state_level s_level_next;
+	s_level_next = s_level_curr;
 	s_level_next.set_depth(get_length());
 	bool new_state_insertion = false;
 
@@ -961,7 +992,6 @@ void planning_graph::pg_build()
 
 void planning_graph::add_state_level(const pg_state_level & s_level)
 {
-
 	m_state_levels.push_back(s_level);
 }
 
@@ -983,7 +1013,7 @@ void planning_graph::set_sum(unsigned short sum)
 	m_pg_sum = sum;
 }
 
-unsigned short planning_graph::get_length()
+unsigned short planning_graph::get_length() const
 {
 	if (is_satisfiable()) {
 
@@ -993,7 +1023,7 @@ unsigned short planning_graph::get_length()
 	exit(1);
 }//construct planning graph and return the level that satisfied the goal.
 
-unsigned short planning_graph::get_sum()
+unsigned short planning_graph::get_sum() const
 {
 	if (is_satisfiable()) {
 
@@ -1003,19 +1033,20 @@ unsigned short planning_graph::get_sum()
 	exit(1);
 }//
 
-const pg_bfs_score & planning_graph::get_bfs_score()
-{
-	if (is_satisfiable()) {
-		return m_bfs_score;
-	}
-	std::cerr << "\nThe planning graph could not find any solution. Check for the satisfiability before calling \"get_bfs_score\"\n";
-	exit(1);
-}//
+//const pg_bfs_score & planning_graph::get_bfs_score()
+//{
+//	if (is_satisfiable()) {
+//		return m_bfs_score;
+//	}
+//	std::cerr << "\nThe planning graph could not find any solution. Check for the satisfiability before calling \"get_bfs_score\"\n";
+//	exit(1);
+//}//
 
 void planning_graph::set_goal(const formula_list & goal)
 {
 	m_goal = goal;
 }
+
 /*
 const pg_worlds_score & planning_graph::get_worlds_score()
 {
@@ -1036,3 +1067,57 @@ const pg_bfs_score & planning_graph::get_bfs_score()
 	std::cerr << "\nThe planning graph could not find any solution. Check for the satisfiability before calling \"get_bfs_score\"\n";
 	exit(1);
 } FOR FUTURE USE */
+
+const std::vector< pg_state_level > & planning_graph::get_state_levels() const
+{
+	return m_state_levels;
+}
+
+const std::vector< pg_action_level > & planning_graph::get_action_levels() const
+{
+	return m_action_levels;
+}
+
+const pg_f_map & planning_graph::get_f_scores() const
+{
+	return m_state_levels.back().get_f_map();
+}
+
+const pg_bf_map & planning_graph::get_bf_scores() const
+{
+	return m_state_levels.back().get_bf_map();
+}
+
+const formula_list & planning_graph::get_goal() const
+{
+	return m_goal;
+}
+
+const action_set & planning_graph::get_never_executed() const
+{
+	return m_never_executed;
+}
+
+const bformula_set & planning_graph::get_belief_formula_false() const
+{
+	return m_belief_formula_false;
+}
+
+bool planning_graph::operator=(const planning_graph & to_assign)
+{
+	set_pg(to_assign);
+	return true;
+}
+
+void planning_graph::set_pg(const planning_graph & to_assign)
+{
+	m_state_levels = to_assign.get_state_levels();
+	m_action_levels = to_assign.get_action_levels();
+	m_pg_length = to_assign.get_length();
+	m_pg_sum = to_assign.get_sum();
+	m_satisfiable = to_assign.is_satisfiable();
+	m_goal = to_assign.get_goal();
+	//	m_bfs_score = to_assign.get_bfs_score();
+	m_never_executed = to_assign.get_never_executed();
+	m_belief_formula_false = to_assign.get_belief_formula_false();
+}

@@ -14,9 +14,11 @@ heuristics_manager::heuristics_manager(heuristics used_heur)
 	}
 	case C_PG:
 	{
-		planning_graph pg(m_goals);
+		planning_graph pg;
 		if (pg.is_satisfiable()) {
-			m_bf_score = pg.get_bfs_score();
+			m_fluents_score = pg.get_f_scores();
+			m_bf_score = pg.get_bf_scores();
+
 		} else {
 			std::cout << "\n\nIt does not exists any Plan for this domain instance:(\n";
 			exit(1);
@@ -128,4 +130,3 @@ bool heuristics_manager::operator=(const heuristics_manager& to_copy)
 	set_goals(to_copy.get_goals());
 	return true;
 }
-
