@@ -273,6 +273,9 @@ void pg_state_level::modify_fluent_value(const fluent & key, short value)
 		if (m_pg_f_map.at(key) < 0) {
 			m_pg_f_map[key] = value;
 		}
+	} else {
+		std::cerr << "\n\nFound fluent never declared in the Planning Graph.\n";
+		exit(1);
 	}
 }
 
@@ -282,6 +285,9 @@ void pg_state_level::modify_bf_value(const belief_formula & key, short value)
 		if (m_pg_bf_map.at(key) < 0) {
 			m_pg_bf_map[key] = value;
 		}
+	} else {
+		std::cerr << "\n\nFound bf formula never declared in the Planning Graph.\n";
+		exit(1);
 	}
 }
 
@@ -292,7 +298,11 @@ bool pg_state_level::pg_entailment(const fluent & f) const
 
 bool pg_state_level::pg_entailment(const belief_formula & bf) const
 {
-	return get_bf_value(bf) >= 0;
+	if (bf.get_formula_type() == BF_EMPTY) {
+		return true;
+	} else {
+		return get_bf_value(bf) >= 0;
+	}
 }
 
 bool pg_state_level::pg_entailment(const formula_list & fl) const
@@ -459,8 +469,6 @@ bool pg_state_level::exec_epistemic(const action & act, const pg_state_level & p
 			partially_obs.insert(it_partially->first);
 		}
 	}
-
-
 
 	bool modified_pg = false;
 	bformula_set tmp_fl = false_bf;
@@ -994,10 +1002,10 @@ void planning_graph::pg_build()
 	} else if (!new_state_insertion) {
 		set_satisfiable(false);
 		/*\*****START PLANNING GRAPH TIME MEASURE*******/
-		if (get_length() > 2) {
-		print();
+		if (get_length() > 0) {
+			print();
 		}
-	/*\******END PLANNING GRAPH TIME MEASURE********/
+		/*\******END PLANNING GRAPH TIME MEASURE********/
 		return;
 	} else {
 		pg_build();
@@ -1110,12 +1118,12 @@ void planning_graph::print() const
 {
 
 	std::cout << "\n\n**********ePLANNING-GRAPH PRINT**********\n";
-	short count = 0;
+	unsigned short count = 0;
 	for (auto it_stlv = m_state_levels.begin(); it_stlv != m_state_levels.end(); ++it_stlv) {
 		auto fluents_score = it_stlv->get_f_map();
 		auto bf_score = it_stlv->get_bf_map();
 
-		std::cout << "\n\t*******Level " << count << "*******\n";
+		std::cout << "\n\t*******State Level " << count << "*******\n";
 		std::cout << "\n\t\t****Fluents****\n\n";
 		for (auto it_pgf = fluents_score.begin(); it_pgf != fluents_score.end(); ++it_pgf) {
 			std::cout << "\t\t\t" << domain::get_instance().get_grounder().deground_fluent(it_pgf->first) << " -> " << it_pgf->second << std::endl;
@@ -1126,7 +1134,19 @@ void planning_graph::print() const
 			it_pgbf->first.print();
 			std::cout << " -> " << it_pgbf->second << std::endl;
 		}
-		std::cout << "\n\t*******End Level " << count++ << "*******\n";
+		std::cout << "\n\t*******End State Level " << count << "*******\n";
+
+
+		if (count < m_action_levels.size()) {
+			std::cout << "\n\t*******Action Level " << count << "*******\n";
+			auto act_set = m_action_levels.at(count).get_actions();
+			for (auto it_acts = act_set.begin(); it_acts != act_set.end(); it_acts++) {
+
+				std::cout << "\n\t\t" << it_acts->get_name() << std::endl;
+			}
+			std::cout << "\n\t*******End Action Level " << count++ << "*******\n";
+		}
+
 	}
 	std::cout << "\n*********END ePLANNING-GRAPH PRINT**********\n";
 }
