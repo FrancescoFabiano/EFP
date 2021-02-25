@@ -815,11 +815,11 @@ void pg_state_level::set_pg_state_level(const pg_state_level & to_assign)
 
 /*\******************************************************************************************************************/
 
-/*\*****START PLANNING GRAPH TIME MEASURE*******/
+/*\*****START PLANNING GRAPH TIME MEASURE*******
 #include <chrono>
 std::chrono::duration<double> t1, t2, t3, t4;
 
-/*\******END PLANNING GRAPH TIME MEASURE********/
+*\******END PLANNING GRAPH TIME MEASURE********/
 
 planning_graph::planning_graph()
 {
@@ -843,10 +843,10 @@ planning_graph::planning_graph(const formula_list & goal)
 
 void planning_graph::init(const formula_list & goal, const pg_state_level & pg_init)
 {
-	/*\*****START PLANNING GRAPH TIME MEASURE*******/
+	/*\*****START PLANNING GRAPH TIME MEASURE*******
 	auto start_pg_build = std::chrono::system_clock::now();
 	std::cout << "start" << std::endl;
-	/*\******END PLANNING GRAPH TIME MEASURE********/
+	*\******END PLANNING GRAPH TIME MEASURE********/
 
 
 	set_goal(goal);
@@ -862,9 +862,9 @@ void planning_graph::init(const formula_list & goal, const pg_state_level & pg_i
 	set_length(0);
 	set_sum(0);
 
-	/*\*****START PLANNING GRAPH TIME MEASURE*******/
+	/*\*****START PLANNING GRAPH TIME MEASURE*******
 	auto start_pg_goal_ini = std::chrono::system_clock::now();
-	/*\******END PLANNING GRAPH TIME MEASURE********/
+	*\******END PLANNING GRAPH TIME MEASURE********/
 
 
 	bool not_goal = false;
@@ -877,14 +877,14 @@ void planning_graph::init(const formula_list & goal, const pg_state_level & pg_i
 		}
 	}
 
-	/*\*****START PLANNING GRAPH TIME MEASURE*******/
+	/*\*****START PLANNING GRAPH TIME MEASURE*******
 	auto end_pg_goal_ini = std::chrono::system_clock::now();
 	std::chrono::duration<double> pg_goal_ini_time = end_pg_goal_ini - start_pg_goal_ini;
 	t1 = std::chrono::milliseconds::zero();
 	t2 = std::chrono::milliseconds::zero();
 	t3 = std::chrono::milliseconds::zero();
 	t4 = std::chrono::milliseconds::zero();
-	/*\******END PLANNING GRAPH TIME MEASURE********/
+	*\******END PLANNING GRAPH TIME MEASURE********/
 
 	if (not_goal) {
 		//	if (!is_single) {
@@ -899,7 +899,7 @@ void planning_graph::init(const formula_list & goal, const pg_state_level & pg_i
 		exit(1);
 	}
 
-	/*\*****START PLANNING GRAPH TIME MEASURE*******/
+	/*\*****START PLANNING GRAPH TIME MEASURE*******
 	auto end_pg_build = std::chrono::system_clock::now();
 	std::chrono::duration<double> pg_build_time = end_pg_build - start_pg_build;
 	std::cout << "\n\nGenerated Planning Graph of length " << get_length() << " in " << pg_build_time.count() << " seconds of which:";
@@ -908,7 +908,7 @@ void planning_graph::init(const formula_list & goal, const pg_state_level & pg_i
 	std::cout << "\n\nState Level Creation:  " << t2.count() << " of which:";
 	std::cout << "\nActions Execution:     " << t4.count();
 	std::cout << "\n\nGoals Check:           " << t3.count() << std::endl;
-	/*\******END PLANNING GRAPH TIME MEASURE********/
+	*\******END PLANNING GRAPH TIME MEASURE********/
 
 
 }
@@ -932,9 +932,9 @@ void planning_graph::pg_build()
 	pg_action_level a_level_curr;
 	a_level_curr.set_depth(get_length());
 
-	/*\*****START PLANNING GRAPH TIME MEASURE*******/
+	/*\*****START PLANNING GRAPH TIME MEASURE*******
 	auto start = std::chrono::system_clock::now();
-	/*\******END PLANNING GRAPH TIME MEASURE********/
+	*\******END PLANNING GRAPH TIME MEASURE********/
 
 	if (m_action_levels.size() > 0) {
 		a_level_curr = m_action_levels.back();
@@ -948,10 +948,10 @@ void planning_graph::pg_build()
 			it_actset++;
 		}
 	}
-	/*\*****START PLANNING GRAPH TIME MEASURE*******/
+	/*\*****START PLANNING GRAPH TIME MEASURE*******
 	auto end = std::chrono::system_clock::now();
 	t1 += end - start;
-	/*\******END PLANNING GRAPH TIME MEASURE********/
+	*\******END PLANNING GRAPH TIME MEASURE********/
 
 
 	add_action_level(a_level_curr);
@@ -963,48 +963,48 @@ void planning_graph::pg_build()
 	s_level_next.set_depth(get_length());
 	bool new_state_insertion = false;
 
-	/*\*****START PLANNING GRAPH TIME MEASURE*******/
+	/*\*****START PLANNING GRAPH TIME MEASURE*******
 	start = std::chrono::system_clock::now();
-	/*\******END PLANNING GRAPH TIME MEASURE********/
+	*\******END PLANNING GRAPH TIME MEASURE********/
 
-	/*\*****START PLANNING GRAPH TIME MEASURE*******/
+	/*\*****START PLANNING GRAPH TIME MEASURE*******
 	std::cerr << "\n\nPlaning Graph Length: " << get_length();
 	if (get_length() > 0) {
 		std::cerr << "\nAction Level creation: " << t1.count();
 		std::cerr << "\nState Level Creation:  " << t2.count() << " of which:";
 		std::cerr << "\nActions execution:     " << t4.count();
 	}
-	/*\******END PLANNING GRAPH TIME MEASURE********/
+	*\******END PLANNING GRAPH TIME MEASURE********/
 
 
 	for (it_actset = a_level_curr.get_actions().begin(); it_actset != a_level_curr.get_actions().end(); it_actset++) {
 
-		/*\*****START PLANNING GRAPH TIME MEASURE*******/
+		/*\*****START PLANNING GRAPH TIME MEASURE*******
 		auto startN = std::chrono::system_clock::now();
-		/*\******END PLANNING GRAPH TIME MEASURE********/
+		*\******END PLANNING GRAPH TIME MEASURE********/
 
 		if (s_level_next.compute_succ(*it_actset, s_level_curr, m_belief_formula_false)) {
 			new_state_insertion = true;
 		}
-		/*\*****START PLANNING GRAPH TIME MEASURE*******/
+		/*\*****START PLANNING GRAPH TIME MEASURE*******
 		auto endN = std::chrono::system_clock::now();
 		t4 += endN - startN;
-		/*\******END PLANNING GRAPH TIME MEASURE********/
+		*\******END PLANNING GRAPH TIME MEASURE********/
 	}
 
-	/*\*****START PLANNING GRAPH TIME MEASURE*******/
+	/*\*****START PLANNING GRAPH TIME MEASURE*******
 	end = std::chrono::system_clock::now();
 	t2 += end - start;
-	/*\******END PLANNING GRAPH TIME MEASURE********/
+	*\******END PLANNING GRAPH TIME MEASURE********/
 
 
 	add_state_level(s_level_next);
 
 	bool not_goal = false;
 
-	/*\*****START PLANNING GRAPH TIME MEASURE*******/
+	/*\*****START PLANNING GRAPH TIME MEASURE*******
 	start = std::chrono::system_clock::now();
-	/*\******END PLANNING GRAPH TIME MEASURE********/
+	*\******END PLANNING GRAPH TIME MEASURE********/
 
 
 	//Remove each sub goal already satisfied: it will always be and we just need to check it once
@@ -1019,20 +1019,20 @@ void planning_graph::pg_build()
 			not_goal = true;
 		}
 	}
-	/*\*****START PLANNING GRAPH TIME MEASURE*******/
+	/*\*****START PLANNING GRAPH TIME MEASURE*******
 	end = std::chrono::system_clock::now();
 	t3 += end - start;
-	/*\******END PLANNING GRAPH TIME MEASURE********/
+	*\******END PLANNING GRAPH TIME MEASURE********/
 	if (!not_goal) {
 		set_satisfiable(true);
 		return;
 	} else if (!new_state_insertion) {
 		set_satisfiable(false);
-		/*\*****START PLANNING GRAPH TIME MEASURE*******/
+		/*\*****START PLANNING GRAPH TIME MEASURE*******
 		if (get_length() > 5) {
 			print();
 		}
-		/*\******END PLANNING GRAPH TIME MEASURE********/
+		*\******END PLANNING GRAPH TIME MEASURE********/
 		return;
 	} else {
 		pg_build();
