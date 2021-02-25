@@ -62,6 +62,10 @@ public:
      * 
      * @param[in] used_heur: Which heuristic has to be used.*/
     heuristics_manager(heuristics used_heur);
+
+    template <class T>
+    heuristics_manager(heuristics used_heur, const T & eState);
+
     /** \brief The function that compute heuristic value
      * 
      * @param[out] eState: The state to update with the calculated heuristic value.*/

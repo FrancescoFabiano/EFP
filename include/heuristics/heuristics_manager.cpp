@@ -14,6 +14,9 @@ heuristics_manager::heuristics_manager(heuristics used_heur)
 	}
 	case C_PG:
 	{
+		std::cout << "\n\nWrong implementation of initial state from initial formuale\n";
+					exit(1);
+
 		planning_graph pg;
 		if (pg.is_satisfiable()) {
 			m_fluents_score = pg.get_f_scores();

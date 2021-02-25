@@ -5,10 +5,10 @@
 //Planning Graph Code
 
 template <class T>
-void pg_state_level::initialize(T & eState)
+void pg_state_level::initialize(const formula_list & goals, T & eState)
 {
 	build_init_f_map(eState);
-	build_init_bf_map(eState);
+	build_init_bf_map(goals, eState);
 }
 
 template <class T>
@@ -20,20 +20,19 @@ void pg_state_level::build_init_f_map(T & eState)
 			m_pg_f_map.insert(std::pair<fluent, short>(*it_fls, 0));
 		} else {
 			m_pg_f_map.insert(std::pair<fluent, short>(*it_fls, -1));
-
 		}
 	}
 }
 
 template <class T>
-void pg_state_level::build_init_bf_map(T & eState)
+void pg_state_level::build_init_bf_map(const formula_list & goals, T & eState)
 {
 	//The one to set to TRUE
-	auto ini_conditions = domain::get_instance().get_initial_description().get_initial_conditions();
-	for (auto it_fl = ini_conditions.begin(); it_fl != ini_conditions.end(); it_fl++) {
-		insert_subformula_bf(*it_fl, eState);
-	}
+	insert_subformula_bf(domain::get_instance().get_initial_description().get_initial_conditions(), eState);
 
+
+	insert_subformula_bf(goals, eState);
+	
 	action_set actions = domain::get_instance().get_actions();
 	for (auto it_acs = actions.begin(); it_acs != actions.end(); it_acs++) {
 
@@ -130,15 +129,16 @@ void pg_state_level::insert_subformula_bf(const belief_formula & bf, T & eState)
 
 template <class T>
 planning_graph::planning_graph(T & eState)
-{
-	pg_state_level pg_init(eState);
-	init(domain::get_instance().get_goal_description(), pg_init);
+{auto goals = domain::get_instance().get_goal_description();
+	pg_state_level pg_init;
+	pg_init.initialize(goals, eState);
+	init(goals, pg_init);
 }
 
 template <class T>
 planning_graph::planning_graph(const formula_list & goal, T & eState)
 {
 	pg_state_level pg_init;
-	pg_init.initialize(eState);
+	pg_init.initialize(goal, eState);
 	init(goal, pg_init);
 }

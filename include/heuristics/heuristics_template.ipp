@@ -4,6 +4,47 @@
 #include "heuristics_manager.h"
 //heuristic Manager
 template <class T>
+heuristics_manager::heuristics_manager(heuristics used_heur, const T & eState)
+{
+	set_used_h(used_heur);
+	m_goals = domain::get_instance().get_goal_description();
+	switch ( m_used_heur ) {
+	case L_PG:
+	case S_PG:
+	{
+		expand_goals();
+		break;
+
+	}
+	case C_PG:
+	{
+		planning_graph pg(eState);
+		if (pg.is_satisfiable()) {
+			m_fluents_score = pg.get_f_scores();
+			m_bf_score = pg.get_bf_scores();
+
+		} else {
+			std::cout << "\n\nIt does not exists any Plan for this domain instance:(\n";
+			exit(1);
+		}
+		break;
+	}
+	case SUBGOALS:
+	{
+		expand_goals();
+		satisfied_goals::get_instance().set(m_goals);
+		break;
+	}
+	default:
+	{
+		std::cerr << "\nWrong Heuristic Selection\n";
+		exit(1);
+	}
+
+	}
+}
+
+template <class T>
 void heuristics_manager::set_heuristic_value(T & eState)
 {
 

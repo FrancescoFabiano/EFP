@@ -332,7 +332,7 @@ bool planner<T>::search_heur(bool results_file, heuristics used_heur)
 	std::cout << "\nInitial Built in " << elapsed_seconds.count() << " seconds\n";
 
 	start_timing = std::chrono::system_clock::now();
-	heuristics_manager h_manager(used_heur);
+	heuristics_manager h_manager(used_heur,initial);
 	end_timing = std::chrono::system_clock::now();
 	elapsed_seconds = end_timing - start_timing;
 	std::cout << "\nHeuristic Built in " << elapsed_seconds.count() << " seconds\n";

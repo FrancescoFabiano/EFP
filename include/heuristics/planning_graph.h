@@ -160,7 +160,7 @@ private:
 
     void build_init_f_map();
 
-    void build_init_bf_map();
+    void build_init_bf_map(const formula_list & goals);
 
     void insert_subformula_bf(const formula_list & fl, short value);
 
@@ -171,7 +171,7 @@ private:
     void build_init_f_map(T & eState);
 
     template <class T>
-    void build_init_bf_map(T & eState);
+    void build_init_bf_map(const formula_list & goals, T & eState);
 
     template <class T>
     void insert_subformula_bf(const formula_list & fl, T & eState);
@@ -198,10 +198,10 @@ public:
     pg_state_level(const pg_state_level & to_assign);
 
     //*Constructor that sets the depth to 0 and correctly initialize the maps*/
-    void initialize();
+    void initialize(const formula_list & goal);
 
     template <class T>
-    void initialize(T & eState);
+    void initialize(const formula_list & goal, T & eState);
 
 
     /*Constructor of this that set the depth and the maps.

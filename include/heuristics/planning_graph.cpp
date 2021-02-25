@@ -33,13 +33,11 @@ pg_action_level::pg_action_level(const action_set & actions, unsigned short dept
 
 void pg_action_level::set_actions(const action_set & actions)
 {
-
 	m_actions = actions;
 }
 
 void pg_action_level::add_action(const action & act)
 {
-
 	m_actions.insert(act);
 }
 
@@ -55,7 +53,6 @@ unsigned short pg_action_level::get_depth() const
 
 const action_set & pg_action_level::get_actions() const
 {
-
 	return m_actions;
 }
 
@@ -85,10 +82,10 @@ pg_state_level::pg_state_level()
 	set_depth(0);
 }
 
-void pg_state_level::initialize()
+void pg_state_level::initialize(const formula_list & goals)
 {
 	build_init_f_map();
-	build_init_bf_map();
+	build_init_bf_map(goals);
 }
 
 pg_state_level::pg_state_level(const pg_state_level & to_assign)
@@ -179,13 +176,12 @@ void pg_state_level::insert_subformula_bf(const belief_formula & bf, short value
 	}
 }
 
-void pg_state_level::build_init_bf_map()
+void pg_state_level::build_init_bf_map(const formula_list & goals)
 {
 	//The one to set to TRUE
-	auto ini_conditions = domain::get_instance().get_initial_description().get_initial_conditions();
-	for (auto it_fl = ini_conditions.begin(); it_fl != ini_conditions.end(); it_fl++) {
-		insert_subformula_bf(*it_fl, 0);
-	}
+	insert_subformula_bf(domain::get_instance().get_initial_description().get_initial_conditions(), 0);
+
+	insert_subformula_bf(goals, -1);
 
 	action_set actions = domain::get_instance().get_actions();
 	for (auto it_acs = actions.begin(); it_acs != actions.end(); it_acs++) {
@@ -242,8 +238,31 @@ short pg_state_level::get_bf_value(const belief_formula & key) const
 {
 	if (m_pg_bf_map.find(key) != m_pg_bf_map.end()) {
 		return m_pg_bf_map.at(key);
+	} else if (key.get_formula_type() == FLUENT_FORMULA) {
+		fluent_formula ff_temp = key.get_fluent_formula();
+		fluent_set fs_temp;
+		short ret_val = -1;
+		short tmp_val;
+		if (ff_temp.size() == 1) {
+			fs_temp = *ff_temp.begin();
+			for (auto it_f = fs_temp.begin(); it_f != fs_temp.end(); ++it_f) {
+				if (!pg_entailment(*it_f)) {
+					return -1;
+				} else {
+					tmp_val = m_pg_f_map.at(*it_f);
+					if (tmp_val > ret_val) {
+						ret_val = tmp_val;
+					}
+				}
+			}
+		} else {
+			std::cerr << "\nThe planning graph does not support non-deterministic action yet.";
+			exit(1);
+		}
+		return ret_val;
 	} else {
-		return -1;
+		std::cerr << "\n\nFound bf formula never declared in the Planning Graph.\n";
+		exit(1);
 	}
 }
 
@@ -425,12 +444,13 @@ bool pg_state_level::exec_ontic(const action & act, const pg_state_level & prede
 
 	bformula_set tmp_fl = false_bf;
 
+
 	for (auto it_false_bf = tmp_fl.begin(); it_false_bf != tmp_fl.end(); it_false_bf++) {
 		bool tmp_modified = false;
 		bf_base_fluents.clear();
 		get_base_fluents(*it_false_bf, bf_base_fluents);
-
 		if (!helper::fluentset_empty_intersection(verified_fluents, bf_base_fluents)) {
+
 			apply_ontic_effects(*it_false_bf, false_bf, fully_obs, tmp_modified);
 			if (!modified_pg && tmp_modified) {
 				modified_pg = true;
@@ -450,7 +470,6 @@ bool pg_state_level::exec_epistemic(const action & act, const pg_state_level & p
 	agent_set fully_obs;
 	agent_set partially_obs;
 	effects_map effects_map = act.get_effects();
-	fluent_set verified_fluents;
 	fluent_set bf_base_fluents;
 	fluent_formula ff_temp;
 	fluent_set fs_temp;
@@ -804,9 +823,10 @@ std::chrono::duration<double> t1, t2, t3, t4;
 
 planning_graph::planning_graph()
 {
+	auto goals = domain::get_instance().get_goal_description();
 	pg_state_level pg_init;
-	pg_init.initialize();
-	init(domain::get_instance().get_goal_description(), pg_init);
+	pg_init.initialize(goals);
+	init(goals, pg_init);
 }
 
 planning_graph::planning_graph(const planning_graph & pg)
@@ -817,7 +837,7 @@ planning_graph::planning_graph(const planning_graph & pg)
 planning_graph::planning_graph(const formula_list & goal)
 {
 	pg_state_level pg_init;
-	pg_init.initialize();
+	pg_init.initialize(goal);
 	init(goal, pg_init);
 }
 
@@ -831,6 +851,13 @@ void planning_graph::init(const formula_list & goal, const pg_state_level & pg_i
 
 	set_goal(goal);
 	m_state_levels.push_back(pg_init);
+	auto init_bf_score = pg_init.get_bf_map();
+	for (auto it_pgbf = init_bf_score.begin(); it_pgbf != init_bf_score.end(); ++it_pgbf) {
+		if (it_pgbf->second < 0) {
+			m_belief_formula_false.insert(it_pgbf->first);
+		}
+	}
+
 	m_never_executed = domain::get_instance().get_actions();
 	set_length(0);
 	set_sum(0);
@@ -879,7 +906,7 @@ void planning_graph::init(const formula_list & goal, const pg_state_level & pg_i
 	std::cout << "\nFirst goal check:      " << pg_goal_ini_time.count();
 	std::cout << "\nAction Level creation: " << t1.count();
 	std::cout << "\n\nState Level Creation:  " << t2.count() << " of which:";
-	std::cout << "\nState equality:        " << t4.count();
+	std::cout << "\nActions Execution:     " << t4.count();
 	std::cout << "\n\nGoals Check:           " << t3.count() << std::endl;
 	/*\******END PLANNING GRAPH TIME MEASURE********/
 
@@ -941,11 +968,11 @@ void planning_graph::pg_build()
 	/*\******END PLANNING GRAPH TIME MEASURE********/
 
 	/*\*****START PLANNING GRAPH TIME MEASURE*******/
-	std::cerr << "\n\nNew Plan Length: " << get_length();
-	if (get_length() > 3) {
+	std::cerr << "\n\nPlaning Graph Length: " << get_length();
+	if (get_length() > 0) {
 		std::cerr << "\nAction Level creation: " << t1.count();
 		std::cerr << "\nState Level Creation:  " << t2.count() << " of which:";
-		std::cerr << "\nState equality:        " << t4.count();
+		std::cerr << "\nActions execution:     " << t4.count();
 	}
 	/*\******END PLANNING GRAPH TIME MEASURE********/
 
@@ -1002,7 +1029,7 @@ void planning_graph::pg_build()
 	} else if (!new_state_insertion) {
 		set_satisfiable(false);
 		/*\*****START PLANNING GRAPH TIME MEASURE*******/
-		if (get_length() > 0) {
+		if (get_length() > 5) {
 			print();
 		}
 		/*\******END PLANNING GRAPH TIME MEASURE********/
