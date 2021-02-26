@@ -39,6 +39,7 @@ bool check_visited = false;
 bool has_attitudes = false;
 bis_type bisimulation = BIS_NONE;
 heuristics used_heur = NO_H;
+search_type used_search = BFS;
 state_type state_struc = POSSIBILITIES; //default
 domain_restriction ini_restriction = S5; //default
 domain_restriction goal_restriction = NONE; //default
@@ -50,8 +51,8 @@ std::vector<std::string> given_actions;
 
 bool generate_asp = false;
 
-int max_depth = 1;
-int step = 1;
+short max_depth = 1;
+short step = 1;
 
 void print_usage(char* prog_name)
 {
@@ -112,12 +113,19 @@ void print_usage(char* prog_name)
 	std::cout << "-attitudes" << std::endl;
 	std::cout << "	The planner will use the updated semantics with attitudes (by default it does not)." << std::endl;
 
+
+	std::cout << "-search @search_type" << std::endl;
+	std::cout << "	Set the @search_type to use during the planning (Breadth First is default)." << std::endl;
+	std::cout << "	Possible @search_type:" << std::endl;
+	std::cout << "		BFS: Breadth First Search. (Default)" << std::endl;
+	std::cout << "		DFS: Depth First Search" << std::endl;
+	std::cout << "		I_DFS: Iterative Depth First Search (-mm to set max_depth and -ss to set the step)" << std::endl;
+
 	std::cout << "-h @heuristic" << std::endl;
-	std::cout << "	Set the @heuristic to use to perform the search." << std::endl;
+	std::cout << "	Set the @heuristic to use to perform the search (Best First overrides the search methods)." << std::endl;
 	std::cout << "	Possible @heuristic:" << std::endl;
+	std::cout << "		NONE: The selected search methods is used instead (BFS or DFS). (Default)" << std::endl;
 	std::cout << "		L_PG: A planning graph is used to calculate the distance of each state from the goal." << std::endl;
-	std::cout << "		NO_H_DFS: DFS standard" << std::endl;
-	std::cout << "		DFS_ITER: DFS Iterative and used -mm max_depth and -ss step" << std::endl;
 	std::cout << "		S_PG: A planning graph is used to calculate the sum of each sub-goal distance starting from the state." << std::endl;
 	std::cout << "		C_PG: A single planning graph is used to calculate the sum of each 'grounded' belief formula." << std::endl;
 	std::cout << "		SUBGOALS: We select the state with the highest number of satisfied subgoals." << std::endl;
@@ -204,13 +212,12 @@ void manage_arguments(int argc, char** argv)
 			std::cout << "The planner will check for visited states" << std::endl;
 			check_visited = true;
 
-		}else if (strcmp(argv[i], "-attitudes") == 0) {
+		} else if (strcmp(argv[i], "-attitudes") == 0) {
 
 			std::cout << "The planner will use the updated semantics with attitudes" << std::endl;
 			has_attitudes = true;
 
-		}
-		else if (strcmp(argv[i], "-st") == 0) {
+		} else if (strcmp(argv[i], "-st") == 0) {
 			i++;
 			if (i >= argc) {
 				std::cerr << "-st needs specification (POSS, KRIPKE, KRIPKE_OPT, OBDD)." << std::endl;
@@ -218,8 +225,7 @@ void manage_arguments(int argc, char** argv)
 			} else if (strcmp(argv[i], "POSS") == 0) {
 				std::cout << "The States are represented with Possibilities (NWF-SET).  (Default)" << std::endl;
 				state_struc = POSSIBILITIES;
-			} 
-			else if (strcmp(argv[i], "KRIPKE") == 0) {
+			} else if (strcmp(argv[i], "KRIPKE") == 0) {
 				std::cout << "The States are represented with Kripke structures." << std::endl;
 				state_struc = KRIPKE; //default
 				kopt = false;
@@ -279,12 +285,10 @@ void manage_arguments(int argc, char** argv)
 				std::cerr << "-act_check needs specification (PP, PW, WW)." << std::endl;
 				exit(1);
 			} else if (strcmp(argv[i], "PP") == 0) {
-				std::cout << "Both the executability and the conditonal effects are checked only on the state."
-					<< std::endl;
+				std::cout << "Both the executability and the conditonal effects are checked only on the state." << std::endl;
 				act_check = EXE_POINTED__COND_POINTED; //default
 			} else if (strcmp(argv[i], "PW") == 0) {
-				std::cout
-					<< "The executability is checked only on the state but the conditonal effects are checked in every worlds. (Default)"
+				std::cout << "The executability is checked only on the state but the conditonal effects are checked in every worlds. (Default)"
 					<< std::endl;
 				act_check = EXE_POINTED__COND_WORLD;
 			} else if (strcmp(argv[i], "WW") == 0) {
@@ -308,33 +312,37 @@ void manage_arguments(int argc, char** argv)
 					<< std::endl;
 				used_heur = L_PG;
 			} else if (strcmp(argv[i], "S_PG") == 0) {
-				std::cout
-					<< "A planning graph is used to calculate the sum of each sub-goal distance starting from the state."
-					<< std::endl;
+				std::cout << "A planning graph is used to calculate the sum of each sub-goal distance starting from the state." << std::endl;
 				used_heur = S_PG;
 			} else if (strcmp(argv[i], "C_PG") == 0) {
 				std::cout << "A single planning graph is used to calculate the sum of each 'grounded' belief formula."
 					<< std::endl;
 				used_heur = C_PG;
-			} else if (strcmp(argv[i], "E_PG") == 0) {
-				std::cout << "A single planning graph is used to calculate the sum of each 'grounded' belief formula."
-					<< std::endl;
-				used_heur = E_PG;
 			} else if (strcmp(argv[i], "SUBGOALS") == 0) {
 				std::cout << "We select the state with the highest number of satisfied subgoals." << std::endl;
 				used_heur = SUBGOALS;
-			} else if (strcmp(argv[i], "NO_H_DFS") == 0) {
-				std::cout << "Search with DFS." << std::endl;
-				used_heur = NO_H_DFS;
-			} else if (strcmp(argv[i], "DFS_ITER") == 0) {
-				std::cout << "Search with DFS Iterative." << std::endl;
-				used_heur = DFS_ITER;
 			} else {
-				std::cerr
-					<< "Wrong specification for '-h'; use 'NONE' or 'L_PG' or 'S_PG' or 'C_PG' or 'SUBGOALS' or 'DFS_ITER' or 'NO_H_DFS'."
+				std::cerr << "Wrong specification for '-h'; use 'NONE' or 'L_PG' or 'S_PG' or 'C_PG' or 'SUBGOALS'." << std::endl;
+				exit(1);
+			}
+		} else if (strcmp(argv[i], "-search_type") == 0) {
+			i++;
+			if (i >= argc) {
+				std::cerr << "-search_type needs specification (BFS, DFS, I_DFS)." << std::endl;
+				exit(1);
+			} else if (strcmp(argv[i], "BFS") == 0) {
+				std::cout << "The solving process will use Breadth first search. (Default)" << std::endl;
+				used_search = BFS; //default
+			} else if (strcmp(argv[i], "DFS") == 0) {
+				std::cout << "The solving process will use Depth first search." << std::endl;
+				used_search = DFS;
+			} else if (strcmp(argv[i], "I_DFS") == 0) {
+				std::cout << "The solving process will use Iterative Depth First Search (-mm to set max_depth and -ss to set the step)" << std::endl;
+				used_search = I_DFS;
+			} else {
+				std::cerr << "Wrong specification for '-search_type'; use 'BFS' or 'DFS' or 'I_DFS'."
 					<< std::endl;
 				exit(1);
-
 			}
 		} else if (strcmp(argv[i], "-bis") == 0) {
 			i++;
@@ -374,7 +382,7 @@ void manage_arguments(int argc, char** argv)
 
 }
 
-void launch_search(state_type state_struc, bool execute_given_action, bool results_file, heuristics used_heur, std::vector<std::string> given_actions, int max_depth, int step)
+void launch_search(state_type state_struc, bool execute_given_action, bool results_file, heuristics used_heur, search_type used_search, std::vector<std::string> given_actions, short max_depth, short step)
 {
 	switch ( state_struc ) {
 		/*case KRIPKE:
@@ -393,7 +401,7 @@ void launch_search(state_type state_struc, bool execute_given_action, bool resul
 				} else {
 					std::cout << "\n\n\n*****THE SAD END*****\n";
 				}
-			}	
+			}
 			break;
 		}*/
 	case POSSIBILITIES:
@@ -407,7 +415,7 @@ void launch_search(state_type state_struc, bool execute_given_action, bool resul
 			}
 			std::cout << "\n\n\n*****THE END*****\n";
 		} else {
-			if (m_planner.search(results_file, used_heur, max_depth, step)) {
+			if (m_planner.search(results_file, used_heur, used_search, max_depth, step)) {
 				std::cout << "\n\n\n*****THE END*****\n";
 			} else {
 				std::cout << "\n\n\n*****THE SAD END*****\n";
@@ -469,14 +477,14 @@ int main(int argc, char** argv)
 	//check eventualy problem on input file and generate domain
 	generate_domain(argv);
 
-	//check generation asp	
+	//check generation asp
 	generate_asp_encoding();
 
 
 	//domain::get_instance().get_attitudes().print();
 
 	//launch search planner
-	launch_search(state_struc, execute_given_actions, results_file, used_heur, given_actions, max_depth, step);
+	launch_search(state_struc, execute_given_actions, results_file, used_heur, used_search, given_actions, max_depth, step);
 
 	//timer.end(READ_TIMER);
 	//planner.main();

@@ -59,15 +59,20 @@ void planner<T>::print_results(std::chrono::duration<double> elapsed_seconds, T 
 }
 
 template <class T>
-bool planner<T>::search(bool results_file, heuristics used_heur, int max_depth, int step_)
+bool planner<T>::search(bool results_file, heuristics used_heur, search_type used_search, short IDFS_d, short IDFS_s)
 {
 	
 	if (used_heur == NO_H) {
-		return search_BFS(results_file);
-	} else if (used_heur == NO_H_DFS) {
-		return search_DFS(results_file);
-	} else if (used_heur == DFS_ITER) {
-		return search_IterativeDFS(results_file, max_depth, step_);
+		switch (used_search)
+		{
+		case DFS:
+			return search_DFS(results_file);
+		case I_DFS:
+			return search_IterativeDFS(results_file, IDFS_d, IDFS_s);
+		case BFS:
+		default:
+			return search_BFS(results_file);
+		}
 	} else {
 		return search_heur(results_file, used_heur);
 	}
@@ -157,7 +162,7 @@ bool planner<T>::search_BFS(bool results_file)
 }
 
 template <class T>
-bool planner<T>::search_IterativeDFS(bool results_file, int maxDepth_, int step_)
+bool planner<T>::search_IterativeDFS(bool results_file, short maxDepth_, short step_)
 {
 	//stack di supporto per i risultati della ricerca.
 	std::stack<T> supportSearch;

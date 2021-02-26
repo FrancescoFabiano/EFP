@@ -104,8 +104,6 @@ typedef std::map<action_id, std::string> reverse_action_name_map; /**< \brief Th
 enum heuristics
 {
     NO_H, /**< Breadth first search is executed*/
-    NO_H_DFS, /**DFS*/
-    DFS_ITER, /**DFS iterativa in profondità*/
     L_PG, /**< A planning graph is used to calculate the distance of each state from the goal.
                     * 
                     * For now for every state is computed a planning graph and then the lenght of it is returned.
@@ -122,11 +120,16 @@ enum heuristics
                     * 
                     * This follows the idea of converting belief formula in fluent and just execute classical planning graph.
                     * .*/
-    SUBGOALS, /**< For each state is calculate dthe number of (found or) missing subgoals
+    SUBGOALS /**< For each state is calculate dthe number of (found or) missing subgoals
                     * 
                     * The group operator C is splitted in more belief_formulae.*/
-    E_PG, /** Planning graph with complete idea of planning in epistemic states
-            ***/
+};
+
+enum search_type
+{
+    BFS, /** Breadth first search is executed*/
+    DFS, /** Depth first search is executed*/
+    I_DFS /** Iterative Depth first search is executed*/
 };
 
 /** \brief The possible types of bisimulation algorithms.*/

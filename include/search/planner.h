@@ -58,7 +58,7 @@ private:
 
     //ricerca con dfs iterativa che scandisce a livelli la ricerca in profondita, maxDepth è il massimo cammino in profonidtà e step di quanto ad ogni giro incrementiamo
     //i nostri step in profondità
-    bool search_IterativeDFS(bool results_file, int maxDepth_, int step_);
+    bool search_IterativeDFS(bool results_file, short maxDepth, short step);
 
     /**Function that searches on m_search_space using Best First Search.
      * 
@@ -76,8 +76,11 @@ public:
      * Calls either \ref search_BFS(bool results_file) or \ref search_heur(bool results_file)
      * @param[in] results_file: if true print the plan time in a file to easy the confrontation with the old version.
      * @param[in] used_heur: used to determine if any heuristic has to be used and which one.
+     * @param[in] used_search: used to determine the type of search employed by the planner.
+     * @param[in] IDFS_d: used as initial "max depth" parameter by I_DFS.
+     * @param[in] IDFS_s: used "step" parameter by I_DFS.
      * @return true if a plan is found.*/
-    bool search(bool results_file, heuristics used_heur, int max_depth, int step_);
+    bool search(bool results_file, heuristics used_heur, search_type used_search, short IDFS_d, short IDFS_s);
 
     /**Function print out the solution time.
      * 
