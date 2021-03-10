@@ -1,4 +1,4 @@
-#include "bisimulation.h"
+#include "bisimulation_k.h"
 
 /*\***IO_FC2.cpp****/
 void bisimulation::DisposeAutoma(automa *a)

@@ -10,7 +10,7 @@
 #include "planner.h"
 
 template <class T>
-void planner<T>::print_results(std::chrono::duration<double> elapsed_seconds, T goal, bool results_file, bool givenplan)
+void planner<T>::print_results(std::chrono::duration<double> elapsed_seconds, T goal, bool results_file, bool givenplan, search_type used_search, heuristics used_heur)
 {
 	std::cout << "\n\n\nWell Done, Goal found in " << elapsed_seconds.count() << " :)\n";
 	goal.print();
@@ -48,9 +48,49 @@ void planner<T>::print_results(std::chrono::duration<double> elapsed_seconds, T 
 			break;
 		}
 		result << ") ";
-		if (domain::get_instance().check_visited()) {
-			result << "with VISITED-STATE ";
+
+		if (givenplan) {
+			result << "with ";
+		} else if (used_heur != NO_H) {
+			result << "with ";
+		} else {
+			switch ( used_search ) {
+			case DFS:
+				result << "with DFS ";
+				break;
+			case I_DFS:
+				result << "with I_DFS ";
+				break;
+			case BFS:
+			default:
+				result << "with BFS ";
+				break;
+			}
 		}
+
+
+
+		switch ( used_heur ) {
+		case S_PG:
+			result << "SUM_PG heuristic ";
+			break;
+		case L_PG:
+			result << "LENGTH_PG heuristic ";
+			break;
+		case C_PG:
+			result << "CLASSIC_PG heuristic ";
+			break;
+		case SUBGOALS:
+			result << "SUBGOALS heuristic ";
+			break;
+		case NO_H:
+		default: break;
+		}
+
+		if (domain::get_instance().check_visited()) {
+			result << "and VISITED-STATE ";
+		}
+
 		result << "completed the search in " << elapsed_seconds.count() << "\n";
 		result.close();
 	} else {
@@ -61,10 +101,9 @@ void planner<T>::print_results(std::chrono::duration<double> elapsed_seconds, T 
 template <class T>
 bool planner<T>::search(bool results_file, heuristics used_heur, search_type used_search, short IDFS_d, short IDFS_s)
 {
-	
+
 	if (used_heur == NO_H) {
-		switch (used_search)
-		{
+		switch ( used_search ) {
 		case DFS:
 			return search_DFS(results_file);
 		case I_DFS:
@@ -114,7 +153,7 @@ bool planner<T>::search_BFS(bool results_file)
 	if (initial.is_goal()) {
 		end_timing = std::chrono::system_clock::now();
 		elapsed_seconds = end_timing - start_timing;
-		print_results(elapsed_seconds, initial, results_file, false);
+		print_results(elapsed_seconds, initial, results_file, false, BFS, NO_H);
 
 		return true;
 	}
@@ -123,7 +162,7 @@ bool planner<T>::search_BFS(bool results_file)
 	if (check_visited) {
 		visited_states.insert(initial);
 	}
-	
+
 	while (!m_search_space.empty()) {
 		popped_state = m_search_space.front();
 		m_search_space.pop();
@@ -141,7 +180,7 @@ bool planner<T>::search_BFS(bool results_file)
 				if (tmp_state.is_goal()) {
 					end_timing = std::chrono::system_clock::now();
 					elapsed_seconds = end_timing - start_timing;
-					print_results(elapsed_seconds, tmp_state, results_file, false);
+					print_results(elapsed_seconds, tmp_state, results_file, false, BFS, NO_H);
 					return true;
 				}
 				if (!check_visited || visited_states.insert(tmp_state).second) {
@@ -199,7 +238,7 @@ bool planner<T>::search_IterativeDFS(bool results_file, short maxDepth_, short s
 	if (initial.is_goal()) {
 		end_timing = std::chrono::system_clock::now();
 		elapsed_seconds = end_timing - start_timing;
-		print_results(elapsed_seconds, initial, results_file, false);
+		print_results(elapsed_seconds, initial, results_file, false, I_DFS, NO_H);
 
 		return true;
 	}
@@ -227,7 +266,7 @@ bool planner<T>::search_IterativeDFS(bool results_file, short maxDepth_, short s
 					if (tmp_state.is_goal()) {
 						end_timing = std::chrono::system_clock::now();
 						elapsed_seconds = end_timing - start_timing;
-						print_results(elapsed_seconds, tmp_state, results_file, false);
+						print_results(elapsed_seconds, initial, results_file, false, I_DFS, NO_H);
 						return true;
 					}
 
@@ -279,7 +318,7 @@ bool planner<T>::search_DFS(bool results_file)
 	if (initial.is_goal()) {
 		end_timing = std::chrono::system_clock::now();
 		elapsed_seconds = end_timing - start_timing;
-		print_results(elapsed_seconds, initial, results_file, false);
+		print_results(elapsed_seconds, initial, results_file, false, DFS, NO_H);
 
 		return true;
 	}
@@ -302,7 +341,7 @@ bool planner<T>::search_DFS(bool results_file)
 				if (tmp_state.is_goal()) {
 					end_timing = std::chrono::system_clock::now();
 					elapsed_seconds = end_timing - start_timing;
-					print_results(elapsed_seconds, tmp_state, results_file, false);
+					print_results(elapsed_seconds, initial, results_file, false, DFS, NO_H);
 					return true;
 				}
 
@@ -337,7 +376,7 @@ bool planner<T>::search_heur(bool results_file, heuristics used_heur)
 	std::cout << "\nInitial Built in " << elapsed_seconds.count() << " seconds\n";
 
 	start_timing = std::chrono::system_clock::now();
-	heuristics_manager h_manager(used_heur,initial);
+	heuristics_manager h_manager(used_heur, initial);
 	end_timing = std::chrono::system_clock::now();
 	elapsed_seconds = end_timing - start_timing;
 	std::cout << "\nHeuristic Built in " << elapsed_seconds.count() << " seconds\n";
@@ -353,7 +392,7 @@ bool planner<T>::search_heur(bool results_file, heuristics used_heur)
 	if (initial.is_goal()) {
 		end_timing = std::chrono::system_clock::now();
 		elapsed_seconds = end_timing - start_timing;
-		print_results(elapsed_seconds, initial, results_file, false);
+		print_results(elapsed_seconds, initial, results_file, false, BFS, used_heur);
 		return true;
 	}
 
@@ -376,7 +415,7 @@ bool planner<T>::search_heur(bool results_file, heuristics used_heur)
 				if (tmp_state.is_goal()) {
 					end_timing = std::chrono::system_clock::now();
 					elapsed_seconds = end_timing - start_timing;
-					print_results(elapsed_seconds, tmp_state, results_file, false);
+					print_results(elapsed_seconds, initial, results_file, false, BFS, used_heur);
 					return true;
 				}
 				if (!check_visited || visited_states.insert(tmp_state).second) {
@@ -534,7 +573,7 @@ void planner<T>::execute_given_actions_timed(std::vector<std::string>& act_name)
 	auto end_timing = std::chrono::system_clock::now();
 	std::chrono::duration<double> elapsed_seconds = end_timing - start_timing;
 
-	print_results(elapsed_seconds, state, true, true);
+	print_results(elapsed_seconds, state, true, true, BFS);
 
 	return;
 }
