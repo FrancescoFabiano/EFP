@@ -9,18 +9,20 @@ Realize a scalable Epistemic Forward Planner that bases its concept on different
 Temporally disabled Kripke and OBDD
 
 ## Current situation:
-Implemented EFP v. 2.1 that uses templatic e-States representations with relative templatic transition function and data structure based on bit.
-The planner is based on several scientific pubblications where are described the different semantics and tranisition functions.
+Implemented EFP v. 2.1 that uses templatic e-States representations with relative templatic transition function and data structure based on bitset.
+The planner is based on several scientific publications where the different semantics and transition functions are described.
 In particular we have the following configurations:
 - **eState:** *Kripke Structures*; **transition function:** *event based updates---mA<sup>\*</sup>* (Baral et al. 2015, Le et al. 2018);
 - **eState:** *Kripke Structures*; **transition function:** *optimized event based updates* (Fabiano et al. 2020);
 - **eState:** *Possibilities*; **transition function:** *Iterative transition function---mA<sup>p</sup>* (Fabiano et al. 2019, Fabiano et al. 2020).
+- **eState:** *Possibilities*; **transition function:** *Iterative transition function---mA<sup>p</sup> that consider agents attitudes for complex epistemic reasoning (e.g., lies, misconception etc.)* (Under review).
+
 
 Moreover the planner admits templatic heuristics usage.
 At the moment we implemented:
-- a complete (yet inefficient) version of the *Epistemic planning graph* introduced in (Le et al. 2018);
-- *number of satisfied goals* that possibly expands the original goal for a better scalability.
-- BFS, DFS and DFS Iterative
+- a complete version of the *Epistemic planning graph* introduced in (Le et al. 2018);
+- *number of satisfied goals* that possibly expands the original goal for a better scalability;
+- BFS, DFS and DFS Iterative searches.
 
   
 ## Future works and some ideas
@@ -39,7 +41,6 @@ At the moment we implemented:
 - false beliefs correction.
 
 
-- Lies and biased info;
 - ethic constraints.
 
 ### Requirements

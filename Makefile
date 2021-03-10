@@ -4,8 +4,8 @@ OBJS	=	$(BUILD_DIR)/bison.o $(BUILD_DIR)/lex.o $(BUILD_DIR)/main.o \
 			$(BUILD_DIR)/grounder.o $(BUILD_DIR)/printer.o $(BUILD_DIR)/asp_maker.o \
 			$(BUILD_DIR)/action.o $(BUILD_DIR)/helper.o $(BUILD_DIR)/initially.o \
 			$(BUILD_DIR)/attitude.o $(BUILD_DIR)/attitudes_table.o \
-			$(BUILD_DIR)/pstore.o \
-			$(BUILD_DIR)/pworld.o $(BUILD_DIR)/pstate.o \
+			$(BUILD_DIR)/kstore.o $(BUILD_DIR)/kedge.o $(BUILD_DIR)/kworld.o $(BUILD_DIR)/kstate.o \
+			$(BUILD_DIR)/pstore.o $(BUILD_DIR)/pworld.o $(BUILD_DIR)/pstate.o \
 			$(BUILD_DIR)/reader.o \
 			$(BUILD_DIR)/heuristics_manager.o $(BUILD_DIR)/satisfied_goals.o $(BUILD_DIR)/planning_graph.o \
 			$(BUILD_DIR)/bisimulation.o
@@ -45,7 +45,7 @@ PARSE_DIR = $(INCLUDE_DIR)/parse
 STATES_DIR = $(INCLUDE_DIR)/states
 
 S_POSSIBILITY_DIR = $(STATES_DIR)/possibilities
-S_POSSIBILITY_OPT_DIR = $(STATES_DIR)/possibilities_opt
+S_KRIPE_DIR = $(STATES_DIR)/kripke
 UTILITIES_DIR = $(INCLUDE_DIR)/utilities
 SEARCH_DIR = $(INCLUDE_DIR)/search
 
@@ -98,7 +98,7 @@ $(BUILD_DIR)/main.o:	$(SRC_DIR)/main.cpp \
 $(BUILD_DIR)/bisimulation.o: $(BISIMULATION_DIR)/bisimulation.cpp $(BISIMULATION_DIR)/bisimulation.h
 		$(dir_guard)
 		$(CC) $(CFLAGS) -c $(BISIMULATION_DIR)/bisimulation.cpp -o $(BUILD_DIR)/bisimulation.o
-		
+				
 #-----------------------------------INCLUDE FILES-----------------------------------#
 ####UTILITIES
 $(BUILD_DIR)/printer.o: $(UTILITIES_DIR)/printer.cpp $(UTILITIES_DIR)/printer.h \
@@ -204,6 +204,35 @@ $(BUILD_DIR)/planning_graph.o: $(HEURISTIC_DIR)/planning_graph.cpp $(HEURISTIC_D
 
 
 
+
+##KRIPKE STATES
+$(BUILD_DIR)/kstate.o: $(S_KRIPE_DIR)/kstate.cpp $(S_KRIPE_DIR)/kstate.h \
+					   $(S_KRIPE_DIR)/kworld.h $(S_KRIPE_DIR)/kedge.h $(S_KRIPE_DIR)/kstore.h \
+					   $(ACTION_DIR)/action.h \
+					   $(DOMAIN_DIR)/initially.h \
+					   $(UTILITIES_DIR)/helper.h \
+					   $(UTILITIES_DIR)/define.h \
+					   $(BISIMULATION_DIR)/bisimulation.h
+		$(dir_guard)
+		$(CC) $(CFLAGS) -c $(S_KRIPE_DIR)/kstate.cpp -o $(BUILD_DIR)/kstate.o
+
+$(BUILD_DIR)/kworld.o: $(S_KRIPE_DIR)/kworld.cpp $(S_KRIPE_DIR)/kworld.h \
+					   $(UTILITIES_DIR)/printer.h $(UTILITIES_DIR)/define.h
+		$(dir_guard)
+		$(CC) $(CFLAGS) -c $(S_KRIPE_DIR)/kworld.cpp -o $(BUILD_DIR)/kworld.o
+
+$(BUILD_DIR)/kedge.o: $(S_KRIPE_DIR)/kedge.cpp $(S_KRIPE_DIR)/kedge.h \
+					  $(S_KRIPE_DIR)/kworld.h \
+					  $(UTILITIES_DIR)/define.h
+		$(dir_guard)
+		$(CC) $(CFLAGS) -c $(S_KRIPE_DIR)/kedge.cpp -o $(BUILD_DIR)/kedge.o
+
+$(BUILD_DIR)/kstore.o: $(S_KRIPE_DIR)/kstore.cpp $(S_KRIPE_DIR)/kstore.h \
+					   $(S_KRIPE_DIR)/kworld.h $(S_KRIPE_DIR)/kedge.h \
+					   $(UTILITIES_DIR)/define.h
+		$(dir_guard)
+		$(CC) $(CFLAGS) -c $(S_KRIPE_DIR)/kstore.cpp -o $(BUILD_DIR)/kstore.o
+		
 
 ##POSSIBILITIES STATES
 $(BUILD_DIR)/pstate.o: $(S_POSSIBILITY_DIR)/pstate.cpp $(S_POSSIBILITY_DIR)/pstate.h \

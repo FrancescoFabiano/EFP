@@ -3,7 +3,7 @@
 INPATH="exp/Heur-tests/"; #Path of the domain
 OUTPATH="out/Heur-tests/"; #Path of the output
 
-OUTPATH_FINDINGPLAN='out/Heur_comparison/findingplan/'
+OUTPATH_FINDINGPLAN='out/EFP_comparison/findingplan/'
 
 mkdir -p $OUTPATH
 DOMAIN_EXT=".txt"; # Name of the domain
@@ -29,7 +29,7 @@ for dir in $INPATH*; do
             i="1";
             while [[ $i -le $ITERATIONS ]]; do
                 start=$SECONDS;
-                . scripts/comparison_heuristics.sh "$file";
+                . scripts/EFP_scripts/comparison_heuristics.sh "$file";
 
 				duration=$(( SECONDS - start ));
                 #mv $OUTPATH_FINDINGPLAN"$(basename $file)" $OUTPATH"$(basename $dir)"/"$(basename $file)"

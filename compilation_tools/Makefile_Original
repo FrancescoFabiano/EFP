@@ -3,10 +3,8 @@ OBJS	=	$(BUILD_DIR)/bison.o $(BUILD_DIR)/lex.o $(BUILD_DIR)/main.o \
 			$(BUILD_DIR)/belief_formula.o $(BUILD_DIR)/proposition.o $(BUILD_DIR)/domain.o \
 			$(BUILD_DIR)/grounder.o $(BUILD_DIR)/printer.o $(BUILD_DIR)/asp_maker.o \
 			$(BUILD_DIR)/action.o $(BUILD_DIR)/helper.o $(BUILD_DIR)/initially.o \
-			$(BUILD_DIR)/kstore.o \
-			$(BUILD_DIR)/kedge.o $(BUILD_DIR)/kworld.o $(BUILD_DIR)/kstate.o \
-			$(BUILD_DIR)/pstore.o \
-			$(BUILD_DIR)/pworld.o $(BUILD_DIR)/pstate.o \
+			$(BUILD_DIR)/kstore.o $(BUILD_DIR)/kedge.o $(BUILD_DIR)/kworld.o $(BUILD_DIR)/kstate.o \
+			$(BUILD_DIR)/pstore.o $(BUILD_DIR)/pworld.o $(BUILD_DIR)/pstate.o \
 			$(BUILD_DIR)/pstore_opt.o $(BUILD_DIR)/pstate_opt.o \
 			$(BUILD_DIR)/reader.o \
 			$(BUILD_DIR)/heuristics_manager.o $(BUILD_DIR)/satisfied_goals.o \
