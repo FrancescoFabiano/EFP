@@ -352,6 +352,26 @@ typedef std::map<agent, pstate_opt_ptr_set> pedges_opt; /**< \brief A map betwee
                                                        *
                                                        * @see pstate_opt.*/
 
+/****************** Delphic *******************/
+// PEM
+typedef std::map<fluent, belief_formula> postconditions;
+
+class pem_ptr;
+typedef std::set<pem_ptr> pem_ptr_set; /**< \brief A set of \ref pem_ptr.
+                                        *
+                                        * Mainly used to store all the reachable \ref pem of a \ref pem without wasting memory.
+                                        *
+                                        * \todo The operator < for std::shared_ptr must be implemented.
+                                        * @see pem.*/
+
+typedef std::map<agent, pem_ptr_set> pem_edges; /**< \brief A map between agents and set of \ref pem_ptr
+                                               *
+                                               * Each element consists of <\ref agent, \ref pem_ptr_set> and link each
+                                               * \ref agent to a set of possibilities;
+                                               * remember that each possibility is a state itself.
+                                               *
+                                               * @see pem.*/
+
 /****************** Agent's Attitudes related *******************/
 
 

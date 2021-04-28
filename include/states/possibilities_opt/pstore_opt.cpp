@@ -1,4 +1,4 @@
-/*
+/**
  * \brief Implementation of \ref pstore_opt.h
  * \copyright GNU Public License.
  *

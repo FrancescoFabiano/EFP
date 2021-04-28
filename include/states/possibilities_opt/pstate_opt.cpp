@@ -1,4 +1,4 @@
-/*
+/**
  * \brief Implementation of \ref pstate_opt.h and \ref pstate_opt_ptr.h.
  *
  * \copyright GNU Public License.
