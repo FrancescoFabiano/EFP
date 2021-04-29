@@ -79,18 +79,9 @@ const pem_edges & pem::get_edges() const
     return m_edges;
 }
 
-bool pem::operator=(const pem & to_copy)
-{
-    set_type(to_copy.get_type());
-    set_precondition(to_copy.get_precondition());
-    set_postconditions(to_copy.get_postconditions());
-    set_edges(to_copy.get_edges());
-    return true;
-}
-
 bool pem::operator<(const pem & to_compare) const
 {
-    if (m_type < to_compare.get_type())
+    if (m_type < to_compare.get_type())     // We compare the types since we assume that each action has at most one PEM for each type
         return true;
     return false;
 }
@@ -109,6 +100,15 @@ bool pem::operator==(const pem & to_compare) const
         return true;
     }
     return false;
+}
+
+bool pem::operator=(const pem & to_copy)
+{
+    set_type(to_copy.get_type());
+    set_precondition(to_copy.get_precondition());
+    set_postconditions(to_copy.get_postconditions());
+    set_edges(to_copy.get_edges());
+    return true;
 }
 
 /****************************************************************************/
@@ -183,12 +183,6 @@ const pem_edges & pem_ptr::get_edges() const
     exit(1);
 }
 
-bool pem_ptr::operator=(const pem_ptr & to_copy)
-{
-    set_ptr(to_copy.get_ptr());
-    return true;
-}
-
 bool pem_ptr::operator<(const pem_ptr & to_compare) const
 {
     if (get_type() < to_compare.get_type()) {
@@ -212,4 +206,10 @@ bool pem_ptr::operator==(const pem_ptr & to_compare) const
         return true;
     }
     return false;
+}
+
+bool pem_ptr::operator=(const pem_ptr & to_copy)
+{
+    set_ptr(to_copy.get_ptr());
+    return true;
 }

@@ -18,8 +18,8 @@ pem_store& pem_store::get_instance()
     return instance;
 }
 
-//const pem_ptr pem_store::add_pem(const pem & to_add)
-//{
-//    auto tmp_ptr = std::make_shared<pem>(*(std::get<0>(m_created_pems.insert(to_add))));
-//    return tmp_ptr;
-//}
+const pem_ptr pem_store::add_pem(const pem & to_add)
+{
+    auto tmp_ptr = std::make_shared<pem>(*(std::get<0>(m_created_pems.insert(to_add))));
+    return tmp_ptr;
+}

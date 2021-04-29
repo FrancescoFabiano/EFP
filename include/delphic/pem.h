@@ -99,10 +99,42 @@ class pem
      * @param[in] action: the \ref pem to copy into *this*.*/
     pem(const pem & action);
 
-    bool operator=(const pem & to_copy);
+    /**
+     *\brief The < operator based on the field \ref m_type.
+     * Implemented to allow the ordering on set of \ref pem (used in \ref pem_store).
+     *
+     * @see pem_store.
+     *
+     * @param [in] to_compare: the \ref pem to compare with *this*.
+     * @return true: if \p to_compare is smaller than *this*
+     * @return false: otherwise.*/
     bool operator<(const pem & to_compare) const;
+    /**
+     *\brief The > operator based on the field \ref m_type.
+     * Implemented to allow the ordering on set of \ref pem (used in \ref pem_store).
+     *
+     * @see pem_store.
+     *
+     * @param [in] to_compare: the \ref pem to compare with *this*.
+     * @return true: if \p to_compare is bigger than *this*
+     * @return false: otherwise.*/
     bool operator>(const pem & to_compare) const;
+    /**
+     *\brief The == operator based on the field \ref m_type.
+     * Implemented to allow the ordering on set of \ref pem (used in \ref pem_store).
+     *
+     * @see pem_store.
+     *
+     * @param [in] to_compare: the \ref pem to compare with *this*.
+     * @return true: if \p to_compare is equal to *this*
+     * @return false: otherwise.*/
     bool operator==(const pem & to_compare) const;
+    /** \brief The copy operator.
+     *
+     * @param [in] to_assign: the \ref pem to assign to *this*.
+     * @return true: if \p the assignment went ok.
+     * @return false: otherwise.*/
+    bool operator=(const pem & to_copy);
 };
 
 /**
@@ -191,8 +223,40 @@ public:
      * @return the \ref m_edges of the \ref pem pointed by \ref m_ptr.*/
     const pem_edges& get_edges() const;
 
-    bool operator=(const pem_ptr & to_copy);
+    /**
+     *\brief The < operator based on the field \ref m_type.
+     * Implemented to allow the ordering on set of \ref pem_ptr (used in \ref pem_store).
+     *
+     * @see pem_store.
+     *
+     * @param [in] to_compare: the \ref pem_ptr to compare with *this*.
+     * @return true: if \p to_compare is smaller than *this*
+     * @return false: otherwise.*/
     bool operator<(const pem_ptr & to_compare) const;
+    /**
+     *\brief The > operator based on the field \ref m_type.
+     * Implemented to allow the ordering on set of \ref pem_ptr (used in \ref pem_store).
+     *
+     * @see pem_store.
+     *
+     * @param [in] to_compare: the \ref pem_ptr to compare with *this*.
+     * @return true: if \p to_compare is bigger than *this*
+     * @return false: otherwise.*/
     bool operator>(const pem_ptr & to_compare) const;
+    /**
+     *\brief The == operator based on the field \ref m_type.
+     * Implemented to allow the ordering on set of \ref pem_ptr (used in \ref pem_store).
+     *
+     * @see pem_store.
+     *
+     * @param [in] to_compare: the \ref pem_ptr to compare with *this*.
+     * @return true: if \p to_compare is equal to *this*
+     * @return false: otherwise.*/
     bool operator==(const pem_ptr & to_compare) const;
+    /** \brief The copy operator.
+     *
+     * @param [in] to_assign: the \ref pem_ptr to assign to *this*.
+     * @return true: if \p the assignment went ok.
+     * @return false: otherwise.*/
+    bool operator=(const pem_ptr & to_copy);
 };
