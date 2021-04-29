@@ -16,14 +16,14 @@
 #include "pem.h"
 #include "pem_store.h"
 
-#include "../../domain/domain.h"
-#include "../../utilities/helper.h"
+#include "../domain/domain.h"
+#include "../utilities/helper.h"
 
 pem::pem()
 {
 }
 
-pem::pem(const event_type type, const belief_formula & pre, const postconditions & post, const pedges_opt & edges)
+pem::pem(const event_type type, const belief_formula & pre, const postconditions & post, const pem_edges & edges)
 {
     set_type(type);
     set_precondition(pre);
@@ -39,24 +39,24 @@ pem::pem(const pem & action)
     set_edges(action.get_edges());
 }
 
-void pem::set_type(const event_type type)
+void pem::set_type(const event_type to_set)
 {
-    m_type = type;
+    m_type = to_set;
 }
 
-void pem::set_precondition(const belief_formula & pre)
+void pem::set_precondition(const belief_formula & to_set)
 {
-    m_pre = pre;
+    m_pre = to_set;
 }
 
-void pem::set_postconditions(const postconditions & post)
+void pem::set_postconditions(const postconditions & to_set)
 {
-    m_post = post;
+    m_post = to_set;
 }
 
-void pem::set_edges(const pem_edges & edges)
+void pem::set_edges(const pem_edges & to_set)
 {
-    m_edges = edges;
+    m_edges = to_set;
 }
 
 const event_type pem::get_type() const
@@ -64,17 +64,17 @@ const event_type pem::get_type() const
     return m_type;
 }
 
-const belief_formula pem::get_precondition() const
+const belief_formula & pem::get_precondition() const
 {
     return m_pre;
 }
 
-const postconditions pem::get_postconditions() const
+const postconditions & pem::get_postconditions() const
 {
     return m_post;
 }
 
-const pedges_opt& pem::get_edges() const
+const pem_edges & pem::get_edges() const
 {
     return m_edges;
 }
@@ -82,8 +82,33 @@ const pedges_opt& pem::get_edges() const
 bool pem::operator=(const pem & to_copy)
 {
     set_type(to_copy.get_type());
+    set_precondition(to_copy.get_precondition());
+    set_postconditions(to_copy.get_postconditions());
     set_edges(to_copy.get_edges());
     return true;
+}
+
+bool pem::operator<(const pem & to_compare) const
+{
+    if (m_type < to_compare.get_type())
+        return true;
+    return false;
+}
+
+bool pem::operator>(const pem & to_compare) const
+{
+    if (m_type > to_compare.get_type())
+        return true;
+    return false;
+}
+
+bool pem::operator==(const pem & to_compare) const
+{
+    /**std way*/
+    if (!(*this < to_compare) && !(to_compare < *this)) {
+        return true;
+    }
+    return false;
 }
 
 /****************************************************************************/
@@ -131,7 +156,7 @@ const event_type pem_ptr::get_type() const
     exit(1);
 }
 
-const event_type pem_ptr::get_precondition() const
+const belief_formula & pem_ptr::get_precondition() const
 {
     if (m_ptr != nullptr) {
         return get_ptr()->get_precondition();
@@ -140,7 +165,7 @@ const event_type pem_ptr::get_precondition() const
     exit(1);
 }
 
-const event_type pem_ptr::get_postconditions()
+const postconditions & pem_ptr::get_postconditions() const
 {
     if (m_ptr != nullptr) {
         return get_ptr()->get_postconditions();
@@ -149,11 +174,42 @@ const event_type pem_ptr::get_postconditions()
     exit(1);
 }
 
-const event_type pem_ptr::get_edges() const
+const pem_edges & pem_ptr::get_edges() const
 {
     if (m_ptr != nullptr) {
         return get_ptr()->get_edges();
     }
     std::cerr << "Error in creating a pem_ptr\n";
     exit(1);
+}
+
+bool pem_ptr::operator=(const pem_ptr & to_copy)
+{
+    set_ptr(to_copy.get_ptr());
+    return true;
+}
+
+bool pem_ptr::operator<(const pem_ptr & to_compare) const
+{
+    if (get_type() < to_compare.get_type()) {
+        return true;
+    }
+    return false;
+}
+
+bool pem_ptr::operator>(const pem_ptr & to_compare) const
+{
+    if (get_type() > to_compare.get_type()) {
+        return true;
+    }
+    return false;
+}
+
+bool pem_ptr::operator==(const pem_ptr & to_compare) const
+{
+    /**std way*/
+    if (!(*this < to_compare) && !(to_compare < (*this))) {
+        return true;
+    }
+    return false;
 }

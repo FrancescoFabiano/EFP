@@ -17,6 +17,8 @@
 
 class pem
 {
+    friend class pem_ptr;
+
     private:
     /** \brief The type of *this*.*/
     event_type m_type;
@@ -36,25 +38,25 @@ class pem
      * Only accessible by the \ref pem_ptr.
      *
      * @param[in] type: the \ref event_type to set as \ref m_type.*/
-    void set_type(const event_type type);
+    void set_type(const event_type to_set);
     /** \brief Setter for the field \ref m_pre.
      *
      * Only accessible by the \ref pem_ptr.
      *
      * @param[in] pre: the \ref belief_formula to set as \ref m_pre.*/
-    void set_precondition(const belief_formula & pre);
+    void set_precondition(const belief_formula & to_set);
     /** \brief Setter for the field \ref m_post.
      *
      * Only accessible by the \ref pem_ptr.
      *
      * @param[in] post: the \ref postconditions to set as \ref m_post.*/
-    void set_postconditions(const postconditions & post);
+    void set_postconditions(const postconditions & to_set);
     /** \brief Setter for the field \ref m_edges.
      *
      * Only accessible by the \ref pem_ptr.
      *
      * @param[in] edges: the map of \ref edges to set as \ref m_edges.*/
-    void set_edges(const pem_edges & edges);
+    void set_edges(const pem_edges & to_set);
 
     /** \brief Getter of \ref m_type.
      *
@@ -67,19 +69,19 @@ class pem
      * Only accessible by the \ref pem_ptr.
      *
      * @return the precondition of *this*.*/
-    void get_precondition();
+    const belief_formula & get_precondition() const;
     /** \brief Getter of \ref m_post.
      *
      * Only accessible by the \ref pem_ptr.
      *
      * @return the postconditions of *this*.*/
-    void get_postconditions();
+    const postconditions & get_postconditions() const;
     /** \brief Getter of \ref m_edges.
      *
      * Only accessible by the \ref pem_ptr.
      *
      * @return the map of edges of *this*.*/
-    const pem_edges& get_edges() const;
+    const pem_edges & get_edges() const;
 
     public:
     /** \brief Empty constructor, call the default constructor of all the fields.*/
@@ -91,11 +93,16 @@ class pem
      * @param[in] pre: the \ref belief_formula to set as \ref m_pre.
      * @param[in] post: the \ref postconditions to set as \ref m_post.
      * @param[in] edges: the map of the edges of *this*.*/
-    pem(const event_type type, const belief_formula & pre, const postconditions & post, const pedges_opt & edges);
+    pem(const event_type type, const belief_formula & pre, const postconditions & post, const pem_edges & edges);
     /** \brief Copy constructor.
      *
      * @param[in] action: the \ref pem to copy into *this*.*/
     pem(const pem & action);
+
+    bool operator=(const pem & to_copy);
+    bool operator<(const pem & to_compare) const;
+    bool operator>(const pem & to_compare) const;
+    bool operator==(const pem & to_compare) const;
 };
 
 /**
@@ -174,13 +181,18 @@ public:
     /** \brief Function that return the field m_precondition of the pointed \ref pem.
      *
      * @return the \ref m_precondition of the \ref pem pointed by \ref m_ptr.*/
-    void get_precondition();
+    const belief_formula & get_precondition() const;
     /** \brief Function that return the field m_postconditions of the pointed \ref pem.
      *
      * @return the \ref m_postconditions of the \ref pem pointed by \ref m_ptr.*/
-    void get_postconditions();
+    const postconditions & get_postconditions() const;
     /** \brief Function that return the field m_edges of the pointed \ref pem.
      *
      * @return the \ref m_edges of the \ref pem pointed by \ref m_ptr.*/
     const pem_edges& get_edges() const;
+
+    bool operator=(const pem_ptr & to_copy);
+    bool operator<(const pem_ptr & to_compare) const;
+    bool operator>(const pem_ptr & to_compare) const;
+    bool operator==(const pem_ptr & to_compare) const;
 };
