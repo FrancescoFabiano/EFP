@@ -356,6 +356,9 @@ typedef std::map<agent, pstate_opt_ptr_set> pedges_opt; /**< \brief A map betwee
 // PEM
 typedef std::map<fluent, belief_formula> postconditions;
 
+class pem;
+typedef std::set<pem> pem_set;
+
 class pem_ptr;
 typedef std::set<pem_ptr> pem_ptr_set; /**< \brief A set of \ref pem_ptr.
                                         *

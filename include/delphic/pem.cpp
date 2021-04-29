@@ -23,24 +23,20 @@ pem::pem()
 {
 }
 
-pem::pem(const fluent_set & description)
+pem::pem(const event_type type, const belief_formula & pre, const postconditions & post, const pedges_opt & edges)
 {
-    set_fluent_set(description);
-    set_id();
-}
-
-pem::pem(const fluent_set & description, const pedges_opt & edges)
-{
-    set_fluent_set(description);
+    set_type(type);
+    set_precondition(pre);
+    set_postconditions(post);
     set_edges(edges);
-    set_id();
 }
 
 pem::pem(const pem & action)
 {
-    set_fluent_set(action.get_fluent_set());
+    set_type(action.get_type());
+    set_precondition(action.get_precondition());
+    set_postconditions(action.get_postconditions());
     set_edges(action.get_edges());
-    set_id();
 }
 
 void pem::set_type(const event_type type)
@@ -68,12 +64,12 @@ const event_type pem::get_type() const
     return m_type;
 }
 
-const belief_formula::get_precondition() const
+const belief_formula pem::get_precondition() const
 {
     return m_pre;
 }
 
-const belief_formula::get_postconditions() const
+const postconditions pem::get_postconditions() const
 {
     return m_post;
 }

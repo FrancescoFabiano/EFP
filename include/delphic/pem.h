@@ -12,6 +12,9 @@
  */
 #pragma once
 
+#include "../utilities/define.h"
+#include "../formulae/belief_formula.h"
+
 class pem
 {
     private:
@@ -77,6 +80,22 @@ class pem
      *
      * @return the map of edges of *this*.*/
     const pem_edges& get_edges() const;
+
+    public:
+    /** \brief Empty constructor, call the default constructor of all the fields.*/
+    pem();
+    /** \brief Constructor with parameters.
+     * Construct an object with the given info.
+     *
+     * @param[in] type: the \ref event_type to set as \ref m_type.
+     * @param[in] pre: the \ref belief_formula to set as \ref m_pre.
+     * @param[in] post: the \ref postconditions to set as \ref m_post.
+     * @param[in] edges: the map of the edges of *this*.*/
+    pem(const event_type type, const belief_formula & pre, const postconditions & post, const pedges_opt & edges);
+    /** \brief Copy constructor.
+     *
+     * @param[in] action: the \ref pem to copy into *this*.*/
+    pem(const pem & action);
 };
 
 /**

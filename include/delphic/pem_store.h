@@ -43,7 +43,7 @@ public:
      * @return the \ref pem_ptr to \p to_add.
      * 
      * \todo Param ok because set makes copy?*/
-    const pem_ptr add_pem(const pem & to_add);
+//    const pem_ptr add_pem(const pem & to_add);
 
     /** \brief Copy constructor removed since is Singleton class. */
     pem_store(pem_store const&) = delete;
