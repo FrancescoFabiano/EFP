@@ -12,8 +12,7 @@
 #include <boost/dynamic_bitset.hpp>
 
 #include "pstate.h"
-#include "../../domain/domain.h"
-#include "../../utilities/helper.h"
+#include "../../utilities/helper_t.ipp"
 
 void pstate::set_worlds(const pworld_ptr_set & to_set)
 {
@@ -264,7 +263,7 @@ const pworld_ptr_set pstate::get_B_reachable_worlds(agent ag, const pworld_ptr &
 	if (pw_map != m_beliefs.end()) {
 		auto pw_set = pw_map->second.find(ag);
 		if (pw_set != pw_map->second.end()) {
-			helper::sum_set<pworld_ptr>(ret, pw_set->second);
+			helper_t::sum_set<pworld_ptr>(ret, pw_set->second);
 		}
 	}
 	return ret;
@@ -279,7 +278,7 @@ bool pstate::get_B_reachable_worlds_recoursive(agent ag, const pworld_ptr & worl
 		auto pw_set = pw_map->second.find(ag);
 		if (pw_set != pw_map->second.end()) {
 			unsigned long previous_size = ret.size();
-			helper::sum_set<pworld_ptr>(ret, pw_set->second);
+			helper_t::sum_set<pworld_ptr>(ret, pw_set->second);
 			unsigned long current_size = ret.size();
 
 			return previous_size == current_size;
@@ -295,7 +294,7 @@ const pworld_ptr_set pstate::get_E_reachable_worlds(const agent_set & ags, const
 	pworld_ptr_set ret;
 	agent_set::const_iterator it_agset;
 	for (it_agset = ags.begin(); it_agset != ags.end(); it_agset++) {
-		helper::sum_set<pworld_ptr>(ret, get_B_reachable_worlds(*it_agset, world));
+		helper_t::sum_set<pworld_ptr>(ret, get_B_reachable_worlds(*it_agset, world));
 	}
 
 	return ret;
@@ -327,8 +326,8 @@ const pworld_ptr_set pstate::get_C_reachable_worlds(const agent_set & ags, const
 	pworld_ptr_set already_reached;
 	pworld_ptr_set ret;
 	while (!is_fixed_point) {
-		helper::sum_set<pworld_ptr>(newly_reached, ret);
-		helper::minus_set<pworld_ptr>(newly_reached, already_reached);
+		helper_t::sum_set<pworld_ptr>(newly_reached, ret);
+		helper_t::minus_set<pworld_ptr>(newly_reached, already_reached);
 		is_fixed_point = get_E_reachable_worlds_recoursive(ags, newly_reached, ret);
 		already_reached = newly_reached;
 	}
@@ -754,10 +753,10 @@ void pstate::maintain_oblivious_believed_pworlds(pstate &ret, const agent_set & 
 		tmp_world_set = get_E_reachable_worlds(oblivious_obs_agents, get_pointed());
 		for (it_agset = domain::get_instance().get_agents().begin(); it_agset != domain::get_instance().get_agents().end(); it_agset++) {
 			for (it_wo_ob = tmp_world_set.begin(); it_wo_ob != tmp_world_set.end(); it_wo_ob++) {
-				helper::sum_set<pworld_ptr>(world_oblivious, get_B_reachable_worlds(*it_agset, *it_wo_ob));
+				helper_t::sum_set<pworld_ptr>(world_oblivious, get_B_reachable_worlds(*it_agset, *it_wo_ob));
 			}
 		}
-		helper::sum_set<pworld_ptr>(world_oblivious, tmp_world_set);
+		helper_t::sum_set<pworld_ptr>(world_oblivious, tmp_world_set);
 		ret.set_max_depth(get_max_depth() + 1);
 		ret.set_worlds(world_oblivious);
 
@@ -856,7 +855,7 @@ pstate pstate::execute_ontic(const action & act) const
 	agent_set fully_obs_agents = helper::get_agents_if_entailed(act.get_fully_observants(), *this);
 
 	agent_set oblivious_obs_agents = agents;
-    helper::minus_set<agent>(oblivious_obs_agents, fully_obs_agents);
+    helper_t::minus_set<agent>(oblivious_obs_agents, fully_obs_agents);
 
 	transition_map calculated; // A map that links the pworlds of *this* to the corresponding ones of ret
 	maintain_oblivious_believed_pworlds(ret, oblivious_obs_agents);
@@ -936,8 +935,8 @@ pstate pstate::execute_sensing(const action & act) const
 	agent_set partially_obs_agents = helper::get_agents_if_entailed(act.get_partially_observants(), *this);
 
 	agent_set oblivious_obs_agents = agents;
-	helper::minus_set<agent>(oblivious_obs_agents, fully_obs_agents);
-	helper::minus_set<agent>(oblivious_obs_agents, partially_obs_agents);
+	helper_t::minus_set<agent>(oblivious_obs_agents, fully_obs_agents);
+	helper_t::minus_set<agent>(oblivious_obs_agents, partially_obs_agents);
 
 	if (!oblivious_obs_agents.empty()) {
 		ret.set_max_depth(get_max_depth() + 1);
@@ -970,8 +969,8 @@ pstate pstate::execute_announcement(const action & act) const
 	//	agent_set partially_obs_agents = get_agents_if_entailed(act.get_partially_observants(), get_pointed());
 	//
 	//	agent_set oblivious_obs_agents = agents;
-	//	helper::minus_set(oblivious_obs_agents, fully_obs_agents);
-	//	helper::minus_set(oblivious_obs_agents, partially_obs_agents);
+	//	helper_t::minus_set(oblivious_obs_agents, fully_obs_agents);
+	//	helper_t::minus_set(oblivious_obs_agents, partially_obs_agents);
 	//
 	//	if (!oblivious_obs_agents.empty()) {
 	//		ret.set_max_depth(get_max_depth() + 1);
@@ -2390,8 +2389,8 @@ pstate pstate::execute_sensing_att(const action & act) const
 	agent_set partially_obs_agents = helper::get_agents_if_entailed(act.get_partially_observants(), *this);
 
 	agent_set oblivious_obs_agents = agents;
-	helper::minus_set<agent>(oblivious_obs_agents, fully_obs_agents);
-	helper::minus_set<agent>(oblivious_obs_agents, partially_obs_agents);
+	helper_t::minus_set<agent>(oblivious_obs_agents, fully_obs_agents);
+	helper_t::minus_set<agent>(oblivious_obs_agents, partially_obs_agents);
 
 	//agent executor = act.get_executor();
 	single_attitudes_map attitudes;
@@ -2468,8 +2467,8 @@ pstate pstate::execute_announcement_att(const action & act) const
 	agent_set partially_obs_agents = helper::get_agents_if_entailed(act.get_partially_observants(), *this);
 
 	agent_set oblivious_obs_agents = agents;
-	helper::minus_set<agent>(oblivious_obs_agents, fully_obs_agents);
-	helper::minus_set<agent>(oblivious_obs_agents, partially_obs_agents);
+	helper_t::minus_set<agent>(oblivious_obs_agents, fully_obs_agents);
+	helper_t::minus_set<agent>(oblivious_obs_agents, partially_obs_agents);
 
 	agent executor = act.get_executor();
 	single_attitudes_map attitudes = get_P_attitudes(executor, partially_obs_agents);
@@ -2628,8 +2627,8 @@ pstate pstate::execute_announcement_dox(const action & act) const
 	agent_set partially_obs_agents = helper::get_agents_if_entailed(act.get_partially_observants(), *this);
 
 	agent_set oblivious_obs_agents = agents;
-	helper::minus_set<agent>(oblivious_obs_agents, fully_obs_agents);
-	helper::minus_set<agent>(oblivious_obs_agents, partially_obs_agents);
+	helper_t::minus_set<agent>(oblivious_obs_agents, fully_obs_agents);
+	helper_t::minus_set<agent>(oblivious_obs_agents, partially_obs_agents);
 
 	if (!oblivious_obs_agents.empty()) {
 		ret.set_max_depth(get_max_depth() + 1);

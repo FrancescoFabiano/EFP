@@ -1,4 +1,4 @@
-/* \brief Implementation of helper.h
+/** \brief Implementation of helper.h
  *
  * \copyright GNU Public License.
  *
@@ -228,24 +228,6 @@ bool helper::fluentset_negated_empty_intersection(const fluent_set & set1, const
 		}
 	}
 	return true;
-}
-
-template <class T>
-void helper::sum_set(std::set<T> & to_modify, const std::set<T> & factor2)
-{
-    typename std::set<T>::const_iterator it_pwset;
-    for (it_pwset = factor2.begin(); it_pwset != factor2.end(); it_pwset++) {
-        to_modify.insert(*it_pwset);
-    }
-}
-
-template <class T>
-void helper::minus_set(std::set<T> & to_modify, const std::set<T> & factor2)
-{
-    typename std::set<T>::const_iterator it_pwset;
-    for (it_pwset = factor2.begin(); it_pwset != factor2.end(); it_pwset++) {
-        to_modify.erase(*it_pwset);
-    }
 }
 
 agent_set helper::get_agents_if_entailed(const observability_map& map, const pstate & state)
