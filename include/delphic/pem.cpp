@@ -18,9 +18,9 @@ pem::pem()
 {
 }
 
-pem::pem(const event_type type, const belief_formula & pre, const postconditions & post, const pem_edges & edges)
+pem::pem(const pem_id id, const belief_formula & pre, const pem_postconditions & post, const pem_edges & edges)
 {
-    set_type(type);
+    set_id(id);
     set_precondition(pre);
     set_postconditions(post);
     set_edges(edges);
@@ -28,15 +28,15 @@ pem::pem(const event_type type, const belief_formula & pre, const postconditions
 
 pem::pem(const pem & action)
 {
-    set_type(action.get_type());
+    set_id(action.get_id());
     set_precondition(action.get_precondition());
     set_postconditions(action.get_postconditions());
     set_edges(action.get_edges());
 }
 
-void pem::set_type(const event_type to_set)
+void pem::set_id(const pem_id to_set)
 {
-    m_type = to_set;
+    m_id = to_set;
 }
 
 void pem::set_precondition(const belief_formula & to_set)
@@ -44,7 +44,7 @@ void pem::set_precondition(const belief_formula & to_set)
     m_pre = to_set;
 }
 
-void pem::set_postconditions(const postconditions & to_set)
+void pem::set_postconditions(const pem_postconditions & to_set)
 {
     m_post = to_set;
 }
@@ -54,9 +54,9 @@ void pem::set_edges(const pem_edges & to_set)
     m_edges = to_set;
 }
 
-const event_type pem::get_type() const
+const pem_id pem::get_id() const
 {
-    return m_type;
+    return m_id;
 }
 
 const belief_formula & pem::get_precondition() const
@@ -64,7 +64,7 @@ const belief_formula & pem::get_precondition() const
     return m_pre;
 }
 
-const postconditions & pem::get_postconditions() const
+const pem_postconditions & pem::get_postconditions() const
 {
     return m_post;
 }
@@ -76,14 +76,14 @@ const pem_edges & pem::get_edges() const
 
 bool pem::operator<(const pem & to_compare) const
 {
-    if (m_type < to_compare.get_type())     // We compare the types since we assume that each action has at most one PEM for each type
+    if (m_id < to_compare.get_id())     // We compare the ids since we assume that each action has at most one PEM for each id
         return true;
     return false;
 }
 
 bool pem::operator>(const pem & to_compare) const
 {
-    if (m_type > to_compare.get_type())
+    if (m_id > to_compare.get_id())
         return true;
     return false;
 }
@@ -99,7 +99,7 @@ bool pem::operator==(const pem & to_compare) const
 
 bool pem::operator=(const pem & to_copy)
 {
-    set_type(to_copy.get_type());
+    set_id(to_copy.get_id());
     set_precondition(to_copy.get_precondition());
     set_postconditions(to_copy.get_postconditions());
     set_edges(to_copy.get_edges());
@@ -142,10 +142,10 @@ std::shared_ptr <pem> pem_ptr::get_ptr() const
     return m_ptr;
 }
 
-const event_type pem_ptr::get_type() const
+const pem_id pem_ptr::get_id() const
 {
     if (m_ptr != nullptr) {
-        return get_ptr()->get_type();
+        return get_ptr()->get_id();
     }
     std::cerr << "Error in creating a pem_ptr\n";
     exit(1);
@@ -160,7 +160,7 @@ const belief_formula & pem_ptr::get_precondition() const
     exit(1);
 }
 
-const postconditions & pem_ptr::get_postconditions() const
+const pem_postconditions & pem_ptr::get_postconditions() const
 {
     if (m_ptr != nullptr) {
         return get_ptr()->get_postconditions();
@@ -180,7 +180,7 @@ const pem_edges & pem_ptr::get_edges() const
 
 bool pem_ptr::operator<(const pem_ptr & to_compare) const
 {
-    if (get_type() < to_compare.get_type()) {
+    if (get_id() < to_compare.get_id()) {
         return true;
     }
     return false;
@@ -188,7 +188,7 @@ bool pem_ptr::operator<(const pem_ptr & to_compare) const
 
 bool pem_ptr::operator>(const pem_ptr & to_compare) const
 {
-    if (get_type() > to_compare.get_type()) {
+    if (get_id() > to_compare.get_id()) {
         return true;
     }
     return false;

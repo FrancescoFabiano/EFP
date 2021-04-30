@@ -35,6 +35,8 @@ private:
     /** \brief Private constructor since it is a Singleton class.*/
     pem_store();
 public:
+    /**Function that populates the list m_action_pems with the event model given as input in \ref file*/
+    void generate(const std::string & file);
 
     /** \brief To get always (the same instance of) *this* and the same instantiated fields.*/
     static pem_store& get_instance();
@@ -44,6 +46,8 @@ public:
      * @parma[in] id: The id associated to \ref to_add.
      */
     void add_action_pem(const pem & to_add, pem_id id);
+
+
 
 
     /** \brief Function that inserts a \ref pem given its id to \ref m_action_pems.
