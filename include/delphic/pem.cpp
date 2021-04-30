@@ -10,14 +10,9 @@
  */
 
 #include <iostream>
-#include <tuple>
 #include <stdexcept>
 
 #include "pem.h"
-#include "pem_store.h"
-
-#include "../domain/domain.h"
-#include "../utilities/helper.h"
 
 pem::pem()
 {

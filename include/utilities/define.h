@@ -283,6 +283,8 @@ typedef std::map<std::pair<kworld_ptr, event_type>, kworld_ptr> kstate_map;
 
 
 /*****************Possibilities*****************/
+class pstate;
+
 class pworld;
 typedef std::size_t pworld_id; /**< \brief The id of a \ref pworld in a \ref pstate.
                                 *

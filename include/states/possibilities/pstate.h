@@ -44,72 +44,6 @@ private:
      *
      * @see pworld.*/
     pworld_transitive_map m_beliefs;
-    /** \brief Function that checks the entailment of a \ref fluent in a given \ref pworld.
-     *     @see \ref pworld::entails(fluent) const
-     *  
-     * @param[in] to_check: the \ref fluent that has to be checked if entailed in \p world.
-     * @param[in] world: the pointer to the  \ref pworld where to check the entailment.
-     *
-     * @return true: \p to_check is entailed in \p world;
-     * @return false: \p -to_check is entailed in \p world.*/
-    bool entails(fluent to_check, const pworld_ptr & world) const;
-    /**
-     *\brief Function that checks the entailment of a conjunctive set of \ref fluent in a given \ref pworld.
-     *     @see \ref pworld::entails(const fluent_set &) const
-     *  
-     * @param[in] to_check: the conjunctive set of \ref fluent that has to be checked if entailed in \p world.
-     * @param[in] world: the pointer to the  \ref pworld where to check the entailment.
-     *
-     * @return true: \p to_check is entailed in \p world;
-     * @return false: \p -to_check is entailed in \p world.*/
-    bool entails(const fluent_set & to_check, const pworld_ptr & world) const;
-    /**
-     *\brief Function that checks the entailment of a conjunctive set of \ref fluent in a given \ref pworld.
-     *     @see \ref pworld::entails(const fluent_formula &) const
-     *  
-     * @param[in] to_check: the DNF \ref fluent_formula that has to be checked if entailed in \p world.
-     * @param[in] world: the pointer to the \ref pworld where to check the entailment.
-     *
-     * @return true: \p to_check is entailed in \p world;
-     * @return false: \p -to_check is entailed in \p world.*/
-    bool entails(const fluent_formula & to_check, const pworld_ptr & world) const;
-
-    /** \brief Function that checks the entailment of a \ref belief_formula.
-     * 
-     * The concept of entailment of a \ref belief_formula is related to reachability
-     * and so an initial state is required, the given \ref pworld \p world is the starting point
-     * (it simulates the pointed world) where the entailment check starts from. The
-     * world needs to be parametric to not create a new \ref pstate for every iteration of the formula;
-     * now we can just change the starting point and keep the same \ref pstate when testing, for example,
-     * *nested knowledge*. The function is private because the entailment always starts from the \ref m_pointed and then
-     * moves to the reachable (with the operators) \ref pworld.
-     *  
-     * @see \ref belief_formula and entails(const belief_formula &) const.
-     * 
-     * @param[in] to_check: the \ref belief_formula that has to be checked if entailed from \p world.
-     * @param[in] world: the pointer to the \ref pworld where to start to check the entailment.
-     *
-     * @return true: \p to_check is entailed starting from \p world;
-     * @return false: \p -to_check is entailed starting from \p world.
-     * 
-     * \todo self-loop?*/
-    bool entails(const belief_formula & to_check, const pworld_ptr & world) const;
-    /** \brief Function that checks the entailment of a \ref belief_formula on several possible starting points.
-     * 
-     * This function eases the task to check the entailment from several starting \ref pworld simultaneously.
-     * This happens when we want to check the transitive closure of the \ref agent ag  to test the formula B(ag, phi).
-     * 
-     * @see belief_formula.
-     * 
-     * @param[in] to_check: the \ref belief_formula that has to be checked if entailed from \p world.
-     * @param[in] worlds: the pointers to the set of \ref pworld where to start to check the entailment.
-     *
-     * @return true: \p to_check is entailed starting from all the \ref pworld in \p worlds;
-     * @return false: \p -to_check is entailed starting from all the \ref pworld in \p worlds.
-     * 
-     * \todo self-loop?*/
-    bool entails(const belief_formula & to_check, const pworld_ptr_set & worlds) const;
-
 
     /** \brief Function that checks the entailment of a \ref formula_list (CNF of \ref belief_formula).
      * 
@@ -293,20 +227,6 @@ private:
      * @param[in] world: the \ref pworld.
      * @param[in] beliefs: a \ref pworld_map containing the beliefs.*/
     void add_pworld_beliefs(const pworld_ptr & world, const pworld_map & beliefs);
-
-    /** \brief Function that return the set of \ref agent that entails the obs condition.
-     *
-     * @param[in] map: the map that contains the tuples to check for entailment.
-     * @param[in] start: the world to set as pointed to check the entailment.
-     * @return the effects that are feasible in *this* with \p start as pointed world*.*/
-    agent_set get_agents_if_entailed(const observability_map & map, const pworld_ptr & start) const;
-
-    /** \brief Function that return the \ref fluent_formula (effect) that entails the exe condition.
-     *  
-     * @param[in] map: the map that contains the tuples to check for entailment.
-     * @param[in] start: the world to set as pointed to check the entailment.
-     * @return the effects that are feasible in *this* with \p start as pointed world*.*/
-    fluent_formula get_effects_if_entailed(const effects_map & map, const pworld_ptr & start) const;
 
     /** \brief Function that copies the \ref pworld(s) and the beliefs of the oblivious agents in the new \ref pstate.
      *
@@ -497,6 +417,72 @@ public:
      * @return: the value of \ref m_max_depth.*/
     unsigned int get_max_depth() const;
 
+    /** \brief Function that checks the entailment of a \ref fluent in a given \ref pworld.
+     *     @see \ref pworld::entails(fluent) const
+     *
+     * @param[in] to_check: the \ref fluent that has to be checked if entailed in \p world.
+     * @param[in] world: the pointer to the  \ref pworld where to check the entailment.
+     *
+     * @return true: \p to_check is entailed in \p world;
+     * @return false: \p -to_check is entailed in \p world.*/
+    bool entails(fluent to_check, const pworld_ptr & world) const;
+    /**
+     *\brief Function that checks the entailment of a conjunctive set of \ref fluent in a given \ref pworld.
+     *     @see \ref pworld::entails(const fluent_set &) const
+     *
+     * @param[in] to_check: the conjunctive set of \ref fluent that has to be checked if entailed in \p world.
+     * @param[in] world: the pointer to the  \ref pworld where to check the entailment.
+     *
+     * @return true: \p to_check is entailed in \p world;
+     * @return false: \p -to_check is entailed in \p world.*/
+    bool entails(const fluent_set & to_check, const pworld_ptr & world) const;
+    /**
+     *\brief Function that checks the entailment of a conjunctive set of \ref fluent in a given \ref pworld.
+     *     @see \ref pworld::entails(const fluent_formula &) const
+     *
+     * @param[in] to_check: the DNF \ref fluent_formula that has to be checked if entailed in \p world.
+     * @param[in] world: the pointer to the \ref pworld where to check the entailment.
+     *
+     * @return true: \p to_check is entailed in \p world;
+     * @return false: \p -to_check is entailed in \p world.*/
+    bool entails(const fluent_formula & to_check, const pworld_ptr & world) const;
+
+    /** \brief Function that checks the entailment of a \ref belief_formula.
+     *
+     * The concept of entailment of a \ref belief_formula is related to reachability
+     * and so an initial state is required, the given \ref pworld \p world is the starting point
+     * (it simulates the pointed world) where the entailment check starts from. The
+     * world needs to be parametric to not create a new \ref pstate for every iteration of the formula;
+     * now we can just change the starting point and keep the same \ref pstate when testing, for example,
+     * *nested knowledge*. The function is private because the entailment always starts from the \ref m_pointed and then
+     * moves to the reachable (with the operators) \ref pworld.
+     *
+     * @see \ref belief_formula and entails(const belief_formula &) const.
+     *
+     * @param[in] to_check: the \ref belief_formula that has to be checked if entailed from \p world.
+     * @param[in] world: the pointer to the \ref pworld where to start to check the entailment.
+     *
+     * @return true: \p to_check is entailed starting from \p world;
+     * @return false: \p -to_check is entailed starting from \p world.
+     *
+     * \todo self-loop?*/
+    bool entails(const belief_formula & to_check, const pworld_ptr & world) const;
+    /** \brief Function that checks the entailment of a \ref belief_formula on several possible starting points.
+     *
+     * This function eases the task to check the entailment from several starting \ref pworld simultaneously.
+     * This happens when we want to check the transitive closure of the \ref agent ag  to test the formula B(ag, phi).
+     *
+     * @see belief_formula.
+     *
+     * @param[in] to_check: the \ref belief_formula that has to be checked if entailed from \p world.
+     * @param[in] worlds: the pointers to the set of \ref pworld where to start to check the entailment.
+     *
+     * @return true: \p to_check is entailed starting from all the \ref pworld in \p worlds;
+     * @return false: \p -to_check is entailed starting from all the \ref pworld in \p worlds.
+     *
+     * \todo self-loop?*/
+    bool entails(const belief_formula & to_check, const pworld_ptr_set & worlds) const;
+
     /** \brief Function that adds a \ref pworld to the Kripke structure represented by *this*.
      *
      * The \ref pworld is added. The structure only stores the pointer to the \ref pworld so
@@ -655,24 +641,6 @@ public:
      *
      * @param[in] graphviz: the ostream where to print the info of *this*.*/
     void print_graphviz(std::ostream& graphviz) const;
-
-
-    /** \brief Function that return the sum_set of the two parameters by modifying the first one.
-     *
-     *  
-     * @param[out] to_modify: the set in which is added \p factor2.
-     * @param[in] factor2: the set to add to \p to_modify.*/
-    template <class T>
-    void sum_set(std::set<T> & to_modify, const std::set<T> & factor2) const;
-    /** \brief Function that return the set difference of the two parameters by modifying the first one.
-     *
-     *  
-     * @param[out] to_modify: the set from which is removed \p factor2.
-     * @param[in] factor2: the set to remove from \p to_modify.*/
-    template <class T>
-    void minus_set(std::set<T> & to_modify, const std::set<T> & factor2) const;
-
-
 
 
     /*fluent_formula get_sensing_effects_if_entailed(const effects_map & map, const pworld_ptr & start) const;*/
