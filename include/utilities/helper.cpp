@@ -8,6 +8,7 @@
 
 #include "helper.h"
 #include  <math.h>
+#include "../states/possibilities/pstate.h"
 
 fluent helper::negate_fluent(const fluent f)
 {
@@ -228,6 +229,54 @@ bool helper::fluentset_negated_empty_intersection(const fluent_set & set1, const
 	}
 	return true;
 }
+
+template <class T>
+void helper::sum_set(std::set<T> & to_modify, const std::set<T> & factor2)
+{
+    typename std::set<T>::const_iterator it_pwset;
+    for (it_pwset = factor2.begin(); it_pwset != factor2.end(); it_pwset++) {
+        to_modify.insert(*it_pwset);
+    }
+}
+
+template <class T>
+void helper::minus_set(std::set<T> & to_modify, const std::set<T> & factor2)
+{
+    typename std::set<T>::const_iterator it_pwset;
+    for (it_pwset = factor2.begin(); it_pwset != factor2.end(); it_pwset++) {
+        to_modify.erase(*it_pwset);
+    }
+}
+
+agent_set helper::get_agents_if_entailed(const observability_map& map, const pstate & state)
+{
+    agent_set ret;
+    observability_map::const_iterator it_map;
+    for (it_map = map.begin(); it_map != map.end(); it_map++) {
+        if (state.entails(it_map->second)) {
+            ret.insert(it_map->first);
+        }
+    }
+    return ret;
+}
+
+fluent_formula helper::get_effects_if_entailed(const effects_map & map, const pstate & state)
+{
+    fluent_formula ret;
+    effects_map::const_iterator it_map;
+    for (it_map = map.begin(); it_map != map.end(); it_map++) {
+        if (state.entails(it_map->second)) {
+            ret = helper::and_ff(ret, it_map->first);
+        }
+    }
+    if (ret.size() > 1) {
+
+        std::cerr << "\nNon determinism in action effect is not supported-1.\n";
+        exit(1);
+    }
+    return ret;
+}
+
 /* Using the std::set == operator
 static bool helper::is_the_same_ff(const fluent_set& to_check_1, const fluent_set& to_check_2)
 {

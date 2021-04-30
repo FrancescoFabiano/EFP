@@ -6,6 +6,7 @@ OBJS	=	$(BUILD_DIR)/bison.o $(BUILD_DIR)/lex.o $(BUILD_DIR)/main.o \
 			$(BUILD_DIR)/attitude.o $(BUILD_DIR)/attitudes_table.o \
 			$(BUILD_DIR)/kstore.o $(BUILD_DIR)/kedge.o $(BUILD_DIR)/kworld.o $(BUILD_DIR)/kstate.o \
 			$(BUILD_DIR)/pstore.o $(BUILD_DIR)/pworld.o $(BUILD_DIR)/pstate.o \
+			$(BUILD_DIR)/pem.o $(BUILD_DIR)/pem_store.o $(BUILD_DIR)/delphic_helper.o \
 			$(BUILD_DIR)/reader.o \
 			$(BUILD_DIR)/heuristics_manager.o $(BUILD_DIR)/satisfied_goals.o $(BUILD_DIR)/planning_graph.o \
 			$(BUILD_DIR)/bisimulation.o
@@ -38,6 +39,7 @@ BISIMULATION_DIR = $(LIB_DIR)/bisimulation
 
 INCLUDE_DIR = include
 ACTION_DIR = $(INCLUDE_DIR)/actions
+DELPHIC_DIR = $(INCLUDE_DIR)/delphic
 DOMAIN_DIR = $(INCLUDE_DIR)/domain
 FORMULA_DIR = $(INCLUDE_DIR)/formulae
 HEURISTIC_DIR = $(INCLUDE_DIR)/heuristics
@@ -271,6 +273,27 @@ $(BUILD_DIR)/pstore_opt.o: $(S_POSSIBILITY_OPT_DIR)/pstore_opt.cpp $(S_POSSIBILI
 					   $(UTILITIES_DIR)/define.h
 		$(dir_guard)
 		$(CC) $(CFLAGS) -c $(S_POSSIBILITY_OPT_DIR)/pstore_opt.cpp -o $(BUILD_DIR)/pstore_opt.o
+
+##DELPHIC
+$(BUILD_DIR)/pem.o: $(DELPHIC_DIR)/pem.cpp $(DELPHIC_DIR)/pem.h \
+					$(DELPHIC_DIR)/pem_store.h $(DELPHIC_DIR)/delphic_helper.h \
+					$(UTILITIES_DIR)/helper.h \
+					$(UTILITIES_DIR)/define.h
+		$(dir_guard)
+		$(CC) $(CFLAGS) -c $(DELPHIC_DIR)/pem.cpp -o $(BUILD_DIR)/pem.o
+
+$(BUILD_DIR)/pem_store.o: $(DELPHIC_DIR)/pem_store.cpp $(DELPHIC_DIR)/pem_store.h \
+					      $(DELPHIC_DIR)/pem.cpp $(DELPHIC_DIR)/pem.h \
+					      $(DELPHIC_DIR)/delphic_helper.h \
+					      $(UTILITIES_DIR)/define.h
+		$(dir_guard)
+		$(CC) $(CFLAGS) -c $(DELPHIC_DIR)/pem_store.cpp -o $(BUILD_DIR)/pem_store.o
+
+$(BUILD_DIR)/delphic_helper.o: $(DELPHIC_DIR)/delphic_helper.cpp $(DELPHIC_DIR)/delphic_helper.h \
+					      	   $(DELPHIC_DIR)/pem.cpp $(DELPHIC_DIR)/pem.h \
+					      	   $(UTILITIES_DIR)/define.h
+		$(dir_guard)
+		$(CC) $(CFLAGS) -c $(DELPHIC_DIR)/delphic_helper.cpp -o $(BUILD_DIR)/delphic_helper.o
 
 ####DOMAIN
 $(BUILD_DIR)/initially.o: $(DOMAIN_DIR)/initially.cpp $(DOMAIN_DIR)/initially.h \

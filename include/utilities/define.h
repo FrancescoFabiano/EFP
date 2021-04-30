@@ -283,6 +283,8 @@ typedef std::map<std::pair<kworld_ptr, event_type>, kworld_ptr> kstate_map;
 
 
 /*****************Possibilities*****************/
+class pstate;
+
 class pworld;
 typedef std::size_t pworld_id; /**< \brief The id of a \ref pworld in a \ref pstate.
                                 *
@@ -358,6 +360,9 @@ typedef std::map<agent, pstate_opt_ptr_set> pedges_opt; /**< \brief A map betwee
 typedef unsigned short pem_id;
 
 typedef std::map<fluent, belief_formula> pem_postconditions;
+
+class pem;
+typedef std::set<pem> pem_set;
 
 class pem_ptr;
 typedef std::set<pem_ptr> pem_ptr_set; /**< \brief A set of \ref pem_ptr.

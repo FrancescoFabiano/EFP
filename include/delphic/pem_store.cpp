@@ -31,7 +31,7 @@ const pem_ptr & pem_store::add_pem(const pem & to_add)
 
 void pem_store::add_action_pem(const pem & to_add, pem_id id)
 {
-	add_adction_pem(add_pem(to_add), id);
+	add_action_pem(add_pem(to_add), id);
 }
 
 void pem_store::add_action_pem(const pem_ptr & to_add, pem_id id)

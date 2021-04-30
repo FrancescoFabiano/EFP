@@ -12,11 +12,17 @@
  */
 #pragma once
 
+#include "../utilities/define.h"
+#include "../formulae/belief_formula.h"
+
 class pem
 {
+    friend class pem_ptr;
+
 private:
     /** \brief The id of *this*.*/
     pem_id m_id;
+
     /** \brief The precondition of *this*.*/
     belief_formula m_pre;
     /** \brief The map that associates a belief formula (postcondition) to each \ref fluent.*/
@@ -39,7 +45,7 @@ private:
      * Only accessible by the \ref pem_ptr.
      *
      * @param[in] pre: the \ref belief_formula to set as \ref m_pre.*/
-    void set_precondition(const belief_formula & pre);
+    void set_precondition(const belief_formula & to_set);
     /** \brief Setter for the field \ref m_post.
      *
      * Only accessible by the \ref pem_ptr.
@@ -51,32 +57,85 @@ private:
      * Only accessible by the \ref pem_ptr.
      *
      * @param[in] edges: the map of \ref edges to set as \ref m_edges.*/
-    void set_edges(const pem_edges & edges);
+    void set_edges(const pem_edges & to_set);
 
-    /** \brief Getter of \ref m_type.
+    /** \brief Getter of \ref m_id.
      *
      * Only accessible by the \ref pem_ptr.
      *
-     * @return the \ref event_type of *this*.*/
-    const event_type get_type() const;
+     * @return the \ref pem_id of *this*.*/
+    const pem_id get_id() const;
     /** \brief Getter of \ref m_pre.
      *
      * Only accessible by the \ref pem_ptr.
      *
      * @return the precondition of *this*.*/
-    const belief_formula & get_precondition();
+    const belief_formula & get_precondition() const;
     /** \brief Getter of \ref m_post.
      *
      * Only accessible by the \ref pem_ptr.
      *
      * @return the postconditions of *this*.*/
-    const pem_postconditions & get_postconditions();
+    const pem_postconditions & get_postconditions() const;
     /** \brief Getter of \ref m_edges.
      *
      * Only accessible by the \ref pem_ptr.
      *
      * @return the map of edges of *this*.*/
-    const pem_edges& get_edges() const;
+    const pem_edges & get_edges() const;
+
+    public:
+    /** \brief Empty constructor, call the default constructor of all the fields.*/
+    pem();
+    /** \brief Constructor with parameters.
+     * Construct an object with the given info.
+     *
+     * @param[in] id: the \ref id to set as \ref m_id.
+     * @param[in] pre: the \ref belief_formula to set as \ref m_pre.
+     * @param[in] post: the \ref postconditions to set as \ref m_post.
+     * @param[in] edges: the map of the edges of *this*.*/
+    pem(const pem_id id, const belief_formula & pre, const pem_postconditions & post, const pem_edges & edges);
+    /** \brief Copy constructor.
+     *
+     * @param[in] action: the \ref pem to copy into *this*.*/
+    pem(const pem & action);
+
+    /**
+     *\brief The < operator based on the field \ref m_id.
+     * Implemented to allow the ordering on set of \ref pem (used in \ref pem_store).
+     *
+     * @see pem_store.
+     *
+     * @param [in] to_compare: the \ref pem to compare with *this*.
+     * @return true: if \p to_compare is smaller than *this*
+     * @return false: otherwise.*/
+    bool operator<(const pem & to_compare) const;
+    /**
+     *\brief The > operator based on the field \ref m_id.
+     * Implemented to allow the ordering on set of \ref pem (used in \ref pem_store).
+     *
+     * @see pem_store.
+     *
+     * @param [in] to_compare: the \ref pem to compare with *this*.
+     * @return true: if \p to_compare is bigger than *this*
+     * @return false: otherwise.*/
+    bool operator>(const pem & to_compare) const;
+    /**
+     *\brief The == operator based on the field \ref m_id.
+     * Implemented to allow the ordering on set of \ref pem (used in \ref pem_store).
+     *
+     * @see pem_store.
+     *
+     * @param [in] to_compare: the \ref pem to compare with *this*.
+     * @return true: if \p to_compare is equal to *this*
+     * @return false: otherwise.*/
+    bool operator==(const pem & to_compare) const;
+    /** \brief The copy operator.
+     *
+     * @param [in] to_assign: the \ref pem to assign to *this*.
+     * @return true: if \p the assignment went ok.
+     * @return false: otherwise.*/
+    bool operator=(const pem & to_copy);
 };
 
 /**
@@ -149,20 +208,57 @@ public:
      * @return a copy of the pointer \ref m_ptr.*/
     std::shared_ptr <pem> get_ptr() const;
 
-    /** \brief Function that return the field m_type of the pointed \ref pem.
+    /** \brief Function that return the field m_id of the pointed \ref pem.
      *
-     * @return the \ref m_type of the \ref pem pointed by \ref m_ptr.*/
-    const event_type get_type() const;
+     * @return the \ref m_id of the \ref pem pointed by \ref m_ptr.*/
+    const pem_id get_id() const;
     /** \brief Function that return the field m_precondition of the pointed \ref pem.
      *
      * @return the \ref m_precondition of the \ref pem pointed by \ref m_ptr.*/
-    void get_precondition();
+    const belief_formula & get_precondition() const;
     /** \brief Function that return the field m_postconditions of the pointed \ref pem.
      *
      * @return the \ref m_postconditions of the \ref pem pointed by \ref m_ptr.*/
-    void get_postconditions();
+    const pem_postconditions & get_postconditions() const;
     /** \brief Function that return the field m_edges of the pointed \ref pem.
      *
      * @return the \ref m_edges of the \ref pem pointed by \ref m_ptr.*/
     const pem_edges& get_edges() const;
+
+    /**
+     *\brief The < operator based on the field \ref m_id.
+     * Implemented to allow the ordering on set of \ref pem_ptr (used in \ref pem_store).
+     *
+     * @see pem_store.
+     *
+     * @param [in] to_compare: the \ref pem_ptr to compare with *this*.
+     * @return true: if \p to_compare is smaller than *this*
+     * @return false: otherwise.*/
+    bool operator<(const pem_ptr & to_compare) const;
+    /**
+     *\brief The > operator based on the field \ref m_id.
+     * Implemented to allow the ordering on set of \ref pem_ptr (used in \ref pem_store).
+     *
+     * @see pem_store.
+     *
+     * @param [in] to_compare: the \ref pem_ptr to compare with *this*.
+     * @return true: if \p to_compare is bigger than *this*
+     * @return false: otherwise.*/
+    bool operator>(const pem_ptr & to_compare) const;
+    /**
+     *\brief The == operator based on the field \ref m_id.
+     * Implemented to allow the ordering on set of \ref pem_ptr (used in \ref pem_store).
+     *
+     * @see pem_store.
+     *
+     * @param [in] to_compare: the \ref pem_ptr to compare with *this*.
+     * @return true: if \p to_compare is equal to *this*
+     * @return false: otherwise.*/
+    bool operator==(const pem_ptr & to_compare) const;
+    /** \brief The copy operator.
+     *
+     * @param [in] to_assign: the \ref pem_ptr to assign to *this*.
+     * @return true: if \p the assignment went ok.
+     * @return false: otherwise.*/
+    bool operator=(const pem_ptr & to_copy);
 };
