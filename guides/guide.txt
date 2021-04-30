@@ -38,7 +38,7 @@ The folder that contains the domains is "exp/"
 Some extra (and not fully tested) features, found in the printout of all the planner parameters, are: 
 	- Heuristics (-h @heuristic);
 	- Different type of Search (-search @search_type);
-	- Agents's attitudes (-attitudes) that imply a much more complex transition function (example of domains can be found in the "exp/att" folder)
+	- Agents' attitudes (-attitudes) that imply a much more complex transition function (examples of domains can be found in the "exp/att" folder). This configuration works only with Possibilities.
 
 
 ### Requirements

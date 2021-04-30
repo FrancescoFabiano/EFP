@@ -813,6 +813,12 @@ void pg_state_level::set_pg_state_level(const pg_state_level & to_assign)
 
 
 
+/*\********************Transition function based on update models**********************************/
+//Given: a formula, custom update model, action definition and the map of belief formula (previous level) determines whether the given bf is true or not by exploring the update model graph
+
+
+
+
 /*\******************************************************************************************************************/
 
 /*\*****START PLANNING GRAPH TIME MEASURE*******

@@ -14,12 +14,42 @@ pem_store::pem_store()
 
 pem_store& pem_store::get_instance()
 {
-    static pem_store instance;
-    return instance;
+	static pem_store instance;
+	return instance;
 }
 
-const pem_ptr pem_store::add_pem(const pem & to_add)
+
+void pem_store::generate(const std::string & file){
+	
+}
+
+const pem_ptr & pem_store::add_pem(const pem & to_add)
 {
-    auto tmp_ptr = std::make_shared<pstate_opt>(*(std::get<0>(m_created_states.insert(to_add))));
-    return tmp_ptr;
+	auto tmp_ptr = std::make_shared<const pem>(*(std::get<0>(m_created_pem.insert(to_add))));
+	return tmp_ptr;
+}
+
+void pem_store::add_action_pem(const pem & to_add, pem_id id)
+{
+	add_adction_pem(add_pem(to_add), id);
+}
+
+void pem_store::add_action_pem(const pem_ptr & to_add, pem_id id)
+{
+	if (m_action_pems.find(id) == m_action_pems.end()) {
+		m_action_pems.insert(std::pair<pem_id, pem>(id, to_add));
+	} else {
+		std::cerr << "\nYou are trying to allocate two Event Models with the same id, this is not possible.";
+		exit(1);
+	}
+}
+
+const pem_ptr & pem_store::get_action_pem(pem_id id)
+{
+	if (m_created_pems.find(id) != m_created_pems.end()) {
+		return m_action_pems[id];
+	} else {
+		std::cerr << "\nYou have requested an Event Model that does not exists.";
+		exit(1);
+	}
 }

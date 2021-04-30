@@ -14,13 +14,13 @@
 
 class pem
 {
-    private:
-    /** \brief The type of *this*.*/
-    event_type m_type;
+private:
+    /** \brief The id of *this*.*/
+    pem_id m_id;
     /** \brief The precondition of *this*.*/
     belief_formula m_pre;
     /** \brief The map that associates a belief formula (postcondition) to each \ref fluent.*/
-    postconditions m_post;
+    pem_postconditions m_post;
     /** \brief The map containing the edges of the action.
      *
      * Each edge consists of <\ref agent, \ref pem_ptr_set> and link each \ref agent to a set of pems.
@@ -28,12 +28,12 @@ class pem
      * @see pem_store and agent.*/
     pem_edges m_edges;
 
-    /** \brief Setter for the field \ref m_event.
+    /** \brief Setter for the field \ref m_id.
      *
      * Only accessible by the \ref pem_ptr.
      *
-     * @param[in] type: the \ref event_type to set as \ref m_type.*/
-    void set_type(const event_type type);
+     * @param[in] id: the \ref pem_id to set as \ref m_id.*/
+    void set_id(pem_id id);
     /** \brief Setter for the field \ref m_pre.
      *
      * Only accessible by the \ref pem_ptr.
@@ -44,8 +44,8 @@ class pem
      *
      * Only accessible by the \ref pem_ptr.
      *
-     * @param[in] post: the \ref postconditions to set as \ref m_post.*/
-    void set_postconditions(const postconditions & post);
+     * @param[in] post: the \ref pem_postconditions to set as \ref m_post.*/
+    void set_postconditions(const pem_postconditions & post);
     /** \brief Setter for the field \ref m_edges.
      *
      * Only accessible by the \ref pem_ptr.
@@ -64,13 +64,13 @@ class pem
      * Only accessible by the \ref pem_ptr.
      *
      * @return the precondition of *this*.*/
-    void get_precondition();
+    const belief_formula & get_precondition();
     /** \brief Getter of \ref m_post.
      *
      * Only accessible by the \ref pem_ptr.
      *
      * @return the postconditions of *this*.*/
-    void get_postconditions();
+    const pem_postconditions & get_postconditions();
     /** \brief Getter of \ref m_edges.
      *
      * Only accessible by the \ref pem_ptr.
@@ -93,7 +93,8 @@ class pem
  * \author Francesco Fabiano.
  * \date April 28, 2021
  */
-class pem_ptr {
+class pem_ptr
+{
 private:
     /**\brief the pointer that is wrapped by *this*.*/
     std::shared_ptr <pem> m_ptr;

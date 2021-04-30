@@ -354,7 +354,10 @@ typedef std::map<agent, pstate_opt_ptr_set> pedges_opt; /**< \brief A map betwee
 
 /****************** Delphic *******************/
 // PEM
-typedef std::map<fluent, belief_formula> postconditions;
+
+typedef unsigned short pem_id;
+
+typedef std::map<fluent, belief_formula> pem_postconditions;
 
 class pem_ptr;
 typedef std::set<pem_ptr> pem_ptr_set; /**< \brief A set of \ref pem_ptr.
@@ -371,6 +374,8 @@ typedef std::map<agent, pem_ptr_set> pem_edges; /**< \brief A map between agents
                                                * remember that each possibility is a state itself.
                                                *
                                                * @see pem.*/
+
+typedef std::map<pem_id, pem_ptr> pem_map; /**< \brief A map that stores the event model for a given type of action (identified through an id).*/
 
 /****************** Agent's Attitudes related *******************/
 
