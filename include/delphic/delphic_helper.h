@@ -18,10 +18,10 @@
 class delphic_helper {
     /** \brief Calculates the PEM relative to the \ref action description and the current \ref pstate.
      *
-     * @param [in] u: the current \ref pstate.
+     * @param [in] state: the current \ref pstate.
      * @param [in] act: the \ref action description.
      * @return the resulting \ref pem.*/
-    static pem get_pem(const pstate & u, const action & act);
+    static pem get_pem(const pstate & state, const action & act);
     /** \brief Calculates the \ref pstate resulting from the given current \ref pstate and \ref pem.
      *
      * @param [in] u: the current \ref pstate.

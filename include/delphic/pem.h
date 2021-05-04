@@ -24,9 +24,11 @@ private:
     pem_id m_id;
 
     /** \brief The precondition of *this*.*/
-    belief_formula m_pre;
+    formula_list m_pre;
     /** \brief The map that associates a belief formula (postcondition) to each \ref fluent.*/
     pem_postconditions m_post;
+    /** \brief Flag that is true iff *this* has some postconditions.*/
+    bool m_ontic_change;
     /** \brief The map containing the edges of the action.
      *
      * Each edge consists of <\ref agent, \ref pem_ptr_set> and link each \ref agent to a set of pems.
@@ -45,7 +47,7 @@ private:
      * Only accessible by the \ref pem_ptr.
      *
      * @param[in] pre: the \ref belief_formula to set as \ref m_pre.*/
-    void set_precondition(const belief_formula & to_set);
+    void set_precondition(const formula_list & to_set);
     /** \brief Setter for the field \ref m_post.
      *
      * Only accessible by the \ref pem_ptr.
@@ -56,8 +58,12 @@ private:
      *
      * Only accessible by the \ref pem_ptr.
      *
-     * @param[in] edges: the map of \ref edges to set as \ref m_edges.*/
+     * @param[in] edges: the map of \ref pem_edges to set as \ref m_edges.*/
     void set_edges(const pem_edges & to_set);
+    /** \brief Setter for the field \ref m_ontic_change.
+     *
+     * @param[in] id: the boolean variable to set as \ref m_ontic_change.*/
+    void set_ontic_change(bool to_set);
 
     /** \brief Getter of \ref m_id.
      *
@@ -70,7 +76,7 @@ private:
      * Only accessible by the \ref pem_ptr.
      *
      * @return the precondition of *this*.*/
-    const belief_formula & get_precondition() const;
+    const formula_list & get_precondition() const;
     /** \brief Getter of \ref m_post.
      *
      * Only accessible by the \ref pem_ptr.
@@ -83,6 +89,12 @@ private:
      *
      * @return the map of edges of *this*.*/
     const pem_edges & get_edges() const;
+    /** \brief Getter of \ref m_ontic_change.
+     *
+     * Only accessible by the \ref pem_ptr.
+     *
+     * @return the \ref m_ontic_change of *this*.*/
+    const bool get_ontic_change() const;
 
     public:
     /** \brief Empty constructor, call the default constructor of all the fields.*/
@@ -94,7 +106,13 @@ private:
      * @param[in] pre: the \ref belief_formula to set as \ref m_pre.
      * @param[in] post: the \ref postconditions to set as \ref m_post.
      * @param[in] edges: the map of the edges of *this*.*/
-    pem(const pem_id id, const belief_formula & pre, const pem_postconditions & post, const pem_edges & edges);
+    pem(const pem_id id, const formula_list & pre, const pem_postconditions & post, const pem_edges & edges);
+    /** \brief Constructor with parameters.
+     * Construct an object with the given info.
+     *
+     * @param[in] id: the \ref id to set as \ref m_id.
+     * @param[in] pre: the \ref belief_formula to set as \ref m_pre.*/
+    pem(const pem_id id, const formula_list & pre);
     /** \brief Copy constructor.
      *
      * @param[in] action: the \ref pem to copy into *this*.*/
@@ -207,6 +225,10 @@ public:
      *
      * @return a copy of the pointer \ref m_ptr.*/
     std::shared_ptr <pem> get_ptr() const;
+    /**\brief Setter for the field \ref m_postconditions of \ref m_ptr.
+     *
+     * @param[in] ptr: the \ref pem_postconditions to assign to \ref m_postconditions.*/
+    void set_postconditions(const pem_postconditions & to_set);
 
     /** \brief Function that return the field m_id of the pointed \ref pem.
      *
@@ -215,7 +237,7 @@ public:
     /** \brief Function that return the field m_precondition of the pointed \ref pem.
      *
      * @return the \ref m_precondition of the \ref pem pointed by \ref m_ptr.*/
-    const belief_formula & get_precondition() const;
+    const formula_list & get_precondition() const;
     /** \brief Function that return the field m_postconditions of the pointed \ref pem.
      *
      * @return the \ref m_postconditions of the \ref pem pointed by \ref m_ptr.*/
@@ -224,7 +246,10 @@ public:
      *
      * @return the \ref m_edges of the \ref pem pointed by \ref m_ptr.*/
     const pem_edges& get_edges() const;
-
+    /** \brief Function that return the field m_ontic_change of the pointed \ref pem.
+     *
+     * @return the \ref m_id of the \ref pem pointed by \ref m_ptr.*/
+    const bool get_ontic_change() const;
     /**
      *\brief The < operator based on the field \ref m_id.
      * Implemented to allow the ordering on set of \ref pem_ptr (used in \ref pem_store).

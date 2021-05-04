@@ -18,12 +18,20 @@ pem::pem()
 {
 }
 
-pem::pem(const pem_id id, const belief_formula & pre, const pem_postconditions & post, const pem_edges & edges)
+pem::pem(const pem_id id, const formula_list & pre, const pem_postconditions & post, const pem_edges & edges)
 {
     set_id(id);
     set_precondition(pre);
     set_postconditions(post);
     set_edges(edges);
+    set_ontic_change(true);
+}
+
+pem::pem(const pem_id id, const formula_list & pre)
+{
+    set_id(id);
+    set_precondition(pre);
+    set_ontic_change(false);
 }
 
 pem::pem(const pem & action)
@@ -32,6 +40,7 @@ pem::pem(const pem & action)
     set_precondition(action.get_precondition());
     set_postconditions(action.get_postconditions());
     set_edges(action.get_edges());
+    set_ontic_change(action.get_ontic_change());
 }
 
 void pem::set_id(const pem_id to_set)
@@ -39,7 +48,7 @@ void pem::set_id(const pem_id to_set)
     m_id = to_set;
 }
 
-void pem::set_precondition(const belief_formula & to_set)
+void pem::set_precondition(const formula_list & to_set)
 {
     m_pre = to_set;
 }
@@ -47,6 +56,7 @@ void pem::set_precondition(const belief_formula & to_set)
 void pem::set_postconditions(const pem_postconditions & to_set)
 {
     m_post = to_set;
+    set_ontic_change(true);
 }
 
 void pem::set_edges(const pem_edges & to_set)
@@ -54,12 +64,16 @@ void pem::set_edges(const pem_edges & to_set)
     m_edges = to_set;
 }
 
+void pem::set_ontic_change(bool to_set) {
+    m_ontic_change = to_set;
+}
+
 const pem_id pem::get_id() const
 {
     return m_id;
 }
 
-const belief_formula & pem::get_precondition() const
+const formula_list & pem::get_precondition() const
 {
     return m_pre;
 }
@@ -72,6 +86,11 @@ const pem_postconditions & pem::get_postconditions() const
 const pem_edges & pem::get_edges() const
 {
     return m_edges;
+}
+
+const bool pem::get_ontic_change() const
+{
+    return m_ontic_change;
 }
 
 bool pem::operator<(const pem & to_compare) const
@@ -137,6 +156,11 @@ void pem_ptr::set_ptr(std::shared_ptr <pem> &&ptr)
     m_ptr = ptr;
 }
 
+void pem_ptr::set_postconditions(const pem_postconditions & to_set)
+{
+    m_ptr->set_postconditions(to_set);
+}
+
 std::shared_ptr <pem> pem_ptr::get_ptr() const
 {
     return m_ptr;
@@ -151,7 +175,7 @@ const pem_id pem_ptr::get_id() const
     exit(1);
 }
 
-const belief_formula & pem_ptr::get_precondition() const
+const formula_list & pem_ptr::get_precondition() const
 {
     if (m_ptr != nullptr) {
         return get_ptr()->get_precondition();
@@ -173,6 +197,15 @@ const pem_edges & pem_ptr::get_edges() const
 {
     if (m_ptr != nullptr) {
         return get_ptr()->get_edges();
+    }
+    std::cerr << "Error in creating a pem_ptr\n";
+    exit(1);
+}
+
+const bool pem_ptr::get_ontic_change() const
+{
+    if (m_ptr != nullptr) {
+        return get_ptr()->get_ontic_change();
     }
     std::cerr << "Error in creating a pem_ptr\n";
     exit(1);
