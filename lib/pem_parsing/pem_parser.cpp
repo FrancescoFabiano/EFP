@@ -14,6 +14,9 @@
 #include <bits/stdc++.h>
 #include <boost/algorithm/string.hpp>
 #include <regex>
+#include "../../include/delphic/pem.h"
+
+//Leggi il pointed ---- Singolo
 
 void apply_spaces_regex(std::string & to_clean, const std::regex & pattern)
 {
@@ -85,6 +88,8 @@ void parse_list(const std::string & line)
 	apply_spaces_regex(cleaned, spaces_ext);
 
 	boost::replace_all(cleaned, ";", " ");
+	boost::replace_all(cleaned, ")(", ") (");
+
 
 
 	std::istringstream args(cleaned);
@@ -128,6 +133,8 @@ void parse_edges_list(const std::string & line)
 
 	apply_spaces_regex(cleaned, spaces_opened);
 	apply_spaces_regex(cleaned, spaces_closed);
+	boost::replace_all(cleaned, ")(", ") (");
+
 
 	//boost::replace_all(cleaned, ";", " ");
 
@@ -225,7 +232,14 @@ int main(int argc, char** argv)
 
 				if (field.compare("id") == 0) {
 					std::cout << "\n\tId is: " << internal_field;
-				} else if (field.compare("precondition") == 0) {
+				} else if (field.compare("pointed") == 0) {
+					if (!in_model) {
+						std::cerr << "\nParsing Error: Pointed event found outside of a model definition.";
+						exit(1);
+					}
+					std::cout << "\n\tPointed is: " << internal_field;
+				}
+				else if (field.compare("precondition") == 0) {
 					if (!in_event) {
 						std::cerr << "\nParsing Error: Precondition found outside of an event definition.";
 						exit(1);
