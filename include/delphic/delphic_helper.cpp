@@ -8,13 +8,13 @@
  */
 
 #include "delphic_helper.h"
-#include "pem.h"
+#include "event.h"
 #include "../utilities/helper_t.ipp"
 #include "pem_store.h"
 
-pem delphic_helper::get_pem(const pstate & state, const action & act)
+event delphic_helper::get_pem(const pstate & state, const action & act)
 {
-    pem ret;
+    event ret;
 
     belief_formula TRUE;
     TRUE.set_formula_type(BF_EMPTY);
@@ -29,10 +29,10 @@ pem delphic_helper::get_pem(const pstate & state, const action & act)
 
     switch (act.get_type()) {
         case ONTIC: {
-            pem_ptr sigma   = pem_ptr(pem(SIGMA  , act.get_executability()));       // pem_store::get_instance().add_pem
-            pem_ptr epsilon = pem_ptr(pem(EPSILON, {TRUE}));
+            event_ptr sigma   = event_ptr(event(SIGMA  , act.get_executability()));       // pem_store::get_instance().add_event
+            event_ptr epsilon = event_ptr(event(EPSILON, {TRUE}));
 
-            pem_postconditions post;
+            event_postconditions post;
             // get_effects_if_entailed per calcolare effetti entailed
 //            act.get_effects();
 //            sigma.set_postconditions(post);
@@ -48,7 +48,7 @@ pem delphic_helper::get_pem(const pstate & state, const action & act)
     return ret;
 }
 
-pstate delphic_helper::union_update(const pstate & u, const pem & e)
+pstate delphic_helper::union_update(const pstate & u, const event & e)
 {
     return u;
 }

@@ -2,45 +2,28 @@
  * \brief Implementation of \ref pem.h and \ref pem_ptr.h.
  *
  * \copyright GNU Public License.
- * 
- * @todo: Redefine the insert so that we have the bulk check (Bisimulation with all the graphs). 
+ *
  *
  * \author Francesco Fabiano.
- * \date April 28, 2021
+ * \date May 05, 2021
  */
 
-#include <iostream>
-#include <stdexcept>
-
 #include "pem.h"
+#include "event.h"
 
 pem::pem()
 {
 }
 
-pem::pem(const pem_id id, const formula_list & pre, const pem_postconditions & post, const pem_edges & edges)
+pem::pem(event_id id)
 {
     set_id(id);
-    set_precondition(pre);
-    set_postconditions(post);
-    set_edges(edges);
-    set_ontic_change(true);
 }
 
-pem::pem(const pem_id id, const formula_list & pre)
+pem::pem(const pem & to_copy)
 {
-    set_id(id);
-    set_precondition(pre);
-    set_ontic_change(false);
-}
-
-pem::pem(const pem & action)
-{
-    set_id(action.get_id());
-    set_precondition(action.get_precondition());
-    set_postconditions(action.get_postconditions());
-    set_edges(action.get_edges());
-    set_ontic_change(action.get_ontic_change());
+    set_id(to_copy.get_id());
+    set_edges(to_copy.get_edges());
 }
 
 void pem::set_id(const pem_id to_set)
@@ -48,24 +31,9 @@ void pem::set_id(const pem_id to_set)
     m_id = to_set;
 }
 
-void pem::set_precondition(const formula_list & to_set)
-{
-    m_pre = to_set;
-}
-
-void pem::set_postconditions(const pem_postconditions & to_set)
-{
-    m_post = to_set;
-    set_ontic_change(true);
-}
-
 void pem::set_edges(const pem_edges & to_set)
 {
     m_edges = to_set;
-}
-
-void pem::set_ontic_change(bool to_set) {
-    m_ontic_change = to_set;
 }
 
 const pem_id pem::get_id() const
@@ -73,37 +41,24 @@ const pem_id pem::get_id() const
     return m_id;
 }
 
-const formula_list & pem::get_precondition() const
-{
-    return m_pre;
-}
-
-const pem_postconditions & pem::get_postconditions() const
-{
-    return m_post;
-}
-
 const pem_edges & pem::get_edges() const
 {
     return m_edges;
 }
 
-const bool pem::get_ontic_change() const
-{
-    return m_ontic_change;
-}
-
 bool pem::operator<(const pem & to_compare) const
 {
-    if (m_id < to_compare.get_id())     // We compare the ids since we assume that each action has at most one PEM for each id
+    if (m_id < to_compare.get_id()) {
         return true;
+    }
     return false;
 }
 
 bool pem::operator>(const pem & to_compare) const
 {
-    if (m_id > to_compare.get_id())
+    if (m_id > to_compare.get_id()) {
         return true;
+    }
     return false;
 }
 
@@ -119,8 +74,6 @@ bool pem::operator==(const pem & to_compare) const
 bool pem::operator=(const pem & to_copy)
 {
     set_id(to_copy.get_id());
-    set_precondition(to_copy.get_precondition());
-    set_postconditions(to_copy.get_postconditions());
     set_edges(to_copy.get_edges());
     return true;
 }
@@ -131,12 +84,12 @@ pem_ptr::pem_ptr()
 {
 }
 
-pem_ptr::pem_ptr(const std::shared_ptr <pem> &ptr)
+pem_ptr::pem_ptr(const std::shared_ptr<pem> &ptr)
 {
     set_ptr(ptr);
 }
 
-pem_ptr::pem_ptr(std::shared_ptr <pem> &&ptr)
+pem_ptr::pem_ptr(std::shared_ptr<pem> &&ptr)
 {
     set_ptr(ptr);
 }
@@ -146,24 +99,29 @@ pem_ptr::pem_ptr(const pem &action)
     m_ptr = std::make_shared<pem>(action);
 }
 
-void pem_ptr::set_ptr(const std::shared_ptr <pem> &ptr)
+void pem_ptr::set_ptr(const std::shared_ptr<pem> &ptr)
 {
     m_ptr = ptr;
 }
 
-void pem_ptr::set_ptr(std::shared_ptr <pem> &&ptr)
+void pem_ptr::set_ptr(std::shared_ptr<pem> &&ptr)
 {
     m_ptr = ptr;
 }
 
-void pem_ptr::set_postconditions(const pem_postconditions & to_set)
-{
-    m_ptr->set_postconditions(to_set);
-}
-
-std::shared_ptr <pem> pem_ptr::get_ptr() const
+std::shared_ptr<pem> pem_ptr::get_ptr() const
 {
     return m_ptr;
+}
+
+void pem_ptr::set_id(pem_id to_set)
+{
+    m_ptr->set_id(to_set);
+}
+
+void pem_ptr::set_edges(const pem_edges & to_set)
+{
+    m_ptr->set_edges(to_set);
 }
 
 const pem_id pem_ptr::get_id() const
@@ -175,37 +133,10 @@ const pem_id pem_ptr::get_id() const
     exit(1);
 }
 
-const formula_list & pem_ptr::get_precondition() const
-{
-    if (m_ptr != nullptr) {
-        return get_ptr()->get_precondition();
-    }
-    std::cerr << "Error in creating a pem_ptr\n";
-    exit(1);
-}
-
-const pem_postconditions & pem_ptr::get_postconditions() const
-{
-    if (m_ptr != nullptr) {
-        return get_ptr()->get_postconditions();
-    }
-    std::cerr << "Error in creating a pem_ptr\n";
-    exit(1);
-}
-
 const pem_edges & pem_ptr::get_edges() const
 {
     if (m_ptr != nullptr) {
         return get_ptr()->get_edges();
-    }
-    std::cerr << "Error in creating a pem_ptr\n";
-    exit(1);
-}
-
-const bool pem_ptr::get_ontic_change() const
-{
-    if (m_ptr != nullptr) {
-        return get_ptr()->get_ontic_change();
     }
     std::cerr << "Error in creating a pem_ptr\n";
     exit(1);
@@ -238,6 +169,6 @@ bool pem_ptr::operator==(const pem_ptr & to_compare) const
 
 bool pem_ptr::operator=(const pem_ptr & to_copy)
 {
-    set_ptr(to_copy.get_ptr());
+        set_ptr(to_copy.get_ptr());
     return true;
 }

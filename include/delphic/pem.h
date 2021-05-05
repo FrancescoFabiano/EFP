@@ -3,35 +3,26 @@
  *
  * \details  A PEM is a representation for actions in epistemic planning
  *
- * @see action and pstate.
+ * @see action and event.
  *
  * \copyright GNU Public License.
  *
  * \author Francesco Fabiano.
- * \date April 28, 2021
+ * \date May 05, 2021
  */
 #pragma once
 
 #include "../utilities/define.h"
-#include "../formulae/belief_formula.h"
 
 class pem
 {
     friend class pem_ptr;
-
 private:
     /** \brief The id of *this*.*/
     pem_id m_id;
-
-    /** \brief The precondition of *this*.*/
-    formula_list m_pre;
-    /** \brief The map that associates a belief formula (postcondition) to each \ref fluent.*/
-    pem_postconditions m_post;
-    /** \brief Flag that is true iff *this* has some postconditions.*/
-    bool m_ontic_change;
     /** \brief The map containing the edges of the action.
      *
-     * Each edge consists of <\ref agent, \ref pem_ptr_set> and link each \ref agent to a set of pems.
+     * Each edge consists of <\ref agent, \ref event_ptr_set> and link each \ref agent to a set of events.
      *
      * @see pem_store and agent.*/
     pem_edges m_edges;
@@ -40,30 +31,14 @@ private:
      *
      * Only accessible by the \ref pem_ptr.
      *
-     * @param[in] id: the \ref pem_id to set as \ref m_id.*/
-    void set_id(pem_id id);
-    /** \brief Setter for the field \ref m_pre.
-     *
-     * Only accessible by the \ref pem_ptr.
-     *
-     * @param[in] pre: the \ref belief_formula to set as \ref m_pre.*/
-    void set_precondition(const formula_list & to_set);
-    /** \brief Setter for the field \ref m_post.
-     *
-     * Only accessible by the \ref pem_ptr.
-     *
-     * @param[in] post: the \ref pem_postconditions to set as \ref m_post.*/
-    void set_postconditions(const pem_postconditions & post);
+     * @param[in] to_set: the \ref pem_id to set as \ref m_id.*/
+    void set_id(const pem_id to_set);
     /** \brief Setter for the field \ref m_edges.
      *
      * Only accessible by the \ref pem_ptr.
      *
-     * @param[in] edges: the map of \ref pem_edges to set as \ref m_edges.*/
+     * @param[in] to_set: the map of \ref pem_edges to set as \ref m_edges.*/
     void set_edges(const pem_edges & to_set);
-    /** \brief Setter for the field \ref m_ontic_change.
-     *
-     * @param[in] id: the boolean variable to set as \ref m_ontic_change.*/
-    void set_ontic_change(bool to_set);
 
     /** \brief Getter of \ref m_id.
      *
@@ -71,52 +46,25 @@ private:
      *
      * @return the \ref pem_id of *this*.*/
     const pem_id get_id() const;
-    /** \brief Getter of \ref m_pre.
-     *
-     * Only accessible by the \ref pem_ptr.
-     *
-     * @return the precondition of *this*.*/
-    const formula_list & get_precondition() const;
-    /** \brief Getter of \ref m_post.
-     *
-     * Only accessible by the \ref pem_ptr.
-     *
-     * @return the postconditions of *this*.*/
-    const pem_postconditions & get_postconditions() const;
     /** \brief Getter of \ref m_edges.
      *
      * Only accessible by the \ref pem_ptr.
      *
      * @return the map of edges of *this*.*/
     const pem_edges & get_edges() const;
-    /** \brief Getter of \ref m_ontic_change.
-     *
-     * Only accessible by the \ref pem_ptr.
-     *
-     * @return the \ref m_ontic_change of *this*.*/
-    const bool get_ontic_change() const;
-
-    public:
+    
+public:
     /** \brief Empty constructor, call the default constructor of all the fields.*/
     pem();
     /** \brief Constructor with parameters.
      * Construct an object with the given info.
      *
-     * @param[in] id: the \ref id to set as \ref m_id.
-     * @param[in] pre: the \ref belief_formula to set as \ref m_pre.
-     * @param[in] post: the \ref postconditions to set as \ref m_post.
-     * @param[in] edges: the map of the edges of *this*.*/
-    pem(const pem_id id, const formula_list & pre, const pem_postconditions & post, const pem_edges & edges);
-    /** \brief Constructor with parameters.
-     * Construct an object with the given info.
-     *
-     * @param[in] id: the \ref id to set as \ref m_id.
-     * @param[in] pre: the \ref belief_formula to set as \ref m_pre.*/
-    pem(const pem_id id, const formula_list & pre);
+     * @param[in] id: the \ref id to set as \ref m_id.*/
+    pem(pem_id id);
     /** \brief Copy constructor.
      *
-     * @param[in] action: the \ref pem to copy into *this*.*/
-    pem(const pem & action);
+     * @param[in] to_copy: the \ref pem to copy into *this*.*/
+    pem(const pem & to_copy);
 
     /**
      *\brief The < operator based on the field \ref m_id.
@@ -168,13 +116,12 @@ private:
  * \copyright GNU Public License.
  *
  * \author Francesco Fabiano.
- * \date April 28, 2021
+ * \date May 05, 2021
  */
-class pem_ptr
-{
+class pem_ptr {
 private:
     /**\brief the pointer that is wrapped by *this*.*/
-    std::shared_ptr <pem> m_ptr;
+    std::shared_ptr<pem> m_ptr;
 
 public:
     /**\brief Constructor without parameters.*/
@@ -187,7 +134,7 @@ public:
      * 
      * @param[in] ptr: the pointer to assign to \ref m_ptr.
      */
-    pem_ptr(const std::shared_ptr <pem> &ptr);
+    pem_ptr(const std::shared_ptr<pem> &ptr);
 
     /**\brief Constructor with parameters.
      *
@@ -196,7 +143,7 @@ public:
      *  
      * @param[in] ptr: the pointer to assign to \ref m_ptr.
      */
-    pem_ptr(std::shared_ptr <pem> &&ptr);
+    pem_ptr(std::shared_ptr<pem> &&ptr);
 
     /** \brief Constructor with parameters.
      *
@@ -211,7 +158,7 @@ public:
      * and the counter of the shared pointer is increased (std implementation).
      * 
      * @param[in] ptr: the pointer to assign to \ref m_ptr.*/
-    void set_ptr(const std::shared_ptr <pem> &ptr);
+    void set_ptr(const std::shared_ptr<pem> &ptr);
 
     /**\brief Setter for the field \ref m_ptr (move constructor).
      * 
@@ -219,37 +166,31 @@ public:
      * in \ref m_ptr and \p ptr becomes empty (std implementation).
      *  
      * @param[in] ptr: the pointer to assign to \ref m_ptr.*/
-    void set_ptr(std::shared_ptr <pem> &&ptr);
+    void set_ptr(std::shared_ptr<pem> &&ptr);
 
     /**\brief Getter for the field \ref m_ptr.
      *
      * @return a copy of the pointer \ref m_ptr.*/
-    std::shared_ptr <pem> get_ptr() const;
-    /**\brief Setter for the field \ref m_postconditions of \ref m_ptr.
+    std::shared_ptr<pem> get_ptr() const;
+
+    /**\brief Setter for the field \ref m_id of \ref m_ptr.
      *
-     * @param[in] ptr: the \ref pem_postconditions to assign to \ref m_postconditions.*/
-    void set_postconditions(const pem_postconditions & to_set);
+     * @param[in] to_set: the \ref pem_id to assign to \ref m_id.*/
+    void set_id(pem_id to_set);
+    /**\brief Setter for the field \ref m_edges of \ref m_ptr.
+     *
+     * @param[in] to_set: the \ref pem_edges to assign to \ref m_edges.*/
+    void set_edges(const pem_edges & to_set);
 
     /** \brief Function that return the field m_id of the pointed \ref pem.
-     *
-     * @return the \ref m_id of the \ref pem pointed by \ref m_ptr.*/
+        *
+        * @return the \ref m_id of the \ref pem pointed by \ref m_ptr.*/
     const pem_id get_id() const;
-    /** \brief Function that return the field m_precondition of the pointed \ref pem.
+    /** \brief Function that return the field m_edges of the pointed \ref event.
      *
-     * @return the \ref m_precondition of the \ref pem pointed by \ref m_ptr.*/
-    const formula_list & get_precondition() const;
-    /** \brief Function that return the field m_postconditions of the pointed \ref pem.
-     *
-     * @return the \ref m_postconditions of the \ref pem pointed by \ref m_ptr.*/
-    const pem_postconditions & get_postconditions() const;
-    /** \brief Function that return the field m_edges of the pointed \ref pem.
-     *
-     * @return the \ref m_edges of the \ref pem pointed by \ref m_ptr.*/
+     * @return the \ref m_edges of the \ref event pointed by \ref m_ptr.*/
     const pem_edges& get_edges() const;
-    /** \brief Function that return the field m_ontic_change of the pointed \ref pem.
-     *
-     * @return the \ref m_id of the \ref pem pointed by \ref m_ptr.*/
-    const bool get_ontic_change() const;
+
     /**
      *\brief The < operator based on the field \ref m_id.
      * Implemented to allow the ordering on set of \ref pem_ptr (used in \ref pem_store).

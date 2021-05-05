@@ -3,7 +3,7 @@
  *
  * \details The union update returns the possibility after the execution of a PEM
  *
- * @see pstate and pem.
+ * @see pstate and event.
  *
  * \copyright GNU Public License.
  *
@@ -20,12 +20,12 @@ class delphic_helper {
      *
      * @param [in] state: the current \ref pstate.
      * @param [in] act: the \ref action description.
-     * @return the resulting \ref pem.*/
-    static pem get_pem(const pstate & state, const action & act);
-    /** \brief Calculates the \ref pstate resulting from the given current \ref pstate and \ref pem.
+     * @return the resulting \ref event.*/
+    static event get_pem(const pstate & state, const action & act);
+    /** \brief Calculates the \ref pstate resulting from the given current \ref pstate and \ref event.
      *
      * @param [in] u: the current \ref pstate.
-     * @param [in] e: the \ref pem to apply.
+     * @param [in] e: the \ref event to apply.
      * @return the updated \ref pstate.*/
-    static pstate union_update(const pstate & u, const pem & e);
+    static pstate union_update(const pstate & u, const event & e);
 };

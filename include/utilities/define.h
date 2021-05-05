@@ -181,6 +181,15 @@ enum action_check
     EXE_WORLD__COND_WORLD/**< \brief Both the executability and the conditional effects are checked in every world.*/
 };
 
+/****************** Agent's Attitudes related *******************/
+
+enum agent_type
+{
+    FUL, /** \brief Fully observant agent */
+    PAR, /** \brief Partially observant agent */
+    OBL, /** \brief Oblivious agent */
+    ALL  /** \brief All agents */
+};
 
 /****************************************************************
  * Actions Related
@@ -200,11 +209,26 @@ typedef std::map<fluent_formula, belief_formula> effects_map; /**< \brief Used t
                                 * 
                                 * Each element associates an \ref action effect to its conditions.*/
 
+enum action_type
+{
+    ONT,     /** \brief Ontic actions */
+    ONT_NO,  /** \brief Ontic actions with No Oblivious agents */
+    SEN,     /** \brief Sensing actions */
+    SEN_NO,  /** \brief Sensing actions with No Oblivious agents */
+    SEN_NP,  /** \brief Sensing actions with No Partially observant agents */
+    SEN_NOP, /** \brief Sensing actions with No Oblivious and Partially observant agents */
+    ANN,     /** \brief Announcement actions */
+    ANN_NO,  /** \brief Announcement actions with No Oblivious agents */
+    ANN_NP,  /** \brief Announcement actions with No Partially observant agents */
+    ANN_NOP, /** \brief Announcement actions with No Oblivious and Partially observant agents */
+    SIZE     /** \brief Number of action types */
+};
+
 enum event_type
 {
     EPSILON, /**< \brief The null event.*/
-    SIGMA, /**< \brief Event corresponding to ... */
-    TAU/**< \brief  Event corresponding to ... */
+    SIGMA,   /**< \brief Event corresponding to ... */
+    TAU      /**< \brief Event corresponding to ... */
 };
 
 typedef std::set<event_type> event_type_set;
@@ -355,35 +379,40 @@ typedef std::map<agent, pstate_opt_ptr_set> pedges_opt; /**< \brief A map betwee
                                                        * @see pstate_opt.*/
 
 /****************** Delphic *******************/
-// PEM
 
+// EVENTS
+class event;
+typedef unsigned short event_id;
+typedef std::map<fluent, belief_formula> event_postconditions;
+
+class event_ptr;
+//typedef std::set<event_ptr> event_ptr_set; /**< \brief A set of \ref event_ptr.
+//                                        *
+//                                        * Mainly used to store all the reachable \ref event of a \ref event without wasting memory.
+//                                        *
+//                                        * \todo The operator < for std::shared_ptr must be implemented.
+//                                        * @see event.*/
+
+// PEMS
+class pem;
 typedef unsigned short pem_id;
 
-typedef std::map<fluent, belief_formula> pem_postconditions;
+typedef std::map<agent_type, std::set<std::pair<event_ptr, event_ptr>>> pem_edges;
+                                       /**< \brief A map between agents and a set of pairs of \ref event_ptr.
+                                       *
+                                       * Each element consists of <\ref agent, <\ref event_ptr, \ref event_ptr>> and
+                                       * specifies for each \ref agent_type a set of pairs of \ref event_ptr (i.e.,
+                                       * a set of edges.
+                                       *
+                                       * @see event.*/
 
-class pem;
-typedef std::set<pem> pem_set;
+//typedef std::map<event_id, event_ptr> pem_map; /**< \brief A map that stores the event model for a given type of action (identified through an id).*/
 
 class pem_ptr;
-typedef std::set<pem_ptr> pem_ptr_set; /**< \brief A set of \ref pem_ptr.
-                                        *
-                                        * Mainly used to store all the reachable \ref pem of a \ref pem without wasting memory.
-                                        *
-                                        * \todo The operator < for std::shared_ptr must be implemented.
-                                        * @see pem.*/
 
-typedef std::map<agent, pem_ptr_set> pem_edges; /**< \brief A map between agents and set of \ref pem_ptr
-                                               *
-                                               * Each element consists of <\ref agent, \ref pem_ptr_set> and link each
-                                               * \ref agent to a set of possibilities;
-                                               * remember that each possibility is a state itself.
-                                               *
-                                               * @see pem.*/
-
-typedef std::map<pem_id, pem_ptr> pem_map; /**< \brief A map that stores the event model for a given type of action (identified through an id).*/
-
-/****************** Agent's Attitudes related *******************/
-
+class pem_store;
+typedef std::set<event> event_set;             /**< \brief A set of \ref event, used to store all the created ones.*/
+typedef std::set<pem> pem_set;                 /**< \brief A set of \ref pem, used to store all the created ones.*/
 
 /****************** Bisimulation *******************/
 
