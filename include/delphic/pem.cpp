@@ -26,9 +26,14 @@ pem::pem(const pem & to_copy)
     set_edges(to_copy.get_edges());
 }
 
-void pem::set_id(const pem_id to_set)
+void pem::set_id(pem_id to_set)
 {
     m_id = to_set;
+}
+
+void pem::set_pointed_id(event_id to_set)
+{
+    m_pointed_id = to_set;
 }
 
 void pem::set_edges(const pem_edges & to_set)
@@ -36,9 +41,14 @@ void pem::set_edges(const pem_edges & to_set)
     m_edges = to_set;
 }
 
-const pem_id pem::get_id() const
+pem_id pem::get_id() const
 {
     return m_id;
+}
+
+event_id pem::get_pointed_id() const
+{
+    return m_pointed_id;
 }
 
 const pem_edges & pem::get_edges() const
@@ -119,15 +129,29 @@ void pem_ptr::set_id(pem_id to_set)
     m_ptr->set_id(to_set);
 }
 
+void pem_ptr::set_pointed_id(event_id to_set)
+{
+    m_ptr->set_pointed_id(to_set);
+}
+
 void pem_ptr::set_edges(const pem_edges & to_set)
 {
     m_ptr->set_edges(to_set);
 }
 
-const pem_id pem_ptr::get_id() const
+pem_id pem_ptr::get_id() const
 {
     if (m_ptr != nullptr) {
         return get_ptr()->get_id();
+    }
+    std::cerr << "Error in creating a pem_ptr\n";
+    exit(1);
+}
+
+event_id pem_ptr::get_pointed_id() const
+{
+    if (m_ptr != nullptr) {
+        return get_ptr()->get_pointed_id();
     }
     std::cerr << "Error in creating a pem_ptr\n";
     exit(1);

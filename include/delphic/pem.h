@@ -27,12 +27,25 @@ private:
      * @see pem_store and agent.*/
     pem_edges m_edges;
 
+    /** \brief The id of the pointed event of *this*.*/
+    event_id m_pointed_id;
+
     /** \brief Setter for the field \ref m_id.
      *
      * Only accessible by the \ref pem_ptr.
      *
      * @param[in] to_set: the \ref pem_id to set as \ref m_id.*/
-    void set_id(const pem_id to_set);
+    void set_id(pem_id to_set);
+
+
+    /** \brief Setter for the field \ref m_pointed_id.
+     *
+     * Only accessible by the \ref pem_ptr.
+     *
+     * @param[in] to_set: the \ref event_id to set as \ref m_pointed_id.*/
+    void set_pointed_id(event_id to_set);
+
+
     /** \brief Setter for the field \ref m_edges.
      *
      * Only accessible by the \ref pem_ptr.
@@ -45,14 +58,23 @@ private:
      * Only accessible by the \ref pem_ptr.
      *
      * @return the \ref pem_id of *this*.*/
-    const pem_id get_id() const;
+    pem_id get_id() const;
+
+
+    /** \brief Getter of \ref m_pointed_id.
+     *
+     * Only accessible by the \ref pem_ptr.
+     *
+     * @return the \ref m_pointed_id of *this*.*/
+    event_id get_pointed_id() const;
+
     /** \brief Getter of \ref m_edges.
      *
      * Only accessible by the \ref pem_ptr.
      *
      * @return the map of edges of *this*.*/
     const pem_edges & get_edges() const;
-    
+
 public:
     /** \brief Empty constructor, call the default constructor of all the fields.*/
     pem();
@@ -118,7 +140,8 @@ public:
  * \author Francesco Fabiano.
  * \date May 05, 2021
  */
-class pem_ptr {
+class pem_ptr
+{
 private:
     /**\brief the pointer that is wrapped by *this*.*/
     std::shared_ptr<pem> m_ptr;
@@ -177,15 +200,29 @@ public:
      *
      * @param[in] to_set: the \ref pem_id to assign to \ref m_id.*/
     void set_id(pem_id to_set);
+
+    /** \brief Setter for the field \ref m_pointed_id.
+     *
+     *
+     * @param[in] to_set: the \ref event_id to set as \ref m_pointed_id.*/
+    void set_pointed_id(event_id to_set);
+
     /**\brief Setter for the field \ref m_edges of \ref m_ptr.
      *
      * @param[in] to_set: the \ref pem_edges to assign to \ref m_edges.*/
     void set_edges(const pem_edges & to_set);
 
-    /** \brief Function that return the field m_id of the pointed \ref pem.
-        *
-        * @return the \ref m_id of the \ref pem pointed by \ref m_ptr.*/
-    const pem_id get_id() const;
+    /** \brief Function that return the field m_id \ref m_ptr.
+     *
+     * @return the \ref m_id of the \ref pem pointed by \ref m_ptr.*/
+    pem_id get_id() const;
+
+    /** \brief Getter of \ref m_pointed_id.
+     *
+     *
+     * @return the \ref pem_id of *this*.*/
+    event_id get_pointed_id() const;
+
     /** \brief Function that return the field m_edges of the pointed \ref event.
      *
      * @return the \ref m_edges of the \ref event pointed by \ref m_ptr.*/

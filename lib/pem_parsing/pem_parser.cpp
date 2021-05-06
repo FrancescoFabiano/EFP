@@ -167,6 +167,10 @@ int main(int argc, char** argv)
 
 		std::regex type_regex("(\\()(\\s*)([^\\s]+)(\\s*)(\\:)(\\s*)(.*)");
 		std::regex field_regex("(\\:)(\\s*)([^\\s]+)(\\s+)([\\(\\{])(.+)([\\)\\}])(.*)");
+		
+		event_id e_id;
+		formula_list e_pre;
+		event_postconditions e_post;
 
 
 		while (getline(pem_file, line)) {
@@ -186,7 +190,10 @@ int main(int argc, char** argv)
 				if (type.compare("event") == 0) {
 					if (!not_assigned) {
 						std::cerr << "\nParsing Error: Trying to define an \'event\' while already defining an \'event\' or a \'model\'.\n";
-
+						
+						e_id = -1;
+						
+						
 					}
 
 					in_event = true;

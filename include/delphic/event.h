@@ -25,7 +25,7 @@ private:
 
     /** \brief The precondition of *this*.*/
     formula_list m_pre;
-    /** \brief The map that associates a belief formula (postcondition) to each \ref fluent.*/
+    /** \brief The list of fluents (fluent formula to alow or but not yet considered) to be imposed in the state updated with this event that associates a belief formula (postcondition) to each \ref fluent.*/
     event_postconditions m_post;
     /** \brief Flag that is true iff *this* has postconditions.*/
     bool m_ontic_change;
@@ -134,6 +134,8 @@ public:
      * @return true: if \p the assignment went ok.
      * @return false: otherwise.*/
     bool operator=(const event & to_copy);
+
+    void print()const;
 };
 
 /**
@@ -262,4 +264,7 @@ public:
      * @return true: if \p the assignment went ok.
      * @return false: otherwise.*/
     bool operator=(const event_ptr & to_copy);
+
+    void print()const;
+
 };
