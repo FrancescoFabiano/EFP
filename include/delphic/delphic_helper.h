@@ -18,14 +18,13 @@
 class delphic_helper {
     /** \brief Calculates the PEM relative to the \ref action description and the current \ref pstate.
      *
-     * @param [in] state: the current \ref pstate.
      * @param [in] act: the \ref action description.
-     * @return the resulting \ref event.*/
-    static pem_ptr get_pem(const pstate & state, const action & act);
-    /** \brief Calculates the \ref pstate resulting from the given current \ref pstate and \ref event.
+     * @return the resulting \ref pem.*/
+    static pem_ptr get_pem(const action & act);
+    /** \brief Calculates the \ref pstate resulting from the given current \ref pstate and \ref pem.
      *
-     * @param [in] u: the current \ref pstate.
-     * @param [in] e: the \ref event to apply.
+     * @param [in] state: the current \ref pstate.
+     * @param [in] e: the \ref pem to apply.
      * @return the updated \ref pstate.*/
-    static pstate union_update(const pstate & u, const event & e);
+    static pstate union_update(const pstate & state, const pem & e);
 };

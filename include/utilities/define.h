@@ -386,6 +386,7 @@ typedef short event_id;
 //typedef std::map<fluent, belief_formula> event_postconditions;
 typedef fluent_formula event_postconditions;
 
+
 class event_ptr;
 //typedef std::set<event_ptr> event_ptr_set; /**< \brief A set of \ref event_ptr.
 //                                        *
