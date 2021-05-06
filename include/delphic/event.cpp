@@ -13,6 +13,7 @@
 #include <stdexcept>
 
 #include "event.h"
+#include "../utilities/printer.h"
 
 event::event()
 {

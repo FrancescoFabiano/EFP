@@ -15,7 +15,7 @@ pem::pem()
 {
 }
 
-pem::pem(event_id id)
+pem::pem(pem_id id)
 {
     set_id(id);
 }

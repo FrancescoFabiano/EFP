@@ -51,7 +51,7 @@ private:
     void set_postconditions(const event_postconditions & post);
     /** \brief Setter for the field \ref m_ontic_change.
      *
-     * @param[in] id: the boolean variable to set as \ref m_ontic_change.*/
+     * @param[in] to_set: the boolean variable to set as \ref m_ontic_change.*/
     void set_ontic_change(bool to_set);
 
     /** \brief Getter of \ref m_id.
