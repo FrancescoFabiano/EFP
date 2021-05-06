@@ -11,6 +11,9 @@
 
 pem_store::pem_store()
 {
+    belief_formula TRUE;
+    TRUE.set_formula_type(BF_EMPTY);
+    m_epsilon = pem_store::get_instance().add_event(event(EPSILON, false, {TRUE}));
 }
 
 pem_store& pem_store::get_instance()
@@ -19,6 +22,10 @@ pem_store& pem_store::get_instance()
 	return instance;
 }
 
+const event_ptr pem_store::get_epsilon()
+{
+    return m_epsilon;
+}
 
 void pem_store::generate(const std::string & file){
 	return;

@@ -212,15 +212,15 @@ typedef std::map<fluent_formula, belief_formula> effects_map; /**< \brief Used t
 enum action_type
 {
     ONT,     /** \brief Ontic actions */
-    ONT_NO,  /** \brief Ontic actions with No Oblivious agents */
+//    ONT_NO,  /** \brief Ontic actions with No Oblivious agents */
     SEN,     /** \brief Sensing actions */
-    SEN_NO,  /** \brief Sensing actions with No Oblivious agents */
-    SEN_NP,  /** \brief Sensing actions with No Partially observant agents */
-    SEN_NOP, /** \brief Sensing actions with No Oblivious and Partially observant agents */
+//    SEN_NO,  /** \brief Sensing actions with No Oblivious agents */
+//    SEN_NP,  /** \brief Sensing actions with No Partially observant agents */
+//    SEN_NOP, /** \brief Sensing actions with No Oblivious and Partially observant agents */
     ANN,     /** \brief Announcement actions */
-    ANN_NO,  /** \brief Announcement actions with No Oblivious agents */
-    ANN_NP,  /** \brief Announcement actions with No Partially observant agents */
-    ANN_NOP, /** \brief Announcement actions with No Oblivious and Partially observant agents */
+//    ANN_NO,  /** \brief Announcement actions with No Oblivious agents */
+//    ANN_NP,  /** \brief Announcement actions with No Partially observant agents */
+//    ANN_NOP, /** \brief Announcement actions with No Oblivious and Partially observant agents */
     SIZE     /** \brief Number of action types */
 };
 

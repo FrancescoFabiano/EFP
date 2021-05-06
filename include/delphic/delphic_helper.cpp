@@ -8,38 +8,42 @@
  */
 
 #include "delphic_helper.h"
-#include "event.h"
 #include "../utilities/helper_t.ipp"
+#include "event.h"
+#include "pem.h"
 #include "pem_store.h"
 
-event delphic_helper::get_pem(const pstate & state, const action & act)
+pem_ptr delphic_helper::get_pem(const pstate & state, const action & act)
 {
-    event ret;
-
-    belief_formula TRUE;
-    TRUE.set_formula_type(BF_EMPTY);
-
-    agent_set agents = domain::get_instance().get_agents();
-    agent_set fully_obs_agents = helper::get_agents_if_entailed(act.get_fully_observants(), state);
-    agent_set partially_obs_agents = helper::get_agents_if_entailed(act.get_partially_observants(), state);
-
-    agent_set oblivious_obs_agents = agents;
-    helper_t::minus_set<agent>(oblivious_obs_agents, fully_obs_agents);
-    helper_t::minus_set<agent>(oblivious_obs_agents, partially_obs_agents);
+    pem_ptr ret;
+    event_ptr eps = pem_store::get_instance().get_epsilon();
 
     switch (act.get_type()) {
         case ONTIC: {
-            event_ptr sigma   = event_ptr(event(SIGMA  , act.get_executability()));       // pem_store::get_instance().add_event
-            event_ptr epsilon = event_ptr(event(EPSILON, {TRUE}));
+            event_ptr sig = pem_store::get_instance().add_event(event(event_type::SIGMA, true, act.get_executability(), act.get_effects()));
+            ret = pem_store::get_instance().add_pem(pem(action_type::ONT));
 
-            event_postconditions post;
-            // get_effects_if_entailed per calcolare effetti entailed
-//            act.get_effects();
-//            sigma.set_postconditions(post);
+            pem_edges edges;
+            edges.insert(pem_edges::value_type(agent_type::FUL, {{sig, sig}, {eps, eps}}));
+            edges.insert(pem_edges::value_type(agent_type::OBL, {{sig, eps}, {eps, eps}}));
+
+            ret.set_edges(edges);
             break;
         }
         case SENSING:
         case ANNOUNCEMENT: {
+            event_ptr sig = pem_store::get_instance().add_event(event(event_type::SIGMA, false));
+            event_ptr tau   = pem_store::get_instance().add_event(event(event_type::TAU  , false));
+
+            action_type a_type = act.get_type() == proposition_type::SENSING ? action_type::SEN : action_type::ANN;
+            ret = pem_store::get_instance().add_pem(pem(a_type));
+
+            pem_edges edges;
+            edges.insert(pem_edges::value_type(agent_type::FUL, {{sig, sig}, {tau, tau}, {eps, eps}}));
+            edges.insert(pem_edges::value_type(agent_type::PAR, {{sig, sig}, {tau, tau}, {eps, eps}, {sig, tau}, {tau, sig}}));
+            edges.insert(pem_edges::value_type(agent_type::OBL, {{sig, eps}, {tau, eps}, {eps, eps}}));
+
+            ret.set_edges(edges);
             break;
         }
         default:

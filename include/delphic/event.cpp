@@ -18,17 +18,25 @@ event::event()
 {
 }
 
-event::event(event_id id, const bool ontic_change)
+event::event(event_id id, bool ontic_change)
 {
     set_id(id);
     set_ontic_change(ontic_change);
 }
 
-event::event(event_id id, const formula_list & pre)
+event::event(event_id id, bool ontic_change, const formula_list & pre)
 {
     set_id(id);
+    set_ontic_change(ontic_change);
     set_precondition(pre);
-    set_ontic_change(false);
+}
+
+event::event(event_id id, bool ontic_change, const formula_list & pre, const effects_map & post)
+{
+    set_id(id);
+    set_ontic_change(ontic_change);
+    set_precondition(pre);
+    set_postconditions(post);
 }
 
 event::event(const event & to_copy)
@@ -49,7 +57,7 @@ void event::set_precondition(const formula_list & to_set)
     m_pre = to_set;
 }
 
-void event::set_postconditions(const event_postconditions & to_set)
+void event::set_postconditions(const effects_map & to_set)
 {
     m_post = to_set;
     set_ontic_change(true);
@@ -69,7 +77,7 @@ const formula_list & event::get_precondition() const
     return m_pre;
 }
 
-const event_postconditions & event::get_postconditions() const
+const effects_map & event::get_postconditions() const
 {
     return m_post;
 }
@@ -143,7 +151,7 @@ void event_ptr::set_ptr(std::shared_ptr <event> &&ptr)
     m_ptr = ptr;
 }
 
-void event_ptr::set_postconditions(const event_postconditions & to_set)
+void event_ptr::set_postconditions(const effects_map & to_set)
 {
     m_ptr->set_postconditions(to_set);
 }
@@ -171,7 +179,7 @@ const formula_list & event_ptr::get_precondition() const
     exit(1);
 }
 
-const event_postconditions & event_ptr::get_postconditions() const
+const effects_map & event_ptr::get_postconditions() const
 {
     if (m_ptr != nullptr) {
         return get_ptr()->get_postconditions();
