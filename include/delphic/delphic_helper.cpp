@@ -13,7 +13,7 @@
 #include "pem.h"
 #include "pem_store.h"
 
-pem_ptr delphic_helper::get_pem(const pstate & state, const action & act)
+pem_ptr delphic_helper::get_pem(const action & act)
 {
     pem_ptr ret;
     event_ptr eps = pem_store::get_instance().get_epsilon();
@@ -52,7 +52,7 @@ pem_ptr delphic_helper::get_pem(const pstate & state, const action & act)
     return ret;
 }
 
-pstate delphic_helper::union_update(const pstate & u, const event & e)
+pstate delphic_helper::union_update(const pstate & state, const pem & e)
 {
-    return u;
+    return state;
 }
