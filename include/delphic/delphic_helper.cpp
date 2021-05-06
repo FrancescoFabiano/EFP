@@ -20,7 +20,7 @@ pem_ptr delphic_helper::get_pem(const action & act)
 
     switch (act.get_type()) {
         case ONTIC: {
-            event_ptr sig = pem_store::get_instance().add_event(event(event_type::SIGMA, true, act.get_executability(), act.get_effects()));
+            event_ptr sig = pem_store::get_instance().add_event(event(event_type::SIGMA, true));
             ret = pem_store::get_instance().add_pem(pem(action_type::ONT));
 
             pem_edges edges;
@@ -33,7 +33,8 @@ pem_ptr delphic_helper::get_pem(const action & act)
         case SENSING:
         case ANNOUNCEMENT: {
             event_ptr sig = pem_store::get_instance().add_event(event(event_type::SIGMA, false));
-            event_ptr tau   = pem_store::get_instance().add_event(event(event_type::TAU  , false));
+            event_ptr tau = pem_store::get_instance().add_event(event(event_type::TAU  , false));
+            /** \todo creare formula_list con precondition ed effetto (eventualmente negato). */
 
             action_type a_type = act.get_type() == proposition_type::SENSING ? action_type::SEN : action_type::ANN;
             ret = pem_store::get_instance().add_pem(pem(a_type));
