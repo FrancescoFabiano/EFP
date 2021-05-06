@@ -43,6 +43,9 @@ void parse_conditions(const std::string & line)
 
 	apply_spaces_regex(cleaned, spaces_opened);
 	apply_spaces_regex(cleaned, spaces_closed);
+	
+	boost::replace_all(cleaned, ")(", ") (");
+
 
 	std::istringstream args(cleaned);
 	std::string sub_arg;

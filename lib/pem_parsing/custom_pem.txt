@@ -3,7 +3,7 @@
 	***Definition of event "sigma-epistemic"
 	(event:
 		:id	(1)
-		:precondition ( ( $act_pre$  ) ( $act_eff$))
+		:precondition (($act_pre$) ($act_eff$))
 		:postcondition (none)
 	)
 	***************************************
@@ -11,7 +11,7 @@
 	***Definition of event "tau"
 	(event:
 		:id	(2)
-		:precondition (($act_pre$) ( not ($act_eff$  )  )  )
+		:precondition (($act_pre$) (not($act_eff$)))
 		:postcondition (none)
 	)
 	***************************************
@@ -31,6 +31,15 @@
 		:postcondition ($act_eff$)
 	)
 	***************************************
+	
+	
+	***Definition of event "sigma-ontic" (CASO PARTICOLARE CON EFFETTI SPECIFICI)
+    	* (event:
+    	*	:id	(5)
+    	*	:precondition ($act_pre$)
+    	*	:postcondition (opened_door)
+    	*)
+    ***************************************
 	
 *****************************************************
 
