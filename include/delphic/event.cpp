@@ -142,7 +142,12 @@ void event::print()const
 		//std::cout << std::endl;
 	}
 	std::cout << " and has postconditions: ";
-	printer::get_instance().print_list(get_postconditions());
+	for (auto it_effmap = m_post.begin(); it_effmap != m_post.end(); ++it_effmap) {
+		std::cout << " | ";
+		printer::get_instance().print_list(it_effmap->first);
+		std::cout << " if ";
+		it_effmap->second.print();
+	}
 	std::cout << std::endl;
 }
 

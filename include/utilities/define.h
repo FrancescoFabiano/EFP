@@ -384,7 +384,7 @@ typedef std::map<agent, pstate_opt_ptr_set> pedges_opt; /**< \brief A map betwee
 class event;
 typedef short event_id;
 //typedef std::map<fluent, belief_formula> event_postconditions;
-typedef fluent_formula event_postconditions;
+typedef effects_map event_postconditions;
 
 
 class event_ptr;
