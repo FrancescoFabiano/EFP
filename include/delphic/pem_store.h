@@ -21,7 +21,8 @@
 class pem_store
 {
 private:
-
+    /** \brief The event representing the perspective of oblivious agents.*/
+    event_ptr m_epsilon;
     /** \brief A set that contains all the generated pems (even the pems that are "internal")*/
     event_set m_created_events;
 
@@ -38,7 +39,10 @@ public:
 
     /** \brief To get always (the same instance of) *this* and the same instantiated fields.*/
     static pem_store& get_instance();
-
+    /** \brief Getter of \ref m_epsilon.
+     *
+     * @return the \ref event m_epsilon of *this*.*/
+    const event_ptr get_epsilon();
 //    /** \brief Function that inserts a \ref event given its id to \ref m_created_pems.
 //     * @param[in] to_add: The event model that represent the graph of an action.
 //     * @parma[in] id: The id associated to \ref to_add.

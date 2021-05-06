@@ -21,7 +21,7 @@ class delphic_helper {
      * @param [in] state: the current \ref pstate.
      * @param [in] act: the \ref action description.
      * @return the resulting \ref event.*/
-    static event get_pem(const pstate & state, const action & act);
+    static pem_ptr get_pem(const pstate & state, const action & act);
     /** \brief Calculates the \ref pstate resulting from the given current \ref pstate and \ref event.
      *
      * @param [in] u: the current \ref pstate.
