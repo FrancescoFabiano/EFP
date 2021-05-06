@@ -27,17 +27,17 @@ event::event(event_id id, bool ontic_change)
 event::event(event_id id, bool ontic_change, const formula_list & pre)
 {
 
-    set_id(id);
-    set_ontic_change(ontic_change);
-    set_precondition(pre);
+	set_id(id);
+	set_ontic_change(ontic_change);
+	set_precondition(pre);
 }
 
-event::event(event_id id, bool ontic_change, const formula_list & pre, const effects_map & post)
+event::event(event_id id, bool ontic_change, const formula_list & pre, const event_postconditions & post)
 {
-    set_id(id);
-    set_ontic_change(ontic_change);
-    set_precondition(pre);
-    set_postconditions(post);
+	set_id(id);
+	set_ontic_change(ontic_change);
+	set_precondition(pre);
+	set_postconditions(post);
 }
 
 event::event(const event & to_copy)
@@ -58,9 +58,9 @@ void event::set_precondition(const formula_list & to_set)
 	m_pre = to_set;
 }
 
-void event::set_postconditions(const effects_map & to_set)
+void event::set_postconditions(const event_postconditions & to_set)
 {
-	if (to_set.size() > 1) {
+	/*if (to_set.size() > 1) {
 		std::cerr << "\n\n***Non determinism in event postconditions is not yet supported.***\n\n";
 		exit(1);
 	} else {
@@ -68,6 +68,9 @@ void event::set_postconditions(const effects_map & to_set)
 		if (effects->begin()->size >= 1) {
 			set_ontic_change(true);
 		}
+	}*/
+	if (to_set.size() > 0) {
+		set_ontic_change(true);
 	}
 	m_post = to_set;
 
@@ -89,7 +92,7 @@ const formula_list & event::get_precondition() const
 	return m_pre;
 }
 
-const effects_map & event::get_postconditions() const
+const event_postconditions & event::get_postconditions() const
 {
 	return m_post;
 }
@@ -182,7 +185,7 @@ void event_ptr::set_ptr(std::shared_ptr <event> &&ptr)
 	m_ptr = ptr;
 }
 
-void event_ptr::set_postconditions(const effects_map & to_set)
+void event_ptr::set_postconditions(const event_postconditions & to_set)
 {
 	m_ptr->set_postconditions(to_set);
 }
@@ -210,7 +213,7 @@ const formula_list & event_ptr::get_precondition() const
 	exit(1);
 }
 
-const effects_map & event_ptr::get_postconditions() const
+const event_postconditions & event_ptr::get_postconditions() const
 {
 	if (m_ptr != nullptr) {
 		return get_ptr()->get_postconditions();

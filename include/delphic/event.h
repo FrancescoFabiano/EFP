@@ -47,8 +47,8 @@ private:
      *
      * Only accessible by the \ref event_ptr.
      *
-     * @param[in] post: the \ref effects_map to set as \ref m_post.*/
-    void set_postconditions(const effects_map & post);
+     * @param[in] post: the \ref event_postconditions to set as \ref m_post.*/
+    void set_postconditions(const event_postconditions & post);
     /** \brief Setter for the field \ref m_ontic_change.
      *
      * @param[in] id: the boolean variable to set as \ref m_ontic_change.*/
@@ -71,7 +71,7 @@ private:
      * Only accessible by the \ref event_ptr.
      *
      * @return the postconditions of *this*.*/
-    const effects_map & get_postconditions() const;
+    const event_postconditions & get_postconditions() const;
     /** \brief Getter of \ref m_ontic_change.
      *
      * Only accessible by the \ref event_ptr.
@@ -101,8 +101,8 @@ public:
      * @param[in] id: the \ref id to set as \ref m_id.
      * @param[ontic_change]: the boolean to set as \ref m_ontic_change.
      * @param[in] pre: the \ref belief_formula to set as \ref m_pre.
-     * @param[post]: the \ref effects_map to set as \ref m_post.*/
-    event(event_id id, bool ontic_change, const formula_list & pre, const effects_map & post);
+     * @param[post]: the \ref event_postconditions to set as \ref m_post.*/
+    event(event_id id, bool ontic_change, const formula_list & pre, const event_postconditions & post);
     /** \brief Copy constructor.
      *
      * @param[in] action: the \ref event to copy into *this*.*/
@@ -219,8 +219,8 @@ public:
     std::shared_ptr <event> get_ptr() const;
     /**\brief Setter for the field \ref m_postconditions of \ref m_ptr.
      *
-     * @param[in] to_set: the \ref effects_map to assign to \ref m_postconditions.*/
-    void set_postconditions(const effects_map & to_set);
+     * @param[in] to_set: the \ref event_postconditions to assign to \ref m_postconditions.*/
+    void set_postconditions(const event_postconditions & to_set);
 
     /** \brief Function that return the field m_id of the pointed \ref event.
      *
@@ -233,7 +233,7 @@ public:
     /** \brief Function that return the field m_postconditions of the pointed \ref event.
      *
      * @return the \ref m_postconditions of the \ref event pointed by \ref m_ptr.*/
-    const effects_map & get_postconditions() const;
+    const event_postconditions & get_postconditions() const;
     /** \brief Function that return the field m_ontic_change of the pointed \ref event.
      *
      * @return the \ref m_id of the \ref event pointed by \ref m_ptr.*/
