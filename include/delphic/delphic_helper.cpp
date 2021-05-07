@@ -15,45 +15,130 @@
 
 pem_ptr delphic_helper::get_pem(const action & act)
 {
-    pem_ptr ret;
-    event_ptr eps = pem_store::get_instance().get_epsilon();
+	pem_id p_id;
+	switch ( act.get_type() ) {
+	case ONTIC:
+	{
+		//Hard-coded
+		p_id = 2;
+		break;
+	}
+	case SENSING:
+	case ANNOUNCEMENT:
+	{
+		//Hard-coded
+		p_id = 1;
+		break;
+	}
+	default:
+		std::cerr << "\nError: wrong action specification.\n";
+		break;
+	}
 
-    switch (act.get_type()) {
-        case ONTIC: {
-            event_ptr sig = pem_store::get_instance().add_event(event(event_type::SIGMA, true));
-            ret = pem_store::get_instance().add_pem(pem(action_type::ONT));
+	return pem_store::get_instance().get_pem(p_id);
 
-            pem_edges edges;
-            edges.insert(pem_edges::value_type(agent_type::FUL, {{sig, sig}, {eps, eps}}));
-            edges.insert(pem_edges::value_type(agent_type::OBL, {{sig, eps}, {eps, eps}}));
-
-            ret.set_edges(edges);
-            break;
-        }
-        case SENSING:
-        case ANNOUNCEMENT: {
-            event_ptr sig = pem_store::get_instance().add_event(event(event_type::SIGMA, false));
-            event_ptr tau = pem_store::get_instance().add_event(event(event_type::TAU  , false));
-            /** \todo creare formula_list con precondition ed effetto (eventualmente negato). */
-
-            action_type a_type = act.get_type() == proposition_type::SENSING ? action_type::SEN : action_type::ANN;
-            ret = pem_store::get_instance().add_pem(pem(a_type));
-
-            pem_edges edges;
-            edges.insert(pem_edges::value_type(agent_type::FUL, {{sig, sig}, {tau, tau}, {eps, eps}}));
-            edges.insert(pem_edges::value_type(agent_type::PAR, {{sig, sig}, {tau, tau}, {eps, eps}, {sig, tau}, {tau, sig}}));
-            edges.insert(pem_edges::value_type(agent_type::OBL, {{sig, eps}, {tau, eps}, {eps, eps}}));
-
-            ret.set_edges(edges);
-            break;
-        }
-        default:
-            break;
-    }
-    return ret;
 }
 
-pstate delphic_helper::union_update(const pstate & state, const pem & e)
+const pstate & delphic_helper::union_update(const pstate & state, const action & act)
 {
-    return state;
+	//DEBUG
+	event_id e_id = 2;
+	event_ptr event = pem_store::get_instance().get_event(e_id);
+	std::cerr << "\nPrinting Action " << act.get_name() << " x Event " << e_id << "!\n";
+	std::cerr << "*******Action*******";
+	act.print();
+	std::cerr << "\n*******Event*******";
+	event.print();
+	auto entailed_eff = helper::get_effects_if_entailed(act.get_effects(), state);
+
+	std::cerr << "*******Effects*******\n";
+	printer::get_instance().print_list(entailed_eff);
+	std::cerr << "\n********************\n";
+
+	std::cerr << "Real Preconditions (in the initial state): ";
+	printer::get_instance().print_list(delphic_helper::get_total_pre(act.get_executability(), entailed_eff, event));
+	std::cerr << "\nReal Postconditions (in the initial state): ";
+	printer::get_instance().print_list(delphic_helper::get_total_effects(entailed_eff, event));
+
+
+
+
+	return state;
+}
+
+const kstate & delphic_helper::union_update(const kstate & state, const action & act)
+{
+	std::cerr << "\nError: Union update not yet implmente for Kripke structures\n";
+	exit(1);
+}
+
+const pworld & delphic_helper::world_cartesian_product(const pworld & world, const event_ptr & e)
+{
+	return world;
+}
+
+fluent_formula delphic_helper::get_total_effects(const fluent_formula & action_eff, const event_ptr & e)
+{
+	auto meta_post = e.get_meta_postconditions();
+	if (meta_post.size() > 1) {
+		std::cerr << "Error: malformed action postcondition in event " << e.get_id() << std::endl;
+		exit(1);
+	} else if (meta_post.size() == 0) {
+		fluent_formula empty;
+		return empty;
+	} else {
+		switch ( *meta_post.begin() ) {
+		case act_eff:
+			return action_eff;
+		case neg_act_eff:
+			return helper::negate_fluent_formula(action_eff);
+			//Not break because it means it is empty
+			//break;
+		case none:
+		default:
+			fluent_formula empty;
+			return empty;
+			break;
+		}
+	}
+
+	//Need to insert the merge with specific postcondition
+}
+
+formula_list delphic_helper::get_total_pre(const formula_list & action_pre, const fluent_formula & action_eff, const event_ptr & e)
+{
+
+	formula_list ret;
+
+
+	auto meta_pre = e.get_meta_precondition();
+
+	for (auto it_meta_pre = meta_pre.begin(); it_meta_pre != meta_pre.end(); ++it_meta_pre) {
+		belief_formula tmp_bf;
+
+		switch ( *it_meta_pre ) {
+		case act_eff:
+			tmp_bf.set_from_ff(action_eff);
+			ret.push_back(tmp_bf);
+			break;
+		case neg_act_eff:
+			tmp_bf.set_from_ff(helper::negate_fluent_formula(action_eff));
+			ret.push_back(tmp_bf);
+			break;
+		case act_pre:
+			for (auto it_act_pre = action_pre.begin(); it_act_pre != action_pre.end(); ++it_act_pre) {
+				ret.push_back(*it_act_pre);
+				
+			}
+			break;
+		case none:
+		default:
+			ret.clear();
+			return ret;
+			break;
+		}
+	}
+
+	return ret;
+
 }

@@ -30,28 +30,7 @@ private:
     /** \brief The id of the pointed event of *this*.*/
     event_id m_pointed_id;
 
-    /** \brief Setter for the field \ref m_id.
-     *
-     * Only accessible by the \ref pem_ptr.
-     *
-     * @param[in] to_set: the \ref pem_id to set as \ref m_id.*/
-    void set_id(pem_id to_set);
 
-
-    /** \brief Setter for the field \ref m_pointed_id.
-     *
-     * Only accessible by the \ref pem_ptr.
-     *
-     * @param[in] to_set: the \ref event_id to set as \ref m_pointed_id.*/
-    void set_pointed_id(event_id to_set);
-
-
-    /** \brief Setter for the field \ref m_edges.
-     *
-     * Only accessible by the \ref pem_ptr.
-     *
-     * @param[in] to_set: the map of \ref pem_edges to set as \ref m_edges.*/
-    void set_edges(const pem_edges & to_set);
 
     /** \brief Getter of \ref m_id.
      *
@@ -87,6 +66,29 @@ public:
      *
      * @param[in] to_copy: the \ref pem to copy into *this*.*/
     pem(const pem & to_copy);
+
+    /** \brief Setter for the field \ref m_id.
+     *
+     * Only accessible by the \ref pem_ptr.
+     *
+     * @param[in] to_set: the \ref pem_id to set as \ref m_id.*/
+    void set_id(pem_id to_set);
+
+
+    /** \brief Setter for the field \ref m_pointed_id.
+     *
+     * Only accessible by the \ref pem_ptr.
+     *
+     * @param[in] to_set: the \ref event_id to set as \ref m_pointed_id.*/
+    void set_pointed_id(event_id to_set);
+
+
+    /** \brief Setter for the field \ref m_edges.
+     *
+     * Only accessible by the \ref pem_ptr.
+     *
+     * @param[in] to_set: the map of \ref pem_edges to set as \ref m_edges.*/
+    void set_edges(const pem_edges & to_set);
 
     /**
      *\brief The < operator based on the field \ref m_id.
@@ -124,6 +126,8 @@ public:
      * @return true: if \p the assignment went ok.
      * @return false: otherwise.*/
     bool operator=(const pem & to_copy);
+
+    void print()const;
 };
 
 /**
@@ -264,4 +268,7 @@ public:
      * @return true: if \p the assignment went ok.
      * @return false: otherwise.*/
     bool operator=(const pem_ptr & to_copy);
+
+    void print()const;
+
 };

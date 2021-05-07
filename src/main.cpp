@@ -17,6 +17,7 @@
 #include "../include/search/planner.ipp"
 
 #include "../include/utilities/asp_maker.h"
+#include "../include/delphic/pem_store.h"
 
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
@@ -385,25 +386,25 @@ void manage_arguments(int argc, char** argv)
 void launch_search(state_type state_struc, bool execute_given_action, bool results_file, heuristics used_heur, search_type used_search, std::vector<std::string> given_actions, short max_depth, short step)
 {
 	switch ( state_struc ) {
-		case KRIPKE:
-		{
-			planner< state<kstate> > m_planner;
-			if (execute_given_action) {
-				if (results_file) {
-					m_planner.execute_given_actions_timed(given_actions);
-				} else {
-					m_planner.execute_given_actions(given_actions);
-				}
+	case KRIPKE:
+	{
+		planner< state<kstate> > m_planner;
+		if (execute_given_action) {
+			if (results_file) {
+				m_planner.execute_given_actions_timed(given_actions);
+			} else {
+				m_planner.execute_given_actions(given_actions);
+			}
+			std::cout << "\n\n\n*****THE END*****\n";
+		} else {
+			if (m_planner.search(results_file, used_heur, used_search, max_depth, step)) {
 				std::cout << "\n\n\n*****THE END*****\n";
 			} else {
-				if (m_planner.search(results_file, used_heur, used_search, max_depth, step)) {
-					std::cout << "\n\n\n*****THE END*****\n";
-				} else {
-					std::cout << "\n\n\n*****THE SAD END*****\n";
-				}
+				std::cout << "\n\n\n*****THE SAD END*****\n";
 			}
-			break;
 		}
+		break;
+	}
 	case POSSIBILITIES:
 	{
 		planner< state<pstate> > m_planner;
@@ -468,6 +469,8 @@ int main(int argc, char** argv)
 {
 	//Get build date
 	std::cout << "EFP version " << VERSION << " - Built date: " << BUILT_DATE << std::endl;
+
+	
 	//if arguments are too less
 	if (argc < 2)
 		print_usage(argv[0]);

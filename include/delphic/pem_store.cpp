@@ -8,12 +8,13 @@
 
 #include "pem_store.h"
 #include "pem.h"
+#include "pem_parser.h"
 
 pem_store::pem_store()
 {
-    belief_formula TRUE;
-    TRUE.set_formula_type(BF_EMPTY);
-    m_epsilon = pem_store::get_instance().add_event(event(EPSILON, false, {TRUE}));
+	//belief_formula TRUE;
+	//TRUE.set_formula_type(BF_EMPTY);
+	//m_epsilon = pem_store::get_instance().add_event(event(EPSILON, false, {TRUE}));
 }
 
 pem_store& pem_store::get_instance()
@@ -22,12 +23,9 @@ pem_store& pem_store::get_instance()
 	return instance;
 }
 
-const event_ptr pem_store::get_epsilon()
+void pem_store::generate(const std::string & file)
 {
-    return m_epsilon;
-}
-
-void pem_store::generate(const std::string & file){
+	pem_parser::parse();
 	return;
 }
 
@@ -39,9 +37,73 @@ const event_ptr pem_store::add_event(const event & to_add)
 
 const pem_ptr pem_store::add_pem(const pem & to_add)
 {
-    auto tmp_ptr = std::make_shared<pem>(*(std::get<0>(m_created_pems.insert(to_add))));
-    return tmp_ptr;
+	auto tmp_ptr = std::make_shared<pem>(*(std::get<0>(m_created_pems.insert(to_add))));
+	return tmp_ptr;
 }
+
+void pem_store::add_agent_group(const std::string & to_add)
+{
+	if (m_agent_group_ids.find(to_add) == m_agent_group_ids.end()) {
+		m_agent_group_ids.insert(std::pair<std::string, agent_group>(to_add, m_agent_group_ids.size()));
+	}
+}
+
+const event_ptr pem_store::get_event(event_id id) const
+{
+	event tmp;
+	tmp.set_id(id);
+
+	auto ptr = m_created_events.find(tmp);
+
+	if (ptr != m_created_events.end()) {
+		return std::make_shared<event>(*ptr);
+	} else {
+		std::cerr << "\nError: you are requesting an not-existing event!";
+		exit(1);
+	}
+}
+
+const pem_ptr pem_store::get_pem(pem_id id) const
+{
+	pem tmp;
+	tmp.set_id(id);
+
+	auto ptr = m_created_pems.find(tmp);
+
+	if (ptr != m_created_pems.end()) {
+		return std::make_shared<pem>(*ptr);
+	} else {
+		std::cerr << "\nError: you are requesting an not-existing event!";
+		exit(1);
+	}
+}
+
+agent_group pem_store::get_agent_group(const std::string & to_get) const
+{
+	auto ptr = m_agent_group_ids.find(to_get);
+
+	if (ptr != m_agent_group_ids.end()) {
+		return ptr->second;
+	} else {
+		std::cerr << "\nError: you are requesting an not-existing agent group!";
+		exit(1);
+	}
+
+}
+
+std::string pem_store::get_agent_group_name(agent_group id) const
+{
+	std::string ret = "not_found";
+
+	for (auto it_map = m_agent_group_ids.begin(); it_map != m_agent_group_ids.end(); ++it_map) {
+		if (it_map->second == id)
+			return it_map->first;
+	}
+
+	return ret;
+}
+
+
 
 //void pem_store::add_action_pem(const event & to_add, event_id id)
 //{

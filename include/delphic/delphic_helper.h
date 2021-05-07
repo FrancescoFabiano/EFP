@@ -12,10 +12,14 @@
  */
 #pragma once
 
+#include "../states/kripke/kstate.h"
+
 #include "../states/possibilities/pstate.h"
 #include "../utilities/define.h"
 
-class delphic_helper {
+class delphic_helper
+{
+public:
     /** \brief Calculates the PEM relative to the \ref action description and the current \ref pstate.
      *
      * @param [in] act: the \ref action description.
@@ -26,5 +30,13 @@ class delphic_helper {
      * @param [in] state: the current \ref pstate.
      * @param [in] e: the \ref pem to apply.
      * @return the updated \ref pstate.*/
-    static pstate union_update(const pstate & state, const pem & e);
+    static const pstate & union_update(const pstate & state, const action & act);
+
+    static const kstate & union_update(const kstate & state, const action & act);
+
+
+    //Francesco: addition
+    static const pworld & world_cartesian_product(const pworld & world, const event_ptr & e);
+    static fluent_formula get_total_effects(const fluent_formula & act_eff, const event_ptr & e);
+    static formula_list get_total_pre(const formula_list & act_pre, const fluent_formula & act_eff, const event_ptr & e);
 };

@@ -183,13 +183,6 @@ enum action_check
 
 /****************** Agent's Attitudes related *******************/
 
-enum agent_type
-{
-    FUL, /** \brief Fully observant agent */
-    PAR, /** \brief Partially observant agent */
-    OBL, /** \brief Oblivious agent */
-    ALL /** \brief All agents */
-};
 
 /****************************************************************
  * Actions Related
@@ -209,21 +202,6 @@ typedef std::map<fluent_formula, belief_formula> effects_map; /**< \brief Used t
                                 * 
                                 * Each element associates an \ref action effect to its conditions.*/
 
-enum action_type
-{
-    ONT, /** \brief Ontic actions */
-    //    ONT_NO,  /** \brief Ontic actions with No Oblivious agents */
-    SEN, /** \brief Sensing actions */
-    //    SEN_NO,  /** \brief Sensing actions with No Oblivious agents */
-    //    SEN_NP,  /** \brief Sensing actions with No Partially observant agents */
-    //    SEN_NOP, /** \brief Sensing actions with No Oblivious and Partially observant agents */
-    ANN, /** \brief Announcement actions */
-    //    ANN_NO,  /** \brief Announcement actions with No Oblivious agents */
-    //    ANN_NP,  /** \brief Announcement actions with No Partially observant agents */
-    //    ANN_NOP, /** \brief Announcement actions with No Oblivious and Partially observant agents */
-    SIZE /** \brief Number of action types */
-};
-
 enum event_type
 {
     EPSILON, /**< \brief The null event.*/
@@ -232,7 +210,7 @@ enum event_type
 };
 
 typedef std::set<event_type> event_type_set;
-typedef std::set<std::pair<event_type, event_type>> event_type_relation;
+typedef std::set<std::pair<event_type, event_type> > event_type_relation;
 
 /****************************************************************
  * States Related
@@ -381,10 +359,21 @@ typedef std::map<agent, pstate_opt_ptr_set> pedges_opt; /**< \brief A map betwee
 /****************** Delphic *******************/
 
 // EVENTS
+
+enum e_meta_condition
+{
+    act_eff,
+    neg_act_eff,
+    act_pre,
+    neg_act_pre,
+    none
+};
+
 class event;
 typedef short event_id;
 //typedef std::map<fluent, belief_formula> event_postconditions;
-typedef effects_map event_postconditions;
+typedef std::set<e_meta_condition> event_metacond;
+typedef fluent_formula event_postconditions;
 
 
 class event_ptr;
@@ -397,9 +386,35 @@ class event_ptr;
 
 // PEMS
 class pem;
-typedef unsigned short pem_id;
+typedef short pem_id;
 
-typedef std::map<agent_type, std::set<std::pair<event_ptr, event_ptr>>> pem_edges;
+typedef std::pair<event_ptr, event_ptr> pem_edge;
+typedef short agent_group;
+typedef std::map<agent_group, std::set<pem_edge> > pem_edges;
+
+//enum action_type
+//{
+//    ONT, /** \brief Ontic actions */
+//    //    ONT_NO,  /** \brief Ontic actions with No Oblivious agents */
+//    SEN, /** \brief Sensing actions */
+//    //    SEN_NO,  /** \brief Sensing actions with No Oblivious agents */
+//    //    SEN_NP,  /** \brief Sensing actions with No Partially observant agents */
+//    //    SEN_NOP, /** \brief Sensing actions with No Oblivious and Partially observant agents */
+//    ANN, /** \brief Announcement actions */
+//    //    ANN_NO,  /** \brief Announcement actions with No Oblivious agents */
+//    //    ANN_NP,  /** \brief Announcement actions with No Partially observant agents */
+//    //    ANN_NOP, /** \brief Announcement actions with No Oblivious and Partially observant agents */
+//    SIZE /** \brief Number of action types */
+//};
+//
+//enum agent_type
+//{
+//    FUL, /** \brief Fully observant agent */
+//    PAR, /** \brief Partially observant agent */
+//    OBL, /** \brief Oblivious agent */
+//    ALL /** \brief All agents */
+//};
+
 /**< \brief A map between agents and a set of pairs of \ref event_ptr.
  *
  * Each element consists of <\ref agent, <\ref event_ptr, \ref event_ptr>> and
@@ -421,8 +436,8 @@ typedef std::set<pem> pem_set; /**< \brief A set of \ref pem, used to store all 
 typedef unsigned short bis_label;
 typedef std::set<bis_label> bis_label_set;
 
-typedef std::map<kworld_ptr, std::map<kworld_ptr, bis_label_set>> kbislabel_map;
-typedef std::map<pworld_ptr, std::map<pworld_ptr, bis_label_set>> pbislabel_map;
+typedef std::map<kworld_ptr, std::map<kworld_ptr, bis_label_set> > kbislabel_map;
+typedef std::map<pworld_ptr, std::map<pworld_ptr, bis_label_set> > pbislabel_map;
 
 /****************** Bisimulation *******************/
 

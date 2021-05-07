@@ -17,6 +17,7 @@
 
 #include <set>
 #include "event.h"
+#include "pem.h"
 
 class pem_store
 {
@@ -31,6 +32,8 @@ private:
      * These pems are pointer to the ones in \ref m_created_events.*/
     pem_set m_created_pems;
 
+    std::map<std::string, agent_group> m_agent_group_ids;
+
     /** \brief Private constructor since it is a Singleton class.*/
     pem_store();
 public:
@@ -39,27 +42,23 @@ public:
 
     /** \brief To get always (the same instance of) *this* and the same instantiated fields.*/
     static pem_store& get_instance();
-    /** \brief Getter of \ref m_epsilon.
-     *
-     * @return the \ref event m_epsilon of *this*.*/
-    const event_ptr get_epsilon();
-//    /** \brief Function that inserts a \ref event given its id to \ref m_created_pems.
-//     * @param[in] to_add: The event model that represent the graph of an action.
-//     * @parma[in] id: The id associated to \ref to_add.
-//     */
-//    void add_action_pem(const event & to_add, event_id id);
-//
-//    /** \brief Function that inserts a \ref event given its id to \ref m_created_pems.
-//     * @param[in] to_add: The event model (pointer) that represent the graph of an action.
-//     * @parma[in] id: The id associated to \ref to_add.
-//     */
-//    void add_action_pem(const event_ptr & to_add, event_id id);
-//
-//    /** \brief Function that retrieves a \ref event from its \ref event_id.
-//     * @parma[in] id: The id of the \ref event that needs to be returned.
-//     * @return: The event model that represent the graph of the action associated to \ref id.
-//     */
-//    const event_ptr & get_action_pem(event_id id);
+    //    /** \brief Function that inserts a \ref event given its id to \ref m_created_pems.
+    //     * @param[in] to_add: The event model that represent the graph of an action.
+    //     * @parma[in] id: The id associated to \ref to_add.
+    //     */
+    //    void add_action_pem(const event & to_add, event_id id);
+    //
+    //    /** \brief Function that inserts a \ref event given its id to \ref m_created_pems.
+    //     * @param[in] to_add: The event model (pointer) that represent the graph of an action.
+    //     * @parma[in] id: The id associated to \ref to_add.
+    //     */
+    //    void add_action_pem(const event_ptr & to_add, event_id id);
+    //
+    //    /** \brief Function that retrieves a \ref event from its \ref event_id.
+    //     * @parma[in] id: The id of the \ref event that needs to be returned.
+    //     * @return: The event model that represent the graph of the action associated to \ref id.
+    //     */
+    //    const event_ptr & get_action_pem(event_id id);
 
 
     /** \brief Function that return the pointer to the given \ref event.
@@ -80,6 +79,33 @@ public:
      *
      * @return the \ref pem_ptr to \p to_add.*/
     const pem_ptr add_pem(const pem & to_add);
+
+
+    /** \brief Function that add a new agent group name to the map name->id.
+     *
+     * @return the \ref string to \p to_add in m_agent_group_ids.*/
+    void add_agent_group(const std::string & to_add);
+
+
+    /** \brief Function that return the pointer to the given \ref event from its id.
+     * 
+     * @return the \ref event_ptr to that has ref \id id.*/
+    const event_ptr get_event(event_id id) const;
+
+    /** \brief Function that return the pointer to the given \ref model from its id.
+     * 
+     * @return the \ref pem_ptr to that has ref \id id.*/
+    const pem_ptr get_pem(pem_id id) const;
+
+
+
+    /** \brief Function that returns the id given an agent group name.
+     *
+     * @return the \ref id of \p to_get.*/
+    agent_group get_agent_group(const std::string & to_get) const;
+
+    std::string get_agent_group_name(agent_group id) const;
+
 
     /** \brief Copy constructor removed since is Singleton class. */
     pem_store(pem_store const&) = delete;

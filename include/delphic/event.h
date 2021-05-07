@@ -28,30 +28,19 @@ private:
     /** \brief The list of fluents (fluent formula to alow or but not yet considered) to be imposed in the state updated with this event that associates a belief formula (postcondition) to each \ref fluent.*/
     event_postconditions m_post;
 
+    /** \brief The 'meta' precondition of *this*.*/
+    event_metacond m_meta_pre;
+    /** \brief The 'meta' postcondition of *this*.*/
+    event_metacond m_meta_post;
+
     /** \brief Flag that is true iff *this* has postconditions.*/
     bool m_ontic_change;
 
-    /** \brief Setter for the field \ref m_id.
-     *
-     * Only accessible by the \ref event_ptr.
-     *
-     * @param[in] id: the \ref event_id to set as \ref m_id.*/
-    void set_id(event_id id);
-    /** \brief Setter for the field \ref m_pre.
-     *
-     * Only accessible by the \ref event_ptr.
-     *
-     * @param[in] pre: the \ref belief_formula to set as \ref m_pre.*/
-    void set_precondition(const formula_list & to_set);
-    /** \brief Setter for the field \ref m_post.
-     *
-     * Only accessible by the \ref event_ptr.
-     *
-     * @param[in] post: the \ref event_postconditions to set as \ref m_post.*/
-    void set_postconditions(const event_postconditions & post);
-    /** \brief Setter for the field \ref m_ontic_change.
-     *
-     * @param[in] to_set: the boolean variable to set as \ref m_ontic_change.*/
+
+    /** \brief Setter for the field \ref m_ontic_change looking at the postconditions.*/
+    void set_ontic_change();
+
+    /** \brief Setter for the field \ref m_ontic_change.*/
     void set_ontic_change(bool to_set);
 
     /** \brief Getter of \ref m_id.
@@ -72,6 +61,21 @@ private:
      *
      * @return the postconditions of *this*.*/
     const event_postconditions & get_postconditions() const;
+
+
+    /** \brief Getter of \ref m_meta_pre.
+     *
+     * Only accessible by the \ref event_ptr.
+     *
+     * @return the meta_precondition of *this*.*/
+    const event_metacond & get_meta_precondition() const;
+    /** \brief Getter of \ref m_meta_post.
+     *
+     * Only accessible by the \ref event_ptr.
+     *
+     * @return the meta_postconditions of *this*.*/
+    const event_metacond & get_meta_postconditions() const;
+
     /** \brief Getter of \ref m_ontic_change.
      *
      * Only accessible by the \ref event_ptr.
@@ -80,33 +84,83 @@ private:
     const bool get_ontic_change() const;
 
 public:
-    /** \brief Empty constructor, call the default constructor of all the fields.*/
+    //    /** \brief Empty constructor, call the default constructor of all the fields.*/
     event();
+    //    /** \brief Constructor with parameters.
+    //     * Construct an object with the given info.
+    //     *
+    //     * @param[in] id: the \ref id to set as \ref m_id.
+    //     * @param[ontic_change]: the boolean to set as \ref m_ontic_change.*/
+    //    event(event_id id, bool ontic_change);
+    //    /** \brief Constructor with parameters.
+    //     * Construct an object with the given info.
+    //     *
+    //     * @param[in] id: the \ref id to set as \ref m_id.
+    //     * @param[ontic_change]: the boolean to set as \ref m_ontic_change.
+    //     * @param[in] pre: the \ref belief_formula to set as \ref m_pre.*/
+    //    event(event_id id, bool ontic_change, const formula_list & pre);
+    //    /** \brief Constructor with parameters.
+    //     * Construct an object with the given info.
+    //     *
+    //     * @param[in] id: the \ref id to set as \ref m_id.
+    //     * @param[ontic_change]: the boolean to set as \ref m_ontic_change.
+    //     * @param[in] pre: the \ref belief_formula to set as \ref m_pre.
+    //     * @param[post]: the \ref event_postconditions to set as \ref m_post.*/
+    //    event(event_id id, bool ontic_change, const formula_list & pre, const event_postconditions & post);
+
+
     /** \brief Constructor with parameters.
      * Construct an object with the given info.
      *
      * @param[in] id: the \ref id to set as \ref m_id.
-     * @param[ontic_change]: the boolean to set as \ref m_ontic_change.*/
-    event(event_id id, bool ontic_change);
+     * @param[in] meta_pre: the \ref event_metacond to set as \ref m_meta_pre.
+     * @param[in] meta_post: the \ref event_metacond to set as \ref m_meta_post.*/
+    event(event_id id, const formula_list & pre, const event_metacond & meta_pre, const event_postconditions & post, const event_metacond & meta_post);
+
     /** \brief Constructor with parameters.
      * Construct an object with the given info.
      *
      * @param[in] id: the \ref id to set as \ref m_id.
-     * @param[ontic_change]: the boolean to set as \ref m_ontic_change.
-     * @param[in] pre: the \ref belief_formula to set as \ref m_pre.*/
-    event(event_id id, bool ontic_change, const formula_list & pre);
-    /** \brief Constructor with parameters.
-     * Construct an object with the given info.
-     *
-     * @param[in] id: the \ref id to set as \ref m_id.
-     * @param[ontic_change]: the boolean to set as \ref m_ontic_change.
-     * @param[in] pre: the \ref belief_formula to set as \ref m_pre.
-     * @param[post]: the \ref event_postconditions to set as \ref m_post.*/
-    event(event_id id, bool ontic_change, const formula_list & pre, const event_postconditions & post);
+     * @param[in] meta_pre: the \ref event_metacond to set as \ref m_meta_pre.
+     * @param[in] meta_post: the \ref event_metacond to set as \ref m_meta_post.*/
+    event(event_id id, const event_metacond & meta_pre, const event_metacond & meta_post);
     /** \brief Copy constructor.
      *
      * @param[in] action: the \ref event to copy into *this*.*/
     event(const event & to_copy);
+
+    /** \brief Setter for the field \ref m_id.
+     *
+     * Only accessible by the \ref event_ptr.
+     *
+     * @param[in] id: the \ref event_id to set as \ref m_id.*/
+    void set_id(event_id id);
+    /** \brief Setter for the field \ref m_pre.
+     *
+     * Only accessible by the \ref event_ptr.
+     *
+     * @param[in] pre: the \ref belief_formula to set as \ref m_pre.*/
+    void set_precondition(const formula_list & to_set);
+    /** \brief Setter for the field \ref m_post.
+     *
+     * Only accessible by the \ref event_ptr.
+     *
+     * @param[in] post: the \ref event_postconditions to set as \ref m_post.*/
+    void set_postconditions(const event_postconditions & to_set);
+
+
+    /** \brief Setter for the field \ref m_meta_pre.
+     *
+     * Only accessible by the \ref event_ptr.
+     *
+     * @param[in] pre: the \ref event_metacond to set as \ref m_pre.*/
+    void set_meta_precondition(const event_metacond & to_set);
+    /** \brief Setter for the field \ref m_meta_post.
+     *
+     * Only accessible by the \ref event_ptr.
+     *
+     * @param[in] post: the \ref event_metacond to set as \ref m_post.*/
+    void set_meta_postconditions(const event_metacond & to_set);
 
     /**
      *\brief The < operator based on the field \ref m_id.
@@ -217,27 +271,31 @@ public:
      *
      * @return a copy of the pointer \ref m_ptr.*/
     std::shared_ptr <event> get_ptr() const;
-    /**\brief Setter for the field \ref m_postconditions of \ref m_ptr.
-     *
-     * @param[in] to_set: the \ref event_postconditions to assign to \ref m_postconditions.*/
-    void set_postconditions(const event_postconditions & to_set);
 
-    /** \brief Function that return the field m_id of the pointed \ref event.
-     *
-     * @return the \ref m_id of the \ref event pointed by \ref m_ptr.*/
+
     const event_id get_id() const;
-    /** \brief Function that return the field m_precondition of the pointed \ref event.
+    /** \brief Getter of \ref m_pre.
      *
-     * @return the \ref m_precondition of the \ref event pointed by \ref m_ptr.*/
+     * @return the precondition of *this*.*/
     const formula_list & get_precondition() const;
-    /** \brief Function that return the field m_postconditions of the pointed \ref event.
+
+    /** \brief Getter of \ref m_post.
      *
-     * @return the \ref m_postconditions of the \ref event pointed by \ref m_ptr.*/
+     * @return the postconditions of *this*.*/
     const event_postconditions & get_postconditions() const;
+
+    /** \brief Getter of \ref m_meta_pre.
+     *
+     * @return the meta_precondition of *this*.*/
+    const event_metacond & get_meta_precondition() const;
+    /** \brief Getter of \ref m_meta_post.
+     *
+     * @return the meta_postconditions of *this*.*/
+    const event_metacond & get_meta_postconditions() const;
     /** \brief Function that return the field m_ontic_change of the pointed \ref event.
      *
      * @return the \ref m_id of the \ref event pointed by \ref m_ptr.*/
-    const bool get_ontic_change() const;
+    bool get_ontic_change() const;
     /**
      *\brief The < operator based on the field \ref m_id.
      * Implemented to allow the ordering on set of \ref event_ptr (used in \ref pem_store).

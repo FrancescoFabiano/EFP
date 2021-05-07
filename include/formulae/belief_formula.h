@@ -267,6 +267,10 @@ public:
      * @return the value of the field \ref m_group_agents.*/
     const agent_set& get_group_agents() const;
 
+    /**Setter from a fluent_formula*/
+    void set_from_ff(const fluent_formula & to_build);
+
+
     /** \brief Function that print *this* (std::string parameters representation).
      *
      * \todo Since the string parameter should be removed print thanks to a \ref grounder.*/

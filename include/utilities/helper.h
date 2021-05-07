@@ -32,16 +32,23 @@ public:
      * @param[in] to_negate: the \ref fluent to negate
      * 
      * @return the negation of \p to_negate.*/
-    static fluent negate_fluent(const fluent to_negate);
+    static fluent negate_fluent(const fluent & to_negate);
+
+    /** \brief Function that returns the negation of a given \ref fluent_formula.
+     * 
+     * @param[in] to_negate: the \ref fluent_formula to negate
+     * 
+     * @return the negation of \p to_negate.*/
+    static fluent_formula negate_fluent_formula(const fluent_formula & to_negate);
 
     /** \brief Function that returns the positive version of a given \ref fluent.
      * 
      * @param[in] to_normalize: the \ref fluent to normalize
      * 
      * @return the normalized of fluent.*/
-    static fluent normalize_fluent(const fluent to_normalize);
+    static fluent normalize_fluent(const fluent & to_normalize);
 
-    static bool is_negate(const fluent f);
+    static bool is_negate(const fluent & f);
 
 
 

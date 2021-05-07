@@ -8,6 +8,8 @@
  */
 #include <algorithm>
 #include "planner.h"
+#include "../delphic/delphic_helper.h"
+#include "../delphic/pem_store.h"
 
 template <class T>
 void planner<T>::print_results(std::chrono::duration<double> elapsed_seconds, T goal, bool results_file, bool givenplan, search_type used_search, heuristics used_heur)
@@ -137,6 +139,8 @@ bool planner<T>::search_BFS(bool results_file)
 	if (bisimulation) {
 		initial.calc_min_bisimilar();
 	}
+	
+	
 
 	auto end_timing = std::chrono::system_clock::now();
 	std::chrono::duration<double> elapsed_seconds = end_timing - start_timing;
@@ -148,6 +152,13 @@ bool planner<T>::search_BFS(bool results_file)
 	T popped_state;
 	T tmp_state;
 	action tmp_action;
+	
+	
+	//DEBUGGGGGG
+	pem_store::get_instance().generate("Debug");
+	delphic_helper::union_update(initial.get_representation(), *actions.begin());
+	return 0;
+	//END
 
 	start_timing = std::chrono::system_clock::now();
 	if (initial.is_goal()) {

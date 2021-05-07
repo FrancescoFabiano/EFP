@@ -10,7 +10,7 @@
 #include  <math.h>
 #include "../states/possibilities/pstate.h"
 
-fluent helper::negate_fluent(const fluent f)
+fluent helper::negate_fluent(const fluent & f)
 {
 	fluent fluent_negated = f;
 
@@ -22,12 +22,28 @@ fluent helper::negate_fluent(const fluent f)
 	return fluent_negated;
 }
 
-/** \brief Function that returns the positive version of a given \ref fluent.
- *
- * @param[in] to_normalize: the \ref fluent to normalize
- *
- * @return the normalized of fluent.*/
-fluent helper::normalize_fluent(const fluent to_normalize)
+fluent_formula helper::negate_fluent_formula(const fluent_formula & to_negate)
+{
+	if (to_negate.size() > 1) {
+		std::cerr << "Error: Non-determinism is not supported yet." << std::endl;
+		exit(1);
+	} else if (to_negate.size() == 1) {
+		fluent_set sub_ff = *to_negate.begin();
+		if (sub_ff.size() > 1) {
+			std::cerr << "Error: You cannot negate multiple effects because non-determinism is not supported yet." << std::endl;
+		exit(1);
+		} else if (sub_ff.size() == 1) {
+			fluent_formula neg_ff;
+			fluent_set neg_fs;
+			neg_fs.insert(helper::negate_fluent(*sub_ff.begin()));
+			neg_ff.insert(neg_fs);
+			return neg_ff;
+		}
+	}
+	return to_negate;
+}
+
+fluent helper::normalize_fluent(const fluent & to_normalize)
 {
 	if (is_negate(to_normalize)) {
 		return negate_fluent(to_normalize);
@@ -36,7 +52,7 @@ fluent helper::normalize_fluent(const fluent to_normalize)
 	}
 }
 
-bool helper::is_negate(const fluent f)
+bool helper::is_negate(const fluent & f)
 {
 	if (f[f.size() - 1] == 0) {
 		return false;
@@ -232,31 +248,31 @@ bool helper::fluentset_negated_empty_intersection(const fluent_set & set1, const
 
 agent_set helper::get_agents_if_entailed(const observability_map& map, const pstate & state)
 {
-    agent_set ret;
-    observability_map::const_iterator it_map;
-    for (it_map = map.begin(); it_map != map.end(); it_map++) {
-        if (state.entails(it_map->second)) {
-            ret.insert(it_map->first);
-        }
-    }
-    return ret;
+	agent_set ret;
+	observability_map::const_iterator it_map;
+	for (it_map = map.begin(); it_map != map.end(); it_map++) {
+		if (state.entails(it_map->second)) {
+			ret.insert(it_map->first);
+		}
+	}
+	return ret;
 }
 
 fluent_formula helper::get_effects_if_entailed(const effects_map & map, const pstate & state)
 {
-    fluent_formula ret;
-    effects_map::const_iterator it_map;
-    for (it_map = map.begin(); it_map != map.end(); it_map++) {
-        if (state.entails(it_map->second)) {
-            ret = helper::and_ff(ret, it_map->first);
-        }
-    }
-    if (ret.size() > 1) {
+	fluent_formula ret;
+	effects_map::const_iterator it_map;
+	for (it_map = map.begin(); it_map != map.end(); it_map++) {
+		if (state.entails(it_map->second)) {
+			ret = helper::and_ff(ret, it_map->first);
+		}
+	}
+	if (ret.size() > 1) {
 
-        std::cerr << "\nNon determinism in action effect is not supported-1.\n";
-        exit(1);
-    }
-    return ret;
+		std::cerr << "\nNon determinism in action effect is not supported-1.\n";
+		exit(1);
+	}
+	return ret;
 }
 
 /* Using the std::set == operator
