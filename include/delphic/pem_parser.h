@@ -17,7 +17,7 @@
 #include <fstream>
 #include <stdio.h>
 #include <string.h>
-#include <bits/stdc++.h>
+//#include <bits/stdc++.h>
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 #include <regex>
