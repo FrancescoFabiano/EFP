@@ -204,7 +204,7 @@ typedef std::map<fluent_formula, belief_formula> effects_map; /**< \brief Used t
 
 enum event_type
 {
-    EPSILON, /**< \brief The null event.*/
+    EPSILON, /**< \brief The null pevent.*/
     SIGMA, /**< \brief Event corresponding to ... */
     TAU /**< \brief Event corresponding to ... */
 };
