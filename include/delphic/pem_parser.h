@@ -3,7 +3,7 @@
  * \brief Singleton class that parse the file that described the custom pems.
  * 
  * 
- * @see event, pem, pem_store.
+ * @see pevent, pem, pem_store.
  * 
  * \copyright GNU Public License.
  *

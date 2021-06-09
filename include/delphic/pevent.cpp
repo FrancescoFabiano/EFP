@@ -1,5 +1,5 @@
 /**
- * \brief Implementation of \ref event.h and \ref event_ptr.h.
+ * \brief Implementation of \ref pevent.h and \ref event_ptr.h.
  *
  * \copyright GNU Public License.
  * 
@@ -12,21 +12,21 @@
 #include <iostream>
 #include <stdexcept>
 
-#include "event.h"
+#include "pevent.h"
 #include "../utilities/printer.h"
 
-event::event()
+pevent::pevent()
 {
 	m_id = -1;
 }
 
-/*event::event(event_id id, bool ontic_change)
+/*pevent::pevent(event_id id, bool ontic_change)
 {
 	set_id(id);
 	set_ontic_change(ontic_change);
 }
 
-event::event(event_id id, bool ontic_change, const formula_list & pre)
+pevent::pevent(event_id id, bool ontic_change, const formula_list & pre)
 {
 
 	set_id(id);
@@ -34,7 +34,7 @@ event::event(event_id id, bool ontic_change, const formula_list & pre)
 	set_precondition(pre);
 }
 
-event::event(event_id id, bool ontic_change, const formula_list & pre, const event_postconditions & post)
+pevent::pevent(event_id id, bool ontic_change, const formula_list & pre, const event_postconditions & post)
 {
 	set_id(id);
 	set_ontic_change(ontic_change);
@@ -43,7 +43,7 @@ event::event(event_id id, bool ontic_change, const formula_list & pre, const eve
 }*/
 
 
-event::event(event_id id, const formula_list & pre, const event_metacond & meta_pre, const event_postconditions & post, const event_metacond & meta_post)
+pevent::pevent(event_id id, const formula_list & pre, const event_metacond & meta_pre, const event_postconditions & post, const event_metacond & meta_post)
 {
 	set_id(id);
 	set_precondition(pre);
@@ -53,7 +53,7 @@ event::event(event_id id, const formula_list & pre, const event_metacond & meta_
 	set_ontic_change();
 }
 
-event::event(event_id id, const event_metacond & meta_pre, const event_metacond & meta_post)
+pevent::pevent(event_id id, const event_metacond & meta_pre, const event_metacond & meta_post)
 {
 	set_id(id);
 	set_meta_precondition(meta_pre);
@@ -61,7 +61,7 @@ event::event(event_id id, const event_metacond & meta_pre, const event_metacond 
 	set_ontic_change();
 }
 
-event::event(const event & to_copy)
+pevent::pevent(const ::pevent & to_copy)
 {
 	set_id(to_copy.get_id());
 	set_precondition(to_copy.get_precondition());
@@ -71,22 +71,22 @@ event::event(const event & to_copy)
 	set_ontic_change(to_copy.get_ontic_change());
 }
 
-void event::set_id(const event_id to_set)
+void pevent::set_id(const event_id to_set)
 {
 	m_id = to_set;
 }
 
-void event::set_precondition(const formula_list & to_set)
+void pevent::set_precondition(const formula_list & to_set)
 {
 	m_pre = to_set;
 }
 
-void event::set_meta_precondition(const event_metacond & to_set)
+void pevent::set_meta_precondition(const event_metacond & to_set)
 {
 	m_meta_pre = to_set;
 }
 
-void event::set_postconditions(const event_postconditions & to_set)
+void pevent::set_postconditions(const event_postconditions & to_set)
 {
 	if (to_set.size() > 1) {
 		std::cerr << "\n\n***Non determinism in event postconditions is not yet supported.***\n\n";
@@ -95,13 +95,13 @@ void event::set_postconditions(const event_postconditions & to_set)
 	m_post = to_set;
 }
 
-void event::set_meta_postconditions(const event_metacond & to_set)
+void pevent::set_meta_postconditions(const event_metacond & to_set)
 {
 	m_meta_post = to_set;
 
 }
 
-void event::set_ontic_change()
+void pevent::set_ontic_change()
 {
 
 	if (m_meta_post.size() == 0) {
@@ -116,44 +116,44 @@ void event::set_ontic_change()
 
 }
 
-void event::set_ontic_change(bool to_set)
+void pevent::set_ontic_change(bool to_set)
 {
 
 	m_ontic_change = to_set;
 
 }
 
-const event_id event::get_id() const
+const event_id pevent::get_id() const
 {
 	return m_id;
 }
 
-const formula_list & event::get_precondition() const
+const formula_list & pevent::get_precondition() const
 {
 	return m_pre;
 }
 
-const event_metacond & event::get_meta_precondition() const
+const event_metacond & pevent::get_meta_precondition() const
 {
 	return m_meta_pre;
 }
 
-const event_postconditions & event::get_postconditions() const
+const event_postconditions & pevent::get_postconditions() const
 {
 	return m_post;
 }
 
-const event_metacond & event::get_meta_postconditions() const
+const event_metacond & pevent::get_meta_postconditions() const
 {
 	return m_meta_post;
 }
 
-const bool event::get_ontic_change() const
+const bool pevent::get_ontic_change() const
 {
 	return m_ontic_change;
 }
 
-bool event::operator<(const event & to_compare) const
+bool pevent::operator<(const ::pevent & to_compare) const
 {
 	if (m_id < to_compare.get_id()) { // We compare the ids since we assume that each PEM has at most one event for each id
 		return true;
@@ -161,7 +161,7 @@ bool event::operator<(const event & to_compare) const
 	return false;
 }
 
-bool event::operator>(const event & to_compare) const
+bool pevent::operator>(const ::pevent & to_compare) const
 {
 	if (m_id > to_compare.get_id()) {
 		return true;
@@ -169,7 +169,7 @@ bool event::operator>(const event & to_compare) const
 	return false;
 }
 
-bool event::operator==(const event & to_compare) const
+bool pevent::operator==(const ::pevent & to_compare) const
 {
 	/**std way*/
 	if (!(*this < to_compare) && !(to_compare < *this)) {
@@ -178,7 +178,7 @@ bool event::operator==(const event & to_compare) const
 	return false;
 }
 
-bool event::operator=(const event & to_copy)
+bool pevent::operator=(const ::pevent & to_copy)
 {
 	set_id(to_copy.get_id());
 	set_precondition(to_copy.get_precondition());
@@ -186,7 +186,7 @@ bool event::operator=(const event & to_copy)
 	return true;
 }
 
-void event::print()const
+void pevent::print()const
 {
 	std::cout << "\nEvent (" << get_id() << ") has meta_preconditions: ";
 
@@ -219,41 +219,41 @@ void event::print()const
 
 /****************************************************************************/
 
-event_ptr::event_ptr()
+pevent_ptr::pevent_ptr()
 {
 }
 
-event_ptr::event_ptr(const std::shared_ptr <event> &ptr)
-{
-	set_ptr(ptr);
-}
-
-event_ptr::event_ptr(std::shared_ptr <event> &&ptr)
+pevent_ptr::pevent_ptr(const std::shared_ptr <::pevent> &ptr)
 {
 	set_ptr(ptr);
 }
 
-event_ptr::event_ptr(const event &action)
+pevent_ptr::pevent_ptr(std::shared_ptr <::pevent> &&ptr)
 {
-	m_ptr = std::make_shared<event>(action);
+	set_ptr(ptr);
 }
 
-void event_ptr::set_ptr(const std::shared_ptr <event> &ptr)
+pevent_ptr::pevent_ptr(const ::pevent &action)
+{
+	m_ptr = std::make_shared<::pevent>(action);
+}
+
+void pevent_ptr::set_ptr(const std::shared_ptr <::pevent> &ptr)
 {
 	m_ptr = ptr;
 }
 
-void event_ptr::set_ptr(std::shared_ptr <event> &&ptr)
+void pevent_ptr::set_ptr(std::shared_ptr <::pevent> &&ptr)
 {
 	m_ptr = ptr;
 }
 
-std::shared_ptr <event> event_ptr::get_ptr() const
+std::shared_ptr <::pevent> pevent_ptr::get_ptr() const
 {
 	return m_ptr;
 }
 
-const event_id event_ptr::get_id() const
+const event_id pevent_ptr::get_id() const
 {
 	if (m_ptr != nullptr) {
 		return get_ptr()->get_id();
@@ -262,7 +262,7 @@ const event_id event_ptr::get_id() const
 	exit(1);
 }
 
-const formula_list & event_ptr::get_precondition() const
+const formula_list & pevent_ptr::get_precondition() const
 {
 	if (m_ptr != nullptr) {
 		return get_ptr()->get_precondition();
@@ -271,7 +271,7 @@ const formula_list & event_ptr::get_precondition() const
 	exit(1);
 }
 
-const event_postconditions & event_ptr::get_postconditions() const
+const event_postconditions & pevent_ptr::get_postconditions() const
 {
 	if (m_ptr != nullptr) {
 		return get_ptr()->get_postconditions();
@@ -280,7 +280,7 @@ const event_postconditions & event_ptr::get_postconditions() const
 	exit(1);
 }
 
-const event_metacond & event_ptr::get_meta_precondition() const
+const event_metacond & pevent_ptr::get_meta_precondition() const
 {
 	if (m_ptr != nullptr) {
 		return get_ptr()->get_meta_precondition();
@@ -289,7 +289,7 @@ const event_metacond & event_ptr::get_meta_precondition() const
 	exit(1);
 }
 
-const event_metacond & event_ptr::get_meta_postconditions() const
+const event_metacond & pevent_ptr::get_meta_postconditions() const
 {
 	if (m_ptr != nullptr) {
 		return get_ptr()->get_meta_postconditions();
@@ -298,7 +298,7 @@ const event_metacond & event_ptr::get_meta_postconditions() const
 	exit(1);
 }
 
-bool event_ptr::get_ontic_change() const
+bool pevent_ptr::get_ontic_change() const
 {
 	if (m_ptr != nullptr) {
 		return get_ptr()->get_ontic_change();
@@ -307,7 +307,7 @@ bool event_ptr::get_ontic_change() const
 	exit(1);
 }
 
-bool event_ptr::operator<(const event_ptr & to_compare) const
+bool pevent_ptr::operator<(const pevent_ptr & to_compare) const
 {
 	if (get_id() < to_compare.get_id()) {
 		return true;
@@ -315,7 +315,7 @@ bool event_ptr::operator<(const event_ptr & to_compare) const
 	return false;
 }
 
-bool event_ptr::operator>(const event_ptr & to_compare) const
+bool pevent_ptr::operator>(const pevent_ptr & to_compare) const
 {
 	if (get_id() > to_compare.get_id()) {
 		return true;
@@ -323,7 +323,7 @@ bool event_ptr::operator>(const event_ptr & to_compare) const
 	return false;
 }
 
-bool event_ptr::operator==(const event_ptr & to_compare) const
+bool pevent_ptr::operator==(const pevent_ptr & to_compare) const
 {
 	/**std way*/
 	if (!(*this < to_compare) && !(to_compare < (*this))) {
@@ -332,13 +332,13 @@ bool event_ptr::operator==(const event_ptr & to_compare) const
 	return false;
 }
 
-bool event_ptr::operator=(const event_ptr & to_copy)
+bool pevent_ptr::operator=(const pevent_ptr & to_copy)
 {
 	set_ptr(to_copy.get_ptr());
 	return true;
 }
 
-void event_ptr::print() const
+void pevent_ptr::print() const
 {
 	get_ptr()->print();
 }

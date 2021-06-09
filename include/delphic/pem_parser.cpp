@@ -8,7 +8,7 @@
  */
 
 #include "pem_parser.h"
-#include "event.h"
+#include "pevent.h"
 #include "pem_store.h"
 
 void pem_parser::apply_spaces_regex(std::string & to_clean, const std::regex & pattern)
@@ -75,7 +75,7 @@ void pem_parser::parse_conditions(const std::string & line, event_metacond & con
 			return;
 			//std::cout << "\n\t\t" << sub_arg;
 		} else {
-			//Here parse of normal fluent/Belief formulae to add as extra field in the event
+			//Here parse of normal fluent/Belief formulae to add as extra field in the pevent
 			std::cerr << "\nParsing Error at Line " << line_count << ": The specified condition has no meaning. Please use \'act_eff\', \'act_pre\', or \'none\'.\n";
 			exit(1);
 		}
@@ -123,10 +123,10 @@ void pem_parser::parse_edge(const std::string & edge, pem_edges & edges)
 	std::string sub_arg;
 
 	args >> sub_arg;
-	event_ptr first = pem_store::get_instance().get_event(boost::lexical_cast<event_id>(sub_arg));
+	pevent_ptr first = pem_store::get_instance().get_event(boost::lexical_cast<event_id>(sub_arg));
 
 	args >> sub_arg;
-    event_ptr second = pem_store::get_instance().get_event(boost::lexical_cast<event_id>(sub_arg));
+    pevent_ptr second = pem_store::get_instance().get_event(boost::lexical_cast<event_id>(sub_arg));
 
 	args >> sub_arg;
     agent_group e_to_add_ag = pem_store::get_instance().get_agent_group(sub_arg);
@@ -209,7 +209,7 @@ void pem_parser::parse()
 		event_id e_id;
 		event_metacond e_meta_pre;
 		event_metacond e_meta_post;
-		event e_to_add;
+		pevent e_to_add;
 
 		pem_id p_id;
 		event_id p_pointed_id;
@@ -235,9 +235,9 @@ void pem_parser::parse()
 					exit(1);
 				}
 
-				if (type.compare("event") == 0) {
+				if (type.compare("pevent") == 0) {
 					if (!not_assigned) {
-						std::cerr << "\nParsing Error at Line " << line_count << ": Trying to define an \'event\' while already defining an \'event\' or a \'model\'.\n";
+						std::cerr << "\nParsing Error at Line " << line_count << ": Trying to define an \'pevent\' while already defining an \'pevent\' or a \'model\'.\n";
 					}
 
 					e_id = -1;
@@ -250,7 +250,7 @@ void pem_parser::parse()
 				} else if (type.compare("model") == 0) {
 
 					if (!not_assigned) {
-						std::cerr << "\nParsing Error at Line " << line_count << ": Trying to define a \'model\' while already defining an \'event\' or a \'model\'.\n";
+						std::cerr << "\nParsing Error at Line " << line_count << ": Trying to define a \'model\' while already defining an \'pevent\' or a \'model\'.\n";
 
 					}
 
@@ -263,7 +263,7 @@ void pem_parser::parse()
 					not_assigned = false;
 				} else if (type.compare("obs_groups") == 0) {
 					if (!not_assigned) {
-						std::cerr << "\nParsing Error at Line " << line_count << ": Trying to define the \'observability groups\' while already defining an \'event\' or a \'model\'.\n";
+						std::cerr << "\nParsing Error at Line " << line_count << ": Trying to define the \'observability groups\' while already defining an \'pevent\' or a \'model\'.\n";
 
 					}
 					std::string obs = std::regex_replace(line, type_regex, "$7");
@@ -271,7 +271,7 @@ void pem_parser::parse()
 					parse_ag_list(std::regex_replace(obs, std::regex("\\{(.*)\\}(.*)"), "$1"));
 
 				} else {
-					std::cerr << "\nParsing Error at Line " << line_count << ": The specified type -- " << type << " -- is not defined in our syntax. Please use either \'event\', \'model\', or \'obs_groups\'.\n";
+					std::cerr << "\nParsing Error at Line " << line_count << ": The specified type -- " << type << " -- is not defined in our syntax. Please use either \'pevent\', \'model\', or \'obs_groups\'.\n";
 					exit(1);
 				}
 
@@ -284,7 +284,7 @@ void pem_parser::parse()
 				internal_field = std::regex_replace(line, field_regex, "$6");
 
 				if (not_assigned) {
-					std::cerr << "\nParsing Error at Line " << line_count << ": Before declaring a new \'" << field << "\' you need to open a new \'event\' or \'model\'.\n";
+					std::cerr << "\nParsing Error at Line " << line_count << ": Before declaring a new \'" << field << "\' you need to open a new \'pevent\' or \'model\'.\n";
 					exit(1);
 				}
 
@@ -295,24 +295,24 @@ void pem_parser::parse()
 					} else if (in_model) {
 						p_id = boost::lexical_cast<pem_id>(internal_field);
 					} else {
-						std::cerr << "\nParsing Error at Line " << line_count << ": Before declaring a new \'" << field << "\' you need to open a new \'event\' or \'model\'.\n";
+						std::cerr << "\nParsing Error at Line " << line_count << ": Before declaring a new \'" << field << "\' you need to open a new \'pevent\' or \'model\'.\n";
 						exit(1);
 					}
 				} else if (field.compare("pointed") == 0) {
 					if (!in_model) {
-						std::cerr << "\nParsing Error at Line " << line_count << ": Pointed event found outside of a model definition.";
+						std::cerr << "\nParsing Error at Line " << line_count << ": Pointed pevent found outside of a model definition.";
 						exit(1);
 					}
 					p_pointed_id = boost::lexical_cast<event_id>(internal_field);
 				} else if (field.compare("precondition") == 0) {
 					if (!in_event) {
-						std::cerr << "\nParsing Error at Line " << line_count << ": Precondition found outside of an event definition.";
+						std::cerr << "\nParsing Error at Line " << line_count << ": Precondition found outside of an pevent definition.";
 						exit(1);
 					}
 					parse_conditions(internal_field, e_meta_pre, line_count);
 				} else if (field.compare("postcondition") == 0) {
 					if (!in_event) {
-						std::cerr << "\nParsing Error at Line " << line_count << ": Postcondition found outside of an event definition.";
+						std::cerr << "\nParsing Error at Line " << line_count << ": Postcondition found outside of an pevent definition.";
 						exit(1);
 					}
 

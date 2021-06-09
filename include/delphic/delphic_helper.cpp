@@ -9,7 +9,7 @@
 
 #include "delphic_helper.h"
 #include "../utilities/helper_t.ipp"
-#include "event.h"
+#include "pevent.h"
 #include "pem.h"
 #include "pem_store.h"
 
@@ -48,9 +48,9 @@ agent_group_map delphic_helper::build_agent_group_map()
 const pstate & delphic_helper::union_update(const pstate & state, const action & act)
 {
     pstate ret;
-    pem_ptr pem = get_pem(act);
+    pem_ptr pem = delphic_helper::build_pem(act);
     pworld_ptr p_pw = state.get_pointed();
-    event_ptr p_ev = pem_store::get_instance().get_event(pem.get_pointed_id());
+    pevent_ptr p_ev = pem_store::get_instance().get_event(pem.get_pointed_id());
     update_map u_map;
     agent_group_map a_map;
 
@@ -65,7 +65,7 @@ const pstate & delphic_helper::union_update(const pstate & state, const action &
     return ret;
 }
 
-const pworld_ptr & delphic_helper::union_update_helper(pstate & ret, const pstate & state, const action & act, const pem_ptr & pem, const pworld_ptr & pw, const event_ptr & ev, update_map & u_map, const agent_group_map & a_map)
+const pworld_ptr & delphic_helper::union_update_helper(pstate & ret, const pstate & state, const action & act, const pem_ptr & pem, const pworld_ptr & pw, const pevent_ptr & ev, update_map & u_map, const agent_group_map & a_map)
 {
     if (ev.get_meta_precondition().find(e_meta_condition::none) != ev.get_meta_precondition().end() && ev.get_ontic_change()) {
         u_map.insert(update_map::value_type({pw, ev}, pw));
@@ -128,18 +128,18 @@ const kstate & delphic_helper::union_update(const kstate & state, const action &
 	exit(1);
 }
 
-const pworld & delphic_helper::world_cartesian_product(const pworld & world, const event_ptr & e)
+const pworld & delphic_helper::world_cartesian_product(const pworld & world, const pevent_ptr & e)
 {
 	return world;
 }
 
-fluent_formula delphic_helper::get_total_effects(const pstate & state, const action & act, const event_ptr & e)
+fluent_formula delphic_helper::get_total_effects(const pstate & state, const action & act, const pevent_ptr & e)
 {
     fluent_formula action_eff = helper::get_effects_if_entailed(act.get_effects(), state);
 	auto meta_post = e.get_meta_postconditions();
 
 	if (meta_post.size() > 1) {
-		std::cerr << "Error: malformed action postcondition in event " << e.get_id() << std::endl;
+		std::cerr << "Error: malformed action postcondition in pevent " << e.get_id() << std::endl;
 		exit(1);
 	} else if (meta_post.size() == 0) {
 		fluent_formula empty;
@@ -163,7 +163,7 @@ fluent_formula delphic_helper::get_total_effects(const pstate & state, const act
 	//Need to insert the merge with specific postcondition
 }
 
-formula_list delphic_helper::get_total_pre(const pstate & state, const action & act, const event_ptr & e)
+formula_list delphic_helper::get_total_pre(const pstate & state, const action & act, const pevent_ptr & e)
 {
 
 	formula_list ret;

@@ -3,7 +3,7 @@
  *
  * \details The union update returns the possibility after the execution of a PEM
  *
- * @see pstate and event.
+ * @see pstate and pevent.
  *
  * \copyright GNU Public License.
  *
@@ -33,13 +33,13 @@ public:
      * @param [in] e: the \ref pem to apply.
      * @return the updated \ref pstate.*/
     static const pstate & union_update(const pstate & state, const action & act);
-    static const pworld_ptr & union_update_helper(pstate & ret, const pstate & state, const action & act, const pem_ptr & pem, const pworld_ptr & pw, const event_ptr & ev, update_map & u_map, const agent_group_map & a_map);
+    static const pworld_ptr & union_update_helper(pstate & ret, const pstate & state, const action & act, const pem_ptr & pem, const pworld_ptr & pw, const pevent_ptr & ev, update_map & u_map, const agent_group_map & a_map);
 
     static const kstate & union_update(const kstate & state, const action & act);
 
 
     //Francesco: addition
-    static const pworld & world_cartesian_product(const pworld & world, const event_ptr & e);
-    static fluent_formula get_total_effects(const pstate & state, const action & act, const event_ptr & e);
-    static formula_list get_total_pre(const pstate & state, const action & act, const event_ptr & e);
+    static const pworld & world_cartesian_product(const pworld & world, const pevent_ptr & e);
+    static fluent_formula get_total_effects(const pstate & state, const action & act, const pevent_ptr & e);
+    static formula_list get_total_pre(const pstate & state, const action & act, const pevent_ptr & e);
 };

@@ -14,7 +14,7 @@ pem_store::pem_store()
 {
 	//belief_formula TRUE;
 	//TRUE.set_formula_type(BF_EMPTY);
-	//m_epsilon = pem_store::get_instance().add_event(event(EPSILON, false, {TRUE}));
+	//m_epsilon = pem_store::get_instance().add_event(pevent(EPSILON, false, {TRUE}));
 }
 
 pem_store& pem_store::get_instance()
@@ -29,9 +29,9 @@ void pem_store::generate(const std::string & file)
 	return;
 }
 
-const event_ptr pem_store::add_event(const event & to_add)
+const pevent_ptr pem_store::add_event(const pevent & to_add)
 {
-	auto tmp_ptr = std::make_shared<event>(*(std::get<0>(m_created_events.insert(to_add))));
+	auto tmp_ptr = std::make_shared<pevent>(*(std::get<0>(m_created_events.insert(to_add))));
 	return tmp_ptr;
 }
 
@@ -48,17 +48,17 @@ void pem_store::add_agent_group(const std::string & to_add)
 	}
 }
 
-const event_ptr pem_store::get_event(event_id id) const
+const pevent_ptr pem_store::get_event(event_id id) const
 {
-	event tmp;
+	pevent tmp;
 	tmp.set_id(id);
 
 	auto ptr = m_created_events.find(tmp);
 
 	if (ptr != m_created_events.end()) {
-		return std::make_shared<event>(*ptr);
+		return std::make_shared<pevent>(*ptr);
 	} else {
-		std::cerr << "\nError: you are requesting an not-existing event!";
+		std::cerr << "\nError: you are requesting an not-existing pevent!";
 		exit(1);
 	}
 }
@@ -73,7 +73,7 @@ const pem_ptr pem_store::get_pem(pem_id id) const
 	if (ptr != m_created_pems.end()) {
 		return std::make_shared<pem>(*ptr);
 	} else {
-		std::cerr << "\nError: you are requesting an not-existing event!";
+		std::cerr << "\nError: you are requesting an not-existing pevent!";
 		exit(1);
 	}
 }
@@ -105,22 +105,22 @@ std::string pem_store::get_agent_group_name(agent_group id) const
 
 
 
-//void pem_store::add_action_pem(const event & to_add, event_id id)
+//void pem_store::add_action_pem(const pevent & to_add, event_id id)
 //{
 //	add_action_pem(add_event(to_add), id);
 //}
 //
-//void pem_store::add_action_pem(const event_ptr & to_add, event_id id)
+//void pem_store::add_action_pem(const pevent_ptr & to_add, event_id id)
 //{
 //	if (m_created_events.find(to_add.get_ptr()) == m_created_events.end()) {
-//        m_created_events.insert(std::pair<event_id, event_ptr>(id, to_add));
+//        m_created_events.insert(std::pair<event_id, pevent_ptr>(id, to_add));
 //	} else {
 //		std::cerr << "\nYou are trying to allocate two Event Models with the same id, this is not possible.";
 //		exit(1);
 //	}
 //}
 //
-//const event_ptr & pem_store::get_action_pem(event_id id)
+//const pevent_ptr & pem_store::get_action_pem(event_id id)
 //{
 //	if (m_created_pems.find(id) != m_created_pems.end()) {
 //		return m_created_pems[id];

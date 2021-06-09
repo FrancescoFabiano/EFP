@@ -346,7 +346,7 @@ private:
      * @param[in] ret: the Kripke structure obtained after performing act.
      * @param[in] kw: the current \ref kworld of *this* being considered.
      * @param[in] kmap: the map between the kworlds of the old Kripke structure and the ones of the new structure.
-     * @param[in] e: the event type being considered.
+     * @param[in] e: the pevent type being considered.
      * @param[in] repetition: action used to help updating the interpretations of the worlds
      */
     void add_ste_worlds(kstate &ret, const kworld_ptr &kw, kstate_map &kmap, const event_type e, const action & act) const;

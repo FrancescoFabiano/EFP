@@ -6,7 +6,7 @@ OBJS	=	$(BUILD_DIR)/bison.o $(BUILD_DIR)/lex.o $(BUILD_DIR)/main.o \
 			$(BUILD_DIR)/attitude.o $(BUILD_DIR)/attitudes_table.o \
 			$(BUILD_DIR)/kstore.o $(BUILD_DIR)/kedge.o $(BUILD_DIR)/kworld.o $(BUILD_DIR)/kstate.o \
 			$(BUILD_DIR)/pstore.o $(BUILD_DIR)/pworld.o $(BUILD_DIR)/pstate.o \
-			$(BUILD_DIR)/event.o $(BUILD_DIR)/pem.o $(BUILD_DIR)/pem_store.o $(BUILD_DIR)/pem_parser.o $(BUILD_DIR)/delphic_helper.o \
+			$(BUILD_DIR)/pevent.o $(BUILD_DIR)/pem.o $(BUILD_DIR)/pem_store.o $(BUILD_DIR)/pem_parser.o $(BUILD_DIR)/delphic_helper.o \
 			$(BUILD_DIR)/reader.o \
 			$(BUILD_DIR)/heuristics_manager.o $(BUILD_DIR)/satisfied_goals.o $(BUILD_DIR)/planning_graph.o \
 			$(BUILD_DIR)/bisimulation.o
@@ -275,15 +275,15 @@ $(BUILD_DIR)/pstore_opt.o: $(S_POSSIBILITY_OPT_DIR)/pstore_opt.cpp $(S_POSSIBILI
 		$(CC) $(CFLAGS) -c $(S_POSSIBILITY_OPT_DIR)/pstore_opt.cpp -o $(BUILD_DIR)/pstore_opt.o
 
 ##DELPHIC
-$(BUILD_DIR)/event.o: $(DELPHIC_DIR)/event.cpp $(DELPHIC_DIR)/event.h \
+$(BUILD_DIR)/pevent.o: $(DELPHIC_DIR)/pevent.cpp $(DELPHIC_DIR)/pevent.h \
 					$(DELPHIC_DIR)/pem_store.h $(DELPHIC_DIR)/delphic_helper.h \
 					$(UTILITIES_DIR)/helper.h \
 					$(UTILITIES_DIR)/define.h
 		$(dir_guard)
-		$(CC) $(CFLAGS) -c $(DELPHIC_DIR)/event.cpp -o $(BUILD_DIR)/event.o
+		$(CC) $(CFLAGS) -c $(DELPHIC_DIR)/pevent.cpp -o $(BUILD_DIR)/pevent.o
 
 $(BUILD_DIR)/pem.o: $(DELPHIC_DIR)/pem.cpp $(DELPHIC_DIR)/pem.h \
-					$(DELPHIC_DIR)/event.h \
+					$(DELPHIC_DIR)/pevent.h \
 					$(DELPHIC_DIR)/pem_store.h $(DELPHIC_DIR)/delphic_helper.h \
 					$(UTILITIES_DIR)/helper.h \
 					$(UTILITIES_DIR)/define.h
@@ -292,14 +292,14 @@ $(BUILD_DIR)/pem.o: $(DELPHIC_DIR)/pem.cpp $(DELPHIC_DIR)/pem.h \
 
 $(BUILD_DIR)/pem_store.o: $(DELPHIC_DIR)/pem_store.cpp $(DELPHIC_DIR)/pem_store.h \
 					      $(DELPHIC_DIR)/pem.h \
-						  $(DELPHIC_DIR)/event.h \
+						  $(DELPHIC_DIR)/pevent.h \
 					      $(UTILITIES_DIR)/define.h
 		$(dir_guard)
 		$(CC) $(CFLAGS) -c $(DELPHIC_DIR)/pem_store.cpp -o $(BUILD_DIR)/pem_store.o
 		
 $(BUILD_DIR)/pem_parser.o: $(DELPHIC_DIR)/pem_parser.cpp $(DELPHIC_DIR)/pem_parser.h \
 					      $(DELPHIC_DIR)/pem.h \
-						  $(DELPHIC_DIR)/event.h \
+						  $(DELPHIC_DIR)/pevent.h \
 					      $(DELPHIC_DIR)/pem_store.h \
 					      $(UTILITIES_DIR)/define.h
 		$(dir_guard)

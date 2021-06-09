@@ -369,26 +369,26 @@ enum e_meta_condition
     none
 };
 
-class event;
+class pevent;
 typedef short event_id;
 //typedef std::map<fluent, belief_formula> event_postconditions;
 typedef std::set<e_meta_condition> event_metacond;
 typedef fluent_formula event_postconditions;
 
 
-class event_ptr;
-typedef std::set<event_ptr> event_ptr_set; /**< \brief A set of \ref event_ptr.
+class pevent_ptr;
+typedef std::set<pevent_ptr> event_ptr_set; /**< \brief A set of \ref pevent_ptr.
 //                                        *
-//                                        * Mainly used to store all the reachable \ref event of a \ref event without wasting memory.
+//                                        * Mainly used to store all the reachable \ref pevent of a \ref pevent without wasting memory.
 //                                        *
 //                                        * \todo The operator < for std::shared_ptr must be implemented.
-//                                        * @see event.*/
+//                                        * @see pevent.*/
 
 // PEMS
 class pem;
 typedef short pem_id;
 
-//typedef std::pair<event_ptr, event_ptr> pem_edge;
+//typedef std::pair<pevent_ptr, pevent_ptr> pem_edge;
 typedef short agent_group;
 //typedef std::map<agent_group, std::set<pem_edge>> pem_edges;
 
@@ -415,28 +415,28 @@ typedef short agent_group;
 //    ALL /** \brief All agents */
 //};
 
-/**< \brief A map between agents and a set of pairs of \ref event_ptr.
+/**< \brief A map between agents and a set of pairs of \ref pevent_ptr.
  *
- * Each element consists of <\ref agent, <\ref event_ptr, \ref event_ptr>> and
- * specifies for each \ref agent_type a set of pairs of \ref event_ptr (i.e.,
+ * Each element consists of <\ref agent, <\ref pevent_ptr, \ref pevent_ptr>> and
+ * specifies for each \ref agent_type a set of pairs of \ref pevent_ptr (i.e.,
  * a set of edges.
  *
- * @see event.*/
+ * @see pevent.*/
 
-//typedef std::map<event_id, event_ptr> pem_map; /**< \brief A map that stores the event model for a given type of action (identified through an id).*/
+//typedef std::map<event_id, pevent_ptr> pem_map; /**< \brief A map that stores the pevent model for a given type of action (identified through an id).*/
 
 class pem_ptr;
 typedef std::set<pem_ptr> pem_ptr_set;
 
 typedef std::map<agent_group, event_ptr_set> event_map;
-typedef std::map<event_ptr, event_map> pem_edges;
+typedef std::map<pevent_ptr, event_map> pem_edges;
 
-typedef std::map<std::pair<pworld_ptr, event_ptr>, pworld_ptr> update_map;
+typedef std::map<std::pair<pworld_ptr, pevent_ptr>, pworld_ptr> update_map;
 
 typedef std::map<agent, agent_group> agent_group_map;
 
 class pem_store;
-typedef std::set<event> event_set; /**< \brief A set of \ref event, used to store all the created ones.*/
+typedef std::set<pevent> event_set; /**< \brief A set of \ref pevent, used to store all the created ones.*/
 typedef std::set<pem> pem_set; /**< \brief A set of \ref pem, used to store all the created ones.*/
 
 /****************** Bisimulation *******************/

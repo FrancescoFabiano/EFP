@@ -3,7 +3,7 @@
  *
  * \details  A PEM is a representation for actions in epistemic planning
  *
- * @see action and event.
+ * @see action and pevent.
  *
  * \copyright GNU Public License.
  *
@@ -27,7 +27,7 @@ private:
      * @see pem_store and agent.*/
     pem_edges m_edges;
 
-    /** \brief The id of the pointed event of *this*.*/
+    /** \brief The id of the pointed pevent of *this*.*/
     event_id m_pointed_id;
 
 
@@ -227,9 +227,9 @@ public:
      * @return the \ref pem_id of *this*.*/
     event_id get_pointed_id() const;
 
-    /** \brief Function that return the field m_edges of the pointed \ref event.
+    /** \brief Function that return the field m_edges of the pointed \ref pevent.
      *
-     * @return the \ref m_edges of the \ref event pointed by \ref m_ptr.*/
+     * @return the \ref m_edges of the \ref pevent pointed by \ref m_ptr.*/
     const pem_edges& get_edges() const;
 
     /**

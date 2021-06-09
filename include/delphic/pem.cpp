@@ -9,7 +9,7 @@
  */
 
 #include "pem.h"
-#include "event.h"
+#include "pevent.h"
 #include "pem_store.h"
 
 pem::pem()
@@ -91,7 +91,7 @@ bool pem::operator=(const pem & to_copy)
 
 void pem::print() const
 {
-	std::cout << "\nModel (" << get_id() << ") has pointed event: " << get_pointed_id() << " and edges: ";
+	std::cout << "\nModel (" << get_id() << ") has pointed pevent: " << get_pointed_id() << " and edges: ";
 
 //	for (auto it_fl = m_edges.begin(); it_fl != m_edges.end(); ++it_fl) {
 //		for (auto it_edge = it_fl->second.begin(); it_edge != it_fl->second.end(); ++it_edge) {
