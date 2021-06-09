@@ -187,7 +187,7 @@ void pem_parser::parse_edges_list(const std::string & line, pem_edges & edges)
 
 void pem_parser::parse()
 {
-	std::string filename = "include/delphic/marho_pem.txt";
+	std::string filename = "include/update/marho_pem.txt";
 	std::cout << "\nTesting the generation of Event Models starting from the file: " << filename << std::endl;
 	std::ifstream pem_file(filename);
 

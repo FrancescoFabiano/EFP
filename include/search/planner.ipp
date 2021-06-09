@@ -8,8 +8,8 @@
  */
 #include <algorithm>
 #include "planner.h"
-#include "../delphic/delphic_helper.h"
-#include "../delphic/pem_store.h"
+#include "../delphic/union_update.h"
+#include "../actions/pem_store.h"
 
 template <class T>
 void planner<T>::print_results(std::chrono::duration<double> elapsed_seconds, T goal, bool results_file, bool givenplan, search_type used_search, heuristics used_heur)
@@ -156,7 +156,7 @@ bool planner<T>::search_BFS(bool results_file)
 	
 	//DEBUGGGGGG
 	pem_store::get_instance().generate("Debug");
-	delphic_helper::union_update(initial.get_representation(), *actions.begin());
+	union_update::u_update(initial.get_representation(), *actions.begin());
 	return 0;
 	//END
 

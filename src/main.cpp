@@ -17,7 +17,7 @@
 #include "../include/search/planner.ipp"
 
 #include "../include/utilities/asp_maker.h"
-#include "../include/delphic/pem_store.h"
+#include "../include/actions/pem_store.h"
 
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>

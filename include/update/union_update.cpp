@@ -1,5 +1,5 @@
 /**
- * \brief Implementation of \ref delphic_helper.h.
+ * \brief Implementation of \ref union_update.h.
  *
  * \copyright GNU Public License.
  *
@@ -7,13 +7,13 @@
  * \date April 29, 2021
  */
 
-#include "delphic_helper.h"
+#include "union_update.h"
 #include "../utilities/helper_t.ipp"
-#include "pevent.h"
-#include "pem.h"
-#include "pem_store.h"
+#include "../actions/pevent.h"
+#include "../actions/pem.h"
+#include "../actions/pem_store.h"
 
-pem_ptr delphic_helper::build_pem(const action & act)
+pem_ptr union_update::build_pem(const action & act)
 {
 	pem_id p_id;
 	switch ( act.get_type() ) {
@@ -39,16 +39,16 @@ pem_ptr delphic_helper::build_pem(const action & act)
 
 }
 
-agent_group_map delphic_helper::build_agent_group_map()
+agent_group_map union_update::build_agent_group_map()
 {
     agent_group_map a_map;
     return a_map;
 }
 
-const pstate & delphic_helper::union_update(const pstate & state, const action & act)
+const pstate & union_update::u_update(const pstate & state, const action & act)
 {
     pstate ret;
-    pem_ptr pem = delphic_helper::build_pem(act);
+    pem_ptr pem = union_update::build_pem(act);
     pworld_ptr p_pw = state.get_pointed();
     pevent_ptr p_ev = pem_store::get_instance().get_event(pem.get_pointed_id());
     update_map u_map;
@@ -59,13 +59,13 @@ const pstate & delphic_helper::union_update(const pstate & state, const action &
         return ret;
     }
 
-    pworld_ptr new_pointed = union_update_helper(ret, state, act, pem, p_pw, p_ev, u_map, a_map);
+    pworld_ptr new_pointed = u_update_helper(ret, state, act, pem, p_pw, p_ev, u_map, a_map);
     ret.set_pointed(new_pointed);
 
     return ret;
 }
 
-const pworld_ptr & delphic_helper::union_update_helper(pstate & ret, const pstate & state, const action & act, const pem_ptr & pem, const pworld_ptr & pw, const pevent_ptr & ev, update_map & u_map, const agent_group_map & a_map)
+const pworld_ptr & union_update::u_update_helper(pstate & ret, const pstate & state, const action & act, const pem_ptr & pem, const pworld_ptr & pw, const pevent_ptr & ev, update_map & u_map, const agent_group_map & a_map)
 {
     if (ev.get_meta_precondition().find(e_meta_condition::none) != ev.get_meta_precondition().end() && ev.get_ontic_change()) {
         u_map.insert(update_map::value_type({pw, ev}, pw));
@@ -109,7 +109,7 @@ const pworld_ptr & delphic_helper::union_update_helper(pstate & ret, const pstat
                             for (it_evs = it_evm->second.begin(); it_evs != it_evm->second.end(); it_evs++) {
                                 if (u_map.find({*it_pws, *it_evs}) == u_map.end() &&
                                         state.entails(get_total_pre(state, act, *it_evs), *it_pws)) {
-                                    pworld_ptr believed_pw = union_update_helper(ret, state, act, pem, *it_pws, *it_evs, u_map, a_map);
+                                    pworld_ptr believed_pw = u_update_helper(ret, state, act, pem, *it_pws, *it_evs, u_map, a_map);
                                     ret.add_edge(new_pw, believed_pw, ag);
                                 }
                             }
@@ -122,18 +122,19 @@ const pworld_ptr & delphic_helper::union_update_helper(pstate & ret, const pstat
     return new_pw;
 }
 
-const kstate & delphic_helper::union_update(const kstate & state, const action & act)
+// todo: to remove
+const kstate & union_update::u_update(const kstate & state, const action & act)
 {
 	std::cerr << "\nError: Union update not yet implmente for Kripke structures\n";
 	exit(1);
 }
 
-const pworld & delphic_helper::world_cartesian_product(const pworld & world, const pevent_ptr & e)
+const pworld & union_update::world_cartesian_product(const pworld & world, const pevent_ptr & e)
 {
 	return world;
 }
 
-fluent_formula delphic_helper::get_total_effects(const pstate & state, const action & act, const pevent_ptr & e)
+fluent_formula union_update::get_total_effects(const pstate & state, const action & act, const pevent_ptr & e)
 {
     fluent_formula action_eff = helper::get_effects_if_entailed(act.get_effects(), state);
 	auto meta_post = e.get_meta_postconditions();
@@ -163,7 +164,7 @@ fluent_formula delphic_helper::get_total_effects(const pstate & state, const act
 	//Need to insert the merge with specific postcondition
 }
 
-formula_list delphic_helper::get_total_pre(const pstate & state, const action & act, const pevent_ptr & e)
+formula_list union_update::get_total_pre(const pstate & state, const action & act, const pevent_ptr & e)
 {
 
 	formula_list ret;

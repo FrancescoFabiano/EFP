@@ -17,7 +17,7 @@
 #include "../states/possibilities/pstate.h"
 #include "../utilities/define.h"
 
-class delphic_helper
+class union_update
 {
 public:
     /** \brief Calculates the PEM relative to the \ref action description and the current \ref pstate.
@@ -32,10 +32,10 @@ public:
      * @param [in] state: the current \ref pstate.
      * @param [in] e: the \ref pem to apply.
      * @return the updated \ref pstate.*/
-    static const pstate & union_update(const pstate & state, const action & act);
-    static const pworld_ptr & union_update_helper(pstate & ret, const pstate & state, const action & act, const pem_ptr & pem, const pworld_ptr & pw, const pevent_ptr & ev, update_map & u_map, const agent_group_map & a_map);
-
-    static const kstate & union_update(const kstate & state, const action & act);
+    static const pstate & u_update(const pstate & state, const action & act);
+    static const pworld_ptr & u_update_helper(pstate & ret, const pstate & state, const action & act, const pem_ptr & pem, const pworld_ptr & pw, const pevent_ptr & ev, update_map & u_map, const agent_group_map & a_map);
+    // todo: to remove
+    static const kstate & u_update(const kstate & state, const action & act);
 
 
     //Francesco: addition
