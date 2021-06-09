@@ -24,7 +24,9 @@ public:
      *
      * @param [in] act: the \ref action description.
      * @return the resulting \ref pem.*/
-    static pem_ptr get_pem(const action & act);
+    static pem_ptr build_pem(const action & act);
+
+    static agent_group_map build_agent_group_map();
     /** \brief Calculates the \ref pstate resulting from the given current \ref pstate and \ref pem.
      *
      * @param [in] state: the current \ref pstate.

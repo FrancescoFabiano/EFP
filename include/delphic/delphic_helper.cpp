@@ -13,7 +13,7 @@
 #include "pem.h"
 #include "pem_store.h"
 
-pem_ptr delphic_helper::get_pem(const action & act)
+pem_ptr delphic_helper::build_pem(const action & act)
 {
 	pem_id p_id;
 	switch ( act.get_type() ) {
@@ -39,6 +39,12 @@ pem_ptr delphic_helper::get_pem(const action & act)
 
 }
 
+agent_group_map delphic_helper::build_agent_group_map()
+{
+    agent_group_map a_map;
+    return a_map;
+}
+
 const pstate & delphic_helper::union_update(const pstate & state, const action & act)
 {
     pstate ret;
@@ -57,29 +63,6 @@ const pstate & delphic_helper::union_update(const pstate & state, const action &
     ret.set_pointed(new_pointed);
 
     return ret;
-/*	//DEBUG
-	event_id e_id = 2;
-	event_ptr event = pem_store::get_instance().get_event(e_id);
-	std::cerr << "\nPrinting Action " << act.get_name() << " x Event " << e_id << "!\n";
-	std::cerr << "*******Action*******";
-	act.print();
-	std::cerr << "\n*******Event*******";
-	event.print();
-	auto entailed_eff = helper::get_effects_if_entailed(act.get_effects(), state);
-
-	std::cerr << "*******Effects*******\n";
-	printer::get_instance().print_list(entailed_eff);
-	std::cerr << "\n********************\n";
-
-	std::cerr << "Real Preconditions (in the initial state): ";
-	printer::get_instance().print_list(delphic_helper::get_total_pre(act.get_executability(), entailed_eff, event));
-	std::cerr << "\nReal Postconditions (in the initial state): ";
-	printer::get_instance().print_list(delphic_helper::get_total_effects(entailed_eff, event));
-
-
-
-
-	return state;*/
 }
 
 const pworld_ptr & delphic_helper::union_update_helper(pstate & ret, const pstate & state, const action & act, const pem_ptr & pem, const pworld_ptr & pw, const event_ptr & ev, update_map & u_map, const agent_group_map & a_map)
