@@ -377,7 +377,7 @@ typedef fluent_formula event_postconditions;
 
 
 class event_ptr;
-//typedef std::set<event_ptr> event_ptr_set; /**< \brief A set of \ref event_ptr.
+typedef std::set<event_ptr> event_ptr_set; /**< \brief A set of \ref event_ptr.
 //                                        *
 //                                        * Mainly used to store all the reachable \ref event of a \ref event without wasting memory.
 //                                        *
@@ -388,9 +388,9 @@ class event_ptr;
 class pem;
 typedef short pem_id;
 
-typedef std::pair<event_ptr, event_ptr> pem_edge;
+//typedef std::pair<event_ptr, event_ptr> pem_edge;
 typedef short agent_group;
-typedef std::map<agent_group, std::set<pem_edge> > pem_edges;
+//typedef std::map<agent_group, std::set<pem_edge>> pem_edges;
 
 //enum action_type
 //{
@@ -426,6 +426,14 @@ typedef std::map<agent_group, std::set<pem_edge> > pem_edges;
 //typedef std::map<event_id, event_ptr> pem_map; /**< \brief A map that stores the event model for a given type of action (identified through an id).*/
 
 class pem_ptr;
+typedef std::set<pem_ptr> pem_ptr_set;
+
+typedef std::map<agent_group, event_ptr_set> event_map;
+typedef std::map<event_ptr, event_map> pem_edges;
+
+typedef std::map<std::pair<pworld_ptr, event_ptr>, pworld_ptr> update_map;
+
+typedef std::map<agent, agent_group> agent_group_map;
 
 class pem_store;
 typedef std::set<event> event_set; /**< \brief A set of \ref event, used to store all the created ones.*/

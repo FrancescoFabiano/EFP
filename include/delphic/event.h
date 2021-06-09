@@ -25,7 +25,8 @@ private:
 
     /** \brief The precondition of *this*.*/
     formula_list m_pre;
-    /** \brief The list of fluents (fluent formula to alow or but not yet considered) to be imposed in the state updated with this event that associates a belief formula (postcondition) to each \ref fluent.*/
+    /** \brief The list of fluents (fluent formula to allow or but not yet considered) to be imposed
+     * in the state updated with this event that associates a belief formula (postcondition) to each \ref fluent.*/
     event_postconditions m_post;
 
     /** \brief The 'meta' precondition of *this*.*/

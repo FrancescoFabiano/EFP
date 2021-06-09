@@ -243,17 +243,17 @@ bool pstate::entails(const belief_formula & bf, const pworld_ptr & world) const
 	return false;
 }
 
-//bool pstate::entails(const formula_list & to_check, const pworld_ptr & world) const
-//{
-//	//formula_list expresses CNF formula
-//	formula_list::const_iterator it_fl;
-//	for (it_fl = to_check.begin(); it_fl != to_check.end(); it_fl++) {
-//		if (!entails(*it_fl, world)) {
-//			return false;
-//		}
-//	}
-//	return true;
-//}
+bool pstate::entails(const formula_list & to_check, const pworld_ptr & world) const
+{
+	//formula_list expresses CNF formula
+	formula_list::const_iterator it_fl;
+	for (it_fl = to_check.begin(); it_fl != to_check.end(); it_fl++) {
+		if (!entails(*it_fl, world)) {
+			return false;
+		}
+	}
+	return true;
+}
 
 const pworld_ptr_set pstate::get_B_reachable_worlds(agent ag, const pworld_ptr & world) const
 {

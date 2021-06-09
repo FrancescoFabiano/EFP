@@ -122,27 +122,38 @@ void pem_parser::parse_edge(const std::string & edge, pem_edges & edges)
 	std::istringstream args(cleaned);
 	std::string sub_arg;
 
-	pem_edge e_to_add;
-	agent_group e_to_add_ag;
+	args >> sub_arg;
+	event_ptr first = pem_store::get_instance().get_event(boost::lexical_cast<event_id>(sub_arg));
 
 	args >> sub_arg;
-	e_to_add.first = pem_store::get_instance().get_event(boost::lexical_cast<event_id>(sub_arg));
+    event_ptr second = pem_store::get_instance().get_event(boost::lexical_cast<event_id>(sub_arg));
 
 	args >> sub_arg;
+    agent_group e_to_add_ag = pem_store::get_instance().get_agent_group(sub_arg);
 
-	e_to_add.second = pem_store::get_instance().get_event(boost::lexical_cast<event_id>(sub_arg));
+    auto it_eve = edges.find(first);
 
-	args >> sub_arg;
-	e_to_add_ag = pem_store::get_instance().get_agent_group(sub_arg);
+    if (it_eve != edges.end()) {
+        event_map e_map = it_eve->second;
+        auto it_evm = e_map.find(e_to_add_ag);
 
-	if (edges.find(e_to_add_ag) != edges.end()) {
-		edges[e_to_add_ag].insert(e_to_add);
-	} else {
-		std::set<pem_edge> tmp_set;
-		tmp_set.insert(e_to_add);
-		edges.insert(std::pair<agent_group, std::set<pem_edge> >(e_to_add_ag, tmp_set));
-	}
-
+        if (it_evm != e_map.end()) {
+            it_evm->second.insert(second);
+        } else {
+            e_map.insert(event_map::value_type(e_to_add_ag, {second}));
+        }
+    } else {
+        event_map tmp;
+        tmp.insert(event_map::value_type(e_to_add_ag, {second}));
+        edges.insert(pem_edges ::value_type(first, tmp));
+    }
+//	if (edges.find(e_to_add_ag) != edges.end()) {
+//		edges[e_to_add_ag].insert(e_to_add);
+//	} else {
+//		std::set<pem_edge> tmp_set;
+//		tmp_set.insert(e_to_add);
+//		edges.insert(std::pair<agent_group, std::set<pem_edge> >(e_to_add_ag, tmp_set));
+//	}
 }
 
 void pem_parser::parse_edges_list(const std::string & line, pem_edges & edges)

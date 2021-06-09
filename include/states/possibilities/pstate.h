@@ -45,18 +45,6 @@ private:
      * @see pworld.*/
     pworld_transitive_map m_beliefs;
 
-    /** \brief Function that checks the entailment of a \ref formula_list (CNF of \ref belief_formula).
-     * 
-     * 
-     * @param[in] to_check: the \ref formula_list that has to be checked if entailed starting from from \p world.
-     * @param[in] world: the pointer to the \ref pworld where to start to check the entailment.
-     *
-     * @return true: \p to_check is entailed starting from \p world;
-     * @return false: \p -to_check is entailed starting from \p world.
-     * 
-     * \todo self-loop?*/
-    //bool entails(const formula_list & to_check, const pworld_ptr & world) const;
-
     /** \brief Function that returns all the reachable \ref pworld given the \ref agent and the staring \ref pworld.
      * 
      * This function finds all the world that are transitively reachable from the starting world following
@@ -214,14 +202,6 @@ private:
      * @param[in] to_check: the \ref belief_formula to check.*/
     void remove_initial_pedge_bf(const belief_formula &to_check);
 
-    void add_world(const pworld & to_add);
-
-    /** \brief Function that adds the belief of agent "ag" for the \ref pworld "pw" *this*.
-     *
-     * @param[in] from: the \ref pworld in which \ref agent "ag" currently is
-     * @param[in] to: the \ref pworld believed from \ref agent "ag"
-     * @param[in] ag: the \ref agent.*/
-    void add_edge(const pworld_ptr & from, const pworld_ptr & to, agent ag);
     /** \brief Function that adds the given beliefs to the \ref pworld "world".
      *
      * @param[in] world: the \ref pworld.
@@ -482,6 +462,26 @@ public:
      *
      * \todo self-loop?*/
     bool entails(const belief_formula & to_check, const pworld_ptr_set & worlds) const;
+    /** \brief Function that checks the entailment of a \ref formula_list (CNF of \ref belief_formula).
+     *
+     *
+     * @param[in] to_check: the \ref formula_list that has to be checked if entailed starting from from \p world.
+     * @param[in] world: the pointer to the \ref pworld where to start to check the entailment.
+     *
+     * @return true: \p to_check is entailed starting from \p world;
+     * @return false: \p -to_check is entailed starting from \p world.
+     *
+     * \todo self-loop?*/
+    bool entails(const formula_list & to_check, const pworld_ptr & world) const;
+
+    void add_world(const pworld & to_add);
+
+    /** \brief Function that adds the belief of agent "ag" for the \ref pworld "pw" *this*.
+     *
+     * @param[in] from: the \ref pworld in which \ref agent "ag" currently is
+     * @param[in] to: the \ref pworld believed from \ref agent "ag"
+     * @param[in] ag: the \ref agent.*/
+    void add_edge(const pworld_ptr & from, const pworld_ptr & to, agent ag);
 
     /** \brief Function that adds a \ref pworld to the Kripke structure represented by *this*.
      *
