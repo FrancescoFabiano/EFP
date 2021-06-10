@@ -774,7 +774,7 @@ void pstate::maintain_oblivious_believed_pworlds(pstate &ret, const agent_set & 
 pworld_ptr pstate::execute_ontic_helper(const action &act, pstate &ret, const pworld_ptr &current_pw, transition_map &calculated, agent_set & oblivious_obs_agents) const
 {
 	// Execute the all the effects
-	fluent_formula current_pw_effects = helper::get_effects_if_entailed(act.get_effects(), *this);
+	fluent_formula current_pw_effects = helper_t::get_effects_if_entailed(act.get_effects(), *this);
 	fluent_set world_description = current_pw.get_fluent_set();
 	fluent_formula::const_iterator it_eff;
 
@@ -852,7 +852,7 @@ pstate pstate::execute_ontic(const action & act) const
 	//This finds all the worlds that are reachable from the initial state following
 	//the edges labeled with fully observant agents.
 	agent_set agents = domain::get_instance().get_agents();
-	agent_set fully_obs_agents = helper::get_agents_if_entailed(act.get_fully_observants(), *this);
+	agent_set fully_obs_agents = helper_t::get_agents_if_entailed(act.get_fully_observants(), *this);
 
 	agent_set oblivious_obs_agents = agents;
     helper_t::minus_set<agent>(oblivious_obs_agents, fully_obs_agents);
@@ -931,8 +931,8 @@ pstate pstate::execute_sensing(const action & act) const
 	//This finds all the worlds that are reachable from the initial state following
 	//the edges labeled with fully observant agents.
 	agent_set agents = domain::get_instance().get_agents();
-	agent_set fully_obs_agents = helper::get_agents_if_entailed(act.get_fully_observants(), *this);
-	agent_set partially_obs_agents = helper::get_agents_if_entailed(act.get_partially_observants(), *this);
+	agent_set fully_obs_agents = helper_t::get_agents_if_entailed(act.get_fully_observants(), *this);
+	agent_set partially_obs_agents = helper_t::get_agents_if_entailed(act.get_partially_observants(), *this);
 
 	agent_set oblivious_obs_agents = agents;
 	helper_t::minus_set<agent>(oblivious_obs_agents, fully_obs_agents);
@@ -945,7 +945,7 @@ pstate pstate::execute_sensing(const action & act) const
 	transition_map calculated; // A map that links the pworlds of *this* to the corresponding ones of ret
 	maintain_oblivious_believed_pworlds(ret, oblivious_obs_agents);
 
-	fluent_formula effects = helper::get_effects_if_entailed(act.get_effects(), *this);
+	fluent_formula effects = helper_t::get_effects_if_entailed(act.get_effects(), *this);
 
 	pworld_ptr new_pointed = execute_sensing_announcement_helper(effects, ret, get_pointed(), calculated, partially_obs_agents, oblivious_obs_agents, entails(effects));
 	ret.set_pointed(new_pointed); // Updating the pointed world
@@ -2385,8 +2385,8 @@ pstate pstate::execute_sensing_att(const action & act) const
 	//This finds all the worlds that are reachable from the initial state following
 	//the edges labeled with fully observant agents.
 	agent_set agents = domain::get_instance().get_agents();
-	agent_set fully_obs_agents = helper::get_agents_if_entailed(act.get_fully_observants(), *this);
-	agent_set partially_obs_agents = helper::get_agents_if_entailed(act.get_partially_observants(), *this);
+	agent_set fully_obs_agents = helper_t::get_agents_if_entailed(act.get_fully_observants(), *this);
+	agent_set partially_obs_agents = helper_t::get_agents_if_entailed(act.get_partially_observants(), *this);
 
 	agent_set oblivious_obs_agents = agents;
 	helper_t::minus_set<agent>(oblivious_obs_agents, fully_obs_agents);
@@ -2424,7 +2424,7 @@ pstate pstate::execute_sensing_att(const action & act) const
 	transition_map_att calculated; // A map that links the pworlds of *this* to the corresponding ones of ret
 	maintain_oblivious_believed_pworlds(ret, oblivious_obs_agents);
 
-	fluent_formula effects = helper::get_effects_if_entailed(act.get_effects(), *this);
+	fluent_formula effects = helper_t::get_effects_if_entailed(act.get_effects(), *this);
 
 	////std::cerr << "\nDEBUG: Reached Sensing 2\n";
 
@@ -2463,8 +2463,8 @@ pstate pstate::execute_announcement_att(const action & act) const
 	//This finds all the worlds that are reachable from the initial state following
 	//the edges labeled with fully observant agents.
 	agent_set agents = domain::get_instance().get_agents();
-	agent_set fully_obs_agents = helper::get_agents_if_entailed(act.get_fully_observants(), *this);
-	agent_set partially_obs_agents = helper::get_agents_if_entailed(act.get_partially_observants(), *this);
+	agent_set fully_obs_agents = helper_t::get_agents_if_entailed(act.get_fully_observants(), *this);
+	agent_set partially_obs_agents = helper_t::get_agents_if_entailed(act.get_partially_observants(), *this);
 
 	agent_set oblivious_obs_agents = agents;
 	helper_t::minus_set<agent>(oblivious_obs_agents, fully_obs_agents);
@@ -2510,7 +2510,7 @@ pstate pstate::execute_announcement_att(const action & act) const
 	transition_map_att calculated; // A map that links the pworlds of *this* to the corresponding ones of ret
 	maintain_oblivious_believed_pworlds(ret, oblivious_obs_agents);
 
-	fluent_formula effects = helper::get_effects_if_entailed(act.get_effects(), *this);
+	fluent_formula effects = helper_t::get_effects_if_entailed(act.get_effects(), *this);
 
 	if (effects.size() == 1) {
 		if (effects.begin()->size() == 1) {
@@ -2623,8 +2623,8 @@ pstate pstate::execute_announcement_dox(const action & act) const
 	//This finds all the worlds that are reachable from the initial state following
 	//the edges labeled with fully observant agents.
 	agent_set agents = domain::get_instance().get_agents();
-	agent_set fully_obs_agents = helper::get_agents_if_entailed(act.get_fully_observants(), *this);
-	agent_set partially_obs_agents = helper::get_agents_if_entailed(act.get_partially_observants(), *this);
+	agent_set fully_obs_agents = helper_t::get_agents_if_entailed(act.get_fully_observants(), *this);
+	agent_set partially_obs_agents = helper_t::get_agents_if_entailed(act.get_partially_observants(), *this);
 
 	agent_set oblivious_obs_agents = agents;
 	helper_t::minus_set<agent>(oblivious_obs_agents, fully_obs_agents);
@@ -2637,7 +2637,7 @@ pstate pstate::execute_announcement_dox(const action & act) const
 	transition_map calculated; // A map that links the pworlds of *this* to the corresponding ones of ret
 	maintain_oblivious_believed_pworlds(ret, oblivious_obs_agents);
 
-	fluent_formula effects = helper::get_effects_if_entailed(act.get_effects(), *this);
+	fluent_formula effects = helper_t::get_effects_if_entailed(act.get_effects(), *this);
 
 	bool implications = true;
 	if (fully_obs_agents.size() == 0) {

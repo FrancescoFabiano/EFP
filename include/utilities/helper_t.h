@@ -12,6 +12,8 @@
 
 #pragma once
 
+#include "../states/state_T.h"
+
 class helper_t {
 public:
     /** \brief Function that return the sum_set of the two parameters by modifying the first one.
@@ -28,4 +30,10 @@ public:
      * @param[in] factor2: the set to remove from \p to_modify.*/
     template <class T>
     static void minus_set(std::set<T> & to_modify, const std::set<T> & factor2);
+
+    template <class T>
+    static agent_set get_agents_if_entailed(const observability_map& map, const T & s);
+
+    template <class T>
+    static fluent_formula get_effects_if_entailed(const effects_map & map, const T & s);
 };
