@@ -112,19 +112,6 @@ private:
      * \todo self-loop?*/
     bool entails(const belief_formula & to_check, const kworld_ptr_set & worlds) const;
 
-
-    /** \brief Function that checks the entailment of a \ref formula_list (CNF of \ref belief_formula).
-     * 
-     * 
-     * @param[in] to_check: the \ref formula_list that has to be checked if entailed starting from from \p world.
-     * @param[in] world: the pointer to the \ref kworld where to start to check the entailment.
-     *
-     * @return true: \p to_check is entailed starting from \p world;
-     * @return false: \p -to_check is entailed starting from \p world.
-     * 
-     * \todo self-loop?*/
-    bool entails(const formula_list & to_check, kworld_ptr world) const;
-
     /** \brief Function that returns all the reachable \ref kworld given the \ref agent and the staring \ref kworld.
      * 
      * This function finds all the world that are transitively reachable from the starting world following
@@ -579,6 +566,18 @@ public:
      * @return true: \p to_check is entailed in *this*;
      * @return false: \p -to_check is entailed in *this*.*/
     bool entails(const belief_formula & to_check) const;
+
+    /** \brief Function that checks the entailment of a \ref formula_list (CNF of \ref belief_formula).
+     *
+     *
+     * @param[in] to_check: the \ref formula_list that has to be checked if entailed starting from from \p world.
+     * @param[in] world: the pointer to the \ref kworld where to start to check the entailment.
+     *
+     * @return true: \p to_check is entailed starting from \p world;
+     * @return false: \p -to_check is entailed starting from \p world.
+     *
+     * \todo self-loop?*/
+    bool entails(const formula_list & to_check, kworld_ptr world) const;
 
     /** \brief Function that builds the initial Kripke structure given the initial conditions.
      *
