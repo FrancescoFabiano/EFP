@@ -8,7 +8,7 @@
  */
 #include <algorithm>
 #include "planner.h"
-#include "../delphic/union_update.h"
+#include "../update/union_update.h"
 #include "../actions/pem_store.h"
 
 template <class T>
