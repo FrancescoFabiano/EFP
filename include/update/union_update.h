@@ -13,6 +13,7 @@
 #pragma once
 
 #include "../states/kripke/kstate.h"
+#include "../states/state_T.h"
 
 #include "../states/possibilities/pstate.h"
 #include "../utilities/define.h"
@@ -33,13 +34,11 @@ public:
      * @param [in] e: the \ref pem to apply.
      * @return the updated \ref pstate.*/
     static const pstate & u_update(const pstate & state, const action & act);
-    static const pworld_ptr & u_update_helper(pstate & ret, const pstate & state, const action & act, const pem_ptr & pem, const pworld_ptr & pw, const pevent_ptr & ev, update_map & u_map, const agent_group_map & a_map);
-    // todo: to remove
+    static const pworld_ptr & u_update_helper(pstate & ret, const pstate & state, const action & act, const pem_ptr & pem, const pworld_ptr & pw, const pevent_ptr & ev, pupdate_map & u_map, const agent_group_map & a_map);
     static const kstate & u_update(const kstate & state, const action & act);
 
-
-    //Francesco: addition
-    static const pworld & world_cartesian_product(const pworld & world, const pevent_ptr & e);
-    static fluent_formula get_total_effects(const pstate & state, const action & act, const pevent_ptr & e);
-    static formula_list get_total_pre(const pstate & state, const action & act, const pevent_ptr & e);
+    template <class T>
+    static fluent_formula get_total_effects(const T & s, const action & act, const pevent_ptr & e);
+    template <class T>
+    static formula_list get_total_pre(const T & s, const action & act, const pevent_ptr & e);
 };

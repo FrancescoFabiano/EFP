@@ -51,7 +51,7 @@ const pstate & union_update::u_update(const pstate & state, const action & act)
     pem_ptr pem = union_update::build_pem(act);
     pworld_ptr p_pw = state.get_pointed();
     pevent_ptr p_ev = pem_store::get_instance().get_event(pem.get_pointed_id());
-    update_map u_map;
+    pupdate_map u_map;
     agent_group_map a_map;
 
     if (!state.entails(get_total_pre(state, act, p_ev), p_pw)) {
@@ -65,10 +65,10 @@ const pstate & union_update::u_update(const pstate & state, const action & act)
     return ret;
 }
 
-const pworld_ptr & union_update::u_update_helper(pstate & ret, const pstate & state, const action & act, const pem_ptr & pem, const pworld_ptr & pw, const pevent_ptr & ev, update_map & u_map, const agent_group_map & a_map)
+const pworld_ptr & union_update::u_update_helper(pstate & ret, const pstate & state, const action & act, const pem_ptr & pem, const pworld_ptr & pw, const pevent_ptr & ev, pupdate_map & u_map, const agent_group_map & a_map)
 {
     if (ev.get_meta_precondition().find(e_meta_condition::none) != ev.get_meta_precondition().end() && ev.get_ontic_change()) {
-        u_map.insert(update_map::value_type({pw, ev}, pw));
+        u_map.insert(pupdate_map::value_type({pw, ev}, pw));
         return pw;
     }
     
@@ -84,7 +84,7 @@ const pworld_ptr & union_update::u_update_helper(pstate & ret, const pstate & st
     }
 
     pworld_ptr new_pw = ret.add_rep_world(pworld(world_description), pw.get_repetition());
-    u_map.insert(update_map::value_type({pw, ev}, new_pw));
+    u_map.insert(pupdate_map::value_type({pw, ev}, new_pw));
 
     auto it_pwtm = state.get_beliefs().find(pw);
 
@@ -122,27 +122,105 @@ const pworld_ptr & union_update::u_update_helper(pstate & ret, const pstate & st
     return new_pw;
 }
 
-// todo: to remove
 const kstate & union_update::u_update(const kstate & state, const action & act)
 {
-	std::cerr << "\nError: Union update not yet implmente for Kripke structures\n";
-	exit(1);
+    kstate ret;
+    pem_ptr pem = union_update::build_pem(act); // <- event_model
+    kworld_ptr p_kw = state.get_pointed();
+    pevent_ptr p_ev = pem_store::get_instance().get_event(pem.get_pointed_id()); // <- event_model
+    kupdate_map u_map;
+    agent_group_map a_map;
+
+    if (!state.entails(get_total_pre(state, act, p_ev), p_kw)) {
+        std::cerr << "Action is not executable." << std::endl;
+        return ret;
+    }
+
+    kworld_ptr_set::const_iterator it_kws;
+    pem_edges::const_iterator it_eve;
+    fluent_formula::const_iterator it_eff;
+
+    fluent_set world_description;
+    fluent_formula effects;
+
+    for (it_kws = state.get_worlds().begin(); it_kws != state.get_worlds().end(); it_kws++) {
+        for (it_eve = pem.get_edges().begin(); it_eve != pem.get_edges().end(); it_eve++) {
+            if (state.entails(get_total_pre(state, act, it_eve->first), *it_kws)) {
+                world_description = it_kws->get_fluent_set();
+                // Execute the all the effects
+                if (it_eve->first.get_ontic_change()) {
+                    effects = get_total_effects(state, act, it_eve->first);
+
+                    for (it_eff = effects.begin(); it_eff != effects.end(); it_eff++) {
+                        helper::apply_effect(*it_eff, world_description);
+                    }
+                }
+
+                kworld_ptr new_kw = ret.add_rep_world(kworld(world_description), it_kws->get_repetition());
+                u_map.insert(kupdate_map::value_type({*it_kws, it_eve->first}, new_kw));
+
+                if (*it_kws == state.get_pointed() && it_eve->first.get_id() == pem.get_pointed_id()) {
+                    ret.set_pointed(new_kw);
+                }
+            }
+        }
+    }
+
+//    kupdate_map::const_iterator it_kum1, it_kum2;
+    kedge_ptr_set::const_iterator it_kes;
+    event_map::const_iterator it_evm;
+    event_ptr_set::const_iterator it_evs;
+
+    kworld_ptr kfirst, ksecond;
+    pevent_ptr efirst, esecond;
+
+    agent ag;
+
+    for (it_kes = state.get_edges().begin(); it_kes != state.get_edges().end(); it_kes++) {
+        kfirst = it_kes->get_from();
+        ksecond = it_kes->get_to();
+        ag = it_kes->get_label();
+
+        for (it_eve = pem.get_edges().begin(); it_eve != pem.get_edges().end(); it_eve++) {
+            efirst = it_eve->first;
+            auto kefirst = u_map.find({kfirst, efirst});
+
+            if (kefirst != u_map.end()) {
+                for (it_evm = it_eve->second.begin(); it_evm != it_eve->second.end(); it_evm++) {
+                    auto it_agm = a_map.find(ag);
+
+                    if (it_agm != a_map.end()) {
+                        for (it_evs = it_evm->second.begin(); it_evs != it_evm->second.end(); it_evs++) {
+                            esecond = *it_evs;
+
+                            auto kesecond = u_map.find({ksecond, esecond});
+
+                            if (kesecond != u_map.end()) {
+                                ret.add_edge(kedge(kefirst->second, kesecond->second, ag));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return ret;
+
+//	std::cerr << "\nError: Union update not yet implmente for Kripke structures\n";
+//	exit(1);
 }
 
-const pworld & union_update::world_cartesian_product(const pworld & world, const pevent_ptr & e)
+template <class T>
+fluent_formula union_update::get_total_effects(const T & s, const action & act, const pevent_ptr & e)
 {
-	return world;
-}
-
-fluent_formula union_update::get_total_effects(const pstate & state, const action & act, const pevent_ptr & e)
-{
-    fluent_formula action_eff = helper::get_effects_if_entailed(act.get_effects(), state);
+    fluent_formula action_eff = helper_t::get_effects_if_entailed(act.get_effects(), s);
 	auto meta_post = e.get_meta_postconditions();
 
 	if (meta_post.size() > 1) {
 		std::cerr << "Error: malformed action postcondition in pevent " << e.get_id() << std::endl;
 		exit(1);
-	} else if (meta_post.size() == 0) {
+	} else if (meta_post.empty()) {
 		fluent_formula empty;
 		return empty;
 	} else {
@@ -164,12 +242,12 @@ fluent_formula union_update::get_total_effects(const pstate & state, const actio
 	//Need to insert the merge with specific postcondition
 }
 
-formula_list union_update::get_total_pre(const pstate & state, const action & act, const pevent_ptr & e)
+template <class T>
+formula_list union_update::get_total_pre(const T & s, const action & act, const pevent_ptr & e)
 {
-
 	formula_list ret;
 	formula_list action_pre = act.get_executability();
-    fluent_formula action_eff = helper::get_effects_if_entailed(act.get_effects(), state);
+    fluent_formula action_eff = helper_t::get_effects_if_entailed(act.get_effects(), s);
 
 	auto meta_pre = e.get_meta_precondition();
 
@@ -188,7 +266,6 @@ formula_list union_update::get_total_pre(const pstate & state, const action & ac
 		case act_pre:
 			for (auto it_act_pre = action_pre.begin(); it_act_pre != action_pre.end(); ++it_act_pre) {
 				ret.push_back(*it_act_pre);
-				
 			}
 			break;
 		case none:
@@ -200,5 +277,4 @@ formula_list union_update::get_total_pre(const pstate & state, const action & ac
 	}
 
 	return ret;
-
 }

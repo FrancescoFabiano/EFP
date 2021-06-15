@@ -301,16 +301,6 @@ private:
      * @param[in] repetition: the number of copy -1 that are certainly already in *this*, maybe there are more.
     void add_copy_world(const kworld & to_add, unsigned short repetition);*/
 
-    /** \brief Function that adds a \ref kedge to the Kripke structure represented by *this*.
-     *
-     * The \ref kedge is added. The structure only stores the pointer to the \ref kedge so
-     * it is necessary to store the \ref kedge in \ref kstore.
-     * 
-     * @see kedge and kstore.
-     *  
-     * @param[in] to_add: the \ref kedge that has to be added to *this*.*/
-    void add_edge(const kedge & to_add);
-
     /** \brief Function that return the set of \ref agent that entails the obs condition.
      *
      * @param[in] map: the map that contains the tuples to check for entailment.
@@ -514,6 +504,16 @@ public:
      * @param[out] is_new: used to inidcate if the world was already present in the *this*.
      * @return The a \ref kworld_ptr to the newly inserted \ref kworld.*/
     kworld_ptr add_rep_world(const kworld & to_add, unsigned short repetition, bool& is_new);
+
+    /** \brief Function that adds a \ref kedge to the Kripke structure represented by *this*.
+     *
+     * The \ref kedge is added. The structure only stores the pointer to the \ref kedge so
+     * it is necessary to store the \ref kedge in \ref kstore.
+     *
+     * @see kedge and kstore.
+     *
+     * @param[in] to_add: the \ref kedge that has to be added to *this*.*/
+    void add_edge(const kedge & to_add);
 
     /** \brief Function that checks the entailment of a \ref fluent in *this*.
      *

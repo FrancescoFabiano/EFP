@@ -431,7 +431,8 @@ typedef std::set<pem_ptr> pem_ptr_set;
 typedef std::map<agent_group, event_ptr_set> event_map;
 typedef std::map<pevent_ptr, event_map> pem_edges;
 
-typedef std::map<std::pair<pworld_ptr, pevent_ptr>, pworld_ptr> update_map;
+typedef std::map<std::pair<pworld_ptr, pevent_ptr>, pworld_ptr> pupdate_map;
+typedef std::map<std::pair<kworld_ptr, pevent_ptr>, kworld_ptr> kupdate_map;
 
 typedef std::map<agent, agent_group> agent_group_map;
 
