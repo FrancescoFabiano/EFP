@@ -156,7 +156,7 @@ const kstate & union_update::u_update(const kstate & state, const action & act)
                     }
                 }
 
-                kworld_ptr new_kw = ret.add_rep_world(kworld(world_description), it_kws->get_repetition());
+                kworld_ptr new_kw = ret.add_world(kworld(world_description));
                 u_map.insert(kupdate_map::value_type({*it_kws, it_eve->first}, new_kw));
 
                 if (*it_kws == state.get_pointed() && it_eve->first.get_id() == pem.get_pointed_id()) {
