@@ -1,8 +1,8 @@
 #include "bisimulation.h"
 
 /*\***IO_FC2.cpp****/
-void bisimulation::DisposeAutoma(automa *a)
-/* Rilascia la memoria allocata per l'automa */
+void bisimulation::DisposeAutoma(automaton *a)
+/* Rilascia la memoria allocata per l'automaton */
 {
 	BIS_indexType i, j, Nv, Ne;
 	v_elem *Vertex;
@@ -18,21 +18,21 @@ void bisimulation::DisposeAutoma(automa *a)
 	free(a);
 }
 
-void bisimulation::FillStructures(automa *A)
+void bisimulation::FillStructures(automaton *A)
 {
 	/*
-	    Questa funzione si occupa della trasformazione di un automa con i soli archi etichettati
+	    Questa funzione si occupa della trasformazione di un automaton con i soli archi etichettati
 	    in uno con i soli stati etichettati e dell'inizializzazione delle strutture dati X e Q
 	    che vengono utilizzate dalle procedure che eseguono gli algoritmi di PaigeTarjan e di
 	    FastBisimulation.
 	    La chiamata a "fill_structures" verra' effettuata alla fine di "LoadFromFC2", che
-	    memorizza in una struttura dati di tipo "automa" il grafo rappresentato all'interno del
+	    memorizza in una struttura dati di tipo "automaton" il grafo rappresentato all'interno del
 	    file .FC2 passatogli come input. Tale struttura dati verra' passata come argomento a
 	    "fill_structure" che la analizzera' e creera' un grafo equivalente con i soli stati
-	    etichettati. La struttura dati in cui tale automa viene memorizzato e' G, anch'essa
+	    etichettati. La struttura dati in cui tale automaton viene memorizzato e' G, anch'essa
 	    utilizzata dalle procedure che implementano PaigeTarjan e FastBisimulation.
 
-	    INPUT:      A, l'automa con soli archi etichettati che dev'essere convertito
+	    INPUT:      A, l'automaton con soli archi etichettati che dev'essere convertito
 
 	    OUTPUT:     nessuno (Gli array X, Q e G sono globali, quindi non e' stato necessario
 			ritornare alcunche' come output)
@@ -42,7 +42,7 @@ void bisimulation::FillStructures(automa *A)
 	BIS_indexType i;
 
 	// Inizializzazione della struttura dati X. Tale struttura dati avra' dimensione iniziale
-	// pari al numero totale di etichette presenti nell'automa. Ogni elemento dell'array X ha
+	// pari al numero totale di etichette presenti nell'automaton. Ogni elemento dell'array X ha
 	// un "puntatore" all'elemento precedente ed uno a quello successivo. L'elemento di indice
 	// 0 non avra' alcun elemento precedente e cio' verra' indicato dal valore BIS_NIL, cosi' come
 	// l'elemento di indice "A->Nbehavs" non avra' alcun elemento successivo.
@@ -235,14 +235,14 @@ void bisimulation::SetPointers(int n)
 	delete[] curr_node;
 }
 
-void bisimulation::GetMinimizedAutoma(automa *A)
+void bisimulation::GetMinimizedAutoma(automaton *A)
 {
 	/*
 	    Questa funzione crea, a partire dal grafo minimizzato (con soli stati etichettati) memorizzato
 	    in G e dal grafo iniziale A (con soli archi etichettati) passato come input, il grafo minimizzato
 	    con soli archi etichettati, che verra' salvato su un file .FC2 dalla funzione "SaveToFC2"
 
-	    INPUT:      A, l'automa di partenza con i soli archi etichettati
+	    INPUT:      A, l'automaton di partenza con i soli archi etichettati
 
 	    OUTPUT:     nessuno
 	 */
@@ -306,17 +306,17 @@ void bisimulation::MarkDeletedNodes()
 	}
 }
 
-void bisimulation::DeleteNodes(automa *A)
+void bisimulation::DeleteNodes(automaton *A)
 {
 	/*
 	    DeleteNodes si occupa di indicare quali tra gli stati del grafo di partenza A, passato come input,
 	    devono essere cancellati, considerando il campo "nextInBlock" degli elementi dell'array G, modificato
 	    dalla funzione "MarkDeletedNodes".
-	    L'automa A che viene modificato da questa funzione verra' successivamente passato come input alla
+	    L'automaton A che viene modificato da questa funzione verra' successivamente passato come input alla
 	    funzione "SaveToFC2" che capira' quali stati e quali archi debbano essere memorizzati nel file .FC2
 	    che produrra' come output.
 
-	    INPUT:      A, l'automa di partenza, con i soli archi etichettati
+	    INPUT:      A, l'automaton di partenza, con i soli archi etichettati
 
 	    OUTPUT:     nessuno
 	 */
@@ -324,7 +324,7 @@ void bisimulation::DeleteNodes(automa *A)
 	// Variabili
 	BIS_indexType i, j;
 
-	// Segno nell'automa A di partenza quali tra i suoi stati sono stati indicati come "BIS_DA_CANCELLARE"
+	// Segno nell'automaton A di partenza quali tra i suoi stati sono stati indicati come "BIS_DA_CANCELLARE"
 	// dalla funzione "MarkDeletedNodes"
 	for (i = 0; i < A->Nvertex; i++) {
 		// Se lo stato "i" dev'essere cancellato, ovvero se la funzione "MarkDeletedNodes" ha impostato
@@ -1775,7 +1775,7 @@ void bisimulation::FastBisimulationAlgorithm()
 	}
 }
 
-void bisimulation::VisAutoma(automa *a)
+void bisimulation::VisAutoma(automaton *a)
 {
 	int i, j, k;
 	v_elem *Vertex;
@@ -1798,7 +1798,7 @@ void bisimulation::VisAutoma(automa *a)
 	}
 }
 
-//void bisimulation::VisAutoma(automa *a)
+//void bisimulation::VisAutoma(automaton *a)
 //{
 //	int i, j, k;
 //	v_elem *Vertex;
@@ -1829,7 +1829,7 @@ void bisimulation::VisAutoma(automa *a)
 
 /*----------------------------------------------------------------------------*/
 
-bool bisimulation::MinimizeAutomaPT(automa *A)
+bool bisimulation::MinimizeAutomaPT(automaton *A)
 {
 	FillStructures(A);
 	// std::cerr << "\nDEBUG: [MinimizeAutomaPT] filled structures...\n";
@@ -1852,7 +1852,7 @@ bool bisimulation::MinimizeAutomaPT(automa *A)
 
 }
 
-bool bisimulation::MinimizeAutomaFB(automa *A)
+bool bisimulation::MinimizeAutomaFB(automaton *A)
 {
 	//std::cerr << "\nDEBUG: IN MINIMIZE\n" << std::flush;
 	FillStructures(A);
@@ -1880,14 +1880,14 @@ bisimulation::bisimulation()
 
 /*\***KRIPKE RELATED ONLY***/
 
-automa* bisimulation::merge_kstate_to_automaton(const kstate & ks1, const kstate & ks2, /*const std::map<kworld_ptr, kworld_ptr_set> & adj_list1, const std::map<kworld_ptr, kworld_ptr_set> & adj_list2,*/ int & root2, const std::map<agent, bis_label> & agent_to_label) const
+automaton* bisimulation::merge_kstate_to_automaton(const kstate & ks1, const kstate & ks2, /*const std::map<kworld_ptr, kworld_ptr_set> & adj_list1, const std::map<kworld_ptr, kworld_ptr_set> & adj_list2,*/ int & root2, const std::map<agent, bis_label> & agent_to_label) const
 {
 
 	std::map<int, int> compact_indices;
 	std::map<kworld_ptr, int> index_map1, index_map2;
 	kbislabel_map label_map1, label_map2; // Map: from -> (to -> ag_set)
 
-	automa *a;
+	automaton *a;
 	int Nvertex = ks1.get_worlds().size() + ks2.get_worlds().size();
 	int ag_set_size = domain::get_instance().get_agents().size();
 	//BIS_ADAPTATION For the loop that identifies the id (We add one edge for each node)
@@ -2009,7 +2009,7 @@ automa* bisimulation::merge_kstate_to_automaton(const kstate & ks1, const kstate
 
 	// Building the automaton
 	int Nbehavs = bhtabSize;
-	a = (automa *) malloc(sizeof(automa));
+	a = (automaton *) malloc(sizeof(automaton));
 	a->Nvertex = Nvertex;
 	a->Nbehavs = Nbehavs;
 	a->Vertex = Vertex;
@@ -2035,7 +2035,7 @@ bool bisimulation::compare_automata(const kstate & ks1, const kstate & ks2)
 	}
 	
 	// std::cerr << "\nDEBUG: Entering merge_automata...\n";
-	automa* a = merge_kstate_to_automaton(ks1, ks2, root2, agent_to_label);
+	automaton* a = merge_kstate_to_automaton(ks1, ks2, root2, agent_to_label);
 
 	if (a == nullptr) {
 		// std::cerr << "\nDEBUG: Returned null automaton...\n";
@@ -2083,7 +2083,7 @@ bool bisimulation::compare_automata_eq(const kstate & ks1, const kstate & ks2)
 	}
 
 	// std::cerr << "\nDEBUG: Entering merge_automata...\n";
-	automa* a = merge_kstate_to_automaton(ks1, ks2, root2, agent_to_label);
+	automaton* a = merge_kstate_to_automaton(ks1, ks2, root2, agent_to_label);
 
 	if (a == nullptr) {
 		return true;
@@ -2105,9 +2105,9 @@ bool bisimulation::compare_automata_eq(const kstate & ks1, const kstate & ks2)
 
 //DEBUG
 //
-//const automa bisimulation::compare_automata_debug(const kstate & ks1, const kstate & ks2, std::vector<kworld_ptr> & kworld_vec)
+//const automaton bisimulation::compare_automata_debug(const kstate & ks1, const kstate & ks2, std::vector<kworld_ptr> & kworld_vec)
 //{
-//	automa* a = merge_kstate_to_automaton_debug(ks1, ks2, kworld_vec);
+//	automaton* a = merge_kstate_to_automaton_debug(ks1, ks2, kworld_vec);
 //
 //
 //	return *a;
@@ -2121,14 +2121,14 @@ bool bisimulation::compare_automata_eq(const kstate & ks1, const kstate & ks2)
 //	}*/
 //}
 //
-//automa* bisimulation::merge_kstate_to_automaton_debug(const kstate & ks1, const kstate & ks2, std::vector<kworld_ptr> & kworld_vec) const
+//automaton* bisimulation::merge_kstate_to_automaton_debug(const kstate & ks1, const kstate & ks2, std::vector<kworld_ptr> & kworld_vec) const
 //{
 //
 //	std::map<int, int> compact_indices;
 //	std::map<kworld_ptr, int> index_map1, index_map2;
 //	kbislabel_map label_map1, label_map2; // Map: from -> (to -> ag_set)
 //
-//	automa *a;
+//	automaton *a;
 //	int Nvertex = ks1.get_worlds().size() + ks2.get_worlds().size();
 //	int ag_set_size = domain::get_instance().get_agents().size();
 //	//BIS_ADAPTATION For the loop that identifies the id (We add one edge for each node)
@@ -2259,7 +2259,7 @@ bool bisimulation::compare_automata_eq(const kstate & ks1, const kstate & ks2)
 //
 //	// Building the automaton
 //	int Nbehavs = bhtabSize;
-//	a = (automa *) malloc(sizeof(automa));
+//	a = (automaton *) malloc(sizeof(automaton));
 //	a->Nvertex = Nvertex;
 //	a->Nbehavs = Nbehavs;
 //	a->Vertex = Vertex;

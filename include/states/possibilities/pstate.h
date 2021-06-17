@@ -355,9 +355,9 @@ private:
 
     void clean_unreachable_pworlds();
 
-    const automa pstate_to_automaton(std::vector<pworld_ptr> & pworld_vec, const std::map<agent, bis_label> & agent_to_label) const;
+    const automaton pstate_to_automaton(std::vector<pworld_ptr> & pworld_vec, const std::map<agent, bis_label> & agent_to_label) const;
 
-    void automaton_to_pstate(const automa & a, const std::vector<pworld_ptr> & pworld_vec, const std::map<bis_label, agent> & label_to_agent);
+    void automaton_to_pstate(const automaton & a, const std::vector<pworld_ptr> & pworld_vec, const std::map<bis_label, agent> & label_to_agent);
 
     //  bool check_reached(agent ag, const pworld_ptr & start, const pworld_ptr & end) const;
 

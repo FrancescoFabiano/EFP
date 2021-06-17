@@ -579,7 +579,7 @@ struct xPartition
 typedef struct e_elem_struct e_elem;
 typedef struct v_elem_struct v_elem;
 // typedef struct bhtab_struct bhtab;
-typedef struct automa_struct automa;
+typedef struct automa_struct automaton;
 
 struct e_elem_struct
 {

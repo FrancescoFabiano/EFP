@@ -173,7 +173,7 @@ bool kstate::entails(fluent f) const
 	return entails(f, m_pointed);
 }
 
-bool kstate::entails(fluent f, kworld_ptr world) const
+bool kstate::entails(fluent f, const kworld_ptr & world) const
 {
 	return world.get_ptr()->entails(f);
 }
@@ -183,7 +183,7 @@ bool kstate::entails(const fluent_set & fl) const
 	return entails(fl, m_pointed);
 }
 
-bool kstate::entails(const fluent_set & fl, kworld_ptr world) const
+bool kstate::entails(const fluent_set & fl, const kworld_ptr & world) const
 {
 	return world.get_ptr()->entails(fl);
 }
@@ -193,7 +193,7 @@ bool kstate::entails(const fluent_formula & ff) const
 	return entails(ff, m_pointed);
 }
 
-bool kstate::entails(const fluent_formula & ff, kworld_ptr world) const
+bool kstate::entails(const fluent_formula & ff, const kworld_ptr & world) const
 {
 	return world.get_ptr()->entails(ff);
 }
@@ -203,7 +203,7 @@ bool kstate::entails(const belief_formula & bf) const
 	return entails(bf, m_pointed);
 }
 
-bool kstate::entails(const belief_formula & bf, kworld_ptr world) const
+bool kstate::entails(const belief_formula & bf, const kworld_ptr & world) const
 {
 	/*
 	 The entailment of a \ref belief_formula just call recursively the entailment on all the reachable world with that formula.
@@ -287,7 +287,7 @@ bool kstate::entails(const belief_formula & to_check, const kworld_ptr_set & rea
     return true;
 }
 
-bool kstate::entails(const formula_list & to_check, kworld_ptr world) const
+bool kstate::entails(const formula_list & to_check, const kworld_ptr & world) const
 {
 	//formula_list expresses CNF formula
 	formula_list::const_iterator it_fl;
@@ -301,7 +301,7 @@ bool kstate::entails(const formula_list & to_check, kworld_ptr world) const
 
 
 /**** REACHABILITY ****/
-const kworld_ptr_set kstate::get_B_reachable_worlds(agent ag, kworld_ptr world) const
+kworld_ptr_set kstate::get_B_reachable_worlds(const agent & ag, const kworld_ptr & world) const
 {
 	kworld_ptr_set ret;
 	kedge_ptr_set::const_iterator it_kedge;
@@ -313,7 +313,7 @@ const kworld_ptr_set kstate::get_B_reachable_worlds(agent ag, kworld_ptr world) 
 	return ret;
 }
 
-bool kstate::get_B_reachable_worlds_recoursive(agent ag, kworld_ptr world, kworld_ptr_set & ret) const
+bool kstate::get_B_reachable_worlds_recoursive(const agent & ag, const kworld_ptr & world, kworld_ptr_set & ret) const
 {
 	/** \todo check: If a--i-->b, b--i-->c then a--i-->c must be there*/
 	bool is_fixed_point = true;
@@ -330,7 +330,7 @@ bool kstate::get_B_reachable_worlds_recoursive(agent ag, kworld_ptr world, kworl
 	return is_fixed_point;
 }
 
-const kworld_ptr_set kstate::get_E_reachable_worlds(const agent_set & ags, kworld_ptr world) const
+kworld_ptr_set kstate::get_E_reachable_worlds(const agent_set & ags, const kworld_ptr & world) const
 {
 	/*Optimized, the K^0 call of this function
 	 *
@@ -363,7 +363,7 @@ bool kstate::get_E_reachable_worlds_recoursive(const agent_set & ags, const kwor
 	return is_fixed_point;
 }
 
-const kworld_ptr_set kstate::get_C_reachable_worlds(const agent_set & ags, kworld_ptr world) const
+kworld_ptr_set kstate::get_C_reachable_worlds(const agent_set & ags, const kworld_ptr & world) const
 {
 	//Use of fixed point to stop.
 	bool is_fixed_point = false;
@@ -381,7 +381,7 @@ const kworld_ptr_set kstate::get_C_reachable_worlds(const agent_set & ags, kworl
 	return ret;
 }
 
-const kworld_ptr_set kstate::get_D_reachable_worlds(const agent_set & ags, kworld_ptr world) const
+kworld_ptr_set kstate::get_D_reachable_worlds(const agent_set & ags, const kworld_ptr & world) const
 {
 	/**@bug: Notion of D-Reachable is correct (page 24 of Reasoning about Knowledge)*/
 	agent_set::const_iterator it_agset = ags.begin();
@@ -460,14 +460,14 @@ void kstate::clean_unreachable_kworlds(std::map<kworld_ptr, kworld_ptr_set> & ad
 
 
 /**** BISIMULATION ****/
-const automa kstate::kstate_to_automaton(/*const std::map<kworld_ptr, kworld_ptr_set> & adj_list,*/ std::vector<kworld_ptr> & kworld_vec, const std::map<agent, bis_label> & agent_to_label) const
+automaton kstate::kstate_to_automaton(/*const std::map<kworld_ptr, kworld_ptr_set> & adj_list,*/ std::vector<kworld_ptr> & kworld_vec, const std::map<agent, bis_label> & agent_to_label) const
 {
 
 	std::map<int, int> compact_indices;
 	std::map<kworld_ptr, int> index_map;
 	kbislabel_map label_map; // Map: from -> (to -> ag_set)
 
-	automa *a;
+	automaton *a;
 	int Nvertex = get_worlds().size();
 	int ag_set_size = domain::get_instance().get_agents().size();
 	//BIS_ADAPTATION For the loop that identifies the id (We add one edge for each node)
@@ -600,7 +600,7 @@ const automa kstate::kstate_to_automaton(/*const std::map<kworld_ptr, kworld_ptr
 	//
 	// Building the automaton
 	int Nbehavs = bhtabSize;
-	a = (automa *) malloc(sizeof(automa));
+	a = (automaton *) malloc(sizeof(automaton));
 	a->Nvertex = Nvertex;
 	a->Nbehavs = Nbehavs;
 	a->Vertex = Vertex;
@@ -611,7 +611,7 @@ const automa kstate::kstate_to_automaton(/*const std::map<kworld_ptr, kworld_ptr
 	return *a;
 }
 
-void kstate::automaton_to_kstate(const automa & a, const std::vector<kworld_ptr> & kworld_vec, const std::map<bis_label, agent> & label_to_agent)
+void kstate::automaton_to_kstate(const automaton & a, const std::vector<kworld_ptr> & kworld_vec, const std::map<bis_label, agent> & label_to_agent)
 {
 	kworld_ptr_set worlds;
 	kedge_ptr_set edges;
@@ -682,13 +682,13 @@ void kstate::calc_min_bisimilar()
 	//	std::cerr << "\nDEBUG: \n\tNvertex_before = " << m_worlds.size() << std::endl;
 	//	std::cerr << "\tNbehavs_before = " << m_edges.size() << std::endl;
 
-	automa a;
+	automaton a;
 	kworld_vec.reserve(get_worlds().size());
 
 	a = kstate_to_automaton(/*adj_list,*/ kworld_vec, agent_to_label);
 
 	bisimulation b;
-	//std::cout << "\nDEBUG: Printing automa pre-Bisimulation\n";
+	//std::cout << "\nDEBUG: Printing automaton pre-Bisimulation\n";
 	//b.VisAutoma(&a);
 
 
@@ -697,7 +697,7 @@ void kstate::calc_min_bisimilar()
 		if (b.MinimizeAutomaPT(&a)) {
 			//VisAutoma(a);
 
-			//std::cout << "\nDEBUG: Printing automa post-Bisimulation\n";
+			//std::cout << "\nDEBUG: Printing automaton post-Bisimulation\n";
 			//b.VisAutoma(&a);
 			//std::cout << "Done\n";
 			automaton_to_kstate(a, kworld_vec,label_to_agent);
@@ -707,7 +707,7 @@ void kstate::calc_min_bisimilar()
 	} else {
 		if (b.MinimizeAutomaFB(&a)) {
 
-			//std::cerr << "\nDEBUG: Printing automa post-Bisimulation\n";
+			//std::cerr << "\nDEBUG: Printing automaton post-Bisimulation\n";
 			//b.VisAutoma(&a);
 			//std::cerr << "Done\n";
 			automaton_to_kstate(a, kworld_vec,label_to_agent);
@@ -1373,7 +1373,7 @@ fluent_formula kstate::get_effects_if_entailed(const effects_map & map, const kw
 //
 //	bisimulation b;
 //	std::vector<kworld_ptr> kworld_vec;
-//	automa a;
+//	automaton a;
 //
 //	//std::cerr << "\nDEBUG:HERE\n";
 //
@@ -1390,7 +1390,7 @@ fluent_formula kstate::get_effects_if_entailed(const effects_map & map, const kw
 //	automaton_to_kstate_debug(a, kworld_vec);
 //}
 //
-//void kstate::automaton_to_kstate_debug(const automa & a, std::vector<kworld_ptr> & kworld_vec)
+//void kstate::automaton_to_kstate_debug(const automaton & a, std::vector<kworld_ptr> & kworld_vec)
 //{
 //	kworld_ptr_set worlds;
 //	kedge_ptr_set edges;

@@ -126,40 +126,40 @@ private:
     void FastBisimulationAlgorithm();
 
     /***********Automata Related**************/
-    void FillStructures(automa *A);
+    void FillStructures(automaton *A);
 
 
 
     void CreateG(int num_v, v_elem *Gtemp);
     void SetPointers(int n);
 
-    void GetMinimizedAutoma(automa *A);
+    void GetMinimizedAutoma(automaton *A);
     void MarkDeletedNodes();
-    void DeleteNodes(automa *A);
+    void DeleteNodes(automaton *A);
 
     /***********Not Sure*************/
     void Inverse();
 
 public:
-    /* Rilascia la memoria allocata per l'automa */
-    void DisposeAutoma(automa *A);
-    void VisAutoma(automa *A);
+    /* Rilascia la memoria allocata per l'automaton */
+    void DisposeAutoma(automaton *A);
+    void VisAutoma(automaton *A);
 
 
     /* Our implementation */
 
     /*Return true if bisimulation has been executed, false otherwise*/
-    bool MinimizeAutomaPT(automa *A);
-    bool MinimizeAutomaFB(automa *A);
+    bool MinimizeAutomaPT(automaton *A);
+    bool MinimizeAutomaFB(automaton *A);
 
     bisimulation();
 
     /*\***KRIPKE RELATED ONLY***/
-    automa* merge_kstate_to_automaton(const kstate & ks1, const kstate & ks2, int & root2, const std::map<agent, bis_label> & agent_to_label) const;
-    //automa* merge_automata(const kstate & ks1, const kstate & ks2, int & root2);
+    automaton* merge_kstate_to_automaton(const kstate & ks1, const kstate & ks2, int & root2, const std::map<agent, bis_label> & agent_to_label) const;
+    //automaton* merge_automata(const kstate & ks1, const kstate & ks2, int & root2);
     bool compare_automata(const kstate & ks1, const kstate & ks2);
     bool compare_automata_eq(const kstate & ks1, const kstate & ks2);
     //DEBUG
-    //    const automa compare_automata_debug(const kstate & ks1, const kstate & ks2, std::vector<kworld_ptr> & kworld_vec);
-    //    automa* merge_kstate_to_automaton_debug(const kstate & ks1, const kstate & ks2, std::vector<kworld_ptr> & kworld_vec) const;
+    //    const automaton compare_automata_debug(const kstate & ks1, const kstate & ks2, std::vector<kworld_ptr> & kworld_vec);
+    //    automaton* merge_kstate_to_automaton_debug(const kstate & ks1, const kstate & ks2, std::vector<kworld_ptr> & kworld_vec) const;
 };

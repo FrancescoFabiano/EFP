@@ -51,7 +51,7 @@ private:
      *
      * @return true: \p to_check is entailed in \p world;
      * @return false: \p -to_check is entailed in \p world.*/
-    bool entails(fluent to_check, kworld_ptr world) const;
+    bool entails(fluent to_check, const kworld_ptr& world) const;
     /**
      *\brief Function that checks the entailment of a conjunctive set of \ref fluent in a given \ref kworld.
      *     @see \ref kworld::entails(const fluent_set &) const
@@ -61,7 +61,7 @@ private:
      *
      * @return true: \p to_check is entailed in \p world;
      * @return false: \p -to_check is entailed in \p world.*/
-    bool entails(const fluent_set & to_check, kworld_ptr world) const;
+    bool entails(const fluent_set & to_check, const kworld_ptr& world) const;
     /**
      *\brief Function that checks the entailment of a conjunctive set of \ref fluent in a given \ref kworld.
      *     @see \ref kworld::entails(const fluent_formula &) const
@@ -71,7 +71,7 @@ private:
      *
      * @return true: \p to_check is entailed in \p world;
      * @return false: \p -to_check is entailed in \p world.*/
-    bool entails(const fluent_formula & to_check, kworld_ptr world) const;
+    bool entails(const fluent_formula & to_check, const kworld_ptr& world) const;
 
     /** \brief Function that checks the entailment of a \ref belief_formula.
      * 
@@ -92,7 +92,7 @@ private:
      * @return false: \p -to_check is entailed starting from \p world.
      * 
      * \todo self-loop?*/
-    bool entails(const belief_formula & to_check, kworld_ptr world) const;
+    bool entails(const belief_formula & to_check, const kworld_ptr& world) const;
     /** \brief Function that checks the entailment of a \ref belief_formula on several possible starting points.
      * 
      * This function eases the task to check the entailment from several starting \ref kworld simultaneously.
@@ -124,7 +124,7 @@ private:
      *
      * 
      * \todo self-loop?*/
-    const kworld_ptr_set get_B_reachable_worlds(agent ag, kworld_ptr world) const;
+    kworld_ptr_set get_B_reachable_worlds(const agent& ag, const kworld_ptr& world) const;
 
     /** \brief Function that returns all the reachable \ref kworld given the \ref agent and the staring \ref kworld.
      * 
@@ -140,7 +140,7 @@ private:
      *
      * 
      * \todo self-loop?*/
-    bool get_B_reachable_worlds_recoursive(agent ag, kworld_ptr world, kworld_ptr_set& reached) const;
+    bool get_B_reachable_worlds_recoursive(const agent& ag, const kworld_ptr& world, kworld_ptr_set& reached) const;
 
     /** \brief Function that returns all the reachable \ref kworld given a set of \ref agent and the staring \ref kworld.
      * 
@@ -157,7 +157,7 @@ private:
      *
      * 
      * \todo self-loop?*/
-    const kworld_ptr_set get_E_reachable_worlds(const agent_set & ags, kworld_ptr world) const;
+    kworld_ptr_set get_E_reachable_worlds(const agent_set & ags, const kworld_ptr& world) const;
 
     /** \brief Function that returns all the reachable \ref kworld given a set of \ref agent and the staring \ref kworld.
      * 
@@ -188,7 +188,7 @@ private:
      * @return a set of pointers to all the reachable worlds.
      * 
      * \todo self-loop?*/
-    const kworld_ptr_set get_C_reachable_worlds(const agent_set &, kworld_ptr world) const;
+    kworld_ptr_set get_C_reachable_worlds(const agent_set &, const kworld_ptr& world) const;
 
     /** \brief Function that returns all the reachable \ref kworld given a set of \ref agent and the staring \ref kworld.
      * 
@@ -198,7 +198,7 @@ private:
      * @param[in] world: the pointers to the set of \ref kworld where to start to check the entailment.
      *
      * @return a set of pointers to all the D_reachable worlds.*/
-    const kworld_ptr_set get_D_reachable_worlds(const agent_set & ags, kworld_ptr world) const;
+    kworld_ptr_set get_D_reachable_worlds(const agent_set & ags, const kworld_ptr& world) const;
 
     /** Function that calculates all the reachable \ref kworld.
      * 
@@ -214,14 +214,14 @@ private:
      * @return the automaton equivalent to *this*.*/
     //     * @param[in] index_map: a map that associates a unique id to each \ref kworld.
     //     * @param[in] compact_indices: we associate to the \ref kworld numerical ids a second kind of numerical ids. These new ids are consecutive numbers (hence, they are compact).
-    const automa kstate_to_automaton(/*const std::map<kworld_ptr, kworld_ptr_set> & adj_list,*/ std::vector<kworld_ptr> & kworld_vec, const std::map<agent, bis_label> & agent_to_label) const;
+    automaton kstate_to_automaton(/*const std::map<kworld_ptr, kworld_ptr_set> & adj_list,*/ std::vector<kworld_ptr> & kworld_vec, const std::map<agent, bis_label> & agent_to_label) const;
     /** \brief Function that transforms the given automaton into an equivalent \ref kstate.
      * 
      * @param[in] a: the automaton to transform.
      * @param[in] kworld_vec: the vector of all \ref kworld.
      * 
      * @return the \ref kstate.*/
-    void automaton_to_kstate(const automa & a, const std::vector<kworld_ptr> & kworld_vec, const std::map<bis_label, agent> & label_to_agent);
+    void automaton_to_kstate(const automaton & a, const std::vector<kworld_ptr> & kworld_vec, const std::map<bis_label, agent> & label_to_agent);
 
 
     /** \brief Function that builds the initial Kripke structure given the initial conditions in a structural way.
@@ -419,7 +419,7 @@ public:
      * @return false: \p -to_check is entailed starting from \p world.
      *
      * \todo self-loop?*/
-    bool entails(const formula_list & to_check, kworld_ptr world) const;
+    bool entails(const formula_list & to_check, const kworld_ptr& world) const;
 
     /** \brief Function that builds the initial Kripke structure given the initial conditions.
      *
@@ -483,7 +483,7 @@ public:
 
     //void DEBUG_add_extra_world();
     //    void debug_print(const kstate & to_compare);
-    //    void automaton_to_kstate_debug(const automa & a, std::vector<kworld_ptr> & kworld_vec);
+    //    void automaton_to_kstate_debug(const automaton & a, std::vector<kworld_ptr> & kworld_vec);
 
 
 };

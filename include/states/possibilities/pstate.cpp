@@ -2706,14 +2706,14 @@ void pstate::clean_unreachable_pworlds()
 	//std::cerr << "\nDEBUG: FINE CLEAN EXTRA PSTATE\n" << std::flush;
 }
 
-const automa pstate::pstate_to_automaton(std::vector<pworld_ptr> & pworld_vec, const std::map<agent, bis_label> & agent_to_label) const
+const automaton pstate::pstate_to_automaton(std::vector<pworld_ptr> & pworld_vec, const std::map<agent, bis_label> & agent_to_label) const
 {
 
 	std::map<int, int> compact_indices;
 	std::map<pworld_ptr, int> index_map;
 	pbislabel_map label_map; // Map: from -> (to -> ag_set)
 
-	automa *a;
+	automaton *a;
 	int Nvertex = get_worlds().size();
 	int ag_set_size = domain::get_instance().get_agents().size();
 	//BIS_ADAPTATION For the loop that identifies the id (We add one edge for each node)
@@ -2829,7 +2829,7 @@ const automa pstate::pstate_to_automaton(std::vector<pworld_ptr> & pworld_vec, c
 	}
 
 	int Nbehavs = bhtabSize;
-	a = (automa *) malloc(sizeof(automa));
+	a = (automaton *) malloc(sizeof(automaton));
 	a->Nvertex = Nvertex;
 	a->Nbehavs = Nbehavs;
 	a->Vertex = Vertex;
@@ -2840,7 +2840,7 @@ const automa pstate::pstate_to_automaton(std::vector<pworld_ptr> & pworld_vec, c
 	return *a;
 }
 
-void pstate::automaton_to_pstate(const automa & a, const std::vector<pworld_ptr> & pworld_vec, const std::map<bis_label, agent> & label_to_agent)
+void pstate::automaton_to_pstate(const automaton & a, const std::vector<pworld_ptr> & pworld_vec, const std::map<bis_label, agent> & label_to_agent)
 {
 	//std::cerr << "\nDEBUG: INIZIO BISIMULATION TO PSTATE\n" << std::flush;
 
@@ -2888,7 +2888,7 @@ void pstate::calc_min_bisimilar()
 	//	std::cerr << "\nDEBUG: \n\tNvertex_before = " << m_worlds.size() << std::endl;
 	//	std::cerr << "\tNbehavs_before = " << m_edges.size() << std::endl;
 
-	automa a;
+	automaton a;
 	pworld_vec.reserve(get_worlds().size());
 
 	std::map<bis_label, agent> label_to_agent;
@@ -2910,14 +2910,14 @@ void pstate::calc_min_bisimilar()
 	a = pstate_to_automaton(pworld_vec, agent_to_label);
 
 	bisimulation b;
-	//std::cout << "\nDEBUG: Printing automa pre-Bisimulation\n";
+	//std::cout << "\nDEBUG: Printing automaton pre-Bisimulation\n";
 	//b.VisAutoma(&a);
 
 	if (domain::get_instance().get_bisimulation() == PaigeTarjan) {
 		if (b.MinimizeAutomaPT(&a)) {
 			//VisAutoma(a);
 
-			//std::cout << "\nDEBUG: Printing automa post-Bisimulation\n";
+			//std::cout << "\nDEBUG: Printing automaton post-Bisimulation\n";
 			//b.VisAutoma(&a);
 			//std::cout << "Done\n";
 			automaton_to_pstate(a, pworld_vec, label_to_agent);
@@ -2927,7 +2927,7 @@ void pstate::calc_min_bisimilar()
 	} else {
 		if (b.MinimizeAutomaFB(&a)) {
 
-			//std::cerr << "\nDEBUG: Printing automa post-Bisimulation\n";
+			//std::cerr << "\nDEBUG: Printing automaton post-Bisimulation\n";
 			//b.VisAutoma(&a);
 			//std::cerr << "Done\n";
 			automaton_to_pstate(a, pworld_vec, label_to_agent);
