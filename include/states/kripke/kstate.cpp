@@ -14,6 +14,7 @@
 
 
 #include "kstate.h"
+#include "../../update/union_update.h"
 #include "../../domain/domain.h"
 #include "../../utilities/helper.h"
 
@@ -983,37 +984,7 @@ void kstate::remove_initial_kedge_bf(const belief_formula & to_check)
 kstate kstate::compute_succ(const action & act) const
 {
     /** \warning executability should be check in \ref state (or \ref planner).*/
-	switch ( act.get_type() ) {
-	case ONTIC:
-	{
-		/*kstate tmp = execute_ontic(act);
-		std::cout << "\n*********************Printing this*********************\n";
-		print();
-		std::cout << "\n*********************Printing tmp*********************\n";
-		tmp.print();*/
-//		return domain::get_instance().get_k_optimized() ? execute_ontic(act) : execute_ontic_um(act);
-		break;
-	}
-	case SENSING:
-	{
-//		return domain::get_instance().get_k_optimized() ? execute_sensing(act) : execute_sensing_um(act);
-		break;
-	}
-	case ANNOUNCEMENT:
-	{
-//		return domain::get_instance().get_k_optimized() ? execute_announcement(act) : execute_announcement_um(act);
-		break;
-	}
-	default:
-	{
-		std::cerr << "Error in executing an action: ";
-		std::cerr << "the type of the action is not defined correctly";
-		std::cerr << std::endl;
-		exit(1);
-
-		break;
-	}
-	}
+	return union_update::u_update(*this, act);
 }
 
 
