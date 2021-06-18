@@ -239,8 +239,6 @@ enum state_type
 };
 
 /*****************Kripke States*****************/
-class kstate;
-
 class kedge;
 typedef std::string kedge_id; /**< \brief The id of an \ref kedge in a \ref kstate.
                                 * 
@@ -283,6 +281,9 @@ typedef std::set<kworld_ptr> kworld_ptr_set; /**< \brief A set of \ref kworld_pt
 
 typedef std::map<std::pair<kworld_ptr, event_type>, kworld_ptr> kstate_map;
 
+class kstate;
+
+typedef std::map<kworld_ptr, std::map<agent, kworld_ptr_set>> kedge_map;
 
 /*****************Possibilities*****************/
 class pstate;
@@ -596,7 +597,7 @@ struct v_elem_struct
 
 struct automa_struct
 {
-    int Nvertex;
-    int Nbehavs;
+    unsigned long Nvertex;
+    unsigned long Nbehavs;
     v_elem *Vertex;
 };

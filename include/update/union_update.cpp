@@ -126,7 +126,7 @@ const kstate & union_update::u_update(const kstate & state, const action & act)
 {
     kstate ret;
     pem_ptr pem = union_update::build_pem(act); // <- event_model
-    kworld_ptr p_kw = state.get_pointed();
+    const kworld_ptr & p_kw = state.get_pointed();
     pevent_ptr p_ev = pem_store::get_instance().get_event(pem.get_pointed_id()); // <- event_model
     kupdate_map u_map;
     agent_group_map a_map;
@@ -166,37 +166,39 @@ const kstate & union_update::u_update(const kstate & state, const action & act)
         }
     }
 
-//    kupdate_map::const_iterator it_kum1, it_kum2;
-    kedge_ptr_set::const_iterator it_kes;
     event_map::const_iterator it_evm;
     event_ptr_set::const_iterator it_evs;
 
     kworld_ptr kfirst, ksecond;
     pevent_ptr efirst, esecond;
-
     agent ag;
 
-    for (it_kes = state.get_edges().begin(); it_kes != state.get_edges().end(); it_kes++) {
-        kfirst = it_kes->get_from();
-        ksecond = it_kes->get_to();
-        ag = it_kes->get_label();
+    kedge_map::const_iterator it_kem;
+    std::map<agent, kworld_ptr_set>::const_iterator it_agkw;
+
+    for (it_kem = state.get_edges().begin(); it_kem != state.get_edges().end(); it_kem++) {
+        kfirst = it_kem->first;
 
         for (it_eve = pem.get_edges().begin(); it_eve != pem.get_edges().end(); it_eve++) {
             efirst = it_eve->first;
             auto kefirst = u_map.find({kfirst, efirst});
 
             if (kefirst != u_map.end()) {
-                for (it_evm = it_eve->second.begin(); it_evm != it_eve->second.end(); it_evm++) {
+                for (it_agkw = it_kem->second.begin(); it_agkw != it_kem->second.end(); it_agkw++) {
+                    ag = it_agkw->first;
                     auto it_agm = a_map.find(ag);
 
                     if (it_agm != a_map.end()) {
-                        for (it_evs = it_evm->second.begin(); it_evs != it_evm->second.end(); it_evs++) {
-                            esecond = *it_evs;
+                        for (it_kws = it_agkw->second.begin(); it_kws != it_agkw->second.end(); it_kws++) {
+                            ksecond = *it_kws;
 
-                            auto kesecond = u_map.find({ksecond, esecond});
+                            for (it_evs = it_evm->second.begin(); it_evs != it_evm->second.end(); it_evs++) {
+                                esecond = *it_evs;
+                                auto kesecond = u_map.find({ksecond, esecond});
 
-                            if (kesecond != u_map.end()) {
-                                ret.add_edge(kedge(kefirst->second, kesecond->second, ag));
+                                if (kesecond != u_map.end()) {
+                                    ret.add_edge(kefirst->second, kesecond->second, ag);
+                                }
                             }
                         }
                     }
@@ -204,11 +206,8 @@ const kstate & union_update::u_update(const kstate & state, const action & act)
             }
         }
     }
-
     return ret;
 
-//	std::cerr << "\nError: Union update not yet implmente for Kripke structures\n";
-//	exit(1);
 }
 
 template <class T>

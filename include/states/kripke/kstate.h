@@ -33,7 +33,7 @@ private:
     /** \brief The set containing a pointer to each edge of the structure.
      * 
      * @see kstore and kedge.*/
-    kedge_ptr_set m_edges;
+    kedge_map m_edges;
     /** \brief The set containing a pointer to each world of the structure.
      * 
      * @see kworld and kstore.*/
@@ -126,21 +126,21 @@ private:
      * \todo self-loop?*/
     kworld_ptr_set get_B_reachable_worlds(const agent& ag, const kworld_ptr& world) const;
 
-    /** \brief Function that returns all the reachable \ref kworld given the \ref agent and the staring \ref kworld.
-     * 
-     * This function modify the parameter so it's easy to check if a fixed point is reached.
-     * This is useful for the operator C. Otherwise its better to use \ref get_B_reachable_worlds(agent, kworld_ptr) const.
-     * 
-     * @see belief_formula, get_B_reachable_worlds(agent, kworld_ptr) const and get_C_reachable_worlds(const agent_set &, kworld_ptr world) const.
-     * 
-     * @param[in] ag: the label of the \ref kedge that the function follows to check the transitivity.
-     * @param[in] world: the pointers to the set of \ref kworld where to start to check the entailment.
-     *
-     * @param[out] reached: the set of pointers to all the reachable worlds.
-     *
-     * 
-     * \todo self-loop?*/
-    bool get_B_reachable_worlds_recoursive(const agent& ag, const kworld_ptr& world, kworld_ptr_set& reached) const;
+//    /** \brief Function that returns all the reachable \ref kworld given the \ref agent and the staring \ref kworld.
+//     *
+//     * This function modify the parameter so it's easy to check if a fixed point is reached.
+//     * This is useful for the operator C. Otherwise its better to use \ref get_B_reachable_worlds(agent, kworld_ptr) const.
+//     *
+//     * @see belief_formula, get_B_reachable_worlds(agent, kworld_ptr) const and get_C_reachable_worlds(const agent_set &, kworld_ptr world) const.
+//     *
+//     * @param[in] ag: the label of the \ref kedge that the function follows to check the transitivity.
+//     * @param[in] world: the pointers to the set of \ref kworld where to start to check the entailment.
+//     *
+//     * @param[out] reached: the set of pointers to all the reachable worlds.
+//     *
+//     *
+//     * \todo self-loop?*/
+//    bool get_B_reachable_worlds_recoursive(const agent& ag, const kworld_ptr& world, kworld_ptr_set& reached) const;
 
     /** \brief Function that returns all the reachable \ref kworld given a set of \ref agent and the staring \ref kworld.
      * 
@@ -159,7 +159,7 @@ private:
      * \todo self-loop?*/
     kworld_ptr_set get_E_reachable_worlds(const agent_set & ags, const kworld_ptr& world) const;
 
-    /** \brief Function that returns all the reachable \ref kworld given a set of \ref agent and the staring \ref kworld.
+    /** \brief Function that returns all the reachable \ref kworld given a set of \ref agent and the starting \ref kworld.
      * 
      * This function modify the parameter so it's easy to check if a fixed point is reached.
      * This is useful for the operator C. Otherwise its better to use \ref get_E_reachable_worlds(const agent_set &, kworld_ptr) const.
@@ -173,7 +173,7 @@ private:
      *
      * 
      * \todo self-loop?*/
-    bool get_E_reachable_worlds_recoursive(const agent_set &ags, const kworld_ptr_set &worlds, kworld_ptr_set& reached) const;
+    bool get_E_reachable_worlds_recursive(const agent_set &ags, const kworld_ptr_set &worlds, kworld_ptr_set& reached) const;
 
     /** \brief Function that returns all the reachable \ref kworld (in the *Common Knowledge* sense) given a \ref agent and the staring \ref kworld.
      * 
@@ -188,7 +188,7 @@ private:
      * @return a set of pointers to all the reachable worlds.
      * 
      * \todo self-loop?*/
-    kworld_ptr_set get_C_reachable_worlds(const agent_set &, const kworld_ptr& world) const;
+    kworld_ptr_set get_C_reachable_worlds(const agent_set & ags, const kworld_ptr & world) const;
 
     /** \brief Function that returns all the reachable \ref kworld given a set of \ref agent and the staring \ref kworld.
      * 
@@ -202,10 +202,15 @@ private:
 
     /** Function that calculates all the reachable \ref kworld.
      * 
-     * @param[in] kw: the current \ref kworld.
+     * @param[in] world: the current \ref kworld.
      * @param[in] reached_worlds: the set of all the reached \ref kworld.
      * @param[in] adj_list: the adjacency list of thr \ref kstate.*/
-    void get_all_reachable_worlds(const kworld_ptr & kw, kworld_ptr_set & reached_worlds, const std::map<kworld_ptr, kworld_ptr_set> & adj_list) const;
+    void get_all_reachable_worlds_edges(const kworld_ptr & world, kworld_ptr_set & reached_worlds, kedge_map & reached_edges) const;
+
+    /** Function that cleares all the unreachable \ref kworld of *this*
+     *
+     * @param[in] adj_list: the adjacency list of thr \ref kstate.*/
+    void clean_unreachable_kworlds();
 
     /** \brief Function that transforms *this* into an equivalent automaton.
      * 
@@ -271,7 +276,7 @@ private:
     /** \brief Function that removes the a \ref kedge_ptr from \ref m_edges.
      * 
      * @param[in] to_remove: the \ref kedge which pointer has to be removed.*/
-    void remove_kedge(const kedge & to_remove);
+    void remove_kedge(const kworld_ptr & from, const kworld_ptr & to, const agent & ag);
     /** \brief Function that removes the \ref kedge(s) that imply that \p ag is ignorant about \p known_ff from *this*.
      *  
      * @param[in] known_ff: the \ref fluent_formula known by \p ag.
@@ -308,7 +313,7 @@ public:
     /** \brief Setter of the field \ref m_edges.
      *
      * @param[in] to_set: the \ref kedge_ptr_set to assign to \ref m_edges.*/
-    void set_edges(const kedge_ptr_set & to_set);
+    void set_edges(const kedge_map & to_set);
     /** \brief Setter of the field \ref m_pointed.
      *
      * @param[in] to_set: the \ref kworld_ptr to assign to \ref m_pointed.*/
@@ -321,7 +326,7 @@ public:
     /** \brief Getter of the field \ref m_edges.
      *
      * @return: the value of \ref m_edges.*/
-    const kedge_ptr_set & get_edges() const;
+    const kedge_map & get_edges() const;
     /** \brief Getter of the field \ref m_pointed.
      *
      * @return: the value of \ref m_pointed.*/
@@ -355,7 +360,7 @@ public:
      * @see kedge and kstore.
      *
      * @param[in] to_add: the \ref kedge that has to be added to *this*.*/
-    void add_edge(const kedge & to_add);
+    void add_edge(const kworld_ptr & from, const kworld_ptr & to, const agent & ag);
 
     /** \brief Function that checks the entailment of a \ref fluent in *this*.
      *
@@ -447,10 +452,6 @@ public:
      * \todo The action must be executable on *this* otherwise it will return a null_ptr.*/
     kstate compute_succ(const action & act) const;
 
-    /** Function that cleares all the unreachable \ref kworld of *this*
-     * 
-     * @param[in] adj_list: the adjacency list of thr \ref kstate.*/
-    void clean_unreachable_kworlds(std::map<kworld_ptr, kworld_ptr_set> & adj_list);
     /** \brief Function that sets *this* as the mimimum \ref kstate that is bisimilar to the current one.
      *
      * The function follows the approach of the algorithm described in Paige and Tarjan (1986).*/

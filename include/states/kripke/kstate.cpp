@@ -25,7 +25,7 @@ void kstate::set_worlds(const kworld_ptr_set & to_set)
 	m_worlds = to_set;
 }
 
-void kstate::set_edges(const kedge_ptr_set & to_set)
+void kstate::set_edges(const kedge_map & to_set)
 {
 	m_edges.clear();
 	m_edges = to_set;
@@ -41,7 +41,7 @@ const kworld_ptr_set & kstate::get_worlds() const
 	return m_worlds;
 }
 
-const kedge_ptr_set & kstate::get_edges() const
+const kedge_map & kstate::get_edges() const
 {
 	return m_edges;
 }
@@ -59,16 +59,21 @@ kworld_ptr kstate::add_world(const kworld & world)
     return tmp;
 }
 
-void kstate::add_edge(const kedge & edge)
+void kstate::add_edge(const kworld_ptr & from, const kworld_ptr & to, const agent & ag)
 {
-    m_edges.insert(kstore::get_instance().add_edge(edge));
+    m_edges[from][ag].insert(to);
 }
 
-void kstate::remove_kedge(const kedge & to_remove)
-{
+void kstate::remove_kedge(const kworld_ptr & from, const kworld_ptr & to, const agent & ag) {
+    auto from_edges = m_edges[from];
 
-    m_edges.erase(kstore::get_instance().add_edge(to_remove));
-    //if(m_edges.erase(kstore::get_instance().add_edge(to_remove)) > 0)count++;
+    if (!from_edges.empty()) {
+        kworld_ptr_set kwset = from_edges[ag];
+
+        if (!kwset.empty()) {
+            kwset.erase(to);
+        }
+    }
 }
 
 
@@ -304,62 +309,70 @@ bool kstate::entails(const formula_list & to_check, const kworld_ptr & world) co
 /**** REACHABILITY ****/
 kworld_ptr_set kstate::get_B_reachable_worlds(const agent & ag, const kworld_ptr & world) const
 {
-	kworld_ptr_set ret;
-	kedge_ptr_set::const_iterator it_kedge;
-	for (it_kedge = m_edges.begin(); it_kedge != m_edges.end(); it_kedge++) {
-		if (((*it_kedge).get_from() == world) && ((*it_kedge).get_label() == ag)) {
-			ret.insert((*it_kedge).get_to());
-		}
-	}
-	return ret;
+	return m_edges.at(world).at(ag);
 }
 
-bool kstate::get_B_reachable_worlds_recoursive(const agent & ag, const kworld_ptr & world, kworld_ptr_set & ret) const
-{
-	/** \todo check: If a--i-->b, b--i-->c then a--i-->c must be there*/
-	bool is_fixed_point = true;
-	kedge_ptr_set::const_iterator it_kedge;
-	for (it_kedge = m_edges.begin(); it_kedge != m_edges.end(); it_kedge++) {
-		if (((*it_kedge).get_from() == world) && ((*it_kedge).get_label() == ag)) {
-			//We use the pair of insert, if we add a new world (true in the set::insert) then is not a fixed point
-			//if (std::get<1>(ret.insert((*it_kedge).get_to()))) {
-			if ((ret.insert((*it_kedge).get_to())).second) {
-				is_fixed_point = false;
-			}
-		}
-	}
-	return is_fixed_point;
-}
+//bool kstate::get_B_reachable_worlds_recoursive(const agent & ag, const kworld_ptr & world, kworld_ptr_set & ret) const
+//{
+//	/** \todo check: If a--i-->b, b--i-->c then a--i-->c must be there*/
+//	bool is_fixed_point = true;
+//	kedge_ptr_set::const_iterator it_kedge;
+//	for (it_kedge = m_edges.begin(); it_kedge != m_edges.end(); it_kedge++) {
+//		if (((*it_kedge).get_from() == world) && ((*it_kedge).get_label() == ag)) {
+//			//We use the pair of insert, if we add a new world (true in the set::insert) then is not a fixed point
+//			//if (std::get<1>(ret.insert((*it_kedge).get_to()))) {
+//			if ((ret.insert((*it_kedge).get_to())).second) {
+//				is_fixed_point = false;
+//			}
+//		}
+//	}
+//	return is_fixed_point;
+//}
 
 kworld_ptr_set kstate::get_E_reachable_worlds(const agent_set & ags, const kworld_ptr & world) const
 {
-	/*Optimized, the K^0 call of this function
+    /*Optimized, the K^0 call of this function
 	 *
 	 * Not calling B_reachability iteratively for optimization
 	 */
-	kworld_ptr_set ret;
-	kedge_ptr_set::const_iterator it_kedge;
-	for (it_kedge = m_edges.begin(); it_kedge != m_edges.end(); it_kedge++) {
-		if (((*it_kedge).get_from() == world) && (ags.find((*it_kedge).get_label()) != ags.end())) {
-			ret.insert((*it_kedge).get_to());
-		}
-	}
+    kworld_ptr_set ret, tmp;
+    agent_set::const_iterator it_ags;
+    auto world_edges = m_edges.at(world);
+
+    for (it_ags = ags.begin(); it_ags != ags.end(); it_ags++) {
+        tmp = world_edges.at(*it_ags);
+        std::merge(ret.begin(), ret.end(),
+                   tmp.begin(), tmp.end(),
+                   std::inserter(ret, ret.begin()));
+    }
 	return ret;
 }
 
-bool kstate::get_E_reachable_worlds_recoursive(const agent_set & ags, const kworld_ptr_set &worlds, kworld_ptr_set & ret) const
+bool kstate::get_E_reachable_worlds_recursive(const agent_set & ags, const kworld_ptr_set & worlds, kworld_ptr_set & reached) const
 {
-	/*Optimized, the K^i (recoursive) call of this function*/
+	/*Optimized, the K^i (recursive) call of this function*/
 
 	bool is_fixed_point = true;
 	kedge_ptr_set::const_iterator it_kedge;
-	/*\bug What if the pointed is not reachable, correct this*/
-	for (it_kedge = m_edges.begin(); it_kedge != m_edges.end(); it_kedge++) {
-		if ((worlds.find((*it_kedge).get_from()) != worlds.end()) && (ags.find((*it_kedge).get_label()) != ags.end())) {
-			if (ret.insert((*it_kedge).get_to()).second) {
-				is_fixed_point = false;
-			}
-		}
+
+	kworld_ptr_set::const_iterator it_kws1, it_kws2;
+	agent_set::const_iterator it_ags;
+
+	std::map<agent, kworld_ptr_set> world_edges;
+	kworld_ptr_set kw_set;
+    /*\bug What if the pointed is not reachable, correct this*/
+    for (it_kws1 = worlds.begin(); it_kws1 != worlds.end(); it_kws1++) {
+	    world_edges = m_edges.at(*it_kws1);
+
+        for (it_ags = ags.begin(); it_ags != ags.end(); it_ags++) {
+            kw_set = world_edges.at(*it_ags);
+
+            for (it_kws2 = kw_set.begin(); it_kws2 != kw_set.end(); it_kws2++) {
+                if (reached.insert(*it_kws2).second) {
+                    is_fixed_point = false;
+                }
+            }
+        }
 	}
 	return is_fixed_point;
 }
@@ -376,7 +389,7 @@ kworld_ptr_set kstate::get_C_reachable_worlds(const agent_set & ags, const kworl
 	while (!is_fixed_point) {
 		sum_set(newly_reached, ret);
 		minus_set(newly_reached, already_reached);
-		is_fixed_point = get_E_reachable_worlds_recoursive(ags, newly_reached, ret);
+		is_fixed_point = get_E_reachable_worlds_recursive(ags, newly_reached, ret);
 		already_reached = newly_reached;
 	}
 	return ret;
@@ -385,20 +398,20 @@ kworld_ptr_set kstate::get_C_reachable_worlds(const agent_set & ags, const kworl
 kworld_ptr_set kstate::get_D_reachable_worlds(const agent_set & ags, const kworld_ptr & world) const
 {
 	/**@bug: Notion of D-Reachable is correct (page 24 of Reasoning about Knowledge)*/
-	agent_set::const_iterator it_agset = ags.begin();
+	auto it_agset = ags.begin();
 	kworld_ptr_set ret = get_B_reachable_worlds((*it_agset), world);
 	it_agset++;
 
 	for (; it_agset != ags.end(); it_agset++) {
 
-		kworld_ptr_set::iterator it_pwset1 = ret.begin();
+		auto it_pwset1 = ret.begin();
 		kworld_ptr_set to_intersect = get_B_reachable_worlds((*it_agset), world);
-		kworld_ptr_set::const_iterator it_pwset2 = to_intersect.begin();
+		auto it_pwset2 = to_intersect.begin();
 		while ((it_pwset1 != ret.end()) && (it_pwset2 != to_intersect.end())) {
 
-			if ((*it_pwset1 < *it_pwset2) && ((*it_pwset1).get_fluent_based_id().compare((*it_pwset2).get_fluent_based_id()) != 0)) {
+			if ((*it_pwset1 < *it_pwset2) && (it_pwset1->get_fluent_based_id() != it_pwset2->get_fluent_based_id())) {
 				ret.erase(it_pwset1++);
-			} else if ((*it_pwset2 < *it_pwset1) && ((*it_pwset1).get_fluent_based_id().compare((*it_pwset2).get_fluent_based_id()) != 0)) {
+			} else if ((*it_pwset2 < *it_pwset1) && (it_pwset1->get_fluent_based_id() != it_pwset2->get_fluent_based_id())) {
 				++it_pwset2;
 			} else { // *it_pwset1 == *it_pwset2
 				++it_pwset1;
@@ -416,47 +429,35 @@ kworld_ptr_set kstate::get_D_reachable_worlds(const agent_set & ags, const kworl
 	return ret;
 }
 
-void kstate::get_all_reachable_worlds(const kworld_ptr & kw, kworld_ptr_set & reached_worlds, const std::map<kworld_ptr, kworld_ptr_set> & adj_list) const
+void kstate::get_all_reachable_worlds_edges(const kworld_ptr & world, kworld_ptr_set & reached_worlds, kedge_map & reached_edges) const
 {
-	kworld_ptr_set::const_iterator it_kwps;
+	auto world_edges = m_edges.at(world);
+	std::map<agent, kworld_ptr_set>::const_iterator it_agkw;
+	kworld_ptr_set::const_iterator it_kws;
 
-	//reached_worlds.insert(kw);
-	kworld_ptr_set kw_list = adj_list.at(kw);
+	for (it_agkw = world_edges.begin(); it_agkw != world_edges.end(); it_agkw++) {
+        for (it_kws = it_agkw->second.begin(); it_kws != it_agkw->second.end(); it_kws++) {
+            reached_edges[world][it_agkw->first].insert(*it_kws);
 
-	for (it_kwps = kw_list.begin(); it_kwps != kw_list.end(); it_kwps++) {
-		if (reached_worlds.insert(*it_kwps).second) {
-			get_all_reachable_worlds(*it_kwps, reached_worlds, adj_list);
-		}
+            if (reached_worlds.insert(*it_kws).second) {
+                get_all_reachable_worlds_edges(*it_kws, reached_worlds, reached_edges);
+            }
+        }
 	}
 }
 
-void kstate::clean_unreachable_kworlds(std::map<kworld_ptr, kworld_ptr_set> & adj_list)
+void kstate::clean_unreachable_kworlds()
 {
-
 	kworld_ptr_set reached_worlds;
-	kedge_ptr_set reached_edges;
+	kedge_map reached_edges;
 
 	kedge_ptr_set::const_iterator it_keps;
 
 	reached_worlds.insert(get_pointed());
-	get_all_reachable_worlds(get_pointed(), reached_worlds, adj_list);
-
-	for (it_keps = m_edges.begin(); it_keps != m_edges.end(); it_keps++) {
-		if (reached_worlds.find(it_keps->get_from()) != reached_worlds.end()) {
-			reached_edges.insert(*it_keps);
-		}/* else {
-			adj_list[it_keps->get_from()].erase(it_keps->get_to());
-
-			if (adj_list.at(it_keps->get_from()).size() == 0) {
-				adj_list.erase(it_keps->get_from());
-				//reached_worlds.erase(it_keps->get_from());
-			}
-		}*/
-	}
+    get_all_reachable_worlds_edges(get_pointed(), reached_worlds, reached_edges);
 
 	set_worlds(reached_worlds);
 	set_edges(reached_edges);
-
 }
 
 
@@ -469,8 +470,8 @@ automaton kstate::kstate_to_automaton(/*const std::map<kworld_ptr, kworld_ptr_se
 	kbislabel_map label_map; // Map: from -> (to -> ag_set)
 
 	automaton *a;
-	int Nvertex = get_worlds().size();
-	int ag_set_size = domain::get_instance().get_agents().size();
+	unsigned long Nvertex = get_worlds().size();
+    unsigned long ag_set_size = domain::get_instance().get_agents().size();
 	//BIS_ADAPTATION For the loop that identifies the id (We add one edge for each node)
 	v_elem *Vertex;
 
@@ -530,12 +531,24 @@ automaton kstate::kstate_to_automaton(/*const std::map<kworld_ptr, kworld_ptr_se
 
 
 	//BIS_ADAPTATION For the loop that identifies the id (We add one potential label for each node)
-	int bhtabSize = ag_set_size + c;
+    unsigned long bhtabSize = ag_set_size + c;
 
 	//std::cerr << "\nDEBUG: Inizializzazione Behavs\n";
 
 	//BIS_ADAPTATION (Moved down here)
-	for (it_keps = m_edges.begin(); it_keps != m_edges.end(); it_keps++) {
+	kedge_map::const_iterator it_kem;
+	std::map<agent, kworld_ptr_set>::const_iterator it_agkw;
+
+	for (it_kem = m_edges.begin(); it_kem != m_edges.end(); it_kem++) {
+        for (it_agkw = it_kem->second.begin(); it_agkw != it_kem->second.end(); it_agkw++) {
+            for (it_kwps = it_agkw->second.begin(); it_kwps != it_agkw->second.end(); it_kwps++) {
+                label_map[it_kem->first][*it_kwps].insert(agent_to_label.at(it_agkw->first));
+                Vertex[index_map[it_kem->first]].ne++;
+            }
+        }
+	}
+
+	/*for (it_keps = m_edges.begin(); it_keps != m_edges.end(); it_keps++) {
 
 		//DEBUG:Change this
 		// if (adj_list[it_keps->get_from()][it_keps->get_to()].empty())
@@ -545,7 +558,7 @@ automaton kstate::kstate_to_automaton(/*const std::map<kworld_ptr, kworld_ptr_se
 
 		label_map[it_keps->get_from()][it_keps->get_to()].insert(agent_to_label.at(it_keps->get_label()));
 		Vertex[index_map[it_keps->get_from()]].ne++;
-	}
+	}*/
 
 	i = 0;
 	for (it_kwps = m_worlds.begin(); it_kwps != m_worlds.end(); it_kwps++) {
@@ -600,7 +613,7 @@ automaton kstate::kstate_to_automaton(/*const std::map<kworld_ptr, kworld_ptr_se
 	//	}
 	//
 	// Building the automaton
-	int Nbehavs = bhtabSize;
+	unsigned long Nbehavs = bhtabSize;
 	a = (automaton *) malloc(sizeof(automaton));
 	a->Nvertex = Nvertex;
 	a->Nbehavs = Nbehavs;
@@ -615,11 +628,12 @@ automaton kstate::kstate_to_automaton(/*const std::map<kworld_ptr, kworld_ptr_se
 void kstate::automaton_to_kstate(const automaton & a, const std::vector<kworld_ptr> & kworld_vec, const std::map<bis_label, agent> & label_to_agent)
 {
 	kworld_ptr_set worlds;
-	kedge_ptr_set edges;
+	kedge_map edges;
 	// The pointed world does not change when we calculate the minimum bisimilar state
 	// Hence we do not need to update it
 
-	int i, j, k, label, agents_size = domain::get_instance().get_agents().size();
+	unsigned long agents_size = domain::get_instance().get_agents().size();
+	int i, j, k, label;
 
 	for (i = 0; i < a.Nvertex; i++) {
 		if (a.Vertex[i].ne > 0) {
@@ -629,14 +643,13 @@ void kstate::automaton_to_kstate(const automaton & a, const std::vector<kworld_p
 				for (k = 0; k < a.Vertex[i].e[j].nbh; k++) {
 					label = a.Vertex[i].e[j].bh[k];
 					if (label < agents_size) {
-						edges.insert(kstore::get_instance().add_edge(kedge(kworld_vec[i], kworld_vec[a.Vertex[i].e[j].tv], label_to_agent.at(label))));
+						edges[kworld_vec[i]][label_to_agent.at(label)].insert(kworld_vec[a.Vertex[i].e[j].tv]);
+//						edges.insert(kstore::get_instance().add_edge(kedge(kworld_vec[i], kworld_vec[a.Vertex[i].e[j].tv], label_to_agent.at(label))));
 					}
 				}
 			}
 		}
-
 	}
-
 
 	set_worlds(worlds);
 	set_edges(edges);
@@ -665,15 +678,7 @@ void kstate::calc_min_bisimilar()
 
 	}
 
-
-	std::map<kworld_ptr, kworld_ptr_set> adj_list;
-	kedge_ptr_set::const_iterator it_keps;
-
-	for (it_keps = m_edges.begin(); it_keps != m_edges.end(); it_keps++) {
-		adj_list[it_keps->get_from()].insert(it_keps->get_to());
-	}
-
-	clean_unreachable_kworlds(adj_list);
+	clean_unreachable_kworlds();
 
 	//std::cerr << "\nDEBUG: INIZIO BISIMULATION IN KSTATE\n" << std::flush;
 	std::vector<kworld_ptr> kworld_vec; // Vector of all kworld_ptr
@@ -842,9 +847,8 @@ void kstate::generate_initial_kedges()
 				kwptr_tmp1 = *it_kwps_1;
 				kwptr_tmp2 = *it_kwps_2;
 
-				add_edge(kedge(kwptr_tmp1, kwptr_tmp2, *i));
-				add_edge(kedge(kwptr_tmp2, kwptr_tmp1, *i));
-
+				add_edge(kwptr_tmp1, kwptr_tmp2, *i);
+				add_edge(kwptr_tmp2, kwptr_tmp1, *i);
 			}
 		}
 	}
@@ -879,12 +883,12 @@ void kstate::remove_initial_kedge(const fluent_formula & known_ff, agent ag)
 			kwptr_tmp1 = *it_kwps_1;
 			kwptr_tmp2 = *it_kwps_2;
 			if (kwptr_tmp1.get_ptr()->entails(known_ff) && !kwptr_tmp2.get_ptr()->entails(known_ff)) {
-				remove_kedge(kedge(kwptr_tmp1, kwptr_tmp2, ag));
-				remove_kedge(kedge(kwptr_tmp2, kwptr_tmp1, ag));
+				remove_kedge(kwptr_tmp1, kwptr_tmp2, ag);
+				remove_kedge(kwptr_tmp2, kwptr_tmp1, ag);
 			} else if (kwptr_tmp2.get_ptr()->entails(known_ff) && !kwptr_tmp1.get_ptr()->entails(known_ff)) {
 
-				remove_kedge(kedge(kwptr_tmp2, kwptr_tmp1, ag));
-				remove_kedge(kedge(kwptr_tmp1, kwptr_tmp2, ag));
+				remove_kedge(kwptr_tmp2, kwptr_tmp1, ag);
+				remove_kedge(kwptr_tmp1, kwptr_tmp2, ag);
 			}
 		}
 	}
@@ -1011,9 +1015,30 @@ void kstate::print() const
 	counter = 1;
 	std::cout << std::endl;
 	std::cout << "*******************************************************************" << std::endl;
-	kedge_ptr_set::const_iterator it_keset;
+
+//	kedge_ptr_set::const_iterator it_keset;
+	kedge_map::const_iterator it_kem;
+	std::map<agent, kworld_ptr_set>::const_iterator it_agkw;
+
 	std::cout << "Edge List:" << std::endl;
-	for (it_keset = get_edges().begin(); it_keset != get_edges().end(); it_keset++) {
+
+    for (it_kem = m_edges.begin(); it_kem != m_edges.end(); it_kem++) {
+        for (it_agkw = it_kem->second.begin(); it_agkw != it_kem->second.end(); it_agkw++) {
+            for (it_kwset = it_agkw->second.begin(); it_kwset != it_agkw->second.end(); it_kwset++) {
+                std::cout << "E-" << counter << ": (";
+                printer::get_instance().print_list(it_kem->first.get_fluent_set());
+                std::cout << "," << it_kem->first.get_repetition();
+                std::cout << ") - (";
+                printer::get_instance().print_list(it_kwset->get_fluent_set());
+                std::cout << "," << it_kwset->get_repetition();
+                std::cout << ") ag:" << domain::get_instance().get_grounder().deground_agent(it_agkw->first);
+                std::cout << std::endl;
+                counter++;
+            }
+        }
+    }
+
+	/*for (it_keset = get_edges().begin(); it_keset != get_edges().end(); it_keset++) {
 
 		std::cout << "E-" << counter << ": (";
 		printer::get_instance().print_list(it_keset->get_from().get_fluent_set());
@@ -1025,7 +1050,7 @@ void kstate::print() const
 		std::cout << std::endl;
 		counter++;
 
-	}
+	}*/
 	std::cout << "*******************************************************************" << std::endl;
 }
 
@@ -1100,10 +1125,30 @@ void kstate::print_graphviz(std::ostream & graphviz) const
 
 	std::map < std::tuple<std::string, std::string>, std::set<std::string> > edges;
 
-	kedge_ptr_set::const_iterator it_keset;
+//	kedge_ptr_set::const_iterator it_keset;
 	std::tuple<std::string, std::string> tmp_tuple;
-	std::string tmp_string = "";
-	for (it_keset = get_edges().begin(); it_keset != get_edges().end(); it_keset++) {
+	std::string tmp_string;
+
+    kedge_map::const_iterator it_kem;
+    std::map<agent, kworld_ptr_set>::const_iterator it_agkw;
+
+    for (it_kem = m_edges.begin(); it_kem != m_edges.end(); it_kem++) {
+        for (it_agkw = it_kem->second.begin(); it_agkw != it_kem->second.end(); it_agkw++) {
+            for (it_kwset = it_agkw->second.begin(); it_kwset != it_agkw->second.end(); it_kwset++) {
+                tmp_string = "_" + std::to_string(map_world_to_index[it_kem->first.get_fluent_set()]);
+                tmp_string.insert(0, 1, map_rep_to_name[it_kem->first.get_repetition()]);
+                std::get<0>(tmp_tuple) = tmp_string;
+
+                tmp_string = "_" + std::to_string(map_world_to_index[it_kwset->get_fluent_set()]);
+                tmp_string.insert(0, 1, map_rep_to_name[it_kwset->get_repetition()]);
+                std::get<1>(tmp_tuple) = tmp_string;
+
+                edges[tmp_tuple].insert(domain::get_instance().get_grounder().deground_agent(it_agkw->first));
+            }
+        }
+    }
+
+	/*for (it_keset = get_edges().begin(); it_keset != get_edges().end(); it_keset++) {
 		tmp_string = "_" + std::to_string(map_world_to_index[it_keset->get_from().get_fluent_set()]);
 		tmp_string.insert(0, 1, map_rep_to_name[it_keset->get_from().get_repetition()]);
 		std::get<0>(tmp_tuple) = tmp_string;
@@ -1113,7 +1158,7 @@ void kstate::print_graphviz(std::ostream & graphviz) const
 		std::get<1>(tmp_tuple) = tmp_string;
 
 		edges[tmp_tuple].insert(domain::get_instance().get_grounder().deground_agent(it_keset->get_label()));
-	}
+	}*/
 
 
 	std::map < std::tuple<std::string, std::string>, std::set < std::string>>::iterator it_map;
