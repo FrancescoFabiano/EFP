@@ -63,10 +63,10 @@ void kstate::add_edge(const kworld_ptr & from, const kworld_ptr & to, const agen
 }
 
 void kstate::remove_kedge(const kworld_ptr & from, const kworld_ptr & to, const agent & ag) {
-    auto from_edges = m_edges[from];
+    auto from_edges = m_edges.at(from);
 
     if (!from_edges.empty()) {
-        kworld_ptr_set kwset = from_edges[ag];
+        kworld_ptr_set kwset = from_edges.at(ag);
 
         if (!kwset.empty()) {
             kwset.erase(to);
@@ -365,8 +365,7 @@ kworld_ptr_set kstate::get_D_reachable_worlds(const agent_set & ags, const kworl
 	/**@bug: Notion of D-Reachable is correct (page 24 of Reasoning about Knowledge)*/
     std::cerr << "\nERROR: D_REACHABLILITY not yet Implemented correctly\n";
     exit(1);
-
-	auto it_agset = ags.begin();
+	/*auto it_agset = ags.begin();
 	kworld_ptr_set ret = get_B_reachable_worlds((*it_agset), world);
 	it_agset++;
 
@@ -392,7 +391,7 @@ kworld_ptr_set kstate::get_D_reachable_worlds(const agent_set & ags, const kworl
 		ret.erase(it_pwset1, ret.end());
 
 	}
-	return ret;
+	return ret;*/
 }
 
 void kstate::get_all_reachable_worlds_edges(const kworld_ptr & world, kworld_ptr_set & reached_worlds, kedge_map & reached_edges) const
