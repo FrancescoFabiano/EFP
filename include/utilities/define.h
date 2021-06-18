@@ -239,25 +239,6 @@ enum state_type
 };
 
 /*****************Kripke States*****************/
-class kedge;
-typedef std::string kedge_id; /**< \brief The id of an \ref kedge in a \ref kstate.
-                                * 
-                                * The id is calculated through an hash (kedge::hash_info_into_id()) of the info of the \ref kedge.
-                                *
-                                * This id is used to extract the \ref kedge from the \ref kstore to not create a new every time
-                                * but to access the already created ones.
-                                * @see kedge and kstore*/
-/*typedef std::shared_ptr<const kedge> kedge_ptr;*/ /*< \brief A std::shared_pointer to a \ref kedge usually stored in \ref kstore.
-                                                * @see kedge and kstore.
-                                                * \todo transform into class for < into set, also add = and empty constructor, operator*,operator ->, = with string.*/
-class kedge_ptr;
-typedef std::set<kedge_ptr> kedge_ptr_set; /**< \brief A set of \ref kedge_ptr.
-                                            * 
-                                            * Mainly used to store all the \ref kedge of a \ref kstate without wasting memory.
-                                            *
-                                            * \todo The operator < for std::shared_ptr must be implemented
-                                            * @see kedge and kstate*/
-
 class kworld;
 ///\todo: remove string from code because they have terrible performances
 typedef std::string kworld_id; /**< \brief The id of a \ref kworld in a \ref kstate.

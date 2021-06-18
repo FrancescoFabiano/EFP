@@ -52,7 +52,7 @@ private:
      * @return the unique numerical id of the world.
      * 
      * @warning Useless if not moved to \ref kstore.*/
-    unsigned int hash_fluents_into_numerical_id(const fluent_set& description);
+    static unsigned int hash_fluents_into_numerical_id(const fluent_set & description);
     /** \brief Function used to hash the the info of *this* in a unique numerical id.
      *
      * @return the unique numerical id of *this*. */
@@ -78,7 +78,7 @@ private:
      * 
      * \todo Add \ref static_law as static class and use it to check.
      */
-    bool consistent(const fluent_set & to_check);
+    static bool consistent(const fluent_set & to_check);
 
     /** \brief Function that uses the info of *this* to set its \ref m_id.*/
     void set_id();
@@ -104,7 +104,7 @@ private:
      * Only accessible by the \ref kworld_ptr.
      * 
      * @return the int that is the unique id of *this*.*/
-    int get_numerical_id() const;
+    unsigned int get_numerical_id() const;
 
 public:
     /** \brief Empty constructor, call the default constructor of all the fields.*/
@@ -136,7 +136,7 @@ public:
      * 
      * \todo To implement also whit \ref kworld_ptr to the \ref kworld?
      * \todo check consistency on constructor?*/
-    bool entails(fluent to_check) const;
+    bool entails(const fluent& to_check) const;
     /**
      *\brief Function that check the entailment of a conjunctive set of \ref fluent in *this*.
      * 
@@ -301,7 +301,7 @@ public:
     /** \brief Function that return the field m_numerical_id of the pointed \ref kworld + \ref m_repetition.
      *     
      * @return the numerical id that is the id of the \ref kworld pointed by \ref m_ptr + \ref m_repetition.*/
-    int get_numerical_id() const;
+    unsigned int get_numerical_id() const;
 
 
     /** \brief Function that check the entailment of a single \ref fluent in \ref m_ptr.
@@ -311,7 +311,7 @@ public:
      *
      * @return true: \p to_check is entailed;
      * @return false: \p -to_check is entailed.*/
-    bool entails(fluent to_check) const;
+    bool entails(const fluent& to_check) const;
     /**
      *\brief Function that check the entailment of a conjunctive set of \ref fluent in \ref m_ptr.
      * 

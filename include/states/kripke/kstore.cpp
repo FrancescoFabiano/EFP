@@ -19,25 +19,6 @@ kstore& kstore::get_instance()
 	return instance;
 }
 
-const kedge_ptr kstore::add_edge(const kedge & to_add)
-{
-	/*      kedge_set::iterator it_edset;
-	      it_edset = m_created_edges.find(edge);
-	      if (it_edset != m_created_edges.end()) {
-		  return *it_edset;
-	      }
-	      else*/
-	//It returns the pointer to the newly inserted element if it doesn't exit (The old one otherwise)
-	//The pair is <iterator,bool>
-	//return std::get<0>(m_created_edges.insert(edge));
-	//kedge tmp = ;
-	/** \todo Maybe we need to implement the operato < so its unique set based on the pointed object.*/
-	auto tmp_ptr = std::make_shared<const kedge>(*(std::get<0>(m_created_edges.insert(to_add))));
-	//*tmp_ptr = tmp;
-	return tmp_ptr;
-
-}
-
 const kworld_ptr kstore::add_world(const kworld & to_add)
 {
 	//It returns the pointer to the newly inserted element if it doesn't exit (The old one otherwise)

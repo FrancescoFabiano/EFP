@@ -18,7 +18,6 @@
  */
 #pragma once
 
-#include "kedge.h"
 #include "kworld.h"
 #include "kstore.h"
 

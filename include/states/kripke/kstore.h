@@ -25,19 +25,12 @@
 
 #include <set>
 #include "kworld.h"
-#include "kedge.h"
 
-
-typedef std::set<kedge> kedge_set; /**< \brief A set of \ref kedge, used to store all the created ones.*/
 typedef std::set<kworld> kworld_set; /**< \brief A set of \ref kworld, used to store all the created ones.*/
 
 class kstore
 {
 private:
-    /** \brief All the created \ref kedge, all the other class only have pointers to elements of this set.
-     * 
-     * \todo should it be static?*/
-    kedge_set m_created_edges;
     /** \brief All the created \ref kworld, all the other class only have pointers to elements of this set.
      * 
      * \todo should it be static?*/
@@ -49,18 +42,7 @@ public:
 
     /** \brief To get always (the same instance of) *this* and the same instantiated fields.*/
     static kstore& get_instance();
-    
-    /** \brief Function that return the pointer to the given \ref kedge.
-     * 
-     * If the \ref kedge didn't exist then it is inserted to \ref m_created_edges and then the pointer is returned;
-     * if it existed a pointer to the already existing version is returned.
-     * 
-     * @param[in] to_add: the \ref kedge to add to the collection of created edges.
-     * 
-     * @return the \ref kedge_ptr to \p to_add.
-     * 
-     * \todo Param ok because set makes copy?*/
-    const kedge_ptr add_edge(const kedge & to_add);
+
     /** \brief Function that return the pointer to the given \ref kworld.
      * 
      * If the \ref kworld didn't exist then it is inserted to \ref m_created_worlds and then the pointer is returned;

@@ -207,7 +207,6 @@ const kstate & union_update::u_update(const kstate & state, const action & act)
         }
     }
     return ret;
-
 }
 
 template <class T>

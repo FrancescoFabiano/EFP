@@ -14,9 +14,7 @@
 
 #include <stdexcept>
 
-kworld::kworld()
-{
-}
+kworld::kworld() = default;
 
 kworld::kworld(const fluent_set & description)
 {
@@ -58,7 +56,7 @@ kworld_id kworld::hash_fluents_into_id()
 	return hash_fluents_into_id(m_fluent_set);
 }
 
-unsigned int kworld::hash_fluents_into_numerical_id(const fluent_set& fl)
+unsigned int kworld::hash_fluents_into_numerical_id(const fluent_set & fl)
 {
 	std::string ret;
 	fluent_set::const_iterator it_fl;
@@ -129,12 +127,12 @@ kworld_id kworld::get_id() const
 	return m_id;
 }
 
-int kworld::get_numerical_id() const
+unsigned int kworld::get_numerical_id() const
 {
 	return m_numerical_id;
 }
 
-bool kworld::entails(fluent to_check) const
+bool kworld::entails(const fluent& to_check) const
 {
 	return(m_fluent_set.find(to_check) != m_fluent_set.end());
 }
@@ -145,7 +143,7 @@ bool kworld::entails(fluent to_check) const
 bool kworld::entails(const fluent_set & to_check) const
 {
 	//fluent_set expresses conjunctive set of \ref fluent
-	if (to_check.size() == 0) {
+	if (to_check.empty()) {
 		return true;
 	}
 	fluent_set::const_iterator it_fl;
@@ -162,7 +160,7 @@ bool kworld::entails(const fluent_set & to_check) const
  */
 bool kworld::entails(const fluent_formula & to_check) const
 {
-	if (to_check.size() == 0) {
+	if (to_check.empty()) {
 		return true;
 	}
 	fluent_formula::const_iterator it_fl;
@@ -212,9 +210,7 @@ void kworld::print() const
 
 /*-***************************************************************************************************************-*/
 
-kworld_ptr::kworld_ptr()
-{
-}
+kworld_ptr::kworld_ptr() = default;
 
 kworld_ptr::kworld_ptr(const std::shared_ptr<const kworld> & ptr, unsigned short repetition)
 {
@@ -278,7 +274,7 @@ kworld_id kworld_ptr::get_id() const
 	exit(1);
 }
 
-int kworld_ptr::get_numerical_id() const
+unsigned int kworld_ptr::get_numerical_id() const
 {
 	if (m_ptr != nullptr) {
 		return(get_ptr()->get_numerical_id());
@@ -298,7 +294,7 @@ unsigned short kworld_ptr::get_repetition() const
 
 }
 
-bool kworld_ptr::entails(fluent to_check) const
+bool kworld_ptr::entails(const fluent & to_check) const
 {
 	return m_ptr->entails(to_check);
 }
