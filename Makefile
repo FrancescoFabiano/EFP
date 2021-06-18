@@ -4,7 +4,7 @@ OBJS	=	$(BUILD_DIR)/bison.o $(BUILD_DIR)/lex.o $(BUILD_DIR)/main.o \
 			$(BUILD_DIR)/grounder.o $(BUILD_DIR)/printer.o $(BUILD_DIR)/asp_maker.o \
 			$(BUILD_DIR)/action.o $(BUILD_DIR)/helper.o $(BUILD_DIR)/initially.o \
 			$(BUILD_DIR)/attitude.o $(BUILD_DIR)/attitudes_table.o \
-			$(BUILD_DIR)/kstore.o $(BUILD_DIR)/kedge.o $(BUILD_DIR)/kworld.o $(BUILD_DIR)/kstate.o \
+			$(BUILD_DIR)/kstore.o $(BUILD_DIR)/kworld.o $(BUILD_DIR)/kstate.o \
 			$(BUILD_DIR)/pstore.o $(BUILD_DIR)/pworld.o $(BUILD_DIR)/pstate.o \
 			$(BUILD_DIR)/pevent.o $(BUILD_DIR)/pem.o $(BUILD_DIR)/pem_store.o $(BUILD_DIR)/pem_parser.o $(BUILD_DIR)/union_update.o \
 			$(BUILD_DIR)/reader.o \
@@ -209,7 +209,7 @@ $(BUILD_DIR)/planning_graph.o: $(HEURISTIC_DIR)/planning_graph.cpp $(HEURISTIC_D
 
 ##KRIPKE STATES
 $(BUILD_DIR)/kstate.o: $(S_KRIPE_DIR)/kstate.cpp $(S_KRIPE_DIR)/kstate.h \
-					   $(S_KRIPE_DIR)/kworld.h $(S_KRIPE_DIR)/kedge.h $(S_KRIPE_DIR)/kstore.h \
+					   $(S_KRIPE_DIR)/kworld.h $(S_KRIPE_DIR)/kstore.h \
 					   $(ACTION_DIR)/action.h \
 					   $(DOMAIN_DIR)/initially.h \
 					   $(UTILITIES_DIR)/helper.h \
@@ -223,14 +223,8 @@ $(BUILD_DIR)/kworld.o: $(S_KRIPE_DIR)/kworld.cpp $(S_KRIPE_DIR)/kworld.h \
 		$(dir_guard)
 		$(CC) $(CFLAGS) -c $(S_KRIPE_DIR)/kworld.cpp -o $(BUILD_DIR)/kworld.o
 
-$(BUILD_DIR)/kedge.o: $(S_KRIPE_DIR)/kedge.cpp $(S_KRIPE_DIR)/kedge.h \
-					  $(S_KRIPE_DIR)/kworld.h \
-					  $(UTILITIES_DIR)/define.h
-		$(dir_guard)
-		$(CC) $(CFLAGS) -c $(S_KRIPE_DIR)/kedge.cpp -o $(BUILD_DIR)/kedge.o
-
 $(BUILD_DIR)/kstore.o: $(S_KRIPE_DIR)/kstore.cpp $(S_KRIPE_DIR)/kstore.h \
-					   $(S_KRIPE_DIR)/kworld.h $(S_KRIPE_DIR)/kedge.h \
+					   $(S_KRIPE_DIR)/kworld.h \
 					   $(UTILITIES_DIR)/define.h
 		$(dir_guard)
 		$(CC) $(CFLAGS) -c $(S_KRIPE_DIR)/kstore.cpp -o $(BUILD_DIR)/kstore.o

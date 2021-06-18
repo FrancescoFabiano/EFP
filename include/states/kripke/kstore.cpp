@@ -11,7 +11,7 @@
 
 kstore::kstore() = default;
 
-kstore& kstore::get_instance()
+kstore & kstore::get_instance()
 {
 	static kstore instance;
 	return instance;

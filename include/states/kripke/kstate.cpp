@@ -13,7 +13,7 @@
 
 #include "kstate.h"
 #include "../../update/union_update.h"
-#include "../../utilities/helper_t.h"
+#include "../../utilities/helper_t.ipp"
 
 /**** GETTERS/SETTERS ****/
 void kstate::set_worlds(const kworld_ptr_set & to_set)
@@ -744,7 +744,7 @@ void kstate::add_initial_kworld(const kworld & possible_add)
 {
 	initially ini_conditions = domain::get_instance().get_initial_description();
 
-	switch ( ini_conditions.get_ini_restriction() ) {
+	switch (ini_conditions.get_ini_restriction()) {
 	case S5:
 	{
 		/* Since the common knowledge is on all the agent it means that every possible \ref kworld

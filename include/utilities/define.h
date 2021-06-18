@@ -239,6 +239,8 @@ enum state_type
 };
 
 /*****************Kripke States*****************/
+class kstore;
+
 class kworld;
 ///\todo: remove string from code because they have terrible performances
 typedef std::string kworld_id; /**< \brief The id of a \ref kworld in a \ref kstate.

@@ -1897,7 +1897,6 @@ automaton* bisimulation::merge_kstate_to_automaton(const kstate & ks1, const kst
 
 	// Initializating vertices
 	kworld_ptr_set::const_iterator it_kwps;
-	kedge_ptr_set::const_iterator it_keps;
 	kbislabel_map::const_iterator it_klm;
 	bis_label_set::const_iterator it_bislab;
 	std::map<kworld_ptr, bis_label_set>::const_iterator it_kw_bislab;
@@ -1952,15 +1951,26 @@ automaton* bisimulation::merge_kstate_to_automaton(const kstate & ks1, const kst
 
 	int bhtabSize = ag_set_size + c;
 
-	for (it_keps = ks1.get_edges().begin(); it_keps != ks1.get_edges().end(); it_keps++) {
-		label_map1[it_keps->get_from()][it_keps->get_to()].insert(agent_to_label.at(it_keps->get_label()));
-		Vertex[index_map1[it_keps->get_from()]].ne++;
-	}
+    kedge_map::const_iterator it_kem;
+    std::map<agent, kworld_ptr_set>::const_iterator it_agkw;
 
-	for (it_keps = ks2.get_edges().begin(); it_keps != ks2.get_edges().end(); it_keps++) {
-		label_map2[it_keps->get_from()][it_keps->get_to()].insert(agent_to_label.at(it_keps->get_label()));
-		Vertex[index_map2[it_keps->get_from()]].ne++;
-	}
+    for (it_kem = ks1.get_edges().begin(); it_kem != ks1.get_edges().end(); it_kem++) {
+        for (it_agkw = it_kem->second.begin(); it_agkw != it_kem->second.end(); it_agkw++) {
+            for (it_kwps = it_agkw->second.begin(); it_kwps != it_agkw->second.end(); it_kwps++) {
+                label_map1[it_kem->first][*it_kwps].insert(agent_to_label.at(it_agkw->first));
+                Vertex[index_map1[it_kem->first]].ne++;
+            }
+        }
+    }
+
+    for (it_kem = ks2.get_edges().begin(); it_kem != ks2.get_edges().end(); it_kem++) {
+        for (it_agkw = it_kem->second.begin(); it_agkw != it_kem->second.end(); it_agkw++) {
+            for (it_kwps = it_agkw->second.begin(); it_kwps != it_agkw->second.end(); it_kwps++) {
+                label_map2[it_kem->first][*it_kwps].insert(agent_to_label.at(it_agkw->first));
+                Vertex[index_map2[it_kem->first]].ne++;
+            }
+        }
+    }
 
 	for (i = 0; i < Nvertex; i++) {
 		Vertex[i].ne++; //Self loop bisimulation

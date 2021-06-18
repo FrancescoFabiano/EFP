@@ -41,7 +41,7 @@ private:
 public:
 
     /** \brief To get always (the same instance of) *this* and the same instantiated fields.*/
-    static kstore& get_instance();
+    static kstore & get_instance();
 
     /** \brief Function that return the pointer to the given \ref kworld.
      * 
