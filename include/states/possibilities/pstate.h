@@ -60,7 +60,7 @@ private:
      *
      * 
      * \todo self-loop?*/
-    const pworld_ptr_set get_B_reachable_worlds(agent ag, const pworld_ptr & world) const;
+    pworld_ptr_set get_B_reachable_worlds(const agent& ag, const pworld_ptr & world) const;
 
     /** \brief Function that returns all the reachable \ref pworld given the \ref agent and the staring \ref pworld.
      * 
@@ -72,11 +72,11 @@ private:
      * @param[in] ag: the label of the \ref kedge that the function follows to check the transitivity.
      * @param[in] world: the pointers to the set of \ref pworld where to start to check the entailment.
      *
-     * @param[out] reached: the set of pointers to all the reachable worlds.
+     * @param[out] ret: the set of pointers to all the reachable worlds.
      *
      * 
      * \todo self-loop?*/
-    bool get_B_reachable_worlds_recoursive(agent ag, const pworld_ptr & world, pworld_ptr_set & reached) const;
+    bool get_B_reachable_worlds_recursive(agent ag, const pworld_ptr & world, pworld_ptr_set & ret) const;
 
     /** \brief Function that returns all the reachable \ref pworld given a set of \ref agent and the staring \ref pworld.
      * 
@@ -93,7 +93,7 @@ private:
      *
      * 
      * \todo self-loop?*/
-    const pworld_ptr_set get_E_reachable_worlds(const agent_set & ags, const pworld_ptr & world) const;
+    pworld_ptr_set get_E_reachable_worlds(const agent_set & ags, const pworld_ptr & world) const;
 
     /** \brief Function that returns all the reachable \ref pworld given a set of \ref agent and the staring \ref pworld.
      * 
@@ -121,7 +121,7 @@ private:
      *
      * 
      * \todo self-loop?*/
-    const pworld_ptr_set get_D_reachable_worlds(const agent_set & ags, const pworld_ptr & world) const;
+    pworld_ptr_set get_D_reachable_worlds(const agent_set & ags, const pworld_ptr & world) const;
 
     /** \brief Function that returns all the reachable \ref pworld (in the *Common Knowledge* sense) given a \ref agent and the staring \ref pworld.
      * 
@@ -136,7 +136,7 @@ private:
      * @return a set of pointers to all the reachable worlds.
      * 
      * \todo self-loop?*/
-    const pworld_ptr_set get_C_reachable_worlds(const agent_set & ags, const pworld_ptr & world) const;
+    pworld_ptr_set get_C_reachable_worlds(const agent_set & ags, const pworld_ptr & world) const;
 
     /** \brief Function that builds the initial Kripke structure given the initial conditions in a structural way.
      *
@@ -188,7 +188,7 @@ private:
      * @param[in] from: the \ref pworld in which \ref agent "ag" currently is
      * @param[in] to: the \ref pworld to remove
      * @param[in] ag: the \ref agent.*/
-    void remove_edge(pworld_ptr & from, const pworld & to, const agent ag);
+    void remove_edge(const pworld_ptr & from, const pworld_ptr & to, const agent & ag);
     /** \brief Function that removes the \ref pedge(s) that imply that \p ag is ignorant about \p known_ff from *this*.
      *  
      * @param[in] known_ff: the \ref fluent_formula known by \p ag.
@@ -201,155 +201,6 @@ private:
      * 
      * @param[in] to_check: the \ref belief_formula to check.*/
     void remove_initial_pedge_bf(const belief_formula &to_check);
-
-    /** \brief Function that adds the given beliefs to the \ref pworld "world".
-     *
-     * @param[in] world: the \ref pworld.
-     * @param[in] beliefs: a \ref pworld_map containing the beliefs.*/
-    void add_pworld_beliefs(const pworld_ptr & world, const pworld_map & beliefs);
-
-    /** \brief Function that copies the \ref pworld(s) and the beliefs of the oblivious agents in the new \ref pstate.
-     *
-     * @param[in] ret: the new \ref pstate.
-     * @param[in] oblivious_obs_agents: the oblivious \ref agent(s).*/
-    void maintain_oblivious_believed_pworlds(pstate &ret, const agent_set &oblivious_obs_agents) const;
-    /** \brief Function that recursively calculates the \ref pworld resulting from the transition function.
-     *
-     * @param[in] act: the \ref ONTIC \ref action to be applied on *this*.
-     * @param[in] ret: the \ref pstate resulting from the \ref action.
-     * @param[in] current_pw: the world being currently calculated.
-     * @param[in] calculated: a map that keeps track of the results of the transition function.
-     * @param[in] oblivious_obs_agents: the oblivious \ref agent set.
-     * @return the \ref pworld resulting from the application of the transition function on "current_pw".*/
-    pworld_ptr execute_ontic_helper(const action &act, pstate &ret, const pworld_ptr &current_pw, transition_map &calculated, agent_set &oblivious_obs_agents) const;
-    /** \brief Function that recursively calculates the \ref pworld resulting from the transition function.
-     *
-     * @param[in] effects: the effects of the \ref SENSING/\ref ANNOUNCEMENT \ref action to be applied on *this*.
-     * @param[in] ret: the \ref pstate resulting from the \ref action.
-     * @param[in] current_pw: the world being currently calculated.
-     * @param[in] calculated: a map that keeps track of the results of the transition function.
-     * @param[in] partially_obs_agents: the partially observant \ref agent set.
-     * @param[in] oblivious_obs_agents: the oblivious \ref agent set.
-     * @param[in] previous_entailment: the value of the coming state entailment (if first is pointed).
-     * @return the \ref pworld resulting from the application of the transition function on "current_pw".*/
-    pworld_ptr execute_sensing_announcement_helper(const fluent_formula &effects, pstate &ret, const pworld_ptr &current_pw, transition_map &calculated, agent_set &partially_obs_agents, agent_set &oblivious_obs_agents, bool previous_entailment) const;
-    /** \brief Function that applies the transition function for a \ref ONTIC \ref action effect on *this* implementing the possibilities semantic.
-     *
-     * The transition function is applied accordingly to mA^rho. Check the paper for more information.
-     *
-     * @see action.
-     *
-     * @param[in] act: the \ref ONTIC action to be applied on *this*.
-     * @return the \ref pstate that results after the execution.*/
-    pstate execute_ontic(const action &act) const;
-    /** \brief Function that applies the transition function for a \ref SENSING \ref action effect on *this* implementing the possibilities semantic.
-     *
-     * The transition function is applied accordingly to mA^rho. Check the paper for more information.
-     *
-     * @see action.
-     *
-     * @param[in] act: the \ref SENSING action to be applied on *this*.
-     * @return the \ref pstate that results after the execution.*/
-    pstate execute_sensing(const action &act) const;
-    /** \brief Function that applies the transition function for a \ref ANNOUNCEMENT \ref action effect on *this* implementing the possibilities semantic.
-     *
-     * The transition function is applied accordingly to mA^rho. Check the paper for more information.
-     *
-     * @see action.
-     *
-     * @param[in] act: the \ref ANNOUNCEMENT action to be applied on *this*.
-     * @return the \ref pstate that results after the execution.*/
-    pstate execute_announcement(const action &act) const;
-
-
-    /** \brief Function that applies the transition function for a \ref SENSING \ref action effect on *this* implementing the possibilities semantic with attitudes.
-     *
-     * This new function is introduced as it won't look at the pointed world to extrapolate the truth value (we have non-consistent belief)
-     * The transition function is applied accordingly to mA^rho. Check the paper IJCAI 21 for more information.
-     *
-     * @see action.
-     *
-     * @param[in] act: the \ref SENSING action to be applied on *this*.
-     * @return the \ref pstate that results after the execution.*/
-    pstate execute_sensing_att(const action &act) const;
-    /** \brief Function that applies the transition function for a \ref ANNOUNCEMENT \ref action effect on *this* implementing the possibilities semantic with attitudes.
-     *
-     * This new function is introduced as it won't look at the pointed world to extrapolate the truth value (we have non-consistent belief)
-     * The transition function is applied accordingly to mA^rho. Check the paper IJCAI 21 for more information.
-     *
-     * @see action.
-     *
-     * @param[in] act: the \ref ANNOUNCEMENT action to be applied on *this*.
-     * @return the \ref pstate that results after the execution.*/
-    pstate execute_announcement_att(const action &act) const;
-
-    /** \brief Function that recursively calculates the \ref pworld resulting from the transition function with attitudes.
-     *
-     * @param[in] effects: the effects of the \ref SENSING/\ref ANNOUNCEMENT \ref action to be applied on *this*.
-     * @param[in] ret: the \ref pstate resulting from the \ref action.
-     * @param[in] current_pw: the world being currently calculated.
-     * @param[in] calculated: a map that keeps track of the results of the transition function.
-     * @param[in] partially_obs_agents: the partially observant \ref agent set.
-     * @param[in] oblivious_obs_agents: the oblivious \ref agent set.
-     * @param[in] fully_att: map that contains the attitudes of the fully observant wrt to the action execution
-     * @param[in] part_att: map that contains the attitudes of the partially observant wrt to the action execution
-     * @param[in] previous_entailment: the value of the coming state entailment (if first is pointed).
-     * @return the \ref pworld resulting from the application of the transition function on "current_pw".*/
-    pworld_ptr execute_sensing_announcement_helper_att(const fluent_formula &effects, pstate &ret, const pworld_ptr &current_pw, transition_map &calculated, agent_set &partially_obs_agents, agent_set &oblivious_obs_agents, const single_attitudes_map & fully_att, const single_attitudes_map & part_att, bool previous_entailment) const;
-
-
-    /**Function that add retrieve the fully_obs attitude for \ref m_agent w.r.t \ref executor and the current state
-     *
-     * @param[in] m_agent: the agent of whom we want to discover the attitude.
-     * @param[in] executor: the agent with respects with \ref m_agent has \ref attitude.
-     * @param[in] table: the map where to check the attitude_condition (fully or partially).
-     * @param[in] is_fully: a boolean that says whether is a fully_obs agent or not.
-     * @return: the attitude that the agent has
-     */
-    agents_attitudes get_attitude(agent m_agent, agent executor, const complete_attitudes_map & table, bool is_fully) const;
-
-
-    /**Function that add retrieve the partially_obs attitude w.r.t \ref executor and the current state
-     *
-     * @param[in] executor: the agent executing the action.
-     * @param[in] agent_set: the set of agents whom we need the attitudes.
-     * @param[in] table: the map where to check the attitude_condition (fully or partially).
-     * @param[in] is_fully: a boolean that says whether is a fully_obs agent or not.
-     * @return: the attitudes that the agents have
-     */
-    single_attitudes_map get_attitudes(agent executor, const agent_set & fully_observant, const complete_attitudes_map & table, bool is_fully) const;
-
-    /**Function that add retrieve the fully_obs attitude w.r.t \ref executor and the current state
-     *
-     * @param[in] executor: the agent executing the action.
-     * @param[in] fully_observant: the set of the fully observant agents.
-     * @return: the fully_obs attitudes that the agents have
-     */
-    single_attitudes_map get_F_attitudes(agent executor, const agent_set & fully_observant) const;
-
-    /**Function that add retrieve the partially_obs attitude w.r.t \ref executor and the current state
-     *
-     * @param[in] executor: the agent executing the action.
-     * @param[in] partially_observant: the set of the partially observant agents.
-     * @return: the partially_obs attitudes that the agents have
-     */
-    single_attitudes_map get_P_attitudes(agent executor, const agent_set & partially_observant) const;
-
-
-    pworld_ptr phi_attitudes(fluent announced_f, pstate &ret, const pworld_ptr &current_pw, transition_map_att &calculated, const single_attitudes_map & attitudes, agent executor = agent()) const;
-
-    pworld_ptr K_attitudes(fluent announced_f, pstate &ret, const pworld_ptr &current_pw, transition_map_att &calculated, const single_attitudes_map & attitudes) const;
-
-    pworld_ptr I_attitudes(fluent announced_f, pstate &ret, const pworld_ptr &current_pw, transition_map_att &calculated, const single_attitudes_map & attitudes) const;
-
-    // pworld_ptr T_attitudes(fluent announced_f, pstate &ret, const pworld_ptr &current_pw, transition_map_att &calculated, const single_attitudes_map & attitudes, bool is_trusty) const;
-
-    pworld_ptr U_attitudes(fluent announced_f, bool ann_f_truth_value, pstate &ret, const pworld_ptr &current_pw, transition_map_att &calculated, const single_attitudes_map & attitudes, unsigned short increase_rep, agent executor = agent()) const;
-
-    pworld_ptr chi_attitudes(fluent announced_f, bool ann_f_truth_value, pstate &ret, const pworld_ptr &current_pw, transition_map_att &calculated, const single_attitudes_map & attitudes, bool trusty_chi, unsigned short increase_rep) const;
-
-
-
 
     void get_all_reachable_worlds(const pworld_ptr & pw, pworld_ptr_set & reached_worlds, pworld_transitive_map & reached_edges) const;
 
@@ -405,7 +256,7 @@ public:
      *
      * @return true: \p to_check is entailed in \p world;
      * @return false: \p -to_check is entailed in \p world.*/
-    bool entails(fluent to_check, const pworld_ptr & world) const;
+    static bool entails(const fluent & to_check, const pworld_ptr & world);
     /**
      *\brief Function that checks the entailment of a conjunctive set of \ref fluent in a given \ref pworld.
      *     @see \ref pworld::entails(const fluent_set &) const
@@ -415,7 +266,7 @@ public:
      *
      * @return true: \p to_check is entailed in \p world;
      * @return false: \p -to_check is entailed in \p world.*/
-    bool entails(const fluent_set & to_check, const pworld_ptr & world) const;
+    static bool entails(const fluent_set & to_check, const pworld_ptr & world) ;
     /**
      *\brief Function that checks the entailment of a conjunctive set of \ref fluent in a given \ref pworld.
      *     @see \ref pworld::entails(const fluent_formula &) const
@@ -425,7 +276,7 @@ public:
      *
      * @return true: \p to_check is entailed in \p world;
      * @return false: \p -to_check is entailed in \p world.*/
-    bool entails(const fluent_formula & to_check, const pworld_ptr & world) const;
+    static bool entails(const fluent_formula & to_check, const pworld_ptr & world) ;
 
     /** \brief Function that checks the entailment of a \ref belief_formula.
      *
@@ -474,54 +325,14 @@ public:
      * \todo self-loop?*/
     bool entails(const formula_list & to_check, const pworld_ptr & world) const;
 
-    void add_world(const pworld & to_add);
+    pworld_ptr add_world(const pworld & world);
 
     /** \brief Function that adds the belief of agent "ag" for the \ref pworld "pw" *this*.
      *
      * @param[in] from: the \ref pworld in which \ref agent "ag" currently is
      * @param[in] to: the \ref pworld believed from \ref agent "ag"
      * @param[in] ag: the \ref agent.*/
-    void add_edge(const pworld_ptr & from, const pworld_ptr & to, agent ag);
-
-    /** \brief Function that adds a \ref pworld to the Kripke structure represented by *this*.
-     *
-     * The \ref pworld is added. The structure only stores the pointer to the \ref pworld so
-     * it is necessary to store the \ref pworld in \ref pstore.
-     * It also uses \ref m_max_depth to avoid clashes with copies of \p world; it
-     * represents the number to give to the pointer of \p word to differentiate it from its copies.
-     * 
-     * @see pworld and pstore.
-     *  
-     * @param[in] to_add: the \ref pworld that has to be added to *this*.
-     * @return The a \ref pworld_ptr to the newly inserted \ref pworld.*/
-    pworld_ptr add_rep_world(const pworld & to_add);
-    /** \brief Function that adds a \ref pworld to the Kripke structure represented by *this* setting its repetition.
-     *
-     * The \ref pworld is added. The structure only stores the pointer to the \ref pworld so
-     * it is necessary to store the \ref pworld in \ref pstore.
-     * It also uses \p repetition to avoid clashes with copies of \p world; it
-     * represents the number to give to the pointer of \p word to differentiate it from its copies.
-     * 
-     * @see pworld and pstore.
-     *  
-     * @param[in] to_add: the \ref pworld that has to be added to *this*.
-     * @param[in] old_repetition: used to distinguish from same level of the structure but derived from different levels of the old structure.
-     * @return The a \ref pworld_ptr to the newly inserted \ref pworld.*/
-    pworld_ptr add_rep_world(const pworld & to_add, unsigned short old_repetition);
-    /** \brief Function that adds a \ref pworld to the Kripke structure represented by *this* setting its repetition.
-     *
-     * The \ref pworld is added. The structure only stores the pointer to the \ref pworld so
-     * it is necessary to store the \ref pworld in \ref pstore.
-     * It also uses \p repetition to avoid clashes with copies of \p world; it
-     * represents the number to give to the pointer of \p word to differentiate it from its copies.
-     * 
-     * @see pworld and pstore.
-     *  
-     * @param[in] to_add: the \ref pworld that has to be added to *this*.
-     * @param[in] repetition: the is to distinguish from other levels of the structure.
-     * @param[out] is_new: used to inidcate if the world was already present in the *this*.
-     * @return The a \ref pworld_ptr to the newly inserted \ref pworld.*/
-    pworld_ptr add_rep_world(const pworld & to_add, unsigned short repetition, bool& is_new);
+    void add_edge(const pworld_ptr & from, const pworld_ptr & to, const agent& ag);
 
     /** \brief Function that checks the entailment of a \ref fluent in *this*.
      *
@@ -534,7 +345,7 @@ public:
      *
      * @return true: \p to_check is entailed in *this*;
      * @return false: \p -to_check is entailed in *this*.*/
-    bool entails(fluent to_check) const;
+    bool entails(const fluent & to_check) const;
     /** \brief Function that checks the entailment of a conjunctive set of \ref fluent in *this*.
      *
      * The entailment of a conjunctive set of \ref fluent in a pstate is true if the conjunctive set of \ref fluent
@@ -644,11 +455,6 @@ public:
 
 
     /*fluent_formula get_sensing_effects_if_entailed(const effects_map & map, const pworld_ptr & start) const;*/
-
-    /***************DOXASTIC REASONING***************/
-    pworld_ptr execute_announcement_helper_dox(const fluent_formula &effects, pstate &ret, const pworld_ptr &current_pw, transition_map &calculated, agent_set &partially_obs_agents, agent_set &oblivious_obs_agents, bool reached_by_fully, bool & implications) const;
-    pstate execute_announcement_dox(const action & act) const;
-    /***************END DOXASTIC***************/
 
     //
     //

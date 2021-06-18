@@ -13,6 +13,7 @@
 
 #include "pstate.h"
 #include "../../utilities/helper_t.ipp"
+#include "../../update/union_update.h"
 
 void pstate::set_worlds(const pworld_ptr_set & to_set)
 {
@@ -60,19 +61,11 @@ bool pstate::operator=(const pstate & to_copy)
 	set_beliefs(to_copy.get_beliefs());
 	m_max_depth = to_copy.get_max_depth();
 	set_pointed(to_copy.get_pointed());
-	//std::cerr << "\nDEBUG: eq ";
 	return true;
 }
 
 bool pstate::operator<(const pstate & to_compare) const
 {
-
-	/*if (m_max_depth < to_compare.get_max_depth()) {
-		return true;
-	} else if (m_max_depth > to_compare.get_max_depth()) {
-		return false;
-	}*/
-
 	if (m_pointed < to_compare.get_pointed()) {
 		return true;
 	} else if (m_pointed > to_compare.get_pointed()) {
@@ -125,12 +118,12 @@ bool pstate::operator<(const pstate & to_compare) const
 	return false;
 }
 
-bool pstate::entails(fluent f) const
+bool pstate::entails(const fluent & f) const
 {
 	return entails(f, m_pointed);
 }
 
-bool pstate::entails(fluent f, const pworld_ptr & world) const
+bool pstate::entails(const fluent & f, const pworld_ptr & world)
 {
 	return world.get_ptr()->entails(f);
 }
@@ -140,7 +133,7 @@ bool pstate::entails(const fluent_set & fl) const
 	return entails(fl, m_pointed);
 }
 
-bool pstate::entails(const fluent_set & fl, const pworld_ptr & world) const
+bool pstate::entails(const fluent_set & fl, const pworld_ptr & world)
 {
 	return world.get_ptr()->entails(fl);
 }
@@ -150,7 +143,7 @@ bool pstate::entails(const fluent_formula & ff) const
 	return entails(ff, m_pointed);
 }
 
-bool pstate::entails(const fluent_formula & ff, const pworld_ptr & world) const
+bool pstate::entails(const fluent_formula & ff, const pworld_ptr & world)
 {
 	return world.get_ptr()->entails(ff);
 }
@@ -172,80 +165,58 @@ bool pstate::entails(const belief_formula & to_check, const pworld_ptr_set & rea
 
 bool pstate::entails(const belief_formula & bf, const pworld_ptr & world) const
 {
-	/*
-	 The entailment of a \ref belief_formula just call recursively the entailment on all the reachable world with that formula.
-	 */
-	pworld_ptr_set D_reachable;
 	switch ( bf.get_formula_type() ) {
+        case FLUENT_FORMULA: {
+            /** \todo Make sure its grounded. Maybe add to \ref belief_formula a bool that store if grounded or not or maybe ground
+             * when \ref domain created.
+             * @see belief_formula::ground(const grounder &).*/
+            return entails(bf.get_fluent_formula(), world);
+        }
 
-	case FLUENT_FORMULA:
-	{
-		/** \todo Make sure its grounded. Maybe add to \ref belief_formula a bool that store if grounded or not or maybe ground
-		 * when \ref domain created.
-		 * @see belief_formula::ground(const grounder &).*/
-		return entails(bf.get_fluent_formula(), world);
-		break;
-	}
-
-	case BELIEF_FORMULA:
-
-		/** \todo what was the at_lest_one of the previous version?*/
-		return entails(bf.get_bf1(), get_B_reachable_worlds(bf.get_agent(), world));
-		break;
-
-	case PROPOSITIONAL_FORMULA:
-		switch ( bf.get_operator() ) {
-		case BF_NOT:
-			return !entails(bf.get_bf1(), world);
-			break;
-		case BF_OR:
-			return entails(bf.get_bf1(), world) || entails(bf.get_bf2(), world);
-			break;
-		case BF_AND:
-			return entails(bf.get_bf1(), world) && entails(bf.get_bf2(), world);
-			break;
-		case BF_FAIL:
-		default:
-			std::cerr << "Something went wrong in checking entailment for Propositional formula";
-			exit(1);
-		}
-		break;
-
-	case E_FORMULA:
-		//Check the entails on the E-reachable worlds
-		return entails(bf.get_bf1(), get_E_reachable_worlds(bf.get_group_agents(), world));
-		break;
-		//Check the entails on the D-reachable worlds
-	case D_FORMULA:
-		D_reachable = get_D_reachable_worlds(bf.get_group_agents(), world);
-		if (D_reachable.size() > 0) {
-			return entails(bf.get_bf1(), D_reachable);
-		} else {
-			return false;
-		}
-		break;
-		//Check the entails on the C-reachable worlds
-	case C_FORMULA:
-		return entails(bf.get_bf1(), get_C_reachable_worlds(bf.get_group_agents(), world));
-		break;
-	case BF_EMPTY:
-	{
-
-		return true;
-		break;
-	}
-	case BF_TYPE_FAIL:
-	default:
-		std::cerr << "Something went wrong in checking entailment for Belief formula";
-		exit(1);
-	}
-
-	return false;
+        case BELIEF_FORMULA: {
+            /** \todo what was the at_lest_one of the previous version?*/
+            return entails(bf.get_bf1(), get_B_reachable_worlds(bf.get_agent(), world));
+        }
+        case PROPOSITIONAL_FORMULA: {
+            switch (bf.get_operator()) {
+                case BF_NOT:
+                    return !entails(bf.get_bf1(), world);
+                case BF_OR:
+                    return entails(bf.get_bf1(), world) || entails(bf.get_bf2(), world);
+                case BF_AND:
+                    return entails(bf.get_bf1(), world) && entails(bf.get_bf2(), world);
+                case BF_FAIL:
+                default:
+                    std::cerr << "Something went wrong in checking entailment for Propositional formula";
+                    exit(1);
+            }
+        }
+        case E_FORMULA: {
+            return entails(bf.get_bf1(), get_E_reachable_worlds(bf.get_group_agents(), world));
+        }
+        case D_FORMULA: {
+            pworld_ptr_set D_reachable = get_D_reachable_worlds(bf.get_group_agents(), world);
+            if (D_reachable.empty()) {
+                return false;
+            }
+            return entails(bf.get_bf1(), D_reachable);
+        }
+        case C_FORMULA: {
+            return entails(bf.get_bf1(), get_C_reachable_worlds(bf.get_group_agents(), world));
+        }
+        case BF_EMPTY: {
+            return true;
+        }
+        case BF_TYPE_FAIL:
+        default: {
+            std::cerr << "Something went wrong in checking entailment for Belief formula";
+            exit(1);
+        }
+    }
 }
 
 bool pstate::entails(const formula_list & to_check, const pworld_ptr & world) const
 {
-	//formula_list expresses CNF formula
 	formula_list::const_iterator it_fl;
 	for (it_fl = to_check.begin(); it_fl != to_check.end(); it_fl++) {
 		if (!entails(*it_fl, world)) {
@@ -255,7 +226,7 @@ bool pstate::entails(const formula_list & to_check, const pworld_ptr & world) co
 	return true;
 }
 
-const pworld_ptr_set pstate::get_B_reachable_worlds(agent ag, const pworld_ptr & world) const
+pworld_ptr_set pstate::get_B_reachable_worlds(const agent & ag, const pworld_ptr & world) const
 {
 	pworld_ptr_set ret;
 	auto pw_map = m_beliefs.find(world);
@@ -269,7 +240,7 @@ const pworld_ptr_set pstate::get_B_reachable_worlds(agent ag, const pworld_ptr &
 	return ret;
 }
 
-bool pstate::get_B_reachable_worlds_recoursive(agent ag, const pworld_ptr & world, pworld_ptr_set& ret) const
+bool pstate::get_B_reachable_worlds_recursive(agent ag, const pworld_ptr & world, pworld_ptr_set& ret) const
 {
 	/** \todo check: If a--i-->b, b--i-->c then a--i-->c must be there*/
 	auto pw_map = m_beliefs.find(world);
@@ -288,7 +259,7 @@ bool pstate::get_B_reachable_worlds_recoursive(agent ag, const pworld_ptr & worl
 	return true;
 }
 
-const pworld_ptr_set pstate::get_E_reachable_worlds(const agent_set & ags, const pworld_ptr & world) const
+pworld_ptr_set pstate::get_E_reachable_worlds(const agent_set & ags, const pworld_ptr & world) const
 {
 	/*The K^0 call of this function*/
 	pworld_ptr_set ret;
@@ -296,20 +267,18 @@ const pworld_ptr_set pstate::get_E_reachable_worlds(const agent_set & ags, const
 	for (it_agset = ags.begin(); it_agset != ags.end(); it_agset++) {
 		helper_t::sum_set<pworld_ptr>(ret, get_B_reachable_worlds(*it_agset, world));
 	}
-
 	return ret;
 }
 
 bool pstate::get_E_reachable_worlds_recoursive(const agent_set & ags, const pworld_ptr_set & worlds, pworld_ptr_set & ret) const
 {
 	/*The K^i (recoursive) call of this function*/
-
 	bool is_fixed_point = true;
 	pworld_ptr_set::const_iterator it_pwptr;
 	agent_set::const_iterator it_agset;
 	for (it_pwptr = worlds.begin(); it_pwptr != worlds.end(); it_pwptr++) {
 		for (it_agset = ags.begin(); it_agset != ags.end(); it_agset++) {
-			if (!get_B_reachable_worlds_recoursive(*it_agset, *it_pwptr, ret)) {
+			if (!get_B_reachable_worlds_recursive(*it_agset, *it_pwptr, ret)) {
 				is_fixed_point = false;
 			}
 		}
@@ -318,7 +287,7 @@ bool pstate::get_E_reachable_worlds_recoursive(const agent_set & ags, const pwor
 
 }
 
-const pworld_ptr_set pstate::get_C_reachable_worlds(const agent_set & ags, const pworld_ptr & world) const
+pworld_ptr_set pstate::get_C_reachable_worlds(const agent_set & ags, const pworld_ptr & world) const
 {
 	//Use of fixed point to stop.
 	bool is_fixed_point = false;
@@ -334,18 +303,17 @@ const pworld_ptr_set pstate::get_C_reachable_worlds(const agent_set & ags, const
 	return ret;
 }
 
-const pworld_ptr_set pstate::get_D_reachable_worlds(const agent_set & ags, const pworld_ptr & world) const
+pworld_ptr_set pstate::get_D_reachable_worlds(const agent_set & ags, const pworld_ptr & world) const
 {
 	/**@bug: Notion of D-Reachable is correct (page 24 of Reasoning about Knowledge)*/
-	agent_set::const_iterator it_agset = ags.begin();
+	auto it_agset = ags.begin();
 	pworld_ptr_set ret = get_B_reachable_worlds((*it_agset), world);
 	it_agset++;
 
 	for (; it_agset != ags.end(); it_agset++) {
-
-		pworld_ptr_set::iterator it_pwset1 = ret.begin();
+		auto it_pwset1 = ret.begin();
 		pworld_ptr_set to_intersect = get_B_reachable_worlds((*it_agset), world);
-		pworld_ptr_set::const_iterator it_pwset2 = to_intersect.begin();
+		auto it_pwset2 = to_intersect.begin();
 		while ((it_pwset1 != ret.end()) && (it_pwset2 != to_intersect.end())) {
 
 			if ((*it_pwset1 < *it_pwset2) && (((*it_pwset1).get_fluent_based_id()) == ((*it_pwset2).get_fluent_based_id()))) {
@@ -368,64 +336,20 @@ const pworld_ptr_set pstate::get_D_reachable_worlds(const agent_set & ags, const
 	return ret;
 }
 
-void pstate::add_world(const pworld & world)
+pworld_ptr pstate::add_world(const pworld & world)
 {
-
-	m_worlds.insert(pstore::get_instance().add_world(world));
-}
-
-pworld_ptr pstate::add_rep_world(const pworld & world, unsigned short repetition, bool& is_new)
-{
-	pworld_ptr tmp = pstore::get_instance().add_world(world);
-	tmp.set_repetition(repetition);
-	is_new = std::get<1>(m_worlds.insert(tmp));
-
+    pworld_ptr tmp = pstore::get_instance().add_world(world);
+	m_worlds.insert(tmp);
 	return tmp;
 }
 
-pworld_ptr pstate::add_rep_world(const pworld & world, unsigned short old_repetition)
+void pstate::add_edge(const pworld_ptr & from, const pworld_ptr & to, const agent & ag)
 {
-	bool tmp = false;
-
-	return add_rep_world(world, get_max_depth() + old_repetition, tmp);
-}
-
-pworld_ptr pstate::add_rep_world(const pworld & world)
-{
-	bool tmp = false;
-
-	return add_rep_world(world, get_max_depth(), tmp);
-}
-
-void pstate::add_edge(const pworld_ptr &from, const pworld_ptr &to, agent ag)
-{
-	pworld_transitive_map::iterator from_beliefs = m_beliefs.find(from);
-
-	if (from_beliefs != m_beliefs.end()) {
-		pworld_map::iterator ag_beliefs = from_beliefs->second.find(ag);
-
-		if (ag_beliefs != from_beliefs->second.end()) {
-			ag_beliefs->second.insert(to);
-		} else {
-			from_beliefs->second.insert(pworld_map::value_type(ag,{to}));
-		}
-	} else {
-
-		pworld_map pwm;
-		pwm.insert(pworld_map::value_type(ag,{to}));
-		m_beliefs.insert(pworld_transitive_map::value_type(from, pwm));
-	}
-}
-
-void pstate::add_pworld_beliefs(const pworld_ptr & world, const pworld_map & beliefs)
-{
-
-	m_beliefs[world] = beliefs;
+    m_beliefs[from][ag].insert(to);
 }
 
 void pstate::build_initial()
 {
-
 	/** \todo for now prune building.*/
 	std::cout << "\nBuilding initial possibility...\n";
 	build_initial_prune();
@@ -568,7 +492,7 @@ void pstate::generate_initial_pedges()
 
 }
 
-void pstate::remove_edge(pworld_ptr &from, const pworld &to, const agent ag)
+void pstate::remove_edge(const pworld_ptr & from, const pworld_ptr & to, const agent & ag)
 {
 	auto from_beliefs = m_beliefs.find(from);
 
@@ -597,12 +521,12 @@ void pstate::remove_initial_pedge(const fluent_formula &known_ff, agent ag)
 			pwptr_tmp1 = *it_pwps_1;
 			pwptr_tmp2 = *it_pwps_2;
 			if (pwptr_tmp1.get_ptr()->entails(known_ff) && !pwptr_tmp2.get_ptr()->entails(known_ff)) {
-				remove_edge(pwptr_tmp1, *pwptr_tmp2.get_ptr(), ag);
-				remove_edge(pwptr_tmp2, *pwptr_tmp1.get_ptr(), ag);
+				remove_edge(pwptr_tmp1, pwptr_tmp2, ag);
+				remove_edge(pwptr_tmp2, pwptr_tmp1, ag);
 			} else if (pwptr_tmp2.get_ptr()->entails(known_ff) && !pwptr_tmp1.get_ptr()->entails(known_ff)) {
 
-				remove_edge(pwptr_tmp2, *pwptr_tmp1.get_ptr(), ag);
-				remove_edge(pwptr_tmp1, *pwptr_tmp2.get_ptr(), ag);
+				remove_edge(pwptr_tmp2, pwptr_tmp1, ag);
+				remove_edge(pwptr_tmp1, pwptr_tmp2, ag);
 			}
 		}
 	}
@@ -699,295 +623,9 @@ void pstate::remove_initial_pedge_bf(const belief_formula & to_check)
 /** \warning executability should be check in \ref state (or \ref planner).*/
 pstate pstate::compute_succ(const action & act) const
 {
-	//std::cerr << "\nDEBUG: Executing " << act.get_name();
-	switch ( act.get_type() ) {
-	case ONTIC:
-	{
-		return execute_ontic(act);
-		break;
-	}
-	case SENSING:
-	{
-		if (domain::get_instance().has_attitudes()) {
-			return execute_sensing_att(act);
-		} else {
-			return execute_sensing(act);
-		}
-		break;
-	}
-	case ANNOUNCEMENT:
-	{
-		if (domain::get_instance().has_attitudes()) {
-			return execute_announcement_att(act);
-		} else {
-			return execute_announcement(act);
-		}
-		break;
-	}
-	case LIES:
-	{
-		return execute_announcement_dox(act);
-		break;
-	}
-	default:
-	{
-		std::cerr << "Error in executing an action: " << act.get_name();
-		std::cerr << " the type of the action is not defined correctly1";
-		std::cerr << std::endl;
-		exit(1);
-
-		break;
-	}
-	}
+    return union_update::u_update(*this, act);
 }
 
-void pstate::maintain_oblivious_believed_pworlds(pstate &ret, const agent_set & oblivious_obs_agents) const
-{
-	agent_set::const_iterator it_agset;
-	pworld_ptr_set world_oblivious;
-	pworld_ptr_set tmp_world_set;
-
-	pworld_ptr_set::const_iterator it_wo_ob;
-
-	if (!oblivious_obs_agents.empty()) {
-		tmp_world_set = get_E_reachable_worlds(oblivious_obs_agents, get_pointed());
-		for (it_agset = domain::get_instance().get_agents().begin(); it_agset != domain::get_instance().get_agents().end(); it_agset++) {
-			for (it_wo_ob = tmp_world_set.begin(); it_wo_ob != tmp_world_set.end(); it_wo_ob++) {
-				helper_t::sum_set<pworld_ptr>(world_oblivious, get_B_reachable_worlds(*it_agset, *it_wo_ob));
-			}
-		}
-		helper_t::sum_set<pworld_ptr>(world_oblivious, tmp_world_set);
-		ret.set_max_depth(get_max_depth() + 1);
-		ret.set_worlds(world_oblivious);
-
-		for (it_wo_ob = world_oblivious.begin(); it_wo_ob != world_oblivious.end(); it_wo_ob++) {
-			auto it_pwmap = m_beliefs.find(*it_wo_ob);
-
-			if (it_pwmap != m_beliefs.end()) {
-
-				ret.add_pworld_beliefs(*it_wo_ob, it_pwmap->second);
-			}
-		}
-	}
-}
-
-pworld_ptr pstate::execute_ontic_helper(const action &act, pstate &ret, const pworld_ptr &current_pw, transition_map &calculated, agent_set & oblivious_obs_agents) const
-{
-	// Execute the all the effects
-	fluent_formula current_pw_effects = helper_t::get_effects_if_entailed(act.get_effects(), *this);
-	fluent_set world_description = current_pw.get_fluent_set();
-	fluent_formula::const_iterator it_eff;
-
-	for (it_eff = current_pw_effects.begin(); it_eff != current_pw_effects.end(); it_eff++) {
-		helper::apply_effect(*it_eff, world_description);
-		//		if (act.get_name().compare("distract_c_a") == 0) {
-		//			std::cerr << "\nDEBUG: Inside the first ONTIC loop " << act.get_name();
-		//		}
-	}
-
-	//	if (act.get_name().compare("distract_c_a") == 0) {
-	//		std::cerr << "\nDEBUG: Out the first ONTIC loop " << act.get_name();
-	//	}
-
-	pworld_ptr new_pw = ret.add_rep_world(pworld(world_description), current_pw.get_repetition()); // We add the corresponding pworld in ret
-	calculated.insert(transition_map::value_type(current_pw, new_pw)); // And we update the calculated map
-
-	auto it_pwtm = get_beliefs().find(current_pw);
-
-	if (it_pwtm != get_beliefs().end()) {
-		pworld_map::const_iterator it_pwm;
-		pworld_ptr_set::const_iterator it_pws;
-
-		for (it_pwm = it_pwtm->second.begin(); it_pwm != it_pwtm->second.end(); it_pwm++) {
-			agent ag = it_pwm->first;
-
-			//			if (act.get_name().compare("distract_c_a") == 0) {
-			//				std::cerr << "\nDEBUG: Inside the SECOND ONTIC loop " << act.get_name();
-			//			}
-
-			bool is_oblivious_obs = oblivious_obs_agents.find(ag) != oblivious_obs_agents.end();
-
-			for (it_pws = it_pwm->second.begin(); it_pws != it_pwm->second.end(); it_pws++) {
-
-				//				if (act.get_name().compare("distract_c_a") == 0) {
-				//					std::cerr << "\nDEBUG: Inside the Third ONTIC loop " << act.get_name();
-				//				}
-
-				if (is_oblivious_obs) { // If we are dealing with an OBLIVIOUS agent we maintain its beliefs as they were
-					auto maintained_pworld = ret.get_worlds().find(*it_pws);
-
-					if (maintained_pworld != ret.get_worlds().end()) {
-						ret.add_edge(new_pw, *it_pws, ag);
-					}
-				} else { // Otherwise, if we have a FULLY OBS agent
-					auto calculated_pworld = calculated.find(*it_pws);
-
-					if (calculated_pworld != calculated.end()) { // If we already calculated the transition function for this pworld
-						ret.add_edge(new_pw, calculated_pworld->second, ag); // Then we update agents' beliefs
-					} else {
-
-						pworld_ptr believed_pw = execute_ontic_helper(act, ret, *it_pws, calculated, oblivious_obs_agents);
-						ret.add_edge(new_pw, believed_pw, ag);
-
-						ret.set_max_depth(ret.get_max_depth() + 1 + current_pw.get_repetition());
-					}
-				}
-			}
-			//			if (act.get_name().compare("distract_c_a") == 0) {
-			//				std::cerr << "\nDEBUG: Out the Second ONTIC loop " << act.get_name();
-			//			}
-		}
-		//std::cerr << "\nDEBUG: Out the THIRD ONTIC loop " << act.get_name();
-
-	}
-	//std::cerr << "\nDEBUG: RETURN TO " << act.get_name();
-
-	return new_pw;
-}
-
-pstate pstate::execute_ontic(const action & act) const
-{
-	pstate ret;
-
-	//This finds all the worlds that are reachable from the initial state following
-	//the edges labeled with fully observant agents.
-	agent_set agents = domain::get_instance().get_agents();
-	agent_set fully_obs_agents = helper_t::get_agents_if_entailed(act.get_fully_observants(), *this);
-
-	agent_set oblivious_obs_agents = agents;
-    helper_t::minus_set<agent>(oblivious_obs_agents, fully_obs_agents);
-
-	transition_map calculated; // A map that links the pworlds of *this* to the corresponding ones of ret
-	maintain_oblivious_believed_pworlds(ret, oblivious_obs_agents);
-
-	pworld_ptr new_pointed = execute_ontic_helper(act, ret, get_pointed(), calculated, oblivious_obs_agents);
-	ret.set_pointed(new_pointed); // Updating the pointed world
-	//std::cerr << "\nDEBUG: Out ONTIC " << act.get_name();
-
-	return ret;
-}
-
-pworld_ptr pstate::execute_sensing_announcement_helper(const fluent_formula &effects, pstate &ret, const pworld_ptr &current_pw, transition_map &calculated, agent_set &partially_obs_agents, agent_set &oblivious_obs_agents, bool previous_entailment) const
-{
-	pworld_ptr new_pw = ret.add_rep_world(pworld(current_pw.get_fluent_set()), current_pw.get_repetition()); // We add the corresponding pworld in ret
-	calculated.insert(transition_map::value_type(current_pw, new_pw)); // And we update the calculated map
-
-	auto it_pwtm = get_beliefs().find(current_pw);
-
-	if (it_pwtm != get_beliefs().end()) {
-		pworld_map::const_iterator it_pwm;
-		pworld_ptr_set::const_iterator it_pws;
-
-		for (it_pwm = it_pwtm->second.begin(); it_pwm != it_pwtm->second.end(); it_pwm++) {
-			agent ag = it_pwm->first;
-
-			bool is_oblivious_obs = oblivious_obs_agents.find(ag) != oblivious_obs_agents.end();
-			bool is_partially_obs = partially_obs_agents.find(ag) != partially_obs_agents.end();
-			bool is_fully_obs = !is_oblivious_obs && !is_partially_obs;
-
-			for (it_pws = it_pwm->second.begin(); it_pws != it_pwm->second.end(); it_pws++) {
-				if (is_oblivious_obs) { // If we are dealing with an OBLIVIOUS agent we maintain its beliefs as they were
-					auto maintained_pworld = ret.get_worlds().find(*it_pws);
-
-					if (maintained_pworld != ret.get_worlds().end()) {
-						ret.add_edge(new_pw, *it_pws, ag);
-					}
-				} else { // Otherwise, if we have a FULLY/PARTIALLY observant agent
-					auto calculated_pworld = calculated.find(*it_pws);
-					//fluent_formula effects = get_effects_if_entailed(act.get_effects(), get_pointed());
-					//bool ent = act.get_type() == SENSING ? entails(effects, *it_pws) == entails(effects, get_pointed()) : entails(effects, *it_pws);
-					bool ent = entails(effects, *it_pws); // == entails(effects, get_pointed());
-
-
-					bool is_consistent_belief = is_partially_obs || // If "ag" is PARTIALLY OBS, we always add an edge; If "ag" is FULLY OBS, we add an edge if he believes that "calculated" may be true (i.e., when "ent" holds) XOR
-						(is_fully_obs && (ent == previous_entailment)); // if a PARTIALLY OBS agent believes that "ag" thinks that "calculated" may be true (i.e., when "previous_entailment" holds)
-
-					if (calculated_pworld != calculated.end()) { // If we already calculated the transition function for this pworld
-						if (is_consistent_belief) {
-							ret.add_edge(new_pw, calculated_pworld->second, ag);
-						}
-					} else { // If we did not already calculate the transition function
-						if (is_consistent_belief) { // We calculate it if it would result in a consistent belief...
-
-							pworld_ptr believed_pw = execute_sensing_announcement_helper(effects, ret, *it_pws, calculated, partially_obs_agents, oblivious_obs_agents, ent);
-							ret.add_edge(new_pw, believed_pw, ag);
-						}
-						//						else if (is_partially_obs && (ent != previous_entailment)) { // ...and when it does not entail the action effects, but a PARTIALLY OBS agent believes that it may be true
-						//							pworld_ptr believed_pw_neg = execute_sensing_announcement_helper(act, ret, *it_pws, calculated, partially_obs_agents, oblivious_obs_agents, ent);
-						//							ret.add_edge(new_pw, believed_pw_neg, ag);
-						//						}
-					}
-				}
-			}
-		}
-	}
-	return new_pw;
-}
-
-pstate pstate::execute_sensing(const action & act) const
-{
-	pstate ret;
-
-	//This finds all the worlds that are reachable from the initial state following
-	//the edges labeled with fully observant agents.
-	agent_set agents = domain::get_instance().get_agents();
-	agent_set fully_obs_agents = helper_t::get_agents_if_entailed(act.get_fully_observants(), *this);
-	agent_set partially_obs_agents = helper_t::get_agents_if_entailed(act.get_partially_observants(), *this);
-
-	agent_set oblivious_obs_agents = agents;
-	helper_t::minus_set<agent>(oblivious_obs_agents, fully_obs_agents);
-	helper_t::minus_set<agent>(oblivious_obs_agents, partially_obs_agents);
-
-	if (!oblivious_obs_agents.empty()) {
-		ret.set_max_depth(get_max_depth() + 1);
-	}
-
-	transition_map calculated; // A map that links the pworlds of *this* to the corresponding ones of ret
-	maintain_oblivious_believed_pworlds(ret, oblivious_obs_agents);
-
-	fluent_formula effects = helper_t::get_effects_if_entailed(act.get_effects(), *this);
-
-	pworld_ptr new_pointed = execute_sensing_announcement_helper(effects, ret, get_pointed(), calculated, partially_obs_agents, oblivious_obs_agents, entails(effects));
-	ret.set_pointed(new_pointed); // Updating the pointed world
-
-	/*if (!check_properties(fully_obs_agents, partially_obs_agents, effects, ret)) {
-		std::cerr << "\nDEBUG: Some properties are not respected\n\n";
-		exit(1);
-	}*/
-
-	return ret;
-}
-
-pstate pstate::execute_announcement(const action & act) const
-{
-	//	pstate ret;
-	//
-	//	//This finds all the worlds that are reachable from the initial state following
-	//	//the edges labeled with fully observant agents.
-	//	agent_set agents = domain::get_instance().get_agents();
-	//	agent_set fully_obs_agents = get_agents_if_entailed(act.get_fully_observants(), get_pointed());
-	//	agent_set partially_obs_agents = get_agents_if_entailed(act.get_partially_observants(), get_pointed());
-	//
-	//	agent_set oblivious_obs_agents = agents;
-	//	helper_t::minus_set(oblivious_obs_agents, fully_obs_agents);
-	//	helper_t::minus_set(oblivious_obs_agents, partially_obs_agents);
-	//
-	//	if (!oblivious_obs_agents.empty()) {
-	//		ret.set_max_depth(get_max_depth() + 1);
-	//	}
-	//
-	//	transition_map calculated; // A map that links the pworlds of *this* to the corresponding ones of ret
-	//	maintain_oblivious_believed_pworlds(ret, oblivious_obs_agents);
-	//
-	//	fluent_formula effects = get_effects_if_entailed(act.get_effects(), get_pointed());
-	//
-	//	pworld_ptr new_pointed = execute_sensing_announcement_helper(act, ret, get_pointed(), calculated, partially_obs_agents, oblivious_obs_agents, entails(effects));
-	//	ret.set_pointed(new_pointed); // Updating the pointed world
-	//
-	//	return ret;
-
-	return execute_sensing(act);
-}
 
 bool pstate::check_properties(const agent_set & fully, const agent_set & partially, const fluent_formula & effects, const pstate & updated) const
 {
@@ -1321,1340 +959,6 @@ void pstate::print_graphviz(std::ostream & graphviz) const
 
 }
 
-/***************ATTITUDES REASONING***************/
-agents_attitudes pstate::get_attitude(agent m_agent, agent executor, const complete_attitudes_map & table, bool is_fully) const
-{
-	if (m_agent == executor) {
-		return executor_att;
-	}
-
-	auto it_ext = table.find(m_agent);
-	if (it_ext != table.end()) {
-		auto it_mid = it_ext->second.find(executor);
-		if (it_mid != it_ext->second.end()) {
-			auto it_int = it_mid->second.begin();
-			for (; it_int != it_mid->second.end(); it_int++) {
-				//Check if this work.
-				if (entails(it_int->second)) {
-					return it_int->first;
-				}
-			}
-		}
-	}
-	if (is_fully) {
-		return F_TRUSTY;
-	}
-	return P_KEEPER;
-
-	//	std::cerr << "\nError: Some attitude declaration is missing, the agent has not any attitude specified.";
-	//	exit(1);
-
-}
-
-single_attitudes_map pstate::get_attitudes(agent executor, const agent_set & agents, const complete_attitudes_map & table, bool is_fully) const
-{
-	//agent_set tot_ags = domain::get_instance().get_agents();
-	agent_set::const_iterator it_ag;
-
-
-	single_attitudes_map ret;
-	for (it_ag = agents.begin(); it_ag != agents.end(); it_ag++) {
-		//if (*it_ag != executor) {
-		ret.insert(std::pair<agent, agents_attitudes>(*it_ag, get_attitude(*it_ag, executor, table, is_fully)));
-		//}
-	}
-
-	return ret;
-}
-
-single_attitudes_map pstate::get_F_attitudes(agent executor, const agent_set & fully_observant) const
-{
-	return get_attitudes(executor, fully_observant, domain::get_instance().get_attitudes().get_F_attitudes(), true);
-}
-
-single_attitudes_map pstate::get_P_attitudes(agent executor, const agent_set & partially_observant) const
-{
-	return get_attitudes(executor, partially_observant, domain::get_instance().get_attitudes().get_P_attitudes(), false);
-}
-
-pworld_ptr pstate::phi_attitudes(fluent announced_f, pstate &ret, const pworld_ptr &current_pw, transition_map_att &calculated, const single_attitudes_map & attitudes, agent executor) const
-{
-	//Phi does not change the value of the fluent (In theory only pointed world)
-	pworld_ptr new_pw = ret.add_rep_world(pworld(current_pw.get_fluent_set()), current_pw.get_repetition()); // We add the corresponding pworld in ret
-
-	//We use this for the lies
-	single_attitudes_map modified_diagonal_table = attitudes;
-	transition_map_att::const_iterator calculated_pworld;
-	agents_attitudes curr_att;
-	pworld_ptr to_add;
-
-	bool f_truth_value = !(helper::is_negate(announced_f));
-	announced_f = helper::normalize_fluent(announced_f);
-
-	sub_functionIndex sf_i;
-
-	auto it_pwtm = get_beliefs().find(current_pw);
-	if (it_pwtm != get_beliefs().end()) {
-		auto it_pwm = it_pwtm->second.begin();
-
-		for (; it_pwm != it_pwtm->second.end(); it_pwm++) {
-			agent ag = it_pwm->first;
-			auto it_pws = it_pwm->second.begin();
-
-
-			if (ag == executor) {
-				curr_att = F_UNTRUSTY;
-			} else {
-				curr_att = attitudes.find(ag) -> second;
-			}
-
-			//auto it_checkk = domain::get_instance().get_agents().begin();
-			//it_checkk = std::next(it_checkk, 3);
-			//auto it_checkk3 = std::next(it_checkk, 3);
-			//auto it_checkk4 = std::next(it_checkk, 4);
-			//if (ag != *it_checkk3) 
-			{
-				switch ( curr_att ) {
-
-				case P_KEEPER:
-				{
-					for (; it_pws != it_pwm->second.end(); it_pws++) {
-						calculated_pworld = calculated.find(std::make_pair(std::make_pair(*it_pws, 0), K_func));
-						if (calculated_pworld != calculated.end()) {
-							to_add = calculated_pworld->second;
-						} else {
-							to_add = I_attitudes(announced_f, ret, *it_pws, calculated, attitudes);
-						}
-						ret.add_edge(new_pw, to_add, ag);
-					}
-					break;
-				}
-				case P_INSECURE:
-				{
-					for (; it_pws != it_pwm->second.end(); it_pws++) {
-						calculated_pworld = calculated.find(std::make_pair(std::make_pair(*it_pws, 0), I_func));
-						if (calculated_pworld != calculated.end()) {
-							to_add = calculated_pworld->second;
-						} else {
-							to_add = I_attitudes(announced_f, ret, *it_pws, calculated, attitudes);
-						}
-						ret.add_edge(new_pw, to_add, ag);
-					}
-					break;
-				}
-				case F_TRUSTY:
-				{
-
-					/*calculated_pworld = calculated.find(std::make_pair(current_pw, T_func));
-					if (calculated_pworld == calculated.end()) {
-						to_add = T_attitudes(announced_f, ret, current_pw, calculated, attitudes, true);
-					}
-					ret.add_edge(new_pw, to_add, ag);
-					break;*/
-					if (f_truth_value) {
-						sf_i = TRUE_CHI_func;
-					} else {
-						sf_i = FALSE_CHI_func;
-					}
-					for (; it_pws != it_pwm->second.end(); it_pws++) {
-
-						calculated_pworld = calculated.find(std::make_pair(std::make_pair(*it_pws, 0), sf_i));
-						if (calculated_pworld != calculated.end()) {
-							to_add = calculated_pworld->second;
-						} else {
-							to_add = chi_attitudes(announced_f, f_truth_value, ret, *it_pws, calculated, attitudes, true, 1);
-						}
-						ret.add_edge(new_pw, to_add, ag);
-
-					}
-					break;
-
-				}
-				case F_MISTRUSTY:
-				{
-					/*calculated_pworld = calculated.find(std::make_pair(current_pw, M_func));
-					if (calculated_pworld == calculated.end()) {
-						to_add = T_attitudes(helper::negate_fluent(announced_f), ret, current_pw, calculated, attitudes, false);
-					}
-					ret.add_edge(new_pw, to_add, ag);*/
-					if (!f_truth_value) {
-						sf_i = TRUE_CHI_func;
-					} else {
-						sf_i = FALSE_CHI_func;
-					}
-					for (; it_pws != it_pwm->second.end(); it_pws++) {
-
-						calculated_pworld = calculated.find(std::make_pair(std::make_pair(*it_pws, 0), sf_i));
-						if (calculated_pworld != calculated.end()) {
-							to_add = calculated_pworld->second;
-						} else {
-							to_add = chi_attitudes(announced_f, !f_truth_value, ret, *it_pws, calculated, attitudes, false, 1);
-						}
-						ret.add_edge(new_pw, to_add, ag);
-					}
-					break;
-
-				}
-				case executor_att:
-				case F_UNTRUSTY:
-				{
-					if (ag == executor) {
-
-						for (; it_pws != it_pwm->second.end(); it_pws++) {
-							calculated_pworld = calculated.find(std::make_pair(std::make_pair(*it_pws, 0), exec_FUNC));
-							if (calculated_pworld != calculated.end()) {
-								to_add = calculated_pworld->second;
-							} else {
-								to_add = U_attitudes(announced_f, f_truth_value, ret, *it_pws, calculated, modified_diagonal_table, 0, executor);
-							}
-							ret.add_edge(new_pw, to_add, ag);
-						}
-
-
-					} else {
-
-						if (f_truth_value) {
-							sf_i = TRUE_U_func;
-						} else {
-							sf_i = FALSE_U_func;
-						}
-
-						for (; it_pws != it_pwm->second.end(); it_pws++) {
-							calculated_pworld = calculated.find(std::make_pair(std::make_pair(*it_pws, 0), sf_i));
-							if (calculated_pworld != calculated.end()) {
-								to_add = calculated_pworld->second;
-							} else {
-								to_add = U_attitudes(announced_f, f_truth_value, ret, *it_pws, calculated, modified_diagonal_table, 3);
-							}
-							ret.add_edge(new_pw, to_add, ag);
-						}
-					}
-					break;
-				}
-				case F_STUBBORN:
-				{
-					break;
-				} /* Oblivious Agents.*/
-				case oblivious_att:
-				default:
-				{
-
-					for (; it_pws != it_pwm->second.end(); it_pws++) {
-						// If we are dealing with an OBLIVIOUS agent we maintain its beliefs as they were
-						//auto maintained_pworld = ret.get_worlds().find(*it_pws);
-
-						//if (maintained_pworld != ret.get_worlds().end()) {
-						ret.add_edge(new_pw, *it_pws, ag);
-						//}
-					}
-					break;
-				}
-				}
-
-			}
-
-		}
-	}
-
-	return new_pw;
-}
-
-pworld_ptr pstate::K_attitudes(fluent announced_f, pstate &ret, const pworld_ptr &current_pw, transition_map_att &calculated, const single_attitudes_map & attitudes) const
-{
-	unsigned short increase_rep = 2;
-
-	//K does not change the value of the fluent (In theory only pointed world)
-	pworld_ptr new_pw = ret.add_rep_world(pworld(current_pw.get_fluent_set()), current_pw.get_repetition() + increase_rep); // We add the corresponding pworld in ret
-	calculated.insert(transition_map_att::value_type(std::make_pair(std::make_pair(current_pw, increase_rep), K_func), new_pw)); // And we update the calculated map
-
-
-	transition_map_att::const_iterator calculated_pworld;
-	pworld_ptr to_add;
-
-	auto it_pwtm = get_beliefs().find(current_pw);
-	bool f_truth_value;
-	sub_functionIndex sf_i;
-	agents_attitudes curr_attitude;
-
-	if (it_pwtm != get_beliefs().end()) {
-		auto it_pwm = it_pwtm->second.begin();
-
-		for (; it_pwm != it_pwtm->second.end(); it_pwm++) {
-			agent ag = it_pwm->first;
-			auto it_pws = it_pwm->second.begin();
-
-
-			curr_attitude = attitudes.find(ag)->second;
-
-			switch ( curr_attitude ) {
-			case P_KEEPER:
-			{
-				for (; it_pws != it_pwm->second.end(); it_pws++) {
-					calculated_pworld = calculated.find(std::make_pair(std::make_pair(*it_pws, increase_rep), K_func));
-					if (calculated_pworld != calculated.end()) {
-						to_add = calculated_pworld->second;
-					} else {
-						to_add = K_attitudes(announced_f, ret, *it_pws, calculated, attitudes);
-					}
-					ret.add_edge(new_pw, to_add, ag);
-				}
-				break;
-			}
-			case P_INSECURE:
-			{
-				calculated_pworld = calculated.find(std::make_pair(std::make_pair(current_pw, increase_rep), I_func));
-				if (calculated_pworld != calculated.end()) {
-					to_add = calculated_pworld->second;
-				} else {
-					to_add = I_attitudes(announced_f, ret, current_pw, calculated, attitudes);
-				}
-				ret.add_edge(new_pw, to_add, ag);
-
-				break;
-			}
-			case executor_att:
-			case F_TRUSTY:
-			case F_MISTRUSTY:
-			{
-
-				f_truth_value = current_pw.entails(announced_f);
-				if (f_truth_value) {
-					sf_i = TRUE_CHI_func;
-				} else {
-					sf_i = FALSE_CHI_func;
-				}
-				calculated_pworld = calculated.find(std::make_pair(std::make_pair(current_pw, increase_rep), sf_i));
-				if (calculated_pworld != calculated.end()) {
-					to_add = calculated_pworld->second;
-				} else {
-					to_add = chi_attitudes(announced_f, f_truth_value, ret, current_pw, calculated, attitudes, curr_attitude != F_MISTRUSTY, increase_rep);
-				}
-				//ret.add_edge(new_pw, to_add, ag);
-				break;
-			}
-			case F_UNTRUSTY:
-			{
-				f_truth_value = current_pw.entails(announced_f);
-				if (f_truth_value) {
-					sf_i = TRUE_U_func;
-				} else {
-					sf_i = FALSE_U_func;
-				}
-				calculated_pworld = calculated.find(std::make_pair(std::make_pair(current_pw, increase_rep), sf_i));
-				if (calculated_pworld != calculated.end()) {
-					to_add = calculated_pworld->second;
-				} else {
-					to_add = U_attitudes(announced_f, f_truth_value, ret, current_pw, calculated, attitudes, increase_rep);
-				}
-				//ret.add_edge(new_pw, to_add, ag);
-
-				break;
-			}
-			case F_STUBBORN:
-			{
-				std::cerr << "\n\nStubborn agents not implemented yet\n";
-				exit(1);
-				break;
-			} // Oblivious Agents.
-			case oblivious_att:
-			default:
-			{
-				for (; it_pws != it_pwm->second.end(); it_pws++) {
-					// If we are dealing with an OBLIVIOUS agent we maintain its beliefs as they were
-					//auto maintained_pworld = ret.get_worlds().find(*it_pws);
-
-					//if (maintained_pworld != ret.get_worlds().end()) {
-					ret.add_edge(new_pw, *it_pws, ag);
-					//}
-				}
-				break;
-			}
-			}
-		}
-	}
-	return new_pw;
-
-}
-
-pworld_ptr pstate::I_attitudes(fluent announced_f, pstate &ret, const pworld_ptr &current_pw, transition_map_att &calculated, const single_attitudes_map & attitudes) const
-{
-	unsigned short increase_rep = 2;
-
-
-	//K does not change the value of the fluent (In theory only pointed world)
-	pworld_ptr new_pw = ret.add_rep_world(pworld(current_pw.get_fluent_set()), current_pw.get_repetition() + increase_rep); // We add the corresponding pworld in ret
-	calculated.insert(transition_map_att::value_type(std::make_pair(std::make_pair(current_pw, increase_rep), I_func), new_pw)); // And we update the calculated map
-
-	pworld_ptr to_add, to_add2;
-	bool f_truth_value;
-	sub_functionIndex sf_i;
-	agents_attitudes curr_attitude;
-	transition_map_att::const_iterator calculated_pworld;
-
-	auto it_pwtm = get_beliefs().find(current_pw);
-
-	if (it_pwtm != get_beliefs().end()) {
-		auto it_pwm = it_pwtm->second.begin();
-
-		for (; it_pwm != it_pwtm->second.end(); it_pwm++) {
-			agent ag = it_pwm->first;
-			auto it_pws = it_pwm->second.begin();
-
-			curr_attitude = attitudes.find(ag)->second;
-			switch ( curr_attitude ) {
-			case P_KEEPER:
-			{
-				calculated_pworld = calculated.find(std::make_pair(std::make_pair(current_pw, increase_rep), K_func));
-				if (calculated_pworld != calculated.end()) {
-					to_add = calculated_pworld->second;
-				} else {
-					to_add = K_attitudes(announced_f, ret, current_pw, calculated, attitudes);
-				}
-				ret.add_edge(new_pw, to_add, ag);
-				break;
-			}
-			case P_INSECURE:
-			{
-				for (; it_pws != it_pwm->second.end(); it_pws++) {
-
-					calculated_pworld = calculated.find(std::make_pair(std::make_pair(*it_pws, increase_rep), TRUE_CHI_func));
-					if (calculated_pworld != calculated.end()) {
-						to_add = calculated_pworld->second;
-
-					} else {
-						to_add = chi_attitudes(announced_f, true, ret, *it_pws, calculated, attitudes, true, increase_rep);
-					}
-
-					calculated_pworld = calculated.find(std::make_pair(std::make_pair(*it_pws, increase_rep), FALSE_CHI_func));
-					if (calculated_pworld != calculated.end()) {
-						to_add2 = calculated_pworld->second;
-					} else {
-						to_add2 = chi_attitudes(announced_f, false, ret, *it_pws, calculated, attitudes, true, increase_rep);
-					}
-
-					ret.add_edge(new_pw, to_add, ag);
-					ret.add_edge(new_pw, to_add2, ag);
-
-					ret.add_edge(to_add, to_add, ag);
-					ret.add_edge(to_add2, to_add2, ag);
-
-					ret.add_edge(to_add, to_add2, ag);
-					ret.add_edge(to_add2, to_add, ag);
-				}
-				break;
-			}
-			case executor_att:
-			case F_TRUSTY:
-			case F_MISTRUSTY:
-			{
-
-				f_truth_value = current_pw.entails(announced_f);
-				if (f_truth_value) {
-					sf_i = TRUE_CHI_func;
-				} else {
-					sf_i = FALSE_CHI_func;
-				}
-				calculated_pworld = calculated.find(std::make_pair(std::make_pair(current_pw, increase_rep), sf_i));
-				if (calculated_pworld != calculated.end()) {
-					to_add = calculated_pworld->second;
-				} else {
-					to_add = chi_attitudes(announced_f, f_truth_value, ret, current_pw, calculated, attitudes, curr_attitude != F_MISTRUSTY, increase_rep);
-				}
-				//ret.add_edge(new_pw, to_add, ag);
-
-				break;
-			}
-			case F_UNTRUSTY:
-			{
-				f_truth_value = current_pw.entails(announced_f);
-				if (f_truth_value) {
-					sf_i = TRUE_U_func;
-				} else {
-					sf_i = FALSE_U_func;
-				}
-				calculated_pworld = calculated.find(std::make_pair(std::make_pair(current_pw, increase_rep), sf_i));
-				if (calculated_pworld != calculated.end()) {
-					to_add = calculated_pworld->second;
-				} else {
-					to_add = U_attitudes(announced_f, f_truth_value, ret, current_pw, calculated, attitudes, increase_rep);
-				}
-				//ret.add_edge(new_pw, to_add, ag);
-				break;
-			}
-			case F_STUBBORN:
-			{
-				std::cerr << "\n\nStubborn agents not implemented yet\n";
-				exit(1);
-				break;
-			} // Oblivious Agents.
-			case oblivious_att:
-			default:
-			{
-				for (; it_pws != it_pwm->second.end(); it_pws++) {
-					// If we are dealing with an OBLIVIOUS agent we maintain its beliefs as they were
-					//auto maintained_pworld = ret.get_worlds().find(*it_pws);
-
-					//if (maintained_pworld != ret.get_worlds().end()) {
-					ret.add_edge(new_pw, *it_pws, ag);
-					//}
-				}
-				break;
-			}
-			}
-		}
-	}
-	return new_pw;
-
-}
-
-/*pworld_ptr pstate::T_attitudes(fluent announced_f, pstate &ret, const pworld_ptr &current_pw, transition_map_att &calculated, const single_attitudes_map & attitudes, bool is_trusty) const
-{
-	unsigned short increase_rep = 1;
-
-	//K does not change the value of the fluent (In theory only pointed world)
-	pworld_ptr new_pw = ret.add_rep_world(pworld(current_pw.get_fluent_set()), current_pw.get_repetition() + increase_rep); // We add the corresponding pworld in ret
-	sub_functionIndex sf_i = T_func;
-
-	if (!is_trusty) {
-		sf_i = M_func;
-	}
-	calculated.insert(transition_map_att::value_type(std::make_pair(current_pw, T_func), new_pw)); // And we update the calculated map
-
-	bool f_truth_value = !(helper::is_negate(announced_f));
-	announced_f = helper::normalize_fluent(announced_f);
-
-	pworld_ptr to_add;
-	transition_map_att::const_iterator calculated_pworld;
-
-	auto it_pwtm = get_beliefs().find(current_pw);
-	if (it_pwtm != get_beliefs().end()) {
-		auto it_pwm = it_pwtm->second.begin();
-
-		for (; it_pwm != it_pwtm->second.end(); it_pwm++) {
-			agent ag = it_pwm->first;
-			auto it_pws = it_pwm->second.begin();
-
-			agents_attitudes curr_attitude = attitudes.find(ag)->second;
-
-			//We use an if then else to reuse this function for both trusty and mistrusty
-			if (curr_attitude == P_KEEPER) {
-				calculated_pworld = calculated.find(std::make_pair(current_pw, K_func));
-				if (calculated_pworld != calculated.end()) {
-					to_add = calculated_pworld->second;
-				} else {
-					to_add = K_attitudes(announced_f, ret, current_pw, calculated, attitudes);
-				}
-				ret.add_edge(new_pw, to_add, ag);
-			} else if (curr_attitude == P_INSECURE) {
-				calculated_pworld = calculated.find(std::make_pair(current_pw, I_func));
-				if (calculated_pworld != calculated.end()) {
-					to_add = calculated_pworld->second;
-				} else {
-					to_add = I_attitudes(announced_f, ret, current_pw, calculated, attitudes);
-				}
-				ret.add_edge(new_pw, to_add, ag);
-			} else if (curr_attitude == F_TRUSTY || (curr_attitude == executor_att && is_trusty)) {
-				if (f_truth_value == is_trusty) {
-					sf_i = TRUE_CHI_func;
-				} else {
-					sf_i = FALSE_CHI_func;
-				}
-				calculated_pworld = calculated.find(std::make_pair(current_pw, sf_i));
-				if (calculated_pworld != calculated.end()) {
-					to_add = calculated_pworld->second;
-				} else {
-					if (is_trusty) {
-						to_add = chi_attitudes(announced_f, f_truth_value, ret, current_pw, calculated, attitudes, true);
-					} else {
-						to_add = chi_attitudes(announced_f, !f_truth_value, ret, current_pw, calculated, attitudes, true);
-					}
-				}
-				//ret.add_edge(new_pw, to_add, ag);
-//				for (; it_pws != it_pwm->second.end(); it_pws++) {
-//					calculated_pworld = calculated.find(std::make_pair(*it_pws, sf_i));
-//					if (calculated_pworld != calculated.end()) {
-//						to_add = calculated_pworld->second;
-//					} else {
-//						if (is_trusty) {
-//							to_add = chi_attitudes(announced_f, f_truth_value, ret, *it_pws, calculated, attitudes, true);
-//						} else {
-//							to_add = chi_attitudes(announced_f, !f_truth_value, ret, *it_pws, calculated, attitudes, true);
-//
-//						}
-//					}
-//					//ret.add_edge(new_pw, to_add, ag);
-//				}
-			} else if (curr_attitude == F_MISTRUSTY || (curr_attitude == executor_att && !is_trusty)) {
-
-				if (f_truth_value == is_trusty) {
-					sf_i = TRUE_CHI_func;
-				} else {
-					sf_i = FALSE_CHI_func;
-				}
-				calculated_pworld = calculated.find(std::make_pair(current_pw, sf_i));
-				if (calculated_pworld != calculated.end()) {
-					to_add = calculated_pworld->second;
-				} else {
-					if (!is_trusty) {
-						to_add = chi_attitudes(announced_f, f_truth_value, ret, current_pw, calculated, attitudes, false);
-					} else {
-						to_add = chi_attitudes(announced_f, !f_truth_value, ret, current_pw, calculated, attitudes, false);
-					}
-				}
-				//ret.add_edge(new_pw, to_add, ag);
-
-			} else if (curr_attitude == F_UNTRUSTY) {
-
-				//f_truth_value = current_pw.entails(announced_f);
-				if (f_truth_value == is_trusty) {
-					sf_i = TRUE_U_func;
-				} else {
-					sf_i = FALSE_U_func;
-				}
-				calculated_pworld = calculated.find(std::make_pair(current_pw, sf_i));
-				if (calculated_pworld != calculated.end()) {
-					to_add = calculated_pworld->second;
-				} else {
-					if (is_trusty) {
-						to_add = U_attitudes(announced_f, f_truth_value, ret, current_pw, calculated, attitudes, is_trusty);
-					} else {
-						to_add = U_attitudes(announced_f, !f_truth_value, ret, current_pw, calculated, attitudes, is_trusty);
-					}
-				}
-				ret.add_edge(new_pw, to_add, ag);
-
-
-//				if (f_truth_value == is_trusty) {
-//					sf_i = TRUE_CHI_func;
-//				} else {
-//					sf_i = FALSE_CHI_func;
-//				}
-//				for (; it_pws != it_pwm->second.end(); it_pws++) {
-//					calculated_pworld = calculated.find(std::make_pair(*it_pws, sf_i));
-//					if (calculated_pworld != calculated.end()) {
-//						to_add = calculated_pworld->second;
-//					} else {
-//						if (is_trusty) {
-//							to_add = U_attitudes(announced_f, f_truth_value, ret, *it_pws, calculated, attitudes, is_trusty);
-//						} else {
-//							to_add = U_attitudes(announced_f, !f_truth_value, ret, *it_pws, calculated, attitudes, is_trusty);
-//						}
-//					}
-//					ret.add_edge(new_pw, to_add, ag);
-//				}
-			} else if (curr_attitude == F_STUBBORN) {
-				exit(1);
-			}// Oblivious Agents.
-			else {
-				for (; it_pws != it_pwm->second.end(); it_pws++) {
-					// If we are dealing with an OBLIVIOUS agent we maintain its beliefs as they were
-					auto maintained_pworld = ret.get_worlds().find(*it_pws);
-
-					if (maintained_pworld != ret.get_worlds().end()) {
-						ret.add_edge(new_pw, *it_pws, ag);
-					}
-				}
-			}
-
-		}
-	}
-	return new_pw;
-
-}*/
-
-pworld_ptr pstate::U_attitudes(fluent announced_f, bool f_truth_value, pstate &ret, const pworld_ptr &current_pw, transition_map_att &calculated, const single_attitudes_map & attitudes, unsigned short increase_rep, agent executor) const
-{
-	//K does not change the value of the fluent (In theory only pointed world)
-
-	sub_functionIndex sf_i;
-
-	if (!executor.empty()) {
-		sf_i = exec_FUNC;
-	} else if (f_truth_value) {
-		sf_i = TRUE_U_func;
-	} else {
-		sf_i = FALSE_U_func;
-	}
-	
-	
-	
-
-
-	pworld_ptr new_pw = ret.add_rep_world(pworld(current_pw.get_fluent_set()), current_pw.get_repetition() + increase_rep); // We add the corresponding pworld in ret
-	calculated.insert(transition_map_att::value_type(std::make_pair(std::make_pair(current_pw, increase_rep), sf_i), new_pw)); // And we update the calculated map
-
-	if (increase_rep == 0)
-	{
-		increase_rep = 1;
-	}
-		unsigned short incr_arg = increase_rep;
-
-	
-	/*if (!executor.empty()) {
-		increase_rep = 1;
-	}*/
-
-	auto it_pwtm = get_beliefs().find(current_pw);
-
-	pworld_ptr to_add;
-	transition_map_att::const_iterator calculated_pworld;
-
-	if (it_pwtm != get_beliefs().end()) {
-		auto it_pwm = it_pwtm->second.begin();
-
-		for (; it_pwm != it_pwtm->second.end(); it_pwm++) {
-			agent ag = it_pwm->first;
-			auto it_pws = it_pwm->second.begin();
-			agents_attitudes curr_att;
-			//	if (!executor.empty()) {
-			if (ag == executor) {
-				//increase_rep = 0;
-				sf_i = exec_FUNC;
-				for (; it_pws != it_pwm->second.end(); it_pws++) {
-
-					calculated_pworld = calculated.find(std::make_pair(std::make_pair(*it_pws, 0), sf_i));
-					if (calculated_pworld != calculated.end()) {
-						to_add = calculated_pworld->second;
-					} else {
-						to_add = U_attitudes(announced_f, f_truth_value, ret, *it_pws, calculated, attitudes, 0, executor);
-					}
-					ret.add_edge(new_pw, to_add, ag);
-				}
-				//	}
-			} else {
-
-				curr_att = attitudes.find(ag) -> second;
-
-				switch ( curr_att ) {
-				case P_KEEPER:
-				{
-					calculated_pworld = calculated.find(std::make_pair(std::make_pair(current_pw, increase_rep), K_func));
-					if (calculated_pworld != calculated.end()) {
-						to_add = calculated_pworld->second;
-					} else {
-						to_add = K_attitudes(announced_f, ret, current_pw, calculated, attitudes);
-					}
-					ret.add_edge(new_pw, to_add, ag);
-					break;
-				}
-				case P_INSECURE:
-				{
-					calculated_pworld = calculated.find(std::make_pair(std::make_pair(current_pw, increase_rep), I_func));
-					if (calculated_pworld != calculated.end()) {
-						to_add = calculated_pworld->second;
-					} else {
-						to_add = I_attitudes(announced_f, ret, current_pw, calculated, attitudes);
-					}
-					ret.add_edge(new_pw, to_add, ag);
-					break;
-				}
-				case executor_att:
-				case F_TRUSTY:
-				{
-					if (f_truth_value) {
-						sf_i = TRUE_CHI_func;
-					} else {
-						sf_i = FALSE_CHI_func;
-					}
-					if (increase_rep != 2) {
-						incr_arg = 1;
-					}
-					for (; it_pws != it_pwm->second.end(); it_pws++) {
-						calculated_pworld = calculated.find(std::make_pair(std::make_pair(*it_pws, incr_arg), sf_i));
-						if (calculated_pworld != calculated.end()) {
-							to_add = calculated_pworld->second;
-						} else {
-							to_add = chi_attitudes(announced_f, f_truth_value, ret, *it_pws, calculated, attitudes, true, incr_arg);
-						}
-						if (increase_rep != 2) {
-							ret.add_edge(new_pw, to_add, ag);
-						}
-					}
-					break;
-
-				}
-					/*for (; it_pws != it_pwm->second.end(); it_pws++) {
-
-						calculated_pworld = calculated.find(std::make_pair(*it_pws, sf_i));
-						if (calculated_pworld != calculated.end()) {
-							to_add = calculated_pworld->second;
-						} else {
-							if (is_trusty) {
-								to_add = chi_attitudes(announced_f, f_truth_value, ret, *it_pws, calculated, attitudes, true);
-							} else {
-								to_add = chi_attitudes(announced_f, !f_truth_value, ret, *it_pws, calculated, attitudes, true);
-							}
-						}
-						ret.add_edge(new_pw, to_add, ag);
-					}*/
-
-
-				case F_MISTRUSTY:
-				{
-					if (!f_truth_value) {
-						sf_i = TRUE_CHI_func;
-					} else {
-						sf_i = FALSE_CHI_func;
-					}
-
-					if (increase_rep != 2) {
-						incr_arg = 1;
-					}
-					for (; it_pws != it_pwm->second.end(); it_pws++) {
-
-						calculated_pworld = calculated.find(std::make_pair(std::make_pair(*it_pws, incr_arg), sf_i));
-						if (calculated_pworld != calculated.end()) {
-							to_add = calculated_pworld->second;
-						} else {
-							to_add = chi_attitudes(announced_f, !f_truth_value, ret, *it_pws, calculated, attitudes, false, incr_arg);
-						}
-
-						if (increase_rep != 2) {
-							ret.add_edge(new_pw, to_add, ag);
-						}
-					}
-					break;
-				}
-
-					/*for (; it_pws != it_pwm->second.end(); it_pws++) {
-
-						calculated_pworld = calculated.find(std::make_pair(*it_pws, sf_i));
-						if (calculated_pworld != calculated.end()) {
-							to_add = calculated_pworld->second;
-						} else {
-							if (!is_trusty) {
-								to_add = chi_attitudes(announced_f, f_truth_value, ret, *it_pws, calculated, attitudes, false);
-							} else {
-								to_add = chi_attitudes(announced_f, !f_truth_value, ret, *it_pws, calculated, attitudes, false);
-							}
-						}
-						ret.add_edge(new_pw, to_add, ag);
-					}*/
-
-				case F_UNTRUSTY:
-				{
-					if (f_truth_value) {
-						sf_i = TRUE_U_func;
-					} else {
-						sf_i = FALSE_U_func;
-					}
-					for (; it_pws != it_pwm->second.end(); it_pws++) {
-
-						calculated_pworld = calculated.find(std::make_pair(std::make_pair(*it_pws, increase_rep), sf_i));
-						if (calculated_pworld != calculated.end()) {
-							to_add = calculated_pworld->second;
-						} else {
-							to_add = U_attitudes(announced_f, f_truth_value, ret, *it_pws, calculated, attitudes, increase_rep);
-
-						}
-						ret.add_edge(new_pw, to_add, ag);
-					}
-					break;
-				}
-				case F_STUBBORN:
-				{
-					std::cerr << "\n\nStubborn agents not implemented yet\n";
-					exit(1);
-					break;
-				} // Oblivious Agents.
-				case oblivious_att:
-				default:
-				{
-					for (; it_pws != it_pwm->second.end(); it_pws++) {
-						// If we are dealing with an OBLIVIOUS agent we maintain its beliefs as they were
-						//auto maintained_pworld = ret.get_worlds().find(*it_pws);
-
-						//if (maintained_pworld != ret.get_worlds().end()) {
-						ret.add_edge(new_pw, *it_pws, ag);
-						//}
-					}
-					break;
-				}
-				}
-			}
-		}
-	}
-	return new_pw;
-}
-
-pworld_ptr pstate::chi_attitudes(fluent announced_f, bool f_truth_value, pstate &ret, const pworld_ptr &current_pw, transition_map_att &calculated, const single_attitudes_map & attitudes, bool is_trusty, unsigned short increase_rep) const
-{
-	//Chi changes the value of the fluent
-	fluent_set updated_pwfs = current_pw.get_fluent_set();
-
-	unsigned short incr_arg = increase_rep;
-
-	fluent to_apply;
-	sub_functionIndex sf_i;
-	if (f_truth_value) {
-		to_apply = announced_f;
-		sf_i = TRUE_CHI_func;
-	} else {
-		to_apply = helper::negate_fluent(announced_f);
-		sf_i = FALSE_CHI_func;
-
-	}
-
-	helper::apply_effect(to_apply, updated_pwfs);
-
-	pworld_ptr new_pw = ret.add_rep_world(pworld(updated_pwfs), current_pw.get_repetition() + increase_rep); // We add the corresponding pworld in ret
-	calculated.insert(transition_map_att::value_type(std::make_pair(std::make_pair(current_pw, increase_rep), sf_i), new_pw)); // And we update the calculated map
-
-
-	auto it_pwtm = get_beliefs().find(current_pw);
-
-	pworld_ptr to_add;
-	transition_map_att::const_iterator calculated_pworld;
-
-	if (it_pwtm != get_beliefs().end()) {
-		auto it_pwm = it_pwtm->second.begin();
-
-		for (; it_pwm != it_pwtm->second.end(); it_pwm++) {
-
-			auto it_pws = it_pwm->second.begin();
-
-			agent ag = it_pwm->first;
-			agents_attitudes curr_attitude = attitudes.find(ag)->second;
-
-
-			if (curr_attitude == P_KEEPER) {
-				calculated_pworld = calculated.find(std::make_pair(std::make_pair(current_pw, increase_rep), K_func));
-				if (calculated_pworld != calculated.end()) {
-					to_add = calculated_pworld->second;
-				} else {
-					to_add = K_attitudes(announced_f, ret, current_pw, calculated, attitudes);
-				}
-				ret.add_edge(new_pw, to_add, ag);
-
-
-			} else if (curr_attitude == P_INSECURE) {
-				calculated_pworld = calculated.find(std::make_pair(std::make_pair(current_pw, increase_rep), I_func));
-				if (calculated_pworld != calculated.end()) {
-					to_add = calculated_pworld->second;
-				} else {
-					to_add = I_attitudes(announced_f, ret, current_pw, calculated, attitudes);
-				}
-				ret.add_edge(new_pw, to_add, ag);
-
-			} else if (curr_attitude == F_TRUSTY || (curr_attitude == executor_att && is_trusty) || (curr_attitude == F_MISTRUSTY && increase_rep == 2)) {
-				if (f_truth_value == is_trusty) {
-					sf_i = TRUE_CHI_func;
-				} else {
-					sf_i = FALSE_CHI_func;
-				}
-				for (; it_pws != it_pwm->second.end(); it_pws++) {
-
-					calculated_pworld = calculated.find(std::make_pair(std::make_pair(*it_pws, increase_rep), sf_i));
-
-					if (calculated_pworld != calculated.end()) {
-						to_add = calculated_pworld->second;
-					} else {
-						if (is_trusty) {
-							to_add = chi_attitudes(announced_f, f_truth_value, ret, *it_pws, calculated, attitudes, true, increase_rep);
-						} else {
-							to_add = chi_attitudes(announced_f, !f_truth_value, ret, *it_pws, calculated, attitudes, true, increase_rep);
-						}
-					}
-					ret.add_edge(new_pw, to_add, ag);
-				}
-
-			} else if (curr_attitude == F_MISTRUSTY || (curr_attitude == executor_att && !is_trusty)) {
-				if (f_truth_value != is_trusty) {
-					sf_i = TRUE_CHI_func;
-				} else {
-					sf_i = FALSE_CHI_func;
-				}
-				for (; it_pws != it_pwm->second.end(); it_pws++) {
-
-					calculated_pworld = calculated.find(std::make_pair(std::make_pair(*it_pws, increase_rep), sf_i));
-
-					if (calculated_pworld != calculated.end()) {
-						to_add = calculated_pworld->second;
-
-					} else {
-						if (!is_trusty) {
-							to_add = chi_attitudes(announced_f, f_truth_value, ret, *it_pws, calculated, attitudes, false, increase_rep);
-						} else {
-							to_add = chi_attitudes(announced_f, !f_truth_value, ret, *it_pws, calculated, attitudes, false, increase_rep);
-						}
-					}
-					ret.add_edge(new_pw, to_add, ag);
-				}
-			} else if (curr_attitude == F_UNTRUSTY) {
-				if (f_truth_value == is_trusty) {
-					sf_i = TRUE_U_func;
-				} else {
-					sf_i = FALSE_U_func;
-				}
-				//for (; it_pws != it_pwm->second.end(); it_pws++) {
-				if (increase_rep != 2) {
-					incr_arg = 3;
-				}
-
-				for (; it_pws != it_pwm->second.end(); it_pws++) {
-					calculated_pworld = calculated.find(std::make_pair(std::make_pair(*it_pws, incr_arg), sf_i));
-					if (calculated_pworld != calculated.end()) {
-						to_add = calculated_pworld->second;
-					} else {
-						if (is_trusty) {
-							to_add = U_attitudes(announced_f, f_truth_value, ret, *it_pws, calculated, attitudes, incr_arg);
-						} else {
-							to_add = U_attitudes(announced_f, !f_truth_value, ret, *it_pws, calculated, attitudes, incr_arg);
-						}
-					}
-					if (increase_rep != 2) {
-						ret.add_edge(new_pw, to_add, ag);
-					}
-				}
-				//}
-			} else if (curr_attitude == F_STUBBORN) {
-				std::cerr << "\n\nStubborn agents not implemented yet\n";
-				exit(1);
-			}/* Oblivious Agents.*/
-			else {
-				//std::cerr << "\nDEBUG: Reached CHI 9 with ag: " << domain::get_instance().get_grounder().deground_agent(ag) << "\n";
-				//				belief_formula bf, ext_bf;
-				//				fluent_formula ff;
-				//				fluent_set fs;
-				//				fluent f;
-				//				bool changed_belief = (f_truth_value != current_pw.entails(announced_f));
-				for (; it_pws != it_pwm->second.end(); it_pws++) {
-
-					//					if (changed_belief) {
-					//						//	if (it_pws->entails(announced_f) != current_pw.entails(announced_f))
-					//
-					//
-					//						if (!f_truth_value) {
-					//							f = announced_f;
-					//						} else {
-					//							f = helper::negate_fluent(announced_f);
-					//						}
-					//
-					//						fs.insert(f);
-					//						ff.insert(fs);
-					//
-					//						bf.set_formula_type(FLUENT_FORMULA);
-					//						bf.set_fluent_formula(ff);
-					//						bf.set_is_grounded(true);
-					//						bf.deground();
-					//
-					//						ext_bf.set_formula_type(BELIEF_FORMULA);
-					//						ext_bf.set_agent(ag);
-					//						ext_bf.set_bf1(bf);
-					//						ext_bf.set_is_grounded(true);
-					//						ext_bf.deground();
-					//
-					//
-					//						auto tmp_pworld = new_pw;
-					//						tmp_pworld.set_repetition(current_pw.get_repetition());
-					//						auto find_pworld = m_worlds.find(tmp_pworld);
-					//						if (find_pworld != m_worlds.end()) {
-					//							if (!entails(ext_bf, *find_pworld)) {
-					//								//	ret.add_edge(new_pw, *it_pws, ag);
-					//								ret.add_edge(new_pw, *it_pws, ag);
-					//							}
-					//						} else {
-					//							ret.add_edge(new_pw, *it_pws, ag);
-					//						}
-					//						
-					//						auto tmpSet = get_B_reachable_worlds(ag, current_pw);
-					//						auto tmpSet_it = tmpSet.find(current_pw);
-					//						if (tmpSet_it != tmpSet.end())
-					//						{
-					//							if
-					//						}
-					//						//
-					//
-					//					} else if (!changed_belief){
-					ret.add_edge(new_pw, *it_pws, ag);
-					//}
-					//}
-				}
-			}
-		}
-	}
-	return new_pw;
-
-}
-
-pstate pstate::execute_sensing_att(const action & act) const
-{
-	////std::cerr << "\n\nDEBUG: Reached Sensing 1\n";
-	pstate ret;
-
-	//This finds all the worlds that are reachable from the initial state following
-	//the edges labeled with fully observant agents.
-	agent_set agents = domain::get_instance().get_agents();
-	agent_set fully_obs_agents = helper_t::get_agents_if_entailed(act.get_fully_observants(), *this);
-	agent_set partially_obs_agents = helper_t::get_agents_if_entailed(act.get_partially_observants(), *this);
-
-	agent_set oblivious_obs_agents = agents;
-	helper_t::minus_set<agent>(oblivious_obs_agents, fully_obs_agents);
-	helper_t::minus_set<agent>(oblivious_obs_agents, partially_obs_agents);
-
-	//agent executor = act.get_executor();
-	single_attitudes_map attitudes;
-
-	auto it_ags = fully_obs_agents.begin();
-	//We set all the fully observant to be trusty
-	for (; it_ags != fully_obs_agents.end(); it_ags++) {
-		//	//std::cerr << "\nDEBUG: Reached Sensing F\n";
-
-		attitudes.insert(std::make_pair(*it_ags, F_TRUSTY));
-	}
-	//attitudes.insert(std::make_pair(executor, F_TRUSTY));
-
-	//We set all the partially observant to be keeper
-	it_ags = partially_obs_agents.begin();
-	for (; it_ags != partially_obs_agents.end(); it_ags++) {
-		attitudes.insert(std::make_pair(*it_ags, P_KEEPER));
-	}
-
-	if (!oblivious_obs_agents.empty()) {
-		ret.set_max_depth(get_max_depth() + 1);
-		auto it_obl = oblivious_obs_agents.begin();
-		for (; it_obl != oblivious_obs_agents.end(); it_obl++) {
-			//		//std::cerr << "\nDEBUG: Reached Sensing O\n";
-
-			//We use "oblivious_att" to encode the oblivious agents
-			attitudes.insert(std::make_pair(*it_obl, oblivious_att));
-		}
-	}
-
-	transition_map_att calculated; // A map that links the pworlds of *this* to the corresponding ones of ret
-	maintain_oblivious_believed_pworlds(ret, oblivious_obs_agents);
-
-	fluent_formula effects = helper_t::get_effects_if_entailed(act.get_effects(), *this);
-
-	////std::cerr << "\nDEBUG: Reached Sensing 2\n";
-
-
-	if (effects.size() == 1) {
-		if (effects.begin()->size() == 1) {
-			//	//std::cerr << "\nDEBUG: Reached Sensing 3\n";
-
-			fluent single_eff = *(effects.begin()->begin());
-			//	//std::cerr << "\nDEBUG: Reached Sensing 4\n";
-
-			//pworld_ptr new_pointed = phi_attitudes(*(fully_obs_agents.begin()), single_eff, ret, get_pointed(), calculated, attitudes, false);
-			pworld_ptr new_pointed = phi_attitudes(single_eff, ret, get_pointed(), calculated, attitudes);
-
-			//	//std::cerr << "\nDEBUG: Reached Sensing 5\n";
-
-			ret.set_pointed(new_pointed); // Updating the pointed world
-
-
-			return ret;
-		}
-	}
-
-	std::cerr << "\n\nAttitudes-based sensing only allows for single fluent effects.";
-	std::cerr << "\nThe action " << act.get_name() << " has the following effects: ";
-	printer::get_instance().print_list(effects);
-	std::cerr << std::endl;
-
-	exit(1);
-}
-
-pstate pstate::execute_announcement_att(const action & act) const
-{
-	pstate ret;
-
-	//This finds all the worlds that are reachable from the initial state following
-	//the edges labeled with fully observant agents.
-	agent_set agents = domain::get_instance().get_agents();
-	agent_set fully_obs_agents = helper_t::get_agents_if_entailed(act.get_fully_observants(), *this);
-	agent_set partially_obs_agents = helper_t::get_agents_if_entailed(act.get_partially_observants(), *this);
-
-	agent_set oblivious_obs_agents = agents;
-	helper_t::minus_set<agent>(oblivious_obs_agents, fully_obs_agents);
-	helper_t::minus_set<agent>(oblivious_obs_agents, partially_obs_agents);
-
-	agent executor = act.get_executor();
-	single_attitudes_map attitudes = get_P_attitudes(executor, partially_obs_agents);
-	single_attitudes_map F_attitudes = get_F_attitudes(executor, fully_obs_agents);
-
-	//bool ag_trusty = false;
-	//bool ag_mistrusty = false;
-
-
-	auto it_att = F_attitudes.begin();
-	//agents_attitudes tmp_att;
-	for (; it_att != F_attitudes.end(); it_att++) {
-		//tmp_att = it_att->second;
-		attitudes.insert(std::make_pair(it_att->first, it_att->second));
-	//	std::cerr << "\nDEBUG: Agent " << domain::get_instance().get_grounder().deground_agent(it_att->first) << " has attitude " << it_att->second << " wrt " << domain::get_instance().get_grounder().deground_agent(executor);
-		/*switch ( tmp_att ) {
-
-		case F_TRUSTY:
-			ag_trusty = true;
-			break;
-		case F_MISTRUSTY:
-			ag_mistrusty = true;
-			break;
-		default:
-			break;
-
-		}*/
-	}
-
-	if (!oblivious_obs_agents.empty()) {
-		ret.set_max_depth(get_max_depth() + 1);
-		auto it_obl = oblivious_obs_agents.begin();
-		for (; it_obl != oblivious_obs_agents.end(); it_obl++) {
-			//We use "oblivious_att" to encode the oblivious agents
-			attitudes.insert(std::make_pair(*it_obl, oblivious_att));
-		}
-	}
-
-	transition_map_att calculated; // A map that links the pworlds of *this* to the corresponding ones of ret
-	maintain_oblivious_believed_pworlds(ret, oblivious_obs_agents);
-
-	fluent_formula effects = helper_t::get_effects_if_entailed(act.get_effects(), *this);
-
-	if (effects.size() == 1) {
-		if (effects.begin()->size() == 1) {
-
-			fluent single_eff = *(effects.begin()->begin());
-
-			//pworld_ptr new_pointed = phi_attitudes(executor, single_eff, ret, get_pointed(), calculated, attitudes, (ag_trusty && ag_mistrusty));
-			pworld_ptr new_pointed = phi_attitudes(single_eff, ret, get_pointed(), calculated, attitudes, executor);
-
-			ret.set_pointed(new_pointed); // Updating the pointed world
-
-			/*if (!check_properties(fully_obs_agents, partially_obs_agents, effects, ret)) {
-				std::cerr << "\nDEBUG: Some properties are not respected\n\n";
-				exit(1);
-			}*/
-
-			return ret;
-		}
-	}
-
-	std::cerr << "\n\nAttitudes-based announcement only allows for single fluent effects";
-	exit(1);
-}
-
-/***************END ATTITUDES REASONING***************/
-
-/***************DOXASTIC REASONING***************/
-
-pworld_ptr pstate::execute_announcement_helper_dox(const fluent_formula &effects, pstate &ret, const pworld_ptr &current_pw, transition_map &calculated, agent_set &partially_obs_agents, agent_set &oblivious_obs_agents, bool reached_by_fully, bool & implications) const
-{
-	pworld_ptr new_pw = ret.add_rep_world(pworld(current_pw.get_fluent_set()), current_pw.get_repetition()); // We add the corresponding pworld in ret
-	calculated.insert(transition_map::value_type(current_pw, new_pw)); // And we update the calculated map
-
-	auto it_pwtm = get_beliefs().find(current_pw);
-
-	if (it_pwtm != get_beliefs().end()) {
-		pworld_map::const_iterator it_pwm;
-		pworld_ptr_set::const_iterator it_pws;
-
-		for (it_pwm = it_pwtm->second.begin(); it_pwm != it_pwtm->second.end(); it_pwm++) {
-			agent ag = it_pwm->first;
-
-			bool is_oblivious_obs = oblivious_obs_agents.find(ag) != oblivious_obs_agents.end();
-			bool is_partially_obs = partially_obs_agents.find(ag) != partially_obs_agents.end();
-			bool is_fully_obs = !is_oblivious_obs && !is_partially_obs;
-
-			for (it_pws = it_pwm->second.begin(); it_pws != it_pwm->second.end(); it_pws++) {
-
-				if (is_partially_obs) {
-					pworld_ptr_set tmp_set = get_B_reachable_worlds(ag, *it_pws);
-					pworld_ptr_set::const_iterator it_tmp;
-					bool tmp_ent1 = false;
-					bool tmp_ent2 = false;
-
-					for (it_tmp = tmp_set.begin(); it_tmp != tmp_set.end();) {
-						if (entails(effects, *it_tmp)) {
-							tmp_ent1 = true;
-						} else {
-							tmp_ent2 = true;
-						}
-
-						if (tmp_ent1 && tmp_ent2) {
-							is_fully_obs = true;
-							implications = true;
-							is_partially_obs = false;
-							it_tmp = tmp_set.end();
-						} else {
-							it_tmp++;
-						}
-					}
-				}
-
-				if (is_oblivious_obs) { // If we are dealing with an OBLIVIOUS agent we maintain its beliefs as they were
-					auto maintained_pworld = ret.get_worlds().find(*it_pws);
-
-					if (maintained_pworld != ret.get_worlds().end()) {
-						ret.add_edge(new_pw, *it_pws, ag);
-					}
-				} else { // Otherwise, if we have a FULLY/PARTIALLY observant agent
-					auto calculated_pworld = calculated.find(*it_pws);
-					//fluent_formula effects = get_effects_if_entailed(act.get_effects(), get_pointed());
-					//bool ent = act.get_type() == SENSING ? entails(effects, *it_pws) == entails(effects, get_pointed()) : entails(effects, *it_pws);
-
-
-					bool is_consistent_belief = ((!reached_by_fully && is_partially_obs) ||
-						(reached_by_fully && is_partially_obs && (entails(effects, *it_pws))) ||
-						(is_fully_obs && (entails(effects, *it_pws)))); // if a PARTIALLY OBS agent believes that "ag" thinks that "calculated" may be true (i.e., when "previous_entailment" holds)
-
-					if (calculated_pworld != calculated.end()) { // If we already calculated the transition function for this pworld
-						if (is_consistent_belief) {
-							ret.add_edge(new_pw, calculated_pworld->second, ag);
-						}
-					} else { // If we did not already calculate the transition function
-						if (is_consistent_belief) { // We calculate it if it would result in a consistent belief...
-							pworld_ptr believed_pw = execute_announcement_helper_dox(effects, ret, *it_pws, calculated, partially_obs_agents, oblivious_obs_agents, (reached_by_fully || is_fully_obs), implications);
-							ret.add_edge(new_pw, believed_pw, ag);
-						}
-					}
-				}
-			}
-		}
-	}
-	return new_pw;
-}
-
-pstate pstate::execute_announcement_dox(const action & act) const
-{
-	pstate ret;
-
-	//This finds all the worlds that are reachable from the initial state following
-	//the edges labeled with fully observant agents.
-	agent_set agents = domain::get_instance().get_agents();
-	agent_set fully_obs_agents = helper_t::get_agents_if_entailed(act.get_fully_observants(), *this);
-	agent_set partially_obs_agents = helper_t::get_agents_if_entailed(act.get_partially_observants(), *this);
-
-	agent_set oblivious_obs_agents = agents;
-	helper_t::minus_set<agent>(oblivious_obs_agents, fully_obs_agents);
-	helper_t::minus_set<agent>(oblivious_obs_agents, partially_obs_agents);
-
-	if (!oblivious_obs_agents.empty()) {
-		ret.set_max_depth(get_max_depth() + 1);
-	}
-
-	transition_map calculated; // A map that links the pworlds of *this* to the corresponding ones of ret
-	maintain_oblivious_believed_pworlds(ret, oblivious_obs_agents);
-
-	fluent_formula effects = helper_t::get_effects_if_entailed(act.get_effects(), *this);
-
-	bool implications = true;
-	if (fully_obs_agents.size() == 0) {
-		implications = false;
-	}
-
-	pworld_ptr new_pointed = execute_announcement_helper_dox(effects, ret, get_pointed(), calculated, partially_obs_agents, oblivious_obs_agents, false, implications);
-	ret.set_pointed(new_pointed); // Updating the pointed world
-
-	if (!implications) {
-		ret = *this;
-	}
-
-	return ret;
-}
-
-/***************END DOXASTIC***************/
 
 /****************BISIMULATION********************/
 void pstate::get_all_reachable_worlds(const pworld_ptr & pw, pworld_ptr_set & reached_worlds, pworld_transitive_map & reached_edges) const

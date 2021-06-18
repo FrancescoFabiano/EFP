@@ -49,7 +49,7 @@ const pstate & union_update::u_update(const pstate & state, const action & act)
 {
     pstate ret;
     pem_ptr pem = union_update::build_pem(act);
-    pworld_ptr p_pw = state.get_pointed();
+    const pworld_ptr& p_pw = state.get_pointed();
     pevent_ptr p_ev = pem_store::get_instance().get_event(pem.get_pointed_id());
     pupdate_map u_map;
     agent_group_map a_map;
@@ -83,7 +83,7 @@ const pworld_ptr & union_update::u_update_helper(pstate & ret, const pstate & st
         }
     }
 
-    pworld_ptr new_pw = ret.add_rep_world(pworld(world_description), pw.get_repetition());
+    pworld_ptr new_pw = ret.add_world(pworld(world_description));
     u_map.insert(pupdate_map::value_type({pw, ev}, new_pw));
 
     auto it_pwtm = state.get_beliefs().find(pw);
