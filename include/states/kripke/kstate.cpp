@@ -10,13 +10,10 @@
 #include <iostream>
 #include <tuple>
 #include <stack>
-#include <stdio.h>
-
 
 #include "kstate.h"
 #include "../../update/union_update.h"
-#include "../../domain/domain.h"
-#include "../../utilities/helper.h"
+#include "../../utilities/helper_t.h"
 
 /**** GETTERS/SETTERS ****/
 void kstate::set_worlds(const kworld_ptr_set & to_set)
@@ -51,6 +48,7 @@ const kworld_ptr & kstate::get_pointed() const
 	return m_pointed;
 }
 
+
 /**** ADD/REMOVE WORLDS/EDGES ****/
 kworld_ptr kstate::add_world(const kworld & world)
 {
@@ -82,7 +80,6 @@ bool kstate::operator=(const kstate & to_copy)
 {
     set_edges(to_copy.get_edges());
     set_worlds(to_copy.get_worlds());
-//	m_max_depth = get_max_depth();
     set_pointed(to_copy.get_pointed());
     return true;
 }
@@ -94,18 +91,11 @@ bool kstate::operator==(const kstate & to_compare) const
     }
 
     bisimulation b;
-
     return b.compare_automata_eq(*this, to_compare);
 }
 
 bool kstate::operator<(const kstate & to_compare) const
 {
-//	if (m_max_depth < to_compare.get_max_depth()) {
-//		return true;
-//	} else if (m_max_depth > to_compare.get_max_depth()) {
-//		return false;
-//	}
-
     if (m_pointed.get_numerical_id() < to_compare.get_pointed().get_numerical_id()) {
         return true;
     } else if (m_pointed.get_numerical_id() > to_compare.get_pointed().get_numerical_id()) {
@@ -174,12 +164,12 @@ bool kstate::operator<(const kstate & to_compare) const
 
 
 /**** ENTAILMENT ****/
-bool kstate::entails(fluent f) const
+bool kstate::entails(const fluent & f) const
 {
 	return entails(f, m_pointed);
 }
 
-bool kstate::entails(fluent f, const kworld_ptr & world) const
+bool kstate::entails(const fluent & f, const kworld_ptr & world)
 {
 	return world.get_ptr()->entails(f);
 }
@@ -189,7 +179,7 @@ bool kstate::entails(const fluent_set & fl) const
 	return entails(fl, m_pointed);
 }
 
-bool kstate::entails(const fluent_set & fl, const kworld_ptr & world) const
+bool kstate::entails(const fluent_set & fl, const kworld_ptr & world)
 {
 	return world.get_ptr()->entails(fl);
 }
@@ -199,7 +189,7 @@ bool kstate::entails(const fluent_formula & ff) const
 	return entails(ff, m_pointed);
 }
 
-bool kstate::entails(const fluent_formula & ff, const kworld_ptr & world) const
+bool kstate::entails(const fluent_formula & ff, const kworld_ptr & world)
 {
 	return world.get_ptr()->entails(ff);
 }
@@ -211,75 +201,53 @@ bool kstate::entails(const belief_formula & bf) const
 
 bool kstate::entails(const belief_formula & bf, const kworld_ptr & world) const
 {
-	/*
-	 The entailment of a \ref belief_formula just call recursively the entailment on all the reachable world with that formula.
-	 */
-	kworld_ptr_set D_reachable;
-	switch ( bf.get_formula_type() ) {
-
-	case FLUENT_FORMULA:
-	{
-		/** \todo Make sure its grounded. Maybe add to \ref belief_formula a bool that store if grounded or not or maybe ground
-		 * when \ref domain created.
-		 * @see belief_formula::ground(const grounder &).*/
-		return entails(bf.get_fluent_formula(), world);
-		break;
+	switch (bf.get_formula_type()) {
+        case FLUENT_FORMULA: {
+            /** \todo Make sure its grounded. Maybe add to \ref belief_formula a bool that store if grounded or not or maybe ground
+             * when \ref domain created.
+             * @see belief_formula::ground(const grounder &).*/
+            return entails(bf.get_fluent_formula(), world);
+        }
+        case BELIEF_FORMULA: {
+            /** \todo what was the at_lest_one of the previous version?*/
+            return entails(bf.get_bf1(), get_B_reachable_worlds(bf.get_agent(), world));
+        }
+        case PROPOSITIONAL_FORMULA: {
+            switch (bf.get_operator()) {
+                case BF_NOT:
+                    return !entails(bf.get_bf1(), world);
+                case BF_OR:
+                    return entails(bf.get_bf1(), world) || entails(bf.get_bf2(), world);
+                case BF_AND:
+                    return entails(bf.get_bf1(), world) && entails(bf.get_bf2(), world);
+                case BF_FAIL:
+                default:
+                    std::cerr << "Something went wrong in checking entailment for Propositional formula";
+                    exit(1);
+            }
+        }
+        case E_FORMULA: {
+            return entails(bf.get_bf1(), get_E_reachable_worlds(bf.get_group_agents(), world));
+        }
+        case D_FORMULA: {
+            kworld_ptr_set D_reachable = get_D_reachable_worlds(bf.get_group_agents(), world);
+            if (D_reachable.empty()) {
+                return false;
+            }
+            return entails(bf.get_bf1(), D_reachable);
+        }
+        case C_FORMULA: {
+            return entails(bf.get_bf1(), get_C_reachable_worlds(bf.get_group_agents(), world));
+        }
+        case BF_EMPTY: {
+            return true;
+        }
+        case BF_TYPE_FAIL:
+        default: {
+            std::cerr << "Something went wrong in checking entailment for Belief formula";
+            exit(1);
+        }
 	}
-
-	case BELIEF_FORMULA:
-
-		/** \todo what was the at_lest_one of the previous version?*/
-		return entails(bf.get_bf1(), get_B_reachable_worlds(bf.get_agent(), world));
-		break;
-
-	case PROPOSITIONAL_FORMULA:
-		switch ( bf.get_operator() ) {
-		case BF_NOT:
-			return !entails(bf.get_bf1(), world);
-			break;
-		case BF_OR:
-			return entails(bf.get_bf1(), world) || entails(bf.get_bf2(), world);
-			break;
-		case BF_AND:
-			return entails(bf.get_bf1(), world) && entails(bf.get_bf2(), world);
-			break;
-		case BF_FAIL:
-		default:
-			std::cerr << "Something went wrong in checking entailment for Propositional formula";
-			exit(1);
-		}
-		break;
-
-	case E_FORMULA:
-		//Check the entails on the E-reachable worlds
-		return entails(bf.get_bf1(), get_E_reachable_worlds(bf.get_group_agents(), world));
-		break;
-		//Check the entails on the D-reachable worlds
-	case D_FORMULA:
-		D_reachable = get_D_reachable_worlds(bf.get_group_agents(), world);
-		if (D_reachable.size() > 0) {
-			return entails(bf.get_bf1(), D_reachable);
-		} else {
-			return false;
-		}
-		break;
-		//Check the entails on the C-reachable worlds
-	case C_FORMULA:
-		return entails(bf.get_bf1(), get_C_reachable_worlds(bf.get_group_agents(), world));
-		break;
-	case BF_EMPTY:
-	{
-
-		return true;
-		break;
-	}
-	case BF_TYPE_FAIL:
-	default:
-		std::cerr << "Something went wrong in checking entailment for Belief formula";
-		exit(1);
-	}
-	return false;
-
 }
 
 bool kstate::entails(const belief_formula & to_check, const kworld_ptr_set & reachable) const
@@ -295,7 +263,6 @@ bool kstate::entails(const belief_formula & to_check, const kworld_ptr_set & rea
 
 bool kstate::entails(const formula_list & to_check, const kworld_ptr & world) const
 {
-	//formula_list expresses CNF formula
 	formula_list::const_iterator it_fl;
 	for (it_fl = to_check.begin(); it_fl != to_check.end(); it_fl++) {
 		if (!entails((*it_fl), world)) {
@@ -312,7 +279,7 @@ kworld_ptr_set kstate::get_B_reachable_worlds(const agent & ag, const kworld_ptr
 	return m_edges.at(world).at(ag);
 }
 
-//bool kstate::get_B_reachable_worlds_recoursive(const agent & ag, const kworld_ptr & world, kworld_ptr_set & ret) const
+//bool kstate::get_B_reachable_worlds_recursive(const agent & ag, const kworld_ptr & world, kworld_ptr_set & ret) const
 //{
 //	/** \todo check: If a--i-->b, b--i-->c then a--i-->c must be there*/
 //	bool is_fixed_point = true;
@@ -351,9 +318,7 @@ kworld_ptr_set kstate::get_E_reachable_worlds(const agent_set & ags, const kworl
 bool kstate::get_E_reachable_worlds_recursive(const agent_set & ags, const kworld_ptr_set & worlds, kworld_ptr_set & reached) const
 {
 	/*Optimized, the K^i (recursive) call of this function*/
-
 	bool is_fixed_point = true;
-	kedge_ptr_set::const_iterator it_kedge;
 
 	kworld_ptr_set::const_iterator it_kws1, it_kws2;
 	agent_set::const_iterator it_ags;
@@ -387,8 +352,8 @@ kworld_ptr_set kstate::get_C_reachable_worlds(const agent_set & ags, const kworl
 	kworld_ptr_set ret;
 	//FROM HERE K^i UNTIL FIXED_POINT
 	while (!is_fixed_point) {
-		sum_set(newly_reached, ret);
-		minus_set(newly_reached, already_reached);
+		helper_t::sum_set(newly_reached, ret);
+        helper_t::minus_set(newly_reached, already_reached);
 		is_fixed_point = get_E_reachable_worlds_recursive(ags, newly_reached, ret);
 		already_reached = newly_reached;
 	}
@@ -398,6 +363,9 @@ kworld_ptr_set kstate::get_C_reachable_worlds(const agent_set & ags, const kworl
 kworld_ptr_set kstate::get_D_reachable_worlds(const agent_set & ags, const kworld_ptr & world) const
 {
 	/**@bug: Notion of D-Reachable is correct (page 24 of Reasoning about Knowledge)*/
+    std::cerr << "\nERROR: D_REACHABLILITY not yet Implemented correctly\n";
+    exit(1);
+
 	auto it_agset = ags.begin();
 	kworld_ptr_set ret = get_B_reachable_worlds((*it_agset), world);
 	it_agset++;
@@ -424,8 +392,6 @@ kworld_ptr_set kstate::get_D_reachable_worlds(const agent_set & ags, const kworl
 		ret.erase(it_pwset1, ret.end());
 
 	}
-	std::cerr << "\nERROR: D_REACHABLILITY not yet Implemented correctly\n";
-	exit(1);
 	return ret;
 }
 
@@ -450,8 +416,6 @@ void kstate::clean_unreachable_kworlds()
 {
 	kworld_ptr_set reached_worlds;
 	kedge_map reached_edges;
-
-	kedge_ptr_set::const_iterator it_keps;
 
 	reached_worlds.insert(get_pointed());
     get_all_reachable_worlds_edges(get_pointed(), reached_worlds, reached_edges);
@@ -479,7 +443,6 @@ automaton kstate::kstate_to_automaton(/*const std::map<kworld_ptr, kworld_ptr_se
 
 	// Initializating vertices
 	kworld_ptr_set::const_iterator it_kwps;
-	kedge_ptr_set::const_iterator it_keps;
 	kbislabel_map::const_iterator it_klm;
 	bis_label_set::const_iterator it_bislab;
 	std::map<kworld_ptr, bis_label_set>::const_iterator it_kw_bislab;
@@ -490,7 +453,7 @@ automaton kstate::kstate_to_automaton(/*const std::map<kworld_ptr, kworld_ptr_se
 	// is always chosen as the first of its block. Therefore, we do not need to update it when converting back to a kstate
 	index_map[get_pointed()] = 0;
 	kworld_vec.push_back(get_pointed());
-	compact_indices[get_pointed().get_numerical_id()] = 0;
+	compact_indices[static_cast<int>(get_pointed().get_numerical_id())] = 0;
 
 	//For the loop that identifies the id
 	//BIS_ADAPTATION For the loop that identifies the id (+1)
@@ -525,7 +488,7 @@ automaton kstate::kstate_to_automaton(/*const std::map<kworld_ptr, kworld_ptr_se
 			i++;
 		}
 		//BIS_ADAPTATION (Added self-loop)
-		label_map[*it_kwps][*it_kwps].insert(compact_indices[it_kwps->get_numerical_id()] + ag_set_size);
+		label_map[*it_kwps][*it_kwps].insert(compact_indices[static_cast<int>(it_kwps->get_numerical_id())] + ag_set_size);
 		//std::cerr << "\nDEBUG: Added to " << it_kwps->get_numerical_id() << " the label " << compact_indices[it_kwps->get_numerical_id()] + ag_set_size << std::endl;
 	}
 
@@ -657,14 +620,9 @@ void kstate::automaton_to_kstate(const automaton & a, const std::vector<kworld_p
 
 void kstate::calc_min_bisimilar()
 {
-
 	// ************* Cleaning unreachable kworlds *************
-	//DEBUG_add_extra_world();
-
-	
 	std::map<bis_label, agent> label_to_agent;
 	std::map<agent, bis_label> agent_to_label;
-
 
 	auto agents = domain::get_instance().get_agents();
 	auto it_ag = agents.begin();
@@ -741,14 +699,11 @@ void kstate::build_initial_structural()
 
 void kstate::build_initial_prune()
 {
-
 	/*Building of all the possible consistent \ref kworld and setting the pointed world.
 	 * Creation of all the \ref fluent combinations. All the consistent ones are added to \ref kstore.*/
 	fluent_set permutation;
-		initially ini_conditions = domain::get_instance().get_initial_description();
-
+	initially ini_conditions = domain::get_instance().get_initial_description();
 	generate_initial_kworlds(permutation, 0, ini_conditions.get_initially_known_fluents());
-
 
 	/*Building of all the consistent \ref kedge.*/
 	generate_initial_kedges();
@@ -757,9 +712,8 @@ void kstate::build_initial_prune()
 /*From https://www.geeksforgeeks.org/generate-all-the-binary-strings-of-n-bits/ since is like generating all the binary numbers.*/
 void kstate::generate_initial_kworlds(fluent_set& permutation, int index, const fluent_set & initially_known)
 {
-		int fluent_number = domain::get_instance().get_fluent_number();
-
-	int bit_size = (domain::get_instance().get_size_fluent());
+    unsigned int fluent_number = domain::get_instance().get_fluent_number();
+	unsigned int bit_size = domain::get_instance().get_size_fluent();
 
 	if (index == fluent_number) {
 		kworld to_add(permutation);
@@ -772,8 +726,8 @@ void kstate::generate_initial_kworlds(fluent_set& permutation, int index, const 
 	//Add the \ref fluent in positive version
 	boost::dynamic_bitset<> bitSetToFindPositve(bit_size, index);
 	boost::dynamic_bitset<> bitSetToFindNegative(bit_size, index);
-	bitSetToFindNegative.set(bitSetToFindPositve.size() - 1, 1);
-	bitSetToFindPositve.set(bitSetToFindPositve.size() - 1, 0);
+	bitSetToFindNegative.set(bitSetToFindPositve.size() - 1, true);
+	bitSetToFindPositve.set(bitSetToFindPositve.size() - 1, false);
 
 
 	if (initially_known.find(bitSetToFindNegative) == initially_known.end()) {
@@ -836,24 +790,24 @@ void kstate::add_initial_kworld(const kworld & possible_add)
 
 void kstate::generate_initial_kedges()
 {
-	kworld_ptr_set::const_iterator it_kwps_1, it_kwps_2;
-	auto agents = domain::get_instance().get_agents();
+	agent_set agents = domain::get_instance().get_agents();
 	kworld_ptr kwptr_tmp1, kwptr_tmp2;
+
+	kworld_ptr_set::const_iterator it_kwps_1, it_kwps_2;
+	agent_set::const_iterator it_ags;
 
 	/*This for add to *this* all the possible edges.*/
 	for (it_kwps_1 = m_worlds.begin(); it_kwps_1 != m_worlds.end(); it_kwps_1++) {
 		for (it_kwps_2 = it_kwps_1; it_kwps_2 != m_worlds.end(); it_kwps_2++) {
-			for (auto i = agents.begin(); i != agents.end(); i++) {
+			for (it_ags = agents.begin(); it_ags != agents.end(); it_ags++) {
 				kwptr_tmp1 = *it_kwps_1;
 				kwptr_tmp2 = *it_kwps_2;
 
-				add_edge(kwptr_tmp1, kwptr_tmp2, *i);
-				add_edge(kwptr_tmp2, kwptr_tmp1, *i);
+				add_edge(kwptr_tmp1, kwptr_tmp2, *it_ags);
+				add_edge(kwptr_tmp2, kwptr_tmp1, *it_ags);
 			}
 		}
 	}
-
-	//std::cout << "Tot edges: " << m_edges.size() << std::endl;
 
 	initially ini_conditions = domain::get_instance().get_initial_description();
 
@@ -861,13 +815,9 @@ void kstate::generate_initial_kedges()
 	for (it_fl = ini_conditions.get_initial_conditions().begin(); it_fl != ini_conditions.get_initial_conditions().end(); it_fl++) {
 		remove_initial_kedge_bf(*it_fl);
 	}
-	//std::cout << "Removed edges: " << count << std::endl;
-
-	//std::cout << "Final edges: " << m_edges.size() << std::endl;
-
 }
 
-void kstate::remove_initial_kedge(const fluent_formula & known_ff, agent ag)
+void kstate::remove_initial_kedge(const fluent_formula & known_ff, const agent & ag)
 {
 
 	kworld_ptr_set::const_iterator it_kwps_1, it_kwps_2;
@@ -898,88 +848,58 @@ void kstate::remove_initial_kedge(const fluent_formula & known_ff, agent ag)
 void kstate::remove_initial_kedge_bf(const belief_formula & to_check)
 {
 	switch ( domain::get_instance().get_initial_description().get_ini_restriction() ) {
-	case S5:
-	{
-		/* Just check whenever is B(--) \/ B(--) and remove that edge*/
-		if (to_check.get_formula_type() == C_FORMULA) {
+        case S5: {
+            /* Just check whenever is B(--) \/ B(--) and remove that edge*/
+            if (to_check.get_formula_type() == C_FORMULA) {
+                const belief_formula & tmp = to_check.get_bf1();
 
-			belief_formula tmp = to_check.get_bf1();
+                switch ( tmp.get_formula_type() ) {
+                    //Only one for edges -- expresses that someone is ignorant.
+                    case PROPOSITIONAL_FORMULA: {
+                        //We remove all the check on the formula since they have already been controlled when ini_conditions has been created
+                        if (tmp.get_operator() == BF_OR) {
+                            auto known_ff_ptr = std::make_shared<fluent_formula>();
+                            helper::check_Bff_notBff(tmp.get_bf1(), tmp.get_bf2(), known_ff_ptr);
+                            if (known_ff_ptr != nullptr) {
+                                remove_initial_kedge(*known_ff_ptr, tmp.get_bf2().get_agent());
+                            }
+                            return;
 
-			switch ( tmp.get_formula_type() ) {
-
-				//Only one for edges -- expresses that someone is ignorant.
-			case PROPOSITIONAL_FORMULA:
-			{
-				//We remove all the check on the formula since they have already been controlled when ini_conditions has been created
-				if (tmp.get_operator() == BF_OR) {
-
-					//fluent_formula known_ff;
-					auto known_ff_ptr = std::make_shared<fluent_formula>();
-					helper::check_Bff_notBff(tmp.get_bf1(), tmp.get_bf2(), known_ff_ptr);
-					if (known_ff_ptr != nullptr) {
-						//printer::get_instance().print_list(*known_ff_ptr);
-						remove_initial_kedge(*known_ff_ptr, tmp.get_bf2().get_agent());
-					}
-					return;
-
-				} else if (tmp.get_operator() == BF_AND) {
-					//This case doesn't add knowledge.
-					return;
-
-				} else {
-					std::cerr << "\nError in the type of initial formulae (FIFTH).\n";
-					exit(1);
-				}
-				return;
-				break;
-			}
-			case FLUENT_FORMULA:
-			case BELIEF_FORMULA:
-			{
-				return;
-				break;
-			}
-			case BF_EMPTY:
-			{
-				return;
-				break;
-			}
-
-			default:
-			{
-				std::cerr << "\nError in the type of initial formulae (SIXTH).\n";
-				exit(1);
-				break;
-			}
-			}
-		} else {
-			std::cerr << "\nError in the type of initial formulae (SEVENTH).\n";
-			exit(1);
-		}
-
-		return;
-		break;
-	}
-
-	case K45:
-	{
-		std::cerr << "\nNot implemented yet - 4\n";
-		exit(1);
-		break;
-	}
-	case NONE:
-	{
-		std::cerr << "\nNot implemented yet - 5\n";
-		exit(1);
-		break;
-	}
-	default:
-	{
-		std::cerr << "\nNot implemented yet - 6\n";
-		exit(1);
-
-		break;
-	}
+                        } else if (tmp.get_operator() == BF_AND) {
+                            //This case doesn't add knowledge.
+                            return;
+                        } else {
+                            std::cerr << "\nError in the type of initial formulae (FIFTH).\n";
+                            exit(1);
+                        }
+                    }
+                    case FLUENT_FORMULA:
+                    case BELIEF_FORMULA:
+                    case BF_EMPTY: {
+                        return;
+                    }
+                    default: {
+                        std::cerr << "\nError in the type of initial formulae (SIXTH).\n";
+                        exit(1);
+                    }
+                }
+            } else {
+                std::cerr << "\nError in the type of initial formulae (SEVENTH).\n";
+                exit(1);
+            }
+        }
+        case K45: {
+            std::cerr << "\nNot implemented yet - 4\n";
+            exit(1);
+        }
+        case NONE: {
+            std::cerr << "\nNot implemented yet - 5\n";
+            exit(1);
+        }
+        default: {
+            std::cerr << "\nNot implemented yet - 6\n";
+            exit(1);
+        }
 	}
 }
 
@@ -1001,7 +921,7 @@ void kstate::print() const
 	printer::get_instance().print_list(get_pointed().get_fluent_set());
 	std::cout << std::endl;
 	std::cout << "*******************************************************************" << std::endl;
-	;
+
 	kworld_ptr_set::const_iterator it_kwset;
 	std::cout << "World List:" << std::endl;
 
@@ -1016,7 +936,6 @@ void kstate::print() const
 	std::cout << std::endl;
 	std::cout << "*******************************************************************" << std::endl;
 
-//	kedge_ptr_set::const_iterator it_keset;
 	kedge_map::const_iterator it_kem;
 	std::map<agent, kworld_ptr_set>::const_iterator it_agkw;
 
@@ -1037,20 +956,6 @@ void kstate::print() const
             }
         }
     }
-
-	/*for (it_keset = get_edges().begin(); it_keset != get_edges().end(); it_keset++) {
-
-		std::cout << "E-" << counter << ": (";
-		printer::get_instance().print_list(it_keset->get_from().get_fluent_set());
-		std::cout << "," << it_keset->get_from().get_repetition();
-		std::cout << ") - (";
-		printer::get_instance().print_list(it_keset->get_to().get_fluent_set());
-		std::cout << "," << it_keset->get_to().get_repetition();
-		std::cout << ") ag:" << domain::get_instance().get_grounder().deground_agent(it_keset->get_label());
-		std::cout << std::endl;
-		counter++;
-
-	}*/
 	std::cout << "*******************************************************************" << std::endl;
 }
 
@@ -1084,7 +989,7 @@ void kstate::print_graphviz(std::ostream & graphviz) const
 			map_world_to_index[tmp_fs] = found_fs;
 			found_fs++;
 		}
-		tmp_unsh = it_kwset->get_repetition();
+		tmp_unsh = static_cast<char>(it_kwset->get_repetition());
 		if (map_rep_to_name.count(tmp_unsh) == 0) {
 			map_rep_to_name[tmp_unsh] = found_rep;
 			found_rep++;
@@ -1125,7 +1030,6 @@ void kstate::print_graphviz(std::ostream & graphviz) const
 
 	std::map < std::tuple<std::string, std::string>, std::set<std::string> > edges;
 
-//	kedge_ptr_set::const_iterator it_keset;
 	std::tuple<std::string, std::string> tmp_tuple;
 	std::string tmp_string;
 
@@ -1148,29 +1052,16 @@ void kstate::print_graphviz(std::ostream & graphviz) const
         }
     }
 
-	/*for (it_keset = get_edges().begin(); it_keset != get_edges().end(); it_keset++) {
-		tmp_string = "_" + std::to_string(map_world_to_index[it_keset->get_from().get_fluent_set()]);
-		tmp_string.insert(0, 1, map_rep_to_name[it_keset->get_from().get_repetition()]);
-		std::get<0>(tmp_tuple) = tmp_string;
-
-		tmp_string = "_" + std::to_string(map_world_to_index[it_keset->get_to().get_fluent_set()]);
-		tmp_string.insert(0, 1, map_rep_to_name[it_keset->get_to().get_repetition()]);
-		std::get<1>(tmp_tuple) = tmp_string;
-
-		edges[tmp_tuple].insert(domain::get_instance().get_grounder().deground_agent(it_keset->get_label()));
-	}*/
-
-
 	std::map < std::tuple<std::string, std::string>, std::set < std::string>>::iterator it_map;
 	std::map < std::tuple<std::string, std::string>, std::set < std::string>>::const_iterator it_map_2;
 
 	std::map < std::tuple<std::string, std::string>, std::set < std::string>> to_print_double;
 	for (it_map = edges.begin(); it_map != edges.end(); it_map++) {
 		for (it_map_2 = it_map; it_map_2 != edges.end(); it_map_2++) {
-			if (std::get<0>(it_map->first).compare(std::get<1>(it_map_2->first)) == 0) {
-				if (std::get<1>(it_map->first).compare(std::get<0>(it_map_2->first)) == 0) {
+			if (std::get<0>(it_map->first) == std::get<1>(it_map_2->first)) {
+				if (std::get<1>(it_map->first) == std::get<0>(it_map_2->first)) {
 					if (it_map->second == it_map_2->second) {
-						if (std::get<0>(it_map->first).compare(std::get<1>(it_map->first)) != 0) {
+						if (std::get<0>(it_map->first) != std::get<1>(it_map->first)) {
 							to_print_double[it_map->first] = it_map->second;
 							it_map_2 = edges.erase(it_map_2);
 							it_map = edges.erase(it_map);
@@ -1241,61 +1132,6 @@ void kstate::print_graphviz(std::ostream & graphviz) const
 	graphviz << "	</table>>]\n";
 	graphviz << "	{rank = max; description};\n";
 
-}
-
-/******************************MOVE TO HELPER*********************************/
-template <class T>
-void kstate::sum_set(std::set<T> & to_modify, const std::set<T> & factor2) const
-{
-	/**\todo move to helper*/
-	typename std::set<T>::const_iterator it_kwset;
-	for (it_kwset = factor2.begin(); it_kwset != factor2.end(); it_kwset++) {
-
-		to_modify.insert(*it_kwset);
-	}
-}
-
-template <class T>
-void kstate::minus_set(std::set<T> & to_modify, const std::set<T> & factor2) const
-{ /**\todo move to helper*/
-
-	typename std::set<T>::const_iterator it_kwset;
-	for (it_kwset = factor2.begin(); it_kwset != factor2.end(); it_kwset++) {
-
-		to_modify.erase(*it_kwset);
-	}
-}
-
-agent_set kstate::get_agents_if_entailed(const observability_map& map, const kworld_ptr & start) const
-{ /**\todo move to helper*/
-
-	agent_set ret;
-	observability_map::const_iterator it_map;
-	for (it_map = map.begin(); it_map != map.end(); it_map++) {
-		if (entails(it_map->second, start)) {
-
-			ret.insert(it_map->first);
-		}
-	}
-	return ret;
-}
-
-fluent_formula kstate::get_effects_if_entailed(const effects_map & map, const kworld_ptr & start) const
-{ /**\todo move to helper*/
-
-	fluent_formula ret;
-	effects_map::const_iterator it_map;
-	for (it_map = map.begin(); it_map != map.end(); it_map++) {
-		if (entails(it_map->second, start)) {
-			ret = helper::and_ff(ret, it_map->first);
-		}
-	}
-	if (ret.size() > 1) {
-
-		std::cerr << "\nNon determinism in action effect is not supported-1.\n";
-		exit(1);
-	}
-	return ret;
 }
 
 /*fluent_formula kstate::get_sensing_effects_if_entailed(const effects_map & map, const kworld_ptr & start) const

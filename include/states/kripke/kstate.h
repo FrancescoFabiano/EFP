@@ -50,7 +50,7 @@ private:
      *
      * @return true: \p to_check is entailed in \p world;
      * @return false: \p -to_check is entailed in \p world.*/
-    bool entails(fluent to_check, const kworld_ptr& world) const;
+    static bool entails(const fluent& to_check, const kworld_ptr& world);
     /**
      *\brief Function that checks the entailment of a conjunctive set of \ref fluent in a given \ref kworld.
      *     @see \ref kworld::entails(const fluent_set &) const
@@ -60,7 +60,7 @@ private:
      *
      * @return true: \p to_check is entailed in \p world;
      * @return false: \p -to_check is entailed in \p world.*/
-    bool entails(const fluent_set & to_check, const kworld_ptr& world) const;
+    static bool entails(const fluent_set & to_check, const kworld_ptr& world);
     /**
      *\brief Function that checks the entailment of a conjunctive set of \ref fluent in a given \ref kworld.
      *     @see \ref kworld::entails(const fluent_formula &) const
@@ -70,7 +70,7 @@ private:
      *
      * @return true: \p to_check is entailed in \p world;
      * @return false: \p -to_check is entailed in \p world.*/
-    bool entails(const fluent_formula & to_check, const kworld_ptr& world) const;
+    static bool entails(const fluent_formula & to_check, const kworld_ptr& world);
 
     /** \brief Function that checks the entailment of a \ref belief_formula.
      * 
@@ -139,7 +139,7 @@ private:
 //     *
 //     *
 //     * \todo self-loop?*/
-//    bool get_B_reachable_worlds_recoursive(const agent& ag, const kworld_ptr& world, kworld_ptr_set& reached) const;
+//    bool get_B_reachable_worlds_recursive(const agent& ag, const kworld_ptr& world, kworld_ptr_set& reached) const;
 
     /** \brief Function that returns all the reachable \ref kworld given a set of \ref agent and the staring \ref kworld.
      * 
@@ -280,7 +280,7 @@ private:
      *  
      * @param[in] known_ff: the \ref fluent_formula known by \p ag.
      * @param[in] ag: the \ref agent that knows \p known_ff.*/
-    void remove_initial_kedge(const fluent_formula & known_ff, agent ag);
+    void remove_initial_kedge(const fluent_formula & known_ff, const agent& ag);
     /** \brief Function check if a belief_formula removes some edges from the initial state.
      *  
      * For example whenever is B(i, *phi*) \/ B(i, -*phi*) is necessary to remove the edges
@@ -288,20 +288,6 @@ private:
      * 
      * @param[in] to_check: the \ref belief_formula to check.*/
     void remove_initial_kedge_bf(const belief_formula & to_check);
-
-    /** \brief Function that return the set of \ref agent that entails the obs condition.
-     *
-     * @param[in] map: the map that contains the tuples to check for entailment.
-     * @param[in] start: the world to set as pointed to check the entailment.
-     * @return the effects that are feasible in *this* with \p start as pointed world*.*/
-    agent_set get_agents_if_entailed(const observability_map & map, const kworld_ptr & start) const;
-
-    /** \brief Function that return the \ref fluent_formula (effect) that entails the exe condition.
-     *  
-     * @param[in] map: the map that contains the tuples to check for entailment.
-     * @param[in] start: the world to set as pointed to check the entailment.
-     * @return the effects that are feasible in *this* with \p start as pointed world*.*/
-    fluent_formula get_effects_if_entailed(const effects_map & map, const kworld_ptr & start) const;
 
 public:
 
@@ -372,7 +358,7 @@ public:
      *
      * @return true: \p to_check is entailed in *this*;
      * @return false: \p -to_check is entailed in *this*.*/
-    bool entails(fluent to_check) const;
+    bool entails(const fluent& to_check) const;
     /** \brief Function that checks the entailment of a conjunctive set of \ref fluent in *this*.
      *
      * The entailment of a conjunctive set of \ref fluent in a kstate is true if the conjunctive set of \ref fluent
@@ -463,23 +449,6 @@ public:
      *
      * @param[in] graphviz: the ostream where to print the info of *this*.*/
     void print_graphviz(std::ostream& graphviz) const;
-
-    /** \brief Function that return the sum_set of the two parameters by modifying the first one.
-     *
-     *  
-     * @param[out] to_modify: the set in which is added \p factor2.
-     * @param[in] factor2: the set to add to \p to_modify.*/
-    /* @return: True if at least one new element is added.
-     * @return: False otherwise.*/
-    template <class T>
-    void sum_set(std::set<T> & to_modify, const std::set<T> & factor2) const;
-    /** \brief Function that return the set difference of the two parameters by modifying the first one.
-     *
-     *  
-     * @param[out] to_modify: the set from which is removed \p factor2.
-     * @param[in] factor2: the set to remove from \p to_modify.*/
-    template <class T>
-    void minus_set(std::set<T> & to_modify, const std::set<T> & factor2) const;
 
     //void DEBUG_add_extra_world();
     //    void debug_print(const kstate & to_compare);

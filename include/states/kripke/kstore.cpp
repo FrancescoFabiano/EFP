@@ -1,4 +1,4 @@
-/*
+/**
  * \brief Implementation of \ref kstore.h
  * \copyright GNU Public License.
  *
@@ -9,9 +9,7 @@
 
 #include "kstore.h"
 
-kstore::kstore()
-{
-}
+kstore::kstore() = default;
 
 kstore& kstore::get_instance()
 {
