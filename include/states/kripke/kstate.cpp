@@ -420,6 +420,8 @@ void kstate::clean_unreachable_kworlds()
 	kedge_map reached_edges;
 
 	reached_worlds.insert(get_pointed());
+    reached_edges[get_pointed()] = m_edges.at(get_pointed());
+
     get_all_reachable_worlds_edges(get_pointed(), reached_worlds, reached_edges);
 
 	set_worlds(reached_worlds);
