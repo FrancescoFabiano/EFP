@@ -63,7 +63,7 @@ unsigned int kworld::hash_fluents_into_numerical_id(const fluent_set & fl)
 	for (it_fl = fl.begin(); it_fl != fl.end(); it_fl++) {
 		ret.append(std::to_string(helper::is_negate(*it_fl)));
 	}
-	return std::stoi(ret, 0, 2);
+	return std::stoi(ret, nullptr, 2);
 }
 
 unsigned int kworld::hash_fluents_into_numerical_id()

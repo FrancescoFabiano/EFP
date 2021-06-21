@@ -86,32 +86,28 @@ const pworld_ptr & union_update::u_update_helper(pstate & ret, const pstate & st
     pworld_ptr new_pw = ret.add_world(pworld(world_description));
     u_map.insert(pupdate_map::value_type({pw, ev}, new_pw));
 
-    auto it_pwtm = state.get_beliefs().find(pw);
+    information_state::const_iterator it_pwm;
+    pworld_ptr_set::const_iterator it_pws;
 
-    if (it_pwtm != state.get_beliefs().end()) {
-        pworld_map::const_iterator it_pwm;
-        pworld_ptr_set::const_iterator it_pws;
+    for (it_pwm = pw.get_information_state().begin(); it_pwm != pw.get_information_state().end(); it_pwm++) {
+        auto it_eve = pem.get_edges().find(ev);
 
-        for (it_pwm = it_pwtm->second.begin(); it_pwm != it_pwtm->second.end(); it_pwm++) {
-            auto it_eve = pem.get_edges().find(ev);
+        if (it_eve != pem.get_edges().end()) {
+            agent ag = it_pwm->first;
+            auto it_agm = a_map.find(ag);
 
-            if (it_eve != pem.get_edges().end()) {
-                agent ag = it_pwm->first;
-                auto it_agm = a_map.find(ag);
+            if (it_agm != a_map.end()) {
+                auto it_evm = it_eve->second.find(it_agm->second);
 
-                if (it_agm != a_map.end()) {
-                    auto it_evm = it_eve->second.find(it_agm->second);
-    
-                    if (it_evm != it_eve->second.end()) {
-                        event_ptr_set::const_iterator it_evs;
-    
-                        for (it_pws = it_pwm->second.begin(); it_pws != it_pwm->second.end(); it_pws++) {
-                            for (it_evs = it_evm->second.begin(); it_evs != it_evm->second.end(); it_evs++) {
-                                if (u_map.find({*it_pws, *it_evs}) == u_map.end() &&
-                                        state.entails(get_total_pre(state, act, *it_evs), *it_pws)) {
-                                    pworld_ptr believed_pw = u_update_helper(ret, state, act, pem, *it_pws, *it_evs, u_map, a_map);
-                                    ret.add_edge(new_pw, believed_pw, ag);
-                                }
+                if (it_evm != it_eve->second.end()) {
+                    event_ptr_set::const_iterator it_evs;
+
+                    for (it_pws = it_pwm->second.begin(); it_pws != it_pwm->second.end(); it_pws++) {
+                        for (it_evs = it_evm->second.begin(); it_evs != it_evm->second.end(); it_evs++) {
+                            if (u_map.find({*it_pws, *it_evs}) == u_map.end() &&
+                                    state.entails(get_total_pre(state, act, *it_evs), *it_pws)) {
+                                pworld_ptr believed_pw = u_update_helper(ret, state, act, pem, *it_pws, *it_evs, u_map, a_map);
+                                ret.add_edge(new_pw, believed_pw, ag);
                             }
                         }
                     }

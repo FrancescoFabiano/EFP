@@ -291,13 +291,13 @@ typedef std::set<pworld_ptr> pworld_ptr_set; /**< \brief A set of \ref pworld_pt
                                             * \todo The operator < for std::shared_ptr must be implemented.
                                             * @see pworld and pstate.*/
 
-typedef std::map<agent, pworld_ptr_set> pworld_map; /**< \brief A map between agents and set of \ref pworld_ptr.
+typedef std::map<agent, pworld_ptr_set> information_state; /**< \brief A map between agents and set of \ref pworld_ptr.
                                                     *
                                                     * @see pworld and pstate.*/
 
-typedef std::map<pworld_ptr, pworld_map> pedges; /**< \brief A map, for every \ref pworld, of the beleifs of its agents.
-                                                                 *
-                                                                 * @see pworld and pstate.*/
+//typedef std::map<pworld_ptr, information_state> pedges; /**< \brief A map, for every \ref pworld, of the beleifs of its agents.
+//                                                                 *
+//                                                                 * @see pworld and pstate.*/
 
 typedef std::queue<pworld_ptr> pworld_queue; /**< \brief A queue of \ref pworld_ptr.
                                             *
