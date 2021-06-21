@@ -35,9 +35,9 @@ private:
     /**
      * \brief The \ref proposition_type of the of *this*.
      * 
-     * The type is initially NOTSET and then it's updated during the reading of the input file.
+     * The type is initially NOTSET (-1) and then it's updated during the reading of the input file.
      */
-    proposition_type m_type = NOTSET;
+    act_type m_type = -1;
 
     /**\brief The executability conditions of *this*.*/
     formula_list m_executability;

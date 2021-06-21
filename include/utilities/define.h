@@ -371,6 +371,7 @@ typedef std::set<pevent_ptr> event_ptr_set; /**< \brief A set of \ref pevent_ptr
 // PEMS
 class pem;
 typedef short pem_id;
+typedef pem_id act_type;
 
 //typedef std::pair<pevent_ptr, pevent_ptr> pem_edge;
 typedef short agent_group;

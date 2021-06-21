@@ -50,14 +50,9 @@ extern std::shared_ptr<reader> domain_reader;
 %token FLUENT
 %token ACTION
 %token IF
-%token CAUSES
 %token EXECUTABLE
-%token IMPOSSIBLE
-%token DETERMINE
-%token AWAREOF
-%token OBSERVES
-%token ANNOUNCES
-%token AGEXEC
+%token HAS_EFFECTS
+%token IN_GROUP
 %token INIT
 %token GOAL
 %token AGENT
@@ -65,16 +60,7 @@ extern std::shared_ptr<reader> domain_reader;
 %token MC
 %token ME
 %token MD
-%token LIE
 
-%token ATTITUDES
-%token WRT
-%token TRUSTY
-%token MISTRUSTY
-%token UNTRUSTY
-%token STUBBORN
-%token KEEPER
-%token INSECURE
 
 
 %type <str_val> id
@@ -118,34 +104,16 @@ extern std::shared_ptr<reader> domain_reader;
 %type <prop> executability
 //%type <prop> impossibility
 %type <prop> proposition
-%type <prop> determine
-%type <prop> awareness
-%type <prop> observance
-%type <prop> announcement
+%type <prop> has_effects
+%type <prop> in_group
 %type <prop> executing
 %type <prop_list> domain
-/***************DOXASTIC REASONING***************/
-%type <prop> lie
-/***************END DOXASTIC***************/
-
-
-%type <att> attitude
-%type <att> trusty
-%type <att> mistrusty
-%type <att> untrusty
-%type <att> stubborn
-%type <att> keeper
-%type <att> insecure
-%type <att_list> attitude_table
-
-
 %%
 input:		
 |
 fluent_decls 
 action_decls
 agent_decls 
-attitude_table
 domain 
 init_spec 
 goal_spec
@@ -153,10 +121,9 @@ goal_spec
   domain_reader->m_fluents = *$1;
   domain_reader->m_actions = *$2;
   domain_reader->m_agents = *$3;
-  domain_reader->m_attitudes = *$4;
-  domain_reader->m_propositions = *$5;
-  domain_reader->m_bf_initially = *$6;
-  domain_reader->m_bf_goal = *$7;
+  domain_reader->m_propositions = *$4;
+  domain_reader->m_bf_initially = *$5;
+  domain_reader->m_bf_goal = *$6;
 }
 ;
 
@@ -498,18 +465,6 @@ literal_list if_part SEMICOLON
   $$->set_action_effect(*$1);
 };*/
 
-/* dynamic law */
-dynamic_law:
-action CAUSES literal_list if_part_bf SEMICOLON 
-{  
-  $$ = new proposition;
-  $$->set_type(ONTIC);
-  $$->set_action_name(*$1);
-  $$->set_executability_conditions(*$4);
-  //@TODO:Effect_Conversion | previously   $$->m_action_effect = *$3;
-  $$->add_action_effect(*$3);
-};
-
 /* executability condition */
 executability:
 EXECUTABLE action if_part_bf SEMICOLON
@@ -520,91 +475,42 @@ EXECUTABLE action if_part_bf SEMICOLON
   $$->set_executability_conditions(*$3);
 };
 
-/* determines condition */
-determine:
-action DETERMINE literal_list if_part_bf SEMICOLON
+/* effects condition */
+has_effects:
+action HAS_EFFECTS literal_list if_part_bf SEMICOLON
 {
   $$ = new proposition;
-  $$->set_type(SENSING);
-  $$->set_action_name(*$1);
-  //@TODO:Effect_Conversion | previously   $$->m_action_effect = *$3;
-  $$->add_action_effect(*$3);
-  $$->set_executability_conditions(*$4);
-};
-
-/* announcement condition */
-announcement:
-action ANNOUNCES literal_list if_part_bf SEMICOLON
-{
-  $$ = new proposition;
-  $$->set_type(ANNOUNCEMENT);
+  $$->set_type(EFFECTS);
   $$->set_action_name(*$1);
   $$->add_action_effect(*$3);
   $$->set_executability_conditions(*$4);
-
 };
 
-
-
-/***************DOXASTIC REASONING***************/
-/* lie condition */
-lie:
-action LIE formula SEMICOLON
+/* effects condition */
+has_effects:
+action HAS_TYPE id SEMICOLON
 {
   $$ = new proposition;
-  $$->set_type(LIES);
+  $$->set_type(TYPE);
   $$->set_action_name(*$1);
-  $$->set_action_effect(*$3);
+  $$->set_action_type(*$3);
 };
-/***************END DOXASTIC***************/
+
 
 /* awareness condition */
-awareness:
-agent AWAREOF action if_part_bf SEMICOLON
-{
-  $$ = new proposition;
-  $$->set_type(AWARENESS);
-  $$->set_action_name(*$3);
-  $$->set_agent(*$1);
-  $$->set_observability_conditions(*$4);
-};
-
-/* observance condition */
 observance:
-agent OBSERVES action if_part_bf SEMICOLON
+agent IN_GROUP id OF action if_part_bf SEMICOLON
 {
   $$ = new proposition;
-  $$->set_type(OBSERVANCE);
-  $$->set_action_name(*$3);				
+  $$->set_type(OBSERVABILITY);
+  $$->set_action_name(*$5);
+  $$->set_ag_group(*$3);
   $$->set_agent(*$1);
   $$->set_observability_conditions(*$4);
 };
 
-/* executing */
-executing:
-agent AGEXEC action SEMICOLON
-{
-  $$ = new proposition;
-  $$->set_type(EXECUTOR);
-  $$->set_action_name(*$3);				
-  $$->set_agent(*$1);
- };
-/* impossibility condition 
-impossibility:
-IMPOSSIBLE action if_part SEMICOLON
-{
-  $$ = new proposition;
-  $$->set_type(IMPOSSIBILITY);
-  $$->set_action_name(*$2);
-  $$->set_action_precondition(*$3);
-};
-*/
 /* proposition */
 proposition:
-/*static_law {
-  $$ = $1;
-}
-|*/
 dynamic_law
 {
   $$ = $1;
@@ -615,17 +521,7 @@ executability
   $$ = $1;
 }
 |
-/*impossibility
-{
-  $$ = $1;
-}
-|*/
-determine
-{
-  $$ = $1;
-}
-|
-announcement
+has_effects
 {
   $$ = $1;
 }
@@ -635,22 +531,10 @@ observance
   $$ = $1;
 }
 |
-awareness
-{
-  $$ = $1;
-}
-|
 executing
 {
   $$ = $1;
 }
-/***************DOXASTIC REASONING***************/
-|
-lie
-{
-  $$ = $1;
-}
-/***************END DOXASTIC***************/
 ;
 
 /* domain */
@@ -665,121 +549,6 @@ domain:
   $1->push_back(*$2);
 }
 ;
-
-
-
-/***************************************************** ATTITUDES *****************************************************/
-trusty:
-ATTITUDES agent WRT agent TRUSTY if_part_bf SEMICOLON
-{
-  $$ = new attitude;
-  $$->set_agent(*$2);
-  $$->set_executor(*$4);
-  $$->set_type(F_TRUSTY);
-  $$->set_attitude_conditions(*$6);
- };
-
-mistrusty:
-ATTITUDES agent WRT agent MISTRUSTY if_part_bf SEMICOLON
-{
-  $$ = new attitude;
-  $$->set_agent(*$2);
-  $$->set_executor(*$4);
-  $$->set_type(F_MISTRUSTY);
-  $$->set_attitude_conditions(*$6);
- };
-
-untrusty:
-ATTITUDES agent WRT agent UNTRUSTY if_part_bf SEMICOLON
-{
-  $$ = new attitude;
-  $$->set_agent(*$2);
-  $$->set_executor(*$4);
-  $$->set_type(F_UNTRUSTY);
-  $$->set_attitude_conditions(*$6);
- };
-
-stubborn:
-ATTITUDES agent WRT agent STUBBORN if_part_bf SEMICOLON
-{
-  $$ = new attitude;
-  $$->set_agent(*$2);
-  $$->set_executor(*$4);
-  $$->set_type(F_STUBBORN);
-  $$->set_attitude_conditions(*$6);
- };
-
-keeper:
-ATTITUDES agent WRT agent KEEPER if_part_bf SEMICOLON
-{
-  $$ = new attitude;
-  $$->set_agent(*$2);
-  $$->set_executor(*$4);
-  $$->set_type(P_KEEPER);
-  $$->set_attitude_conditions(*$6);
- }
-
-insecure:
-ATTITUDES agent WRT agent INSECURE if_part_bf SEMICOLON
-{
-  $$ = new attitude;
-  $$->set_agent(*$2);
-  $$->set_executor(*$4);
-  $$->set_type(P_INSECURE);
-  $$->set_attitude_conditions(*$6);
- };
-
-
-/* attitudes */
-attitude:
-trusty
-{
-  $$ = $1;
-}
-|
-mistrusty
-{
-  $$ = $1;
-}
-|
-untrusty
-{
-  $$ = $1;
-}
-|
-stubborn
-{
-  $$ = $1;
-}
-|
-keeper
-{
-  $$ = $1;
-}
-|
-insecure
-{
-  $$ = $1;
-};
-
-
-
-/* att_list */
-attitude_table:
-/* empty */
-{
-  $$ = new attitudes_list;
-}
-| attitude_table attitude
-{
-  $$ = $1;
-  $1->push_back(*$2);
-}
-;
-
-
-
-/***************************************************** END ATTITUDES *****************************************************/
 
 
 /* init */
