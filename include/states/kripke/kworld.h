@@ -39,7 +39,7 @@ private:
      * @return the unique id of the world.
      * 
      * @warning Useless if not moved to \ref kstore.*/
-    kworld_id hash_fluents_into_id(const fluent_set& description);
+    static kworld_id hash_fluents_into_id(const fluent_set& description);
 
     /** \brief Function used to hash the the info of *this* in a unique id.
      *

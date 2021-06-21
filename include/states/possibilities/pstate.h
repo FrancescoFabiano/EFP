@@ -37,10 +37,10 @@ private:
      * 
      * @see pworld and pstore.*/
     pworld_ptr m_pointed;
-    /** \brief The beliefs of each \ref agent in every \ref pworld.
-     *
-     * @see pworld.*/
-    pedges m_beliefs;
+//    /** \brief The beliefs of each \ref agent in every \ref pworld.
+//     *
+//     * @see pworld.*/
+//    pedges m_beliefs;
 
     /** \brief Function that returns all the reachable \ref pworld given the \ref agent and the staring \ref pworld.
      * 
@@ -57,7 +57,7 @@ private:
      *
      * 
      * \todo self-loop?*/
-    pworld_ptr_set get_B_reachable_worlds(const agent& ag, const pworld_ptr & world) const;
+    static pworld_ptr_set get_B_reachable_worlds(const agent& ag, const pworld_ptr & world) ;
 
     /** \brief Function that returns all the reachable \ref pworld given the \ref agent and the staring \ref pworld.
      * 
@@ -73,7 +73,7 @@ private:
      *
      * 
      * \todo self-loop?*/
-    bool get_B_reachable_worlds_recursive(const agent& ag, const pworld_ptr & world, pworld_ptr_set & ret) const;
+    static bool get_B_reachable_worlds_recursive(const agent& ag, const pworld_ptr & world, pworld_ptr_set & ret) ;
 
     /** \brief Function that returns all the reachable \ref pworld given a set of \ref agent and the staring \ref pworld.
      * 
@@ -90,7 +90,7 @@ private:
      *
      * 
      * \todo self-loop?*/
-    pworld_ptr_set get_E_reachable_worlds(const agent_set & ags, const pworld_ptr & world) const;
+    static pworld_ptr_set get_E_reachable_worlds(const agent_set & ags, const pworld_ptr & world) ;
 
     /** \brief Function that returns all the reachable \ref pworld given a set of \ref agent and the staring \ref pworld.
      * 
@@ -106,7 +106,7 @@ private:
      *
      * 
      * \todo self-loop?*/
-    bool get_E_reachable_worlds_recoursive(const agent_set &ags, const pworld_ptr_set & worlds, pworld_ptr_set & reached) const;
+    static bool get_E_reachable_worlds_recoursive(const agent_set &ags, const pworld_ptr_set & worlds, pworld_ptr_set & reached) ;
 
     /** \brief Function that returns all the Distributed reachable \ref pworld given a set of \ref agent and the staring \ref pworld.
      * 
@@ -118,7 +118,7 @@ private:
      *
      * 
      * \todo self-loop?*/
-    pworld_ptr_set get_D_reachable_worlds(const agent_set & ags, const pworld_ptr & world) const;
+    static pworld_ptr_set get_D_reachable_worlds(const agent_set & ags, const pworld_ptr & world) ;
 
     /** \brief Function that returns all the reachable \ref pworld (in the *Common Knowledge* sense) given a \ref agent and the staring \ref pworld.
      * 
@@ -185,7 +185,7 @@ private:
      * @param[in] from: the \ref pworld in which \ref agent "ag" currently is
      * @param[in] to: the \ref pworld to remove
      * @param[in] ag: the \ref agent.*/
-    void remove_edge(const pworld_ptr & from, const pworld_ptr & to, const agent & ag);
+    static void remove_edge(const pworld_ptr & from, const pworld_ptr & to, const agent & ag);
     /** \brief Function that removes the \ref pedge(s) that imply that \p ag is ignorant about \p known_ff from *this*.
      *  
      * @param[in] known_ff: the \ref fluent_formula known by \p ag.
@@ -198,10 +198,6 @@ private:
      * 
      * @param[in] to_check: the \ref belief_formula to check.*/
     void remove_initial_pedge_bf(const belief_formula &to_check);
-
-    void get_all_reachable_worlds_edges(const pworld_ptr & world, pworld_ptr_set & reached_worlds, pedges & reached_edges) const;
-
-    void clean_unreachable_pworlds();
 
     automaton pstate_to_automaton(std::vector<pworld_ptr> & pworld_vec, const std::map<agent, bis_label> & agent_to_label) const;
 
@@ -219,10 +215,10 @@ public:
      *
      * @param[in] to_set: the \ref pworld_ptr to assign to \ref m_pointed.*/
     void set_pointed(const pworld_ptr & to_set);
-    /** \brief Setter of the field \ref m_beliefs.
-     *
-     * @param[in] to_set: the \ref pedges to assign to \ref m_beliefs.*/
-    void set_beliefs(const pedges & to_set);
+//    /** \brief Setter of the field \ref m_beliefs.
+//     *
+//     * @param[in] to_set: the \ref pedges to assign to \ref m_beliefs.*/
+//    void set_beliefs(const pedges & to_set);
 
     /** \brief Getter of the field \ref m_worlds.
      *
@@ -235,7 +231,7 @@ public:
     /** \brief Getter of the field \ref m_beliefs.
      *
      * @return: the value of \ref m_beliefs.*/
-    const pedges & get_beliefs() const;
+    const information_state & get_beliefs(const pworld_ptr & world) const;
 
     /** \brief Function that checks the entailment of a \ref fluent in a given \ref pworld.
      *     @see \ref pworld::entails(fluent) const
