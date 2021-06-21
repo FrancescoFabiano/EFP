@@ -295,7 +295,7 @@ typedef std::map<agent, pworld_ptr_set> pworld_map; /**< \brief A map between ag
                                                     *
                                                     * @see pworld and pstate.*/
 
-typedef std::map<pworld_ptr, pworld_map> pworld_transitive_map; /**< \brief A map, for every \ref pworld, of the beleifs of its agents.
+typedef std::map<pworld_ptr, pworld_map> pedges; /**< \brief A map, for every \ref pworld, of the beleifs of its agents.
                                                                  *
                                                                  * @see pworld and pstate.*/
 

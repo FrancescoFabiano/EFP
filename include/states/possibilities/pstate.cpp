@@ -1,4 +1,4 @@
-/*
+/**
  * \brief Implementation of \ref pstate.h
  *
  * \copyright GNU Public License.
@@ -15,6 +15,8 @@
 #include "../../utilities/helper_t.ipp"
 #include "../../update/union_update.h"
 
+
+/**** GETTERS/SETTERS ****/
 void pstate::set_worlds(const pworld_ptr_set & to_set)
 {
 	m_worlds = to_set;
@@ -25,14 +27,9 @@ void pstate::set_pointed(const pworld_ptr & to_set)
 	m_pointed = to_set;
 }
 
-void pstate::set_beliefs(const pworld_transitive_map & to_set)
+void pstate::set_beliefs(const pedges & to_set)
 {
 	m_beliefs = to_set;
-}
-
-void pstate::set_max_depth(unsigned int to_set)
-{
-	if (m_max_depth < to_set) m_max_depth = to_set;
 }
 
 const pworld_ptr_set & pstate::get_worlds() const
@@ -45,21 +42,41 @@ const pworld_ptr & pstate::get_pointed() const
 	return m_pointed;
 }
 
-const pworld_transitive_map & pstate::get_beliefs() const
+const pedges & pstate::get_beliefs() const
 {
 	return m_beliefs;
 }
 
-unsigned int pstate::get_max_depth() const
-{
-	return m_max_depth;
+
+/**** ADD/REMOVE WORLDS/EDGES ****/
+pworld_ptr pstate::add_world(const pworld & world) {
+    pworld_ptr tmp = pstore::get_instance().add_world(world);
+    m_worlds.insert(tmp);
+    return tmp;
 }
 
+void pstate::add_edge(const pworld_ptr & from, const pworld_ptr & to, const agent & ag) {
+    m_beliefs[from][ag].insert(to);
+}
+
+void pstate::remove_edge(const pworld_ptr & from, const pworld_ptr & to, const agent & ag) {
+    auto from_beliefs = m_beliefs.find(from);
+
+    if (from_beliefs != m_beliefs.end()) {
+        auto ag_beliefs = from_beliefs->second.find(ag);
+
+        if (ag_beliefs != from_beliefs->second.end()) {
+            ag_beliefs->second.erase(to);
+        }
+    }
+}
+
+
+/**** OPERATORS ****/
 bool pstate::operator=(const pstate & to_copy)
 {
 	set_worlds(to_copy.get_worlds());
 	set_beliefs(to_copy.get_beliefs());
-	m_max_depth = to_copy.get_max_depth();
 	set_pointed(to_copy.get_pointed());
 	return true;
 }
@@ -78,8 +95,8 @@ bool pstate::operator<(const pstate & to_compare) const
 		return false;
 	}
 
-	pworld_transitive_map::const_iterator it_tramap1;
-	pworld_transitive_map::const_iterator it_tramap2 = to_compare.get_beliefs().begin();
+	pedges::const_iterator it_tramap1;
+	auto it_tramap2 = to_compare.get_beliefs().begin();
 
 	pworld_map tmp_pwmap1, tmp_pwmap2;
 	pworld_map::const_iterator it_pwmap1, it_pwmap2;
@@ -118,6 +135,8 @@ bool pstate::operator<(const pstate & to_compare) const
 	return false;
 }
 
+
+/**** ENTAILMENT ****/
 bool pstate::entails(const fluent & f) const
 {
 	return entails(f, m_pointed);
@@ -226,6 +245,8 @@ bool pstate::entails(const formula_list & to_check, const pworld_ptr & world) co
 	return true;
 }
 
+
+/**** REACHABILITY ****/
 pworld_ptr_set pstate::get_B_reachable_worlds(const agent & ag, const pworld_ptr & world) const
 {
 	pworld_ptr_set ret;
@@ -240,7 +261,7 @@ pworld_ptr_set pstate::get_B_reachable_worlds(const agent & ag, const pworld_ptr
 	return ret;
 }
 
-bool pstate::get_B_reachable_worlds_recursive(agent ag, const pworld_ptr & world, pworld_ptr_set& ret) const
+bool pstate::get_B_reachable_worlds_recursive(const agent & ag, const pworld_ptr & world, pworld_ptr_set& ret) const
 {
 	/** \todo check: If a--i-->b, b--i-->c then a--i-->c must be there*/
 	auto pw_map = m_beliefs.find(world);
@@ -284,7 +305,6 @@ bool pstate::get_E_reachable_worlds_recoursive(const agent_set & ags, const pwor
 		}
 	}
 	return is_fixed_point;
-
 }
 
 pworld_ptr_set pstate::get_C_reachable_worlds(const agent_set & ags, const pworld_ptr & world) const
@@ -336,18 +356,42 @@ pworld_ptr_set pstate::get_D_reachable_worlds(const agent_set & ags, const pworl
 	return ret;
 }
 
-pworld_ptr pstate::add_world(const pworld & world)
+void pstate::get_all_reachable_worlds_edges(const pworld_ptr & world, pworld_ptr_set & reached_worlds, pedges & reached_edges) const
 {
-    pworld_ptr tmp = pstore::get_instance().add_world(world);
-	m_worlds.insert(tmp);
-	return tmp;
+    pworld_ptr_set::const_iterator it_pws;
+    pworld_ptr_set pw_list;
+
+    auto ag_set = domain::get_instance().get_agents();
+    auto ag_it = ag_set.begin();
+
+    for (; ag_it != ag_set.end(); ag_it++) {
+        pw_list = m_beliefs.at(world).at(*ag_it);
+
+        for (it_pws = pw_list.begin(); it_pws != pw_list.end(); it_pws++) {
+            if (reached_worlds.insert(*it_pws).second) {
+                reached_edges[*it_pws] = m_beliefs.at(*it_pws);
+                get_all_reachable_worlds_edges(*it_pws, reached_worlds, reached_edges);
+            }
+        }
+    }
 }
 
-void pstate::add_edge(const pworld_ptr & from, const pworld_ptr & to, const agent & ag)
+void pstate::clean_unreachable_pworlds()
 {
-    m_beliefs[from][ag].insert(to);
+    pworld_ptr_set reached_worlds;
+    pedges reached_edges;
+
+    reached_worlds.insert(get_pointed());
+    reached_edges[get_pointed()] = m_beliefs.at(get_pointed());
+
+    get_all_reachable_worlds_edges(get_pointed(), reached_worlds, reached_edges);
+
+    set_worlds(reached_worlds);
+    set_beliefs(reached_edges);
 }
 
+
+/**** INITIAL STATE ****/
 void pstate::build_initial()
 {
 	/** \todo for now prune building.*/
@@ -380,9 +424,8 @@ void pstate::build_initial_prune()
 void pstate::generate_initial_pworlds(fluent_set& permutation, int index, const fluent_set & initially_known)
 {
 	//todo non usare indici ma bitset prima positivo fluent poi negativo
-	int fluent_number = domain::get_instance().get_fluent_number();
-
-	int bit_size = (domain::get_instance().get_size_fluent());
+	unsigned int fluent_number = domain::get_instance().get_fluent_number();
+	unsigned int bit_size = domain::get_instance().get_size_fluent();
 
 	if (index == fluent_number) {
 		pworld to_add(permutation);
@@ -395,8 +438,8 @@ void pstate::generate_initial_pworlds(fluent_set& permutation, int index, const 
 	//Add the \ref fluent in positive version
 	boost::dynamic_bitset<> bitSetToFindPositve(bit_size, index);
 	boost::dynamic_bitset<> bitSetToFindNegative(bit_size, index);
-	bitSetToFindNegative.set(bitSetToFindPositve.size() - 1, 1);
-	bitSetToFindPositve.set(bitSetToFindPositve.size() - 1, 0);
+	bitSetToFindNegative.set(bitSetToFindPositve.size() - 1, true);
+	bitSetToFindPositve.set(bitSetToFindPositve.size() - 1, false);
 
 
 	if (initially_known.find(bitSetToFindNegative) == initially_known.end()) {
@@ -414,99 +457,63 @@ void pstate::add_initial_pworld(const pworld & possible_add)
 {
 	initially ini_conditions = domain::get_instance().get_initial_description();
 
-	switch ( ini_conditions.get_ini_restriction() ) {
-	case S5:
-	{
-		/* Since the common knowledge is on all the agent it means that every possible \ref pworld
-		 * in the initial state must entail *phi* where C(*phi*) is an initial condition.*/
+	switch (ini_conditions.get_ini_restriction()) {
+        case S5: {
+            /* Since the common knowledge is on all the agent it means that every possible \ref pworld
+             * in the initial state must entail *phi* where C(*phi*) is an initial condition.*/
 
-		//Already setted in \ref domain::build_initially(bool).
-		if (possible_add.entails(ini_conditions.get_ff_forS5())) {
-			add_world(possible_add);
-			if (possible_add.entails(ini_conditions.get_pointed_world_conditions())) {
-				m_pointed = pworld_ptr(possible_add);
-				/*std::cout << "pointed world: ";
-				printer::get_instance().print_list(possible_add.get_fluent_set());
-				std::cout << std::endl;*/
-			}
-		} else {
-			//std::cout << "error non generata una permeutazione uguale ad un altra" << std::endl;
-			//Already generated so we save it on pstore
-			pstore::get_instance().add_world(possible_add);
-		}
-		break;
-	}
-	case K45:
-	{
-		std::cerr << "\nNot implemented yet\n";
-		exit(1);
-		break;
-	}
-	case NONE:
-	{
-		std::cerr << "\nNot implemented yet\n";
-		exit(1);
-		break;
-	}
-	default:
-	{
-		std::cerr << "\nNot implemented yet\n";
-		exit(1);
-
-		break;
-	}
+            //Already setted in \ref domain::build_initially(bool).
+            if (possible_add.entails(ini_conditions.get_ff_forS5())) {
+                add_world(possible_add);
+                if (possible_add.entails(ini_conditions.get_pointed_world_conditions())) {
+                    m_pointed = pworld_ptr(possible_add);
+                }
+            } else {
+                //Already generated so we save it on pstore
+                pstore::get_instance().add_world(possible_add);
+            }
+            break;
+        }
+        case K45:
+        case NONE:
+        default: {
+            std::cerr << "\nNot implemented yet\n";
+            exit(1);
+        }
 	}
 }
 
 void pstate::generate_initial_pedges()
 {
-	pworld_ptr_set::const_iterator it_pwps_1, it_pwps_2;
-
+    agent_set agents = domain::get_instance().get_agents();
 	pworld_ptr pwptr_tmp1, pwptr_tmp2;
+
+	pworld_ptr_set::const_iterator it_pwps_1, it_pwps_2;
+    agent_set::const_iterator it_ags;
 
 	/*This for add to *this* all the possible edges.*/
 	for (it_pwps_1 = m_worlds.begin(); it_pwps_1 != m_worlds.end(); it_pwps_1++) {
 		for (it_pwps_2 = it_pwps_1; it_pwps_2 != m_worlds.end(); it_pwps_2++) {
-			for (auto agent : domain::get_instance().get_agents()) {
+			for (it_ags = agents.begin(); it_ags != agents.end(); it_ags++) {
 				pwptr_tmp1 = *it_pwps_1;
 				pwptr_tmp2 = *it_pwps_2;
-				add_edge(pwptr_tmp1, pwptr_tmp2, agent);
-				add_edge(pwptr_tmp2, pwptr_tmp1, agent);
+
+				add_edge(pwptr_tmp1, pwptr_tmp2, *it_ags);
+				add_edge(pwptr_tmp2, pwptr_tmp1, *it_ags);
 
 			}
 		}
 	}
 
-	//std::cout << "Tot edges: " << m_edges.size() << std::endl;
-
 	initially ini_conditions = domain::get_instance().get_initial_description();
-
 	formula_list::const_iterator it_fl;
-	for (it_fl = ini_conditions.get_initial_conditions().begin(); it_fl != ini_conditions.get_initial_conditions().end(); it_fl++) {
 
+	for (it_fl = ini_conditions.get_initial_conditions().begin(); it_fl != ini_conditions.get_initial_conditions().end(); it_fl++) {
 		remove_initial_pedge_bf(*it_fl);
 	}
-	//std::cout << "Removed edges: " << count << std::endl;
-
-	//std::cout << "Final edges: " << m_edges.size() << std::endl;
-
 }
 
-void pstate::remove_edge(const pworld_ptr & from, const pworld_ptr & to, const agent & ag)
-{
-	auto from_beliefs = m_beliefs.find(from);
-
-	if (from_beliefs != m_beliefs.end()) {
-		auto ag_beliefs = from_beliefs->second.find(ag);
-
-		if (ag_beliefs != from_beliefs->second.end()) {
-
-			ag_beliefs->second.erase(to);
-		}
-	}
-}
-
-void pstate::remove_initial_pedge(const fluent_formula &known_ff, agent ag)
+void pstate::remove_initial_pedge(const fluent_formula &known_ff, const agent & ag)
 {
 	pworld_ptr_set::const_iterator it_pwps_1, it_pwps_2;
 
@@ -534,103 +541,300 @@ void pstate::remove_initial_pedge(const fluent_formula &known_ff, agent ag)
 
 void pstate::remove_initial_pedge_bf(const belief_formula & to_check)
 {
-	switch ( domain::get_instance().get_initial_description().get_ini_restriction() ) {
-	case S5:
-	{
-		/* Just check whenever is B(--) \/ B(--) and remove that edge*/
-		if (to_check.get_formula_type() == C_FORMULA) {
+	switch (domain::get_instance().get_initial_description().get_ini_restriction()) {
+        case S5: {
+            /* Just check whenever is B(--) \/ B(--) and remove that edge*/
+            if (to_check.get_formula_type() == C_FORMULA) {
+                const belief_formula& tmp = to_check.get_bf1();
 
-			belief_formula tmp = to_check.get_bf1();
-
-			switch ( tmp.get_formula_type() ) {
-
-				//Only one for edges -- expresses that someone is ignorant.
-			case PROPOSITIONAL_FORMULA:
-			{
-				//We remove all the check on the formula since they have already been controlled when ini_conditions has been created
-				if (tmp.get_operator() == BF_OR) {
-
-					//fluent_formula known_ff;
-					auto known_ff_ptr = std::make_shared<fluent_formula>();
-					helper::check_Bff_notBff(tmp.get_bf1(), tmp.get_bf2(), known_ff_ptr);
-					if (known_ff_ptr != nullptr) {
-						//printer::get_instance().print_list(*known_ff_ptr);
-						remove_initial_pedge(*known_ff_ptr, tmp.get_bf2().get_agent());
-					}
-					return;
-
-				} else if (tmp.get_operator() == BF_AND) {
-					//This case doesn't add knowledge.
-					return;
-
-				} else {
-					std::cerr << "\nError in the type of initial formulae (FIFTH).\n";
-					exit(1);
-				}
-				return;
-				break;
-			}
-			case FLUENT_FORMULA:
-			case BELIEF_FORMULA:
-			{
-				return;
-				break;
-			}
-			case BF_EMPTY:
-			{
-				return;
-				break;
-			}
-
-			default:
-			{
-				std::cerr << "\nError in the type of initial formulae (SIXTH).\n";
-				exit(1);
-				break;
-			}
-			}
-		} else {
-			std::cerr << "\nError in the type of initial formulae (SEVENTH).\n";
-			exit(1);
-		}
-
-		return;
-		break;
-	}
-
-	case K45:
-	{
-		std::cerr << "\nNot implemented yet\n";
-		exit(1);
-		break;
-	}
-	case NONE:
-	{
-		std::cerr << "\nNot implemented yet\n";
-		exit(1);
-		break;
-	}
-	default:
-	{
-		std::cerr << "\nNot implemented yet\n";
-		exit(1);
-
-		break;
-	}
+                switch (tmp.get_formula_type()) {
+                    //Only one for edges -- expresses that someone is ignorant.
+                    case PROPOSITIONAL_FORMULA: {
+                        //We remove all the check on the formula since they have already been controlled when ini_conditions has been created
+                        if (tmp.get_operator() == BF_OR) {
+                            //fluent_formula known_ff;
+                            auto known_ff_ptr = std::make_shared<fluent_formula>();
+                            helper::check_Bff_notBff(tmp.get_bf1(), tmp.get_bf2(), known_ff_ptr);
+                            if (known_ff_ptr != nullptr) {
+                                remove_initial_pedge(*known_ff_ptr, tmp.get_bf2().get_agent());
+                            }
+                            return;
+                        } else if (tmp.get_operator() == BF_AND) {
+                            //This case doesn't add knowledge.
+                            return;
+                        } else {
+                            std::cerr << "\nError in the type of initial formulae (FIFTH).\n";
+                            exit(1);
+                        }
+                        return;
+                    }
+                    case FLUENT_FORMULA:
+                    case BELIEF_FORMULA:
+                    case BF_EMPTY: {
+                        return;
+                    }
+                    default: {
+                        std::cerr << "\nError in the type of initial formulae (SIXTH).\n";
+                        exit(1);
+                    }
+                }
+            } else {
+                std::cerr << "\nError in the type of initial formulae (SEVENTH).\n";
+                exit(1);
+            }
+            return;
+        }
+        case K45:
+        case NONE:
+        default: {
+            std::cerr << "\nNot implemented yet\n";
+            exit(1);
+        }
 	}
 }
 
-/** \warning executability should be check in \ref state (or \ref planner).*/
+
+/**** TRANSITION FUNCTION ****/
 pstate pstate::compute_succ(const action & act) const
 {
+    /** \warning executability should be check in \ref state (or \ref planner).*/
     return union_update::u_update(*this, act);
 }
 
 
-bool pstate::check_properties(const agent_set & fully, const agent_set & partially, const fluent_formula & effects, const pstate & updated) const
+/**** BISIMULATION ****/
+automaton pstate::pstate_to_automaton(std::vector<pworld_ptr> & pworld_vec, const std::map<agent, bis_label> & agent_to_label) const
 {
 
-	if (fully.size() > 0) {
+    std::map<int, int> compact_indices;
+    std::map<pworld_ptr, int> index_map;
+    pbislabel_map label_map; // Map: from -> (to -> ag_set)
+
+    automaton *a;
+    unsigned long Nvertex = get_worlds().size();
+    unsigned long  ag_set_size = domain::get_instance().get_agents().size();
+    //BIS_ADAPTATION For the loop that identifies the id (We add one edge for each node)
+    v_elem *Vertex;
+
+    Vertex = (v_elem *) malloc(sizeof(v_elem) * Nvertex);
+
+    // Initializating vertices
+    pworld_ptr_set::const_iterator it_pwps;
+    pedges::const_iterator it_peps;
+    pbislabel_map::const_iterator it_plm;
+    bis_label_set::const_iterator it_bislab;
+    std::map<pworld_ptr, bis_label_set>::const_iterator it_pw_bislab;
+
+    //std::cerr << "\nDEBUG: Inizializzazione Edges\n";
+
+    // The pointed world is set to the index 0. This ensures that, when deleting the bisimilar nodes, the pointed pworld
+    // is always chosen as the first of its block. Therefore, we do not need to update it when converting back to a kstate
+    index_map[get_pointed()] = 0;
+    pworld_vec.push_back(get_pointed());
+    compact_indices[static_cast<int>(get_pointed().get_numerical_id())] = 0;
+
+    //For the loop that identifies the id
+    //BIS_ADAPTATION For the loop that identifies the id (+1)
+    ///@bug: If the pointed has no self-loop to add
+    //pworld_ptr_set pointed_adj = adj_list.at(get_pointed());
+
+    Vertex[0].ne = 0; // pointed_adj.size(); // edge_counter[get_pointed()];
+    //	if (pointed_adj.find(get_pointed()) == pointed_adj.end()) {
+    //		Vertex[0].ne++;
+    //	}
+    //	Vertex[0].e = (e_elem *) malloc(sizeof(e_elem) * Vertex[0].ne);
+
+    int i = 1, c = 1;
+
+    //std::cerr << "\nDEBUG: Inizializzazione Vertex\n";
+
+    for (it_pwps = m_worlds.begin(); it_pwps != m_worlds.end(); it_pwps++) {
+        if (!(*it_pwps == get_pointed())) {
+            index_map[*it_pwps] = i;
+            pworld_vec.push_back(*it_pwps);
+
+            // if (compact_indices.find(it_pwps->get_numerical_id()) == compact_indices.end()) {
+            if (compact_indices.insert({it_pwps->get_numerical_id(), c}).second) {
+                // compact_indices[it_pwps->get_numerical_id()] = c;
+                c++;
+                //std::cerr << "\nDEBUG: Added:" << it_pwps->get_id() << "\n";
+            }
+            Vertex[i].ne = 0;
+            i++;
+        }
+        //BIS_ADAPTATION (Added self-loop)
+        label_map[*it_pwps][*it_pwps].insert(compact_indices[static_cast<int>(it_pwps->get_numerical_id())] + ag_set_size);
+        //std::cerr << "\nDEBUG: Added to " << it_pwps->get_numerical_id() << " the label " << compact_indices[it_pwps->get_numerical_id()] + ag_set_size << std::endl;
+    }
+
+
+    //BIS_ADAPTATION For the loop that identifies the id (We add one potential label for each node)
+    unsigned long bhtabSize = ag_set_size + c;
+
+    //std::cerr << "\nDEBUG: Inizializzazione Behavs\n";
+
+    //BIS_ADAPTATION (Moved down here)
+
+    for (it_peps = m_beliefs.begin(); it_peps != m_beliefs.end(); it_peps++) {
+
+        for (auto it_mid_bel = it_peps->second.begin(); it_mid_bel != it_peps->second.end(); it_mid_bel++) {
+            for (auto it_int_ed = it_mid_bel->second.begin(); it_int_ed != it_mid_bel->second.end(); it_int_ed++) {
+                label_map[it_peps->first][*it_int_ed].insert(agent_to_label.at(it_mid_bel->first));
+                Vertex[index_map[it_peps->first]].ne++;
+            }
+        }
+    }
+
+    i = 0;
+    for (it_pwps = m_worlds.begin(); it_pwps != m_worlds.end(); it_pwps++) {
+        Vertex[i].ne++; //Self loop bisimulation
+        Vertex[i].e = (e_elem *) malloc(sizeof(e_elem) * Vertex[i].ne);
+        i++;
+    }
+
+    //std::cerr << "\nDEBUG: Fine Inizializzazione Vertex\n";
+
+
+    int from, to, j = 0; //, k = 0, nbh;
+
+    //std::cerr << "\nDEBUG: Inizializzazione Mappa\n";
+    for (it_plm = label_map.begin(); it_plm != label_map.end(); it_plm++) {
+        from = index_map[it_plm->first]; // For each pworld 'from'
+
+        //std::cerr << "\nDEBUG: Inizializzazione K\n";
+
+        for (it_pw_bislab = it_plm->second.begin(); it_pw_bislab != it_plm->second.end(); it_pw_bislab++) { // For each edge that reaches the pworld 'to'
+            to = index_map[it_pw_bislab->first];
+            //nbh = it_pw_bislab->second.size();
+
+            for (it_bislab = it_pw_bislab->second.begin(); it_bislab != it_pw_bislab->second.end(); it_bislab++) { // For each agent 'ag' in the label of the kedge
+                //std::cerr << "\nDEBUG: j is: " << j << " and k is: " << k << "\n";
+                //nbh = 1;
+                Vertex[from].e[j].nbh = 1; // Let j be the index of the adjacency list of from that stores the kedge (from, to)
+                Vertex[from].e[j].bh = (int *) malloc(sizeof(int)); // Let nbh be the number of agents in such kedge
+                Vertex[from].e[j].tv = to; // Update the value of the reache pworld
+                Vertex[from].e[j].bh[0] = *it_bislab; // Update the value of the label at index k to 'ag'
+                //std::cerr << "\nDEBUG: j is: " << j << " and k is: " << k << "\n";
+
+                j++; // Update the value of the index j
+            }
+
+
+        }
+
+        j = 0; // Reset j
+    }
+
+    unsigned long Nbehavs = bhtabSize;
+    a = (automaton *) malloc(sizeof(automaton));
+    a->Nvertex = Nvertex;
+    a->Nbehavs = Nbehavs;
+    a->Vertex = Vertex;
+
+    //	std::cerr << "\nDEBUG: \n\tNvertex = " << Nvertex << std::endl;
+    //	std::cerr << "\tNbehavs = " << Nbehavs << std::endl;
+
+    return *a;
+}
+
+void pstate::automaton_to_pstate(const automaton & a, const std::vector<pworld_ptr> & pworld_vec, const std::map<bis_label, agent> & label_to_agent)
+{
+    pworld_ptr_set worlds;
+    m_beliefs.clear();
+    // The pointed world does not change when we calculate the minimum bisimilar state
+    // Hence we do not need to update it
+
+    int i, j, k, label;
+    unsigned long agents_size = domain::get_instance().get_agents().size();
+
+    for (i = 0; i < a.Nvertex; i++) {
+        if (a.Vertex[i].ne > 0) {
+            worlds.insert(pworld_vec[i]);
+            for (j = 0; j < a.Vertex[i].ne; j++) {
+                for (k = 0; k < a.Vertex[i].e[j].nbh; k++) {
+                    label = a.Vertex[i].e[j].bh[k];
+                    if (label < agents_size) {
+                        add_edge(pworld_vec[i], pworld_vec[a.Vertex[i].e[j].tv], label_to_agent.at(label));
+                    }
+                }
+            }
+        }
+    }
+
+    set_worlds(worlds);
+}
+
+void pstate::calc_min_bisimilar()
+{
+    //std::cerr << "\nDEBUG: INIZIO BISIMULATION IN PSTATE\n" << std::flush;
+
+    // ************* Cleaning unreachable pworlds *************
+
+    clean_unreachable_pworlds();
+
+    std::vector<pworld_ptr> pworld_vec; // Vector of all pworld_ptr
+    //std::cerr << "\nDEBUG: PRE-ALLOCAZIONE AUTOMA\n" << std::flush;
+
+
+    //	std::cerr << "\nDEBUG: \n\tNvertex_before = " << m_worlds.size() << std::endl;
+    //	std::cerr << "\tNbehavs_before = " << m_edges.size() << std::endl;
+
+    automaton a;
+    pworld_vec.reserve(get_worlds().size());
+
+    std::map<bis_label, agent> label_to_agent;
+    std::map<agent, bis_label> agent_to_label;
+
+
+    auto agents = domain::get_instance().get_agents();
+    auto it_ag = agents.begin();
+    bis_label ag_label = 0;
+    agent lab_agent;
+    for (; it_ag != agents.end(); it_ag++) {
+        lab_agent = *it_ag;
+        label_to_agent.insert(std::make_pair(ag_label, lab_agent));
+        agent_to_label.insert(std::make_pair(lab_agent, ag_label));
+        ag_label++;
+
+    }
+
+    a = pstate_to_automaton(pworld_vec, agent_to_label);
+
+    bisimulation b;
+    //std::cout << "\nDEBUG: Printing automaton pre-Bisimulation\n";
+    //b.VisAutoma(&a);
+
+    if (domain::get_instance().get_bisimulation() == PaigeTarjan) {
+        if (b.MinimizeAutomaPT(&a)) {
+            //VisAutoma(a);
+
+            //std::cout << "\nDEBUG: Printing automaton post-Bisimulation\n";
+            //b.VisAutoma(&a);
+            //std::cout << "Done\n";
+            automaton_to_pstate(a, pworld_vec, label_to_agent);
+
+            //b.DisposeAutoma(&a);
+        }
+    } else {
+        if (b.MinimizeAutomaFB(&a)) {
+
+            //std::cerr << "\nDEBUG: Printing automaton post-Bisimulation\n";
+            //b.VisAutoma(&a);
+            //std::cerr << "Done\n";
+            automaton_to_pstate(a, pworld_vec, label_to_agent);
+            //b.DisposeAutoma(&a);
+        }
+    }
+
+    //std::cerr << "\nDEBUG: PRe Clean" << std::endl;
+
+}
+
+
+/**** UTILITIES ****/
+bool pstate::check_properties(const agent_set & fully, const agent_set & partially, const fluent_formula & effects, const pstate & updated) const
+{
+	if (!fully.empty()) {
 		/************Formulae Building************/
 		/******Formulae containing the effects of the sensing******/
 		belief_formula effects_formula;
@@ -638,7 +842,6 @@ bool pstate::check_properties(const agent_set & fully, const agent_set & partial
 		effects_formula.set_fluent_formula(effects);
 		effects_formula.set_is_grounded(true);
 		effects_formula.deground();
-
 
 		/******First Property C(Fully, eff)******/
 		belief_formula property1;
@@ -648,16 +851,12 @@ bool pstate::check_properties(const agent_set & fully, const agent_set & partial
 		property1.set_is_grounded(true);
 		property1.deground();
 
-
-
 		if (!updated.entails(property1)) {
 			std::cerr << "\nDEBUG: First property not respected";
 			return false;
 		}
 
-
-
-		if (partially.size() > 0) {
+		if (!partially.empty()) {
 			/******Second Property C(P, (C(Fully,eff) | C(Fully, -eff)))******/
 			belief_formula inner_nested2, nested2, disjunction, property2;
 			//First nested formula is equal to First Property C(Fully, eff)
@@ -668,13 +867,11 @@ bool pstate::check_properties(const agent_set & fully, const agent_set & partial
 			inner_nested2.set_is_grounded(true);
 			inner_nested2.deground();
 
-
 			nested2.set_formula_type(PROPOSITIONAL_FORMULA);
 			nested2.set_operator(BF_NOT);
 			nested2.set_bf1(inner_nested2);
 			nested2.set_is_grounded(true);
 			nested2.deground();
-
 
 			//The disjunction (C(Fully,eff) | C(Fully, -eff)) is made with property1 and nested2
 			disjunction.set_formula_type(PROPOSITIONAL_FORMULA);
@@ -684,7 +881,6 @@ bool pstate::check_properties(const agent_set & fully, const agent_set & partial
 			disjunction.set_is_grounded(true);
 			disjunction.deground();
 
-
 			//Finally we can construct the second property
 			property2.set_group_agents(partially);
 			property2.set_formula_type(C_FORMULA);
@@ -692,20 +888,14 @@ bool pstate::check_properties(const agent_set & fully, const agent_set & partial
 			property2.set_is_grounded(true);
 			property2.deground();
 
-
-
-
 			/******Third Property C(F, C(P, (C(Fully,eff) | C(Fully, -eff))))******/
 			//This formula is just C(Fully, property2)
 			belief_formula property3;
 			property3.set_group_agents(fully);
 			property3.set_formula_type(C_FORMULA);
 			property3.set_bf1(property2);
-
 			property3.set_is_grounded(true);
-
 			property3.deground();
-
 
 			if (!updated.entails(property2)) {
 				std::cerr << "\nDEBUG: Second property not respected in the formula: ";
@@ -747,7 +937,7 @@ void pstate::print() const
 	counter = 1;
 	std::cout << std::endl;
 	std::cout << "*******************************************************************" << std::endl;
-	pworld_transitive_map::const_iterator it_pwtm;
+	pedges::const_iterator it_pwtm;
 	pworld_map::const_iterator it_pwm;
 	std::cout << "Edge List:" << std::endl;
 	for (it_pwtm = get_beliefs().begin(); it_pwtm != get_beliefs().end(); it_pwtm++) {
@@ -805,7 +995,7 @@ void pstate::print_graphviz(std::ostream & graphviz) const
 			map_world_to_index[tmp_fs] = found_fs;
 			found_fs++;
 		}
-		tmp_unsh = it_pwset->get_repetition();
+		tmp_unsh = static_cast<char>(it_pwset->get_repetition());
 		if (map_rep_to_name.count(tmp_unsh) == 0) {
 			map_rep_to_name[tmp_unsh] = found_rep;
 			found_rep++;
@@ -846,10 +1036,10 @@ void pstate::print_graphviz(std::ostream & graphviz) const
 
 	std::map < std::tuple<std::string, std::string>, std::set<std::string> > edges;
 
-	pworld_transitive_map::const_iterator it_pwtm;
+	pedges::const_iterator it_pwtm;
 	pworld_map::const_iterator it_pwm;
 	std::tuple<std::string, std::string> tmp_tuple;
-	std::string tmp_string = "";
+	std::string tmp_string;
 
 	for (it_pwtm = get_beliefs().begin(); it_pwtm != get_beliefs().end(); it_pwtm++) {
 		pworld_ptr from = it_pwtm->first;
@@ -882,12 +1072,11 @@ void pstate::print_graphviz(std::ostream & graphviz) const
 	std::map < std::tuple<std::string, std::string>, std::set < std::string>> to_print_double;
 	for (it_map = edges.begin(); it_map != edges.end(); it_map++) {
 		for (it_map_2 = it_map; it_map_2 != edges.end(); it_map_2++) {
-			if (std::get<0>(it_map->first).compare(std::get<1>(it_map_2->first)) == 0) {
-				if (std::get<1>(it_map->first).compare(std::get<0>(it_map_2->first)) == 0) {
+			if (std::get<0>(it_map->first) == std::get<1>(it_map_2->first)) {
+				if (std::get<1>(it_map->first) == std::get<0>(it_map_2->first)) {
 					if (it_map->second == it_map_2->second) {
-						if (std::get<0>(it_map->first).compare(std::get<1>(it_map->first)) != 0) {
+						if (std::get<0>(it_map->first) != std::get<1>(it_map->first)) {
 							to_print_double[it_map->first] = it_map->second;
-							//std::cerr << std::get<0>(it_map->first) << " " << std::get<0>(it_map_2->first) << "\n";
 							it_map_2 = edges.erase(it_map_2);
 							it_map = edges.erase(it_map);
 						}
@@ -958,301 +1147,3 @@ void pstate::print_graphviz(std::ostream & graphviz) const
 	graphviz << "	{rank = max; description};\n";
 
 }
-
-
-/****************BISIMULATION********************/
-void pstate::get_all_reachable_worlds(const pworld_ptr & pw, pworld_ptr_set & reached_worlds, pworld_transitive_map & reached_edges) const
-{
-
-	//std::cerr << "\nDEBUG: QUI 1\n" << std::flush;
-
-	pworld_ptr_set::const_iterator it_pwps;
-	pworld_ptr_set pw_list;
-
-	//reached_worlds.insert(kw);
-	auto ag_set = domain::get_instance().get_agents();
-	auto ag_it = ag_set.begin();
-	for (; ag_it != ag_set.end(); ag_it++) {
-		//std::cerr << "\nDEBUG: QUI 2\n" << std::flush;
-
-		pw_list = m_beliefs.at(pw).at(*ag_it);
-		//std::cerr << "\nDEBUG: QUI 3\n" << std::flush;
-
-		for (it_pwps = pw_list.begin(); it_pwps != pw_list.end(); it_pwps++) {
-			if (reached_worlds.insert(*it_pwps).second) {
-				//std::cerr << "\nDEBUG: QUI 4\n" << std::flush;
-
-				get_all_reachable_worlds(*it_pwps, reached_worlds, reached_edges);
-				reached_edges.insert(std::make_pair(*it_pwps, m_beliefs.at(*it_pwps)));
-			}
-		}
-	}
-}
-
-void pstate::clean_unreachable_pworlds()
-{
-	//std::cerr << "\nDEBUG: INIZIO CLEAN EXTRA PSTATE\n" << std::flush;
-
-	pworld_ptr_set reached_worlds;
-	pworld_transitive_map reached_edges;
-
-	reached_worlds.insert(get_pointed());
-	reached_edges.insert(std::make_pair(get_pointed(), m_beliefs.at(get_pointed())));
-	//std::cerr << "\nDEBUG: CLEAN 1 EXTRA PSTATE\n" << std::flush;
-
-	get_all_reachable_worlds(get_pointed(), reached_worlds, reached_edges);
-
-	//std::cerr << "\nDEBUG: CLEAN 2 EXTRA PSTATE\n" << std::flush;
-
-	set_worlds(reached_worlds);
-	set_beliefs(reached_edges);
-
-	//std::cerr << "\nDEBUG: FINE CLEAN EXTRA PSTATE\n" << std::flush;
-}
-
-const automaton pstate::pstate_to_automaton(std::vector<pworld_ptr> & pworld_vec, const std::map<agent, bis_label> & agent_to_label) const
-{
-
-	std::map<int, int> compact_indices;
-	std::map<pworld_ptr, int> index_map;
-	pbislabel_map label_map; // Map: from -> (to -> ag_set)
-
-	automaton *a;
-	int Nvertex = get_worlds().size();
-	int ag_set_size = domain::get_instance().get_agents().size();
-	//BIS_ADAPTATION For the loop that identifies the id (We add one edge for each node)
-	v_elem *Vertex;
-
-	Vertex = (v_elem *) malloc(sizeof(v_elem) * Nvertex);
-
-	// Initializating vertices
-	pworld_ptr_set::const_iterator it_pwps;
-	pworld_transitive_map::const_iterator it_peps;
-	pbislabel_map::const_iterator it_plm;
-	bis_label_set::const_iterator it_bislab;
-	std::map<pworld_ptr, bis_label_set>::const_iterator it_pw_bislab;
-
-	//std::cerr << "\nDEBUG: Inizializzazione Edges\n";
-
-	// The pointed world is set to the index 0. This ensures that, when deleting the bisimilar nodes, the pointed pworld
-	// is always chosen as the first of its block. Therefore, we do not need to update it when converting back to a kstate
-	index_map[get_pointed()] = 0;
-	pworld_vec.push_back(get_pointed());
-	compact_indices[get_pointed().get_numerical_id()] = 0;
-
-	//For the loop that identifies the id
-	//BIS_ADAPTATION For the loop that identifies the id (+1)
-	///@bug: If the pointed has no self-loop to add
-	//pworld_ptr_set pointed_adj = adj_list.at(get_pointed());
-
-	Vertex[0].ne = 0; // pointed_adj.size(); // edge_counter[get_pointed()];
-	//	if (pointed_adj.find(get_pointed()) == pointed_adj.end()) {
-	//		Vertex[0].ne++;
-	//	}
-	//	Vertex[0].e = (e_elem *) malloc(sizeof(e_elem) * Vertex[0].ne);
-
-	int i = 1, c = 1;
-
-	//std::cerr << "\nDEBUG: Inizializzazione Vertex\n";
-
-	for (it_pwps = m_worlds.begin(); it_pwps != m_worlds.end(); it_pwps++) {
-		if (!(*it_pwps == get_pointed())) {
-			index_map[*it_pwps] = i;
-			pworld_vec.push_back(*it_pwps);
-
-			// if (compact_indices.find(it_pwps->get_numerical_id()) == compact_indices.end()) {
-			if (compact_indices.insert({it_pwps->get_numerical_id(), c}).second) {
-				// compact_indices[it_pwps->get_numerical_id()] = c;
-				c++;
-				//std::cerr << "\nDEBUG: Added:" << it_pwps->get_id() << "\n";
-			}
-			Vertex[i].ne = 0;
-			i++;
-		}
-		//BIS_ADAPTATION (Added self-loop)
-		label_map[*it_pwps][*it_pwps].insert(compact_indices[it_pwps->get_numerical_id()] + ag_set_size);
-		//std::cerr << "\nDEBUG: Added to " << it_pwps->get_numerical_id() << " the label " << compact_indices[it_pwps->get_numerical_id()] + ag_set_size << std::endl;
-	}
-
-
-	//BIS_ADAPTATION For the loop that identifies the id (We add one potential label for each node)
-	int bhtabSize = ag_set_size + c;
-
-	//std::cerr << "\nDEBUG: Inizializzazione Behavs\n";
-
-	//BIS_ADAPTATION (Moved down here)
-
-	for (it_peps = m_beliefs.begin(); it_peps != m_beliefs.end(); it_peps++) {
-
-		for (auto it_mid_bel = it_peps->second.begin(); it_mid_bel != it_peps->second.end(); it_mid_bel++) {
-			for (auto it_int_ed = it_mid_bel->second.begin(); it_int_ed != it_mid_bel->second.end(); it_int_ed++) {
-				label_map[it_peps->first][*it_int_ed].insert(agent_to_label.at(it_mid_bel->first));
-				Vertex[index_map[it_peps->first]].ne++;
-			}
-		}
-	}
-
-	i = 0;
-	for (it_pwps = m_worlds.begin(); it_pwps != m_worlds.end(); it_pwps++) {
-		Vertex[i].ne++; //Self loop bisimulation
-		Vertex[i].e = (e_elem *) malloc(sizeof(e_elem) * Vertex[i].ne);
-		i++;
-	}
-
-	//std::cerr << "\nDEBUG: Fine Inizializzazione Vertex\n";
-
-
-	int from, to, j = 0; //, k = 0, nbh;
-
-	//std::cerr << "\nDEBUG: Inizializzazione Mappa\n";
-	for (it_plm = label_map.begin(); it_plm != label_map.end(); it_plm++) {
-		from = index_map[it_plm->first]; // For each pworld 'from'
-
-		//std::cerr << "\nDEBUG: Inizializzazione K\n";
-
-		for (it_pw_bislab = it_plm->second.begin(); it_pw_bislab != it_plm->second.end(); it_pw_bislab++) { // For each edge that reaches the pworld 'to'
-			to = index_map[it_pw_bislab->first];
-			//nbh = it_pw_bislab->second.size();
-
-			for (it_bislab = it_pw_bislab->second.begin(); it_bislab != it_pw_bislab->second.end(); it_bislab++) { // For each agent 'ag' in the label of the kedge
-				//std::cerr << "\nDEBUG: j is: " << j << " and k is: " << k << "\n";
-				//nbh = 1;
-				Vertex[from].e[j].nbh = 1; // Let j be the index of the adjacency list of from that stores the kedge (from, to)
-				Vertex[from].e[j].bh = (int *) malloc(sizeof(int)); // Let nbh be the number of agents in such kedge
-				Vertex[from].e[j].tv = to; // Update the value of the reache pworld
-				Vertex[from].e[j].bh[0] = *it_bislab; // Update the value of the label at index k to 'ag'
-				//std::cerr << "\nDEBUG: j is: " << j << " and k is: " << k << "\n";
-
-				j++; // Update the value of the index j
-			}
-
-
-		}
-
-		j = 0; // Reset j
-	}
-
-	int Nbehavs = bhtabSize;
-	a = (automaton *) malloc(sizeof(automaton));
-	a->Nvertex = Nvertex;
-	a->Nbehavs = Nbehavs;
-	a->Vertex = Vertex;
-
-	//	std::cerr << "\nDEBUG: \n\tNvertex = " << Nvertex << std::endl;
-	//	std::cerr << "\tNbehavs = " << Nbehavs << std::endl;
-
-	return *a;
-}
-
-void pstate::automaton_to_pstate(const automaton & a, const std::vector<pworld_ptr> & pworld_vec, const std::map<bis_label, agent> & label_to_agent)
-{
-	//std::cerr << "\nDEBUG: INIZIO BISIMULATION TO PSTATE\n" << std::flush;
-
-	pworld_ptr_set worlds;
-	m_beliefs.clear();
-	// The pointed world does not change when we calculate the minimum bisimilar state
-	// Hence we do not need to update it
-
-	int i, j, k, label, agents_size = domain::get_instance().get_agents().size();
-
-	for (i = 0; i < a.Nvertex; i++) {
-		if (a.Vertex[i].ne > 0) {
-			worlds.insert(pworld_vec[i]);
-			for (j = 0; j < a.Vertex[i].ne; j++) {
-				for (k = 0; k < a.Vertex[i].e[j].nbh; k++) {
-					label = a.Vertex[i].e[j].bh[k];
-					if (label < agents_size) {
-						add_edge(pworld_vec[i], pworld_vec[a.Vertex[i].e[j].tv], label_to_agent.at(label));
-					}
-				}
-			}
-		}
-
-	}
-
-
-	set_worlds(worlds);
-	//std::cerr << "\nDEBUG: FINE BISIMULATION TO PSTATE\n" << std::flush;
-
-	//set_edges(edges);
-}
-
-void pstate::calc_min_bisimilar()
-{
-	//std::cerr << "\nDEBUG: INIZIO BISIMULATION IN PSTATE\n" << std::flush;
-
-	// ************* Cleaning unreachable pworlds *************
-
-	clean_unreachable_pworlds();
-
-	std::vector<pworld_ptr> pworld_vec; // Vector of all pworld_ptr
-	//std::cerr << "\nDEBUG: PRE-ALLOCAZIONE AUTOMA\n" << std::flush;
-
-
-	//	std::cerr << "\nDEBUG: \n\tNvertex_before = " << m_worlds.size() << std::endl;
-	//	std::cerr << "\tNbehavs_before = " << m_edges.size() << std::endl;
-
-	automaton a;
-	pworld_vec.reserve(get_worlds().size());
-
-	std::map<bis_label, agent> label_to_agent;
-	std::map<agent, bis_label> agent_to_label;
-
-
-	auto agents = domain::get_instance().get_agents();
-	auto it_ag = agents.begin();
-	bis_label ag_label = 0;
-	agent lab_agent;
-	for (; it_ag != agents.end(); it_ag++) {
-		lab_agent = *it_ag;
-		label_to_agent.insert(std::make_pair(ag_label, lab_agent));
-		agent_to_label.insert(std::make_pair(lab_agent, ag_label));
-		ag_label++;
-
-	}
-
-	a = pstate_to_automaton(pworld_vec, agent_to_label);
-
-	bisimulation b;
-	//std::cout << "\nDEBUG: Printing automaton pre-Bisimulation\n";
-	//b.VisAutoma(&a);
-
-	if (domain::get_instance().get_bisimulation() == PaigeTarjan) {
-		if (b.MinimizeAutomaPT(&a)) {
-			//VisAutoma(a);
-
-			//std::cout << "\nDEBUG: Printing automaton post-Bisimulation\n";
-			//b.VisAutoma(&a);
-			//std::cout << "Done\n";
-			automaton_to_pstate(a, pworld_vec, label_to_agent);
-
-			//b.DisposeAutoma(&a);
-		}
-	} else {
-		if (b.MinimizeAutomaFB(&a)) {
-
-			//std::cerr << "\nDEBUG: Printing automaton post-Bisimulation\n";
-			//b.VisAutoma(&a);
-			//std::cerr << "Done\n";
-			automaton_to_pstate(a, pworld_vec, label_to_agent);
-			//b.DisposeAutoma(&a);
-		}
-	}
-
-	//std::cerr << "\nDEBUG: PRe Clean" << std::endl;
-
-}
-/*********************END BISIMILUATION***********************/
-
-
-//int pstate::get_edges() const
-//{
-//	std::cerr << "\nYou are playing with debug only options-1.\n";
-//	exit(1);
-//}
-//
-//void pstate::debug_print(pstate tmp)
-//{
-//	std::cerr << "\nYou are playing with debug only options-2.\n";
-//	exit(1);
-//}
