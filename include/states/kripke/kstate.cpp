@@ -396,19 +396,22 @@ kworld_ptr_set kstate::get_D_reachable_worlds(const agent_set & ags, const kworl
 
 void kstate::get_all_reachable_worlds_edges(const kworld_ptr & world, kworld_ptr_set & reached_worlds, kedge_map & reached_edges) const
 {
-	auto world_edges = m_edges.at(world);
-	std::map<agent, kworld_ptr_set>::const_iterator it_agkw;
-	kworld_ptr_set::const_iterator it_kws;
+    kworld_ptr_set::const_iterator it_kws;
+    kworld_ptr_set kw_list;
 
-	for (it_agkw = world_edges.begin(); it_agkw != world_edges.end(); it_agkw++) {
-        for (it_kws = it_agkw->second.begin(); it_kws != it_agkw->second.end(); it_kws++) {
-            reached_edges[world][it_agkw->first].insert(*it_kws);
+    auto ag_set = domain::get_instance().get_agents();
+    auto ag_it = ag_set.begin();
 
+    for (; ag_it != ag_set.end(); ag_it++) {
+        kw_list = m_edges.at(world).at(*ag_it);
+
+        for (it_kws = kw_list.begin(); it_kws != kw_list.end(); it_kws++) {
             if (reached_worlds.insert(*it_kws).second) {
+                reached_edges[*it_kws] = m_edges.at(*it_kws);
                 get_all_reachable_worlds_edges(*it_kws, reached_worlds, reached_edges);
             }
         }
-	}
+    }
 }
 
 void kstate::clean_unreachable_kworlds()
@@ -421,265 +424,6 @@ void kstate::clean_unreachable_kworlds()
 
 	set_worlds(reached_worlds);
 	set_edges(reached_edges);
-}
-
-
-/**** BISIMULATION ****/
-automaton kstate::kstate_to_automaton(/*const std::map<kworld_ptr, kworld_ptr_set> & adj_list,*/ std::vector<kworld_ptr> & kworld_vec, const std::map<agent, bis_label> & agent_to_label) const
-{
-
-	std::map<int, int> compact_indices;
-	std::map<kworld_ptr, int> index_map;
-	kbislabel_map label_map; // Map: from -> (to -> ag_set)
-
-	automaton *a;
-	unsigned long Nvertex = get_worlds().size();
-    unsigned long ag_set_size = domain::get_instance().get_agents().size();
-	//BIS_ADAPTATION For the loop that identifies the id (We add one edge for each node)
-	v_elem *Vertex;
-
-	Vertex = (v_elem *) malloc(sizeof(v_elem) * Nvertex);
-
-	// Initializating vertices
-	kworld_ptr_set::const_iterator it_kwps;
-	kbislabel_map::const_iterator it_klm;
-	bis_label_set::const_iterator it_bislab;
-	std::map<kworld_ptr, bis_label_set>::const_iterator it_kw_bislab;
-
-	//std::cerr << "\nDEBUG: Inizializzazione Edges\n";
-
-	// The pointed world is set to the index 0. This ensures that, when deleting the bisimilar nodes, the pointed kworld
-	// is always chosen as the first of its block. Therefore, we do not need to update it when converting back to a kstate
-	index_map[get_pointed()] = 0;
-	kworld_vec.push_back(get_pointed());
-	compact_indices[static_cast<int>(get_pointed().get_numerical_id())] = 0;
-
-	//For the loop that identifies the id
-	//BIS_ADAPTATION For the loop that identifies the id (+1)
-	///@bug: If the pointed has no self-loop to add
-	//kworld_ptr_set pointed_adj = adj_list.at(get_pointed());
-
-	Vertex[0].ne = 0; // pointed_adj.size(); // edge_counter[get_pointed()];
-	//	if (pointed_adj.find(get_pointed()) == pointed_adj.end()) {
-	//		Vertex[0].ne++;
-	//	}
-	//	Vertex[0].e = (e_elem *) malloc(sizeof(e_elem) * Vertex[0].ne);
-
-	int i = 1, c = 1;
-
-	//std::cerr << "\nDEBUG: Inizializzazione Vertex\n";
-
-	for (it_kwps = m_worlds.begin(); it_kwps != m_worlds.end(); it_kwps++) {
-		if (!(*it_kwps == get_pointed())) {
-			index_map[*it_kwps] = i;
-			kworld_vec.push_back(*it_kwps);
-
-			// if (compact_indices.find(it_kwps->get_numerical_id()) == compact_indices.end()) {
-			if (compact_indices.insert({it_kwps->get_numerical_id(), c}).second) {
-				// compact_indices[it_kwps->get_numerical_id()] = c;
-				c++;
-				//std::cerr << "\nDEBUG: Added:" << it_kwps->get_id() << "\n";
-			}
-
-			//BIS_ADAPTATION For the loop that identifies the id (+1)
-			Vertex[i].ne = 0; //adj_list.at(*it_kwps).size(); // edge_counter[*it_kwps];
-			//			Vertex[i].e = (e_elem *) malloc(sizeof(e_elem) * Vertex[i].ne);
-			i++;
-		}
-		//BIS_ADAPTATION (Added self-loop)
-		label_map[*it_kwps][*it_kwps].insert(compact_indices[static_cast<int>(it_kwps->get_numerical_id())] + ag_set_size);
-		//std::cerr << "\nDEBUG: Added to " << it_kwps->get_numerical_id() << " the label " << compact_indices[it_kwps->get_numerical_id()] + ag_set_size << std::endl;
-	}
-
-
-	//BIS_ADAPTATION For the loop that identifies the id (We add one potential label for each node)
-    unsigned long bhtabSize = ag_set_size + c;
-
-	//std::cerr << "\nDEBUG: Inizializzazione Behavs\n";
-
-	//BIS_ADAPTATION (Moved down here)
-	kedge_map::const_iterator it_kem;
-	std::map<agent, kworld_ptr_set>::const_iterator it_agkw;
-
-	for (it_kem = m_edges.begin(); it_kem != m_edges.end(); it_kem++) {
-        for (it_agkw = it_kem->second.begin(); it_agkw != it_kem->second.end(); it_agkw++) {
-            for (it_kwps = it_agkw->second.begin(); it_kwps != it_agkw->second.end(); it_kwps++) {
-                label_map[it_kem->first][*it_kwps].insert(agent_to_label.at(it_agkw->first));
-                Vertex[index_map[it_kem->first]].ne++;
-            }
-        }
-	}
-
-	/*for (it_keps = m_edges.begin(); it_keps != m_edges.end(); it_keps++) {
-
-		//DEBUG:Change this
-		// if (adj_list[it_keps->get_from()][it_keps->get_to()].empty())
-		// {
-		// 	edge_counter[it_keps->get_from()]++;
-		// }
-
-		label_map[it_keps->get_from()][it_keps->get_to()].insert(agent_to_label.at(it_keps->get_label()));
-		Vertex[index_map[it_keps->get_from()]].ne++;
-	}*/
-
-	i = 0;
-	for (it_kwps = m_worlds.begin(); it_kwps != m_worlds.end(); it_kwps++) {
-		Vertex[i].ne++; //Self loop bisimulation
-		Vertex[i].e = (e_elem *) malloc(sizeof(e_elem) * Vertex[i].ne);
-		i++;
-	}
-
-	//std::cerr << "\nDEBUG: Fine Inizializzazione Vertex\n";
-
-
-	int from, to, j = 0; //, k = 0, nbh;
-
-	//std::cerr << "\nDEBUG: Inizializzazione Mappa\n";
-	for (it_klm = label_map.begin(); it_klm != label_map.end(); it_klm++) {
-		from = index_map[it_klm->first]; // For each kworld 'from'
-
-		//std::cerr << "\nDEBUG: Inizializzazione K\n";
-
-		for (it_kw_bislab = it_klm->second.begin(); it_kw_bislab != it_klm->second.end(); it_kw_bislab++) { // For each edge that reaches the kworld 'to'
-			to = index_map[it_kw_bislab->first];
-			//nbh = it_kw_bislab->second.size();
-
-			for (it_bislab = it_kw_bislab->second.begin(); it_bislab != it_kw_bislab->second.end(); it_bislab++) { // For each agent 'ag' in the label of the kedge
-				//std::cerr << "\nDEBUG: j is: " << j << " and k is: " << k << "\n";
-				//nbh = 1;
-				Vertex[from].e[j].nbh = 1; // Let j be the index of the adjacency list of from that stores the kedge (from, to)
-				Vertex[from].e[j].bh = (int *) malloc(sizeof(int)); // Let nbh be the number of agents in such kedge
-				Vertex[from].e[j].tv = to; // Update the value of the reache kworld
-				Vertex[from].e[j].bh[0] = *it_bislab; // Update the value of the label at index k to 'ag'
-				//std::cerr << "\nDEBUG: j is: " << j << " and k is: " << k << "\n";
-
-				j++; // Update the value of the index j
-			}
-
-			//std::cerr << "\nDEBUG J: " << j-1 << "\n";
-
-			//k = 0; // Reset k
-		}
-		//std::cerr << "\nDEBUG: Fine Inizializzazione K\n";
-
-		j = 0; // Reset j
-	}
-
-	//std::cerr << "\nDEBUG: Fine Inizializzazione Mappa\n";
-
-	//		std::vector<kworld_ptr>::const_iterator it_kwp;
-	//	int temp_counter = 0;
-	//	for (it_kwp = kworld_vec.begin(); it_kwp != kworld_vec.end(); it_kwp++) {
-	//		//std::cerr << "DEBUG: World " << temp_counter << " has ID: " << it_kwp->get_numerical_id() << std::endl;
-	//		temp_counter++;
-	//	}
-	//
-	// Building the automaton
-	unsigned long Nbehavs = bhtabSize;
-	a = (automaton *) malloc(sizeof(automaton));
-	a->Nvertex = Nvertex;
-	a->Nbehavs = Nbehavs;
-	a->Vertex = Vertex;
-
-	//	std::cerr << "\nDEBUG: \n\tNvertex = " << Nvertex << std::endl;
-	//	std::cerr << "\tNbehavs = " << Nbehavs << std::endl;
-
-	return *a;
-}
-
-void kstate::automaton_to_kstate(const automaton & a, const std::vector<kworld_ptr> & kworld_vec, const std::map<bis_label, agent> & label_to_agent)
-{
-	kworld_ptr_set worlds;
-	kedge_map edges;
-	// The pointed world does not change when we calculate the minimum bisimilar state
-	// Hence we do not need to update it
-
-	unsigned long agents_size = domain::get_instance().get_agents().size();
-	int i, j, k, label;
-
-	for (i = 0; i < a.Nvertex; i++) {
-		if (a.Vertex[i].ne > 0) {
-			worlds.insert(kworld_vec[i]);
-
-			for (j = 0; j < a.Vertex[i].ne; j++) {
-				for (k = 0; k < a.Vertex[i].e[j].nbh; k++) {
-					label = a.Vertex[i].e[j].bh[k];
-					if (label < agents_size) {
-						edges[kworld_vec[i]][label_to_agent.at(label)].insert(kworld_vec[a.Vertex[i].e[j].tv]);
-//						edges.insert(kstore::get_instance().add_edge(kedge(kworld_vec[i], kworld_vec[a.Vertex[i].e[j].tv], label_to_agent.at(label))));
-					}
-				}
-			}
-		}
-	}
-
-	set_worlds(worlds);
-	set_edges(edges);
-}
-
-void kstate::calc_min_bisimilar()
-{
-	// ************* Cleaning unreachable kworlds *************
-	std::map<bis_label, agent> label_to_agent;
-	std::map<agent, bis_label> agent_to_label;
-
-	auto agents = domain::get_instance().get_agents();
-	auto it_ag = agents.begin();
-	bis_label ag_label = 0;
-	agent lab_agent;
-	for (; it_ag != agents.end(); it_ag++) {
-		lab_agent = *it_ag;
-		label_to_agent.insert(std::make_pair(ag_label, lab_agent));
-		agent_to_label.insert(std::make_pair(lab_agent, ag_label));
-		ag_label++;
-
-	}
-
-	clean_unreachable_kworlds();
-
-	//std::cerr << "\nDEBUG: INIZIO BISIMULATION IN KSTATE\n" << std::flush;
-	std::vector<kworld_ptr> kworld_vec; // Vector of all kworld_ptr
-	//std::cerr << "\nDEBUG: PRE-ALLOCAZIONE AUTOMA\n" << std::flush;
-
-
-	//	std::cerr << "\nDEBUG: \n\tNvertex_before = " << m_worlds.size() << std::endl;
-	//	std::cerr << "\tNbehavs_before = " << m_edges.size() << std::endl;
-
-	automaton a;
-	kworld_vec.reserve(get_worlds().size());
-
-	a = kstate_to_automaton(/*adj_list,*/ kworld_vec, agent_to_label);
-
-	bisimulation b;
-	//std::cout << "\nDEBUG: Printing automaton pre-Bisimulation\n";
-	//b.VisAutoma(&a);
-
-
-
-	if (domain::get_instance().get_bisimulation() == PaigeTarjan) {
-		if (b.MinimizeAutomaPT(&a)) {
-			//VisAutoma(a);
-
-			//std::cout << "\nDEBUG: Printing automaton post-Bisimulation\n";
-			//b.VisAutoma(&a);
-			//std::cout << "Done\n";
-			automaton_to_kstate(a, kworld_vec,label_to_agent);
-
-			//b.DisposeAutoma(&a);
-		}
-	} else {
-		if (b.MinimizeAutomaFB(&a)) {
-
-			//std::cerr << "\nDEBUG: Printing automaton post-Bisimulation\n";
-			//b.VisAutoma(&a);
-			//std::cerr << "Done\n";
-			automaton_to_kstate(a, kworld_vec,label_to_agent);
-			//b.DisposeAutoma(&a);
-		}
-	}
-
-	//std::cerr << "\nDEBUG: PRe Clean" << std::endl;
-
 }
 
 
@@ -809,8 +553,8 @@ void kstate::generate_initial_kedges()
 	}
 
 	initially ini_conditions = domain::get_instance().get_initial_description();
-
 	formula_list::const_iterator it_fl;
+
 	for (it_fl = ini_conditions.get_initial_conditions().begin(); it_fl != ini_conditions.get_initial_conditions().end(); it_fl++) {
 		remove_initial_kedge_bf(*it_fl);
 	}
@@ -908,6 +652,264 @@ kstate kstate::compute_succ(const action & act) const
 {
     /** \warning executability should be check in \ref state (or \ref planner).*/
 	return union_update::u_update(*this, act);
+}
+
+
+/**** BISIMULATION ****/
+automaton kstate::kstate_to_automaton(std::vector<kworld_ptr> & kworld_vec, const std::map<agent, bis_label> & agent_to_label) const
+{
+
+    std::map<int, int> compact_indices;
+    std::map<kworld_ptr, int> index_map;
+    kbislabel_map label_map; // Map: from -> (to -> ag_set)
+
+    automaton *a;
+    unsigned long Nvertex = get_worlds().size();
+    unsigned long ag_set_size = domain::get_instance().get_agents().size();
+    //BIS_ADAPTATION For the loop that identifies the id (We add one edge for each node)
+    v_elem *Vertex;
+
+    Vertex = (v_elem *) malloc(sizeof(v_elem) * Nvertex);
+
+    // Initializating vertices
+    kworld_ptr_set::const_iterator it_kwps;
+    kbislabel_map::const_iterator it_klm;
+    bis_label_set::const_iterator it_bislab;
+    std::map<kworld_ptr, bis_label_set>::const_iterator it_kw_bislab;
+
+    //std::cerr << "\nDEBUG: Inizializzazione Edges\n";
+
+    // The pointed world is set to the index 0. This ensures that, when deleting the bisimilar nodes, the pointed kworld
+    // is always chosen as the first of its block. Therefore, we do not need to update it when converting back to a kstate
+    index_map[get_pointed()] = 0;
+    kworld_vec.push_back(get_pointed());
+    compact_indices[static_cast<int>(get_pointed().get_numerical_id())] = 0;
+
+    //For the loop that identifies the id
+    //BIS_ADAPTATION For the loop that identifies the id (+1)
+    ///@bug: If the pointed has no self-loop to add
+    //kworld_ptr_set pointed_adj = adj_list.at(get_pointed());
+
+    Vertex[0].ne = 0; // pointed_adj.size(); // edge_counter[get_pointed()];
+    //	if (pointed_adj.find(get_pointed()) == pointed_adj.end()) {
+    //		Vertex[0].ne++;
+    //	}
+    //	Vertex[0].e = (e_elem *) malloc(sizeof(e_elem) * Vertex[0].ne);
+
+    int i = 1, c = 1;
+
+    //std::cerr << "\nDEBUG: Inizializzazione Vertex\n";
+
+    for (it_kwps = m_worlds.begin(); it_kwps != m_worlds.end(); it_kwps++) {
+        if (!(*it_kwps == get_pointed())) {
+            index_map[*it_kwps] = i;
+            kworld_vec.push_back(*it_kwps);
+
+            // if (compact_indices.find(it_kwps->get_numerical_id()) == compact_indices.end()) {
+            if (compact_indices.insert({it_kwps->get_numerical_id(), c}).second) {
+                // compact_indices[it_kwps->get_numerical_id()] = c;
+                c++;
+                //std::cerr << "\nDEBUG: Added:" << it_kwps->get_id() << "\n";
+            }
+
+            //BIS_ADAPTATION For the loop that identifies the id (+1)
+            Vertex[i].ne = 0; //adj_list.at(*it_kwps).size(); // edge_counter[*it_kwps];
+            //			Vertex[i].e = (e_elem *) malloc(sizeof(e_elem) * Vertex[i].ne);
+            i++;
+        }
+        //BIS_ADAPTATION (Added self-loop)
+        label_map[*it_kwps][*it_kwps].insert(compact_indices[static_cast<int>(it_kwps->get_numerical_id())] + ag_set_size);
+        //std::cerr << "\nDEBUG: Added to " << it_kwps->get_numerical_id() << " the label " << compact_indices[it_kwps->get_numerical_id()] + ag_set_size << std::endl;
+    }
+
+
+    //BIS_ADAPTATION For the loop that identifies the id (We add one potential label for each node)
+    unsigned long bhtabSize = ag_set_size + c;
+
+    //std::cerr << "\nDEBUG: Inizializzazione Behavs\n";
+
+    //BIS_ADAPTATION (Moved down here)
+    kedge_map::const_iterator it_kem;
+    std::map<agent, kworld_ptr_set>::const_iterator it_agkw;
+
+    for (it_kem = m_edges.begin(); it_kem != m_edges.end(); it_kem++) {
+        for (it_agkw = it_kem->second.begin(); it_agkw != it_kem->second.end(); it_agkw++) {
+            for (it_kwps = it_agkw->second.begin(); it_kwps != it_agkw->second.end(); it_kwps++) {
+                label_map[it_kem->first][*it_kwps].insert(agent_to_label.at(it_agkw->first));
+                Vertex[index_map[it_kem->first]].ne++;
+            }
+        }
+    }
+
+    /*for (it_keps = m_edges.begin(); it_keps != m_edges.end(); it_keps++) {
+
+        //DEBUG:Change this
+        // if (adj_list[it_keps->get_from()][it_keps->get_to()].empty())
+        // {
+        // 	edge_counter[it_keps->get_from()]++;
+        // }
+
+        label_map[it_keps->get_from()][it_keps->get_to()].insert(agent_to_label.at(it_keps->get_label()));
+        Vertex[index_map[it_keps->get_from()]].ne++;
+    }*/
+
+    i = 0;
+    for (it_kwps = m_worlds.begin(); it_kwps != m_worlds.end(); it_kwps++) {
+        Vertex[i].ne++; //Self loop bisimulation
+        Vertex[i].e = (e_elem *) malloc(sizeof(e_elem) * Vertex[i].ne);
+        i++;
+    }
+
+    //std::cerr << "\nDEBUG: Fine Inizializzazione Vertex\n";
+
+
+    int from, to, j = 0; //, k = 0, nbh;
+
+    //std::cerr << "\nDEBUG: Inizializzazione Mappa\n";
+    for (it_klm = label_map.begin(); it_klm != label_map.end(); it_klm++) {
+        from = index_map[it_klm->first]; // For each kworld 'from'
+
+        //std::cerr << "\nDEBUG: Inizializzazione K\n";
+
+        for (it_kw_bislab = it_klm->second.begin(); it_kw_bislab != it_klm->second.end(); it_kw_bislab++) { // For each edge that reaches the kworld 'to'
+            to = index_map[it_kw_bislab->first];
+            //nbh = it_kw_bislab->second.size();
+
+            for (it_bislab = it_kw_bislab->second.begin(); it_bislab != it_kw_bislab->second.end(); it_bislab++) { // For each agent 'ag' in the label of the kedge
+                //std::cerr << "\nDEBUG: j is: " << j << " and k is: " << k << "\n";
+                //nbh = 1;
+                Vertex[from].e[j].nbh = 1; // Let j be the index of the adjacency list of from that stores the kedge (from, to)
+                Vertex[from].e[j].bh = (int *) malloc(sizeof(int)); // Let nbh be the number of agents in such kedge
+                Vertex[from].e[j].tv = to; // Update the value of the reache kworld
+                Vertex[from].e[j].bh[0] = *it_bislab; // Update the value of the label at index k to 'ag'
+                //std::cerr << "\nDEBUG: j is: " << j << " and k is: " << k << "\n";
+
+                j++; // Update the value of the index j
+            }
+
+            //std::cerr << "\nDEBUG J: " << j-1 << "\n";
+
+            //k = 0; // Reset k
+        }
+        //std::cerr << "\nDEBUG: Fine Inizializzazione K\n";
+
+        j = 0; // Reset j
+    }
+
+    //std::cerr << "\nDEBUG: Fine Inizializzazione Mappa\n";
+
+    //		std::vector<kworld_ptr>::const_iterator it_kwp;
+    //	int temp_counter = 0;
+    //	for (it_kwp = kworld_vec.begin(); it_kwp != kworld_vec.end(); it_kwp++) {
+    //		//std::cerr << "DEBUG: World " << temp_counter << " has ID: " << it_kwp->get_numerical_id() << std::endl;
+    //		temp_counter++;
+    //	}
+    //
+    // Building the automaton
+    unsigned long Nbehavs = bhtabSize;
+    a = (automaton *) malloc(sizeof(automaton));
+    a->Nvertex = Nvertex;
+    a->Nbehavs = Nbehavs;
+    a->Vertex = Vertex;
+
+    //	std::cerr << "\nDEBUG: \n\tNvertex = " << Nvertex << std::endl;
+    //	std::cerr << "\tNbehavs = " << Nbehavs << std::endl;
+
+    return *a;
+}
+
+void kstate::automaton_to_kstate(const automaton & a, const std::vector<kworld_ptr> & kworld_vec, const std::map<bis_label, agent> & label_to_agent)
+{
+    kworld_ptr_set worlds;
+    m_edges.clear();
+    // The pointed world does not change when we calculate the minimum bisimilar state
+    // Hence we do not need to update it
+
+    unsigned long agents_size = domain::get_instance().get_agents().size();
+    int i, j, k, label;
+
+    for (i = 0; i < a.Nvertex; i++) {
+        if (a.Vertex[i].ne > 0) {
+            worlds.insert(kworld_vec[i]);
+
+            for (j = 0; j < a.Vertex[i].ne; j++) {
+                for (k = 0; k < a.Vertex[i].e[j].nbh; k++) {
+                    label = a.Vertex[i].e[j].bh[k];
+                    if (label < agents_size) {
+                        add_edge(kworld_vec[i], kworld_vec[a.Vertex[i].e[j].tv], label_to_agent.at(label));
+//						edges.insert(kstore::get_instance().add_edge(kedge(kworld_vec[i], kworld_vec[a.Vertex[i].e[j].tv], label_to_agent.at(label))));
+                    }
+                }
+            }
+        }
+    }
+
+    set_worlds(worlds);
+}
+
+void kstate::calc_min_bisimilar()
+{
+    // ************* Cleaning unreachable kworlds *************
+    std::map<bis_label, agent> label_to_agent;
+    std::map<agent, bis_label> agent_to_label;
+
+    auto agents = domain::get_instance().get_agents();
+    auto it_ag = agents.begin();
+    bis_label ag_label = 0;
+    agent lab_agent;
+    for (; it_ag != agents.end(); it_ag++) {
+        lab_agent = *it_ag;
+        label_to_agent.insert(std::make_pair(ag_label, lab_agent));
+        agent_to_label.insert(std::make_pair(lab_agent, ag_label));
+        ag_label++;
+
+    }
+
+    clean_unreachable_kworlds();
+
+    //std::cerr << "\nDEBUG: INIZIO BISIMULATION IN KSTATE\n" << std::flush;
+    std::vector<kworld_ptr> kworld_vec; // Vector of all kworld_ptr
+    //std::cerr << "\nDEBUG: PRE-ALLOCAZIONE AUTOMA\n" << std::flush;
+
+
+    //	std::cerr << "\nDEBUG: \n\tNvertex_before = " << m_worlds.size() << std::endl;
+    //	std::cerr << "\tNbehavs_before = " << m_edges.size() << std::endl;
+
+    automaton a;
+    kworld_vec.reserve(get_worlds().size());
+
+    a = kstate_to_automaton(/*adj_list,*/ kworld_vec, agent_to_label);
+
+    bisimulation b;
+    //std::cout << "\nDEBUG: Printing automaton pre-Bisimulation\n";
+    //b.VisAutoma(&a);
+
+
+
+    if (domain::get_instance().get_bisimulation() == PaigeTarjan) {
+        if (b.MinimizeAutomaPT(&a)) {
+            //VisAutoma(a);
+
+            //std::cout << "\nDEBUG: Printing automaton post-Bisimulation\n";
+            //b.VisAutoma(&a);
+            //std::cout << "Done\n";
+            automaton_to_kstate(a, kworld_vec,label_to_agent);
+
+            //b.DisposeAutoma(&a);
+        }
+    } else {
+        if (b.MinimizeAutomaFB(&a)) {
+
+            //std::cerr << "\nDEBUG: Printing automaton post-Bisimulation\n";
+            //b.VisAutoma(&a);
+            //std::cerr << "Done\n";
+            automaton_to_kstate(a, kworld_vec,label_to_agent);
+            //b.DisposeAutoma(&a);
+        }
+    }
+
+    //std::cerr << "\nDEBUG: PRe Clean" << std::endl;
+
 }
 
 
