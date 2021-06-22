@@ -1,0 +1,53 @@
+%%% Executed actions: open_a peek_a %%%
+
+fluent tail, has_key_a, has_key_b, has_key_c, opened ,looking_a, looking_b, looking_c;
+
+action open_a;
+action peek_a; 
+action shout_tail_a;
+
+agent a,b,c;
+
+%
+
+executable open_a;
+open_a has_effects opened;
+open_a has_type 2;
+b in_group Partially of open_a if looking_b;
+c in_group Partially of open_a if looking_c;
+a in_group Fully of open_a;
+
+
+executable peek_a if B(a,opened), B(a,looking_a), looking_a, opened;
+peek_a has_effects tail;
+peek_a has_type 1;
+b in_group Partially of peek_a if looking_b;
+c in_group Partially of peek_a if looking_c;
+a in_group Fully of peek_a;
+
+executable shout_tail_a if B(a,tail), tail;
+shout_tail_a has_effects tail;
+shout_tail_a has_type 1;
+a in_group Fully of shout_tail_a;
+b in_group Fully of shout_tail_a if looking_b;
+c in_group Fully of shout_tail_a if looking_c;
+
+
+
+
+
+initially C([a,b,c],has_key_a);
+initially C([a,b,c],-has_key_b);
+initially C([a,b,c],-has_key_c);
+initially C([a,b,c],-opened);
+%initially C([a,b,c],-B(a,tail) , -B(a,(-tail));
+%initially C([a,b,c],-B(b,tail) , -B(b,(-tail));
+%initially C([a,b,c],-B(c,tail) , -B(c,(-tail));
+initially C([a,b,c], looking_a);
+initially C([a,b,c], -looking_b);
+initially C([a,b,c], -looking_c);
+initially tail, has_key_a, -has_key_b, -has_key_c, -opened, looking_a, -looking_b, -looking_c;
+%initially C([a,b,c],B(a,tail));
+
+% 2 actions
+goal B(a,tail);

@@ -32,7 +32,7 @@ void pg_state_level::build_init_bf_map(const formula_list & goals, T & eState)
 
 
 	insert_subformula_bf(goals, eState);
-	
+
 	action_set actions = domain::get_instance().get_actions();
 	for (auto it_acs = actions.begin(); it_acs != actions.end(); it_acs++) {
 
@@ -129,7 +129,8 @@ void pg_state_level::insert_subformula_bf(const belief_formula & bf, T & eState)
 
 template <class T>
 planning_graph::planning_graph(T & eState)
-{auto goals = domain::get_instance().get_goal_description();
+{
+	auto goals = domain::get_instance().get_goal_description();
 	pg_state_level pg_init;
 	pg_init.initialize(goals, eState);
 	init(goals, pg_init);

@@ -8,7 +8,7 @@
 
 #include "pem_store.h"
 #include "pem.h"
-#include "pem_parser.h"
+#include "../parse/pem_parser.h"
 
 pem_store::pem_store()
 {
@@ -25,7 +25,7 @@ pem_store& pem_store::get_instance()
 
 void pem_store::generate(const std::string & file)
 {
-	pem_parser::parse();
+	pem_parser::parse(file);
 	return;
 }
 
@@ -45,7 +45,12 @@ void pem_store::add_agent_group(const std::string & to_add)
 {
 	if (m_agent_group_ids.find(to_add) == m_agent_group_ids.end()) {
 		m_agent_group_ids.insert(std::pair<std::string, agent_group>(to_add, m_agent_group_ids.size()));
+
+		//	m_inverse_agent_group_ids.insert(std::pair<agent_group, std::string>(m_inverse_agent_group_ids.size(),to_add));
+
 	}
+
+
 }
 
 const pevent_ptr pem_store::get_event(event_id id) const
@@ -58,7 +63,7 @@ const pevent_ptr pem_store::get_event(event_id id) const
 	if (ptr != m_created_events.end()) {
 		return std::make_shared<pevent>(*ptr);
 	} else {
-		std::cerr << "\nError: you are requesting an not-existing pevent!";
+		std::cerr << "\nError: you are requesting an not-existing pevent!\n";
 		exit(1);
 	}
 }
@@ -73,7 +78,7 @@ const pem_ptr pem_store::get_pem(pem_id id) const
 	if (ptr != m_created_pems.end()) {
 		return std::make_shared<pem>(*ptr);
 	} else {
-		std::cerr << "\nError: you are requesting an not-existing pevent!";
+		std::cerr << "\nError: you are requesting an not-existing pem!\n";
 		exit(1);
 	}
 }
@@ -85,7 +90,7 @@ agent_group pem_store::get_agent_group(const std::string & to_get) const
 	if (ptr != m_agent_group_ids.end()) {
 		return ptr->second;
 	} else {
-		std::cerr << "\nError: you are requesting an not-existing agent group!";
+		std::cerr << "\nError: you are requesting: " << to_get << " that is an not-existing agent group!\n";
 		exit(1);
 	}
 
@@ -101,6 +106,11 @@ std::string pem_store::get_agent_group_name(agent_group id) const
 	}
 
 	return ret;
+}
+
+short pem_store::get_agent_group_number() const
+{
+	return m_agent_group_ids.size();
 }
 
 

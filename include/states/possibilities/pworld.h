@@ -276,8 +276,8 @@ public:
     const fluent_set & get_fluent_set() const;
 
     /** \brief Function that return the field m_information_state of the pointed \ref pworld.
-    *
-    * @return the \ref information_state that represents the beliefs of the agents in the \ref pworld pointed by \ref m_ptr.*/
+     *
+     * @return the \ref information_state that represents the beliefs of the agents in the \ref pworld pointed by \ref m_ptr.*/
     const information_state & get_information_state() const;
 
     /** \brief Function that return the field m_id of the pointed \ref pworld + \ref m_repetition.

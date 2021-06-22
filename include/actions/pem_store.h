@@ -34,6 +34,9 @@ private:
 
     std::map<std::string, agent_group> m_agent_group_ids;
 
+    //  std::map<agent_group, std::string> m_inverse_agent_group_ids;
+
+
     /** \brief Private constructor since it is a Singleton class.*/
     pem_store();
 public:
@@ -105,6 +108,8 @@ public:
     agent_group get_agent_group(const std::string & to_get) const;
 
     std::string get_agent_group_name(agent_group id) const;
+
+    short get_agent_group_number() const;
 
 
     /** \brief Copy constructor removed since is Singleton class. */

@@ -1,31 +1,31 @@
-***************Single event definitions**************
+***************Single pevent definitions**************
 
-	***Definition of event "sigma-epistemic"
-	(event:
+	***Definition of pevent "sigma-epistemic"
+	(pevent:
 		:id	(1)
 		:precondition (($act_pre$) ($act_eff$))
 		:postcondition (none)
 	)
 	***************************************
 	
-	***Definition of event "tau"
-	(event:
+	***Definition of pevent "tau"
+	(pevent:
 		:id	(2)
 		:precondition (($act_pre$) (not($act_eff$)))
 		:postcondition (none)
 	)
 	***************************************
 	
-	***Definition of event "epsilon"
-	(event:
+	***Definition of pevent "epsilon"
+	(pevent:
 		:id	(3)
 		:precondition (none)
 		:postcondition (none)
 	)
 	***************************************
 	
-	***Definition of event "sigma-ontic"
-	(event:	
+	***Definition of pevent "sigma-ontic"
+	(pevent:	
 		:id	(4)
 		:precondition ($act_pre$)
 		:postcondition ($act_eff$)
@@ -33,8 +33,8 @@
 	***************************************
 	
 	
-	***Definition of event "sigma-ontic" (CASO PARTICOLARE CON EFFETTI SPECIFICI)
-    	* (event:
+	***Definition of pevent "sigma-ontic" (CASO PARTICOLARE CON EFFETTI SPECIFICI)
+    	* (pevent:
     	*	:id	(5)
     	*	:precondition ($act_pre$)
     	*	:postcondition (opened_door)
@@ -47,7 +47,7 @@
 	
 *****************Observability Groups****************
 	
-	(obs_groups: {A;B;C})
+	(obs_groups: {Fully;Partially;Oblivious})
 	
 *****************************************************
 
@@ -58,18 +58,18 @@
 	*** Epistemic (Sensing - Annoucement) Action
 	(model:
 		:id (1)
-		:events {1;2;3}
+		:pevents {1;2;3}
 		:pointed (1)
-		:edges	{(1,1,A)(2,2,A)(3,3,A)(2,2,B)(1,2,B)(2,1,B)(3,3,B)(1,3,C)(2,3,C)(3,3,C)}
+		:edges	{(1,1,Fully)(2,2,Fully)(3,3,Fully)(2,2,Partially)(1,2,Partially)(2,1,Partially)(3,3,Partially)(1,3,Oblivious)(2,3,Oblivious)(3,3,Oblivious)}
 	) 
 	***************************************
 	
 	*** Ontic Action
 	(model:
 		:id (2)
-		:events {4;3}
+		:pevents {4;3}
 		:pointed (4)
-		:edges	((4,4,A)(3,3,A)(4,3,C)(3,3,C))
+		:edges	((4,4,Fully)(3,3,Fully)(4,3,Oblivious)(3,3,Oblivious))
 	)
 	***************************************
 

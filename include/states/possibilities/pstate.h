@@ -21,7 +21,6 @@
 #include "../../utilities/define.h"
 #include "../../domain/initially.h"
 #include "../../actions/action.h"
-#include "../../domain/attitudes_table.h"
 #include "../../../lib/bisimulation/bisimulation.h"
 
 class pstate
@@ -37,10 +36,10 @@ private:
      * 
      * @see pworld and pstore.*/
     pworld_ptr m_pointed;
-//    /** \brief The beliefs of each \ref agent in every \ref pworld.
-//     *
-//     * @see pworld.*/
-//    pedges m_beliefs;
+    //    /** \brief The beliefs of each \ref agent in every \ref pworld.
+    //     *
+    //     * @see pworld.*/
+    //    pedges m_beliefs;
 
     /** \brief Function that returns all the reachable \ref pworld given the \ref agent and the staring \ref pworld.
      * 
@@ -57,7 +56,7 @@ private:
      *
      * 
      * \todo self-loop?*/
-    static pworld_ptr_set get_B_reachable_worlds(const agent& ag, const pworld_ptr & world) ;
+    static pworld_ptr_set get_B_reachable_worlds(const agent& ag, const pworld_ptr & world);
 
     /** \brief Function that returns all the reachable \ref pworld given the \ref agent and the staring \ref pworld.
      * 
@@ -73,7 +72,7 @@ private:
      *
      * 
      * \todo self-loop?*/
-    static bool get_B_reachable_worlds_recursive(const agent& ag, const pworld_ptr & world, pworld_ptr_set & ret) ;
+    static bool get_B_reachable_worlds_recursive(const agent& ag, const pworld_ptr & world, pworld_ptr_set & ret);
 
     /** \brief Function that returns all the reachable \ref pworld given a set of \ref agent and the staring \ref pworld.
      * 
@@ -90,7 +89,7 @@ private:
      *
      * 
      * \todo self-loop?*/
-    static pworld_ptr_set get_E_reachable_worlds(const agent_set & ags, const pworld_ptr & world) ;
+    static pworld_ptr_set get_E_reachable_worlds(const agent_set & ags, const pworld_ptr & world);
 
     /** \brief Function that returns all the reachable \ref pworld given a set of \ref agent and the staring \ref pworld.
      * 
@@ -106,7 +105,7 @@ private:
      *
      * 
      * \todo self-loop?*/
-    static bool get_E_reachable_worlds_recoursive(const agent_set &ags, const pworld_ptr_set & worlds, pworld_ptr_set & reached) ;
+    static bool get_E_reachable_worlds_recoursive(const agent_set &ags, const pworld_ptr_set & worlds, pworld_ptr_set & reached);
 
     /** \brief Function that returns all the Distributed reachable \ref pworld given a set of \ref agent and the staring \ref pworld.
      * 
@@ -118,7 +117,7 @@ private:
      *
      * 
      * \todo self-loop?*/
-    static pworld_ptr_set get_D_reachable_worlds(const agent_set & ags, const pworld_ptr & world) ;
+    static pworld_ptr_set get_D_reachable_worlds(const agent_set & ags, const pworld_ptr & world);
 
     /** \brief Function that returns all the reachable \ref pworld (in the *Common Knowledge* sense) given a \ref agent and the staring \ref pworld.
      * 
@@ -215,10 +214,10 @@ public:
      *
      * @param[in] to_set: the \ref pworld_ptr to assign to \ref m_pointed.*/
     void set_pointed(const pworld_ptr & to_set);
-//    /** \brief Setter of the field \ref m_beliefs.
-//     *
-//     * @param[in] to_set: the \ref pedges to assign to \ref m_beliefs.*/
-//    void set_beliefs(const pedges & to_set);
+    //    /** \brief Setter of the field \ref m_beliefs.
+    //     *
+    //     * @param[in] to_set: the \ref pedges to assign to \ref m_beliefs.*/
+    //    void set_beliefs(const pedges & to_set);
 
     /** \brief Getter of the field \ref m_worlds.
      *

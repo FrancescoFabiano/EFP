@@ -188,13 +188,19 @@ enum action_check
  * Actions Related
  ****************************************************************/
 class belief_formula;
+typedef short agent_group;
+typedef short act_type;
+
 typedef std::list<belief_formula> formula_list; /**< \brief A CNF formula of \ref belief_formula.
                                                  *
                                                  * Each element of the formula is a \ref belief_formula.*/
 
 typedef std::set<belief_formula> bformula_set; /**< \brief A set of \ref belief_formula.*/
 
-typedef std::map<agent, belief_formula> observability_map; /**< \brief Used to express the obsverbability conditions.
+typedef std::map<agent, agent_group> single_observability_map;
+/**< \brief Used to map a single agent to his observability group w.r.t.an action execution.*/
+
+typedef std::map<agent, std::map<agent_group, belief_formula> > observability_map; /**< \brief Used to express the obsverbability conditions.
                                 * 
                                 * Each element associates an \ref agent to the observability conditions for an \ref effff.*/
 //Associate each effect the condition
@@ -370,11 +376,8 @@ typedef std::set<pevent_ptr> event_ptr_set; /**< \brief A set of \ref pevent_ptr
 
 // PEMS
 class pem;
-typedef short pem_id;
-typedef pem_id act_type;
+typedef act_type pem_id;
 
-//typedef std::pair<pevent_ptr, pevent_ptr> pem_edge;
-typedef short agent_group;
 //typedef std::map<agent_group, std::set<pem_edge>> pem_edges;
 
 //enum action_type
@@ -435,25 +438,6 @@ typedef std::map<pworld_ptr, std::map<pworld_ptr, bis_label_set> > pbislabel_map
 
 /****************** Bisimulation *******************/
 
-/** \brief The list of the possible agents' attitude.*/
-enum agents_attitudes
-{
-    //Partially Agents' Attitudes
-    P_KEEPER, /** represents the set of those agents that will Keep their beliefs after the epistemic action.*/
-    P_INSECURE, /** represents the set of those agents that are Insecure about their beliefs and,
-                 * after the action, will not know the value of the fluent even if they knew it before*/
-
-    //Fully Agents' Attitudes  
-    F_TRUSTY, /**represents the Trusty agents that will believe what has been announced/sensed and
-             * update their beliefs accordingly.*/
-    F_MISTRUSTY, /**represents the Mistrusty agents that believe the opposite of what has been annnounced/sensed.*/
-    F_UNTRUSTY, /**agents that formalizes the will not change their beliefs about the world no matter
-                 * what the announcement/sensing says.*/
-    F_STUBBORN, /**represents the Stubborn agents that will maintain their beliefs on f if they already know it.
-                * If they do not know it they will update their belief.*/
-    oblivious_att, /**represents the oblivious agents, to simplify the switch in the transition function.*/
-    executor_att /**represents the executing agent, to simplify the switch in the transition function.*/
-};
 
 enum sub_functionIndex
 {
@@ -483,9 +467,6 @@ struct comp
     }
 };
 
-typedef std::map<std::pair< std::pair<pworld_ptr, unsigned short>, sub_functionIndex>, pworld_ptr, comp> transition_map_att; /**< \brief A map that keeps track of the results of the transition function when attitudes are involved.
-                                                          *
-                                                          * @see pworld and pstate.*/
 
 /****************** Bisimulation *******************/
 

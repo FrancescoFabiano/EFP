@@ -26,8 +26,6 @@ extern std::shared_ptr<reader> domain_reader;
   proposition_list* prop_list;
   belief_formula* bf;
   formula_list* init_nodes;
-  attitude* att;
-  attitudes_list* att_list;
 }
 
 %start	input 
@@ -53,6 +51,8 @@ extern std::shared_ptr<reader> domain_reader;
 %token EXECUTABLE
 %token HAS_EFFECTS
 %token IN_GROUP
+%token OF
+%token HAS_TYPE
 %token INIT
 %token GOAL
 %token AGENT
@@ -100,13 +100,11 @@ extern std::shared_ptr<reader> domain_reader;
 /* DEBUG_WARNING_REMOVAL %type <str_list2> gd_formula DEBUG_WARNING_REMOVAL*/
 
 //%type <prop> static_law
-%type <prop> dynamic_law
 %type <prop> executability
-//%type <prop> impossibility
+%type <prop> effects
+%type <prop> type
+%type <prop> observance
 %type <prop> proposition
-%type <prop> has_effects
-%type <prop> in_group
-%type <prop> executing
 %type <prop_list> domain
 %%
 input:		
@@ -451,20 +449,6 @@ IF formula {
 
 
 
-
-
-
-
-/* static law
-static_law:
-literal_list if_part SEMICOLON
-{
-  $$ = new proposition;
-  $$->set_type(STATIC);
-  $$->set_action_precondition(*$2);
-  $$->set_action_effect(*$1);
-};*/
-
 /* executability condition */
 executability:
 EXECUTABLE action if_part_bf SEMICOLON
@@ -472,23 +456,23 @@ EXECUTABLE action if_part_bf SEMICOLON
   $$ = new proposition;
   $$->set_type(EXECUTABILITY);
   $$->set_action_name(*$2);
-  $$->set_executability_conditions(*$3);
+  $$->set_conditions(*$3);
 };
 
 /* effects condition */
-has_effects:
+effects:
 action HAS_EFFECTS literal_list if_part_bf SEMICOLON
 {
   $$ = new proposition;
   $$->set_type(EFFECTS);
   $$->set_action_name(*$1);
   $$->add_action_effect(*$3);
-  $$->set_executability_conditions(*$4);
+  $$->set_conditions(*$4);
 };
 
 /* effects condition */
-has_effects:
-action HAS_TYPE id SEMICOLON
+type:
+action HAS_TYPE constant SEMICOLON
 {
   $$ = new proposition;
   $$->set_type(TYPE);
@@ -497,41 +481,36 @@ action HAS_TYPE id SEMICOLON
 };
 
 
-/* awareness condition */
+/* observability declaration */
 observance:
 agent IN_GROUP id OF action if_part_bf SEMICOLON
 {
   $$ = new proposition;
   $$->set_type(OBSERVABILITY);
   $$->set_action_name(*$5);
-  $$->set_ag_group(*$3);
+  $$->set_agent_group(*$3);
   $$->set_agent(*$1);
-  $$->set_observability_conditions(*$4);
+  $$->set_conditions(*$6);
 };
 
 /* proposition */
 proposition:
-dynamic_law
-{
-  $$ = $1;
-}
-|
 executability
 {
   $$ = $1;
 }
 |
-has_effects
+effects
+{
+  $$ = $1;
+}
+|
+type
 {
   $$ = $1;
 }
 |
 observance
-{
-  $$ = $1;
-}
-|
-executing
 {
   $$ = $1;
 }

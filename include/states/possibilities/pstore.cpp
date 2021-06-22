@@ -39,7 +39,7 @@ const pworld_ptr pstore::add_world(const pworld & to_add)
 	//*tmp_ptr = tmp;
 	//return tmp_ptr;
 
-    auto tmp_ptr = std::make_shared<const pworld>(*(std::get<0>(m_created_worlds.insert(to_add))));
-    //*tmp_ptr = tmp;
-    return tmp_ptr;
+	auto tmp_ptr = std::make_shared<const pworld>(*(std::get<0>(m_created_worlds.insert(to_add))));
+	//*tmp_ptr = tmp;
+	return tmp_ptr;
 }

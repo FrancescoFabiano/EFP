@@ -1,14 +1,13 @@
 # Makefile
 OBJS	=	$(BUILD_DIR)/bison.o $(BUILD_DIR)/lex.o $(BUILD_DIR)/main.o \
 			$(BUILD_DIR)/belief_formula.o $(BUILD_DIR)/proposition.o $(BUILD_DIR)/domain.o \
-			$(BUILD_DIR)/grounder.o $(BUILD_DIR)/printer.o $(BUILD_DIR)/asp_maker.o \
+			$(BUILD_DIR)/grounder.o $(BUILD_DIR)/printer.o \
 			$(BUILD_DIR)/action.o $(BUILD_DIR)/helper.o $(BUILD_DIR)/initially.o \
-			$(BUILD_DIR)/attitude.o $(BUILD_DIR)/attitudes_table.o \
 			$(BUILD_DIR)/kstore.o $(BUILD_DIR)/kworld.o $(BUILD_DIR)/kstate.o \
 			$(BUILD_DIR)/pstore.o $(BUILD_DIR)/pworld.o $(BUILD_DIR)/pstate.o \
 			$(BUILD_DIR)/pevent.o $(BUILD_DIR)/pem.o $(BUILD_DIR)/pem_store.o $(BUILD_DIR)/pem_parser.o $(BUILD_DIR)/union_update.o \
 			$(BUILD_DIR)/reader.o \
-			$(BUILD_DIR)/heuristics_manager.o $(BUILD_DIR)/satisfied_goals.o $(BUILD_DIR)/planning_graph.o \
+			$(BUILD_DIR)/heuristics_manager.o $(BUILD_DIR)/satisfied_goals.o \
 			$(BUILD_DIR)/bisimulation.o
 
 
@@ -88,7 +87,7 @@ $(BUILD_DIR)/main.o:	$(SRC_DIR)/main.cpp \
 						$(UTILITIES_DIR)/reader.h \
 						$(DOMAIN_DIR)/domain.h \
 						$(SEARCH_DIR)/planner.h $(SEARCH_DIR)/planner.ipp \
-						$(HEURISTIC_DIR)/heuristics_manager.h $(HEURISTIC_DIR)/heuristics_template.ipp $(HEURISTIC_DIR)/planning_graph_template.ipp\
+						$(HEURISTIC_DIR)/heuristics_manager.h $(HEURISTIC_DIR)/heuristics_template.ipp \
 						$(STATES_DIR)/state_T.h $(STATES_DIR)/state_T.ipp 
 		$(dir_guard)
 		echo "#define BUILT_DATE \"`date`\"" > $(BUILD_DIR)/built_date
@@ -113,7 +112,6 @@ $(BUILD_DIR)/printer.o: $(UTILITIES_DIR)/printer.cpp $(UTILITIES_DIR)/printer.h 
 $(BUILD_DIR)/reader.o: $(UTILITIES_DIR)/reader.cpp $(UTILITIES_DIR)/reader.h \
 					   $(UTILITIES_DIR)/define.h $(UTILITIES_DIR)/printer.h \
 					   $(FORMULA_DIR)/belief_formula.h \
-					   $(DOMAIN_DIR)/attitude.h \
 					   $(ACTION_DIR)/proposition.h
 		$(dir_guard)
 		$(CC) $(CFLAGS) -c $(UTILITIES_DIR)/reader.cpp -o $(BUILD_DIR)/reader.o
@@ -124,12 +122,12 @@ $(BUILD_DIR)/helper.o: $(UTILITIES_DIR)/helper.cpp $(UTILITIES_DIR)/helper.h \
 		$(dir_guard)
 		$(CC) $(CFLAGS) -c $(UTILITIES_DIR)/helper.cpp -o $(BUILD_DIR)/helper.o
 		
-$(BUILD_DIR)/asp_maker.o: $(UTILITIES_DIR)/asp_maker.cpp $(UTILITIES_DIR)/asp_maker.h \
-					   $(UTILITIES_DIR)/define.h $(UTILITIES_DIR)/printer.h \
-					   $(FORMULA_DIR)/belief_formula.h \
-					   $(DOMAIN_DIR)/domain.h
-		$(dir_guard)
-		$(CC) $(CFLAGS) -c $(UTILITIES_DIR)/asp_maker.cpp -o $(BUILD_DIR)/asp_maker.o
+#$(BUILD_DIR)/asp_maker.o: $(UTILITIES_DIR)/asp_maker.cpp $(UTILITIES_DIR)/asp_maker.h \
+#					   $(UTILITIES_DIR)/define.h $(UTILITIES_DIR)/printer.h \
+#					   $(FORMULA_DIR)/belief_formula.h \
+#					   $(DOMAIN_DIR)/domain.h
+#		$(dir_guard)
+#		$(CC) $(CFLAGS) -c $(UTILITIES_DIR)/asp_maker.cpp -o $(BUILD_DIR)/asp_maker.o
 
 ####FORMULAE			
 $(BUILD_DIR)/belief_formula.o: $(FORMULA_DIR)/belief_formula.cpp $(FORMULA_DIR)/belief_formula.h \
@@ -161,18 +159,6 @@ $(BUILD_DIR)/proposition.o: $(ACTION_DIR)/proposition.cpp $(ACTION_DIR)/proposit
 		$(CC) $(CFLAGS) -c $(ACTION_DIR)/proposition.cpp -o $(BUILD_DIR)/proposition.o
 		
 		
-####ACTIONS
-$(BUILD_DIR)/attitude.o: $(DOMAIN_DIR)/attitude.cpp $(DOMAIN_DIR)/attitude.h \
-					   $(DOMAIN_DIR)/domain.h \
-					   $(FORMULA_DIR)/belief_formula.h \
-					   $(UTILITIES_DIR)/define.h
-		$(dir_guard)
-		$(CC) $(CFLAGS) -c $(DOMAIN_DIR)/attitude.cpp -o $(BUILD_DIR)/attitude.o
-		
-$(BUILD_DIR)/attitudes_table.o: $(DOMAIN_DIR)/attitudes_table.cpp $(DOMAIN_DIR)/attitudes_table.h \
-							$(DOMAIN_DIR)/attitude.h
-		$(dir_guard)
-		$(CC) $(CFLAGS) -c $(DOMAIN_DIR)/attitudes_table.cpp -o $(BUILD_DIR)/attitudes_table.o
 			
 ####STATES
 #$(BUILD_DIR)/state_T.o: $(STATES_DIR)/state_T.cpp $(STATES_DIR)/state_T.h \
@@ -185,8 +171,7 @@ $(BUILD_DIR)/attitudes_table.o: $(DOMAIN_DIR)/attitudes_table.cpp $(DOMAIN_DIR)/
 ##HEURISTICS
 $(BUILD_DIR)/heuristics_manager.o: $(HEURISTIC_DIR)/heuristics_manager.cpp $(HEURISTIC_DIR)/heuristics_manager.h \
 								   $(UTILITIES_DIR)/define.h \
-								   $(HEURISTIC_DIR)/satisfied_goals.h \
-								   $(HEURISTIC_DIR)/planning_graph.h $(HEURISTIC_DIR)/planning_graph.cpp
+								   $(HEURISTIC_DIR)/satisfied_goals.h
 		$(dir_guard)
 		$(CC) $(CFLAGS) -c $(HEURISTIC_DIR)/heuristics_manager.cpp -o $(BUILD_DIR)/heuristics_manager.o 
 
@@ -196,13 +181,13 @@ $(BUILD_DIR)/satisfied_goals.o: $(HEURISTIC_DIR)/satisfied_goals.cpp $(HEURISTIC
 		$(dir_guard)
 		$(CC) $(CFLAGS) -c $(HEURISTIC_DIR)/satisfied_goals.cpp -o $(BUILD_DIR)/satisfied_goals.o
 		
-$(BUILD_DIR)/planning_graph.o: $(HEURISTIC_DIR)/planning_graph.cpp $(HEURISTIC_DIR)/planning_graph.h \
-								$(UTILITIES_DIR)/define.h \
-								$(FORMULA_DIR)/belief_formula.h \
-								$(ACTION_DIR)/action.h \
-								$(DOMAIN_DIR)/domain.h
-		$(dir_guard)
-		$(CC) $(CFLAGS) -c $(HEURISTIC_DIR)/planning_graph.cpp -o $(BUILD_DIR)/planning_graph.o
+#$(BUILD_DIR)/planning_graph.o: $(HEURISTIC_DIR)/planning_graph.cpp $(HEURISTIC_DIR)/planning_graph.h \
+#								$(UTILITIES_DIR)/define.h \
+#								$(FORMULA_DIR)/belief_formula.h \
+#								$(ACTION_DIR)/action.h \
+#								$(DOMAIN_DIR)/domain.h
+#		$(dir_guard)
+#		$(CC) $(CFLAGS) -c $(HEURISTIC_DIR)/planning_graph.cpp -o $(BUILD_DIR)/planning_graph.o
 
 
 
@@ -291,13 +276,13 @@ $(BUILD_DIR)/pem_store.o: $(ACTION_DIR)/pem_store.cpp $(ACTION_DIR)/pem_store.h 
 		$(dir_guard)
 		$(CC) $(CFLAGS) -c $(ACTION_DIR)/pem_store.cpp -o $(BUILD_DIR)/pem_store.o
 		
-$(BUILD_DIR)/pem_parser.o: $(ACTION_DIR)/pem_parser.cpp $(ACTION_DIR)/pem_parser.h \
+$(BUILD_DIR)/pem_parser.o: $(PARSE_DIR)/pem_parser.cpp $(PARSE_DIR)/pem_parser.h \
 					      $(ACTION_DIR)/pem.h \
 						  $(ACTION_DIR)/pevent.h \
 					      $(ACTION_DIR)/pem_store.h \
 					      $(UTILITIES_DIR)/define.h
 		$(dir_guard)
-		$(CC) $(CFLAGS) -c $(ACTION_DIR)/pem_parser.cpp -o $(BUILD_DIR)/pem_parser.o
+		$(CC) $(CFLAGS) -c $(PARSE_DIR)/pem_parser.cpp -o $(BUILD_DIR)/pem_parser.o
 
 $(BUILD_DIR)/union_update.o: $(UPDATE_DIR)/union_update.cpp $(UPDATE_DIR)/union_update.h \
 					      	   $(ACTION_DIR)/pem.h \
@@ -320,7 +305,6 @@ $(BUILD_DIR)/grounder.o: $(DOMAIN_DIR)/grounder.cpp $(DOMAIN_DIR)/grounder.h \
 $(BUILD_DIR)/domain.o: $(DOMAIN_DIR)/domain.cpp $(DOMAIN_DIR)/domain.h \
 					   $(DOMAIN_DIR)/initially.h $(DOMAIN_DIR)/grounder.h \
 					   $(UTILITIES_DIR)/reader.h $(UTILITIES_DIR)/define.h \
-					   $(DOMAIN_DIR)/attitudes_table.h \
 					   $(ACTION_DIR)/action.h
 		$(dir_guard)
 		$(CC) $(CFLAGS) -c $(DOMAIN_DIR)/domain.cpp -o $(BUILD_DIR)/domain.o

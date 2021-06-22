@@ -34,7 +34,7 @@ public:
 
     /** \brief To get always (the same instance of) *this* and the same instantiated fields.*/
     static pstore& get_instance();
-    
+
     /** \brief Function that return the pointer to the given \ref pworld.
      * 
      * If the \ref pworld didn't exist then it is inserted to \ref m_created_worlds and then the pointer is returned;

@@ -6,7 +6,6 @@
 #include "../include/utilities/define.h"
 #include "../include/actions/proposition.h"
 #include "../include/formulae/belief_formula.h"
-#include "../include/domain/attitude.h"
 
 #include "tok.h"
 
@@ -27,30 +26,18 @@ comment %.*$
 "action" {return ACTION;}
 "agent" {return AGENT;}
 "if" {return IF;}
-"executes" {return AGEXEC;}
-"causes" {return CAUSES;}
+"has_effects" {return HAS_EFFECTS;}
 "executable" {return EXECUTABLE;}
-"impossible" {return IMPOSSIBLE;}
-"determines" {return DETERMINE;}
-"aware_of" {return AWAREOF;}
-"observes" {return OBSERVES;}
-"announces" {return ANNOUNCES;}
+"in_group" {return IN_GROUP;}
+"of" {return OF;}
+"has_type" {return HAS_TYPE;}
 "initially" {return INIT;}
 "goal" {return GOAL;}
 "B" {return MB;}
 "C" {return MC;}
 "E" {return ME;}
 "D" {return MD;}
-"dox_announces" {return LIE;}
 
-"has_attitude" {return ATTITUDES;}
-"wrt" {return WRT;}
-"f_trusty" {return TRUSTY;}
-"f_mistrusty" {return MISTRUSTY;}
-"f_untrusty" {return UNTRUSTY;}
-"f_stubborn" {return STUBBORN;}
-"p_keeper" {return KEEPER;}
-"p_insecure" {return INSECURE;}
 
 
 "[" {return LEFT_BRAC;}

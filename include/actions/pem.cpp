@@ -93,12 +93,12 @@ void pem::print() const
 {
 	std::cout << "\nModel (" << get_id() << ") has pointed pevent: " << get_pointed_id() << " and edges: ";
 
-//	for (auto it_fl = m_edges.begin(); it_fl != m_edges.end(); ++it_fl) {
-//		for (auto it_edge = it_fl->second.begin(); it_edge != it_fl->second.end(); ++it_edge) {
-//			std::cout << " | " << pem_store::get_instance().get_agent_group_name(it_fl->first) << "-" << it_edge->first.get_id() << "-" << it_edge->second.get_id();
-//		}
-		//std::cout << std::endl;
-//	}
+	//	for (auto it_fl = m_edges.begin(); it_fl != m_edges.end(); ++it_fl) {
+	//		for (auto it_edge = it_fl->second.begin(); it_edge != it_fl->second.end(); ++it_edge) {
+	//			std::cout << " | " << pem_store::get_instance().get_agent_group_name(it_fl->first) << "-" << it_edge->first.get_id() << "-" << it_edge->second.get_id();
+	//		}
+	//std::cout << std::endl;
+	//	}
 }
 
 /****************************************************************************/

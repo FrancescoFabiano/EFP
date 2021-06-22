@@ -108,10 +108,6 @@ public:
      * @param[in] to_print: the \ref agent_set to be printed.*/
     void print_list_ag(const agent_set& to_print) const;
 
-    /** \brief Function used to print the map of the transition function for attitudes.
-     * 
-     * @param[in] to_print: the \ref transition_map_att to be printed.*/
-    void print_map_att(const transition_map_att& to_print) const;
 
     /** \brief Copy constructor removed since is Singleton class. */
     printer(printer const&) = delete;

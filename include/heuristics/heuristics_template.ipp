@@ -3,13 +3,14 @@
 //#include "planning_graph_template.ipp"
 #include "heuristics_manager.h"
 //heuristic Manager
+
 template <class T>
 heuristics_manager::heuristics_manager(heuristics used_heur, const T & eState)
 {
 	set_used_h(used_heur);
 	m_goals = domain::get_instance().get_goal_description();
 	switch ( m_used_heur ) {
-	case L_PG:
+	/*case L_PG:
 	case S_PG:
 	{
 		expand_goals();
@@ -28,7 +29,7 @@ heuristics_manager::heuristics_manager(heuristics used_heur, const T & eState)
 			exit(1);
 		}
 		break;
-	}
+	}*/
 	case SUBGOALS:
 	{
 		expand_goals();
@@ -49,7 +50,7 @@ void heuristics_manager::set_heuristic_value(T & eState)
 {
 
 	switch ( m_used_heur ) {
-	case L_PG:
+	/*case L_PG:
 	{
 		planning_graph pg(m_goals, eState);
 		if (pg.is_satisfiable()) {
@@ -80,13 +81,13 @@ void heuristics_manager::set_heuristic_value(T & eState)
 		}
 
 		for (auto it_pgbf = m_bf_score.begin(); it_pgbf != m_bf_score.end(); ++it_pgbf) {
-			if (eState.entails(it_pgbf->first)  && (it_pgbf->second > 0)) {
+			if (eState.entails(it_pgbf->first) && (it_pgbf->second > 0)) {
 				h_value += it_pgbf->second;
 			}
 		}
 		eState.set_heuristic_value(-h_value);
 		break;
-	}
+	}*/
 	case SUBGOALS:
 	{
 		eState.set_heuristic_value(satisfied_goals::get_instance().get_unsatisfied_goals(eState));

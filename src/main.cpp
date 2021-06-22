@@ -16,8 +16,8 @@
 
 #include "../include/search/planner.ipp"
 
-#include "../include/utilities/asp_maker.h"
-#include "../include/actions/pem_store.h"
+//#include "../include/utilities/asp_maker.h"
+//#include "../include/actions/pem_store.h"
 
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
@@ -37,7 +37,6 @@ bool debug = false;
 bool results_file = false;
 bool is_global_obsv = true;
 bool check_visited = false;
-bool has_attitudes = false;
 bis_type bisimulation = BIS_NONE;
 heuristics used_heur = NO_H;
 search_type used_search = BFS;
@@ -110,10 +109,6 @@ void print_usage(char* prog_name)
 
 	std::cout << "-check_visited" << std::endl;
 	std::cout << "	The planner will check for visited states (by default it does not)." << std::endl;
-
-	std::cout << "-attitudes" << std::endl;
-	std::cout << "	The planner will use the updated semantics with attitudes (by default it does not)." << std::endl;
-
 
 	std::cout << "-search @search_type" << std::endl;
 	std::cout << "	Set the @search_type to use during the planning (Breadth First is default)." << std::endl;
@@ -212,11 +207,6 @@ void manage_arguments(int argc, char** argv)
 
 			std::cout << "The planner will check for visited states" << std::endl;
 			check_visited = true;
-
-		} else if (strcmp(argv[i], "-attitudes") == 0) {
-
-			std::cout << "The planner will use the updated semantics with attitudes" << std::endl;
-			has_attitudes = true;
 
 		} else if (strcmp(argv[i], "-st") == 0) {
 			i++;
@@ -443,19 +433,19 @@ void generate_domain(char** argv)
 	domain_name = domain_name.substr(domain_name.find_last_of("\\/") + 1);
 	domain_name = domain_name.substr(0, domain_name.find_last_of("."));
 
-
 	//timer.start(READ_TIMER);
 	domain_reader->read();
+
 	//	if (debug) {
 	//		domain_reader->print();
 	//	}
 	//Domain building
-	domain::get_instance().set_domain(domain_name, debug, state_struc, kopt, domain_reader, ini_restriction, goal_restriction, is_global_obsv, act_check, check_visited, bisimulation, has_attitudes);
+	domain::get_instance().set_domain(domain_name, debug, state_struc, kopt, domain_reader, ini_restriction, goal_restriction, is_global_obsv, act_check, check_visited, bisimulation);
 
 	domain::get_instance().build();
 }
 
-void generate_asp_encoding()
+/*void generate_asp_encoding()
 {
 	if (generate_asp) {
 
@@ -463,7 +453,7 @@ void generate_asp_encoding()
 		aspm.print_all();
 		exit(0);
 	}
-}
+}*/
 
 int main(int argc, char** argv)
 {
@@ -472,19 +462,20 @@ int main(int argc, char** argv)
 
 	
 	//if arguments are too less
-	if (argc < 2)
+	if (argc < 2){
 		print_usage(argv[0]);
+	}
+
 
 	//manage and prepare arguments for the planner
 	manage_arguments(argc, argv);
+
 	//check eventualy problem on input file and generate domain
 	generate_domain(argv);
 
+
 	//check generation asp
-	generate_asp_encoding();
-
-
-	//domain::get_instance().get_attitudes().print();
+	//generate_asp_encoding();
 
 	//launch search planner
 	launch_search(state_struc, execute_given_actions, results_file, used_heur, used_search, given_actions, max_depth, step);

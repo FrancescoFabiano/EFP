@@ -53,11 +53,11 @@ std::string asp_maker::print_subformula(const fluent & fl, std::ofstream & to_pr
 std::string asp_maker::print_subformula(const fluent_set & fluents, std::ofstream & to_print, const std::string & predicate)
 {
 	std::string ret = "";
-	
+
 	fluent_set tmp = fluents;
 
 	if (tmp.size() > 1) {
-		
+
 		ret += "and(" + print_subformula(*tmp.begin(), to_print, predicate) + ",";
 		tmp.erase(*tmp.begin());
 		ret += print_subformula(tmp, to_print, predicate) + ")";
@@ -83,7 +83,7 @@ std::string asp_maker::print_subformula(const fluent_formula & ff, std::ofstream
 
 	fluent_formula tmp = ff;
 
-	
+
 	if (tmp.size() > 1) {
 
 		ret += "or(" + print_subformula(*tmp.begin(), to_print, predicate) + ",";
@@ -102,7 +102,6 @@ std::string asp_maker::print_subformula(const fluent_formula & ff, std::ofstream
 	}
 	return ret;
 }
-
 
 std::string asp_maker::print_subformula(const formula_list & fl, std::ofstream & to_print, const std::string & predicate)
 {
@@ -542,11 +541,11 @@ void asp_maker::print_agent_set(std::ofstream & to_print) const
 		bitmask.resize(n, 0); // N-K trailing 0's
 
 		// print integers and permute bitmask
-        int size_agent = helper::lenght_to_power_two(n);
+		int size_agent = helper::lenght_to_power_two(n);
 		do {
 			for (int i = 0; i < n; ++i) // [0..N-1] integers
 			{
-                boost::dynamic_bitset<> agent_bits(size_agent,i);
+				boost::dynamic_bitset<> agent_bits(size_agent, i);
 				if (bitmask[i]) to_print << "contains_ag(" << ags << ", " << m_grounder.deground_agent(agent_bits) << ").\n";
 			}
 			to_print << "\n";
@@ -558,7 +557,7 @@ void asp_maker::print_agent_set(std::ofstream & to_print) const
 /*From https://www.geeksforgeeks.org/generate-all-the-binary-strings-of-n-bits/ since is like generating all the binary numbers.*/
 void asp_maker::print_all_fluent_set(fluent_set& permutation, unsigned int index, int & permutation_number, std::ofstream & to_print) const
 {
-    int bit_size = helper::lenght_to_power_two(domain::get_instance().get_fluent_number());
+	int bit_size = helper::lenght_to_power_two(domain::get_instance().get_fluent_number());
 	fluent_set::const_iterator it_fls;
 	if (index / 2 == domain::get_instance().get_fluent_number()) {
 		to_print << "fluent_set(" << permutation_number << ").\t%";
@@ -586,14 +585,14 @@ void asp_maker::print_all_fluent_set(fluent_set& permutation, unsigned int index
 	}
 	fluent_set permutation_2 = permutation;
 	//Add the \ref fluent in positive version
-    boost::dynamic_bitset<> bitSetToFindPositve(bit_size,index);
-    bitSetToFindPositve.set(bitSetToFindPositve.size()-1,0);
+	boost::dynamic_bitset<> bitSetToFindPositve(bit_size, index);
+	bitSetToFindPositve.set(bitSetToFindPositve.size() - 1, 0);
 	permutation.insert(bitSetToFindPositve);
 	print_all_fluent_set(permutation, index + 2, permutation_number, to_print);
 
 	//Add the \ref fluent in negative version
-    boost::dynamic_bitset<> bitSetToFindNegative(bit_size,index);
-    bitSetToFindNegative.set(bitSetToFindPositve.size() - 1, 1);
+	boost::dynamic_bitset<> bitSetToFindNegative(bit_size, index);
+	bitSetToFindNegative.set(bitSetToFindPositve.size() - 1, 1);
 	permutation_2.insert(bitSetToFindNegative);
 	print_all_fluent_set(permutation_2, index + 2, permutation_number, to_print);
 }

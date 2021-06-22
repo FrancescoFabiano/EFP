@@ -31,7 +31,7 @@ fluent_formula helper::negate_fluent_formula(const fluent_formula & to_negate)
 		fluent_set sub_ff = *to_negate.begin();
 		if (sub_ff.size() > 1) {
 			std::cerr << "Error: You cannot negate multiple effects because non-determinism is not supported yet." << std::endl;
-		exit(1);
+			exit(1);
 		} else if (sub_ff.size() == 1) {
 			fluent_formula neg_ff;
 			fluent_set neg_fs;

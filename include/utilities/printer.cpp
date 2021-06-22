@@ -180,27 +180,3 @@ void printer::print_list_ag(const agent_set& to_print) const
 	}
 }
 
-void printer::print_map_att(const transition_map_att& to_print) const
-{
-
-	std::cout << "\n*******Printing the attitudes transition map*******\n";
-	auto it_mapatt = to_print.begin();
-	//Iterate on the \p to_print and print its content using ::to_print(const string_set&) seprated by a OR to represent a DNF.
-
-	for (; it_mapatt != to_print.end(); it_mapatt++) {
-		auto pair = it_mapatt->first;
-		pworld_ptr ptr1 = pair.first.first;
-		pworld_id id1 =  ptr1.get_id();
-		
-		pworld_ptr ptr2 = it_mapatt->second;
-		pworld_id id2 =  ptr2.get_id();
-		
-		std::cout << "\t The world: " << id1;
-		std::cout << " updated following " << pair.second;
-		std::cout << " results in the world " << id2;
-		std::cout << std::endl;
-	}
-
-	std::cout << "*********************DONE*********************\n\n";
-
-}

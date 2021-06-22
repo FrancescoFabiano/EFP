@@ -27,46 +27,46 @@ pworld::pworld(const pworld & world)
 	set_id();
 }
 
-boost::dynamic_bitset<> concatStringDyn( const boost::dynamic_bitset<>& bs1,const boost::dynamic_bitset<>& bs2)
+boost::dynamic_bitset<> concatStringDyn(const boost::dynamic_bitset<>& bs1, const boost::dynamic_bitset<>& bs2)
 {
-    std::string s1;
-    std::string s2;
+	std::string s1;
+	std::string s2;
 
-    to_string(bs1,s1);
-    to_string(bs2,s2);
-    boost::dynamic_bitset<> res(s1+s2);
-    return res;
+	to_string(bs1, s1);
+	to_string(bs2, s2);
+	boost::dynamic_bitset<> res(s1 + s2);
+	return res;
 }
 
-boost::dynamic_bitset<> concatOperatorsDyn( const boost::dynamic_bitset<>& bs1,const boost::dynamic_bitset<>& bs2)
+boost::dynamic_bitset<> concatOperatorsDyn(const boost::dynamic_bitset<>& bs1, const boost::dynamic_bitset<>& bs2)
 {
-    boost::dynamic_bitset<> bs1Copy(bs1);
-    boost::dynamic_bitset<> bs2Copy(bs2);
-    size_t totalSize=bs1.size()+bs2.size();
-    bs1Copy.resize(totalSize);
-    bs2Copy.resize(totalSize);
-    bs1Copy<<=bs2.size();
-    bs1Copy|=bs2Copy;
-    return bs1Copy;
+	boost::dynamic_bitset<> bs1Copy(bs1);
+	boost::dynamic_bitset<> bs2Copy(bs2);
+	size_t totalSize = bs1.size() + bs2.size();
+	bs1Copy.resize(totalSize);
+	bs2Copy.resize(totalSize);
+	bs1Copy <<= bs2.size();
+	bs1Copy |= bs2Copy;
+	return bs1Copy;
 }
 
-boost::dynamic_bitset<> concatLoopDyn( const boost::dynamic_bitset<>& bs1,const boost::dynamic_bitset<>& bs2)
+boost::dynamic_bitset<> concatLoopDyn(const boost::dynamic_bitset<>& bs1, const boost::dynamic_bitset<>& bs2)
 {
-    boost::dynamic_bitset<> res(bs1);
-    res.resize(bs1.size()+bs2.size());
-    size_t bs1Size=bs1.size();
+	boost::dynamic_bitset<> res(bs1);
+	res.resize(bs1.size() + bs2.size());
+	size_t bs1Size = bs1.size();
 
-    for(size_t i=0;i<bs2.size();i++)
-        res[i+bs1Size]=bs2[i];
-    return res;
+	for (size_t i = 0; i < bs2.size(); i++)
+		res[i + bs1Size] = bs2[i];
+	return res;
 }
 
 pworld_id pworld::hash_fluents_into_id(const fluent_set& fl)
 {
-    fluent_set fl2 = fl;
-    std::size_t hash;
-    hash = boost::hash_range(fl2.begin(),fl2.end());
-    return hash;
+	fluent_set fl2 = fl;
+	std::size_t hash;
+	hash = boost::hash_range(fl2.begin(), fl2.end());
+	return hash;
 
 }
 
@@ -94,7 +94,7 @@ bool pworld::consistent(const fluent_set & to_check)
 	for (it_flset = to_check.begin(); it_flset != to_check.end(); it_flset++) {
 		/* If the pointed fluent is in modulo 2 it means is the positive and if
 		 * its successor (the negative version) is in the set then is not consistent.*/
-		if (it_flset->test(it_flset->size()-1)) {
+		if (it_flset->test(it_flset->size() - 1)) {
 			//The std::set has is elements ordered so we can just check its successor.
 			it_flset_tmp = it_flset;
 			it_flset_tmp++;
@@ -129,7 +129,7 @@ const pworld_id & pworld::get_id() const
 
 const information_state & pworld::get_information_state() const
 {
-    return m_information_state;
+	return m_information_state;
 }
 
 bool pworld::entails(const fluent& to_check) const
@@ -265,35 +265,33 @@ pworld_id pworld_ptr::get_fluent_based_id() const
 	exit(1);
 }
 
-
 const information_state & pworld_ptr::get_information_state() const
 {
-    if (m_ptr != nullptr) {
-        return(get_ptr()->get_information_state());
-    }
-    std::cerr << "\nError in creating a pworld_ptr\n";
-    exit(1);
-}
-
-pworld_id pworld_ptr::get_id() const
-{
 	if (m_ptr != nullptr) {
-	    pworld_id id = (get_ptr()->get_id());
-
-	    //moltiplico * 10 id + get_repetion() TODO test con shift 
-        return boost::hash_value((1000*id)/*+get_repetition()*/);
+		return(get_ptr()->get_information_state());
 	}
 	std::cerr << "\nError in creating a pworld_ptr\n";
 	exit(1);
 }
 
+pworld_id pworld_ptr::get_id() const
+{
+	if (m_ptr != nullptr) {
+		pworld_id id = (get_ptr()->get_id());
+
+		//moltiplico * 10 id + get_repetion() TODO test con shift 
+		return boost::hash_value((1000 * id)/*+get_repetition()*/);
+	}
+	std::cerr << "\nError in creating a pworld_ptr\n";
+	exit(1);
+}
 
 pworld_id pworld_ptr::get_numerical_id() const
 {
 	if (m_ptr != nullptr) {
-	    pworld_id id = (get_ptr()->get_id());
+		pworld_id id = (get_ptr()->get_id());
 
-        return boost::hash_value(id);
+		return boost::hash_value(id);
 	}
 	std::cerr << "\nError in creating a pworld_ptr\n";
 	exit(1);
@@ -352,6 +350,6 @@ bool pworld_ptr::operator==(const pworld_ptr & to_compare) const
 bool pworld_ptr::operator=(const pworld_ptr & to_copy)
 {
 	set_ptr(to_copy.get_ptr());
-//	set_repetition(to_copy.get_repetition());
+	//	set_repetition(to_copy.get_repetition());
 	return true;
 }

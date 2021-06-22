@@ -31,7 +31,6 @@
 #include "../formulae/belief_formula.h"
 #include "../actions/action.h"
 #include "../domain/initially.h"
-#include "../domain/attitudes_table.h"
 
 /**
  * @tparam T:
@@ -289,21 +288,17 @@ public:
     void print_graphviz(std::string postfix = "") const;
 
 
-    /**Function that add retrieve the fully_obs attitude w.r.t \ref executor and the current state
+    /**Function that retrieves the observants w.r.t. the current state
      *
-     * @param[in] executor: the agent executing the action.
-     * @param[in] curr: the state where the attitude's conditions are checked.
-     * @return: the fully_obs attitudes that the agents have
-     */
-    single_attitudes_map get_F_attitudes(agent executor) const;
+     * @return: the observability of each agent*/
+    single_observability_map get_observants(const observability_map & table) const;
 
-    /**Function that add retrieve the partially_obs attitude w.r.t \ref executor and the current state
+
+    /**Function that retrieves the agent group of an agent w.r.t. the current state
      *
-     * @param[in] executor: the agent executing the action.
-     * @param[in] curr: the state where the attitude's conditions are checked.
-     * @return: the partially_obs attitudes that the agents have
-     */
-    single_attitudes_map get_P_attitudes(agent executor) const;
+     * @return: the agent_group of \p ag*/
+    agent_group get_obs_group(agent ag, const observability_map & table) const;
+
 
     //DEBUG
     //    void min_with_print(state<T> tmp);

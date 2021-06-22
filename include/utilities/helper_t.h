@@ -14,7 +14,8 @@
 
 #include "../states/state_T.h"
 
-class helper_t {
+class helper_t
+{
 public:
     /** \brief Function that return the sum_set of the two parameters by modifying the first one.
      *

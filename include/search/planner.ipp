@@ -64,7 +64,7 @@ void planner<T>::print_results(std::chrono::duration<double> elapsed_seconds, T 
 				result << "with I_DFS ";
 				break;
 			case BFS:
-			 default:
+			default:
 				result << "with BFS ";
 				break;
 			}
@@ -86,7 +86,7 @@ void planner<T>::print_results(std::chrono::duration<double> elapsed_seconds, T 
 			result << "SUBGOALS heuristic ";
 			break;
 		case NO_H:
-		 default: break;
+		default: break;
 		}
 
 		if (domain::get_instance().check_visited()) {
@@ -139,8 +139,8 @@ bool planner<T>::search_BFS(bool results_file)
 	if (bisimulation) {
 		initial.calc_min_bisimilar();
 	}
-	
-	
+
+
 
 	auto end_timing = std::chrono::system_clock::now();
 	std::chrono::duration<double> elapsed_seconds = end_timing - start_timing;
@@ -152,13 +152,6 @@ bool planner<T>::search_BFS(bool results_file)
 	T popped_state;
 	T tmp_state;
 	action tmp_action;
-	
-	
-	//DEBUGGGGGG
-	pem_store::get_instance().generate("Debug");
-	union_update::u_update(initial.get_representation(), *actions.begin());
-	return 0;
-	//END
 
 	start_timing = std::chrono::system_clock::now();
 	if (initial.is_goal()) {
@@ -485,14 +478,7 @@ void planner<T>::execute_given_actions(std::vector<std::string>& act_name)
 		for (it_acset = domain::get_instance().get_actions().begin(); it_acset != domain::get_instance().get_actions().end(); it_acset++) {
 			if ((*it_acset).get_name().compare(*it_stset) == 0) {
 
-				/*auto attitudes = state.get_F_attitudes(*(domain::get_instance().get_agents().begin()));
-				auto attitudes_it = attitudes.begin();
-
-				std::cout << "\n\nF table\n";
-				for (; attitudes_it != attitudes.end(); attitudes_it++) {
-					std::cout << "Agent " << domain::get_instance().get_grounder().deground_agent(attitudes_it->first) << " has attitude " << attitudes_it->second;
-					std::cout << std::endl;
-				}*/
+				
 				if (state.is_executable(*it_acset)) {
 					state = state.compute_succ(*it_acset);
 					if (bisimulation) {
@@ -617,4 +603,4 @@ void planner<T>::check_actions_names(std::vector<std::string>& act_name)
 
 /*\ IMPLEMENTATION OF OTHER TEMPLATIC FUNCTIONS INSTANCIATED WITH A TEMPLATIC STATE*/
 #include "../heuristics/heuristics_template.ipp"
-#include "../heuristics/planning_graph_template.ipp"
+//#include "../heuristics/planning_graph_template.ipp"

@@ -38,7 +38,8 @@ private:
 
 public:
 
-    static void parse();
+    static void parse(const std::string & filename);
+
 
 };
 

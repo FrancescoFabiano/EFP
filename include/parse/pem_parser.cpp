@@ -8,8 +8,8 @@
  */
 
 #include "pem_parser.h"
-#include "pevent.h"
-#include "pem_store.h"
+#include "../actions/pevent.h"
+#include "../actions/pem_store.h"
 
 void pem_parser::apply_spaces_regex(std::string & to_clean, const std::regex & pattern)
 {
@@ -126,34 +126,34 @@ void pem_parser::parse_edge(const std::string & edge, pem_edges & edges)
 	pevent_ptr first = pem_store::get_instance().get_event(boost::lexical_cast<event_id>(sub_arg));
 
 	args >> sub_arg;
-    pevent_ptr second = pem_store::get_instance().get_event(boost::lexical_cast<event_id>(sub_arg));
+	pevent_ptr second = pem_store::get_instance().get_event(boost::lexical_cast<event_id>(sub_arg));
 
 	args >> sub_arg;
-    agent_group e_to_add_ag = pem_store::get_instance().get_agent_group(sub_arg);
+	agent_group e_to_add_ag = pem_store::get_instance().get_agent_group(sub_arg);
 
-    auto it_eve = edges.find(first);
+	auto it_eve = edges.find(first);
 
-    if (it_eve != edges.end()) {
-        event_map e_map = it_eve->second;
-        auto it_evm = e_map.find(e_to_add_ag);
+	if (it_eve != edges.end()) {
+		event_map e_map = it_eve->second;
+		auto it_evm = e_map.find(e_to_add_ag);
 
-        if (it_evm != e_map.end()) {
-            it_evm->second.insert(second);
-        } else {
-            e_map.insert(event_map::value_type(e_to_add_ag, {second}));
-        }
-    } else {
-        event_map tmp;
-        tmp.insert(event_map::value_type(e_to_add_ag, {second}));
-        edges.insert(pem_edges ::value_type(first, tmp));
-    }
-//	if (edges.find(e_to_add_ag) != edges.end()) {
-//		edges[e_to_add_ag].insert(e_to_add);
-//	} else {
-//		std::set<pem_edge> tmp_set;
-//		tmp_set.insert(e_to_add);
-//		edges.insert(std::pair<agent_group, std::set<pem_edge> >(e_to_add_ag, tmp_set));
-//	}
+		if (it_evm != e_map.end()) {
+			it_evm->second.insert(second);
+		} else {
+			e_map.insert(event_map::value_type(e_to_add_ag,{second}));
+		}
+	} else {
+		event_map tmp;
+		tmp.insert(event_map::value_type(e_to_add_ag,{second}));
+		edges.insert(pem_edges::value_type(first, tmp));
+	}
+	//	if (edges.find(e_to_add_ag) != edges.end()) {
+	//		edges[e_to_add_ag].insert(e_to_add);
+	//	} else {
+	//		std::set<pem_edge> tmp_set;
+	//		tmp_set.insert(e_to_add);
+	//		edges.insert(std::pair<agent_group, std::set<pem_edge> >(e_to_add_ag, tmp_set));
+	//	}
 }
 
 void pem_parser::parse_edges_list(const std::string & line, pem_edges & edges)
@@ -185,10 +185,9 @@ void pem_parser::parse_edges_list(const std::string & line, pem_edges & edges)
 	}
 }
 
-void pem_parser::parse()
+void pem_parser::parse(const std::string & filename)
 {
-	std::string filename = "include/update/marho_pem.txt";
-	std::cout << "\nTesting the generation of Event Models starting from the file: " << filename << std::endl;
+	//std::cout << "\nTesting the generation of Event Models starting from the file: " << filename << std::endl;
 	std::ifstream pem_file(filename);
 
 
@@ -317,7 +316,7 @@ void pem_parser::parse()
 					}
 
 					parse_conditions(internal_field, e_meta_post, line_count);
-				} else if (field.compare("events") == 0) {
+				} else if (field.compare("pevents") == 0) {
 					if (!in_model) {
 						std::cerr << "\nParsing Error at Line " << line_count << ": Events found outside of a model definition.";
 						exit(1);
@@ -336,7 +335,7 @@ void pem_parser::parse()
 
 					//std::cout << field << " -> " << internal_field << std::endl;
 				} else {
-					std::cerr << "\nParsing Error at Line " << line_count << ": The specified field -- " << field << " -- is not properly defined in our syntax (watch out for repetition). Please use \'id\', \'precondition\', \'postcondition\', \'events\', or \'edges\'.\n";
+					std::cerr << "\nParsing Error at Line " << line_count << ": The specified field -- " << field << " -- is not properly defined in our syntax (watch out for repetition). Please use \'id\', \'precondition\', \'postcondition\', \'pevents\', or \'edges\'.\n";
 					exit(1);
 				}
 			} else if (std::regex_match(line, std::regex("(\\))(\\s*)"))) {

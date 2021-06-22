@@ -22,6 +22,8 @@
 #pragma once
 
 #include <list>
+#include <boost/lexical_cast.hpp>
+
 
 #include "../formulae/belief_formula.h"
 #include "../utilities/define.h"
@@ -110,7 +112,7 @@ public:
     /** Setter for the field \ref m_act_type.
      * 
      * @param[in] to_set: the value to assign to \ref m_act_type.*/
-    void set_action_type(act_type & to_set);
+    void set_action_type(const std::string & to_set);
     /** Setter for the field \ref m_action_effect.
      * 
      * @param[in] to_set: the value to assign to \ref m_action_effect.*/
@@ -127,8 +129,8 @@ public:
 
     /** Setter for the field \ref m_agent_group.
      * 
-     * @param[in] to_set: the value to assign to \ref m_agent_group.*/
-    void set_agent_group(agent_group to_set);
+     * @param[in] to_set: the value (retrived by the map in pem store) to assign to \ref m_agent_group.*/
+    void set_agent_group(const std::string & to_set);
 
     /** Setter for the field \ref m_conditions.
      * 
@@ -138,9 +140,6 @@ public:
 
     /** \brief Function that print *this*.*/
     void print() const;
-
-    /** \brief Function that grounds *this*.*/
-    void ground();
 };
 
 typedef std::list<proposition> proposition_list; /**< \brief A list of proposition to simplify the usage.*/

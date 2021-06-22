@@ -571,7 +571,6 @@ bool pg_state_level::apply_ontic_effects(const belief_formula & bf, bformula_set
 
 	case PROPOSITIONAL_FORMULA:
 		switch ( bf.get_operator() ) {
-			//Without attitudes the beliefs are monotonic, so it should be true in the initial state and cannot ever
 		case BF_NOT:
 		{
 			return pg_entailment(bf);
@@ -708,7 +707,6 @@ bool pg_state_level::apply_epistemic_effects(fluent effect, const belief_formula
 
 	case PROPOSITIONAL_FORMULA:
 		switch ( bf.get_operator() ) {
-			//Without attitudes the beliefs are monotonic, so it should be true in the initial state and cannot ever
 		case BF_NOT:
 			return pg_entailment(bf);
 			break;
@@ -825,7 +823,7 @@ void pg_state_level::set_pg_state_level(const pg_state_level & to_assign)
 #include <chrono>
 std::chrono::duration<double> t1, t2, t3, t4;
 
-*\******END PLANNING GRAPH TIME MEASURE********/
+ *\******END PLANNING GRAPH TIME MEASURE********/
 
 planning_graph::planning_graph()
 {
@@ -852,7 +850,7 @@ void planning_graph::init(const formula_list & goal, const pg_state_level & pg_i
 	/*\*****START PLANNING GRAPH TIME MEASURE*******
 	auto start_pg_build = std::chrono::system_clock::now();
 	std::cout << "start" << std::endl;
-	*\******END PLANNING GRAPH TIME MEASURE********/
+	 *\******END PLANNING GRAPH TIME MEASURE********/
 
 
 	set_goal(goal);
@@ -870,7 +868,7 @@ void planning_graph::init(const formula_list & goal, const pg_state_level & pg_i
 
 	/*\*****START PLANNING GRAPH TIME MEASURE*******
 	auto start_pg_goal_ini = std::chrono::system_clock::now();
-	*\******END PLANNING GRAPH TIME MEASURE********/
+	 *\******END PLANNING GRAPH TIME MEASURE********/
 
 
 	bool not_goal = false;
@@ -890,7 +888,7 @@ void planning_graph::init(const formula_list & goal, const pg_state_level & pg_i
 	t2 = std::chrono::milliseconds::zero();
 	t3 = std::chrono::milliseconds::zero();
 	t4 = std::chrono::milliseconds::zero();
-	*\******END PLANNING GRAPH TIME MEASURE********/
+	 *\******END PLANNING GRAPH TIME MEASURE********/
 
 	if (not_goal) {
 		//	if (!is_single) {
@@ -914,7 +912,7 @@ void planning_graph::init(const formula_list & goal, const pg_state_level & pg_i
 	std::cout << "\n\nState Level Creation:  " << t2.count() << " of which:";
 	std::cout << "\nActions Execution:     " << t4.count();
 	std::cout << "\n\nGoals Check:           " << t3.count() << std::endl;
-	*\******END PLANNING GRAPH TIME MEASURE********/
+	 *\******END PLANNING GRAPH TIME MEASURE********/
 
 
 }
@@ -940,7 +938,7 @@ void planning_graph::pg_build()
 
 	/*\*****START PLANNING GRAPH TIME MEASURE*******
 	auto start = std::chrono::system_clock::now();
-	*\******END PLANNING GRAPH TIME MEASURE********/
+	 *\******END PLANNING GRAPH TIME MEASURE********/
 
 	if (m_action_levels.size() > 0) {
 		a_level_curr = m_action_levels.back();
@@ -957,7 +955,7 @@ void planning_graph::pg_build()
 	/*\*****START PLANNING GRAPH TIME MEASURE*******
 	auto end = std::chrono::system_clock::now();
 	t1 += end - start;
-	*\******END PLANNING GRAPH TIME MEASURE********/
+	 *\******END PLANNING GRAPH TIME MEASURE********/
 
 
 	add_action_level(a_level_curr);
@@ -971,7 +969,7 @@ void planning_graph::pg_build()
 
 	/*\*****START PLANNING GRAPH TIME MEASURE*******
 	start = std::chrono::system_clock::now();
-	*\******END PLANNING GRAPH TIME MEASURE********/
+	 *\******END PLANNING GRAPH TIME MEASURE********/
 
 	/*\*****START PLANNING GRAPH TIME MEASURE*******
 	std::cerr << "\n\nPlaning Graph Length: " << get_length();
@@ -980,14 +978,14 @@ void planning_graph::pg_build()
 		std::cerr << "\nState Level Creation:  " << t2.count() << " of which:";
 		std::cerr << "\nActions execution:     " << t4.count();
 	}
-	*\******END PLANNING GRAPH TIME MEASURE********/
+	 *\******END PLANNING GRAPH TIME MEASURE********/
 
 
 	for (it_actset = a_level_curr.get_actions().begin(); it_actset != a_level_curr.get_actions().end(); it_actset++) {
 
 		/*\*****START PLANNING GRAPH TIME MEASURE*******
 		auto startN = std::chrono::system_clock::now();
-		*\******END PLANNING GRAPH TIME MEASURE********/
+		 *\******END PLANNING GRAPH TIME MEASURE********/
 
 		if (s_level_next.compute_succ(*it_actset, s_level_curr, m_belief_formula_false)) {
 			new_state_insertion = true;
@@ -995,13 +993,13 @@ void planning_graph::pg_build()
 		/*\*****START PLANNING GRAPH TIME MEASURE*******
 		auto endN = std::chrono::system_clock::now();
 		t4 += endN - startN;
-		*\******END PLANNING GRAPH TIME MEASURE********/
+		 *\******END PLANNING GRAPH TIME MEASURE********/
 	}
 
 	/*\*****START PLANNING GRAPH TIME MEASURE*******
 	end = std::chrono::system_clock::now();
 	t2 += end - start;
-	*\******END PLANNING GRAPH TIME MEASURE********/
+	 *\******END PLANNING GRAPH TIME MEASURE********/
 
 
 	add_state_level(s_level_next);
@@ -1010,7 +1008,7 @@ void planning_graph::pg_build()
 
 	/*\*****START PLANNING GRAPH TIME MEASURE*******
 	start = std::chrono::system_clock::now();
-	*\******END PLANNING GRAPH TIME MEASURE********/
+	 *\******END PLANNING GRAPH TIME MEASURE********/
 
 
 	//Remove each sub goal already satisfied: it will always be and we just need to check it once
@@ -1028,7 +1026,7 @@ void planning_graph::pg_build()
 	/*\*****START PLANNING GRAPH TIME MEASURE*******
 	end = std::chrono::system_clock::now();
 	t3 += end - start;
-	*\******END PLANNING GRAPH TIME MEASURE********/
+	 *\******END PLANNING GRAPH TIME MEASURE********/
 	if (!not_goal) {
 		set_satisfiable(true);
 		return;
@@ -1038,7 +1036,7 @@ void planning_graph::pg_build()
 		if (get_length() > 5) {
 			print();
 		}
-		*\******END PLANNING GRAPH TIME MEASURE********/
+		 *\******END PLANNING GRAPH TIME MEASURE********/
 		return;
 	} else {
 		pg_build();

@@ -563,8 +563,6 @@ bool pstate_opt::operator<(const pstate_opt & to_compare) const
 	return false;
 }
 
-
-
 void pstate_opt::execute_action(const action &act, pstate_opt &ret, agent_set &fully_obs_agents, agent_set &oblivious_obs_agents) const
 {
 

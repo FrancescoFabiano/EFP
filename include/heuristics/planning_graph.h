@@ -115,8 +115,6 @@ public:
  * \date September 24, 2019
  */
 
-typedef std::map<fluent, short> pg_f_map;
-typedef std::map<belief_formula, short> pg_bf_map;
 
 class pg_state_level
 {

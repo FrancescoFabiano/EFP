@@ -15,7 +15,10 @@
 #include "../utilities/define.h"
 #include "../domain/domain.h"
 #include "satisfied_goals.h"
-#include "planning_graph.h"
+//#include "planning_graph.h"
+
+typedef std::map<fluent, short> pg_f_map;
+typedef std::map<belief_formula, short> pg_bf_map;
 
 class heuristics_manager
 {

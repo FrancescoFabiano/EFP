@@ -286,22 +286,38 @@ void state<T>::print_graphviz(std::string postfix) const
 }
 
 template <class T>
-single_attitudes_map state<T>::get_F_attitudes(agent executor) const
+single_observability_map state<T>::get_observants(const observability_map & table) const
 {
+	agent_set agents = domain::get_instance().get_agents();
+	single_observability_map ret;
+	for (auto it_ag = agents.begin(); it_ag != agents.end(); it_ag++) {
+		//if (*it_ag != executor) {
+		ret.insert(std::pair<agent, agent_group>(*it_ag, get_obs_group(*it_ag, table)));
+		//}
+	}
 
-	return get_representation().get_F_attitudes();
-
+	return ret;
 }
 
 template <class T>
-single_attitudes_map state<T>::get_P_attitudes(agent executor) const
+agent_group state<T>::get_obs_group(agent ag, const observability_map & table) const
 {
-	return get_representation().get_P_attitudes();
-	//get_attitudes(executor, domain::get_instance().get_attitudes().get_P_attitudes(), false);
+	auto it_ag = table.find(ag);
+	if (it_ag != table.end()) {
+		auto it_int = it_ag->second.begin();
+		for (; it_int != it_ag->second.end(); ++it_ag) {
+			if (entails(it_int->second)) {
+				return it_int->first;
+			}
+		}
+	}
+	//The last declared observability group
+	return pem_store::get_instance().get_agent_group_number();
+
+	//std::cerr << "\nError: Some observability declaration is missing, the agent has not any agent group specified.";
+	//exit(1);
+
 }
-
-
-
 
 //DEBUG
 //

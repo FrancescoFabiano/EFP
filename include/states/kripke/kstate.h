@@ -125,21 +125,21 @@ private:
      * \todo self-loop?*/
     kworld_ptr_set get_B_reachable_worlds(const agent& ag, const kworld_ptr& world) const;
 
-//    /** \brief Function that returns all the reachable \ref kworld given the \ref agent and the staring \ref kworld.
-//     *
-//     * This function modify the parameter so it's easy to check if a fixed point is reached.
-//     * This is useful for the operator C. Otherwise its better to use \ref get_B_reachable_worlds(agent, kworld_ptr) const.
-//     *
-//     * @see belief_formula, get_B_reachable_worlds(agent, kworld_ptr) const and get_C_reachable_worlds(const agent_set &, kworld_ptr world) const.
-//     *
-//     * @param[in] ag: the label of the \ref kedge that the function follows to check the transitivity.
-//     * @param[in] world: the pointers to the set of \ref kworld where to start to check the entailment.
-//     *
-//     * @param[out] reached: the set of pointers to all the reachable worlds.
-//     *
-//     *
-//     * \todo self-loop?*/
-//    bool get_B_reachable_worlds_recursive(const agent& ag, const kworld_ptr& world, kworld_ptr_set& reached) const;
+    //    /** \brief Function that returns all the reachable \ref kworld given the \ref agent and the staring \ref kworld.
+    //     *
+    //     * This function modify the parameter so it's easy to check if a fixed point is reached.
+    //     * This is useful for the operator C. Otherwise its better to use \ref get_B_reachable_worlds(agent, kworld_ptr) const.
+    //     *
+    //     * @see belief_formula, get_B_reachable_worlds(agent, kworld_ptr) const and get_C_reachable_worlds(const agent_set &, kworld_ptr world) const.
+    //     *
+    //     * @param[in] ag: the label of the \ref kedge that the function follows to check the transitivity.
+    //     * @param[in] world: the pointers to the set of \ref kworld where to start to check the entailment.
+    //     *
+    //     * @param[out] reached: the set of pointers to all the reachable worlds.
+    //     *
+    //     *
+    //     * \todo self-loop?*/
+    //    bool get_B_reachable_worlds_recursive(const agent& ag, const kworld_ptr& world, kworld_ptr_set& reached) const;
 
     /** \brief Function that returns all the reachable \ref kworld given a set of \ref agent and the staring \ref kworld.
      * 
