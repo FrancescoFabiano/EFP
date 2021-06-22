@@ -57,7 +57,7 @@
 
 	*** Epistemic (Sensing - Annoucement) Action
 	(model:
-		:id (1)
+		:id (Epistemic)
 		:pevents {1;2;3}
 		:pointed (1)
 		:edges	{(1,1,Fully)(2,2,Fully)(3,3,Fully)(2,2,Partially)(1,2,Partially)(2,1,Partially)(3,3,Partially)(1,3,Oblivious)(2,3,Oblivious)(3,3,Oblivious)}
@@ -66,7 +66,7 @@
 	
 	*** Ontic Action
 	(model:
-		:id (2)
+		:id (Ontic)
 		:pevents {4;3}
 		:pointed (4)
 		:edges	((4,4,Fully)(3,3,Fully)(4,3,Oblivious)(3,3,Oblivious))

@@ -43,12 +43,13 @@ const pem_ptr pem_store::add_pem(const pem & to_add)
 
 void pem_store::add_agent_group(const std::string & to_add)
 {
-	if (m_agent_group_ids.find(to_add) == m_agent_group_ids.end()) {
-		m_agent_group_ids.insert(std::pair<std::string, agent_group>(to_add, m_agent_group_ids.size()));
+	//if (m_agent_group_ids.find(to_add) == m_agent_group_ids.end()) {
+	//Insert does not override	
+	m_agent_group_ids.insert(std::pair<std::string, agent_group>(to_add, m_agent_group_ids.size()));
 
-		//	m_inverse_agent_group_ids.insert(std::pair<agent_group, std::string>(m_inverse_agent_group_ids.size(),to_add));
+	//	m_inverse_agent_group_ids.insert(std::pair<agent_group, std::string>(m_inverse_agent_group_ids.size(),to_add));
 
-	}
+	//}
 
 
 }
@@ -98,14 +99,54 @@ agent_group pem_store::get_agent_group(const std::string & to_get) const
 
 std::string pem_store::get_agent_group_name(agent_group id) const
 {
-	std::string ret = "not_found";
-
 	for (auto it_map = m_agent_group_ids.begin(); it_map != m_agent_group_ids.end(); ++it_map) {
 		if (it_map->second == id)
 			return it_map->first;
 	}
 
-	return ret;
+	std::cerr << "\nError: you are requesting: " << id << " that is an not-existing agent group!\n";
+	exit(1);
+}
+
+pem_id pem_store::get_pem_id(const std::string & to_get)
+{
+	//if (m_pem_ids_map.find(to_add) == m_pem_ids_map.end()) {
+	//Insert does not override
+	auto ret = m_pem_ids_map.insert(std::pair<std::string, pem_id>(to_get, m_pem_ids_map.size()));
+	return ret.first->second;
+	//}
+}
+
+bool pem_store::exist_pem(pem_id to_check)
+{
+	//if (m_pem_ids_map.find(to_add) == m_pem_ids_map.end()) {
+	//Insert does not override
+	auto it = m_created_pems.find(to_check);
+	if (it != m_created_pems.end()) {
+		return true;
+	}
+	return false;
+	//}
+}
+
+std::string pem_store::get_pem_name(pem_id id) const
+{
+	for (auto it_map = m_pem_ids_map.begin(); it_map != m_pem_ids_map.end(); ++it_map) {
+		if (it_map->second == id)
+			return it_map->first;
+	}
+
+	std::cerr << "\nError: you are requesting: " << id << " that is an not-existing pem!\n";
+	exit(1);
+}
+
+event_id pem_store::get_event_id(const std::string & to_get)
+{
+	//if (m_pem_ids_map.find(to_add) == m_pem_ids_map.end()) {
+	//Insert does not override
+	auto ret = m_events_ids_map.insert(std::pair<std::string, event_id>(to_get, m_events_ids_map.size()));
+	return ret.first->second;
+	//}
 }
 
 short pem_store::get_agent_group_number() const

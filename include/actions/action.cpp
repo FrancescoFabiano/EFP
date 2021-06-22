@@ -100,9 +100,13 @@ void action::set_type(act_type type)
 {
 	if (type != -1) {
 		if (m_type == -1) {
-			/*std::cerr << "Two different actions with the same name." << std::endl;
-			exit(1);*/
-			m_type = type;
+			if (pem_store::get_instance().exist_pem(type)) {
+				m_type = type;
+				return;
+			} else {
+				std::cerr << "The specified action type: " << type << " does not match any pem specification." << std::endl;
+				exit(1);
+			}
 		}
 	}
 }
@@ -194,7 +198,7 @@ void action::print() const
 	grounder grounder = domain::get_instance().get_grounder();
 	std::cout << "\nAction " << get_name() << ":" << std::endl;
 	std::cout << "	ID: " << get_id() << ":" << std::endl;
-	std::cout << "	Type: " << get_type() << std::endl;
+	std::cout << "	Type: " << pem_store::get_instance().get_pem_name(get_type()) << std::endl;
 
 	std::cout << "	Executability:";
 	formula_list::const_iterator it_fl;

@@ -483,7 +483,7 @@ action HAS_TYPE constant SEMICOLON
 
 /* observability declaration */
 observance:
-agent IN_GROUP id OF action if_part_bf SEMICOLON
+agent IN_GROUP constant OF action if_part_bf SEMICOLON
 {
   $$ = new proposition;
   $$->set_type(OBSERVABILITY);

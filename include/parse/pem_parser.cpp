@@ -123,10 +123,10 @@ void pem_parser::parse_edge(const std::string & edge, pem_edges & edges)
 	std::string sub_arg;
 
 	args >> sub_arg;
-	pevent_ptr first = pem_store::get_instance().get_event(boost::lexical_cast<event_id>(sub_arg));
+	pevent_ptr first = pem_store::get_instance().get_event(pem_store::get_instance().get_event_id(sub_arg));
 
 	args >> sub_arg;
-	pevent_ptr second = pem_store::get_instance().get_event(boost::lexical_cast<event_id>(sub_arg));
+	pevent_ptr second = pem_store::get_instance().get_event(pem_store::get_instance().get_event_id(sub_arg));
 
 	args >> sub_arg;
 	agent_group e_to_add_ag = pem_store::get_instance().get_agent_group(sub_arg);
@@ -290,9 +290,9 @@ void pem_parser::parse(const std::string & filename)
 				if (field.compare("id") == 0 && (e_id == -1 || p_id == -1)) {
 
 					if (in_event) {
-						e_id = boost::lexical_cast<event_id>(internal_field);
+						e_id = pem_store::get_instance().get_event_id(internal_field);
 					} else if (in_model) {
-						p_id = boost::lexical_cast<pem_id>(internal_field);
+						p_id = pem_store::get_instance().get_pem_id(internal_field);
 					} else {
 						std::cerr << "\nParsing Error at Line " << line_count << ": Before declaring a new \'" << field << "\' you need to open a new \'pevent\' or \'model\'.\n";
 						exit(1);
@@ -302,7 +302,7 @@ void pem_parser::parse(const std::string & filename)
 						std::cerr << "\nParsing Error at Line " << line_count << ": Pointed pevent found outside of a model definition.";
 						exit(1);
 					}
-					p_pointed_id = boost::lexical_cast<event_id>(internal_field);
+					p_pointed_id = pem_store::get_instance().get_event_id(internal_field);
 				} else if (field.compare("precondition") == 0) {
 					if (!in_event) {
 						std::cerr << "\nParsing Error at Line " << line_count << ": Precondition found outside of an pevent definition.";

@@ -12,7 +12,7 @@ agent a,b,c;
 
 executable open_a;
 open_a has_effects opened;
-open_a has_type 2;
+open_a has_type Ontic;
 b in_group Partially of open_a if looking_b;
 c in_group Partially of open_a if looking_c;
 a in_group Fully of open_a;
@@ -20,14 +20,14 @@ a in_group Fully of open_a;
 
 executable peek_a if B(a,opened), B(a,looking_a), looking_a, opened;
 peek_a has_effects tail;
-peek_a has_type 1;
+peek_a has_type Epistemic;
 b in_group Partially of peek_a if looking_b;
 c in_group Partially of peek_a if looking_c;
 a in_group Fully of peek_a;
 
 executable shout_tail_a if B(a,tail), tail;
 shout_tail_a has_effects tail;
-shout_tail_a has_type 1;
+shout_tail_a has_type Epistemic;
 a in_group Fully of shout_tail_a;
 b in_group Fully of shout_tail_a if looking_b;
 c in_group Fully of shout_tail_a if looking_c;

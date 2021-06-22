@@ -33,6 +33,9 @@ private:
     pem_set m_created_pems;
 
     std::map<std::string, agent_group> m_agent_group_ids;
+    std::map<std::string, pem_id> m_pem_ids_map;
+    std::map<std::string, event_id> m_events_ids_map;
+
 
     //  std::map<agent_group, std::string> m_inverse_agent_group_ids;
 
@@ -108,6 +111,14 @@ public:
     agent_group get_agent_group(const std::string & to_get) const;
 
     std::string get_agent_group_name(agent_group id) const;
+
+    pem_id get_pem_id(const std::string & to_get);
+    bool exist_pem(pem_id to_check);
+
+    std::string get_pem_name(pem_id id) const;
+
+    event_id get_event_id(const std::string & to_get);
+
 
     short get_agent_group_number() const;
 
