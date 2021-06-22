@@ -163,7 +163,7 @@ void action::add_proposition(proposition & prop)
 		break;
 	case TYPE:
 		//@TODO:What if there is more than one? Then CNF or DNF
-		set_type(prop.get_type());
+		set_type(prop.get_action_type());
 		break;
 	default:
 		break;
