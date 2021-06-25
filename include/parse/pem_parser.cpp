@@ -224,6 +224,7 @@ void pem_parser::parse(const std::string & filename)
 
 			line = std::regex_replace(line, indentation, "$2");
 			line = std::regex_replace(line, comment, "$1");
+			boost::to_lower(line);
 
 			if (std::regex_match(line, type_regex)) {
 

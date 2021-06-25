@@ -19,7 +19,6 @@
 #include <string.h>
 //#include <bits/stdc++.h>
 #include <boost/algorithm/string.hpp>
-#include <boost/lexical_cast.hpp>
 #include <regex>
 #include "../utilities/define.h"
 
