@@ -39,7 +39,7 @@ private:
      *
      * @see pstate_opt, pstore_opt and agent.*/
     pedges_opt m_edges;
-    /** \brief The number of pstate_opts with the same \ref m_fluent_set but different in a \ref m_edges.*/
+    /** \brief The number of pstate_opts with the same \ref m_fluent_set but different in a \ref m_information_state.*/
     //unsigned short m_repetition = 0;
 
     /** \brief Function used to hash the the info of a possibility in a unique id.
@@ -63,11 +63,11 @@ private:
     /** \brief Function that uses the info of *this* to set its \ref m_id.
      * Only accessible by the \ref pstate_opt_ptr.*/
     void set_id();
-    /** \brief Setter for the field \ref m_edges.
+    /** \brief Setter for the field \ref m_information_state.
      * 
      * Only accessible by the \ref pstate_opt_ptr.
      * 
-     * @param[in] edges: the map of \ref edges to set as \ref m_edges.*/
+     * @param[in] edges: the map of \ref edges to set as \ref m_information_state.*/
     void set_edges(const pedges_opt & edges);
 
     /** \brief Getter of \ref m_fluent_set.
@@ -82,7 +82,7 @@ private:
      * 
      * @return the short that is the unique id of *this*.*/
     pstate_opt_id get_id() const;
-    /** \brief Getter of \ref m_edges.
+    /** \brief Getter of \ref m_information_state.
      * 
      * Only accessible by the \ref pstate_opt_ptr.
      *     
@@ -192,7 +192,7 @@ private:
      * @param[out] ret: a set of pointer with all the states that entail the initially conditions*/
     void generate_initial_pstate_opts(fluent_set& permutation, int index, pstate_opt_ptr_set& ret);
 
-    /** \brief Function used to build the \ref m_edges of the initial \ref pstate_opts.
+    /** \brief Function used to build the \ref m_information_state of the initial \ref pstate_opts.
      *  
      * The function creates all the edges and adds to *this* only the ones that respect \p ini_conditions.
      * All the other ones are stored in \ref pstore_opt for future uses.
@@ -541,9 +541,9 @@ public:
      * @return the \ref pstate_opt_id that is the id of the \ref pstate_opt pointed by \ref m_ptr + \ref m_repetition.*/
     pstate_opt_id get_id() const;
 
-    /** \brief Function that return the field m_edges of the pointed \ref pstate_opt.
+    /** \brief Function that return the field m_information_state of the pointed \ref pstate_opt.
      *     
-     * @return the \ref m_edges of the \ref pstate_opt pointed by \ref m_ptr.*/
+     * @return the \ref m_information_state of the \ref pstate_opt pointed by \ref m_ptr.*/
     const pedges_opt & get_edges() const;
 
 

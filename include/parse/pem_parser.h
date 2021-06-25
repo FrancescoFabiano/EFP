@@ -32,9 +32,11 @@ private:
 
     static void parse_ag_list(const std::string & line);
 
+/*
     static void parse_edge(const std::string & edge, pem_edges & edges);
 
     static void parse_edges_list(const std::string & line, pem_edges & edges);
+*/
 
 public:
 

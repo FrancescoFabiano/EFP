@@ -188,7 +188,7 @@ enum action_check
  * Actions Related
  ****************************************************************/
 class belief_formula;
-typedef short agent_group;
+typedef short agent_group_id;
 typedef short act_type;
 
 typedef std::list<belief_formula> formula_list; /**< \brief A CNF formula of \ref belief_formula.
@@ -197,10 +197,10 @@ typedef std::list<belief_formula> formula_list; /**< \brief A CNF formula of \re
 
 typedef std::set<belief_formula> bformula_set; /**< \brief A set of \ref belief_formula.*/
 
-typedef std::map<agent, agent_group> single_observability_map;
+typedef std::map<agent, agent_group_id> single_observability_map;
 /**< \brief Used to map a single agent to his observability group w.r.t.an action execution.*/
 
-typedef std::map<agent, std::map<agent_group, belief_formula> > observability_map; /**< \brief Used to express the obsverbability conditions.
+typedef std::map<agent, std::map<agent_group_id, belief_formula> > observability_map; /**< \brief Used to express the obsverbability conditions.
                                 * 
                                 * Each element associates an \ref agent to the observability conditions for an \ref effff.*/
 //Associate each effect the condition
@@ -362,7 +362,7 @@ enum e_meta_condition
 typedef std::set<e_meta_condition> event_metacond;
 typedef fluent_formula event_postconditions;
 
-typedef std::map<agent, agent_group> agent_group_map;
+typedef std::map<agent, agent_group_id> agent_group_map;
 
 // Kripke
 class kevent;
@@ -377,7 +377,7 @@ typedef act_type kem_id;
 
 class kem_ptr;
 
-typedef std::map<agent_group, kevent_ptr_set> kevent_map;
+typedef std::map<agent_group_id, kevent_ptr_set> kevent_map;
 typedef std::map<kevent_ptr, kevent_map> kem_edges;
 
 typedef std::map<std::pair<kworld_ptr, kevent_ptr>, kworld_ptr> kupdate_map;
@@ -403,7 +403,7 @@ typedef std::set<pevent_ptr> pevent_ptr_set; /**< \brief A set of \ref pevent_pt
 class pem;
 typedef act_type pem_id;
 
-//typedef std::map<agent_group, std::set<pem_edge>> pem_edges;
+//typedef std::map<agent_group_id, std::set<pem_edge>> pem_edges;
 
 //enum action_type
 //{
@@ -440,8 +440,8 @@ typedef act_type pem_id;
 
 class pem_ptr;
 
-typedef std::map<agent_group, pevent_ptr_set> pevent_map;
-typedef std::map<pevent_ptr, pevent_map> pem_edges;
+typedef std::map<agent_group_id, pevent_ptr_set> event_information_state;
+//typedef std::map<pevent_ptr, event_information_state> pem_edges;
 
 typedef std::map<std::pair<pworld_ptr, pevent_ptr>, pworld_ptr> pupdate_map;
 

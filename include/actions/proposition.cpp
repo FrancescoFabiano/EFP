@@ -37,7 +37,7 @@ agent proposition::get_agent() const
 	return domain::get_instance().get_grounder().ground_agent(m_agent);
 }
 
-agent_group proposition::get_agent_group() const
+agent_group_id proposition::get_agent_group() const
 {
 	return m_agent_group;
 }

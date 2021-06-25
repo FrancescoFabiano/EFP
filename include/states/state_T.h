@@ -296,8 +296,8 @@ public:
 
     /**Function that retrieves the agent group of an agent w.r.t. the current state
      *
-     * @return: the agent_group of \p ag*/
-    agent_group get_obs_group(agent ag, const observability_map & table) const;
+     * @return: the agent_group_id of \p ag*/
+    agent_group_id get_obs_group(agent ag, const observability_map & table) const;
 
 
     //DEBUG

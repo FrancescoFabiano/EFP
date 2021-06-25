@@ -14,6 +14,7 @@
 
 #include "../../utilities/define.h"
 #include "../../formulae/belief_formula.h"
+#include "../action.h"
 
 class pevent
 {
@@ -22,6 +23,9 @@ class pevent
 private:
     /** \brief The id of *this*.*/
     event_id m_id;
+
+    /** \brief The edges of *this*.*/
+    event_information_state m_information_state;
 
     /** \brief The precondition of *this*.*/
     formula_list m_pre;
@@ -50,18 +54,24 @@ private:
      *
      * @return the \ref event_id of *this*.*/
     const event_id get_id() const;
+    /** \brief Getter of \ref m_information_state.
+     *
+     * Only accessible by the \ref pevent_ptr.
+     *
+     * @return the \ref event_information_state of *this*.*/
+    const event_information_state get_information_state() const;
     /** \brief Getter of \ref m_pre.
      *
      * Only accessible by the \ref pevent_ptr.
      *
      * @return the precondition of *this*.*/
-    const formula_list & get_precondition() const;
+    const formula_list & get_precondition(const pstate & s, const action & act) const;
     /** \brief Getter of \ref m_post.
      *
      * Only accessible by the \ref pevent_ptr.
      *
      * @return the postconditions of *this*.*/
-    const event_postconditions & get_postconditions() const;
+    const event_postconditions & get_postconditions(const pstate & s, const action & act) const;
 
 
     /** \brief Getter of \ref m_meta_pre.
@@ -108,15 +118,6 @@ public:
     //     * @param[in] pre: the \ref belief_formula to set as \ref m_pre.
     //     * @param[post]: the \ref event_postconditions to set as \ref m_post.*/
     //    pevent(event_id id, bool ontic_change, const formula_list & pre, const event_postconditions & post);
-
-
-    /** \brief Constructor with parameters.
-     * Construct an object with the given info.
-     *
-     * @param[in] id: the \ref id to set as \ref m_id.
-     * @param[in] meta_pre: the \ref event_metacond to set as \ref m_meta_pre.
-     * @param[in] meta_post: the \ref event_metacond to set as \ref m_meta_post.*/
-    pevent(event_id id, const formula_list & pre, const event_metacond & meta_pre, const event_postconditions & post, const event_metacond & meta_post);
 
     /** \brief Constructor with parameters.
      * Construct an object with the given info.
@@ -273,17 +274,23 @@ public:
      * @return a copy of the pointer \ref m_ptr.*/
     std::shared_ptr <pevent> get_ptr() const;
 
-
+    /** \brief Getter of \ref m_id.
+     *
+     * @return the id of *this*.*/
     const event_id get_id() const;
+    /** \brief Getter of \ref m_information_state.
+     *
+     * @return the information state of *this*.*/
+    const event_information_state get_information_state() const;
     /** \brief Getter of \ref m_pre.
      *
      * @return the precondition of *this*.*/
-    const formula_list & get_precondition() const;
+    const formula_list & get_precondition(const pstate & s, const action & act) const;
 
     /** \brief Getter of \ref m_post.
      *
      * @return the postconditions of *this*.*/
-    const event_postconditions & get_postconditions() const;
+    const event_postconditions & get_postconditions(const pstate & s, const action & act) const;
 
     /** \brief Getter of \ref m_meta_pre.
      *

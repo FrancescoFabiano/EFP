@@ -32,12 +32,12 @@ private:
      * These kems are pointer to the ones in \ref m_created_events.*/
     kem_set m_created_kems;
 
-    std::map<std::string, agent_group> m_agent_group_ids;
+    std::map<std::string, agent_group_id> m_agent_group_ids;
     std::map<std::string, kem_id> m_kem_ids_map;
     std::map<std::string, event_id> m_events_ids_map;
 
 
-    //  std::map<agent_group, std::string> m_inverse_agent_group_ids;
+    //  std::map<agent_group_id, std::string> m_inverse_agent_group_ids;
 
 
     /** \brief Private constructor since it is a Singleton class.*/
@@ -108,9 +108,9 @@ public:
     /** \brief Function that returns the id given an agent group name.
      *
      * @return the \ref id of \p to_get.*/
-    agent_group get_agent_group(const std::string & to_get) const;
+    agent_group_id get_agent_group(const std::string & to_get) const;
 
-    std::string get_agent_group_name(agent_group id) const;
+    std::string get_agent_group_name(agent_group_id id) const;
 
     kem_id get_kem_id(const std::string & to_get);
     bool exist_kem(kem_id to_check);

@@ -48,7 +48,7 @@ private:
      * @return the \ref m_pointed_id of *this*.*/
     event_id get_pointed_id() const;
 
-    /** \brief Getter of \ref m_edges.
+    /** \brief Getter of \ref m_information_state.
      *
      * Only accessible by the \ref kem_ptr.
      *
@@ -85,11 +85,11 @@ public:
     void set_pointed_id(event_id to_set);
 
 
-    /** \brief Setter for the field \ref m_edges.
+    /** \brief Setter for the field \ref m_information_state.
      *
      * Only accessible by the \ref kem_ptr.
      *
-     * @param[in] to_set: the map of \ref kem_edges to set as \ref m_edges.*/
+     * @param[in] to_set: the map of \ref kem_edges to set as \ref m_information_state.*/
     void set_edges(const kem_edges & to_set);
 
     /**
@@ -213,9 +213,9 @@ public:
      * @param[in] to_set: the \ref event_id to set as \ref m_pointed_id.*/
     void set_pointed_id(event_id to_set);
 
-    /**\brief Setter for the field \ref m_edges of \ref m_ptr.
+    /**\brief Setter for the field \ref m_information_state of \ref m_ptr.
      *
-     * @param[in] to_set: the \ref kem_edges to assign to \ref m_edges.*/
+     * @param[in] to_set: the \ref kem_edges to assign to \ref m_information_state.*/
     void set_edges(const kem_edges & to_set);
 
     /** \brief Function that return the field m_id \ref m_ptr.
@@ -229,9 +229,9 @@ public:
      * @return the \ref kem_id of *this*.*/
     event_id get_pointed_id() const;
 
-    /** \brief Function that return the field m_edges of the pointed \ref pevent.
+    /** \brief Function that return the field m_information_state of the pointed \ref pevent.
      *
-     * @return the \ref m_edges of the \ref pevent pointed by \ref m_ptr.*/
+     * @return the \ref m_information_state of the \ref pevent pointed by \ref m_ptr.*/
     const kem_edges& get_edges() const;
 
     /**

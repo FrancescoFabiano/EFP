@@ -54,8 +54,8 @@ private:
     string_set_set m_action_effect;
     /** If *this* is \ref OBSERVABILITY the relative \ref agent is stored here.*/
     std::string m_agent;
-    /** If *this* is \ref OBSERVABILITY the relative \ref agent_group.*/
-    agent_group m_agent_group;
+    /** If *this* is \ref OBSERVABILITY the relative \ref agent_group_id.*/
+    agent_group_id m_agent_group;
     /** \brief If *this* is \ref OBSERVABILITY or \ref EFFECTS or \ref EXECUTABILITY the \ref fluent_formula condition for the observability is stored here (not grounded).*/
     belief_formula m_conditions;
 
@@ -87,7 +87,7 @@ public:
     /** Getter of the field \ref m_agent_group.
      * 
      * @return the value of \ref m_agent_group.*/
-    agent_group get_agent_group() const;
+    agent_group_id get_agent_group() const;
 
     /** Getter of the field \ref m_conditions.
      * 

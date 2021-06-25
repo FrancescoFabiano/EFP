@@ -2212,12 +2212,12 @@ bool bisimulation::compare_automata_eq(const kstate & ks1, const kstate & ks2)
 //
 //	int bhtabSize = ag_set_size + c;
 //
-//	for (it_keps = ks1.get_edges().begin(); it_keps != ks1.get_edges().end(); it_keps++) {
+//	for (it_keps = ks1.get_information_state().begin(); it_keps != ks1.get_information_state().end(); it_keps++) {
 //		label_map1[it_keps->get_from()][it_keps->get_to()].insert(it_keps->get_label());
 //		Vertex[index_map1[it_keps->get_from()]].ne++;
 //	}
 //
-//	for (it_keps = ks2.get_edges().begin(); it_keps != ks2.get_edges().end(); it_keps++) {
+//	for (it_keps = ks2.get_information_state().begin(); it_keps != ks2.get_information_state().end(); it_keps++) {
 //		label_map2[it_keps->get_from()][it_keps->get_to()].insert(it_keps->get_label());
 //		Vertex[index_map2[it_keps->get_from()]].ne++;
 //	}

@@ -14,6 +14,7 @@
 
 #include "../../utilities/define.h"
 #include "../../formulae/belief_formula.h"
+#include "../action.h"
 
 class kevent
 {
@@ -55,13 +56,13 @@ private:
      * Only accessible by the \ref kevent_ptr.
      *
      * @return the precondition of *this*.*/
-    const formula_list & get_precondition() const;
+    const formula_list & get_precondition(const kstate & s, const action & act) const;
     /** \brief Getter of \ref m_post.
      *
      * Only accessible by the \ref kevent_ptr.
      *
      * @return the postconditions of *this*.*/
-    const event_postconditions & get_postconditions() const;
+    const event_postconditions & get_postconditions(const kstate & s, const action & act) const;
 
 
     /** \brief Getter of \ref m_meta_pre.
@@ -278,12 +279,12 @@ public:
     /** \brief Getter of \ref m_pre.
      *
      * @return the precondition of *this*.*/
-    const formula_list & get_precondition() const;
+    const formula_list & get_precondition(const kstate & s, const action & act) const;
 
     /** \brief Getter of \ref m_post.
      *
      * @return the postconditions of *this*.*/
-    const event_postconditions & get_postconditions() const;
+    const event_postconditions & get_postconditions(const kstate & s, const action & act) const;
 
     /** \brief Getter of \ref m_meta_pre.
      *

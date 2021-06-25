@@ -8,7 +8,6 @@
  */
 
 #include "union_update.h"
-#include "../utilities/helper_t.ipp"
 #include "../actions/possibilities/pevent.h"
 #include "../actions/possibilities/pem.h"
 #include "../actions/possibilities/pem_store.h"
@@ -32,7 +31,7 @@ const pstate & union_update::u_update(const pstate & state, const action & act)
 	pupdate_map u_map;
 	agent_group_map a_map;
 
-	if (!state.entails(get_total_pre(state, act, p_ev.get_meta_precondition()), p_pw)) {
+	if (!state.entails(p_ev.get_precondition(state, act), p_pw)) {
 		std::cerr << "Action is not executable." << std::endl;
 		return ret;
 	}
@@ -53,7 +52,7 @@ const pworld_ptr & union_update::u_update_helper(pstate & ret, const pstate & st
 	fluent_set world_description = pw.get_fluent_set();
 	// Execute the all the effects
 	if (ev.get_ontic_change()) {
-		fluent_formula effects = get_total_effects(state, act, ev.get_meta_postconditions(), ev.get_id());
+		fluent_formula effects = ev.get_postconditions(state, act);
 		fluent_formula::const_iterator it_eff;
 
 		for (it_eff = effects.begin(); it_eff != effects.end(); it_eff++) {
@@ -64,34 +63,41 @@ const pworld_ptr & union_update::u_update_helper(pstate & ret, const pstate & st
 	pworld_ptr new_pw = ret.add_world(pworld(world_description));
 	u_map.insert(pupdate_map::value_type({pw, ev}, new_pw));
 
-	information_state::const_iterator it_pwm;
+//	event_information_state::const_iterator it_eis;
+//
+//	agent_group_id agg;
+
+	information_state::const_iterator it_pis;
 	pworld_ptr_set::const_iterator it_pws;
+    pevent_ptr_set::const_iterator it_evs;
+    agent_group_map::const_iterator it_agm;
 
-	for (it_pwm = pw.get_information_state().begin(); it_pwm != pw.get_information_state().end(); it_pwm++) {
-		auto it_eve = pem.get_edges().find(ev);
+    pevent_ptr_set evs;
+    agent ag;
 
-		if (it_eve != pem.get_edges().end()) {
-			agent ag = it_pwm->first;
-			auto it_agm = a_map.find(ag);
+//    for (it_eis = ev.get_information_state().begin(); it_eis != ev.get_information_state().end(); it_eis++) {
+//        agg = it_eis->first;
+//
+//        for (it_agm = )
+//    }
 
-			if (it_agm != a_map.end()) {
-				auto it_evm = it_eve->second.find(it_agm->second);
+	for (it_pis = pw.get_information_state().begin(); it_pis != pw.get_information_state().end(); it_pis++) {
+	    ag = it_pis->first;
+        it_agm = a_map.find(ag);
 
-				if (it_evm != it_eve->second.end()) {
-					pevent_ptr_set::const_iterator it_evs;
+        if (it_agm != a_map.end()) {
+            for (it_pws = it_pis->second.begin(); it_pws != it_pis->second.end(); it_pws++) {
+                evs = ev.get_information_state().at(it_agm->second);
 
-					for (it_pws = it_pwm->second.begin(); it_pws != it_pwm->second.end(); it_pws++) {
-						for (it_evs = it_evm->second.begin(); it_evs != it_evm->second.end(); it_evs++) {
-							if (u_map.find({*it_pws, *it_evs}) == u_map.end() &&
-								state.entails(get_total_pre(state, act, it_evs->get_meta_precondition()), *it_pws)) {
-								pworld_ptr believed_pw = u_update_helper(ret, state, act, pem, *it_pws, *it_evs, u_map, a_map);
-								ret.add_edge(new_pw, believed_pw, ag);
-							}
-						}
-					}
-				}
-			}
-		}
+                for (it_evs = evs.begin(); it_evs != evs.end(); it_evs++) {
+                    if (u_map.find({*it_pws, *it_evs}) == u_map.end() &&
+                        state.entails(it_evs->get_precondition(state, act), *it_pws)) {
+                        pworld_ptr believed_pw = u_update_helper(ret, state, act, pem, *it_pws, *it_evs, u_map, a_map);
+                        ret.add_edge(new_pw, believed_pw, ag);
+                    }
+                }
+            }
+        }
 	}
 	return new_pw;
 }
@@ -105,7 +111,7 @@ const kstate & union_update::u_update(const kstate & state, const action & act)
 	kupdate_map u_map;
 	agent_group_map a_map;
 
-	if (!state.entails(get_total_pre(state, act, p_ev.get_meta_precondition()), p_kw)) {
+	if (!state.entails(p_ev.get_precondition(state, act), p_kw)) {
 		std::cerr << "Action is not executable." << std::endl;
 		return ret;
 	}
@@ -119,11 +125,11 @@ const kstate & union_update::u_update(const kstate & state, const action & act)
 
 	for (it_kws = state.get_worlds().begin(); it_kws != state.get_worlds().end(); it_kws++) {
 		for (it_eve = kem.get_edges().begin(); it_eve != kem.get_edges().end(); it_eve++) {
-			if (state.entails(get_total_pre(state, act, it_eve->first.get_meta_precondition()), *it_kws)) {
+			if (state.entails(it_eve->first.get_precondition(state, act), *it_kws)) {
 				world_description = it_kws->get_fluent_set();
 				// Execute the all the effects
 				if (it_eve->first.get_ontic_change()) {
-					effects = get_total_effects(state, act, it_eve->first.get_meta_postconditions(), it_eve->first.get_id());
+					effects = it_eve->first.get_postconditions(state, act);
 
 					for (it_eff = effects.begin(); it_eff != effects.end(); it_eff++) {
 						helper::apply_effect(*it_eff, world_description);
@@ -181,68 +187,4 @@ const kstate & union_update::u_update(const kstate & state, const action & act)
 		}
 	}
 	return ret;
-}
-
-template <class T>
-formula_list union_update::get_total_pre(const T & s, const action & act, const event_metacond & meta_pre)
-{
-	formula_list ret;
-	formula_list action_pre = act.get_executability();
-	fluent_formula action_eff = helper_t::get_effects_if_entailed(act.get_effects(), s);
-
-	event_metacond::const_iterator it_meta_pre;
-	formula_list::const_iterator it_act_pre;
-
-	for (it_meta_pre = meta_pre.begin(); it_meta_pre != meta_pre.end(); ++it_meta_pre) {
-		belief_formula tmp_bf;
-
-		switch ( *it_meta_pre ) {
-		case act_eff:
-			tmp_bf.set_from_ff(action_eff);
-			ret.push_back(tmp_bf);
-			break;
-		case neg_act_eff:
-			tmp_bf.set_from_ff(helper::negate_fluent_formula(action_eff));
-			ret.push_back(tmp_bf);
-			break;
-		case act_pre:
-			for (it_act_pre = action_pre.begin(); it_act_pre != action_pre.end(); ++it_act_pre) {
-				ret.push_back(*it_act_pre);
-			}
-			break;
-		case none:
-		default:
-			ret.clear();
-			return ret;
-		}
-	}
-	return ret;
-}
-
-template <class T>
-fluent_formula union_update::get_total_effects(const T & s, const action & act, const event_metacond & meta_post, const event_id & e_id)
-{
-    fluent_formula action_eff = helper_t::get_effects_if_entailed(act.get_effects(), s);
-
-    if (meta_post.size() > 1) {
-        std::cerr << "Error: malformed action postcondition in pevent " << e_id << std::endl;
-        exit(1);
-    } else if (meta_post.empty()) {
-        fluent_formula empty;
-        return empty;
-    } else {
-        switch ( *meta_post.begin() ) {
-            case act_eff:
-                return action_eff;
-            case neg_act_eff:
-                return helper::negate_fluent_formula(action_eff);
-                //Not break because it means it is empty
-            case none:
-            default:
-                fluent_formula empty;
-                return empty;
-        }
-    }
-
-    //Need to insert the merge with specific postcondition
 }

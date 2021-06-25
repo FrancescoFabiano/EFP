@@ -272,7 +272,7 @@ private:
      * The function creates all the edges and adds to *this* only the ones that respect \p ini_conditions.
      * All the other ones are stored in \ref kstore for future usees.*/
     void generate_initial_kedges();
-    /** \brief Function that removes the a \ref kedge_ptr from \ref m_edges.
+    /** \brief Function that removes the a \ref kedge_ptr from \ref m_information_state.
      * 
      * @param[in] to_remove: the \ref kedge which pointer has to be removed.*/
     void remove_kedge(const kworld_ptr & from, const kworld_ptr & to, const agent & ag);
@@ -295,9 +295,9 @@ public:
      *
      * @param[in] to_set: the \ref kworld_ptr_set to assign to \ref m_worlds.*/
     void set_worlds(const kworld_ptr_set & to_set);
-    /** \brief Setter of the field \ref m_edges.
+    /** \brief Setter of the field \ref m_information_state.
      *
-     * @param[in] to_set: the \ref kedge_ptr_set to assign to \ref m_edges.*/
+     * @param[in] to_set: the \ref kedge_ptr_set to assign to \ref m_information_state.*/
     void set_edges(const kedge_map & to_set);
     /** \brief Setter of the field \ref m_pointed.
      *
@@ -308,9 +308,9 @@ public:
      *
      * @return: the value of \ref m_worlds.*/
     const kworld_ptr_set & get_worlds() const;
-    /** \brief Getter of the field \ref m_edges.
+    /** \brief Getter of the field \ref m_information_state.
      *
-     * @return: the value of \ref m_edges.*/
+     * @return: the value of \ref m_information_state.*/
     const kedge_map & get_edges() const;
     /** \brief Getter of the field \ref m_pointed.
      *

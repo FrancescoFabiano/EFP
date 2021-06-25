@@ -45,7 +45,7 @@ void kem_store::add_agent_group(const std::string & to_add)
 {
     //if (m_agent_group_ids.find(to_add) == m_agent_group_ids.end()) {
     //Insert does not override
-    m_agent_group_ids.insert(std::pair<std::string, agent_group>(to_add, m_agent_group_ids.size()));
+    m_agent_group_ids.insert(std::pair<std::string, agent_group_id>(to_add, m_agent_group_ids.size()));
 
     //	m_inverse_agent_group_ids.insert(std::pair<agent_group, std::string>(m_inverse_agent_group_ids.size(),to_add));
 
@@ -84,7 +84,7 @@ const kem_ptr kem_store::get_kem(kem_id id) const
     }
 }
 
-agent_group kem_store::get_agent_group(const std::string & to_get) const
+agent_group_id kem_store::get_agent_group(const std::string & to_get) const
 {
     auto ptr = m_agent_group_ids.find(to_get);
 
@@ -97,7 +97,7 @@ agent_group kem_store::get_agent_group(const std::string & to_get) const
 
 }
 
-std::string kem_store::get_agent_group_name(agent_group id) const
+std::string kem_store::get_agent_group_name(agent_group_id id) const
 {
     for (auto it_map = m_agent_group_ids.begin(); it_map != m_agent_group_ids.end(); ++it_map) {
         if (it_map->second == id)

@@ -292,7 +292,7 @@ single_observability_map state<T>::get_observants(const observability_map & tabl
 	single_observability_map ret;
 	for (auto it_ag = agents.begin(); it_ag != agents.end(); it_ag++) {
 		//if (*it_ag != executor) {
-		ret.insert(std::pair<agent, agent_group>(*it_ag, get_obs_group(*it_ag, table)));
+		ret.insert(std::pair<agent, agent_group_id>(*it_ag, get_obs_group(*it_ag, table)));
 		//}
 	}
 
@@ -300,7 +300,7 @@ single_observability_map state<T>::get_observants(const observability_map & tabl
 }
 
 template <class T>
-agent_group state<T>::get_obs_group(agent ag, const observability_map & table) const
+agent_group_id state<T>::get_obs_group(agent ag, const observability_map & table) const
 {
 	auto it_ag = table.find(ag);
 	if (it_ag != table.end()) {

@@ -149,7 +149,7 @@ const agent_set & belief_formula::get_group_agents() const
 {
 	if (!m_is_grounded) {
 		std::cerr << "\nError in reading a belief_formula, it must be grounded";
-		std::cerr << " (agent_group not grounded).";
+		std::cerr << " (agent_group_id not grounded).";
 		std::cerr << std::endl;
 		exit(1);
 	}

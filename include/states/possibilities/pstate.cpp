@@ -755,7 +755,7 @@ void pstate::calc_min_bisimilar()
 
 
 	//	std::cerr << "\nDEBUG: \n\tNvertex_before = " << m_worlds.size() << std::endl;
-	//	std::cerr << "\tNbehavs_before = " << m_edges.size() << std::endl;
+	//	std::cerr << "\tNbehavs_before = " << m_information_state.size() << std::endl;
 
 	automaton a;
 	pworld_vec.reserve(get_worlds().size());
