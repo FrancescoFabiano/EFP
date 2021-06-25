@@ -8,8 +8,8 @@
  */
 
 #include "pem_parser.h"
-#include "../actions/pevent.h"
-#include "../actions/pem_store.h"
+#include "../actions/possibilities/pevent.h"
+#include "../actions/possibilities/pem_store.h"
 
 void pem_parser::apply_spaces_regex(std::string & to_clean, const std::regex & pattern)
 {
@@ -134,17 +134,17 @@ void pem_parser::parse_edge(const std::string & edge, pem_edges & edges)
 	auto it_eve = edges.find(first);
 
 	if (it_eve != edges.end()) {
-		event_map e_map = it_eve->second;
+		pevent_map e_map = it_eve->second;
 		auto it_evm = e_map.find(e_to_add_ag);
 
 		if (it_evm != e_map.end()) {
 			it_evm->second.insert(second);
 		} else {
-			e_map.insert(event_map::value_type(e_to_add_ag,{second}));
+			e_map.insert(pevent_map::value_type(e_to_add_ag, {second}));
 		}
 	} else {
-		event_map tmp;
-		tmp.insert(event_map::value_type(e_to_add_ag,{second}));
+		pevent_map tmp;
+		tmp.insert(pevent_map::value_type(e_to_add_ag, {second}));
 		edges.insert(pem_edges::value_type(first, tmp));
 	}
 	//	if (edges.find(e_to_add_ag) != edges.end()) {

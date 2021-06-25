@@ -6,7 +6,7 @@
  */
 #include "action.h"
 #include "../domain/domain.h"
-#include "pem_store.h"
+#include "possibilities/pem_store.h"
 
 /*********************************************************************
  Action implementation

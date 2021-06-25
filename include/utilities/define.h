@@ -359,15 +359,40 @@ enum e_meta_condition
     none
 };
 
-class pevent;
-typedef short event_id;
-//typedef std::map<fluent, belief_formula> event_postconditions;
 typedef std::set<e_meta_condition> event_metacond;
 typedef fluent_formula event_postconditions;
 
+typedef std::map<agent, agent_group> agent_group_map;
+
+// Kripke
+class kevent;
+typedef short event_id;
+
+class kevent_ptr;
+typedef std::set<kevent_ptr> kevent_ptr_set;
+
+
+class kem;
+typedef act_type kem_id;
+
+class kem_ptr;
+
+typedef std::map<agent_group, kevent_ptr_set> kevent_map;
+typedef std::map<kevent_ptr, kevent_map> kem_edges;
+
+typedef std::map<std::pair<kworld_ptr, kevent_ptr>, kworld_ptr> kupdate_map;
+
+class kem_store;
+typedef std::set<kevent> kevent_set; /**< \brief A set of \ref kevent, used to store all the created ones.*/
+typedef std::set<kem> kem_set; /**< \brief A set of \ref kem, used to store all the created ones.*/
+
+
+// Possibilities
+class pevent;
+typedef short event_id;
 
 class pevent_ptr;
-typedef std::set<pevent_ptr> event_ptr_set; /**< \brief A set of \ref pevent_ptr.
+typedef std::set<pevent_ptr> pevent_ptr_set; /**< \brief A set of \ref pevent_ptr.
 //                                        *
 //                                        * Mainly used to store all the reachable \ref pevent of a \ref pevent without wasting memory.
 //                                        *
@@ -414,18 +439,14 @@ typedef act_type pem_id;
 //typedef std::map<event_id, pevent_ptr> pem_map; /**< \brief A map that stores the pevent model for a given type of action (identified through an id).*/
 
 class pem_ptr;
-typedef std::set<pem_ptr> pem_ptr_set;
 
-typedef std::map<agent_group, event_ptr_set> event_map;
-typedef std::map<pevent_ptr, event_map> pem_edges;
+typedef std::map<agent_group, pevent_ptr_set> pevent_map;
+typedef std::map<pevent_ptr, pevent_map> pem_edges;
 
 typedef std::map<std::pair<pworld_ptr, pevent_ptr>, pworld_ptr> pupdate_map;
-typedef std::map<std::pair<kworld_ptr, pevent_ptr>, kworld_ptr> kupdate_map;
-
-typedef std::map<agent, agent_group> agent_group_map;
 
 class pem_store;
-typedef std::set<pevent> event_set; /**< \brief A set of \ref pevent, used to store all the created ones.*/
+typedef std::set<pevent> pevent_set; /**< \brief A set of \ref pevent, used to store all the created ones.*/
 typedef std::set<pem> pem_set; /**< \brief A set of \ref pem, used to store all the created ones.*/
 
 /****************** Bisimulation *******************/

@@ -1,6 +1,6 @@
 /**
  * \class state
- * \brief Templatic Class that encodes a state of planner.h.
+ * \brief Template-based Class that encodes a state of planner.h.
  *
  * \details  This is the *TEMPLATE* and will be used as black box from planner.h:
  * its implementation will depend on the initial choices.

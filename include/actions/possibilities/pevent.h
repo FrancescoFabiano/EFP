@@ -12,8 +12,8 @@
  */
 #pragma once
 
-#include "../utilities/define.h"
-#include "../formulae/belief_formula.h"
+#include "../../utilities/define.h"
+#include "../../formulae/belief_formula.h"
 
 class pevent
 {

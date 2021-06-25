@@ -20,7 +20,7 @@
 #include "../utilities/define.h"
 #include "../utilities/reader.h"
 #include "../actions/action.h"
-#include "../actions/pem_store.h"
+#include "../actions/possibilities/pem_store.h"
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
 

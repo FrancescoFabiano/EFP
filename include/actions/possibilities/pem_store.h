@@ -25,7 +25,7 @@ private:
     /** \brief The pevent representing the perspective of oblivious agents.*/
     pevent_ptr m_epsilon;
     /** \brief A set that contains all the generated pems (even the pems that are "internal")*/
-    event_set m_created_events;
+    pevent_set m_created_events;
 
     /** \brief All the pevent that represent an action (given as input).
      *
