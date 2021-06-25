@@ -13,7 +13,8 @@
 #include <stdexcept>
 
 #include "pevent.h"
-#include "../utilities/printer.h"
+#include "../../utilities/printer.h"
+#include "../../utilities/helper_t.ipp"
 
 pevent::pevent()
 {
@@ -42,17 +43,6 @@ pevent::pevent(event_id id, bool ontic_change, const formula_list & pre, const e
 	set_postconditions(post);
 }*/
 
-
-pevent::pevent(event_id id, const formula_list & pre, const event_metacond & meta_pre, const event_postconditions & post, const event_metacond & meta_post)
-{
-	set_id(id);
-	set_precondition(pre);
-	set_meta_precondition(meta_pre);
-	set_postconditions(post);
-	set_meta_postconditions(meta_post);
-	set_ontic_change();
-}
-
 pevent::pevent(event_id id, const event_metacond & meta_pre, const event_metacond & meta_post)
 {
 	set_id(id);
@@ -61,12 +51,10 @@ pevent::pevent(event_id id, const event_metacond & meta_pre, const event_metacon
 	set_ontic_change();
 }
 
-pevent::pevent(const ::pevent & to_copy)
+pevent::pevent(const pevent & to_copy)
 {
 	set_id(to_copy.get_id());
-	set_precondition(to_copy.get_precondition());
 	set_meta_precondition(to_copy.get_meta_precondition());
-	set_postconditions(to_copy.get_postconditions());
 	set_meta_postconditions(to_copy.get_meta_postconditions());
 	set_ontic_change(to_copy.get_ontic_change());
 }
@@ -98,12 +86,10 @@ void pevent::set_postconditions(const event_postconditions & to_set)
 void pevent::set_meta_postconditions(const event_metacond & to_set)
 {
 	m_meta_post = to_set;
-
 }
 
 void pevent::set_ontic_change()
 {
-
 	if (m_meta_post.size() == 0) {
 		set_ontic_change(false);
 	} else if (m_meta_post.size() > 1) {
@@ -113,14 +99,11 @@ void pevent::set_ontic_change()
 	} else {
 		set_ontic_change(true);
 	}
-
 }
 
 void pevent::set_ontic_change(bool to_set)
 {
-
 	m_ontic_change = to_set;
-
 }
 
 const event_id pevent::get_id() const
@@ -128,19 +111,76 @@ const event_id pevent::get_id() const
 	return m_id;
 }
 
-const formula_list & pevent::get_precondition() const
+const event_information_state pevent::get_information_state() const
 {
-	return m_pre;
+    return m_information_state;
+}
+
+const formula_list & pevent::get_precondition(const pstate & s, const action & act) const
+{
+    formula_list ret;
+    formula_list action_pre = act.get_executability();
+    fluent_formula action_eff = helper_t::get_effects_if_entailed(act.get_effects(), s);
+
+    event_metacond::const_iterator it_meta_pre;
+    formula_list::const_iterator it_act_pre;
+
+    for (it_meta_pre = get_meta_precondition().begin(); it_meta_pre != get_meta_precondition().end(); ++it_meta_pre) {
+        belief_formula tmp_bf;
+
+        switch ( *it_meta_pre ) {
+            case act_eff:
+                tmp_bf.set_from_ff(action_eff);
+                ret.push_back(tmp_bf);
+                break;
+            case neg_act_eff:
+                tmp_bf.set_from_ff(helper::negate_fluent_formula(action_eff));
+                ret.push_back(tmp_bf);
+                break;
+            case act_pre:
+                for (it_act_pre = action_pre.begin(); it_act_pre != action_pre.end(); ++it_act_pre) {
+                    ret.push_back(*it_act_pre);
+                }
+                break;
+            case none:
+            default:
+                ret.clear();
+                return ret;
+        }
+    }
+    return ret;
+}
+
+const event_postconditions & pevent::get_postconditions(const pstate & s, const action & act) const
+{
+    fluent_formula action_eff = helper_t::get_effects_if_entailed(act.get_effects(), s);
+
+    if (get_meta_postconditions().size() > 1) {
+        std::cerr << "Error: malformed action postcondition in pevent " << get_id() << std::endl;
+        exit(1);
+    } else if (get_meta_postconditions().empty()) {
+        fluent_formula empty;
+        return empty;
+    } else {
+        switch (*(get_meta_postconditions().begin())) {
+            case act_eff:
+                return action_eff;
+            case neg_act_eff:
+                return helper::negate_fluent_formula(action_eff);
+                //Not break because it means it is empty
+            case none:
+            default:
+                fluent_formula empty;
+                return empty;
+        }
+    }
+
+    //Need to insert the merge with specific postcondition
 }
 
 const event_metacond & pevent::get_meta_precondition() const
 {
 	return m_meta_pre;
-}
-
-const event_postconditions & pevent::get_postconditions() const
-{
-	return m_post;
 }
 
 const event_metacond & pevent::get_meta_postconditions() const
@@ -181,8 +221,6 @@ bool pevent::operator==(const ::pevent & to_compare) const
 bool pevent::operator=(const ::pevent & to_copy)
 {
 	set_id(to_copy.get_id());
-	set_precondition(to_copy.get_precondition());
-	set_postconditions(to_copy.get_postconditions());
 	return true;
 }
 
@@ -262,19 +300,28 @@ const event_id pevent_ptr::get_id() const
 	exit(1);
 }
 
-const formula_list & pevent_ptr::get_precondition() const
+const event_information_state pevent_ptr::get_information_state() const
+{
+    if (m_ptr != nullptr) {
+        return get_ptr()->get_information_state();
+    }
+    std::cerr << "Error in creating a event_ptr\n";
+    exit(1);
+}
+
+const formula_list & pevent_ptr::get_precondition(const pstate & s, const action & act) const
 {
 	if (m_ptr != nullptr) {
-		return get_ptr()->get_precondition();
+		return get_ptr()->get_precondition(s, act);
 	}
 	std::cerr << "Error in creating a event_ptr\n";
 	exit(1);
 }
 
-const event_postconditions & pevent_ptr::get_postconditions() const
+const event_postconditions & pevent_ptr::get_postconditions(const pstate & s, const action & act) const
 {
 	if (m_ptr != nullptr) {
-		return get_ptr()->get_postconditions();
+		return get_ptr()->get_postconditions(s, act);
 	}
 	std::cerr << "Error in creating a event_ptr\n";
 	exit(1);

@@ -9,7 +9,7 @@
 #include <algorithm>
 #include "planner.h"
 #include "../update/union_update.h"
-#include "../actions/pem_store.h"
+#include "../actions/possibilities/pem_store.h"
 
 template <class T>
 void planner<T>::print_results(std::chrono::duration<double> elapsed_seconds, T goal, bool results_file, bool givenplan, search_type used_search, heuristics used_heur)

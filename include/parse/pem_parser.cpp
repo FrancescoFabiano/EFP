@@ -8,8 +8,8 @@
  */
 
 #include "pem_parser.h"
-#include "../actions/pevent.h"
-#include "../actions/pem_store.h"
+#include "../actions/possibilities/pevent.h"
+#include "../actions/possibilities/pem_store.h"
 
 void pem_parser::apply_spaces_regex(std::string & to_clean, const std::regex & pattern)
 {
@@ -113,6 +113,7 @@ void pem_parser::parse_ag_list(const std::string & line)
 
 }
 
+/*
 void pem_parser::parse_edge(const std::string & edge, pem_edges & edges)
 {
 	std::string cleaned = edge;
@@ -129,22 +130,22 @@ void pem_parser::parse_edge(const std::string & edge, pem_edges & edges)
 	pevent_ptr second = pem_store::get_instance().get_event(pem_store::get_instance().get_event_id(sub_arg));
 
 	args >> sub_arg;
-	agent_group e_to_add_ag = pem_store::get_instance().get_agent_group(sub_arg);
+	agent_group_id e_to_add_ag = pem_store::get_instance().get_agent_group(sub_arg);
 
 	auto it_eve = edges.find(first);
 
 	if (it_eve != edges.end()) {
-		event_map e_map = it_eve->second;
+		event_information_state e_map = it_eve->second;
 		auto it_evm = e_map.find(e_to_add_ag);
 
 		if (it_evm != e_map.end()) {
 			it_evm->second.insert(second);
 		} else {
-			e_map.insert(event_map::value_type(e_to_add_ag,{second}));
+			e_map.insert(event_information_state::value_type(e_to_add_ag, {second}));
 		}
 	} else {
-		event_map tmp;
-		tmp.insert(event_map::value_type(e_to_add_ag,{second}));
+		event_information_state tmp;
+		tmp.insert(event_information_state::value_type(e_to_add_ag, {second}));
 		edges.insert(pem_edges::value_type(first, tmp));
 	}
 	//	if (edges.find(e_to_add_ag) != edges.end()) {
@@ -152,7 +153,7 @@ void pem_parser::parse_edge(const std::string & edge, pem_edges & edges)
 	//	} else {
 	//		std::set<pem_edge> tmp_set;
 	//		tmp_set.insert(e_to_add);
-	//		edges.insert(std::pair<agent_group, std::set<pem_edge> >(e_to_add_ag, tmp_set));
+	//		edges.insert(std::pair<agent_group_id, std::set<pem_edge> >(e_to_add_ag, tmp_set));
 	//	}
 }
 
@@ -184,10 +185,11 @@ void pem_parser::parse_edges_list(const std::string & line, pem_edges & edges)
 		parse_edge(sub_arg, edges);
 	}
 }
+*/
 
 void pem_parser::parse(const std::string & filename)
 {
-	//std::cout << "\nTesting the generation of Event Models starting from the file: " << filename << std::endl;
+	/*//std::cout << "\nTesting the generation of Event Models starting from the file: " << filename << std::endl;
 	std::ifstream pem_file(filename);
 
 
@@ -369,6 +371,6 @@ void pem_parser::parse(const std::string & filename)
 		std::cerr << "\nParsing Error: It is impossible to open the file \'" << filename << "\'.";
 		exit(1);
 	}
-	pem_file.close();
+	pem_file.close();*/
 }
 

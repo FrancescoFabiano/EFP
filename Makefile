@@ -5,7 +5,9 @@ OBJS	=	$(BUILD_DIR)/bison.o $(BUILD_DIR)/lex.o $(BUILD_DIR)/main.o \
 			$(BUILD_DIR)/action.o $(BUILD_DIR)/helper.o $(BUILD_DIR)/initially.o \
 			$(BUILD_DIR)/kstore.o $(BUILD_DIR)/kworld.o $(BUILD_DIR)/kstate.o \
 			$(BUILD_DIR)/pstore.o $(BUILD_DIR)/pworld.o $(BUILD_DIR)/pstate.o \
-			$(BUILD_DIR)/pevent.o $(BUILD_DIR)/pem.o $(BUILD_DIR)/pem_store.o $(BUILD_DIR)/pem_parser.o $(BUILD_DIR)/union_update.o \
+			$(BUILD_DIR)/pevent.o $(BUILD_DIR)/pem.o $(BUILD_DIR)/pem_store.o \
+			$(BUILD_DIR)/kevent.o $(BUILD_DIR)/kem.o $(BUILD_DIR)/kem_store.o \
+			$(BUILD_DIR)/pem_parser.o $(BUILD_DIR)/union_update.o \
 			$(BUILD_DIR)/reader.o \
 			$(BUILD_DIR)/heuristics_manager.o $(BUILD_DIR)/satisfied_goals.o \
 			$(BUILD_DIR)/bisimulation.o
@@ -45,6 +47,8 @@ HEURISTIC_DIR = $(INCLUDE_DIR)/heuristics
 PARSE_DIR = $(INCLUDE_DIR)/parse
 STATES_DIR = $(INCLUDE_DIR)/states
 
+A_POSSIBILITY_DIR = $(ACTION_DIR)/possibilities
+A_KRIPKE_DIR = $(ACTION_DIR)/kripke
 S_POSSIBILITY_DIR = $(STATES_DIR)/possibilities
 S_KRIPE_DIR = $(STATES_DIR)/kripke
 UTILITIES_DIR = $(INCLUDE_DIR)/utilities
@@ -253,40 +257,63 @@ $(BUILD_DIR)/pstore_opt.o: $(S_POSSIBILITY_OPT_DIR)/pstore_opt.cpp $(S_POSSIBILI
 		$(dir_guard)
 		$(CC) $(CFLAGS) -c $(S_POSSIBILITY_OPT_DIR)/pstore_opt.cpp -o $(BUILD_DIR)/pstore_opt.o
 
-##DELPHIC
-$(BUILD_DIR)/pevent.o: $(ACTION_DIR)/pevent.cpp $(ACTION_DIR)/pevent.h \
-					$(ACTION_DIR)/pem_store.h $(UPDATE_DIR)/union_update.h \
+
+$(BUILD_DIR)/kevent.o: $(A_KRIPKE_DIR)/kevent.cpp $(A_KRIPKE_DIR)/kevent.h \
+					   $(A_KRIPKE_DIR)/kem_store.h $(UPDATE_DIR)/union_update.h \
+					   $(UTILITIES_DIR)/helper.h \
+					   $(UTILITIES_DIR)/define.h
+		$(dir_guard)
+		$(CC) $(CFLAGS) -c $(A_KRIPKE_DIR)/kevent.cpp -o $(BUILD_DIR)/kevent.o
+
+$(BUILD_DIR)/kem.o: $(A_KRIPKE_DIR)/kem.cpp $(A_KRIPKE_DIR)/kem.h \
+					$(A_KRIPKE_DIR)/kevent.h \
+					$(A_KRIPKE_DIR)/kem_store.h $(UPDATE_DIR)/union_update.h \
 					$(UTILITIES_DIR)/helper.h \
 					$(UTILITIES_DIR)/define.h
 		$(dir_guard)
-		$(CC) $(CFLAGS) -c $(ACTION_DIR)/pevent.cpp -o $(BUILD_DIR)/pevent.o
+		$(CC) $(CFLAGS) -c $(A_KRIPKE_DIR)/kem.cpp -o $(BUILD_DIR)/kem.o
 
-$(BUILD_DIR)/pem.o: $(ACTION_DIR)/pem.cpp $(ACTION_DIR)/pem.h \
-					$(ACTION_DIR)/pevent.h \
-					$(ACTION_DIR)/pem_store.h $(UPDATE_DIR)/union_update.h \
-					$(UTILITIES_DIR)/helper.h \
-					$(UTILITIES_DIR)/define.h
-		$(dir_guard)
-		$(CC) $(CFLAGS) -c $(ACTION_DIR)/pem.cpp -o $(BUILD_DIR)/pem.o
-
-$(BUILD_DIR)/pem_store.o: $(ACTION_DIR)/pem_store.cpp $(ACTION_DIR)/pem_store.h \
-					      $(ACTION_DIR)/pem.h \
-						  $(ACTION_DIR)/pevent.h \
+$(BUILD_DIR)/kem_store.o: $(A_KRIPKE_DIR)/kem_store.cpp $(A_KRIPKE_DIR)/kem_store.h \
+					      $(A_KRIPKE_DIR)/kem.h \
+						  $(A_KRIPKE_DIR)/kevent.h \
 					      $(UTILITIES_DIR)/define.h
 		$(dir_guard)
-		$(CC) $(CFLAGS) -c $(ACTION_DIR)/pem_store.cpp -o $(BUILD_DIR)/pem_store.o
+		$(CC) $(CFLAGS) -c $(A_KRIPKE_DIR)/kem_store.cpp -o $(BUILD_DIR)/kem_store.o
+
+##DELPHIC
+$(BUILD_DIR)/pevent.o: $(A_POSSIBILITY_DIR)/pevent.cpp $(A_POSSIBILITY_DIR)/pevent.h \
+					   $(A_POSSIBILITY_DIR)/pem_store.h $(UPDATE_DIR)/union_update.h \
+					   $(UTILITIES_DIR)/helper.h \
+					   $(UTILITIES_DIR)/define.h
+		$(dir_guard)
+		$(CC) $(CFLAGS) -c $(A_POSSIBILITY_DIR)/pevent.cpp -o $(BUILD_DIR)/pevent.o
+
+$(BUILD_DIR)/pem.o: $(A_POSSIBILITY_DIR)/pem.cpp $(A_POSSIBILITY_DIR)/pem.h \
+					$(A_POSSIBILITY_DIR)/pevent.h \
+					$(A_POSSIBILITY_DIR)/pem_store.h $(UPDATE_DIR)/union_update.h \
+					$(UTILITIES_DIR)/helper.h \
+					$(UTILITIES_DIR)/define.h
+		$(dir_guard)
+		$(CC) $(CFLAGS) -c $(A_POSSIBILITY_DIR)/pem.cpp -o $(BUILD_DIR)/pem.o
+
+$(BUILD_DIR)/pem_store.o: $(A_POSSIBILITY_DIR)/pem_store.cpp $(A_POSSIBILITY_DIR)/pem_store.h \
+					      $(A_POSSIBILITY_DIR)/pem.h \
+						  $(A_POSSIBILITY_DIR)/pevent.h \
+					      $(UTILITIES_DIR)/define.h
+		$(dir_guard)
+		$(CC) $(CFLAGS) -c $(A_POSSIBILITY_DIR)/pem_store.cpp -o $(BUILD_DIR)/pem_store.o
 		
 $(BUILD_DIR)/pem_parser.o: $(PARSE_DIR)/pem_parser.cpp $(PARSE_DIR)/pem_parser.h \
-					      $(ACTION_DIR)/pem.h \
-						  $(ACTION_DIR)/pevent.h \
-					      $(ACTION_DIR)/pem_store.h \
-					      $(UTILITIES_DIR)/define.h
+					       $(A_POSSIBILITY_DIR)/pem.h \
+						   $(A_POSSIBILITY_DIR)/pevent.h \
+					       $(A_POSSIBILITY_DIR)/pem_store.h \
+					       $(UTILITIES_DIR)/define.h
 		$(dir_guard)
 		$(CC) $(CFLAGS) -c $(PARSE_DIR)/pem_parser.cpp -o $(BUILD_DIR)/pem_parser.o
 
 $(BUILD_DIR)/union_update.o: $(UPDATE_DIR)/union_update.cpp $(UPDATE_DIR)/union_update.h \
-					      	   $(ACTION_DIR)/pem.h \
-					      	   $(UTILITIES_DIR)/define.h
+					      	 $(A_POSSIBILITY_DIR)/pem.h \
+					      	 $(UTILITIES_DIR)/define.h
 		$(dir_guard)
 		$(CC) $(CFLAGS) -c $(UPDATE_DIR)/union_update.cpp -o $(BUILD_DIR)/union_update.o
 

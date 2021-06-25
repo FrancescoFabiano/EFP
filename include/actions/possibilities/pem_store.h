@@ -25,19 +25,19 @@ private:
     /** \brief The pevent representing the perspective of oblivious agents.*/
     pevent_ptr m_epsilon;
     /** \brief A set that contains all the generated pems (even the pems that are "internal")*/
-    event_set m_created_events;
+    pevent_set m_created_events;
 
     /** \brief All the pevent that represent an action (given as input).
      *
      * These pems are pointer to the ones in \ref m_created_events.*/
     pem_set m_created_pems;
 
-    std::map<std::string, agent_group> m_agent_group_ids;
+    std::map<std::string, agent_group_id> m_agent_group_ids;
     std::map<std::string, pem_id> m_pem_ids_map;
     std::map<std::string, event_id> m_events_ids_map;
 
 
-    //  std::map<agent_group, std::string> m_inverse_agent_group_ids;
+    //  std::map<agent_group_id, std::string> m_inverse_agent_group_ids;
 
 
     /** \brief Private constructor since it is a Singleton class.*/
@@ -108,9 +108,9 @@ public:
     /** \brief Function that returns the id given an agent group name.
      *
      * @return the \ref id of \p to_get.*/
-    agent_group get_agent_group(const std::string & to_get) const;
+    agent_group_id get_agent_group(const std::string & to_get) const;
 
-    std::string get_agent_group_name(agent_group id) const;
+    std::string get_agent_group_name(agent_group_id id) const;
 
     pem_id get_pem_id(const std::string & to_get);
     bool exist_pem(pem_id to_check);

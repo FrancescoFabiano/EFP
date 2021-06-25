@@ -6,7 +6,7 @@
  */
 #include "action.h"
 #include "../domain/domain.h"
-#include "pem_store.h"
+#include "possibilities/pem_store.h"
 
 /*********************************************************************
  Action implementation
@@ -57,8 +57,8 @@ void action::initialize_obs_table(const agent_set & tot_ags, const fluent_set &t
 	false_bf.deground();
 
 
-	//std::map<agent, std::map<agent_group, belief_formula>> map_mid;
-	std::map<agent_group, belief_formula> map_internal;
+	//std::map<agent, std::map<agent_group_id, belief_formula>> map_mid;
+	std::map<agent_group_id, belief_formula> map_internal;
 
 	for (it_ag = tot_ags.begin(); it_ag != tot_ags.end(); ++it_ag) {
 		for (short it_ag_group = 0; it_ag_group != pem_store::get_instance().get_agent_group_number(); ++it_ag_group) {
@@ -139,9 +139,9 @@ void action::add_effect(const fluent_formula& effect, const belief_formula &cond
 	m_effects.insert(effects_map::value_type(effect, condition));
 }
 
-void action::add_observant(agent ag, agent_group ag_group, const belief_formula& condition)
+void action::add_observant(agent ag, agent_group_id ag_group, const belief_formula& condition)
 {
-	//std::pair<agent_group, belief_formula> tmp_obs(ag_group, condition);
+	//std::pair<agent_group_id, belief_formula> tmp_obs(ag_group, condition);
 
 	m_observants[ag][ag_group] = condition; //.insert(observability_map::value_type(fully, condition));
 }

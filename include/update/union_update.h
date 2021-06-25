@@ -21,12 +21,6 @@
 class union_update
 {
 public:
-    /** \brief Calculates the PEM relative to the \ref action description and the current \ref pstate.
-     *
-     * @param [in] act: the \ref action description.
-     * @return the resulting \ref pem.*/
-    static pem_ptr build_pem(const action & act);
-
     static agent_group_map build_agent_group_map();
     /** \brief Calculates the \ref pstate resulting from the given current \ref pstate and \ref pem.
      *
@@ -36,9 +30,4 @@ public:
     static const pstate & u_update(const pstate & state, const action & act);
     static const pworld_ptr & u_update_helper(pstate & ret, const pstate & state, const action & act, const pem_ptr & pem, const pworld_ptr & pw, const pevent_ptr & ev, pupdate_map & u_map, const agent_group_map & a_map);
     static const kstate & u_update(const kstate & state, const action & act);
-
-    template <class T>
-    static fluent_formula get_total_effects(const T & s, const action & act, const pevent_ptr & e);
-    template <class T>
-    static formula_list get_total_pre(const T & s, const action & act, const pevent_ptr & e);
 };

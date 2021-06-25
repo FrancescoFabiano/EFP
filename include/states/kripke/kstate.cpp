@@ -103,7 +103,7 @@ bool kstate::operator<(const kstate & to_compare) const
 
 	//	bisimulation b;
 	//
-	//	if (m_edges < to_compare.get_edges()) {
+	//	if (m_information_state < to_compare.get_information_state()) {
 	//		return b.compare_automata(*this, to_compare);
 	//	} else {
 	//		return b.compare_automata(to_compare, *this);
@@ -129,9 +129,9 @@ bool kstate::operator<(const kstate & to_compare) const
 	//		return false;
 	//	}
 	//
-	//	if (m_edges.size() < to_compare.get_edges().size()) {
+	//	if (m_information_state.size() < to_compare.get_information_state().size()) {
 	//		return true;
-	//	} else if (m_edges.size() > to_compare.get_edges().size()) {
+	//	} else if (m_information_state.size() > to_compare.get_information_state().size()) {
 	//		return false;
 	//	}
 
@@ -148,8 +148,8 @@ bool kstate::operator<(const kstate & to_compare) const
 	//	}
 
 	//	kedge_ptr_set::const_iterator it_kepts1, it_kepts2;
-	//	it_kepts2 = to_compare.get_edges().begin();
-	//	for (it_kepts1 = m_edges.begin(); it_kepts1 != m_edges.end(); it_kepts1++) {
+	//	it_kepts2 = to_compare.get_information_state().begin();
+	//	for (it_kepts1 = m_information_state.begin(); it_kepts1 != m_information_state.end(); it_kepts1++) {
 	//		if ((*it_kepts1) < (*it_kepts2)) {
 	//			return true;
 	//		} else if ((*it_kepts1) > (*it_kepts2)) {
@@ -289,7 +289,7 @@ kworld_ptr_set kstate::get_B_reachable_worlds(const agent & ag, const kworld_ptr
 //	/** \todo check: If a--i-->b, b--i-->c then a--i-->c must be there*/
 //	bool is_fixed_point = true;
 //	kedge_ptr_set::const_iterator it_kedge;
-//	for (it_kedge = m_edges.begin(); it_kedge != m_edges.end(); it_kedge++) {
+//	for (it_kedge = m_information_state.begin(); it_kedge != m_information_state.end(); it_kedge++) {
 //		if (((*it_kedge).get_from() == world) && ((*it_kedge).get_label() == ag)) {
 //			//We use the pair of insert, if we add a new world (true in the set::insert) then is not a fixed point
 //			//if (std::get<1>(ret.insert((*it_kedge).get_to()))) {
@@ -752,7 +752,7 @@ automaton kstate::kstate_to_automaton(std::vector<kworld_ptr> & kworld_vec, cons
 		}
 	}
 
-	/*for (it_keps = m_edges.begin(); it_keps != m_edges.end(); it_keps++) {
+	/*for (it_keps = m_information_state.begin(); it_keps != m_information_state.end(); it_keps++) {
 
 	    //DEBUG:Change this
 	    // if (adj_list[it_keps->get_from()][it_keps->get_to()].empty())
@@ -884,7 +884,7 @@ void kstate::calc_min_bisimilar()
 
 
 	//	std::cerr << "\nDEBUG: \n\tNvertex_before = " << m_worlds.size() << std::endl;
-	//	std::cerr << "\tNbehavs_before = " << m_edges.size() << std::endl;
+	//	std::cerr << "\tNbehavs_before = " << m_information_state.size() << std::endl;
 
 	automaton a;
 	kworld_vec.reserve(get_worlds().size());
@@ -1207,7 +1207,7 @@ void kstate::print_graphviz(std::ostream & graphviz) const
 //
 //
 //	kedge_ptr_set::const_iterator it_kep;
-//	for (it_kep = m_edges.begin(); it_kep != m_edges.end(); it_kep++) {
+//	for (it_kep = m_information_state.begin(); it_kep != m_information_state.end(); it_kep++) {
 //		if (it_kep->get_from() == tmp_ptr && !(it_kep->get_to() == tmp_ptr)) {
 //			kedge extra_ed(extra_ptr, it_kep->get_to(), it_kep->get_label());
 //			add_edge(extra_ed);
@@ -1241,7 +1241,7 @@ void kstate::print_graphviz(std::ostream & graphviz) const
 //	//std::cerr << "\nDEBUG:HERE\n";
 //
 //
-//	if (m_edges < to_compare.get_edges()) {
+//	if (m_information_state < to_compare.get_information_state()) {
 //		//std::cerr << "\nDEBUG:HERE 1\n";
 //
 //		a = b.compare_automata_debug(*this, to_compare, kworld_vec);
