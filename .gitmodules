@@ -1,0 +1,3 @@
+[submodule "scripts/EPDDL_scripts/EPDDL_parser"]
+	path = scripts/EPDDL_scripts/EPDDL_parser
+	url = https://github.com/FrancescoFabiano/E-PDDL.git

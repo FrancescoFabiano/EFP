@@ -15,7 +15,6 @@
 #include "../actions/kripke/kem.h"
 #include "../actions/kripke/kem_store.h"
 
-
 agent_group_map union_update::build_agent_group_map()
 {
 	agent_group_map a_map;
@@ -63,41 +62,41 @@ const pworld_ptr & union_update::u_update_helper(pstate & ret, const pstate & st
 	pworld_ptr new_pw = ret.add_world(pworld(world_description));
 	u_map.insert(pupdate_map::value_type({pw, ev}, new_pw));
 
-//	event_information_state::const_iterator it_eis;
-//
-//	agent_group_id agg;
+	//	event_information_state::const_iterator it_eis;
+	//
+	//	agent_group_id agg;
 
 	information_state::const_iterator it_pis;
 	pworld_ptr_set::const_iterator it_pws;
-    pevent_ptr_set::const_iterator it_evs;
-    agent_group_map::const_iterator it_agm;
+	pevent_ptr_set::const_iterator it_evs;
+	agent_group_map::const_iterator it_agm;
 
-    pevent_ptr_set evs;
-    agent ag;
+	pevent_ptr_set evs;
+	agent ag;
 
-//    for (it_eis = ev.get_information_state().begin(); it_eis != ev.get_information_state().end(); it_eis++) {
-//        agg = it_eis->first;
-//
-//        for (it_agm = )
-//    }
+	//    for (it_eis = ev.get_information_state().begin(); it_eis != ev.get_information_state().end(); it_eis++) {
+	//        agg = it_eis->first;
+	//
+	//        for (it_agm = )
+	//    }
 
 	for (it_pis = pw.get_information_state().begin(); it_pis != pw.get_information_state().end(); it_pis++) {
-	    ag = it_pis->first;
-        it_agm = a_map.find(ag);
+		ag = it_pis->first;
+		it_agm = a_map.find(ag);
 
-        if (it_agm != a_map.end()) {
-            for (it_pws = it_pis->second.begin(); it_pws != it_pis->second.end(); it_pws++) {
-                evs = ev.get_information_state().at(it_agm->second);
+		if (it_agm != a_map.end()) {
+			for (it_pws = it_pis->second.begin(); it_pws != it_pis->second.end(); it_pws++) {
+				evs = ev.get_information_state().at(it_agm->second);
 
-                for (it_evs = evs.begin(); it_evs != evs.end(); it_evs++) {
-                    if (u_map.find({*it_pws, *it_evs}) == u_map.end() &&
-                        state.entails(it_evs->get_precondition(state, act), *it_pws)) {
-                        pworld_ptr believed_pw = u_update_helper(ret, state, act, pem, *it_pws, *it_evs, u_map, a_map);
-                        ret.add_edge(new_pw, believed_pw, ag);
-                    }
-                }
-            }
-        }
+				for (it_evs = evs.begin(); it_evs != evs.end(); it_evs++) {
+					if (u_map.find({*it_pws, *it_evs}) == u_map.end() &&
+						state.entails(it_evs->get_precondition(state, act), *it_pws)) {
+						pworld_ptr believed_pw = u_update_helper(ret, state, act, pem, *it_pws, *it_evs, u_map, a_map);
+						ret.add_edge(new_pw, believed_pw, ag);
+					}
+				}
+			}
+		}
 	}
 	return new_pw;
 }

@@ -53,11 +53,10 @@ reader::reader()
 {
 }
 
-int reader::read()
+int reader::read(const std::string & filename)
 {
 	//Call to the parser function.
 	//Generation of action groups and events (after agents declaration but before actions decalration)
-	std::string filename = "include/update/marho_pem.txt";
 	std::cout << "\nBuilding event models..." << std::endl;
 	pem_store::get_instance().generate(filename);
 	return yyparse();

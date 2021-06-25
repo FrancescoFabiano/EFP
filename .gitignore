@@ -49,6 +49,8 @@ Doxygen/Docs/
 
 # Out files
 out/
+temp/
+tmp/
 *.tmp
 callgrind.out*
 

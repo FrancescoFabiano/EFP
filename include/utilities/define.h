@@ -29,6 +29,24 @@
  ****************************************************************/
 #define NEGATION_SYMBOL "-" /**< \brief The negation symbol to negate the \ref fluent */
 
+/*****************************************************************
+ * Language and Update Models
+ ****************************************************************/
+
+enum spec_lang_type
+{
+    EPDDL, /**< The E-PDDL language is used to speficy the input file*/
+    MAR /**< The mAp language is used to speficy the input file*/
+};
+
+enum up_model_type
+{
+    STANDARD, /**< The transition function follows the standard ontic,sensing,announcement update models*/
+    CUSTOM /**< The transition function follows the update models defined by the user*/
+};
+
+
+
 /****************************************************************
  * Non class specific
  ****************************************************************/

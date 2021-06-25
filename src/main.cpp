@@ -45,11 +45,13 @@ domain_restriction ini_restriction = S5; //default
 domain_restriction goal_restriction = NONE; //default
 action_check act_check = EXE_POINTED__COND_WORLD; //default
 
+spec_lang_type input_lang = EPDDL;
+up_model_type update_models = STANDARD;
+std::string models_filename = "";
+
 bool execute_given_actions = false;
 bool kopt = false;
 std::vector<std::string> given_actions;
-
-bool generate_asp = false;
 
 short max_depth = 1;
 short step = 1;
@@ -62,6 +64,21 @@ void print_usage(char* prog_name)
 
 	std::cout << "-debug" << std::endl;
 	std::cout << "	Makes the solving process verbose." << std::endl;
+
+	std::cout << "-input_lang @input_language" << std::endl;
+	std::cout << "	Select the @input_language used to define the problem." << std::endl;
+	std::cout << "	Possible @input_language:" << std::endl;
+	std::cout << "		EPDDL: The problem and the domain are specified in EPDDL (a single problem instance file with the domain included). (Default)" << std::endl;
+	std::cout << "		MAR: The problem instance is defined through the action language mAp." << std::endl;
+
+	std::cout << "-update_models @models" << std::endl;
+	std::cout << "	Select the @models used to define the transition function." << std::endl;
+	std::cout << "	Possible @models:" << std::endl;
+	std::cout << "		STANDARD: The model with Ontic, Sensing and Announcement actions where the agents may be Fully, Partially or Oblivious. (Default)" << std::endl;
+	std::cout << "		CUSTOM: The solver will ask for the name of the file which contains the specification of the custom update models." << std::endl;
+
+	std::cout << "-set_models_file @filename" << std::endl;
+	std::cout << "	Set the update model to CUSTOM and also define which file contains the update models specification." << std::endl;
 
 	std::cout << "-st @state_type" << std::endl;
 	std::cout << "	Select the @state_type for the planner." << std::endl;
@@ -121,11 +138,10 @@ void print_usage(char* prog_name)
 	std::cout << "	Set the @heuristic to use to perform the search (Best First overrides the search methods)." << std::endl;
 	std::cout << "	Possible @heuristic:" << std::endl;
 	std::cout << "		NONE: The selected search methods is used instead (BFS or DFS). (Default)" << std::endl;
-	std::cout << "		L_PG: A planning graph is used to calculate the distance of each state from the goal." << std::endl;
-	std::cout << "		S_PG: A planning graph is used to calculate the sum of each sub-goal distance starting from the state." << std::endl;
-	std::cout << "		C_PG: A single planning graph is used to calculate the sum of each 'grounded' belief formula." << std::endl;
+	//std::cout << "		L_PG: A planning graph is used to calculate the distance of each state from the goal." << std::endl;
+	//std::cout << "		S_PG: A planning graph is used to calculate the sum of each sub-goal distance starting from the state." << std::endl;
+	//std::cout << "		C_PG: A single planning graph is used to calculate the sum of each 'grounded' belief formula." << std::endl;
 	std::cout << "		SUBGOALS: We select the state with the highest number of satisfied subgoals." << std::endl;
-
 
 
 	std::cout << "-e action1 action2 action3 ..." << std::endl;
@@ -139,8 +155,8 @@ void print_usage(char* prog_name)
 	std::cout << "	Print the plan time in a file to make the tests confrontations easier." << std::endl << std::endl;
 
 
-	std::cout << "-generate_asp" << std::endl;
-	std::cout << "	Generate a version of the input file for the ASP solver (the c++ planner does not search for a plan)." << std::endl << std::endl;
+	//std::cout << "-generate_asp" << std::endl;
+	//std::cout << "	Generate a version of the input file for the ASP solver (the c++ planner does not search for a plan)." << std::endl << std::endl;
 
 
 	std::cout << "EXAMPLES:" << std::endl;
@@ -167,8 +183,6 @@ void manage_arguments(int argc, char** argv)
 			debug = true;
 		} else if (strcmp(argv[i], "-results_file") == 0) {
 			results_file = true;
-		} else if (strcmp(argv[i], "-generate_asp") == 0) {
-			generate_asp = true;
 		}//No case sensitivity
 		else if (strcmp(argv[i], "-ir") == 0) {
 			i++;
@@ -350,7 +364,7 @@ void manage_arguments(int argc, char** argv)
 				std::cout << "The Fast-Bisimulation Algorithm introduced by Dovier et al, 2001 is used for kstate reduction." << std::endl;
 				bisimulation = FastBisimulation;
 			} else {
-				std::cerr << "Wrong specification for '-gr'; use 'S5' or 'K45' or 'NONE'." << std::endl;
+				std::cerr << "Wrong specification for '-bis'; use 'NONE' or 'PT' or 'FB'." << std::endl;
 				exit(1);
 			}
 		} else if (strcmp(argv[i], "-e") == 0) {
@@ -364,6 +378,45 @@ void manage_arguments(int argc, char** argv)
 				given_actions.push_back(std::string(argv[i++]));
 			}
 
+		} else if (strcmp(argv[i], "-input_lang") == 0) {
+			i++;
+			if (i >= argc) {
+				std::cerr << "-input_lang needs specification (EPDDL,MAR)." << std::endl;
+				exit(1);
+			} else if (strcmp(argv[i], "EPDDL") == 0) {
+				std::cout << "The input language is set to EPDDL. (Default)" << std::endl;
+				input_lang = EPDDL; //default
+			} else if (strcmp(argv[i], "MAR") == 0) {
+				std::cout << "The input language is set to MAR." << std::endl;
+				input_lang = MAR;
+			} else {
+				std::cerr << "Wrong specification for '-input_lang'; use 'EPDDL' or 'MAR'." << std::endl;
+				exit(1);
+			}
+		} else if (strcmp(argv[i], "-update_models") == 0) {
+			i++;
+			if (i >= argc) {
+				std::cerr << "-update_models needs specification (STANDARD,CUSTOM)." << std::endl;
+				exit(1);
+			} else if (strcmp(argv[i], "STANDARD") == 0) {
+				std::cout << "The update models follow the standard definition. (Default)" << std::endl;
+				update_models = STANDARD; //default
+			} else if (strcmp(argv[i], "CUSTOM") == 0) {
+				std::cout << "The update models are specified by the user in a file." << std::endl;
+				update_models = CUSTOM;
+			} else {
+				std::cerr << "Wrong specification for '-update_models'; use 'STANDARD' or 'CUSTOM'." << std::endl;
+				exit(1);
+			}
+		} else if (strcmp(argv[i], "-set_models_file") == 0) {
+			i++;
+			if (i >= argc) {
+				std::cerr << "-set_models_file needs a filename." << std::endl;
+				exit(1);
+			} else {
+				update_models = CUSTOM;
+				models_filename = argv[i];
+			}
 		} else {
 			print_usage(argv[0]);
 		}
@@ -424,17 +477,50 @@ void launch_search(state_type state_struc, bool execute_given_action, bool resul
 void generate_domain(char** argv)
 {
 	std::string domain_name = argv[1];
-	if (freopen(argv[1], "r", stdin) == NULL) {
+	std::string used_name = domain_name;
 
-		std::cerr << argv[0] << ": File " << domain_name << " cannot be opened.\n";
+	
+	if (update_models == CUSTOM) {
+		if (models_filename.compare("") == 0) {
+			std::cout << "\nInsert the filename, with the path relative to the execution folder, that specifies the update models (press Enter to confirm): ";
+			std::getline(std::cin, models_filename);
+		}
+	} else {
+		models_filename = "include/update/marho_pem.txt";
+	}
+
+	if (input_lang == EPDDL) {
+		//Execute script
+		system(("sh scripts/EPDDL_scripts/generate_mar_from_epddl.sh " + domain_name).c_str());
+
+		std::string filename_path = "temp/"; //Complete Later @TODO
+		std::string filename_name = "filename.tmp";
+		std::string complete_filename = filename_path + filename_name;
+		std::ifstream name_domain_file(complete_filename);
+		if (name_domain_file.is_open()) {
+
+			getline(name_domain_file, used_name);
+
+			name_domain_file.close();
+		} else {
+			std::cerr << "\nThe file " << complete_filename << " does not exist.\n";
+		}
+	}
+
+	if (freopen(used_name.c_str(), "r", stdin) == NULL) {
+
+		std::cerr << argv[0] << ": File " << used_name << " cannot be opened.\n";
 		exit(1);
 	}
 
 	domain_name = domain_name.substr(domain_name.find_last_of("\\/") + 1);
 	domain_name = domain_name.substr(0, domain_name.find_last_of("."));
 
+
+	exit(0);
+
 	//timer.start(READ_TIMER);
-	domain_reader->read();
+	domain_reader->read(models_filename);
 
 	//	if (debug) {
 	//		domain_reader->print();
@@ -460,9 +546,9 @@ int main(int argc, char** argv)
 	//Get build date
 	std::cout << "EFP version " << VERSION << " - Built date: " << BUILT_DATE << std::endl;
 
-	
+
 	//if arguments are too less
-	if (argc < 2){
+	if (argc < 2) {
 		print_usage(argv[0]);
 	}
 

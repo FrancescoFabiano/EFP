@@ -187,7 +187,7 @@ void pem_parser::parse_edges_list(const std::string & line, pem_edges & edges)
 }
 */
 
-void pem_parser::parse(const std::string & filename)
+void pem_parser::parse(const std::string & filename)//, state_type state_t)
 {
 	/*//std::cout << "\nTesting the generation of Event Models starting from the file: " << filename << std::endl;
 	std::ifstream pem_file(filename);

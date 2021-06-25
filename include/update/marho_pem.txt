@@ -60,7 +60,7 @@
 		:id (Epistemic)
 		:pevents {1;2;epsilon}
 		:pointed (1)
-		:edges	{(1,1,Fully)(2,2,Fully)(epsilon,epsilon,Fully)(2,2,Partially)(1,2,Partially)(2,1,Partially)(epsilon,epsilon,Partially)(1,epsilon,Oblivious)(2,epsilon,Oblivious)(epsilon,epsilon,Oblivious)}
+		:edges	 {(1,1,Fully)(2,2,Fully)(epsilon,epsilon,Fully)(2,2,Partially)(1,2,Partially)(2,1,Partially)(epsilon,epsilon,Partially)(1,epsilon,Oblivious)(2,epsilon,Oblivious)(epsilon,epsilon,Oblivious)}
 	) 
 	***************************************
 	
@@ -69,7 +69,7 @@
 		:id (Ontic)
 		:pevents {4;epsilon}
 		:pointed (4)
-		:edges	((4,4,Fully)(epsilon,epsilon,Fully)(4,epsilon,Oblivious)(epsilon,epsilon,Oblivious))
+		:edges	 ((4,4,Fully)(2,4,Fully)(4,epsilon,Oblivious)(epsilon,epsilon,Oblivious))
 	)
 	***************************************
 
