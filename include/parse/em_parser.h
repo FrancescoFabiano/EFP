@@ -22,7 +22,7 @@
 #include <regex>
 #include "../utilities/define.h"
 
-class pem_parser
+class em_parser
 {
 private:
     static void apply_spaces_regex(std::string & to_clean, const std::regex & pattern);
@@ -31,16 +31,13 @@ private:
 
     static void parse_ag_list(const std::string & line);
 
-/*
     static void parse_edge(const std::string & edge, pem_edges & edges);
 
     static void parse_edges_list(const std::string & line, pem_edges & edges);
-*/
 
 public:
 
     static void parse(const std::string & filename);
-
 
 };
 

@@ -24,12 +24,6 @@ private:
     /** \brief The id of *this*.*/
     event_id m_id;
 
-    /** \brief The precondition of *this*.*/
-    formula_list m_pre;
-    /** \brief The list of fluents (fluent formula to allow or but not yet considered) to be imposed
-     * in the state updated with this kevent that associates a belief formula (postcondition) to each \ref fluent.*/
-    event_postconditions m_post;
-
     /** \brief The 'meta' precondition of *this*.*/
     event_metacond m_meta_pre;
     /** \brief The 'meta' postcondition of *this*.*/

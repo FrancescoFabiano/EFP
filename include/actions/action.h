@@ -60,8 +60,7 @@ private:
     /* \brief Function that adds an effect (with its conditions) to *this*.
      *
      * @param[in] to_add: The \ref fluent_formula that represents the effect to add.
-     * @param[in] condition: The condition of \p to_add.
-     */
+     * @param[in] condition: The condition of \p to_add. */
     void add_effect(const fluent_formula& to_add, const belief_formula& condition);
     /* \brief Function that adds an observability condition to ag wrt to *this*.
      *

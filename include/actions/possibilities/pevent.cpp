@@ -64,10 +64,6 @@ void pevent::set_id(const event_id to_set)
 	m_id = to_set;
 }
 
-void pevent::set_precondition(const formula_list & to_set)
-{
-	m_pre = to_set;
-}
 
 void pevent::set_meta_precondition(const event_metacond & to_set)
 {

@@ -16,7 +16,7 @@ pem::pem()
 {
 }
 
-pem::pem(pem_id id)
+pem::pem(em_id id)
 {
 	set_id(id);
 }

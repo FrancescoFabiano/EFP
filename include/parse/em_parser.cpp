@@ -7,11 +7,11 @@
  * \date Aprile 1, 2019
  */
 
-#include "pem_parser.h"
-#include "../actions/possibilities/pevent.h"
-#include "../actions/possibilities/pem_store.h"
+#include "em_parser.h"
+#include "../actions/kripke/kevent.h"
+#include "../actions/kripke/kem_store.h"
 
-void pem_parser::apply_spaces_regex(std::string & to_clean, const std::regex & pattern)
+void em_parser::apply_spaces_regex(std::string & to_clean, const std::regex & pattern)
 {
 
 	std::string tmp_cleaned;
@@ -23,7 +23,7 @@ void pem_parser::apply_spaces_regex(std::string & to_clean, const std::regex & p
 	}
 }
 
-void pem_parser::parse_conditions(const std::string & line, event_metacond & cond, int line_count)
+void em_parser::parse_conditions(const std::string & line, event_metacond & cond, int line_count)
 {
 
 	std::regex spaces_opened("(.*[\\w\\(\\$])(\\s+)([\\w\\(\\$].*)");
@@ -75,14 +75,14 @@ void pem_parser::parse_conditions(const std::string & line, event_metacond & con
 			return;
 			//std::cout << "\n\t\t" << sub_arg;
 		} else {
-			//Here parse of normal fluent/Belief formulae to add as extra field in the pevent
+			//Here parse of normal fluent/Belief formulae to add as extra field in the event
 			std::cerr << "\nParsing Error at Line " << line_count << ": The specified condition has no meaning. Please use \'act_eff\', \'act_pre\', or \'none\'.\n";
 			exit(1);
 		}
 	}
 }
 
-void pem_parser::parse_ag_list(const std::string & line)
+void em_parser::parse_ag_list(const std::string & line)
 {
 
 	std::string cleaned = line;
@@ -108,13 +108,12 @@ void pem_parser::parse_ag_list(const std::string & line)
 
 
 	while (args >> sub_arg) {
-		pem_store::get_instance().add_agent_group(sub_arg);
+		kem_store::get_instance().add_agent_group(sub_arg);
 	}
 
 }
 
-/*
-void pem_parser::parse_edge(const std::string & edge, pem_edges & edges)
+void em_parser::parse_edge(const std::string & edge, kem_edges & edges)
 {
 	std::string cleaned = edge;
 
@@ -124,13 +123,13 @@ void pem_parser::parse_edge(const std::string & edge, pem_edges & edges)
 	std::string sub_arg;
 
 	args >> sub_arg;
-	pevent_ptr first = pem_store::get_instance().get_event(pem_store::get_instance().get_event_id(sub_arg));
+	event_ptr first = kem_store::get_instance().get_event(kem_store::get_instance().get_event_id(sub_arg));
 
 	args >> sub_arg;
-	pevent_ptr second = pem_store::get_instance().get_event(pem_store::get_instance().get_event_id(sub_arg));
+	event_ptr second = kem_store::get_instance().get_event(kem_store::get_instance().get_event_id(sub_arg));
 
 	args >> sub_arg;
-	agent_group_id e_to_add_ag = pem_store::get_instance().get_agent_group(sub_arg);
+	agent_group_id e_to_add_ag = kem_store::get_instance().get_agent_group(sub_arg);
 
 	auto it_eve = edges.find(first);
 
@@ -146,18 +145,18 @@ void pem_parser::parse_edge(const std::string & edge, pem_edges & edges)
 	} else {
 		event_information_state tmp;
 		tmp.insert(event_information_state::value_type(e_to_add_ag, {second}));
-		edges.insert(pem_edges::value_type(first, tmp));
+		edges.insert(em_edges::value_type(first, tmp));
 	}
 	//	if (edges.find(e_to_add_ag) != edges.end()) {
 	//		edges[e_to_add_ag].insert(e_to_add);
 	//	} else {
-	//		std::set<pem_edge> tmp_set;
+	//		std::set<em_edge> tmp_set;
 	//		tmp_set.insert(e_to_add);
-	//		edges.insert(std::pair<agent_group_id, std::set<pem_edge> >(e_to_add_ag, tmp_set));
+	//		edges.insert(std::pair<agent_group_id, std::set<em_edge> >(e_to_add_ag, tmp_set));
 	//	}
 }
 
-void pem_parser::parse_edges_list(const std::string & line, pem_edges & edges)
+void em_parser::parse_edges_list(const std::string & line, em_edges & edges)
 {
 	std::string cleaned = line;
 
@@ -185,15 +184,15 @@ void pem_parser::parse_edges_list(const std::string & line, pem_edges & edges)
 		parse_edge(sub_arg, edges);
 	}
 }
-*/
 
-void pem_parser::parse(const std::string & filename)//, state_type state_t)
+
+void em_parser::parse(const std::string & filename, state_type state_t)
 {
-	/*//std::cout << "\nTesting the generation of Event Models starting from the file: " << filename << std::endl;
-	std::ifstream pem_file(filename);
+	//std::cout << "\nTesting the generation of Event Models starting from the file: " << filename << std::endl;
+	std::ifstream em_file(filename);
 
 
-	if (pem_file.is_open()) {
+	if (em_file.is_open()) {
 
 		bool in_event = false, in_model = false, not_assigned = true;
 		std::string line;
@@ -210,17 +209,17 @@ void pem_parser::parse(const std::string & filename)//, state_type state_t)
 		event_id e_id;
 		event_metacond e_meta_pre;
 		event_metacond e_meta_post;
-		pevent e_to_add;
+		//event e_to_add;
 
-		pem_id p_id;
+		em_id p_id;
 		event_id p_pointed_id;
-		pem_edges p_edges;
-		pem p_to_add;
+		em_edges p_edges;
+		//em p_to_add;
 
 
 		int line_count = 0;
 
-		while (getline(pem_file, line)) {
+		while (getline(em_file, line)) {
 
 			++line_count;
 
@@ -237,9 +236,9 @@ void pem_parser::parse(const std::string & filename)//, state_type state_t)
 					exit(1);
 				}
 
-				if (type.compare("pevent") == 0) {
+				if (type.compare("event") == 0) {
 					if (!not_assigned) {
-						std::cerr << "\nParsing Error at Line " << line_count << ": Trying to define an \'pevent\' while already defining an \'pevent\' or a \'model\'.\n";
+						std::cerr << "\nParsing Error at Line " << line_count << ": Trying to define an \'event\' while already defining an \'event\' or a \'model\'.\n";
 					}
 
 					e_id = -1;
@@ -252,7 +251,7 @@ void pem_parser::parse(const std::string & filename)//, state_type state_t)
 				} else if (type.compare("model") == 0) {
 
 					if (!not_assigned) {
-						std::cerr << "\nParsing Error at Line " << line_count << ": Trying to define a \'model\' while already defining an \'pevent\' or a \'model\'.\n";
+						std::cerr << "\nParsing Error at Line " << line_count << ": Trying to define a \'model\' while already defining an \'event\' or a \'model\'.\n";
 
 					}
 
@@ -265,7 +264,7 @@ void pem_parser::parse(const std::string & filename)//, state_type state_t)
 					not_assigned = false;
 				} else if (type.compare("obs_groups") == 0) {
 					if (!not_assigned) {
-						std::cerr << "\nParsing Error at Line " << line_count << ": Trying to define the \'observability groups\' while already defining an \'pevent\' or a \'model\'.\n";
+						std::cerr << "\nParsing Error at Line " << line_count << ": Trying to define the \'observability groups\' while already defining an \'event\' or a \'model\'.\n";
 
 					}
 					std::string obs = std::regex_replace(line, type_regex, "$7");
@@ -273,7 +272,7 @@ void pem_parser::parse(const std::string & filename)//, state_type state_t)
 					parse_ag_list(std::regex_replace(obs, std::regex("\\{(.*)\\}(.*)"), "$1"));
 
 				} else {
-					std::cerr << "\nParsing Error at Line " << line_count << ": The specified type -- " << type << " -- is not defined in our syntax. Please use either \'pevent\', \'model\', or \'obs_groups\'.\n";
+					std::cerr << "\nParsing Error at Line " << line_count << ": The specified type -- " << type << " -- is not defined in our syntax. Please use either \'event\', \'model\', or \'obs_groups\'.\n";
 					exit(1);
 				}
 
@@ -286,40 +285,40 @@ void pem_parser::parse(const std::string & filename)//, state_type state_t)
 				internal_field = std::regex_replace(line, field_regex, "$6");
 
 				if (not_assigned) {
-					std::cerr << "\nParsing Error at Line " << line_count << ": Before declaring a new \'" << field << "\' you need to open a new \'pevent\' or \'model\'.\n";
+					std::cerr << "\nParsing Error at Line " << line_count << ": Before declaring a new \'" << field << "\' you need to open a new \'event\' or \'model\'.\n";
 					exit(1);
 				}
 
 				if (field.compare("id") == 0 && (e_id == -1 || p_id == -1)) {
 
 					if (in_event) {
-						e_id = pem_store::get_instance().get_event_id(internal_field);
+						e_id = kem_store::get_instance().get_event_id(internal_field);
 					} else if (in_model) {
-						p_id = pem_store::get_instance().get_pem_id(internal_field);
+						p_id = kem_store::get_instance().get_em_id(internal_field);
 					} else {
-						std::cerr << "\nParsing Error at Line " << line_count << ": Before declaring a new \'" << field << "\' you need to open a new \'pevent\' or \'model\'.\n";
+						std::cerr << "\nParsing Error at Line " << line_count << ": Before declaring a new \'" << field << "\' you need to open a new \'event\' or \'model\'.\n";
 						exit(1);
 					}
 				} else if (field.compare("pointed") == 0) {
 					if (!in_model) {
-						std::cerr << "\nParsing Error at Line " << line_count << ": Pointed pevent found outside of a model definition.";
+						std::cerr << "\nParsing Error at Line " << line_count << ": Pointed event found outside of a model definition.";
 						exit(1);
 					}
-					p_pointed_id = pem_store::get_instance().get_event_id(internal_field);
+					p_pointed_id = kem_store::get_instance().get_event_id(internal_field);
 				} else if (field.compare("precondition") == 0) {
 					if (!in_event) {
-						std::cerr << "\nParsing Error at Line " << line_count << ": Precondition found outside of an pevent definition.";
+						std::cerr << "\nParsing Error at Line " << line_count << ": Precondition found outside of an event definition.";
 						exit(1);
 					}
 					parse_conditions(internal_field, e_meta_pre, line_count);
 				} else if (field.compare("postcondition") == 0) {
 					if (!in_event) {
-						std::cerr << "\nParsing Error at Line " << line_count << ": Postcondition found outside of an pevent definition.";
+						std::cerr << "\nParsing Error at Line " << line_count << ": Postcondition found outside of an event definition.";
 						exit(1);
 					}
 
 					parse_conditions(internal_field, e_meta_post, line_count);
-				} else if (field.compare("pevents") == 0) {
+				} else if (field.compare("events") == 0) {
 					if (!in_model) {
 						std::cerr << "\nParsing Error at Line " << line_count << ": Events found outside of a model definition.";
 						exit(1);
@@ -338,7 +337,7 @@ void pem_parser::parse(const std::string & filename)//, state_type state_t)
 
 					//std::cout << field << " -> " << internal_field << std::endl;
 				} else {
-					std::cerr << "\nParsing Error at Line " << line_count << ": The specified field -- " << field << " -- is not properly defined in our syntax (watch out for repetition). Please use \'id\', \'precondition\', \'postcondition\', \'pevents\', or \'edges\'.\n";
+					std::cerr << "\nParsing Error at Line " << line_count << ": The specified field -- " << field << " -- is not properly defined in our syntax (watch out for repetition). Please use \'id\', \'precondition\', \'postcondition\', \'events\', or \'edges\'.\n";
 					exit(1);
 				}
 			} else if (std::regex_match(line, std::regex("(\\))(\\s*)"))) {
@@ -348,13 +347,13 @@ void pem_parser::parse(const std::string & filename)//, state_type state_t)
 					e_to_add.set_meta_precondition(e_meta_pre);
 					e_to_add.set_meta_postconditions(e_meta_post);
 
-					pem_store::get_instance().add_event(e_to_add);
+					kem_store::get_instance().add_event(e_to_add);
 				} else if (in_model) {
 					p_to_add.set_id(p_id);
 					p_to_add.set_pointed_id(p_pointed_id);
 					p_to_add.set_edges(p_edges);
 
-					pem_store::get_instance().add_pem(p_to_add);
+					kem_store::get_instance().add_em(p_to_add);
 
 				}
 				in_event = false;
@@ -371,6 +370,6 @@ void pem_parser::parse(const std::string & filename)//, state_type state_t)
 		std::cerr << "\nParsing Error: It is impossible to open the file \'" << filename << "\'.";
 		exit(1);
 	}
-	pem_file.close();*/
+	em_file.close();
 }
 

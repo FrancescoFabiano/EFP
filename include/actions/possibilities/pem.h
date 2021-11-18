@@ -19,7 +19,7 @@ class pem
     friend class pem_ptr;
 private:
     /** \brief The id of *this*.*/
-    pem_id m_id;
+    em_id m_id;
 
     /** \brief The id of the pointed pevent of *this*.*/
     event_id m_pointed_id;

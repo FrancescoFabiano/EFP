@@ -20,7 +20,7 @@ class kem
     friend class kem_ptr;
 private:
     /** \brief The id of *this*.*/
-    kem_id m_id;
+    em_id m_id;
     /** \brief The map containing the edges of the action.
      *
      * Each edge consists of <\ref agent, \ref event_ptr_set> and link each \ref agent to a set of events.

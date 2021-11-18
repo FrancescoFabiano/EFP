@@ -8,7 +8,7 @@
 
 #include "kem_store.h"
 #include "kem.h"
-#include "../../parse/pem_parser.h"
+#include "../../parse/em_parser.h"
 
 kem_store::kem_store()
 {
