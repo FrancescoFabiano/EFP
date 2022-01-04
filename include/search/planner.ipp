@@ -8,8 +8,8 @@
  */
 #include <algorithm>
 #include "planner.h"
-#include "../update/union_update.h"
-#include "../actions/possibilities/pem_store.h"
+#include "../update/product_update.h"
+#include "../actions/custom_event_models/cem_store.h"
 
 template <class T>
 void planner<T>::print_results(std::chrono::duration<double> elapsed_seconds, T goal, bool results_file, bool givenplan, search_type used_search, heuristics used_heur)
@@ -135,17 +135,16 @@ bool planner<T>::search_BFS(bool results_file)
 	std::set<T> visited_states;
 
 	auto start_timing = std::chrono::system_clock::now();
+
 	initial.build_initial();
+
 	if (bisimulation) {
 		initial.calc_min_bisimilar();
 	}
-
-
-
 	auto end_timing = std::chrono::system_clock::now();
 	std::chrono::duration<double> elapsed_seconds = end_timing - start_timing;
 
-	std::cout << "\nInitial Built in " << elapsed_seconds.count() << " seconds\n";
+	std::cout << "\nInitial Built in " << elapsed_seconds.count() << " seconds" << std::endl;
 
 	action_set actions = domain::get_instance().get_actions();
 	action_set::const_iterator it_acset;
@@ -166,7 +165,7 @@ bool planner<T>::search_BFS(bool results_file)
 	if (check_visited) {
 		visited_states.insert(initial);
 	}
-
+			
 	while (!m_search_space.empty()) {
 		popped_state = m_search_space.front();
 		m_search_space.pop();
@@ -175,6 +174,7 @@ bool planner<T>::search_BFS(bool results_file)
 			tmp_action = *it_acset;
 
 			if (popped_state.is_executable(tmp_action)) {
+
 				tmp_state = popped_state.compute_succ(tmp_action);
 				//tmp_state.print();
 				if (bisimulation) {
@@ -478,7 +478,7 @@ void planner<T>::execute_given_actions(std::vector<std::string>& act_name)
 		for (it_acset = domain::get_instance().get_actions().begin(); it_acset != domain::get_instance().get_actions().end(); it_acset++) {
 			if ((*it_acset).get_name().compare(*it_stset) == 0) {
 
-				
+
 				if (state.is_executable(*it_acset)) {
 					state = state.compute_succ(*it_acset);
 					if (bisimulation) {

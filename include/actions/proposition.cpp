@@ -10,7 +10,7 @@
 
 #include "proposition.h"
 #include "../domain/domain.h"
-#include "possibilities/pem_store.h"
+#include "custom_event_models/cem_store.h"
 
 proposition_type proposition::get_type() const
 {
@@ -65,7 +65,12 @@ void proposition::set_action_name(const std::string & to_set)
 
 void proposition::set_action_type(const std::string & to_set)
 {
-	m_act_type = pem_store::get_instance().get_pem_id(to_set);
+	//if (cem_store::get_instance().get_cem_name(to_set)) {
+	m_act_type = cem_store::get_instance().get_cem_id(to_set);
+	//} else {
+	//	std::cerr << "The specified cem name: " << to_set << " does not match any cem specification." << std::endl;
+	//	exit(1);
+	//}
 }
 
 void proposition::add_action_effect(const string_set & to_add)
@@ -85,7 +90,7 @@ void proposition::set_agent(const std::string & to_set)
 
 void proposition::set_agent_group(const std::string & to_set)
 {
-	m_agent_group = pem_store::get_instance().get_agent_group(to_set);
+	m_agent_group = cem_store::get_instance().get_agent_group(to_set);
 }
 
 void proposition::set_conditions(const belief_formula & to_set)
@@ -107,10 +112,10 @@ void proposition::print() const
 		get_conditions().print();
 		break;
 	case OBSERVABILITY:
-		std::cout << get_agent() << " belongs to group " << pem_store::get_instance().get_agent_group_name(get_agent_group()) << " if ";
+		std::cout << get_agent() << " belongs to group " << cem_store::get_instance().get_agent_group_name(get_agent_group()) << " if ";
 		get_conditions().print();
 	case TYPE:
-		std::cout << get_action_name() << " has_type " << pem_store::get_instance().get_pem_name(get_action_type());
+		std::cout << get_action_name() << " has_type " << cem_store::get_instance().get_cem_name(get_action_type());
 	default: /* static */
 		break;
 	}

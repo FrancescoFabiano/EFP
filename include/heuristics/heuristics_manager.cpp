@@ -5,29 +5,29 @@ heuristics_manager::heuristics_manager(heuristics used_heur)
 	set_used_h(used_heur);
 	m_goals = domain::get_instance().get_goal_description();
 	switch ( m_used_heur ) {
-	/*case L_PG:
-	case S_PG:
-	{
-		expand_goals();
-		break;
+		/*case L_PG:
+		case S_PG:
+		{
+			expand_goals();
+			break;
 
-	}
-	case C_PG:
-	{
-		std::cout << "\n\nWrong implementation of initial state from initial formuale\n";
-		exit(1);
-
-		planning_graph pg;
-		if (pg.is_satisfiable()) {
-			m_fluents_score = pg.get_f_scores();
-			m_bf_score = pg.get_bf_scores();
-
-		} else {
-			std::cout << "\n\nIt does not exists any Plan for this domain instance:(\n";
-			exit(1);
 		}
-		break;
-	}*/
+		case C_PG:
+		{
+			std::cout << "\n\nWrong implementation of initial state from initial formuale\n";
+			exit(1);
+
+			planning_graph pg;
+			if (pg.is_satisfiable()) {
+				m_fluents_score = pg.get_f_scores();
+				m_bf_score = pg.get_bf_scores();
+
+			} else {
+				std::cout << "\n\nIt does not exists any Plan for this domain instance:(\n";
+				exit(1);
+			}
+			break;
+		}*/
 	case SUBGOALS:
 	{
 		expand_goals();

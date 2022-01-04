@@ -312,7 +312,7 @@ agent_group_id state<T>::get_obs_group(agent ag, const observability_map & table
 		}
 	}
 	//The last declared observability group
-	return pem_store::get_instance().get_agent_group_number();
+	return cem_store::get_instance().get_agent_group_number();
 
 	//std::cerr << "\nError: Some observability declaration is missing, the agent has not any agent group specified.";
 	//exit(1);

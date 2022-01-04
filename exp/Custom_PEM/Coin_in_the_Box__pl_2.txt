@@ -2,9 +2,11 @@
 
 fluent tail, has_key_a, has_key_b, has_key_c, opened ,looking_a, looking_b, looking_c;
 
-action open_a;
-action peek_a; 
-action shout_tail_a;
+action open_a, open_b ,open_c;
+action peek_a, peek_b, peek_c; 
+action signal_a_b, signal_a_c, signal_b_a, signal_b_c, signal_c_a, signal_c_b;
+action distract_a_b, distract_a_c, distract_b_a, distract_b_c, distract_c_a, distract_c_b;
+action shout_tail_a, shout_tail_b, shout_tail_c;
 
 agent a,b,c;
 
@@ -13,9 +15,29 @@ agent a,b,c;
 executable open_a;
 open_a has_effects opened;
 open_a has_type Ontic;
-b in_group Partially of open_a if looking_b;
-c in_group Partially of open_a if looking_c;
+b in_group Fully of open_a if looking_b;
+c in_group Fully of open_a if looking_c;
 a in_group Fully of open_a;
+b in_group Oblivious of open_a;
+c in_group Oblivious of open_a;
+
+executable open_b if B(b,has_key_b), has_key_b;
+open_b has_effects opened;
+open_b has_type Ontic;
+c in_group Fully of open_b if looking_c;
+a in_group Fully of open_b if looking_a;
+b in_group Fully of open_b;
+a in_group Oblivious of open_b;
+c in_group Oblivious of open_b;
+
+executable open_c if B(c,has_key_c), has_key_c;
+open_c has_effects opened;
+open_c has_type Ontic;
+a in_group Fully of open_c if looking_a;
+b in_group Fully of open_c if looking_b;
+c in_group Fully of open_c;
+a in_group Oblivious of open_c;
+b in_group Oblivious of open_c;
 
 
 executable peek_a if B(a,opened), B(a,looking_a), looking_a, opened;
@@ -24,16 +46,144 @@ peek_a has_type Epistemic;
 b in_group Partially of peek_a if looking_b;
 c in_group Partially of peek_a if looking_c;
 a in_group Fully of peek_a;
+b in_group Oblivious of peek_a;
+c in_group Oblivious of peek_a;
 
-executable shout_tail_a if B(a,tail), tail;
+executable peek_b if B(b,opened), B(b,looking_b), looking_b, opened;
+peek_b has_effects tail;
+peek_b has_type Epistemic;
+a in_group Partially of peek_b if looking_a;
+c in_group Partially of peek_b if looking_c;
+b in_group Fully of peek_b;
+a in_group Oblivious of peek_b;
+c in_group Oblivious of peek_b;
+
+executable peek_c if B(c,opened), B(c,looking_c), looking_c, opened;
+peek_c has_effects tail;
+peek_c has_type Epistemic;
+a in_group Partially of peek_c if looking_a;
+b in_group Partially of peek_c if looking_b;
+c in_group Fully of peek_c;
+a in_group Oblivious of peek_c;
+b in_group Oblivious of peek_c;
+
+
+
+executable signal_a_b if  B(a, looking_a), B(a, -looking_b), looking_a, -looking_b;
+signal_a_b has_effects looking_b;
+signal_a_b has_type Ontic;
+b in_group Fully of signal_a_b;
+a in_group Fully of signal_a_b;
+c in_group Oblivious of signal_a_b;
+
+executable signal_a_c if  B(a, looking_a), B(a, -looking_c), looking_a, -looking_c;
+signal_a_c has_effects looking_c;
+signal_a_c has_type Ontic;
+a in_group Fully of signal_a_c;
+c in_group Fully of signal_a_c;
+b in_group Oblivious of signal_a_c;
+
+executable signal_b_a if  B(b, looking_b), B(b, -looking_a), looking_b, -looking_a;
+signal_b_a has_effects looking_a;
+signal_b_a has_type Ontic;
+b in_group Fully of signal_b_a;
+a in_group Fully of signal_b_a;
+c in_group Oblivious of signal_b_a;
+
+executable signal_b_c if  B(b, looking_b), B(b, -looking_c), looking_b, -looking_c;
+signal_b_c has_effects looking_c;
+signal_b_c has_type Ontic;
+c in_group Fully of signal_b_c;
+b in_group Fully of signal_b_c;
+a in_group Oblivious of signal_b_c;
+
+executable signal_c_a if  B(c, looking_c), B(c, -looking_a), looking_c, -looking_a;
+signal_c_a has_effects looking_a;
+signal_c_a has_type Ontic;
+c in_group Fully of signal_c_a;
+a in_group Fully of signal_c_a;
+b in_group Oblivious of signal_c_a;
+
+executable signal_c_b if  B(c, looking_c), B(c, -looking_b), looking_c, -looking_b;
+signal_c_b has_effects looking_b;
+signal_c_b has_type Ontic;
+c in_group Fully of signal_c_b;
+b in_group Fully of signal_c_b;
+a in_group Oblivious of signal_c_b;
+
+
+
+executable distract_a_b if B(a,looking_a), B(a, looking_b), looking_a, looking_b;
+distract_a_b has_effects -looking_b;
+distract_a_b has_type Ontic;
+a in_group Fully of distract_a_b;
+b in_group Fully of distract_a_b;
+c in_group Oblivious of distract_a_b;
+
+executable distract_a_c if B(a,looking_a), B(a, looking_c), looking_a, looking_c;
+distract_a_c has_effects -looking_c;
+distract_a_c has_type Ontic;
+a in_group Fully of distract_a_c;
+c in_group Fully of distract_a_c;
+b in_group Oblivious of distract_a_c;
+
+executable distract_b_a if B(b,looking_b), B(b, looking_a), looking_b, looking_a;
+distract_b_a has_effects -looking_a;
+distract_b_a has_type Ontic;
+a in_group Fully of distract_b_a;
+b in_group Fully of distract_b_a;
+c in_group Oblivious of distract_b_a;
+
+executable distract_b_c if B(b,looking_b), B(b, looking_c), looking_b, looking_c;
+distract_b_c has_effects -looking_c;
+distract_b_c has_type Ontic;
+b in_group Fully of distract_b_c;
+c in_group Fully of distract_b_c;
+a in_group Oblivious of distract_b_c;
+
+executable distract_c_a if B(c,looking_c), B(c, looking_a), looking_c, looking_a;
+distract_c_a has_effects -looking_a;
+distract_c_a has_type Ontic;
+a in_group Fully of distract_c_a;
+c in_group Fully of distract_c_a;
+b in_group Oblivious of distract_c_a;
+
+executable distract_c_b if B(c,looking_c), B(c, looking_b), looking_c, looking_b;
+distract_c_b has_effects -looking_b;
+distract_c_b has_type Ontic;
+c in_group Fully of distract_c_b;
+b in_group Fully of distract_c_b;
+a in_group Oblivious of distract_c_b;
+
+
+
+executable shout_tail_a if B(a,tail), tail, looking_a;
 shout_tail_a has_effects tail;
 shout_tail_a has_type Epistemic;
 a in_group Fully of shout_tail_a;
 b in_group Fully of shout_tail_a if looking_b;
 c in_group Fully of shout_tail_a if looking_c;
+b in_group Oblivious of shout_tail_a;
+c in_group Oblivious of shout_tail_a;
+
+executable shout_tail_b if B(b,tail), tail, looking_b;
+shout_tail_b has_effects tail;
+shout_tail_b has_type Epistemic;
+b in_group Fully of shout_tail_b;
+a in_group Fully of shout_tail_b if looking_a;
+c in_group Fully of shout_tail_b if looking_c;
+a in_group Oblivious of shout_tail_b;
+c in_group Oblivious of shout_tail_b;
 
 
-
+executable shout_tail_c if B(c,tail), tail, looking_c;
+shout_tail_c has_effects tail;
+shout_tail_c has_type Epistemic;
+c in_group Fully of shout_tail_c;
+a in_group Fully of shout_tail_c if looking_a;
+b in_group Fully of shout_tail_c if looking_b;
+b in_group Oblivious of shout_tail_c;
+a in_group Oblivious of shout_tail_c;
 
 
 initially C([a,b,c],has_key_a);
@@ -50,4 +200,7 @@ initially tail, has_key_a, -has_key_b, -has_key_c, -opened, looking_a, -looking_
 %initially C([a,b,c],B(a,tail));
 
 % 2 actions
-goal B(a,tail);
+goal B(b, ((-B(a, tail)), (-B(a, -tail))));
+goal B(c, B(a, tail));
+goal C([b,c], tail);
+

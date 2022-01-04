@@ -17,7 +17,7 @@
 #include "../include/search/planner.ipp"
 
 //#include "../include/utilities/asp_maker.h"
-//#include "../include/actions/pem_store.h"
+//#include "../include/actions/cem_store.h"
 
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
@@ -488,7 +488,7 @@ void generate_domain(char** argv)
 	} else {
 		models_filename = "include/update/marho_pem.txt";
 	}
-
+	
 	if (input_lang == EPDDL) {
 		//Execute script
 		system(("sh scripts/EPDDL_scripts/generate_mar_from_epddl.sh " + domain_name).c_str());
@@ -517,15 +517,15 @@ void generate_domain(char** argv)
 	domain_name = domain_name.substr(0, domain_name.find_last_of("."));
 
 
-	exit(0);
 
 	//timer.start(READ_TIMER);
 	domain_reader->read(models_filename);
-
+	
 	//	if (debug) {
 	//		domain_reader->print();
 	//	}
 	//Domain building
+	
 	domain::get_instance().set_domain(domain_name, debug, state_struc, kopt, domain_reader, ini_restriction, goal_restriction, is_global_obsv, act_check, check_visited, bisimulation);
 
 	domain::get_instance().build();
@@ -558,6 +558,8 @@ int main(int argc, char** argv)
 
 	//check eventualy problem on input file and generate domain
 	generate_domain(argv);
+
+//	exit(0);
 
 
 	//check generation asp

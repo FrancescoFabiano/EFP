@@ -133,7 +133,7 @@ void domain::build()
 	// std::cout << "Goal" <<std::endl;
 	build_goal();
 	//DEBUG
-	exit(1);
+	//exit(1);
 }
 
 void domain::build_agents()

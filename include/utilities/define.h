@@ -228,7 +228,7 @@ typedef std::map<fluent_formula, belief_formula> effects_map; /**< \brief Used t
 
 enum event_type
 {
-    EPSILON, /**< \brief The null pevent.*/
+    EPSILON, /**< \brief The null cevent.*/
     SIGMA, /**< \brief Event corresponding to ... */
     TAU /**< \brief Event corresponding to ... */
 };
@@ -315,11 +315,11 @@ typedef std::set<pworld_ptr> pworld_ptr_set; /**< \brief A set of \ref pworld_pt
                                             * \todo The operator < for std::shared_ptr must be implemented.
                                             * @see pworld and pstate.*/
 
-typedef std::map<agent, pworld_ptr_set> information_state; /**< \brief A map between agents and set of \ref pworld_ptr.
+typedef std::map<agent, pworld_ptr_set> pworld_map; /**< \brief A map between agents and set of \ref pworld_ptr.
                                                     *
                                                     * @see pworld and pstate.*/
 
-//typedef std::map<pworld_ptr, information_state> pedges; /**< \brief A map, for every \ref pworld, of the beleifs of its agents.
+typedef std::map<pworld_ptr, pworld_map> pedges; /**< \brief A map, for every \ref pworld, of the beleifs of its agents.
 //                                                                 *
 //                                                                 * @see pworld and pstate.*/
 
@@ -382,90 +382,27 @@ typedef fluent_formula event_postconditions;
 
 typedef std::map<agent, agent_group_id> agent_group_map;
 
-// Kripke
-class kevent;
-typedef short event_id;
-
-class kevent_ptr;
-typedef std::set<kevent_ptr> kevent_ptr_set;
-
-
-class kem;
-typedef act_type kem_id;
-
-class kem_ptr;
-
-typedef std::map<agent_group_id, kevent_ptr_set> kevent_map;
-typedef std::map<kevent_ptr, kevent_map> kem_edges;
-
-typedef std::map<std::pair<kworld_ptr, kevent_ptr>, kworld_ptr> kupdate_map;
-
-class kem_store;
-typedef std::set<kevent> kevent_set; /**< \brief A set of \ref kevent, used to store all the created ones.*/
-typedef std::set<kem> kem_set; /**< \brief A set of \ref kem, used to store all the created ones.*/
-
-
 // Possibilities
-class pevent;
+class cevent;
 typedef short event_id;
 
-class pevent_ptr;
-typedef std::set<pevent_ptr> pevent_ptr_set; /**< \brief A set of \ref pevent_ptr.
-//                                        *
-//                                        * Mainly used to store all the reachable \ref pevent of a \ref pevent without wasting memory.
-//                                        *
-//                                        * \todo The operator < for std::shared_ptr must be implemented.
-//                                        * @see pevent.*/
+class cevent_ptr;
+typedef std::set<cevent_ptr> cevent_ptr_set;
 
-// PEMS
-class pem;
-typedef act_type pem_id;
 
-//typedef std::map<agent_group_id, std::set<pem_edge>> pem_edges;
+class cem;
+typedef act_type cem_id;
 
-//enum action_type
-//{
-//    ONT, /** \brief Ontic actions */
-//    //    ONT_NO,  /** \brief Ontic actions with No Oblivious agents */
-//    SEN, /** \brief Sensing actions */
-//    //    SEN_NO,  /** \brief Sensing actions with No Oblivious agents */
-//    //    SEN_NP,  /** \brief Sensing actions with No Partially observant agents */
-//    //    SEN_NOP, /** \brief Sensing actions with No Oblivious and Partially observant agents */
-//    ANN, /** \brief Announcement actions */
-//    //    ANN_NO,  /** \brief Announcement actions with No Oblivious agents */
-//    //    ANN_NP,  /** \brief Announcement actions with No Partially observant agents */
-//    //    ANN_NOP, /** \brief Announcement actions with No Oblivious and Partially observant agents */
-//    SIZE /** \brief Number of action types */
-//};
-//
-//enum agent_type
-//{
-//    FUL, /** \brief Fully observant agent */
-//    PAR, /** \brief Partially observant agent */
-//    OBL, /** \brief Oblivious agent */
-//    ALL /** \brief All agents */
-//};
+class cem_ptr;
 
-/**< \brief A map between agents and a set of pairs of \ref pevent_ptr.
- *
- * Each element consists of <\ref agent, <\ref pevent_ptr, \ref pevent_ptr>> and
- * specifies for each \ref agent_type a set of pairs of \ref pevent_ptr (i.e.,
- * a set of edges.
- *
- * @see pevent.*/
+typedef std::map<agent_group_id, cevent_ptr_set> cevent_map;
+typedef std::map<cevent_ptr, cevent_map> cem_edges;
 
-//typedef std::map<event_id, pevent_ptr> pem_map; /**< \brief A map that stores the pevent model for a given type of action (identified through an id).*/
+typedef std::map<std::pair<pworld_ptr, cevent_ptr>, pworld_ptr> cupdate_map;
 
-class pem_ptr;
-
-typedef std::map<agent_group_id, pevent_ptr_set> event_information_state;
-//typedef std::map<pevent_ptr, event_information_state> pem_edges;
-
-typedef std::map<std::pair<pworld_ptr, pevent_ptr>, pworld_ptr> pupdate_map;
-
-class pem_store;
-typedef std::set<pevent> pevent_set; /**< \brief A set of \ref pevent, used to store all the created ones.*/
-typedef std::set<pem> pem_set; /**< \brief A set of \ref pem, used to store all the created ones.*/
+class cem_store;
+typedef std::set<cevent> cevent_set; /**< \brief A set of \ref cevent, used to store all the created ones.*/
+typedef std::set<cem> cem_set; /**< \brief A set of \ref cem, used to store all the created ones.*/
 
 /****************** Bisimulation *******************/
 

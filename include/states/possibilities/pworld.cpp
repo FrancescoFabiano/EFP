@@ -13,13 +13,17 @@
 
 #include <stdexcept>
 #include "../../utilities/helper.h"
-pworld::pworld() = default;
+
+pworld::pworld()
+{
+}
 
 pworld::pworld(const fluent_set & description)
 {
 	set_fluent_set(description);
 	set_id();
 }
+//generate an unique id given the state information -> the literals
 
 pworld::pworld(const pworld & world)
 {
@@ -122,17 +126,12 @@ const fluent_set & pworld::get_fluent_set() const
 	return m_fluent_set;
 }
 
-const pworld_id & pworld::get_id() const
+pworld_id pworld::get_id() const
 {
 	return m_id;
 }
 
-const information_state & pworld::get_information_state() const
-{
-	return m_information_state;
-}
-
-bool pworld::entails(const fluent& to_check) const
+bool pworld::entails(fluent to_check) const
 {
 	return(m_fluent_set.find(to_check) != m_fluent_set.end());
 }
@@ -143,7 +142,7 @@ bool pworld::entails(const fluent& to_check) const
 bool pworld::entails(const fluent_set & to_check) const
 {
 	//fluent_set expresses conjunctive set of \ref fluent
-	if (to_check.empty()) {
+	if (to_check.size() == 0) {
 		return true;
 	}
 	fluent_set::const_iterator it_fl;
@@ -160,7 +159,7 @@ bool pworld::entails(const fluent_set & to_check) const
  */
 bool pworld::entails(const fluent_formula & to_check) const
 {
-	if (to_check.empty()) {
+	if (to_check.size() == 0) {
 		return true;
 	}
 	fluent_formula::const_iterator it_fl;
@@ -174,6 +173,7 @@ bool pworld::entails(const fluent_formula & to_check) const
 
 bool pworld::operator<(const pworld& to_compare) const
 {
+
 	if (m_id < to_compare.get_id())
 		return true;
 
@@ -211,7 +211,9 @@ void pworld::print() const
 
 /*-***************************************************************************************************************-*/
 
-pworld_ptr::pworld_ptr() = default;
+pworld_ptr::pworld_ptr()
+{
+}
 
 pworld_ptr::pworld_ptr(const std::shared_ptr<const pworld> & ptr, unsigned short repetition)
 {
@@ -230,6 +232,7 @@ pworld_ptr::pworld_ptr(const pworld & world, unsigned short repetition)
 {
 	m_ptr = std::make_shared<pworld>(world);
 	set_repetition(repetition);
+
 }
 
 void pworld_ptr::set_ptr(const std::shared_ptr<const pworld> & ptr)
@@ -265,22 +268,13 @@ pworld_id pworld_ptr::get_fluent_based_id() const
 	exit(1);
 }
 
-const information_state & pworld_ptr::get_information_state() const
-{
-	if (m_ptr != nullptr) {
-		return(get_ptr()->get_information_state());
-	}
-	std::cerr << "\nError in creating a pworld_ptr\n";
-	exit(1);
-}
-
 pworld_id pworld_ptr::get_id() const
 {
 	if (m_ptr != nullptr) {
 		pworld_id id = (get_ptr()->get_id());
 
-		//moltiplico * 10 id + get_repetion() TODO test con shift 
-		return boost::hash_value((1000 * id)/*+get_repetition()*/);
+		//moltiplico * 1000 id + get_repetion() TODO test con shift 
+		return boost::hash_value((1000 * id) + get_repetition());
 	}
 	std::cerr << "\nError in creating a pworld_ptr\n";
 	exit(1);
@@ -305,9 +299,16 @@ void pworld_ptr::set_repetition(unsigned short to_set)
 void pworld_ptr::increase_repetition(unsigned short to_increase)
 {
 	m_repetition = m_repetition + to_increase;
+	//m_repetition = m_repetition;
 }
 
-bool pworld_ptr::entails(const fluent& to_check) const
+unsigned short pworld_ptr::get_repetition() const
+{
+	return m_repetition;
+
+}
+
+bool pworld_ptr::entails(fluent to_check) const
 {
 	return m_ptr->entails(to_check);
 }
@@ -350,6 +351,6 @@ bool pworld_ptr::operator==(const pworld_ptr & to_compare) const
 bool pworld_ptr::operator=(const pworld_ptr & to_copy)
 {
 	set_ptr(to_copy.get_ptr());
-	//	set_repetition(to_copy.get_repetition());
+	set_repetition(to_copy.get_repetition());
 	return true;
 }

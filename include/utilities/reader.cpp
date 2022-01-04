@@ -12,7 +12,7 @@
 
 #include "reader.h"
 #include "printer.h" //Used in \ref print as a support
-#include "../actions/possibilities/pem_store.h"
+#include "../actions/custom_event_models/cem_store.h"
 
 //prototype of bison-generated parser function
 int yyparse();
@@ -58,7 +58,7 @@ int reader::read(const std::string & filename)
 	//Call to the parser function.
 	//Generation of action groups and events (after agents declaration but before actions decalration)
 	std::cout << "\nBuilding event models..." << std::endl;
-	pem_store::get_instance().generate(filename);
+	cem_store::get_instance().generate(filename);
 	return yyparse();
 }
 

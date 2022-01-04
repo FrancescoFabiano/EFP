@@ -26,12 +26,10 @@ class pworld
     friend class pworld_ptr;
 
 private:
-    /** \brief The set of \ref fluent that describes how these are interpreted in *this*.*/
+    /** \brief The set of  \ref fluent that describes how these are interpreted in *this*.*/
     fluent_set m_fluent_set;
     /** \brief The unique id of *this* computed with \ref hash_fluents_into_id().*/
-    pworld_id m_id{};
-    /** \brief The information state that represents the beliefs of the agents in *this*.*/
-    information_state m_information_state;
+    pworld_id m_id;
 
     /** \brief Function used to hash the the info of an edge in a unique id.
      * 
@@ -39,7 +37,7 @@ private:
      * @return the unique id of the pworld.
      * 
      * @warning Useless if not moved to \ref pstore.*/
-    static pworld_id hash_fluents_into_id(const fluent_set& description);
+    pworld_id hash_fluents_into_id(const fluent_set& description);
 
     /** \brief Function used to hash the the info of *this* in a unique id.
      *
@@ -66,7 +64,7 @@ private:
      * 
      * \todo Add \ref static_law as static class and use it to check.
      */
-    static bool consistent(const fluent_set & to_check);
+    bool consistent(const fluent_set & to_check);
 
     /** \brief Function that uses the info of *this* to set its \ref m_id.*/
     void set_id();
@@ -84,14 +82,7 @@ private:
      * Only accessible by the \ref pworld_ptr.
      * 
      * @return the int that is the unique id of *this*.*/
-    const pworld_id & get_id() const;
-
-    /** \brief Getter of \ref m_information_state.
-     *
-     * Only accessible by the \ref pworld_ptr.
-     *
-     * @return the information state of *this*.*/
-    const information_state & get_information_state() const;
+    pworld_id get_id() const;
 
 public:
     /** \brief Empty constructor, call the default constructor of all the fields.*/
@@ -123,7 +114,7 @@ public:
      * 
      * \todo To implement also whit \ref pworld_ptr to the \ref pworld?
      * \todo check consistency on constructor?*/
-    bool entails(const fluent& to_check) const;
+    bool entails(fluent to_check) const;
     /**
      *\brief Function that check the entailment of a conjunctive set of \ref fluent in *this*.
      * 
@@ -270,15 +261,15 @@ public:
      * @param[in] increase: the value to add to \ref m_repetition.*/
     void increase_repetition(unsigned short increase);
 
+    /** \brief Getter of the field \ref m_repetition.
+     * 
+     * @return the value to of \ref m_repetition.*/
+    unsigned short get_repetition() const;
+
     /** \brief Function that return the field m_fluent_set of the pointed \ref pworld.
      *     
      * @return the \ref fluent_set that is the description of the \ref pworld pointed by \ref m_ptr.*/
     const fluent_set & get_fluent_set() const;
-
-    /** \brief Function that return the field m_information_state of the pointed \ref pworld.
-     *
-     * @return the \ref information_state that represents the beliefs of the agents in the \ref pworld pointed by \ref m_ptr.*/
-    const information_state & get_information_state() const;
 
     /** \brief Function that return the field m_id of the pointed \ref pworld + \ref m_repetition.
      *     
@@ -303,7 +294,7 @@ public:
      *
      * @return true: \p to_check is entailed;
      * @return false: \p -to_check is entailed.*/
-    bool entails(const fluent& to_check) const;
+    bool entails(fluent to_check) const;
     /**
      *\brief Function that check the entailment of a conjunctive set of \ref fluent in \ref m_ptr.
      * 
@@ -358,4 +349,3 @@ public:
      * @return false: otherwise.*/
     bool operator==(const pworld_ptr & to_compare) const;
 };
-

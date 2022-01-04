@@ -13,7 +13,21 @@
 
 #include "pstate.h"
 #include "../../utilities/helper_t.ipp"
-#include "../../update/union_update.h"
+#include "../../update/product_update.h"
+
+pstate::pstate()
+{
+	m_max_depth = 0;
+}
+
+pstate::pstate(const pstate & to_copy)
+{
+	m_max_depth = 0;
+	set_worlds(to_copy.get_worlds());
+	set_max_depth(to_copy.get_max_depth());
+	set_beliefs(to_copy.get_beliefs());
+	set_pointed(to_copy.get_pointed());
+}
 
 /**** GETTERS/SETTERS ****/
 void pstate::set_worlds(const pworld_ptr_set & to_set)
@@ -26,6 +40,21 @@ void pstate::set_pointed(const pworld_ptr & to_set)
 	m_pointed = to_set;
 }
 
+void pstate::set_beliefs(const pedges & to_set)
+{
+	m_beliefs = to_set;
+}
+
+void pstate::set_max_depth(unsigned int to_set)
+{
+	if (to_set > m_max_depth) m_max_depth = to_set;
+}
+
+unsigned int pstate::get_max_depth() const
+{
+	return m_max_depth;
+}
+
 const pworld_ptr_set & pstate::get_worlds() const
 {
 	return m_worlds;
@@ -36,9 +65,9 @@ const pworld_ptr & pstate::get_pointed() const
 	return m_pointed;
 }
 
-const information_state & pstate::get_beliefs(const pworld_ptr & world) const
+const pedges & pstate::get_beliefs() const
 {
-	return world.get_information_state();
+	return m_beliefs;
 }
 
 /**** ADD/REMOVE WORLDS/EDGES ****/
@@ -49,34 +78,39 @@ pworld_ptr pstate::add_world(const pworld & world)
 	return tmp;
 }
 
+pworld_ptr pstate::add_rep_world(const pworld & world, unsigned short repetition)
+{
+	pworld_ptr tmp = pstore::get_instance().add_world(world);
+	tmp.set_repetition(repetition);
+	m_worlds.insert(tmp);
+	return tmp;
+}
+
 void pstate::add_edge(const pworld_ptr & from, const pworld_ptr & to, const agent & ag)
 {
-	information_state is = from.get_information_state();
-	is.at(ag).insert(to);
-	//    m_beliefs[from][ag].insert(to);
+	m_beliefs[from][ag].insert(to);
 }
 
 void pstate::remove_edge(const pworld_ptr & from, const pworld_ptr & to, const agent & ag)
 {
-	information_state is = from.get_information_state();
-	is.at(ag).erase(to);
+	auto from_beliefs = m_beliefs.find(from);
 
-	//    auto from_beliefs = m_beliefs.find(from);
-	//
-	//    if (from_beliefs != m_beliefs.end()) {
-	//        auto ag_beliefs = from_beliefs->second.find(ag);
-	//
-	//        if (ag_beliefs != from_beliefs->second.end()) {
-	//            ag_beliefs->second.erase(to);
-	//        }
-	//    }
+	if (from_beliefs != m_beliefs.end()) {
+		auto ag_beliefs = from_beliefs->second.find(ag);
+
+		if (ag_beliefs != from_beliefs->second.end()) {
+			ag_beliefs->second.erase(to);
+		}
+	}
 }
 
 /**** OPERATORS ****/
 bool pstate::operator=(const pstate & to_copy)
 {
+	m_max_depth = 0;
 	set_worlds(to_copy.get_worlds());
-	//	set_beliefs(to_copy.get_beliefs());
+	set_max_depth(to_copy.get_max_depth());
+	set_beliefs(to_copy.get_beliefs());
 	set_pointed(to_copy.get_pointed());
 	return true;
 }
@@ -95,11 +129,11 @@ bool pstate::operator<(const pstate & to_compare) const
 		return false;
 	}
 
-	/*pedges::const_iterator it_tramap1;
+	pedges::const_iterator it_tramap1;
 	auto it_tramap2 = to_compare.get_beliefs().begin();
 
-	information_state tmp_pwmap1, tmp_pwmap2;
-	information_state::const_iterator it_pwmap1, it_pwmap2;
+	pworld_map tmp_pwmap1, tmp_pwmap2;
+	pworld_map::const_iterator it_pwmap1, it_pwmap2;
 	//The same size is assured by the same size of m_worlds
 	for (it_tramap1 = m_beliefs.begin(); it_tramap1 != m_beliefs.end(); it_tramap1++) {
 		if (it_tramap1->first < it_tramap2->first) {
@@ -131,7 +165,7 @@ bool pstate::operator<(const pstate & to_compare) const
 			it_pwmap2++;
 		}
 		it_tramap2++;
-	}*/
+	}
 	return false;
 }
 
@@ -252,44 +286,46 @@ bool pstate::entails(const formula_list & to_check, const pworld_ptr & world) co
 	return true;
 }
 
-/**** REACHABILITY ****/
-pworld_ptr_set pstate::get_B_reachable_worlds(const agent & ag, const pworld_ptr & world)
+bool pstate::entails(const formula_list & to_check) const
 {
-	//	pworld_ptr_set ret;
-	//	 m_beliefs.find(world);
-
-	//	if (pw_map != m_beliefs.end()) {
-	auto pw_set = world.get_information_state().find(ag);
-	if (pw_set != world.get_information_state().end()) {
-		return pw_set->second;
-		//        helper_t::sum_set<pworld_ptr>(ret, pw_set->second);
-	}
-	//	}
-	//	return ret;
-	std::cerr << "Missing information state of agent " << ag << " in world " << world.get_id() << std::endl;
-	exit(1);
+	return entails(to_check, m_pointed);
 }
 
-bool pstate::get_B_reachable_worlds_recursive(const agent & ag, const pworld_ptr & world, pworld_ptr_set& ret)
+/**** REACHABILITY ****/
+pworld_ptr_set pstate::get_B_reachable_worlds(const agent & ag, const pworld_ptr & world) const
+{
+	pworld_ptr_set ret;
+	auto pw_map = m_beliefs.find(world);
+
+	if (pw_map != m_beliefs.end()) {
+		auto pw_set = pw_map->second.find(ag);
+		if (pw_set != pw_map->second.end()) {
+			helper_t::sum_set<pworld_ptr>(ret, pw_set->second);
+		}
+	}
+	return ret;
+}
+
+bool pstate::get_B_reachable_worlds_recursive(const agent & ag, const pworld_ptr & world, pworld_ptr_set& ret) const
 {
 	/** \todo check: If a--i-->b, b--i-->c then a--i-->c must be there*/
-	//	auto pw_map = m_beliefs.find(world);
+	auto pw_map = m_beliefs.find(world);
 
-	//	if (pw_map != m_beliefs.end()) {
-	auto pw_set = world.get_information_state().find(ag);
-	if (pw_set != world.get_information_state().end()) {
-		unsigned long previous_size = ret.size();
-		helper_t::sum_set<pworld_ptr>(ret, pw_set->second);
-		unsigned long current_size = ret.size();
+	if (pw_map != m_beliefs.end()) {
+		auto pw_set = pw_map->second.find(ag);
+		if (pw_set != pw_map->second.end()) {
+			unsigned long previous_size = ret.size();
+			helper_t::sum_set<pworld_ptr>(ret, pw_set->second);
+			unsigned long current_size = ret.size();
 
-		return previous_size == current_size;
+			return previous_size == current_size;
+		}
+		/**@bug: We don't know why sometimes is outside the two if cases.*/
 	}
-	/**@bug: We don't know why sometimes is outside the two if cases.*/
-	//	}
 	return true;
 }
 
-pworld_ptr_set pstate::get_E_reachable_worlds(const agent_set & ags, const pworld_ptr & world)
+pworld_ptr_set pstate::get_E_reachable_worlds(const agent_set & ags, const pworld_ptr & world) const
 {
 	/*The K^0 call of this function*/
 	pworld_ptr_set ret;
@@ -300,7 +336,7 @@ pworld_ptr_set pstate::get_E_reachable_worlds(const agent_set & ags, const pworl
 	return ret;
 }
 
-bool pstate::get_E_reachable_worlds_recoursive(const agent_set & ags, const pworld_ptr_set & worlds, pworld_ptr_set & ret)
+bool pstate::get_E_reachable_worlds_recoursive(const agent_set & ags, const pworld_ptr_set & worlds, pworld_ptr_set & ret) const
 {
 	/*The K^i (recoursive) call of this function*/
 	bool is_fixed_point = true;
@@ -332,7 +368,7 @@ pworld_ptr_set pstate::get_C_reachable_worlds(const agent_set & ags, const pworl
 	return ret;
 }
 
-pworld_ptr_set pstate::get_D_reachable_worlds(const agent_set & ags, const pworld_ptr & world)
+pworld_ptr_set pstate::get_D_reachable_worlds(const agent_set & ags, const pworld_ptr & world) const
 {
 	/**@bug: Notion of D-Reachable is correct (page 24 of Reasoning about Knowledge)*/
 	auto it_agset = ags.begin();
@@ -363,6 +399,40 @@ pworld_ptr_set pstate::get_D_reachable_worlds(const agent_set & ags, const pworl
 	std::cerr << "\nERROR: D_REACHABLILITY not yet Implemented correctly\n";
 	exit(1);
 	return ret;
+}
+
+void pstate::get_all_reachable_worlds_edges(const pworld_ptr & world, pworld_ptr_set & reached_worlds, pedges & reached_edges) const
+{
+	pworld_ptr_set::const_iterator it_pws;
+	pworld_ptr_set pw_list;
+
+	auto ag_set = domain::get_instance().get_agents();
+	auto ag_it = ag_set.begin();
+
+	for (; ag_it != ag_set.end(); ag_it++) {
+		pw_list = m_beliefs.at(world).at(*ag_it);
+
+		for (it_pws = pw_list.begin(); it_pws != pw_list.end(); it_pws++) {
+			if (reached_worlds.insert(*it_pws).second) {
+				reached_edges[*it_pws] = m_beliefs.at(*it_pws);
+				get_all_reachable_worlds_edges(*it_pws, reached_worlds, reached_edges);
+			}
+		}
+	}
+}
+
+void pstate::clean_unreachable_pworlds()
+{
+	pworld_ptr_set reached_worlds;
+	pedges reached_edges;
+
+	reached_worlds.insert(get_pointed());
+	reached_edges[get_pointed()] = m_beliefs.at(get_pointed());
+
+	get_all_reachable_worlds_edges(get_pointed(), reached_worlds, reached_edges);
+
+	set_worlds(reached_worlds);
+	set_beliefs(reached_edges);
 }
 
 /**** INITIAL STATE ****/
@@ -578,7 +648,9 @@ void pstate::remove_initial_pedge_bf(const belief_formula & to_check)
 pstate pstate::compute_succ(const action & act) const
 {
 	/** \warning executability should be check in \ref state (or \ref planner).*/
-	return union_update::u_update(*this, act);
+	pstate ret = product_update::update(*this, act);
+	ret.clean_unreachable_pworlds();
+	return ret;
 }
 
 /**** BISIMULATION ****/
@@ -598,8 +670,8 @@ automaton pstate::pstate_to_automaton(std::vector<pworld_ptr> & pworld_vec, cons
 	Vertex = (v_elem *) malloc(sizeof(v_elem) * Nvertex);
 
 	// Initializating vertices
-	pworld_ptr_set::const_iterator it_pws1, it_pws2;
-	information_state::const_iterator it_ins;
+	pworld_ptr_set::const_iterator it_pwps;
+	pedges::const_iterator it_peps;
 	pbislabel_map::const_iterator it_plm;
 	bis_label_set::const_iterator it_bislab;
 	std::map<pworld_ptr, bis_label_set>::const_iterator it_pw_bislab;
@@ -627,23 +699,23 @@ automaton pstate::pstate_to_automaton(std::vector<pworld_ptr> & pworld_vec, cons
 
 	//std::cerr << "\nDEBUG: Inizializzazione Vertex\n";
 
-	for (it_pws1 = m_worlds.begin(); it_pws1 != m_worlds.end(); it_pws1++) {
-		if (!(*it_pws1 == get_pointed())) {
-			index_map[*it_pws1] = i;
-			pworld_vec.push_back(*it_pws1);
+	for (it_pwps = m_worlds.begin(); it_pwps != m_worlds.end(); it_pwps++) {
+		if (!(*it_pwps == get_pointed())) {
+			index_map[*it_pwps] = i;
+			pworld_vec.push_back(*it_pwps);
 
-			// if (compact_indices.find(it_pws1->get_numerical_id()) == compact_indices.end()) {
-			if (compact_indices.insert({it_pws1->get_numerical_id(), c}).second) {
-				// compact_indices[it_pws1->get_numerical_id()] = c;
+			// if (compact_indices.find(it_pwps->get_numerical_id()) == compact_indices.end()) {
+			if (compact_indices.insert({it_pwps->get_numerical_id(), c}).second) {
+				// compact_indices[it_pwps->get_numerical_id()] = c;
 				c++;
-				//std::cerr << "\nDEBUG: Added:" << it_pws1->get_id() << "\n";
+				//std::cerr << "\nDEBUG: Added:" << it_pwps->get_id() << "\n";
 			}
 			Vertex[i].ne = 0;
 			i++;
 		}
 		//BIS_ADAPTATION (Added self-loop)
-		label_map[*it_pws1][*it_pws1].insert(compact_indices[static_cast<int> (it_pws1->get_numerical_id())] + ag_set_size);
-		//std::cerr << "\nDEBUG: Added to " << it_pws1->get_numerical_id() << " the label " << compact_indices[it_pws1->get_numerical_id()] + ag_set_size << std::endl;
+		label_map[*it_pwps][*it_pwps].insert(compact_indices[static_cast<int> (it_pwps->get_numerical_id())] + ag_set_size);
+		//std::cerr << "\nDEBUG: Added to " << it_pwps->get_numerical_id() << " the label " << compact_indices[it_pwps->get_numerical_id()] + ag_set_size << std::endl;
 	}
 
 
@@ -654,17 +726,18 @@ automaton pstate::pstate_to_automaton(std::vector<pworld_ptr> & pworld_vec, cons
 
 	//BIS_ADAPTATION (Moved down here)
 
-	for (it_pws1 = m_worlds.begin(); it_pws1 != m_worlds.end(); it_pws1++) {
-		for (it_ins = it_pws1->get_information_state().begin(); it_ins != it_pws1->get_information_state().end(); it_ins++) {
-			for (it_pws2 = it_ins->second.begin(); it_pws2 != it_ins->second.end(); it_pws2++) {
-				label_map[*it_pws1][*it_pws2].insert(agent_to_label.at(it_ins->first));
-				Vertex[index_map[*it_pws1]].ne++;
+	for (it_peps = m_beliefs.begin(); it_peps != m_beliefs.end(); it_peps++) {
+
+		for (auto it_mid_bel = it_peps->second.begin(); it_mid_bel != it_peps->second.end(); it_mid_bel++) {
+			for (auto it_int_ed = it_mid_bel->second.begin(); it_int_ed != it_mid_bel->second.end(); it_int_ed++) {
+				label_map[it_peps->first][*it_int_ed].insert(agent_to_label.at(it_mid_bel->first));
+				Vertex[index_map[it_peps->first]].ne++;
 			}
 		}
 	}
 
 	i = 0;
-	for (it_pws1 = m_worlds.begin(); it_pws1 != m_worlds.end(); it_pws1++) {
+	for (it_pwps = m_worlds.begin(); it_pwps != m_worlds.end(); it_pwps++) {
 		Vertex[i].ne++; //Self loop bisimulation
 		Vertex[i].e = (e_elem *) malloc(sizeof(e_elem) * Vertex[i].ne);
 		i++;
@@ -718,7 +791,7 @@ automaton pstate::pstate_to_automaton(std::vector<pworld_ptr> & pworld_vec, cons
 void pstate::automaton_to_pstate(const automaton & a, const std::vector<pworld_ptr> & pworld_vec, const std::map<bis_label, agent> & label_to_agent)
 {
 	pworld_ptr_set worlds;
-	//    m_beliefs.clear();
+	m_beliefs.clear();
 	// The pointed world does not change when we calculate the minimum bisimilar state
 	// Hence we do not need to update it
 
@@ -748,14 +821,14 @@ void pstate::calc_min_bisimilar()
 
 	// ************* Cleaning unreachable pworlds *************
 
-	//    clean_unreachable_pworlds();
+	clean_unreachable_pworlds();
 
 	std::vector<pworld_ptr> pworld_vec; // Vector of all pworld_ptr
 	//std::cerr << "\nDEBUG: PRE-ALLOCAZIONE AUTOMA\n" << std::flush;
 
 
 	//	std::cerr << "\nDEBUG: \n\tNvertex_before = " << m_worlds.size() << std::endl;
-	//	std::cerr << "\tNbehavs_before = " << m_information_state.size() << std::endl;
+	//	std::cerr << "\tNbehavs_before = " << m_edges.size() << std::endl;
 
 	automaton a;
 	pworld_vec.reserve(get_worlds().size());
@@ -897,7 +970,7 @@ void pstate::print() const
 	std::cout << std::endl;
 	std::cout << "The Pointed World has id ";
 	printer::get_instance().print_list(get_pointed().get_fluent_set());
-	//	std::cout << "-" << get_pointed().get_repetition();
+	std::cout << "-" << get_pointed().get_repetition();
 	std::cout << std::endl;
 	std::cout << "*******************************************************************" << std::endl;
 
@@ -907,40 +980,40 @@ void pstate::print() const
 	for (it_pwset = get_worlds().begin(); it_pwset != get_worlds().end(); it_pwset++) {
 		std::cout << "W-" << counter << ": ";
 		printer::get_instance().print_list(it_pwset->get_fluent_set());
-		//		std::cout << " rep:" << it_pwset->get_repetition();
+		std::cout << " rep:" << it_pwset->get_repetition();
 		std::cout << std::endl;
 		counter++;
 	}
 	counter = 1;
 	std::cout << std::endl;
 	std::cout << "*******************************************************************" << std::endl;
-	//	pedges::const_iterator it_pwtm;
-	information_state::const_iterator it_pwm;
+	pedges::const_iterator it_pwtm;
+	pworld_map::const_iterator it_pwm;
 	std::cout << "Edge List:" << std::endl;
-	//	for (it_pwtm = get_beliefs().begin(); it_pwtm != get_beliefs().end(); it_pwtm++) {
-	//		pworld_ptr from = it_pwtm->first;
-	//		information_state from_map = it_pwtm->second;
-	//
-	//		for (it_pwm = from_map.begin(); it_pwm != from_map.end(); it_pwm++) {
-	//			agent ag = it_pwm->first;
-	//			pworld_ptr_set to_set = it_pwm->second;
-	//
-	//			for (it_pwset = to_set.begin(); it_pwset != to_set.end(); it_pwset++) {
-	//
-	//				pworld_ptr to = *it_pwset;
-	//
-	//				std::cout << "E-" << counter << ": (";
-	//				printer::get_instance().print_list(from.get_fluent_set());
-	////				std::cout << "," << from.get_repetition();
-	//				std::cout << ") - (";
-	//				printer::get_instance().print_list(to.get_fluent_set());
-	////				std::cout << "," << to.get_repetition();
-	//				std::cout << ") ag:" << domain::get_instance().get_grounder().deground_agent(ag);
-	//				std::cout << std::endl;
-	//				counter++;
-	//			}
-	//		}
-	//	}
+	for (it_pwtm = get_beliefs().begin(); it_pwtm != get_beliefs().end(); it_pwtm++) {
+		pworld_ptr from = it_pwtm->first;
+		pworld_map from_map = it_pwtm->second;
+
+		for (it_pwm = from_map.begin(); it_pwm != from_map.end(); it_pwm++) {
+			agent ag = it_pwm->first;
+			pworld_ptr_set to_set = it_pwm->second;
+
+			for (it_pwset = to_set.begin(); it_pwset != to_set.end(); it_pwset++) {
+
+				pworld_ptr to = *it_pwset;
+
+				std::cout << "E-" << counter << ": (";
+				printer::get_instance().print_list(from.get_fluent_set());
+				std::cout << "," << from.get_repetition();
+				std::cout << ") - (";
+				printer::get_instance().print_list(to.get_fluent_set());
+				std::cout << "," << to.get_repetition();
+				std::cout << ") ag:" << domain::get_instance().get_grounder().deground_agent(ag);
+				std::cout << std::endl;
+				counter++;
+			}
+		}
+	}
 	std::cout << "*******************************************************************" << std::endl;
 }
 
@@ -972,7 +1045,7 @@ void pstate::print_graphviz(std::ostream & graphviz) const
 			map_world_to_index[tmp_fs] = found_fs;
 			found_fs++;
 		}
-		//		tmp_unsh = static_cast<char>(it_pwset->get_repetition());
+		tmp_unsh = static_cast<char> (it_pwset->get_repetition());
 		if (map_rep_to_name.count(tmp_unsh) == 0) {
 			map_rep_to_name[tmp_unsh] = found_rep;
 			found_rep++;
@@ -995,14 +1068,14 @@ void pstate::print_graphviz(std::ostream & graphviz) const
 
 	std::map<int, pworld_ptr_set> for_rank_print;
 	for (it_pwset = get_worlds().begin(); it_pwset != get_worlds().end(); it_pwset++) {
-		//		for_rank_print[it_pwset->get_repetition()].insert(*it_pwset);
+		for_rank_print[it_pwset->get_repetition()].insert(*it_pwset);
 	}
 
 	std::map<int, pworld_ptr_set>::const_iterator it_map_rank;
 	for (it_map_rank = for_rank_print.begin(); it_map_rank != for_rank_print.end(); it_map_rank++) {
 		graphviz << "	{rank = same; ";
 		for (it_pwset = it_map_rank->second.begin(); it_pwset != it_map_rank->second.end(); it_pwset++) {
-			//			graphviz << "\"" << map_rep_to_name[it_pwset->get_repetition()] << "_" << map_world_to_index[it_pwset->get_fluent_set()] << "\"; ";
+			graphviz << "\"" << map_rep_to_name[it_pwset->get_repetition()] << "_" << map_world_to_index[it_pwset->get_fluent_set()] << "\"; ";
 		}
 		graphviz << "}\n";
 	}
@@ -1013,35 +1086,35 @@ void pstate::print_graphviz(std::ostream & graphviz) const
 
 	std::map < std::tuple<std::string, std::string>, std::set<std::string> > edges;
 
-	//	pedges::const_iterator it_pwtm;
-	information_state::const_iterator it_pwm;
+	pedges::const_iterator it_pwtm;
+	pworld_map::const_iterator it_pwm;
 	std::tuple<std::string, std::string> tmp_tuple;
 	std::string tmp_string;
 
-	//	for (it_pwtm = get_beliefs().begin(); it_pwtm != get_beliefs().end(); it_pwtm++) {
-	//		pworld_ptr from = it_pwtm->first;
-	//		information_state from_map = it_pwtm->second;
-	//
-	//		for (it_pwm = from_map.begin(); it_pwm != from_map.end(); it_pwm++) {
-	//			agent ag = it_pwm->first;
-	//			pworld_ptr_set to_set = it_pwm->second;
-	//
-	//			for (it_pwset = to_set.begin(); it_pwset != to_set.end(); it_pwset++) {
-	//				pworld_ptr to = *it_pwset;
-	//
-	//				tmp_string = "_" + std::to_string(map_world_to_index[from.get_fluent_set()]);
-	////				tmp_string.insert(0, 1, map_rep_to_name[from.get_repetition()]);
-	//				std::get<0>(tmp_tuple) = tmp_string;
-	//
-	//				tmp_string = "_" + std::to_string(map_world_to_index[to.get_fluent_set()]);
-	////				tmp_string.insert(0, 1, map_rep_to_name[to.get_repetition()]);
-	//				std::get<1>(tmp_tuple) = tmp_string;
-	//
-	//				edges[tmp_tuple].insert(domain::get_instance().get_grounder().deground_agent(ag));
-	//
-	//			}
-	//		}
-	//	}
+	for (it_pwtm = get_beliefs().begin(); it_pwtm != get_beliefs().end(); it_pwtm++) {
+		pworld_ptr from = it_pwtm->first;
+		pworld_map from_map = it_pwtm->second;
+
+		for (it_pwm = from_map.begin(); it_pwm != from_map.end(); it_pwm++) {
+			agent ag = it_pwm->first;
+			pworld_ptr_set to_set = it_pwm->second;
+
+			for (it_pwset = to_set.begin(); it_pwset != to_set.end(); it_pwset++) {
+				pworld_ptr to = *it_pwset;
+
+				tmp_string = "_" + std::to_string(map_world_to_index[from.get_fluent_set()]);
+				tmp_string.insert(0, 1, map_rep_to_name[from.get_repetition()]);
+				std::get<0>(tmp_tuple) = tmp_string;
+
+				tmp_string = "_" + std::to_string(map_world_to_index[to.get_fluent_set()]);
+				tmp_string.insert(0, 1, map_rep_to_name[to.get_repetition()]);
+				std::get<1>(tmp_tuple) = tmp_string;
+
+				edges[tmp_tuple].insert(domain::get_instance().get_grounder().deground_agent(ag));
+
+			}
+		}
+	}
 
 	std::map < std::tuple<std::string, std::string>, std::set < std::string>>::iterator it_map;
 	std::map < std::tuple<std::string, std::string>, std::set < std::string>>::const_iterator it_map_2;
@@ -1107,7 +1180,7 @@ void pstate::print_graphviz(std::ostream & graphviz) const
 	for (it_pwset = get_worlds().begin(); it_pwset != get_worlds().end(); it_pwset++) {
 		tmp_fs = it_pwset->get_fluent_set();
 		print_first = false;
-		graphviz << "		<tr><td>" << /*map_rep_to_name[it_pwset->get_repetition()] << "_" <<*/ map_world_to_index[tmp_fs] << "</td> <td>";
+		graphviz << "		<tr><td>" << map_rep_to_name[it_pwset->get_repetition()] << "_" << map_world_to_index[tmp_fs] << "</td> <td>";
 		for (it_fs = tmp_fs.begin(); it_fs != tmp_fs.end(); it_fs++) {
 			if (print_first) {
 

@@ -6,7 +6,7 @@
  */
 #include "action.h"
 #include "../domain/domain.h"
-#include "possibilities/pem_store.h"
+#include "custom_event_models/cem_store.h"
 
 /*********************************************************************
  Action implementation
@@ -61,7 +61,7 @@ void action::initialize_obs_table(const agent_set & tot_ags, const fluent_set &t
 	std::map<agent_group_id, belief_formula> map_internal;
 
 	for (it_ag = tot_ags.begin(); it_ag != tot_ags.end(); ++it_ag) {
-		for (short it_ag_group = 0; it_ag_group != pem_store::get_instance().get_agent_group_number(); ++it_ag_group) {
+		for (short it_ag_group = 0; it_ag_group != cem_store::get_instance().get_agent_group_number(); ++it_ag_group) {
 			//Everyone set to false, then in the function that retrieves set the rules that if everything is false you get the last
 			map_internal.insert(std::make_pair(it_ag_group, false_bf));
 		}
@@ -100,11 +100,11 @@ void action::set_type(act_type type)
 {
 	if (type != -1) {
 		if (m_type == -1) {
-			if (pem_store::get_instance().exist_pem(type)) {
+			if (cem_store::get_instance().exist_cem(type)) {
 				m_type = type;
 				return;
 			} else {
-				std::cerr << "The specified action type: " << type << " does not match any pem specification." << std::endl;
+				std::cerr << "The specified action type: " << type << " does not match any cem specification." << std::endl;
 				exit(1);
 			}
 		}
@@ -198,7 +198,7 @@ void action::print() const
 	grounder grounder = domain::get_instance().get_grounder();
 	std::cout << "\nAction " << get_name() << ":" << std::endl;
 	std::cout << "	ID: " << get_id() << ":" << std::endl;
-	std::cout << "	Type: " << pem_store::get_instance().get_pem_name(get_type()) << std::endl;
+	std::cout << "	Type: " << cem_store::get_instance().get_cem_name(get_type()) << std::endl;
 
 	std::cout << "	Executability:";
 	formula_list::const_iterator it_fl;
@@ -223,7 +223,7 @@ void action::print() const
 		auto internal_map = it_obsmap->second;
 		auto ag_string = grounder.deground_agent(it_obsmap->first);
 		for (auto internal_it = internal_map.begin(); internal_it != internal_map.end(); ++internal_it) {
-			std::cout << " | " << ag_string << " belongs to " << pem_store::get_instance().get_agent_group_name(internal_it->first) << " if ";
+			std::cout << " | " << ag_string << " belongs to " << cem_store::get_instance().get_agent_group_name(internal_it->first) << " if ";
 			//printer::get_instance().print_list(it_obsmap->second);
 			belief_formula cond_temp = internal_it->second;
 			if (cond_temp.get_formula_type() == FLUENT_FORMULA) {

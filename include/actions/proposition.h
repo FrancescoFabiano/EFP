@@ -129,7 +129,7 @@ public:
 
     /** Setter for the field \ref m_agent_group.
      * 
-     * @param[in] to_set: the value (retrived by the map in pem store) to assign to \ref m_agent_group.*/
+     * @param[in] to_set: the value (retrived by the map in cem store) to assign to \ref m_agent_group.*/
     void set_agent_group(const std::string & to_set);
 
     /** Setter for the field \ref m_conditions.

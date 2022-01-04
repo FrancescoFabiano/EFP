@@ -55,9 +55,9 @@ public:
      * 
      * Function called to parse the file containing the domain
      * and store the information into the fields of the \ref reader class. 
-     * @param[in] pem_filename: The name of the file that contains the specification of the update models.
+     * @param[in] cem_filename: The name of the file that contains the specification of the update models.
      * @return The same int value returned from the parsing process.*/
-    int read(const std::string & pem_filename);
+    int read(const std::string & cem_filename);
 
     reader();
 

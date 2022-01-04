@@ -1,9 +1,9 @@
 /**
- * \class pem_parser
- * \brief Singleton class that parse the file that described the custom pems.
+ * \class cem_parser
+ * \brief Singleton class that parse the file that described the custom cems.
  * 
  * 
- * @see pevent, pem, pem_store.
+ * @see cevent, cem, cem_store.
  * 
  * \copyright GNU Public License.
  *
@@ -22,7 +22,7 @@
 #include <regex>
 #include "../utilities/define.h"
 
-class em_parser
+class cem_parser
 {
 private:
     static void apply_spaces_regex(std::string & to_clean, const std::regex & pattern);
@@ -31,9 +31,9 @@ private:
 
     static void parse_ag_list(const std::string & line);
 
-    static void parse_edge(const std::string & edge, pem_edges & edges);
+    static void parse_edge(const std::string & edge, cem_edges & edges);
 
-    static void parse_edges_list(const std::string & line, pem_edges & edges);
+    static void parse_edges_list(const std::string & line, cem_edges & edges);
 
 public:
 

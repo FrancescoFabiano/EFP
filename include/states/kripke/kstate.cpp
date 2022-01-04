@@ -12,7 +12,7 @@
 #include <stack>
 
 #include "kstate.h"
-#include "../../update/union_update.h"
+#include "../../update/product_update.h"
 #include "../../utilities/helper_t.ipp"
 
 /**** GETTERS/SETTERS ****/
@@ -663,7 +663,9 @@ void kstate::remove_initial_kedge_bf(const belief_formula & to_check)
 kstate kstate::compute_succ(const action & act) const
 {
 	/** \warning executability should be check in \ref state (or \ref planner).*/
-	return union_update::u_update(*this, act);
+	kstate tmp;
+	return tmp;
+	//return product_update::update(*this, act);
 }
 
 /**** BISIMULATION ****/

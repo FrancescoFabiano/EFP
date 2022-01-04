@@ -7,11 +7,11 @@
  * \date Aprile 1, 2019
  */
 
-#include "em_parser.h"
-#include "../actions/kripke/kevent.h"
-#include "../actions/kripke/kem_store.h"
+#include "cem_parser.h"
+#include "../actions/custom_event_models/cevent.h"
+#include "../actions/custom_event_models/cem_store.h"
 
-void em_parser::apply_spaces_regex(std::string & to_clean, const std::regex & pattern)
+void cem_parser::apply_spaces_regex(std::string & to_clean, const std::regex & pattern)
 {
 
 	std::string tmp_cleaned;
@@ -23,7 +23,7 @@ void em_parser::apply_spaces_regex(std::string & to_clean, const std::regex & pa
 	}
 }
 
-void em_parser::parse_conditions(const std::string & line, event_metacond & cond, int line_count)
+void cem_parser::parse_conditions(const std::string & line, event_metacond & cond, int line_count)
 {
 
 	std::regex spaces_opened("(.*[\\w\\(\\$])(\\s+)([\\w\\(\\$].*)");
@@ -82,7 +82,7 @@ void em_parser::parse_conditions(const std::string & line, event_metacond & cond
 	}
 }
 
-void em_parser::parse_ag_list(const std::string & line)
+void cem_parser::parse_ag_list(const std::string & line)
 {
 
 	std::string cleaned = line;
@@ -107,14 +107,16 @@ void em_parser::parse_ag_list(const std::string & line)
 	std::string sub_arg;
 
 
+
 	while (args >> sub_arg) {
-		kem_store::get_instance().add_agent_group(sub_arg);
+		cem_store::get_instance().add_agent_group(sub_arg);
 	}
 
 }
 
-void em_parser::parse_edge(const std::string & edge, kem_edges & edges)
+void cem_parser::parse_edge(const std::string & edge, cem_edges & edges)
 {
+
 	std::string cleaned = edge;
 
 	boost::replace_all(cleaned, ";", " ");
@@ -123,40 +125,42 @@ void em_parser::parse_edge(const std::string & edge, kem_edges & edges)
 	std::string sub_arg;
 
 	args >> sub_arg;
-	event_ptr first = kem_store::get_instance().get_event(kem_store::get_instance().get_event_id(sub_arg));
+	cevent_ptr first = cem_store::get_instance().get_event(cem_store::get_instance().get_event_id(sub_arg));
+
 
 	args >> sub_arg;
-	event_ptr second = kem_store::get_instance().get_event(kem_store::get_instance().get_event_id(sub_arg));
+	cevent_ptr second = cem_store::get_instance().get_event(cem_store::get_instance().get_event_id(sub_arg));
 
 	args >> sub_arg;
-	agent_group_id e_to_add_ag = kem_store::get_instance().get_agent_group(sub_arg);
+	agent_group_id e_to_add_ag = cem_store::get_instance().get_agent_group(sub_arg);
+
 
 	auto it_eve = edges.find(first);
 
 	if (it_eve != edges.end()) {
-		event_information_state e_map = it_eve->second;
-		auto it_evm = e_map.find(e_to_add_ag);
+		auto it_evm = it_eve->second.find(e_to_add_ag);
 
-		if (it_evm != e_map.end()) {
+		if (it_evm != it_eve->second.end()) {
 			it_evm->second.insert(second);
 		} else {
-			e_map.insert(event_information_state::value_type(e_to_add_ag, {second}));
+			it_eve->second.insert(cevent_map::value_type(e_to_add_ag,{second}));
+
 		}
 	} else {
-		event_information_state tmp;
-		tmp.insert(event_information_state::value_type(e_to_add_ag, {second}));
-		edges.insert(em_edges::value_type(first, tmp));
+		cevent_map tmp;
+		tmp.insert(cevent_map::value_type(e_to_add_ag,{second}));
+		edges.insert(cem_edges::value_type(first, tmp));
 	}
 	//	if (edges.find(e_to_add_ag) != edges.end()) {
 	//		edges[e_to_add_ag].insert(e_to_add);
 	//	} else {
-	//		std::set<em_edge> tmp_set;
+	//		std::set<cem_edge> tmp_set;
 	//		tmp_set.insert(e_to_add);
-	//		edges.insert(std::pair<agent_group_id, std::set<em_edge> >(e_to_add_ag, tmp_set));
+	//		edges.insert(std::pair<agent_group_id, std::set<cem_edge> >(e_to_add_ag, tmp_set));
 	//	}
 }
 
-void em_parser::parse_edges_list(const std::string & line, em_edges & edges)
+void cem_parser::parse_edges_list(const std::string & line, cem_edges & edges)
 {
 	std::string cleaned = line;
 
@@ -185,14 +189,13 @@ void em_parser::parse_edges_list(const std::string & line, em_edges & edges)
 	}
 }
 
-
-void em_parser::parse(const std::string & filename, state_type state_t)
+void cem_parser::parse(const std::string & filename)
 {
 	//std::cout << "\nTesting the generation of Event Models starting from the file: " << filename << std::endl;
-	std::ifstream em_file(filename);
+	std::ifstream cem_file(filename);
 
 
-	if (em_file.is_open()) {
+	if (cem_file.is_open()) {
 
 		bool in_event = false, in_model = false, not_assigned = true;
 		std::string line;
@@ -209,17 +212,17 @@ void em_parser::parse(const std::string & filename, state_type state_t)
 		event_id e_id;
 		event_metacond e_meta_pre;
 		event_metacond e_meta_post;
-		//event e_to_add;
+		cevent e_to_add;
 
-		em_id p_id;
+		cem_id p_id;
 		event_id p_pointed_id;
-		em_edges p_edges;
-		//em p_to_add;
+		cem_edges p_edges;
+		cem c_to_add;
 
 
 		int line_count = 0;
 
-		while (getline(em_file, line)) {
+		while (getline(cem_file, line)) {
 
 			++line_count;
 
@@ -292,9 +295,9 @@ void em_parser::parse(const std::string & filename, state_type state_t)
 				if (field.compare("id") == 0 && (e_id == -1 || p_id == -1)) {
 
 					if (in_event) {
-						e_id = kem_store::get_instance().get_event_id(internal_field);
+						e_id = cem_store::get_instance().get_event_id(internal_field);
 					} else if (in_model) {
-						p_id = kem_store::get_instance().get_em_id(internal_field);
+						p_id = cem_store::get_instance().get_cem_id(internal_field);
 					} else {
 						std::cerr << "\nParsing Error at Line " << line_count << ": Before declaring a new \'" << field << "\' you need to open a new \'event\' or \'model\'.\n";
 						exit(1);
@@ -304,7 +307,7 @@ void em_parser::parse(const std::string & filename, state_type state_t)
 						std::cerr << "\nParsing Error at Line " << line_count << ": Pointed event found outside of a model definition.";
 						exit(1);
 					}
-					p_pointed_id = kem_store::get_instance().get_event_id(internal_field);
+					p_pointed_id = cem_store::get_instance().get_event_id(internal_field);
 				} else if (field.compare("precondition") == 0) {
 					if (!in_event) {
 						std::cerr << "\nParsing Error at Line " << line_count << ": Precondition found outside of an event definition.";
@@ -347,14 +350,17 @@ void em_parser::parse(const std::string & filename, state_type state_t)
 					e_to_add.set_meta_precondition(e_meta_pre);
 					e_to_add.set_meta_postconditions(e_meta_post);
 
-					kem_store::get_instance().add_event(e_to_add);
+					cem_store::get_instance().add_event(e_to_add);
+					//std::cerr << "\nDEBUG: Event is ";
+					//e_to_add.print();
 				} else if (in_model) {
-					p_to_add.set_id(p_id);
-					p_to_add.set_pointed_id(p_pointed_id);
-					p_to_add.set_edges(p_edges);
+					c_to_add.set_id(p_id);
+					c_to_add.set_pointed_id(p_pointed_id);
+					c_to_add.set_edges(p_edges);
 
-					kem_store::get_instance().add_em(p_to_add);
-
+					cem_store::get_instance().add_cem(c_to_add);
+					//std::cerr << "\nDEBUG: Model is ";
+					//c_to_add.print();
 				}
 				in_event = false;
 				in_model = false;
@@ -370,6 +376,6 @@ void em_parser::parse(const std::string & filename, state_type state_t)
 		std::cerr << "\nParsing Error: It is impossible to open the file \'" << filename << "\'.";
 		exit(1);
 	}
-	em_file.close();
+	cem_file.close();
 }
 
