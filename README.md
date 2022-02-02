@@ -1,8 +1,20 @@
 # EFP
 
+## Thesis - Related
+The repository, for a brief period of time, will store previous versions of the planner that match the implementation of some foundamental features.
+The planner, at the moment, is not completly able to manage the various versions.
+These versions will be merged in the next future and we will provide a unique solver that would allow, through parameters, to try different configurations.
+
+As a temporary solution we store in the folder "Thesis Code" four archives:
+- EFP2-0.zip: Contains the code of EFP 2.0 presented at (Fabiano et al. 2020)
+- EFP2-1.zip: Contains the code of EFP 2.1 that is EFP 2.0 optimized -- this version works only with Possibilities and also allows to play with small variation of the classical actions
+- EFP-att.zip: Contains the code where EFP is able to deal with agents attitudes (Fabiano et al. 2021) -- the example files contains the line to execute to generate the graphical states representation
+- EFP-customEve.zip: Contains the code where it is possible to play with custom event model
+- PLATO.zip: The ASP planner based on (Burigana et al. 2020)
+
 ## Goal
 Realize a scalable Epistemic Forward Planner that bases its concept on different states representations such as:
-- [ ] *Kripke structure*
+- [x] *Kripke structure*
 - [x] *possibilities*
 - [ ] *OBDDs*
 
@@ -76,16 +88,26 @@ An action language for multi-agent domains: Foundations.
 CoRR abs/1511.01960.
 
 
+Burigana, A., Fabiano, F., Dovier, A. & Pontelli, E. 2020.
+Modelling Multi-Agent Epistemic Planning in ASP.
+Theory and Practice of Logic Programming.
+
+
 Fabiano, F.; Burigana, A.; Dovier, A.; and Pontelli, E. 2020.
 EFP 2.0: A Multi-Agent Epistemic Solver with Multiple e-State Representations.
-Under Review at the 30th International Conference on Automated Planning and Scheduling.
+In Proceedings of the 30th International Conference on Automated Planning and Scheduling.
+
+
+Fabiano, F., Burigana, A., Dovier, A., Pontelli, E. & Son, T. C. 2021.
+Multi-agent Epistemic Planning with Inconsistent Beliefs, Trust and Lies.
+In Proceedings of the 18th Pacific Rim International Conference on Artificial Intelligence.
 
 
 Fabiano, F.; Riouak, I.; Dovier, A.; and Pontelli, E. 2019.
 Non-well-founded set based multi-agent epistemic action language.
-In Proceedings of the 34th Italian Conference on Computational Logic, volume 2396 of CEUR Workshop Proceedings, 242–259.
+In Proceedings of the 34th Italian Conference on Computational Logic.
 
 
 Le, T.; Fabiano, F.; Son, T. C.; and Pontelli, E. 2018.
 EFP and PG-EFP: Epistemic forward search planners in multiagent domains.
-In Proceedings of the Twenty-Eighth International Conference on Automated Planning and Scheduling, 161–170. Delft, The Netherlands: AAAI Press.
+In Proceedings of the Twenty-Eighth International Conference on Automated Planning and Scheduling.
