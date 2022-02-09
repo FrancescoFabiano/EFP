@@ -3,7 +3,7 @@
  *
  * \copyright GNU Public License.
  *
- * \author Francesco Fabiano.
+ * \author Francesco Fabiano, Alessandro Burigana.
  * \date September 14, 2019
  */
 #include <boost/dynamic_bitset.hpp>

@@ -10,7 +10,7 @@
  *
  * \copyright GNU Public License.
  *
- * \author Francesco Fabiano.
+ * \author Francesco Fabiano, Alessandro Burigana.
  * \date September 16, 2019
  */
 #pragma once
@@ -468,7 +468,7 @@ public:
  *
  * \copyright GNU Public License.
  *
- * \author Francesco Fabiano.
+ * \author Francesco Fabiano, Alessandro Burigana.
  * \date April 29, 2019
  */
 class pstate_opt_ptr

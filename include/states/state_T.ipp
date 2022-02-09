@@ -3,7 +3,7 @@
  *
  * \copyright GNU Public License.
  *
- * \author Francesco Fabiano.
+ * \author Francesco Fabiano, Alessandro Burigana.
  * \date April 11, 2019
  */
 #include <fstream>

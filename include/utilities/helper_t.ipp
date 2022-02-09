@@ -2,7 +2,7 @@
  *
  * \copyright GNU Public License.
  *
- * \author Francesco Fabiano.
+ * \author Francesco Fabiano, Alessandro Burigana.
  * \date April 30, 2021
  */
 

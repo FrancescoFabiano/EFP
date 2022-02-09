@@ -7,7 +7,7 @@
  *
  * \copyright GNU Public License.
  *
- * \author Francesco Fabiano.
+ * \author Francesco Fabiano, Alessandro Burigana.
  * \date June 24, 2021
  */
 
@@ -143,7 +143,7 @@ public:
  *
  * \copyright GNU Public License.
  *
- * \author Francesco Fabiano.
+ * \author Francesco Fabiano, Alessandro Burigana.
  * \date June 24, 2021
  */
 class cem_ptr

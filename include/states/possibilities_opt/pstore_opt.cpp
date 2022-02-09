@@ -2,7 +2,7 @@
  * \brief Implementation of \ref pstore_opt.h
  * \copyright GNU Public License.
  *
- * \author Francesco Fabiano.
+ * \author Francesco Fabiano, Alessandro Burigana.
  * \date September 14, 2019
  */
 

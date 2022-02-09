@@ -4,7 +4,7 @@
  *
  * \copyright GNU Public License.
  * 
- * \author Francesco Fabiano.
+ * \author Francesco Fabiano, Alessandro Burigana.
  * \date November 28, 2019
  */
 //#include "satisfied_goals.h"

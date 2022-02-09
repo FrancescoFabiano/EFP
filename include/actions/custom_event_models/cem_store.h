@@ -9,7 +9,7 @@
  * 
  * \copyright GNU Public License.
  *
- * \author Francesco Fabiano.
+ * \author Francesco Fabiano, Alessandro Burigana.
  * \date June 24, 2021
  */
 

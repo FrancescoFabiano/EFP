@@ -12,7 +12,7 @@
  * 
  * \copyright GNU Public License.
  *
- * \author Francesco Fabiano.
+ * \author Francesco Fabiano, Alessandro Burigana.
  * \date April 5, 2019
  */
 #pragma once

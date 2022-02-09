@@ -2,7 +2,7 @@
  * \brief Implementation of \ref cem_store.h
  * \copyright GNU Public License.
  *
- * \author Francesco Fabiano.
+ * \author Francesco Fabiano, Alessandro Burigana.
  * \date June 24, 2021
  */
 

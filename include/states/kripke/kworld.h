@@ -11,7 +11,7 @@
  *
  * \copyright GNU Public License.
  *
- * \author Francesco Fabiano.
+ * \author Francesco Fabiano, Alessandro Burigana.
  * \date March 31, 2019
  */
 #pragma once
@@ -211,7 +211,7 @@ public:
  *
  * \copyright GNU Public License.
  *
- * \author Francesco Fabiano.
+ * \author Francesco Fabiano, Alessandro Burigana.
  * \date April 29, 2019
  */
 class kworld_ptr

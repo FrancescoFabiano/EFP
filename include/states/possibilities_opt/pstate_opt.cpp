@@ -5,7 +5,7 @@
  * 
  * @todo: Redefine the insert so that we have the bulk check (Bisimulation with all the graphs). 
  *
- * \author Francesco Fabiano.
+ * \author Francesco Fabiano, Alessandro Burigana.
  * \date September 14, 2019
  */
 

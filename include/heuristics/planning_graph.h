@@ -9,7 +9,7 @@
  *
  * \copyright GNU Public License.
  * 
- * \author Francesco Fabiano.
+ * \author Francesco Fabiano, Alessandro Burigana.
  * \date September 24, 2019
  */
 
@@ -31,7 +31,7 @@
  *
  * \copyright GNU Public License.
  * 
- * \author Francesco Fabiano.
+ * \author Francesco Fabiano, Alessandro Burigana.
  * \date September 24, 2019
  */
 
@@ -111,7 +111,7 @@ public:
  *
  * \copyright GNU Public License.
  * 
- * \author Francesco Fabiano.
+ * \author Francesco Fabiano, Alessandro Burigana.
  * \date September 24, 2019
  */
 

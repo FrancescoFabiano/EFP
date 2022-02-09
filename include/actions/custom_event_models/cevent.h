@@ -7,7 +7,7 @@
  *
  * \copyright GNU Public License.
  *
- * \author Francesco Fabiano.
+ * \author Francesco Fabiano, Alessandro Burigana.
  * \date June 24, 2021
  */
 #pragma once
@@ -209,7 +209,7 @@ public:
  *
  * \copyright GNU Public License.
  *
- * \author Francesco Fabiano.
+ * \author Francesco Fabiano, Alessandro Burigana.
  * \date April 28, 2021
  */
 class cevent_ptr

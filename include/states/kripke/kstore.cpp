@@ -2,7 +2,7 @@
  * \brief Implementation of \ref kstore.h
  * \copyright GNU Public License.
  *
- * \author Francesco Fabiano.
+ * \author Francesco Fabiano, Alessandro Burigana.
  * \date April 9, 2019
  */
 

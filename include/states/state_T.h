@@ -15,7 +15,7 @@
  * \todo Check if is the correct way to usa a templatic class.
  * \copyright GNU Public License.
  *
- * \author Francesco Fabiano.
+ * \author Francesco Fabiano, Alessandro Burigana.
  * \date April 11, 2019
  */
 

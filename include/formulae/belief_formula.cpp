@@ -1,7 +1,7 @@
 /**
  * \brief Class that implements a \ref belief_formula.h.
  *
- * \author Francesco Fabiano.
+ * \author Francesco Fabiano, Alessandro Burigana.
  * \date March 31, 2019
  */
 #include "belief_formula.h"

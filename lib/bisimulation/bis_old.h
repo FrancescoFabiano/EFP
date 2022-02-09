@@ -12,7 +12,7 @@
  *
  * \copyright GNU Public License.
  *
- * \author Francesco Fabiano.
+ * \author Francesco Fabiano, Alessandro Burigana.
  * \date January 30, 2020, 10:34 AM
  */
 
