@@ -1,0 +1,14 @@
+Refactor:
+
+- Reintroduce original (EFP 2.1) parsing of the problem and original (EFP 2.1) transition function
+- Check the various capabilities (from the shell command) of the planner and remove the ones that are not useful
+- Add the E-PDDL parsing (through a script)
+- Remove useless files (such as optimized_poss)
+- Check if Kripke structures and possibilities are on the same level (Probably we need to make the new transition function templatic)
+- Update the README
+- Design simple interface
+
+- Check Planning graph and make it work with old transition function
+- Make planning graph able to work with the general Transition function
+
+- Algorithm portfolio-like management of planner characteristics
