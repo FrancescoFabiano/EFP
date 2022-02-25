@@ -12,3 +12,14 @@ Refactor:
 - Make planning graph able to work with the general Transition function
 
 - Algorithm portfolio-like management of planner characteristics
+
+
+- Reorganize classes/directories
+- Rework functions and data structures (from plan search down to single action execution and entailment)
+- Implement Delphic/keeping previous version for ontic, sensing and announcement if faster
+- Reintegrate trust/lies via custom event models
+- Doxygen
+- Equality for possibilities
+
+- Improve graphical representation
+- ASP integration for plan correctness verification
