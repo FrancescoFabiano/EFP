@@ -45,7 +45,7 @@ domain_restriction ini_restriction = S5; //default
 domain_restriction goal_restriction = NONE; //default
 action_check act_check = EXE_POINTED__COND_WORLD; //default
 
-spec_lang_type input_lang = EPDDL;
+spec_lang_type input_lang = MAR; // EPDDL;
 up_model_type update_models = STANDARD;
 std::string models_filename = "";
 
@@ -519,8 +519,9 @@ void generate_domain(char** argv)
 
 
 	//timer.start(READ_TIMER);
-	domain_reader->read(models_filename);
-	
+    if (input_lang == EPDDL) {
+        domain_reader->read(models_filename);
+    }
 	//	if (debug) {
 	//		domain_reader->print();
 	//	}

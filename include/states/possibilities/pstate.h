@@ -204,6 +204,25 @@ private:
 
     void clean_unreachable_pworlds();
 
+    /** \brief Function that return the set of \ref agent that entails the obs condition.
+     *
+     * @param[in] map: the map that contains the tuples to check for entailment.
+     * @param[in] start: the world to set as pointed to check the entailment.
+     * @return the effects that are feasible in *this* with \p start as pointed world*.*/
+    agent_set get_agents_if_entailed(const observability_map & map, const pworld_ptr & start) const;
+    /** \brief Function that return the \ref fluent_formula (effect) that entails the exe condition.
+     *
+     * @param[in] map: the map that contains the tuples to check for entailment.
+     * @param[in] start: the world to set as pointed to check the entailment.
+     * @return the effects that are feasible in *this* with \p start as pointed world*.*/
+    fluent_formula get_effects_if_entailed(const effects_map & map, const pworld_ptr & start) const;
+
+    /** \brief Function that copies the \ref pworld(s) and the beliefs of the oblivious agents in the new \ref pstate.
+     *
+     * @param[in] ret: the new \ref pstate.
+     * @param[in] oblivious_obs_agents: the oblivious \ref agent(s).*/
+    void maintain_oblivious_believed_pworlds(pstate &ret, const agent_set &oblivious_obs_agents) const;
+
     automaton pstate_to_automaton(std::vector<pworld_ptr> & pworld_vec, const std::map<agent, bis_label> & agent_to_label) const;
 
     void automaton_to_pstate(const automaton & a, const std::vector<pworld_ptr> & pworld_vec, const std::map<bis_label, agent> & label_to_agent);
@@ -352,6 +371,11 @@ public:
      * @param[in] to: the \ref pworld believed from \ref agent "ag"
      * @param[in] ag: the \ref agent.*/
     void add_edge(const pworld_ptr & from, const pworld_ptr & to, const agent& ag);
+    /** \brief Function that adds the given beliefs to the \ref pworld "world".
+     *
+     * @param[in] world: the \ref pworld.
+     * @param[in] beliefs: a \ref pworld_map containing the beliefs.*/
+    void add_pworld_beliefs(const pworld_ptr & world, const pworld_map & beliefs);
 
     /** \brief Function that checks the entailment of a \ref fluent in *this*.
      *
@@ -429,6 +453,54 @@ public:
      * \todo The action must be executable on *this* otherwise it will return a null_ptr.*/
     pstate compute_succ(const action & act) const;
 
+    /** \brief Function that recursively calculates the \ref pworld resulting from the transition function.
+     *
+     * @param[in] act: the \ref ONTIC \ref action to be applied on *this*.
+     * @param[in] ret: the \ref pstate resulting from the \ref action.
+     * @param[in] current_pw: the world being currently calculated.
+     * @param[in] calculated: a map that keeps track of the results of the transition function.
+     * @param[in] oblivious_obs_agents: the oblivious \ref agent set.
+     * @return the \ref pworld resulting from the application of the transition function on "current_pw".*/
+    pworld_ptr execute_ontic_helper(const action &act, pstate &ret, const pworld_ptr &current_pw, transition_map &calculated, agent_set &oblivious_obs_agents) const;
+    /** \brief Function that recursively calculates the \ref pworld resulting from the transition function.
+     *
+     * @param[in] effects: the effects of the \ref SENSING/\ref ANNOUNCEMENT \ref action to be applied on *this*.
+     * @param[in] ret: the \ref pstate resulting from the \ref action.
+     * @param[in] current_pw: the world being currently calculated.
+     * @param[in] calculated: a map that keeps track of the results of the transition function.
+     * @param[in] partially_obs_agents: the partially observant \ref agent set.
+     * @param[in] oblivious_obs_agents: the oblivious \ref agent set.
+     * @param[in] previous_entailment: the value of the coming state entailment (if first is pointed).
+     * @return the \ref pworld resulting from the application of the transition function on "current_pw".*/
+    pworld_ptr execute_sensing_announcement_helper(const fluent_formula &effects, pstate &ret, const pworld_ptr &current_pw, transition_map &calculated, agent_set &partially_obs_agents, agent_set &oblivious_obs_agents, bool previous_entailment) const;
+    /** \brief Function that applies the transition function for a \ref ONTIC \ref action effect on *this* implementing the possibilities semantic.
+     *
+     * The transition function is applied accordingly to mA^rho. Check the paper for more information.
+     *
+     * @see action.
+     *
+     * @param[in] act: the \ref ONTIC action to be applied on *this*.
+     * @return the \ref pstate that results after the execution.*/
+    pstate execute_ontic(const action &act) const;
+    /** \brief Function that applies the transition function for a \ref SENSING \ref action effect on *this* implementing the possibilities semantic.
+     *
+     * The transition function is applied accordingly to mA^rho. Check the paper for more information.
+     *
+     * @see action.
+     *
+     * @param[in] act: the \ref SENSING action to be applied on *this*.
+     * @return the \ref pstate that results after the execution.*/
+    pstate execute_sensing(const action &act) const;
+    /** \brief Function that applies the transition function for a \ref ANNOUNCEMENT \ref action effect on *this* implementing the possibilities semantic.
+     *
+     * The transition function is applied accordingly to mA^rho. Check the paper for more information.
+     *
+     * @see action.
+     *
+     * @param[in] act: the \ref ANNOUNCEMENT action to be applied on *this*.
+     * @return the \ref pstate that results after the execution.*/
+    pstate execute_announcement(const action &act) const;
+
     /** \brief sub-Function of \ref compute_succ that checks if the successor respects the epistemic properties after an \ref action execution.
      * 
      * For the moment this is only applied to sensing/announcement
@@ -446,6 +518,21 @@ public:
      *
      * Not yet implemented.*/
     void calc_min_bisimilar();
+
+    /** \brief Function that return the sum_set of the two parameters by modifying the first one.
+     *
+     *
+     * @param[out] to_modify: the set in which is added \p factor2.
+     * @param[in] factor2: the set to add to \p to_modify.*/
+    template <class T>
+    void sum_set(std::set<T> & to_modify, const std::set<T> & factor2) const;
+    /** \brief Function that return the set difference of the two parameters by modifying the first one.
+     *
+     *
+     * @param[out] to_modify: the set from which is removed \p factor2.
+     * @param[in] factor2: the set to remove from \p to_modify.*/
+    template <class T>
+    void minus_set(std::set<T> & to_modify, const std::set<T> & factor2) const;
 
     /** \brief The copy operator.
      *   

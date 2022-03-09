@@ -218,7 +218,7 @@ typedef std::set<belief_formula> bformula_set; /**< \brief A set of \ref belief_
 typedef std::map<agent, agent_group_id> single_observability_map;
 /**< \brief Used to map a single agent to his observability group w.r.t.an action execution.*/
 
-typedef std::map<agent, std::map<agent_group_id, belief_formula> > observability_map; /**< \brief Used to express the obsverbability conditions.
+typedef std::map<agent, belief_formula> observability_map; /**< \brief Used to express the obsverbability conditions.
                                 * 
                                 * Each element associates an \ref agent to the observability conditions for an \ref effff.*/
 //Associate each effect the condition

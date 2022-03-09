@@ -48,11 +48,14 @@ extern std::shared_ptr<reader> domain_reader;
 %token FLUENT
 %token ACTION
 %token IF
+%token CAUSES
 %token EXECUTABLE
-%token HAS_EFFECTS
-%token IN_GROUP
-%token OF
-%token HAS_TYPE
+%token IMPOSSIBLE
+%token DETERMINE
+%token AWAREOF
+%token OBSERVES
+%token ANNOUNCES
+%token AGEXEC
 %token INIT
 %token GOAL
 %token AGENT
@@ -60,8 +63,7 @@ extern std::shared_ptr<reader> domain_reader;
 %token MC
 %token ME
 %token MD
-
-
+%token LIE
 
 %type <str_val> id
 %type <str_val> constant
@@ -100,13 +102,22 @@ extern std::shared_ptr<reader> domain_reader;
 /* DEBUG_WARNING_REMOVAL %type <str_list2> gd_formula DEBUG_WARNING_REMOVAL*/
 
 //%type <prop> static_law
+%type <prop> dynamic_law
 %type <prop> executability
-%type <prop> effects
-%type <prop> type
-%type <prop> observance
+//%type <prop> impossibility
 %type <prop> proposition
+%type <prop> determine
+%type <prop> awareness
+%type <prop> observance
+%type <prop> announcement
+%type <prop> executing
 %type <prop_list> domain
+/***************DOXASTIC REASONING***************/
+%type <prop> lie
+/***************END DOXASTIC***************/
+
 %%
+
 input:		
 |
 fluent_decls 
@@ -449,6 +460,32 @@ IF formula {
 
 
 
+
+
+
+
+/* static law
+static_law:
+literal_list if_part SEMICOLON
+{
+  $$ = new proposition;
+  $$->set_type(STATIC);
+  $$->set_action_precondition(*$2);
+  $$->set_action_effect(*$1);
+};*/
+
+/* dynamic law */
+dynamic_law:
+action CAUSES literal_list if_part_bf SEMICOLON 
+{  
+  $$ = new proposition;
+  $$->set_type(ONTIC);
+  $$->set_action_name(*$1);
+  $$->set_executability_conditions(*$4);
+  //@TODO:Effect_Conversion | previously   $$->m_action_effect = *$3;
+  $$->add_action_effect(*$3);
+};
+
 /* executability condition */
 executability:
 EXECUTABLE action if_part_bf SEMICOLON
@@ -456,56 +493,114 @@ EXECUTABLE action if_part_bf SEMICOLON
   $$ = new proposition;
   $$->set_type(EXECUTABILITY);
   $$->set_action_name(*$2);
-  $$->set_conditions(*$3);
+  $$->set_executability_conditions(*$3);
 };
 
-/* effects condition */
-effects:
-action HAS_EFFECTS literal_list if_part_bf SEMICOLON
+/* determines condition */
+determine:
+action DETERMINE fluent_det_list SEMICOLON
 {
   $$ = new proposition;
-  $$->set_type(EFFECTS);
+  $$->set_type(SENSING);
   $$->set_action_name(*$1);
+  //@TODO:Effect_Conversion | previously   $$->m_action_effect = *$3;
   $$->add_action_effect(*$3);
-  $$->set_conditions(*$4);
 };
 
-/* effects condition */
-type:
-action HAS_TYPE constant SEMICOLON
+/* announcement condition */
+announcement:
+action ANNOUNCES formula if_part_bf SEMICOLON
 {
   $$ = new proposition;
-  $$->set_type(TYPE);
+  $$->set_type(ANNOUNCEMENT);
   $$->set_action_name(*$1);
-  $$->set_action_type(*$3);
+  $$->set_action_effect(*$3);
+  $$->set_executability_conditions(*$4);
+
 };
 
 
-/* observability declaration */
-observance:
-agent IN_GROUP constant OF action if_part_bf SEMICOLON
+
+/***************DOXASTIC REASONING***************/
+/* lie condition */
+lie:
+action LIE formula SEMICOLON
 {
   $$ = new proposition;
-  $$->set_type(OBSERVABILITY);
-  $$->set_action_name(*$5);
-  $$->set_agent_group(*$3);
+  $$->set_type(LIES);
+  $$->set_action_name(*$1);
+  $$->set_action_effect(*$3);
+};
+/***************END DOXASTIC***************/
+
+/* awareness condition */
+awareness:
+agent AWAREOF action if_part_bf SEMICOLON
+{
+  $$ = new proposition;
+  $$->set_type(AWARENESS);
+  $$->set_action_name(*$3);
   $$->set_agent(*$1);
-  $$->set_conditions(*$6);
+  $$->set_observability_conditions(*$4);
 };
 
+/* observance condition */
+observance:
+agent OBSERVES action if_part_bf SEMICOLON
+{
+  $$ = new proposition;
+  $$->set_type(OBSERVANCE);
+  $$->set_action_name(*$3);				
+  $$->set_agent(*$1);
+  $$->set_observability_conditions(*$4);
+};
+
+/* executing */
+executing:
+agent AGEXEC action SEMICOLON
+{
+  $$ = new proposition;
+  $$->set_type(EXECUTOR);
+  $$->set_action_name(*$3);				
+  $$->set_agent(*$1);
+ };
+/* impossibility condition 
+impossibility:
+IMPOSSIBLE action if_part SEMICOLON
+{
+  $$ = new proposition;
+  $$->set_type(IMPOSSIBILITY);
+  $$->set_action_name(*$2);
+  $$->set_action_precondition(*$3);
+};
+*/
 /* proposition */
 proposition:
+/*static_law {
+  $$ = $1;
+}
+|*/
+dynamic_law
+{
+  $$ = $1;
+}
+|
 executability
 {
   $$ = $1;
 }
 |
-effects
+/*impossibility
+{
+  $$ = $1;
+}
+|*/
+determine
 {
   $$ = $1;
 }
 |
-type
+announcement
 {
   $$ = $1;
 }
@@ -514,6 +609,23 @@ observance
 {
   $$ = $1;
 }
+|
+awareness
+{
+  $$ = $1;
+}
+|
+executing
+{
+  $$ = $1;
+}
+/***************DOXASTIC REASONING***************/
+|
+lie
+{
+  $$ = $1;
+}
+/***************END DOXASTIC***************/
 ;
 
 /* domain */
@@ -528,7 +640,6 @@ domain:
   $1->push_back(*$2);
 }
 ;
-
 
 /* init */
 init:

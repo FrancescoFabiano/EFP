@@ -67,6 +67,23 @@ public:
      * @return the description of the world after \p effect has been applied to \p world_description.*/
     static void apply_effect(const fluent_set& effect, fluent_set& world_description);
 
+    /** \brief Function to merge the results of an \ref ONTIC \ref action with a world description.
+     *
+     * @param[in] effect: part of the effect of an \ref ONTIC \ref action in CNF form.
+     * @param[in] world_description: the \ref fluent_set contained inside a single world.
+     *
+     * @return the description of the world after \p effect has been applied to \p world_description.*/
+    static fluent_set ontic_exec(const fluent_set& effect, const fluent_set& world_description);
+    /** \brief Function that check that the \ref ONTIC effect doesn't have uncertainty (OR).
+     *
+     * The it calls ontic_exec(const fluent_set&, const fluent_set&);
+     *
+     * @param[in] effect: the effect of an \ref ONTIC \ref action.
+     * @param[out] world_description: the description of the world after \p effect has been applied to \p world_description.
+     *
+     * @return the description of the world after \p effect has been applied to \p world_description.*/
+    static fluent_set ontic_exec(const fluent_formula& effect, const fluent_set& world_description);
+
     /* Set has == operator
      * \brief Function that checks if two \ref fluent_set are the same.
      * 

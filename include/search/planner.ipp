@@ -146,26 +146,27 @@ bool planner<T>::search_BFS(bool results_file)
 
 	std::cout << "\nInitial Built in " << elapsed_seconds.count() << " seconds" << std::endl;
 
-	action_set actions = domain::get_instance().get_actions();
-	action_set::const_iterator it_acset;
-	T popped_state;
-	T tmp_state;
-	action tmp_action;
+    action_set actions = domain::get_instance().get_actions();
+    action_set::const_iterator it_acset;
+    T popped_state;
+    T tmp_state;
+    action tmp_action;
 
-	start_timing = std::chrono::system_clock::now();
-	if (initial.is_goal()) {
-		end_timing = std::chrono::system_clock::now();
-		elapsed_seconds = end_timing - start_timing;
-		print_results(elapsed_seconds, initial, results_file, false, BFS, NO_H);
+    start_timing = std::chrono::system_clock::now();
+    if (initial.is_goal()) {
+        end_timing = std::chrono::system_clock::now();
+        elapsed_seconds = end_timing - start_timing;
+        print_results(elapsed_seconds, initial, results_file, false, BFS, NO_H);
 
-		return true;
-	}
+        return true;
+    }
 
-	m_search_space.push(initial);
-	if (check_visited) {
-		visited_states.insert(initial);
-	}
-			
+    m_search_space.push(initial);
+    if (check_visited) {
+        visited_states.insert(initial);
+    }
+
+
 	while (!m_search_space.empty()) {
 		popped_state = m_search_space.front();
 		m_search_space.pop();

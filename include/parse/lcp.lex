@@ -6,7 +6,6 @@
 #include "../include/utilities/define.h"
 #include "../include/actions/proposition.h"
 #include "../include/formulae/belief_formula.h"
-
 #include "tok.h"
 
 int yyerror(const char* s);
@@ -26,18 +25,21 @@ comment %.*$
 "action" {return ACTION;}
 "agent" {return AGENT;}
 "if" {return IF;}
-"has_effects" {return HAS_EFFECTS;}
+"executes" {return AGEXEC;}
+"causes" {return CAUSES;}
 "executable" {return EXECUTABLE;}
-"in_group" {return IN_GROUP;}
-"of" {return OF;}
-"has_type" {return HAS_TYPE;}
+"impossible" {return IMPOSSIBLE;}
+"determines" {return DETERMINE;}
+"aware_of" {return AWAREOF;}
+"observes" {return OBSERVES;}
+"announces" {return ANNOUNCES;}
 "initially" {return INIT;}
 "goal" {return GOAL;}
 "B" {return MB;}
 "C" {return MC;}
 "E" {return ME;}
 "D" {return MD;}
-
+"dox_announces" {return LIE;}
 
 
 "[" {return LEFT_BRAC;}

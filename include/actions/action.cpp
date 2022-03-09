@@ -6,7 +6,6 @@
  */
 #include "action.h"
 #include "../domain/domain.h"
-#include "custom_event_models/cem_store.h"
 
 /*********************************************************************
  Action implementation
@@ -16,59 +15,13 @@
 
 action::action()
 {
-	m_type = -1;
-	initialize_obs_table();
+	m_type = NOTSET;
 }
 
-action::action(const std::string & name, action_id id, const agent_set & tot_ags, const fluent_set &tot_fl)
+action::action(const std::string& name, action_id id)
 {
 	set_name(name);
 	set_id(id);
-	m_type = -1;
-	initialize_obs_table(tot_ags, tot_fl);
-}
-
-void action::initialize_obs_table()
-{
-	initialize_obs_table(domain::get_instance().get_agents(), domain::get_instance().get_fluents());
-}
-
-void action::initialize_obs_table(const agent_set & tot_ags, const fluent_set &tot_fl)
-{
-	agent_set::const_iterator it_ag;
-
-	belief_formula false_bf;
-	fluent_formula false_ff;
-
-	fluent f1 = *(tot_fl.begin());
-	fluent f1_negated = helper::negate_fluent(f1);
-
-	//The formula is "fluent_number_1 and -fluent_number_1" which is always false
-	fluent_set true_fs;
-
-	true_fs.insert(f1);
-	true_fs.insert(f1_negated);
-
-	false_ff.insert(true_fs);
-
-	false_bf.set_formula_type(FLUENT_FORMULA);
-	false_bf.set_fluent_formula(false_ff);
-	false_bf.set_is_grounded(true);
-	false_bf.deground();
-
-
-	//std::map<agent, std::map<agent_group_id, belief_formula>> map_mid;
-	std::map<agent_group_id, belief_formula> map_internal;
-
-	for (it_ag = tot_ags.begin(); it_ag != tot_ags.end(); ++it_ag) {
-		for (short it_ag_group = 0; it_ag_group != cem_store::get_instance().get_agent_group_number(); ++it_ag_group) {
-			//Everyone set to false, then in the function that retrieves set the rules that if everything is false you get the last
-			map_internal.insert(std::make_pair(it_ag_group, false_bf));
-		}
-
-		m_observants.insert(std::make_pair(*it_ag, map_internal));
-		map_internal.clear();
-	}
 }
 
 std::string action::get_name() const
@@ -81,6 +34,16 @@ void action::set_name(const std::string & name)
 	m_name = name;
 }
 
+agent action::get_executor() const
+{
+	return m_executor;
+}
+
+void action::set_executor(agent executor)
+{
+	m_executor = executor;
+}
+
 action_id action::get_id() const
 {
 	return m_id;
@@ -91,22 +54,18 @@ void action::set_id(action_id id)
 	m_id = id;
 }
 
-act_type action::get_type() const
+const proposition_type action::get_type() const
 {
 	return m_type;
 }
 
-void action::set_type(act_type type)
+void action::set_type(proposition_type type)
 {
-	if (type != -1) {
-		if (m_type == -1) {
-			if (cem_store::get_instance().exist_cem(type)) {
-				m_type = type;
-				return;
-			} else {
-				std::cerr << "The specified action type: " << type << " does not match any cem specification." << std::endl;
-				exit(1);
-			}
+	if (type != NOTSET) {
+		if (m_type == NOTSET) {
+			/*std::cerr << "Two different actions with the same name." << std::endl;
+			exit(1);*/
+			m_type = type;
 		}
 	}
 }
@@ -121,9 +80,14 @@ const effects_map& action::get_effects() const
 	return m_effects;
 }
 
-const observability_map& action::get_observants() const
+const observability_map& action::get_fully_observants() const
 {
-	return m_observants;
+	return m_fully_observants;
+}
+
+const observability_map& action::get_partially_observants() const
+{
+	return m_partially_observants;
 }
 
 void action::add_executability(const belief_formula& exec)
@@ -139,11 +103,16 @@ void action::add_effect(const fluent_formula& effect, const belief_formula &cond
 	m_effects.insert(effects_map::value_type(effect, condition));
 }
 
-void action::add_observant(agent ag, agent_group_id ag_group, const belief_formula& condition)
+void action::add_fully_observant(agent fully, const belief_formula &condition)
 {
-	//std::pair<agent_group_id, belief_formula> tmp_obs(ag_group, condition);
+	////Parameter Passing ok because is map::value_type and it makes copy
 
-	m_observants[ag][ag_group] = condition; //.insert(observability_map::value_type(fully, condition));
+	m_fully_observants.insert(observability_map::value_type(fully, condition));
+}
+
+void action::add_partially_observant(agent partial, const belief_formula &condition)
+{
+	m_partially_observants.insert(observability_map::value_type(partial, condition));
 }
 
 void action::add_proposition(proposition & prop)
@@ -153,21 +122,46 @@ void action::add_proposition(proposition & prop)
 	switch ( prop.get_type() ) {
 
 		//Add action to the the list (name as identifier, then set id) then update the conditions and the awareness of the action so it's complete)
-	case EFFECTS:
-		add_effect(prop.get_action_effect(), prop.get_grounded_conditions());
+	case ONTIC:
+		set_type(ONTIC);
+		add_effect(prop.get_action_effect(), prop.get_executability_conditions());
 		break;
 
-	case OBSERVABILITY:
-		add_observant(prop.get_agent(), prop.get_agent_group(), prop.get_grounded_conditions());
+	case SENSING:
+		set_type(SENSING);
+		add_effect(prop.get_action_effect(), prop.get_executability_conditions());
+		break;
+
+	case ANNOUNCEMENT:
+		set_type(ANNOUNCEMENT);
+		add_effect(prop.get_action_effect(), prop.get_executability_conditions());
+		break;
+		/***************DOXASTIC REASONING***************/
+	case EXECUTOR:
+		set_type(NOTSET);
+		//@TODO:What if there is more than one? Then CNF or DNF
+		set_executor(prop.get_agent());
+		break;
+	case LIES:
+		set_type(LIES);
+		add_effect(prop.get_action_effect(), prop.get_executability_conditions());
+		break;
+		/***************END DOXASTIC***************/
+
+	case OBSERVANCE:
+		set_type(NOTSET);
+		add_fully_observant(prop.get_agent(), prop.get_observability_conditions());
+		break;
+
+	case AWARENESS:
+		set_type(NOTSET);
+		add_partially_observant(prop.get_agent(), prop.get_observability_conditions());
 		break;
 
 	case EXECUTABILITY:
+		set_type(NOTSET);
 		//@TODO:What if there is more than one? Then CNF or DNF
-		add_executability(prop.get_grounded_conditions());
-		break;
-	case TYPE:
-		//@TODO:What if there is more than one? Then CNF or DNF
-		set_type(prop.get_action_type());
+		add_executability(prop.get_executability_conditions());
 		break;
 	default:
 		break;
@@ -186,9 +180,9 @@ bool action::operator=(const action& act)
 	m_type = act.get_type();
 
 	m_executability = act.get_executability();
-	m_observants = act.get_observants();
+	m_fully_observants = act.get_fully_observants();
+	m_partially_observants = act.get_partially_observants();
 	m_effects = act.get_effects();
-
 
 	return true;
 }
@@ -198,8 +192,8 @@ void action::print() const
 	grounder grounder = domain::get_instance().get_grounder();
 	std::cout << "\nAction " << get_name() << ":" << std::endl;
 	std::cout << "	ID: " << get_id() << ":" << std::endl;
-	std::cout << "	Type: " << cem_store::get_instance().get_cem_name(get_type()) << std::endl;
-
+	std::cout << "	Type: " << get_type() << std::endl;
+	
 	std::cout << "	Executability:";
 	formula_list::const_iterator it_fl;
 	for (it_fl = m_executability.begin(); it_fl != m_executability.end(); ++it_fl) {
@@ -218,27 +212,43 @@ void action::print() const
 	}
 
 
-	std::cout << "\n	Observants:";
-	for (auto it_obsmap = m_observants.begin(); it_obsmap != m_observants.end(); ++it_obsmap) {
-		auto internal_map = it_obsmap->second;
-		auto ag_string = grounder.deground_agent(it_obsmap->first);
-		for (auto internal_it = internal_map.begin(); internal_it != internal_map.end(); ++internal_it) {
-			std::cout << " | " << ag_string << " belongs to " << cem_store::get_instance().get_agent_group_name(internal_it->first) << " if ";
-			//printer::get_instance().print_list(it_obsmap->second);
-			belief_formula cond_temp = internal_it->second;
-			if (cond_temp.get_formula_type() == FLUENT_FORMULA) {
-				auto ff_temp = cond_temp.get_fluent_formula();
-				auto init_fluent = domain::get_instance().get_fluents().begin();
-				auto neg_init_fluent = helper::negate_fluent(*init_fluent);
-				if (ff_temp.begin()->find(*init_fluent) != ff_temp.begin()->end() && ff_temp.begin()->find(neg_init_fluent) != ff_temp.begin()->end()) {
-					std::cout << "False";
-				} else {
-					internal_it->second.print();
-				}
-			} else {
-				internal_it->second.print();
-			}
-		}
+	std::cout << "\n	Fully Observant:";
+	observability_map::const_iterator it_obsmap;
+	for (it_obsmap = m_fully_observants.begin(); it_obsmap != m_fully_observants.end(); ++it_obsmap) {
+		std::cout << " | " << grounder.deground_agent(it_obsmap->first) << " if ";
+		//printer::get_instance().print_list(it_obsmap->second);
+		it_obsmap->second.print();
+
+	}
+
+	std::cout << "\n	Partially Observant:";
+	for (it_obsmap = m_partially_observants.begin(); it_obsmap != m_partially_observants.end(); ++it_obsmap) {
+		std::cout << " | " << grounder.deground_agent(it_obsmap->first) << " if ";
+		//printer::get_instance().print_list(it_obsmap->second);
+		it_obsmap->second.print();
 	}
 	std::cout << std::endl;
+
+
 }
+//
+//  cout << "    Imposibility:\n";
+//  for (it1 = get_imposs()->begin();
+//       it1 != get_imposs()->end(); ++it1) {
+//    cout << "\t";
+//    m_planner->print(*it1);
+//    cout << endl;
+//  }
+//
+//  // print conditional effects
+//  cout << "    Conditional Effects\n";
+//  for (it2 = get_effects()->begin();
+//       it2 != get_effects()->end(); ++it2) {
+//    cout << "\t";
+//    m_planner->print(*it2->get_head());
+//    cout << " <- ";
+//    m_planner->print(*it2->get_body());
+//    cout << endl;
+//  }
+//}
+

@@ -302,15 +302,15 @@ single_observability_map state<T>::get_observants(const observability_map & tabl
 template <class T>
 agent_group_id state<T>::get_obs_group(agent ag, const observability_map & table) const
 {
-	auto it_ag = table.find(ag);
-	if (it_ag != table.end()) {
-		auto it_int = it_ag->second.begin();
-		for (; it_int != it_ag->second.end(); ++it_ag) {
-			if (entails(it_int->second)) {
-				return it_int->first;
-			}
-		}
-	}
+//	auto it_ag = table.find(ag);
+//	if (it_ag != table.end()) {
+//		auto it_int = it_ag->second.begin();
+//		for (; it_int != it_ag->second.end(); ++it_ag) {
+//			if (entails(it_int->second)) {
+//				return it_int->first;
+//			}
+//		}
+//	}
 	//The last declared observability group
 	return cem_store::get_instance().get_agent_group_number();
 

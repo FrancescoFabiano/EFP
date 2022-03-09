@@ -207,6 +207,34 @@ void helper::apply_effect(const fluent_formula& effect, fluent_set& world_descri
 	}
 }
 
+
+fluent_set helper::ontic_exec(const fluent_set& effect, const fluent_set& world_description)
+{ ///\todo The return should be const fluent_set & for efficency? Or move?
+    fluent_set ret = world_description;
+    fluent_set::const_iterator it_fs;
+    for (it_fs = effect.begin(); it_fs != effect.end(); it_fs++) {
+        ret.erase(negate_fluent(*it_fs));
+        ret.insert(*it_fs);
+    }
+    return ret;
+}
+
+fluent_set helper::ontic_exec(const fluent_formula& effect, const fluent_set& world_description)
+{ ///\todo The return should be const fluent_set & for efficency? Or move?
+    //Because of non_determinism
+    if (effect.size() != 1) {
+        return ontic_exec(*(effect.begin()), world_description);
+
+    } else {
+        if (effect.size() > 1) {
+            std::cerr << "\nNon determinism in action effect is not supported.\n";
+            exit(1);
+        }
+        std::cerr << "\nEmpty action effect.\n";
+        exit(1);
+    }
+}
+
 int helper::lenght_to_power_two(int length)
 {
 	return ceil(log2(length));
