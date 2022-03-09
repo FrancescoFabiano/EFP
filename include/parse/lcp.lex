@@ -39,8 +39,6 @@ comment %.*$
 "C" {return MC;}
 "E" {return ME;}
 "D" {return MD;}
-"dox_announces" {return LIE;}
-
 
 "[" {return LEFT_BRAC;}
 "]" {return RIGHT_BRAC;}

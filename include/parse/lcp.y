@@ -63,7 +63,6 @@ extern std::shared_ptr<reader> domain_reader;
 %token MC
 %token ME
 %token MD
-%token LIE
 
 %type <str_val> id
 %type <str_val> constant
@@ -110,11 +109,7 @@ extern std::shared_ptr<reader> domain_reader;
 %type <prop> awareness
 %type <prop> observance
 %type <prop> announcement
-%type <prop> executing
 %type <prop_list> domain
-/***************DOXASTIC REASONING***************/
-%type <prop> lie
-/***************END DOXASTIC***************/
 
 %%
 
@@ -519,20 +514,6 @@ action ANNOUNCES formula if_part_bf SEMICOLON
 
 };
 
-
-
-/***************DOXASTIC REASONING***************/
-/* lie condition */
-lie:
-action LIE formula SEMICOLON
-{
-  $$ = new proposition;
-  $$->set_type(LIES);
-  $$->set_action_name(*$1);
-  $$->set_action_effect(*$3);
-};
-/***************END DOXASTIC***************/
-
 /* awareness condition */
 awareness:
 agent AWAREOF action if_part_bf SEMICOLON
@@ -555,15 +536,6 @@ agent OBSERVES action if_part_bf SEMICOLON
   $$->set_observability_conditions(*$4);
 };
 
-/* executing */
-executing:
-agent AGEXEC action SEMICOLON
-{
-  $$ = new proposition;
-  $$->set_type(EXECUTOR);
-  $$->set_action_name(*$3);				
-  $$->set_agent(*$1);
- };
 /* impossibility condition 
 impossibility:
 IMPOSSIBLE action if_part SEMICOLON
@@ -614,18 +586,6 @@ awareness
 {
   $$ = $1;
 }
-|
-executing
-{
-  $$ = $1;
-}
-/***************DOXASTIC REASONING***************/
-|
-lie
-{
-  $$ = $1;
-}
-/***************END DOXASTIC***************/
 ;
 
 /* domain */

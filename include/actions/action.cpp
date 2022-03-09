@@ -136,18 +136,6 @@ void action::add_proposition(proposition & prop)
 		set_type(ANNOUNCEMENT);
 		add_effect(prop.get_action_effect(), prop.get_executability_conditions());
 		break;
-		/***************DOXASTIC REASONING***************/
-	case EXECUTOR:
-		set_type(NOTSET);
-		//@TODO:What if there is more than one? Then CNF or DNF
-		set_executor(prop.get_agent());
-		break;
-	case LIES:
-		set_type(LIES);
-		add_effect(prop.get_action_effect(), prop.get_executability_conditions());
-		break;
-		/***************END DOXASTIC***************/
-
 	case OBSERVANCE:
 		set_type(NOTSET);
 		add_fully_observant(prop.get_agent(), prop.get_observability_conditions());
