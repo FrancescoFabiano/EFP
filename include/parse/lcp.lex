@@ -1,12 +1,13 @@
 /* Scanner for AL language */
 
 %option nounput
+%option noyywrap
 
 %{
-#include "../include/utilities/define.h"
-#include "../include/actions/proposition.h"
-#include "../include/formulae/belief_formula.h"
-#include "tok.h"
+#include "../utilities/define.h"
+#include "../actions/proposition.h"
+#include "../formulae/belief_formula.h"
+#include "lcp.tab.hh"
 
 int yyerror(const char* s);
 //int yylineno = 1;
