@@ -4,9 +4,9 @@
 %option noyywrap
 
 %{
-#include "../utilities/define.h"
-#include "../actions/proposition.h"
-#include "../formulae/belief_formula.h"
+#include "../../include/utilities/define.h"
+#include "../../include/actions/proposition.h"
+#include "../../include/formulae/belief_formula.h"
 #include "lcp.tab.hh"
 
 int yyerror(const char* s);
