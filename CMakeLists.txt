@@ -93,7 +93,7 @@ add_flex_bison_dependency(lexer parser)
 find_package(Boost 1.76.0 REQUIRED COMPONENTS filesystem)
 message(STATUS "Boost version: ${Boost_VERSION}")
 
-include_directories( ${Boost_INCLUDE_DIR} )
+include_directories(${Boost_INCLUDE_DIR})
 
 # EXECUTABLES
 add_executable(efp ${EFP_SOURCES} ${EFP_HEADERS} ${FLEX_lexer_OUTPUTS} ${BISON_parser_OUTPUTS})

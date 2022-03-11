@@ -519,8 +519,10 @@ void generate_domain(char** argv)
 
 
     //timer.start(READ_TIMER);
-    if (input_lang == EPDDL) {
+    if (update_models == CUSTOM) {
         domain_reader->read(models_filename);
+    } else {
+        domain_reader->read();
     }
     //	if (debug) {
     //		domain_reader->print();

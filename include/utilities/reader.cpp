@@ -53,6 +53,11 @@ reader::reader()
 {
 }
 
+int reader::read()
+{
+    return yyparse();
+}
+
 int reader::read(const std::string & filename)
 {
 	//Call to the parser function.

@@ -51,6 +51,7 @@ public:
     proposition_list m_propositions;
 
 
+    int read();
     /** \brief Function that reads the info from the domain file.
      * 
      * Function called to parse the file containing the domain

@@ -538,7 +538,7 @@ void planner<T>::execute_given_actions(std::vector<std::string>& act_name)
 			name_folder_graphviz += "_unknown";
 			break;
 		}
-		system(("sh scripts/generate_pdf.sh " + name_folder_graphviz).c_str());
+		system(("sh ../scripts/generate_pdf.sh " + name_folder_graphviz).c_str());
 	}
 
 	return;
