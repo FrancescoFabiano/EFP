@@ -81,10 +81,13 @@ find_package(BISON REQUIRED)
 message(STATUS "Flex version:  ${FLEX_VERSION}")
 message(STATUS "Bison version: ${BISON_VERSION}")
 
-flex_target(lexer include/parse/lcp.lex "${CMAKE_CURRENT_BINARY_DIR}/lcp/lcp.lex.cc")
-bison_target(parser include/parse/lcp.y "${CMAKE_CURRENT_BINARY_DIR}/lcp/lcp.tab.cc")
+flex_target(marL include/parse/mar.lex "${CMAKE_CURRENT_BINARY_DIR}/Parse/mar.lex.cc")
+bison_target(marP include/parse/mar.y "${CMAKE_CURRENT_BINARY_DIR}/Parse/mar.tab.cc")
+add_flex_bison_dependency(marL marP)
 
-add_flex_bison_dependency(lexer parser)
+flex_target(cemL include/parse/cem.lex "${CMAKE_CURRENT_BINARY_DIR}/Parse/cem.lex.cc")
+bison_target(cemP include/parse/cem.y "${CMAKE_CURRENT_BINARY_DIR}/Parse/cem.tab.cc")
+add_flex_bison_dependency(cemL cemP)
 
 # BOOST
 #set(Boost_USE_STATIC_LIBS OFF)
@@ -96,7 +99,7 @@ message(STATUS "Boost version: ${Boost_VERSION}")
 include_directories(${Boost_INCLUDE_DIR})
 
 # EXECUTABLES
-add_executable(efp ${EFP_SOURCES} ${EFP_HEADERS} ${FLEX_lexer_OUTPUTS} ${BISON_parser_OUTPUTS})
+add_executable(efp ${EFP_SOURCES} ${EFP_HEADERS} ${FLEX_marL_OUTPUTS} ${BISON_marP_OUTPUTS} ${FLEX_cemL_OUTPUTS} ${BISON_cemP_OUTPUTS})
 target_link_libraries(efp LINK_PUBLIC ${Boost_LIBRARIES})
 target_compile_features(efp PRIVATE cxx_std_17)
 target_compile_options(efp PRIVATE -Wall -Wextra)

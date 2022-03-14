@@ -16,6 +16,7 @@
 
 //prototype of bison-generated parser function
 int marparse();
+int cemparse();
 
 /*string_set reader::name(const fluent_set &x)
 {
@@ -64,7 +65,7 @@ int reader::read(const std::string & filename)
 	//Generation of action groups and events (after agents declaration but before actions decalration)
 	std::cout << "\nBuilding event models..." << std::endl;
 	cem_store::get_instance().generate(filename);
-	return marparse();
+	return cemparse();
 }
 
 /**
