@@ -15,7 +15,7 @@
 #include "../actions/custom_event_models/cem_store.h"
 
 //prototype of bison-generated parser function
-int yyparse();
+int marparse();
 
 /*string_set reader::name(const fluent_set &x)
 {
@@ -55,7 +55,7 @@ reader::reader()
 
 int reader::read()
 {
-    return yyparse();
+    return marparse();
 }
 
 int reader::read(const std::string & filename)
@@ -64,7 +64,7 @@ int reader::read(const std::string & filename)
 	//Generation of action groups and events (after agents declaration but before actions decalration)
 	std::cout << "\nBuilding event models..." << std::endl;
 	cem_store::get_instance().generate(filename);
-	return yyparse();
+	return marparse();
 }
 
 /**

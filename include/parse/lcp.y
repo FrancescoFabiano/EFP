@@ -1,9 +1,15 @@
 /* Parser for AL language */
+
+/* change prefix of symbols from yy to "mar" to avoid
+   clashes with any other parsers we may want to link */
+
+%define api.prefix {mar}
+
 %{
 #include "../../include/utilities/reader.h"
 
-int yyerror(const char *s);
-int yylex(void);
+int marerror(const char *s);
+int marlex(void);
 
 std::string get_negation(const std::string*);
 bool is_consistent(string_set,string_set);
@@ -678,20 +684,20 @@ goal_spec:
 };
 %%
 
-int yyerror(std::string s)
+int marerror(std::string s)
 {
-  extern int yylineno;	// defined and maintained in lex.c
-  extern char *yytext;	// defined and maintained in lex.c
+  extern int marlineno;	// defined and maintained in lex.c
+  extern char *martext;	// defined and maintained in lex.c
   
-  std::cerr << "ERROR: " << s << " at symbol \"" << yytext;
-  std::cerr << "\" on line " << yylineno << std::endl;
+  std::cerr << "ERROR: " << s << " at symbol \"" << martext;
+  std::cerr << "\" on line " << marlineno << std::endl;
   exit(1);
   return 0;
 }
 
-int yyerror(const char *s)
+int marerror(const char *s)
 {
-  return yyerror(std::string(s));
+  return marerror(std::string(s));
 }
 
 bool is_consistent(string_set sl1, string_set sl2)

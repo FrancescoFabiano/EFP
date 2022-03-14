@@ -1,5 +1,10 @@
 /* Scanner for AL language */
 
+/* change prefix of symbols from yy to "mar" to avoid
+   clashes with any other parsers we may want to link */
+
+%option prefix="mar"
+
 %option nounput
 %option noyywrap
 
@@ -9,7 +14,11 @@
 #include "../../include/formulae/belief_formula.h"
 #include "lcp.tab.hh"
 
-int yyerror(const char* s);
+/* seems like a bug that I have to do this, since flex
+   should know prefix=mar and match bison's MARSTYPE */
+#define YYSTYPE MARSTYPE
+
+int marerror(const char* s);
 //int yylineno = 1;
 %}
 
@@ -20,7 +29,7 @@ comment %.*$
 
 %%
 
-{number}	{ yylval.str_val = new std::string(yytext); return NUMBER; }
+{number}	{ marlval.str_val = new std::string(martext); return NUMBER; }
 ";"		{ return SEMICOLON; } 
 "fluent" {return FLUENT;}
 "action" {return ACTION;}
@@ -47,13 +56,13 @@ comment %.*$
 "|" {return OR;}
 "(" {return LEFT_PAREN;}
 ")" {return RIGHT_PAREN;}
-"-" {yylval.str_val = new std::string(yytext); return NEGATION;}
+"-" {marlval.str_val = new std::string(martext); return NEGATION;}
 
-{id} {yylval.str_val = new std::string(yytext); return ID;}
+{id} {marlval.str_val = new std::string(martext); return ID;}
 
 [ \t]*		{}
-[\n]		{ yylineno++;	}
+[\n]		{ marlineno++;	}
 {comment} ;
 
-.		{std::cerr << "SCANNER "; yyerror(""); exit(1);	}
+.		{std::cerr << "SCANNER "; marerror(""); exit(1);	}
 
