@@ -203,8 +203,8 @@ void domain::build_actions()
 	/*
 	 * This function set the grounder action map with the correct values.
 	 */
-//	auto tot_ags = get_agents();
-//	auto tot_fluents = get_fluents();
+	auto tot_ags = get_agents();
+	auto tot_fluents = get_fluents();
 	action_name_map domain_action_name_map;
 	std::cout << "\nBuilding action list..." << std::endl;
 	string_set::const_iterator it_actions_name;
@@ -214,7 +214,7 @@ void domain::build_actions()
 	for (it_actions_name = m_reader->m_actions.begin();
 		it_actions_name != m_reader->m_actions.end(); it_actions_name++) {
 		boost::dynamic_bitset<> action_bitset(bit_size, i);
-		action tmp_action(*it_actions_name, action_bitset); // , tot_ags, tot_fluents);
+		action tmp_action(*it_actions_name, action_bitset, tot_ags, tot_fluents);
 		domain_action_name_map.insert(action_name_map::value_type(*it_actions_name, action_bitset));
 		i++;
 		m_actions.insert(tmp_action);

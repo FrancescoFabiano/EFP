@@ -57,6 +57,13 @@ void cem_store::add_agent_group(const std::string & to_add)
 
 }
 
+void cem_store::add_cem_name(const std::string & to_add)
+{
+
+    m_cem_ids_map.insert(std::pair<std::string, cem_id>(boost::algorithm::to_lower_copy(to_add), m_cem_ids_map.size()));
+
+}
+
 const cevent_ptr cem_store::get_event(event_id id) const
 {
 	cevent tmp;

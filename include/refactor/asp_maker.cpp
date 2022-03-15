@@ -398,9 +398,8 @@ void asp_maker::print_actions(std::ofstream & to_print)
 		m_already_printed_predicate.insert(predicate4);
 		agent_set oblivious = domain::get_instance().get_agents();
 
-		observability_map::const_iterator it_obs;
-		observability_map tmp_map = it_acs->get_fully_observants();
-		for (it_obs = tmp_map.begin(); it_obs != tmp_map.end(); it_obs++) {
+		auto tmp_map = it_acs->get_fully_observants();
+		for (auto it_obs = tmp_map.begin(); it_obs != tmp_map.end(); it_obs++) {
 
 			oblivious.erase(it_obs->first);
 
@@ -417,7 +416,7 @@ void asp_maker::print_actions(std::ofstream & to_print)
 		}
 
 		tmp_map = it_acs->get_partially_observants();
-		for (it_obs = tmp_map.begin(); it_obs != tmp_map.end(); it_obs++) {
+		for (auto it_obs = tmp_map.begin(); it_obs != tmp_map.end(); it_obs++) {
 
 			oblivious.erase(it_obs->first);
 			std::string obs_conditions = print_subformula(it_obs->second, to_print, predicate4);

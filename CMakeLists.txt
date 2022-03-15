@@ -71,7 +71,7 @@ set(
         include/utilities/printer.h
         include/utilities/reader.h
         lib/bisimulation/bisimulation.h
-#        lib/bisimulation/bisimulation_k.h
+#       lib/bisimulation/bisimulation_k.h
 )
 
 # FLEX & BISON

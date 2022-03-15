@@ -22,6 +22,8 @@
 #pragma once
 
 #include <list>
+#include <boost/lexical_cast.hpp>
+
 
 #include "../formulae/belief_formula.h"
 #include "../utilities/define.h"
@@ -33,11 +35,9 @@
 enum proposition_type
 {
     EXECUTABILITY, /**< \brief Used when the proposition specifies an action executability condition -- *act* **exec if** *phi* */
-    ONTIC, /**< \brief Used when the proposition specifies the effects of an ontic action -- *act* **causes** *f*.*/
-    SENSING, /**< \brief Used when the proposition specifies the effects of a sensing action -- *act* **sensed** *f*.*/
-    ANNOUNCEMENT, /**< \brief Used when the proposition specifies the effects of a announcement action -- *act* **annaunces** *ff* */
-    OBSERVANCE, /**< \brief Used when the proposition specifies the full observability conditions of an action -- *ag* **observes** *act* */
-    AWARENESS, /**< \brief Used when the proposition specifies the partial observability conditions of an action -- *ag* **aware** *act* */
+    EFFECTS, /**< \brief Used when the proposition specifies the effects of an action -- *act* **has_effects** *f*.*/
+    OBSERVABILITY, /**< \brief Used when the proposition specifies the observability group of an agent wrt to an action -- *agent* **in_group group** *of act*.*/
+    TYPE, /**< \brief Used when the proposition specifies the type of an action -- *act* **has_type** *type*.*/
     NOTSET, /**< \brief Default case.*/
 };
 
@@ -48,15 +48,16 @@ private:
     proposition_type m_type;
     /** The name of this (used as id).*/
     std::string m_action_name;
-    /** If *this* is \ref ONTIC, \ref SENSING or \ref ANNOUNCEMENT the effects are stored here.*/
+    /** If *this* is \ref TYPE the action type is stored here.*/
+    act_type m_act_type;
+    /** If *this* is \ref EFFECTS the effects are stored here.*/
     string_set_set m_action_effect;
-    /** If *this* is \ref OBSERVANCE or \ref AWARENESS the relative \ref agent is stored here.*/
+    /** If *this* is \ref OBSERVABILITY the relative \ref agent is stored here.*/
     std::string m_agent;
-    /** \brief If *this* is \ref OBSERVANCE or \ref AWARENESS the \ref fluent_formula condition for the observability is stored here (not grounded).*/
-    belief_formula m_observability_conditions;
-    /** \brief If *this* is \ref ONTIC, \ref SENSING or \ref ANNOUNCEMENT the \ref belief_formula condition for the act is stored here.*/
-    belief_formula m_executability_conditions;
-
+    /** If *this* is \ref OBSERVABILITY the relative \ref agent_group_id.*/
+    agent_group_id m_agent_group;
+    /** \brief If *this* is \ref OBSERVABILITY or \ref EFFECTS or \ref EXECUTABILITY the \ref fluent_formula condition for the observability is stored here (not grounded).*/
+    belief_formula m_conditions;
 
 
 public:
@@ -68,23 +69,35 @@ public:
     /** Getter of the field \ref m_action_name.
      * 
      * @return the value of \ref m_action_name.*/
-    std::string get_action_name() const;
+    const std::string & get_action_name() const;
+
+    /** Getter of the field \ref m_act_type.
+     * 
+     * @return the value of \ref m_action_name.*/
+    act_type get_action_type() const;
     /** Getter of the field \ref m_action_effect grounded.
      * 
      * @return the grounded value of \ref m_action_effect.*/
-    fluent_formula get_action_effect();
+    fluent_formula get_action_effect() const;
     /** Getter of the field \ref m_agent grounded.
      * 
      * @return the grounded value of \ref m_agent.*/
-    agent get_agent();
-    /** Getter of the field \ref m_observability_conditions grounded.
+    agent get_agent() const;
+
+    /** Getter of the field \ref m_agent_group.
      * 
-     * @return the grounded value of \ref m_observability_conditions.*/
-    belief_formula get_observability_conditions();
-    /** Getter of the field \ref m_executability_conditions grounded.
+     * @return the value of \ref m_agent_group.*/
+    agent_group_id get_agent_group() const;
+
+    /** Getter of the field \ref m_conditions.
      * 
-     * @return the grounded value of \ref m_executability_conditions.*/
-    belief_formula get_executability_conditions();
+     * @return the grounded value of \ref m_conditions.*/
+    const belief_formula & get_conditions() const;
+
+    /** Getter of the field \ref m_conditions grounded.
+     * 
+     * @return the grounded value of \ref m_conditions.*/
+    const belief_formula & get_grounded_conditions();
 
 
     /** Setter for the field \ref m_type.
@@ -94,9 +107,12 @@ public:
     /** Setter for the field \ref m_action_name.
      * 
      * @param[in] to_set: the value to assign to \ref m_action_name.*/
-    void set_action_name(std::string to_set);
+    void set_action_name(const std::string & to_set);
 
-
+    /** Setter for the field \ref m_act_type.
+     * 
+     * @param[in] to_set: the value to assign to \ref m_act_type.*/
+    void set_action_type(const std::string & to_set);
     /** Setter for the field \ref m_action_effect.
      * 
      * @param[in] to_set: the value to assign to \ref m_action_effect.*/
@@ -109,21 +125,21 @@ public:
     /** Setter for the field \ref m_agent.
      * 
      * @param[in] to_set: the value to assign to \ref m_agent.*/
-    void set_agent(std::string to_set);
-    /** Setter for the field \ref m_observability_conditions.
+    void set_agent(const std::string & to_set);
+
+    /** Setter for the field \ref m_agent_group.
      * 
-     * @param[in] to_set: the value to assign to \ref m_observability_conditions.*/
-    void set_observability_conditions(const belief_formula & to_set);
-    /** Setter for the field \ref m_executability_conditions.
+     * @param[in] to_set: the value (retrived by the map in cem store) to assign to \ref m_agent_group.*/
+    void set_agent_group(const std::string & to_set);
+
+    /** Setter for the field \ref m_conditions.
      * 
-     * @param[in] to_set: the value to assign to \ref m_executability_conditions.*/
-    void set_executability_conditions(const belief_formula & to_set);
+     * @param[in] to_set: the value to assign to \ref m_conditions.*/
+    void set_conditions(const belief_formula & to_set);
+
 
     /** \brief Function that print *this*.*/
     void print() const;
-
-    /** \brief Function that grounds *this*.*/
-    void ground();
 };
 
 typedef std::list<proposition> proposition_list; /**< \brief A list of proposition to simplify the usage.*/

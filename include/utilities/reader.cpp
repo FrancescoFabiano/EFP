@@ -56,13 +56,22 @@ reader::reader()
 
 int reader::read()
 {
+    std::cerr << "\nDEBUG: Here\n";
+    /*to dynamically generate id of groups and actions type*/
+    cem_store::get_instance().add_cem_name("ontic");
+    cem_store::get_instance().add_cem_name("sensing");
+    cem_store::get_instance().add_cem_name("announcement");
+
+    cem_store::get_instance().add_agent_group("fully");
+    cem_store::get_instance().add_agent_group("partially");
+
     return marparse();
 }
 
 int reader::read(const std::string & filename)
 {
 	//Call to the parser function.
-	//Generation of action groups and events (after agents declaration but before actions decalration)
+	//Generation of action groups and events (after agents declaration but before actions declaration)
 	std::cout << "\nBuilding event models..." << std::endl;
 	cem_store::get_instance().generate(filename);
 	return cemparse();

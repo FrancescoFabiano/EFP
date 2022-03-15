@@ -21,7 +21,6 @@ void print_string_set(string_set);
 void print_string_set_set(string_set_set);
 
 extern std::shared_ptr<reader> domain_reader;
-
 %}
 
 %union{
@@ -107,14 +106,15 @@ extern std::shared_ptr<reader> domain_reader;
 /* DEBUG_WARNING_REMOVAL %type <str_list2> gd_formula DEBUG_WARNING_REMOVAL*/
 
 //%type <prop> static_law
-%type <prop> dynamic_law
+%type <prop_list> dynamic_law
 %type <prop> executability
 //%type <prop> impossibility
 %type <prop> proposition
-%type <prop> determine
+%type <prop_list> proposition_list
+%type <prop_list> determine
 %type <prop> awareness
 %type <prop> observance
-%type <prop> announcement
+%type <prop_list> announcement
 %type <prop_list> domain
 
 %%
@@ -459,34 +459,6 @@ IF formula {
   $$ = $2;
 };
 
-
-
-
-
-
-
-/* static law
-static_law:
-literal_list if_part SEMICOLON
-{
-  $$ = new proposition;
-  $$->set_type(STATIC);
-  $$->set_action_precondition(*$2);
-  $$->set_action_effect(*$1);
-};*/
-
-/* dynamic law */
-dynamic_law:
-action CAUSES literal_list if_part_bf SEMICOLON 
-{  
-  $$ = new proposition;
-  $$->set_type(ONTIC);
-  $$->set_action_name(*$1);
-  $$->set_executability_conditions(*$4);
-  //@TODO:Effect_Conversion | previously   $$->m_action_effect = *$3;
-  $$->add_action_effect(*$3);
-};
-
 /* executability condition */
 executability:
 EXECUTABLE action if_part_bf SEMICOLON
@@ -494,29 +466,73 @@ EXECUTABLE action if_part_bf SEMICOLON
   $$ = new proposition;
   $$->set_type(EXECUTABILITY);
   $$->set_action_name(*$2);
-  $$->set_executability_conditions(*$3);
+  $$->set_conditions(*$3);
 };
+
+/* dynamic law */
+dynamic_law:
+action CAUSES literal_list if_part_bf SEMICOLON
+{  
+    $$ = new proposition_list;
+    proposition p1;
+    proposition p2;
+
+    p1.set_type(EFFECTS);
+    p1.set_action_name(*$1);
+    p1.add_action_effect(*$3);
+    p1.set_conditions(*$4);
+
+    $$->push_back(p1);
+
+    p2.set_type(TYPE);
+    p2.set_action_name(*$1);
+    p2.set_action_type("ontic");
+
+    $$->push_back(p2);
+};
+
 
 /* determines condition */
 determine:
-action DETERMINE fluent_det_list SEMICOLON
+action DETERMINE literal_list SEMICOLON
 {
-  $$ = new proposition;
-  $$->set_type(SENSING);
-  $$->set_action_name(*$1);
-  //@TODO:Effect_Conversion | previously   $$->m_action_effect = *$3;
-  $$->add_action_effect(*$3);
+  $$ = new proposition_list;
+  proposition p1;
+  proposition p2;
+
+  p1.set_type(EFFECTS);
+  p1.set_action_name(*$1);
+  p1.add_action_effect(*$3);
+
+  $$->push_back(p1);
+
+  p2.set_type(TYPE);
+  p2.set_action_name(*$1);
+  p2.set_action_type("sensing");
+
+  $$->push_back(p2);
 };
 
 /* announcement condition */
 announcement:
-action ANNOUNCES formula if_part_bf SEMICOLON
+action ANNOUNCES literal_list if_part_bf SEMICOLON
 {
-  $$ = new proposition;
-  $$->set_type(ANNOUNCEMENT);
-  $$->set_action_name(*$1);
-  $$->set_action_effect(*$3);
-  $$->set_executability_conditions(*$4);
+  $$ = new proposition_list;
+  proposition p1;
+  proposition p2;
+
+  p1.set_type(EFFECTS);
+  p1.set_action_name(*$1);
+  p1.add_action_effect(*$3);
+  p1.set_conditions(*$4);
+
+  $$->push_back(p1);
+
+  p2.set_type(TYPE);
+  p2.set_action_name(*$1);
+  p2.set_action_type("announcement");
+
+  $$->push_back(p2);
 
 };
 
@@ -525,60 +541,45 @@ awareness:
 agent AWAREOF action if_part_bf SEMICOLON
 {
   $$ = new proposition;
-  $$->set_type(AWARENESS);
+  $$->set_type(OBSERVABILITY);
+  $$->set_agent_group("partially");
   $$->set_action_name(*$3);
   $$->set_agent(*$1);
-  $$->set_observability_conditions(*$4);
+  $$->set_conditions(*$4);
 };
 
 /* observance condition */
 observance:
 agent OBSERVES action if_part_bf SEMICOLON
 {
-  $$ = new proposition;
-  $$->set_type(OBSERVANCE);
-  $$->set_action_name(*$3);				
-  $$->set_agent(*$1);
-  $$->set_observability_conditions(*$4);
+   $$ = new proposition;
+   $$->set_type(OBSERVABILITY);
+   $$->set_agent_group("fully");
+   $$->set_action_name(*$3);
+   $$->set_agent(*$1);
+   $$->set_conditions(*$4);
 };
 
-/* impossibility condition 
-impossibility:
-IMPOSSIBLE action if_part SEMICOLON
-{
-  $$ = new proposition;
-  $$->set_type(IMPOSSIBILITY);
-  $$->set_action_name(*$2);
-  $$->set_action_precondition(*$3);
-};
-*/
-/* proposition */
-proposition:
-/*static_law {
-  $$ = $1;
-}
-|*/
+
+proposition_list:
 dynamic_law
 {
   $$ = $1;
 }
 |
-executability
-{
-  $$ = $1;
-}
-|
-/*impossibility
-{
-  $$ = $1;
-}
-|*/
 determine
 {
   $$ = $1;
 }
 |
 announcement
+{
+  $$ = $1;
+};
+
+/* proposition */
+proposition:
+executability
 {
   $$ = $1;
 }
@@ -593,6 +594,8 @@ awareness
   $$ = $1;
 }
 ;
+
+
 
 /* domain */
 domain:
@@ -618,9 +621,6 @@ init_spec:
 /* empty */
 {
   $$ = new formula_list;
-  //$$->insert(bf());
-  //$$ = new string_set_set;
-  //$$->insert(string_set());
 }
 | init_spec init
 {
@@ -628,43 +628,6 @@ init_spec:
   $$->push_back(*$2);
 };
 
-/* goal */
-/*DEBUG_WARNING_REMOVAL gd_formula:
-literal {
-  string_set s1;
-
-  $$ = new string_set_set;
-
-  s1.insert(*$1);
-  $$->insert(s1);
-}
-| gd_formula COMMA gd_formula
-{
-  $$ = $1;
-  $$->insert($3->begin(),$3->end());  
-}
-| 
-gd_formula OR gd_formula {
-  string_set_set::iterator it1;
-  string_set_set::iterator it2;
-  string_set ns;
-
-  $$ = new string_set_set;
-
-  for (it2 = $1->begin(); it2 != $1->end(); it2++) {
-    for (it1 = $3->begin(); it1 != $3->end(); it1++){
-      if (is_consistent(*it1,*it2)) {
-	ns = *it2;
-	ns.insert(it1->begin(),it1->end());
-	$$->insert(ns);
-      }
-    }
-  }  
-}
-| LEFT_PAREN gd_formula RIGHT_PAREN
-{
-  $$ = $2;
-}; DEBUG_WARNING_REMOVAL*/
 
 goal:
 GOAL belief_formula SEMICOLON
@@ -699,173 +662,173 @@ int marerror(const char *s)
 {
   return marerror(std::string(s));
 }
-
-bool is_consistent(string_set sl1, string_set sl2)
-{
-  string_set::const_iterator it;
-  std::string nl;
-
-  for (it = sl2.begin(); it != sl2.end(); it++) {
-	nl = get_negation(&(*it));
-	if (sl1.find(nl) != sl1.end())
-	  return false;
-  }
-
-  return true;
-}
-
-std::string get_negation(const std::string* s)
-{
-  std::string ns;
-
-  if (s->substr(0,1) == NEGATION_SYMBOL) {
-	return s->substr(1);
-  }
-  ns = NEGATION_SYMBOL;
-  return ns.append(*s);
-}
-
-/*
-string_set_set get_negateFluentForm(string_set_set input){
-  
-  string_set_set separate;
-  string_set_set join;
-  string_set_set::iterator it1;
-  string_set_set::iterator it3;
-  string_set_set negation;
-  std::string temp;
-  string_set::const_iterator it2;
-
-  for(it1 = input.begin(); it1 != input.end(); it1++){
-     if(it1->begin() == it1->end())
-        join.insert(*it1);
-     else
-        separate.insert(*it1);
-  }//for loop
-
-  //Separate elements in separate
-     for(it1 = separate.begin(); it1 != separate.end(); it1++){
-        temp = get_negation(&(*(it1->begin())));    //possible pointer problem
-        string_set tiep;
-	tiep.insert(temp);
-	negation.insert(tiep);
-     }//for loop
-  
-
-  //Join elements in join with all elements in separate
-  for(it3 = negation.begin(); it3 != negation.end(); it3++)
-     for(it1 = join.begin(); it1 != join.end(); it1++)
-        for(it2 = it1->begin(); it2 != it1->end(); it2++)
-        {
-           temp = get_negation(&(*it2));    //possible pointer problem
-           string_set tiep;
-           tiep.insert(temp);
-           negation.insert(tiep);
-	}
-  
-  return negation;
-}
-*/
-
-//negate_or: input: String list = list of or. 
-//             output: Stringlist 2 = list of and of negation
-
-string_set_set negate_or(string_set input){
-   
-   string_set::iterator it;
-   string_set_set output;
-   std::string element;
-   
-   for(it = input.begin(); it != input.end(); it++){
-      string_set temp;
-      element = get_negation(&(*it));
-      temp.insert(element);
-      output.insert(temp);
-   }
-   //print_string_set_set(output);
-   return output;
-}
-
-
-// or_2_stringlist2
-
-//negate_and : input: std::stringlist2 = list of and of or
-//		negate_or(each member of input) = a std::stringlist 2
-//                -> n std::stringlist 2 -> std::stringlist 3
-//                output = first member stirnglist 3 or second member of std::stringlist 3
-
-string_set_set join_SL2(string_set_set input1, string_set_set input2){
-  
-  if(input2.size() == 0){
-     return input1;
-  }
-
-  string_set_set::iterator it1;
-  string_set_set::iterator it2;
-  string_set ns;
-
-  string_set_set output;
-
-  for (it2 = input1.begin(); it2 != input1.end(); it2++) {
-    for (it1 = input2.begin(); it1 != input2.end(); it1++){
-      if (is_consistent(*it1,*it2)) {
-	ns = *it2;
-	ns.insert(it1->begin(),it1->end());
-	output.insert(ns);
-      }
-    }
-  }  
- 
-  return output;
-   
-}
-
-string_set_set negate_form(string_set_set input){
-   
-  typedef std::set<string_set_set> string_set3;
-  string_set3 list3;
-  string_set_set::iterator it1;
-  string_set_set::iterator it2;
-  string_set3::iterator it3;
-  string_set ns;
-  string_set_set temp;
-
-  string_set_set output;
-
-  //turn all the otr statements to and statements
-   for(it1 = input.begin(); it1 != input.end(); it1++){
-      temp = negate_or(*it1);
-      list3.insert(temp);
-   }
-
-   
-   output = *list3.begin();
-   for(it3 = ++list3.begin(); it3 != list3.end(); it3++){
-      output = join_SL2(output, *it3); 
-   }
-
-   
-   return output;
-}
-
-void print_string_set(string_set in){
-	string_set::iterator it1;
-	std::cout << "[ " ;
-        for(it1 = in.begin();it1!=in.end();it1++){
-		std::cout << *it1 << " , ";   
-	}
-	std::cout << "] " ;
-}
-
-void print_string_set_set(string_set_set in){
-	string_set_set::iterator it1;
-	std::cout << "[ "; 
-        for(it1 = in.begin();it1!=in.end();it1++){
- 		 
-		print_string_set(*it1);
-		std::cout << " , ";   
-	}
-	std::cout << " ] " ;
-}
-
-//Planning as Logic
+//
+//bool is_consistent(string_set sl1, string_set sl2)
+//{
+//  string_set::const_iterator it;
+//  std::string nl;
+//
+//  for (it = sl2.begin(); it != sl2.end(); it++) {
+//	nl = get_negation(&(*it));
+//	if (sl1.find(nl) != sl1.end())
+//	  return false;
+//  }
+//
+//  return true;
+//}
+//
+//std::string get_negation(const std::string* s)
+//{
+//  std::string ns;
+//
+//  if (s->substr(0,1) == NEGATION_SYMBOL) {
+//	return s->substr(1);
+//  }
+//  ns = NEGATION_SYMBOL;
+//  return ns.append(*s);
+//}
+//
+///*
+//string_set_set get_negateFluentForm(string_set_set input){
+//
+//  string_set_set separate;
+//  string_set_set join;
+//  string_set_set::iterator it1;
+//  string_set_set::iterator it3;
+//  string_set_set negation;
+//  std::string temp;
+//  string_set::const_iterator it2;
+//
+//  for(it1 = input.begin(); it1 != input.end(); it1++){
+//     if(it1->begin() == it1->end())
+//        join.insert(*it1);
+//     else
+//        separate.insert(*it1);
+//  }//for loop
+//
+//  //Separate elements in separate
+//     for(it1 = separate.begin(); it1 != separate.end(); it1++){
+//        temp = get_negation(&(*(it1->begin())));    //possible pointer problem
+//        string_set tiep;
+//	tiep.insert(temp);
+//	negation.insert(tiep);
+//     }//for loop
+//
+//
+//  //Join elements in join with all elements in separate
+//  for(it3 = negation.begin(); it3 != negation.end(); it3++)
+//     for(it1 = join.begin(); it1 != join.end(); it1++)
+//        for(it2 = it1->begin(); it2 != it1->end(); it2++)
+//        {
+//           temp = get_negation(&(*it2));    //possible pointer problem
+//           string_set tiep;
+//           tiep.insert(temp);
+//           negation.insert(tiep);
+//	}
+//
+//  return negation;
+//}
+//*/
+//
+////negate_or: input: String list = list of or.
+////             output: Stringlist 2 = list of and of negation
+//
+//string_set_set negate_or(string_set input){
+//
+//   string_set::iterator it;
+//   string_set_set output;
+//   std::string element;
+//
+//   for(it = input.begin(); it != input.end(); it++){
+//      string_set temp;
+//      element = get_negation(&(*it));
+//      temp.insert(element);
+//      output.insert(temp);
+//   }
+//   //print_string_set_set(output);
+//   return output;
+//}
+//
+//
+//// or_2_stringlist2
+//
+////negate_and : input: std::stringlist2 = list of and of or
+////		negate_or(each member of input) = a std::stringlist 2
+////                -> n std::stringlist 2 -> std::stringlist 3
+////                output = first member stirnglist 3 or second member of std::stringlist 3
+//
+//string_set_set join_SL2(string_set_set input1, string_set_set input2){
+//
+//  if(input2.size() == 0){
+//     return input1;
+//  }
+//
+//  string_set_set::iterator it1;
+//  string_set_set::iterator it2;
+//  string_set ns;
+//
+//  string_set_set output;
+//
+//  for (it2 = input1.begin(); it2 != input1.end(); it2++) {
+//    for (it1 = input2.begin(); it1 != input2.end(); it1++){
+//      if (is_consistent(*it1,*it2)) {
+//	ns = *it2;
+//	ns.insert(it1->begin(),it1->end());
+//	output.insert(ns);
+//      }
+//    }
+//  }
+//
+//  return output;
+//
+//}
+//
+//string_set_set negate_form(string_set_set input){
+//
+//  typedef std::set<string_set_set> string_set3;
+//  string_set3 list3;
+//  string_set_set::iterator it1;
+//  string_set_set::iterator it2;
+//  string_set3::iterator it3;
+//  string_set ns;
+//  string_set_set temp;
+//
+//  string_set_set output;
+//
+//  //turn all the otr statements to and statements
+//   for(it1 = input.begin(); it1 != input.end(); it1++){
+//      temp = negate_or(*it1);
+//      list3.insert(temp);
+//   }
+//
+//
+//   output = *list3.begin();
+//   for(it3 = ++list3.begin(); it3 != list3.end(); it3++){
+//      output = join_SL2(output, *it3);
+//   }
+//
+//
+//   return output;
+//}
+//
+//void print_string_set(string_set in){
+//	string_set::iterator it1;
+//	std::cout << "[ " ;
+//        for(it1 = in.begin();it1!=in.end();it1++){
+//		std::cout << *it1 << " , ";
+//	}
+//	std::cout << "] " ;
+//}
+//
+//void print_string_set_set(string_set_set in){
+//	string_set_set::iterator it1;
+//	std::cout << "[ ";
+//        for(it1 = in.begin();it1!=in.end();it1++){
+//
+//		print_string_set(*it1);
+//		std::cout << " , ";
+//	}
+//	std::cout << " ] " ;
+//}
+//
+////Planning as Logic

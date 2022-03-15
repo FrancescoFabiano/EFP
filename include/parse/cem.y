@@ -462,7 +462,7 @@ EXECUTABLE action if_part_bf SEMICOLON
   $$ = new proposition;
   $$->set_type(EXECUTABILITY);
   $$->set_action_name(*$2);
-//  $$->set_conditions(*$3);
+  $$->set_conditions(*$3);
 };
 
 /* effects condition */
@@ -470,10 +470,10 @@ effects:
 action HAS_EFFECTS literal_list if_part_bf SEMICOLON
 {
   $$ = new proposition;
-//  $$->set_type(EFFECTS);
+  $$->set_type(EFFECTS);
   $$->set_action_name(*$1);
   $$->add_action_effect(*$3);
- // $$->set_conditions(*$4);
+  $$->set_conditions(*$4);
 };
 
 /* effects condition */
@@ -481,9 +481,9 @@ type:
 action HAS_TYPE constant SEMICOLON
 {
   $$ = new proposition;
- // $$->set_type(TYPE);
+  $$->set_type(TYPE);
   $$->set_action_name(*$1);
- // $$->set_action_type(*$3);
+  $$->set_action_type(*$3);
 };
 
 
@@ -492,11 +492,11 @@ observance:
 agent IN_GROUP constant OF action if_part_bf SEMICOLON
 {
   $$ = new proposition;
- // $$->set_type(OBSERVABILITY);
+  $$->set_type(OBSERVABILITY);
   $$->set_action_name(*$5);
-//  $$->set_agent_group(*$3);
+  $$->set_agent_group(*$3);
   $$->set_agent(*$1);
-//  $$->set_conditions(*$6);
+  $$->set_conditions(*$6);
 };
 
 /* proposition */
@@ -629,172 +629,172 @@ int cemerror(const char *s)
   return cemerror(std::string(s));
 }
 
-//bool is_consistent(string_set sl1, string_set sl2)
-//{
-//  string_set::const_iterator it;
-//  std::string nl;
-//
-//  for (it = sl2.begin(); it != sl2.end(); it++) {
-//	nl = get_negation(&(*it));
-//	if (sl1.find(nl) != sl1.end())
-//	  return false;
-//  }
-//
-//  return true;
-//}
-//
-//std::string get_negation(const std::string* s)
-//{
-//  std::string ns;
-//
-//  if (s->substr(0,1) == NEGATION_SYMBOL) {
-//	return s->substr(1);
-//  }
-//  ns = NEGATION_SYMBOL;
-//  return ns.append(*s);
-//}
-//
-///*
-//string_set_set get_negateFluentForm(string_set_set input){
-//
-//  string_set_set separate;
-//  string_set_set join;
-//  string_set_set::iterator it1;
-//  string_set_set::iterator it3;
-//  string_set_set negation;
-//  std::string temp;
-//  string_set::const_iterator it2;
-//
-//  for(it1 = input.begin(); it1 != input.end(); it1++){
-//     if(it1->begin() == it1->end())
-//        join.insert(*it1);
-//     else
-//        separate.insert(*it1);
-//  }//for loop
-//
-//  //Separate elements in separate
-//     for(it1 = separate.begin(); it1 != separate.end(); it1++){
-//        temp = get_negation(&(*(it1->begin())));    //possible pointer problem
-//        string_set tiep;
-//	tiep.insert(temp);
-//	negation.insert(tiep);
-//     }//for loop
-//
-//
-//  //Join elements in join with all elements in separate
-//  for(it3 = negation.begin(); it3 != negation.end(); it3++)
-//     for(it1 = join.begin(); it1 != join.end(); it1++)
-//        for(it2 = it1->begin(); it2 != it1->end(); it2++)
-//        {
-//           temp = get_negation(&(*it2));    //possible pointer problem
-//           string_set tiep;
-//           tiep.insert(temp);
-//           negation.insert(tiep);
-//	}
-//
-//  return negation;
-//}
-//*/
-//
-////negate_or: input: String list = list of or.
-////             output: Stringlist 2 = list of and of negation
-//
-//string_set_set negate_or(string_set input){
-//
-//   string_set::iterator it;
-//   string_set_set output;
-//   std::string element;
-//
-//   for(it = input.begin(); it != input.end(); it++){
-//      string_set temp;
-//      element = get_negation(&(*it));
-//      temp.insert(element);
-//      output.insert(temp);
-//   }
-//   //print_string_set_set(output);
-//   return output;
-//}
-//
-//
-//// or_2_stringlist2
-//
-////negate_and : input: std::stringlist2 = list of and of or
-////		negate_or(each member of input) = a std::stringlist 2
-////                -> n std::stringlist 2 -> std::stringlist 3
-////                output = first member stirnglist 3 or second member of std::stringlist 3
-//
-//string_set_set join_SL2(string_set_set input1, string_set_set input2){
-//
-//  if(input2.size() == 0){
-//     return input1;
-//  }
-//
-//  string_set_set::iterator it1;
-//  string_set_set::iterator it2;
-//  string_set ns;
-//
-//  string_set_set output;
-//
-//  for (it2 = input1.begin(); it2 != input1.end(); it2++) {
-//    for (it1 = input2.begin(); it1 != input2.end(); it1++){
-//      if (is_consistent(*it1,*it2)) {
-//	ns = *it2;
-//	ns.insert(it1->begin(),it1->end());
-//	output.insert(ns);
-//      }
-//    }
-//  }
-//
-//  return output;
-//
-//}
-//
-//string_set_set negate_form(string_set_set input){
-//
-//  typedef std::set<string_set_set> string_set3;
-//  string_set3 list3;
-//  string_set_set::iterator it1;
-//  string_set_set::iterator it2;
-//  string_set3::iterator it3;
-//  string_set ns;
-//  string_set_set temp;
-//
-//  string_set_set output;
-//
-//  //turn all the otr statements to and statements
-//   for(it1 = input.begin(); it1 != input.end(); it1++){
-//      temp = negate_or(*it1);
-//      list3.insert(temp);
-//   }
-//
-//
-//   output = *list3.begin();
-//   for(it3 = ++list3.begin(); it3 != list3.end(); it3++){
-//      output = join_SL2(output, *it3);
-//   }
-//
-//
-//   return output;
-//}
-//
-//void print_string_set(string_set in){
-//	string_set::iterator it1;
-//	std::cout << "[ " ;
-//        for(it1 = in.begin();it1!=in.end();it1++){
-//		std::cout << *it1 << " , ";
-//	}
-//	std::cout << "] " ;
-//}
-//
-//void print_string_set_set(string_set_set in){
-//	string_set_set::iterator it1;
-//	std::cout << "[ ";
-//        for(it1 = in.begin();it1!=in.end();it1++){
-//
-//		print_string_set(*it1);
-//		std::cout << " , ";
-//	}
-//	std::cout << " ] " ;
-//}
+bool is_consistent(string_set sl1, string_set sl2)
+{
+  string_set::const_iterator it;
+  std::string nl;
+
+  for (it = sl2.begin(); it != sl2.end(); it++) {
+	nl = get_negation(&(*it));
+	if (sl1.find(nl) != sl1.end())
+	  return false;
+  }
+
+  return true;
+}
+
+std::string get_negation(const std::string* s)
+{
+  std::string ns;
+
+  if (s->substr(0,1) == NEGATION_SYMBOL) {
+	return s->substr(1);
+  }
+  ns = NEGATION_SYMBOL;
+  return ns.append(*s);
+}
+
+/*
+string_set_set get_negateFluentForm(string_set_set input){
+
+  string_set_set separate;
+  string_set_set join;
+  string_set_set::iterator it1;
+  string_set_set::iterator it3;
+  string_set_set negation;
+  std::string temp;
+  string_set::const_iterator it2;
+
+  for(it1 = input.begin(); it1 != input.end(); it1++){
+     if(it1->begin() == it1->end())
+        join.insert(*it1);
+     else
+        separate.insert(*it1);
+  }//for loop
+
+  //Separate elements in separate
+     for(it1 = separate.begin(); it1 != separate.end(); it1++){
+        temp = get_negation(&(*(it1->begin())));    //possible pointer problem
+        string_set tiep;
+	tiep.insert(temp);
+	negation.insert(tiep);
+     }//for loop
+
+
+  //Join elements in join with all elements in separate
+  for(it3 = negation.begin(); it3 != negation.end(); it3++)
+     for(it1 = join.begin(); it1 != join.end(); it1++)
+        for(it2 = it1->begin(); it2 != it1->end(); it2++)
+        {
+           temp = get_negation(&(*it2));    //possible pointer problem
+           string_set tiep;
+           tiep.insert(temp);
+           negation.insert(tiep);
+	}
+
+  return negation;
+}
+*/
+
+//negate_or: input: String list = list of or.
+//             output: Stringlist 2 = list of and of negation
+
+string_set_set negate_or(string_set input){
+
+   string_set::iterator it;
+   string_set_set output;
+   std::string element;
+
+   for(it = input.begin(); it != input.end(); it++){
+      string_set temp;
+      element = get_negation(&(*it));
+      temp.insert(element);
+      output.insert(temp);
+   }
+   //print_string_set_set(output);
+   return output;
+}
+
+
+// or_2_stringlist2
+
+//negate_and : input: std::stringlist2 = list of and of or
+//		negate_or(each member of input) = a std::stringlist 2
+//                -> n std::stringlist 2 -> std::stringlist 3
+//                output = first member stirnglist 3 or second member of std::stringlist 3
+
+string_set_set join_SL2(string_set_set input1, string_set_set input2){
+
+  if(input2.size() == 0){
+     return input1;
+  }
+
+  string_set_set::iterator it1;
+  string_set_set::iterator it2;
+  string_set ns;
+
+  string_set_set output;
+
+  for (it2 = input1.begin(); it2 != input1.end(); it2++) {
+    for (it1 = input2.begin(); it1 != input2.end(); it1++){
+      if (is_consistent(*it1,*it2)) {
+	ns = *it2;
+	ns.insert(it1->begin(),it1->end());
+	output.insert(ns);
+      }
+    }
+  }
+
+  return output;
+
+}
+
+string_set_set negate_form(string_set_set input){
+
+  typedef std::set<string_set_set> string_set3;
+  string_set3 list3;
+  string_set_set::iterator it1;
+  string_set_set::iterator it2;
+  string_set3::iterator it3;
+  string_set ns;
+  string_set_set temp;
+
+  string_set_set output;
+
+  //turn all the otr statements to and statements
+   for(it1 = input.begin(); it1 != input.end(); it1++){
+      temp = negate_or(*it1);
+      list3.insert(temp);
+   }
+
+
+   output = *list3.begin();
+   for(it3 = ++list3.begin(); it3 != list3.end(); it3++){
+      output = join_SL2(output, *it3);
+   }
+
+
+   return output;
+}
+
+void print_string_set(string_set in){
+	string_set::iterator it1;
+	std::cout << "[ " ;
+        for(it1 = in.begin();it1!=in.end();it1++){
+		std::cout << *it1 << " , ";
+	}
+	std::cout << "] " ;
+}
+
+void print_string_set_set(string_set_set in){
+	string_set_set::iterator it1;
+	std::cout << "[ ";
+        for(it1 = in.begin();it1!=in.end();it1++){
+
+		print_string_set(*it1);
+		std::cout << " , ";
+	}
+	std::cout << " ] " ;
+}
 
 //Planning as Logic

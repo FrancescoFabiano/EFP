@@ -93,6 +93,10 @@ public:
      * @return the \ref string to \p to_add in m_agent_group_ids.*/
     void add_agent_group(const std::string & to_add);
 
+    /** \brief Function that add a new cem name to the map name->id.
+     *
+     * This function has been added just for the mAl parsing*/
+    void add_cem_name(const std::string & to_add);
 
     /** \brief Function that return the pointer to the given \ref cevent from its id.
      * 
