@@ -4,6 +4,7 @@ project(EFP VERSION 2.2
         DESCRIPTION "Epistemic Forward Planner"
         LANGUAGES C CXX)
 
+# Source files to include in compilation -- To include all use: file(GLOB_RECURSE EFP_SOURCES ${CMAKE_SOURCE_DIR}/src/*.cpp)
 set(
         EFP_SOURCES
         src/main.cpp
@@ -40,6 +41,7 @@ set(
 #        lib/bisimulation/bisimulation_k.cpp
 )
 
+# Headers files to include in compilation -- To include all use: file(GLOB_RECURSE EFP_HEADERS ${CMAKE_SOURCE_DIR}/src/*.h)
 set(
         EFP_HEADERS
         include/actions/action.h
@@ -99,7 +101,16 @@ message(STATUS "Boost version: ${Boost_VERSION}")
 include_directories(${Boost_INCLUDE_DIR})
 
 # EXECUTABLES
-add_executable(efp ${EFP_SOURCES} ${EFP_HEADERS} ${FLEX_marL_OUTPUTS} ${BISON_marP_OUTPUTS} ${FLEX_cemL_OUTPUTS} ${BISON_cemP_OUTPUTS})
-target_link_libraries(efp LINK_PUBLIC ${Boost_LIBRARIES})
-target_compile_features(efp PRIVATE cxx_std_17)
-target_compile_options(efp PRIVATE -Wall -Wextra)
+set(PROJECT_EXE efp.out)
+add_executable(${PROJECT_EXE} ${EFP_SOURCES} ${EFP_HEADERS} ${FLEX_marL_OUTPUTS} ${BISON_marP_OUTPUTS} ${FLEX_cemL_OUTPUTS} ${BISON_cemP_OUTPUTS})
+
+# Compilation Features
+set(CMAKE_CXX_STANDARD 14)
+target_link_libraries(${PROJECT_EXE} LINK_PUBLIC ${Boost_LIBRARIES})
+target_compile_features(${PROJECT_EXE} PRIVATE cxx_std_${CMAKE_CXX_STANDARD})
+target_compile_options(${PROJECT_EXE} PRIVATE -Wall -Wextra) #To show one error at the time
+
+# Auto-ignore build directory
+if (NOT EXISTS ${PROJECT_BINARY_DIR}/.gitignore)
+    file(WRITE ${PROJECT_BINARY_DIR}/.gitignore "*")
+endif ()
