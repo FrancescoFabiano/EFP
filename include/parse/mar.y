@@ -106,15 +106,14 @@ extern std::shared_ptr<reader> domain_reader;
 /* DEBUG_WARNING_REMOVAL %type <str_list2> gd_formula DEBUG_WARNING_REMOVAL*/
 
 //%type <prop> static_law
-%type <prop_list> dynamic_law
+%type <prop> dynamic_law
 %type <prop> executability
 //%type <prop> impossibility
 %type <prop> proposition
-%type <prop_list> proposition_list
-%type <prop_list> determine
+%type <prop> determine
 %type <prop> awareness
 %type <prop> observance
-%type <prop_list> announcement
+%type <prop> announcement
 %type <prop_list> domain
 
 %%
@@ -472,23 +471,13 @@ EXECUTABLE action if_part_bf SEMICOLON
 /* dynamic law */
 dynamic_law:
 action CAUSES literal_list if_part_bf SEMICOLON
-{  
-    $$ = new proposition_list;
-    proposition p1;
-    proposition p2;
-
-    p1.set_type(EFFECTS);
-    p1.set_action_name(*$1);
-    p1.add_action_effect(*$3);
-    p1.set_conditions(*$4);
-
-    $$->push_back(p1);
-
-    p2.set_type(TYPE);
-    p2.set_action_name(*$1);
-    p2.set_action_type("ontic");
-
-    $$->push_back(p2);
+{
+  $$ = new proposition;
+  $$->set_type(MAL_EFF);
+  $$->set_action_name(*$1);
+  $$->add_action_effect(*$3);
+  $$->set_conditions(*$4);
+  $$->set_action_type("ontic");
 };
 
 
@@ -496,44 +485,23 @@ action CAUSES literal_list if_part_bf SEMICOLON
 determine:
 action DETERMINE literal_list SEMICOLON
 {
-  $$ = new proposition_list;
-  proposition p1;
-  proposition p2;
-
-  p1.set_type(EFFECTS);
-  p1.set_action_name(*$1);
-  p1.add_action_effect(*$3);
-
-  $$->push_back(p1);
-
-  p2.set_type(TYPE);
-  p2.set_action_name(*$1);
-  p2.set_action_type("sensing");
-
-  $$->push_back(p2);
+  $$ = new proposition;
+  $$->set_type(MAL_EFF);
+  $$->set_action_name(*$1);
+  $$->add_action_effect(*$3);
+  $$->set_action_type("sensing");
 };
 
 /* announcement condition */
 announcement:
 action ANNOUNCES literal_list if_part_bf SEMICOLON
 {
-  $$ = new proposition_list;
-  proposition p1;
-  proposition p2;
-
-  p1.set_type(EFFECTS);
-  p1.set_action_name(*$1);
-  p1.add_action_effect(*$3);
-  p1.set_conditions(*$4);
-
-  $$->push_back(p1);
-
-  p2.set_type(TYPE);
-  p2.set_action_name(*$1);
-  p2.set_action_type("announcement");
-
-  $$->push_back(p2);
-
+  $$ = new proposition;
+  $$->set_type(MAL_EFF);
+  $$->set_action_name(*$1);
+  $$->add_action_effect(*$3);
+  $$->set_conditions(*$4);
+  $$->set_action_type("announcement");
 };
 
 /* awareness condition */
@@ -561,7 +529,13 @@ agent OBSERVES action if_part_bf SEMICOLON
 };
 
 
-proposition_list:
+/* proposition */
+proposition:
+executability
+{
+  $$ = $1;
+}
+|
 dynamic_law
 {
   $$ = $1;
@@ -573,13 +547,6 @@ determine
 }
 |
 announcement
-{
-  $$ = $1;
-};
-
-/* proposition */
-proposition:
-executability
 {
   $$ = $1;
 }

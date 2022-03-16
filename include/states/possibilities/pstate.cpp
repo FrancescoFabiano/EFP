@@ -656,7 +656,7 @@ pstate pstate::compute_succ(const action & act) const
 //	pstate ret = product_update::update(*this, act);
 //	ret.clean_unreachable_pworlds();
 //	return ret;
-    switch ( act.get_mal_type() ) {
+    switch ( act.get_type() ) {
         case ONTIC:
         {
             return execute_ontic(act);

@@ -38,7 +38,8 @@ enum proposition_type
     EFFECTS, /**< \brief Used when the proposition specifies the effects of an action -- *act* **has_effects** *f*.*/
     OBSERVABILITY, /**< \brief Used when the proposition specifies the observability group of an agent wrt to an action -- *agent* **in_group group** *of act*.*/
     TYPE, /**< \brief Used when the proposition specifies the type of an action -- *act* **has_type** *type*.*/
-    NOTSET, /**< \brief Default case.*/
+    /*******FOR MAL OPTIMIZATION******/
+    MAL_EFF /**< \brief Used to identify the mAL action definition (causes, determines, announces).*/
 };
 
 class proposition

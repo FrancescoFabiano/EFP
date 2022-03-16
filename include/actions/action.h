@@ -147,8 +147,6 @@ private:
     /**\brief Utility function to calcuate the mAl obs maps.*/
     void get_mal_observants(mal_observability_map & ret, agent_group_id id) const;
 public:
-        /** \brief Getter of the internal field \ref m_type that converts into mAl syntax.*/
-    mal_type get_mal_type() const;
     /**\brief The fully_observant frame (each obsv is related to a condition that's why  map) of *this*.*/
     mal_observability_map get_fully_observants() const;
     /**\brief The partially_observant frame (each obsv is related to a condition that's why  map) of *this*.*/

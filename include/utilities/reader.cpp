@@ -56,7 +56,6 @@ reader::reader()
 
 int reader::read()
 {
-    std::cerr << "\nDEBUG: Here\n";
     /*to dynamically generate id of groups and actions type*/
     cem_store::get_instance().add_cem_name("ontic");
     cem_store::get_instance().add_cem_name("sensing");

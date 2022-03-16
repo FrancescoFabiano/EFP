@@ -57,12 +57,6 @@ void cem_store::add_agent_group(const std::string & to_add)
 
 }
 
-void cem_store::add_cem_name(const std::string & to_add)
-{
-
-    m_cem_ids_map.insert(std::pair<std::string, cem_id>(boost::algorithm::to_lower_copy(to_add), m_cem_ids_map.size()));
-
-}
 
 const cevent_ptr cem_store::get_event(event_id id) const
 {
@@ -164,7 +158,18 @@ short cem_store::get_agent_group_number() const
 	return m_agent_group_ids.size();
 }
 
+/*******FOR MAL OPTIMIZATION******/
+void cem_store::add_cem_name(const std::string & to_add)
+{
+    cem_id id_added_cem = m_cem_ids_map.size();
+    m_created_cems.insert(cem(id_added_cem));
+    m_cem_ids_map.insert(std::pair<std::string, cem_id>(boost::algorithm::to_lower_copy(to_add), id_added_cem));
+    for (auto it = m_cem_ids_map.begin(); it != m_cem_ids_map.end(); ++it)
+    {
+        std::cerr << "\nRecord is: < " << it->first << ", " << it->second <<">" << std::endl;
+    }
 
+}
 
 //void cem_store::add_action_cem(const cevent & to_add, event_id id)
 //{
