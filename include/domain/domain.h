@@ -14,6 +14,7 @@
 #pragma once
 #include <memory>
 
+#include "domain_config.h"
 #include "grounder.h"
 #include "initially.h"
 
@@ -60,6 +61,10 @@ private:
     action_set m_actions;
     /** \brief Set containing all the (grounded) \ref agent of the domain.*/
     agent_set m_agents;
+
+
+    domain_config config;
+
 
     /** \brief The description of the initial state.*/
     initially m_intial_description;
@@ -130,7 +135,7 @@ public:
      * @param[in] act_check: the \ref action_check to assign to \ref m_act_check.
      * @param[in] check_visited: If the \ref search process should check for already visited_states.
      * @param[in] bisimulation: If the \ref states are reduced in size with bisimulation.*/
-    void set_domain(std::string name, bool debug, state_type stype, bool k_opt, boost::shared_ptr<reader> reader, domain_restriction ini_res, domain_restriction goal_res, bool is_global_obsv, action_check act_check, bool check_visited, bis_type bisimulation);
+    void set_domain(const domain_config & config); // std::string name, bool debug, state_type stype, bool k_opt, boost::shared_ptr<reader> reader, domain_restriction ini_res, domain_restriction goal_res, bool is_global_obsv, action_check act_check, bool check_visited, bis_type bisimulation);
 
     /** \brief Function that builds all the domain information.
      *
@@ -139,11 +144,11 @@ public:
     /** \brief Returns the selected type of state.
      *
      * @return the boolean \ref m_stype.*/
-    const state_type & get_stype();
+    const state_type & get_stype() const;
     /** \brief Returns whether the planner uses the optimized version of the transition function for Kripke states.
      *
      * @return the boolean \ref m_kopt.*/
-    const bool & get_k_optimized();
+    const bool & get_k_optimized() const;
 
     /** \brief Getter of the field \ref m_grounder.
      *

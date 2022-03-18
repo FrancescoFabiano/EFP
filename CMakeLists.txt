@@ -14,6 +14,7 @@ set(
         include/actions/custom_event_models/cem_store.cpp
         include/actions/custom_event_models/cevent.cpp
         include/domain/domain.cpp
+        include/domain/domain_config.cpp
         include/domain/grounder.cpp
         include/domain/initially.cpp
         include/formulae/belief_formula.cpp
@@ -50,6 +51,7 @@ set(
         include/actions/custom_event_models/cem_store.h
         include/actions/custom_event_models/cevent.h
         include/domain/domain.h
+        include/domain/domain_config.h
         include/domain/grounder.h
         include/domain/initially.h
         include/formulae/belief_formula.h
@@ -108,7 +110,7 @@ add_executable(${PROJECT_EXE} ${EFP_SOURCES} ${EFP_HEADERS} ${FLEX_marL_OUTPUTS}
 set(CMAKE_CXX_STANDARD 14)
 target_link_libraries(${PROJECT_EXE} LINK_PUBLIC ${Boost_LIBRARIES})
 target_compile_features(${PROJECT_EXE} PRIVATE cxx_std_${CMAKE_CXX_STANDARD})
-target_compile_options(${PROJECT_EXE} PRIVATE -Wall -Wextra) #To show one error at the time
+target_compile_options(${PROJECT_EXE} PRIVATE -Wall) #To show one error at the time
 
 # Auto-ignore build directory
 if (NOT EXISTS ${PROJECT_BINARY_DIR}/.gitignore)

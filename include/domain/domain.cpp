@@ -19,27 +19,28 @@ domain& domain::get_instance()
 	return instance;
 }
 
-void domain::set_domain(std::string name, bool debug, state_type stype, bool k_opt, boost::shared_ptr<reader> reader, domain_restriction ini_res, domain_restriction goal_res, bool is_global_obsv, action_check act_check, bool check_visited, bis_type bisimulation)
+void domain::set_domain(const domain_config & set_config) // (std::string name, bool debug, state_type stype, bool k_opt, boost::shared_ptr<reader> reader, domain_restriction ini_res, domain_restriction goal_res, bool is_global_obsv, action_check act_check, bool check_visited, bis_type bisimulation)
 {
-	m_name = name;
-	m_debug = debug;
-	m_stype = stype;
-	m_kopt = k_opt;
-	m_reader = reader;
-	m_intial_description = initially(ini_res);
-	m_goal_restriction = goal_res;
-	m_is_global_obsv = is_global_obsv;
-	m_act_check = act_check;
-	m_check_visited = check_visited;
-	m_bisimulation = bisimulation;
+    domain::config = set_config;
+//	m_name = name;
+//	m_debug = debug;
+//	m_stype = stype;
+//	m_kopt = k_opt;
+//	m_reader = reader;
+//	m_intial_description = initially(ini_res);
+//	m_goal_restriction = goal_res;
+//	m_is_global_obsv = is_global_obsv;
+//	m_act_check = act_check;
+//	m_check_visited = check_visited;
+//	m_bisimulation = bisimulation;
 }
 
-const state_type & domain::get_stype()
+const state_type & domain::get_stype() const
 {
-	return m_stype;
+	return config.get_state_type();
 }
 
-const bool & domain::get_k_optimized()
+const bool & domain::get_k_optimized() const
 {
 	return m_kopt;
 }
@@ -349,7 +350,7 @@ void domain::build_initially()
 		m_intial_description.set_ff_forS5();
 		break;
 	}
-	case K45:
+	case KD45:
 	{
 		break;
 	}

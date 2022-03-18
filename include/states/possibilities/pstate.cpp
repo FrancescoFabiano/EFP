@@ -524,7 +524,7 @@ void pstate::add_initial_pworld(const pworld & possible_add)
 		}
 		break;
 	}
-	case K45:
+	case KD45:
 	case NONE:
 	default:
 	{
@@ -639,7 +639,7 @@ void pstate::remove_initial_pedge_bf(const belief_formula & to_check)
 		}
 		return;
 	}
-	case K45:
+	case KD45:
 	case NONE:
 	default:
 	{

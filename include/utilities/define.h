@@ -178,7 +178,7 @@ enum domain_restriction
          *
          * With this type of model is associate the concept of *Knowledge* given
          * that the model gurantee the relations to be equivalent.*/
-    K45, /**< \brief Restricts only to K45 models.
+    KD45, /**< \brief Restricts only to KD45 models.
          *
          * With this type of model is associate the concept of *Belief*.*/
     NONE, /**< \brief No restrictions applied.

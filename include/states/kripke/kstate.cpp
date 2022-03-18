@@ -515,7 +515,7 @@ void kstate::add_initial_kworld(const kworld & possible_add)
 		}
 		break;
 	}
-	case K45:
+	case KD45:
 	{
 		std::cerr << "\nNot implemented yet - 1\n";
 		exit(1);
@@ -641,7 +641,7 @@ void kstate::remove_initial_kedge_bf(const belief_formula & to_check)
 			exit(1);
 		}
 	}
-	case K45:
+	case KD45:
 	{
 		std::cerr << "\nNot implemented yet - 4\n";
 		exit(1);

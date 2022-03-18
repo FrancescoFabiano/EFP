@@ -12,6 +12,7 @@
 #include <string.h>
 #include <memory>
 #include <vector>
+#include <algorithm>
 
 
 #include "../include/search/planner.ipp"
@@ -32,29 +33,6 @@ reader generator()
 using namespace boost;
 
 shared_ptr<reader> domain_reader = make_shared<reader>(generator());
-
-bool debug = false;
-bool results_file = false;
-bool is_global_obsv = true;
-bool check_visited = false;
-bis_type bisimulation = BIS_NONE;
-heuristics used_heur = NO_H;
-search_type used_search = BFS;
-state_type state_struc = POSSIBILITIES; //default
-domain_restriction ini_restriction = S5; //default
-domain_restriction goal_restriction = NONE; //default
-action_check act_check = EXE_POINTED__COND_WORLD; //default
-
-spec_lang_type input_lang = MAR; // EPDDL;
-up_model_type update_models = STANDARD;
-std::string models_filename = "";
-
-bool execute_given_actions = false;
-bool kopt = false;
-std::vector<std::string> given_actions;
-
-short max_depth = 1;
-short step = 1;
 
 void print_usage(char* prog_name)
 {
@@ -173,16 +151,16 @@ void print_usage(char* prog_name)
     exit(1);
 }
 
-void manage_arguments(int argc, char** argv)
+void build_domain_config(domain_config & config, int argc, char **argv)
 {
     int i = 2;
     while (i < argc) {
         //No case sensitivity
         if (strcmp(argv[i], "-debug") == 0) {
             std::cout << "Debug is on." << std::endl;
-            debug = true;
+            config.set_debug(true);
         } else if (strcmp(argv[i], "-results_file") == 0) {
-            results_file = true;
+            config.set_results_file(true);
         }//No case sensitivity
         else if (strcmp(argv[i], "-ir") == 0) {
             i++;
@@ -191,13 +169,13 @@ void manage_arguments(int argc, char** argv)
                 exit(1);
             } else if (strcmp(argv[i], "S5") == 0) {
                 std::cout << "Initial state must be an S5. (Default)" << std::endl;
-                ini_restriction = S5; //default
-            } else if (strcmp(argv[i], "K45") == 0) {
+                config.set_ini_restriction(domain_restriction::S5);
+            } else if (strcmp(argv[i], "KD45") == 0) {
                 std::cout << "Initial state must be a K45." << std::endl;
-                ini_restriction = K45;
+                config.set_ini_restriction(domain_restriction::KD45);
             } else if (strcmp(argv[i], "NONE") == 0) {
                 std::cout << "Initial state does not have restrictions." << std::endl;
-                ini_restriction = NONE;
+                config.set_ini_restriction(domain_restriction::NONE);
             } else {
                 std::cerr << "Wrong specification for '-ir'; use 'S5' or 'K45' or 'NONE'." << std::endl;
                 exit(1);
@@ -209,46 +187,35 @@ void manage_arguments(int argc, char** argv)
                 exit(1);
             } else if (strcmp(argv[i], "NONE") == 0) {
                 std::cout << "The Goal does not have restrictions. (Default)" << std::endl;
-                goal_restriction = NONE; //default
+                config.set_goal_restriction(domain_restriction::NONE);
             } else if (strcmp(argv[i], "NONEG") == 0) {
                 std::cout << "The Goal does not accept negative belief formula (-B(i,phi))." << std::endl;
-                goal_restriction = NONEG;
+                config.set_goal_restriction(domain_restriction::NONEG);
             } else {
                 std::cerr << "Wrong specification for '-gr'; use 'S5' or 'K45' or 'NONE'." << std::endl;
                 exit(1);
             }
         } else if (strcmp(argv[i], "-check_visited") == 0) {
-
             std::cout << "The planner will check for visited states" << std::endl;
-            check_visited = true;
-
+            config.set_check_visited(true);
         } else if (strcmp(argv[i], "-st") == 0) {
             i++;
             if (i >= argc) {
-                std::cerr << "-st needs specification (POSS, KRIPKE, KRIPKE_OPT, OBDD)." << std::endl;
+                std::cerr << "-st needs specification; use 'POSS' or 'KRIPKE' or 'KRIPKE_OPT'." << std::endl;
                 exit(1);
             } else if (strcmp(argv[i], "POSS") == 0) {
                 std::cout << "The States are represented with Possibilities (NWF-SET).  (Default)" << std::endl;
-                state_struc = POSSIBILITIES;
+                config.set_state_type(state_type::POSSIBILITIES);
             } else if (strcmp(argv[i], "KRIPKE") == 0) {
                 std::cout << "The States are represented with Kripke structures." << std::endl;
-                state_struc = KRIPKE; //default
-                kopt = false;
-                //std::cerr << "Kripke Structures implementation is a little bit behind. We will back online in a bit :)" << std::endl;
-                //exit(1);
+                config.set_state_type(state_type::KRIPKE);
+                config.set_kopt(false);
             } else if (strcmp(argv[i], "KRIPKE_OPT") == 0) {
-                std::cout
-                        << "KRIPKE_OPT: The States are represented with Kripke structures and the transition function is optimized"
-                        << std::endl;
-                state_struc = KRIPKE;
-                kopt = true;
-                //std::cerr << "Kripke Structures implementation is a little bit behind. We will back online in a bit :)" << std::endl;
-                //exit(1);
-            } else if (strcmp(argv[i], "OBDD") == 0) {
-                std::cout << "The States are represented with OBDDs." << std::endl;
-                state_struc = OBDD;
+                std::cout << "KRIPKE_OPT: The States are represented with Kripke structures and the transition function is optimized" << std::endl;
+                config.set_state_type(state_type::KRIPKE);
+                config.set_kopt(true);
             } else {
-                std::cerr << "Wrong specification for '-st'; use 'KRIPKE' or 'POSS' or 'OBDD'." << std::endl;
+                std::cerr << "Wrong specification for '-st'; use 'POSS' or 'KRIPKE' or 'KRIPKE_OPT'." << std::endl;
                 exit(1);
             }
         } else if (strcmp(argv[i], "-ss") == 0) {
@@ -257,8 +224,7 @@ void manage_arguments(int argc, char** argv)
                 std::cerr << "-s needs an integer value." << std::endl;
                 exit(1);
             } else {
-                max_depth = atoi(argv[i]);
-
+                config.set_max_depth(atoi(argv[i]));
             }
         } else if (strcmp(argv[i], "-mm") == 0) {
             i++;
@@ -266,8 +232,7 @@ void manage_arguments(int argc, char** argv)
                 std::cerr << "-m needs an integer value" << std::endl;
                 exit(1);
             } else {
-                step = atoi(argv[i]);
-
+                config.set_step(atoi(argv[i]));
             }
         } else if (strcmp(argv[i], "-act_obsv") == 0) {
             i++;
@@ -276,10 +241,10 @@ void manage_arguments(int argc, char** argv)
                 exit(1);
             } else if (strcmp(argv[i], "GLOBAL") == 0) {
                 std::cout << "The observability frame is globally defined for each state. (Default)" << std::endl;
-                is_global_obsv = true; //default
+                config.set_is_global_obsv(true);
             } else if (strcmp(argv[i], "RELATIVE") == 0) {
                 std::cout << "The observability frame is defined for each world of the state." << std::endl;
-                is_global_obsv = false;
+                config.set_is_global_obsv(false);
             } else {
                 std::cerr << "Wrong specification for '-act_obsv'; use 'GLOBAL' or 'RELATIVE'." << std::endl;
                 exit(1);
@@ -291,15 +256,13 @@ void manage_arguments(int argc, char** argv)
                 exit(1);
             } else if (strcmp(argv[i], "PP") == 0) {
                 std::cout << "Both the executability and the conditonal effects are checked only on the state." << std::endl;
-                act_check = EXE_POINTED__COND_POINTED; //default
+                config.set_act_check(action_check::EXE_POINTED__COND_POINTED);
             } else if (strcmp(argv[i], "PW") == 0) {
-                std::cout << "The executability is checked only on the state but the conditonal effects are checked in every worlds. (Default)"
-                          << std::endl;
-                act_check = EXE_POINTED__COND_WORLD;
+                std::cout << "The executability is checked only on the state but the conditonal effects are checked in every worlds. (Default)" << std::endl;
+                config.set_act_check(action_check::EXE_POINTED__COND_WORLD);
             } else if (strcmp(argv[i], "WW") == 0) {
-                std::cout << "Both the executability and the conditonal effects are checked in every world."
-                          << std::endl;
-                act_check = EXE_WORLD__COND_WORLD;
+                std::cout << "Both the executability and the conditonal effects are checked in every world." << std::endl;
+                config.set_act_check(action_check::EXE_WORLD__COND_WORLD);
             } else {
                 std::cerr << "Wrong specification for '-act_obsv'; use 'PP' or 'PW' or 'WW'." << std::endl;
                 exit(1);
@@ -311,21 +274,19 @@ void manage_arguments(int argc, char** argv)
                 exit(1);
             } else if (strcmp(argv[i], "NONE") == 0) {
                 std::cout << "Breadth first search. (Default)" << std::endl;
-                used_heur = NO_H; //default
+                config.set_used_heur(heuristics::NO_H);
             } else if (strcmp(argv[i], "L_PG") == 0) {
-                std::cout << "A planning graph is used to calculate the distance of each state from the goal."
-                          << std::endl;
-                used_heur = L_PG;
+                std::cout << "A planning graph is used to calculate the distance of each state from the goal." << std::endl;
+                config.set_used_heur(heuristics::L_PG);
             } else if (strcmp(argv[i], "S_PG") == 0) {
                 std::cout << "A planning graph is used to calculate the sum of each sub-goal distance starting from the state." << std::endl;
-                used_heur = S_PG;
+                config.set_used_heur(heuristics::S_PG);
             } else if (strcmp(argv[i], "C_PG") == 0) {
-                std::cout << "A single planning graph is used to calculate the sum of each 'grounded' belief formula."
-                          << std::endl;
-                used_heur = C_PG;
+                std::cout << "A single planning graph is used to calculate the sum of each 'grounded' belief formula." << std::endl;
+                config.set_used_heur(heuristics::C_PG);
             } else if (strcmp(argv[i], "SUBGOALS") == 0) {
                 std::cout << "We select the state with the highest number of satisfied subgoals." << std::endl;
-                used_heur = SUBGOALS;
+                config.set_used_heur(heuristics::SUBGOALS);
             } else {
                 std::cerr << "Wrong specification for '-h'; use 'NONE' or 'L_PG' or 'S_PG' or 'C_PG' or 'SUBGOALS'." << std::endl;
                 exit(1);
@@ -337,16 +298,15 @@ void manage_arguments(int argc, char** argv)
                 exit(1);
             } else if (strcmp(argv[i], "BFS") == 0) {
                 std::cout << "The solving process will use Breadth first search. (Default)" << std::endl;
-                used_search = BFS; //default
+                config.set_used_search(search_type::BFS);
             } else if (strcmp(argv[i], "DFS") == 0) {
                 std::cout << "The solving process will use Depth first search." << std::endl;
-                used_search = DFS;
+                config.set_used_search(search_type::DFS);
             } else if (strcmp(argv[i], "I_DFS") == 0) {
                 std::cout << "The solving process will use Iterative Depth First Search (-mm to set max_depth and -ss to set the step)" << std::endl;
-                used_search = I_DFS;
+                config.set_used_search(search_type::I_DFS);
             } else {
-                std::cerr << "Wrong specification for '-search_type'; use 'BFS' or 'DFS' or 'I_DFS'."
-                          << std::endl;
+                std::cerr << "Wrong specification for '-search_type'; use 'BFS' or 'DFS' or 'I_DFS'." << std::endl;
                 exit(1);
             }
         } else if (strcmp(argv[i], "-bis") == 0) {
@@ -356,26 +316,28 @@ void manage_arguments(int argc, char** argv)
                 exit(1);
             } else if (strcmp(argv[i], "NONE") == 0) {
                 std::cout << "No Bisimulation is used for the reduction. (Default)" << std::endl;
-                bisimulation = BIS_NONE; //default
+                config.set_bisimulation(bis_type::BIS_NONE);
             } else if (strcmp(argv[i], "PT") == 0) {
                 std::cout << "The Paige-Tarjan Algorithm is used for kstate reduction." << std::endl;
-                bisimulation = PaigeTarjan;
+                config.set_bisimulation(bis_type::PaigeTarjan);
             } else if (strcmp(argv[i], "FB") == 0) {
                 std::cout << "The Fast-Bisimulation Algorithm introduced by Dovier et al, 2001 is used for kstate reduction." << std::endl;
-                bisimulation = FastBisimulation;
+                config.set_bisimulation(bis_type::FastBisimulation);
             } else {
                 std::cerr << "Wrong specification for '-bis'; use 'NONE' or 'PT' or 'FB'." << std::endl;
                 exit(1);
             }
         } else if (strcmp(argv[i], "-e") == 0) {
-            execute_given_actions = true;
+            config.set_execute_given_actions(true);
 
             if (i == argc - 1)
                 print_usage(argv[0]);
             i++;
 
             while (i < argc && argv[i][0] != '-') {
-                given_actions.push_back(std::string(argv[i++]));
+                std::string act_name = argv[i++];
+                act_name.erase(std::remove(act_name.begin(), act_name.end(), ','), act_name.end());
+                config.add_given_action(act_name);
             }
 
         } else if (strcmp(argv[i], "-input_lang") == 0) {
@@ -385,10 +347,10 @@ void manage_arguments(int argc, char** argv)
                 exit(1);
             } else if (strcmp(argv[i], "EPDDL") == 0) {
                 std::cout << "The input language is set to EPDDL. (Default)" << std::endl;
-                input_lang = EPDDL; //default
+                config.set_input_lang(spec_lang_type::EPDDL);
             } else if (strcmp(argv[i], "MAR") == 0) {
                 std::cout << "The input language is set to MAR." << std::endl;
-                input_lang = MAR;
+                config.set_input_lang(spec_lang_type::MAR);
             } else {
                 std::cerr << "Wrong specification for '-input_lang'; use 'EPDDL' or 'MAR'." << std::endl;
                 exit(1);
@@ -400,10 +362,10 @@ void manage_arguments(int argc, char** argv)
                 exit(1);
             } else if (strcmp(argv[i], "STANDARD") == 0) {
                 std::cout << "The update models follow the standard definition. (Default)" << std::endl;
-                update_models = STANDARD; //default
+                config.set_update_models(up_model_type::STANDARD);
             } else if (strcmp(argv[i], "CUSTOM") == 0) {
                 std::cout << "The update models are specified by the user in a file." << std::endl;
-                update_models = CUSTOM;
+                config.set_update_models(up_model_type::CUSTOM);
             } else {
                 std::cerr << "Wrong specification for '-update_models'; use 'STANDARD' or 'CUSTOM'." << std::endl;
                 exit(1);
@@ -414,33 +376,30 @@ void manage_arguments(int argc, char** argv)
                 std::cerr << "-set_models_file needs a filename." << std::endl;
                 exit(1);
             } else {
-                update_models = CUSTOM;
-                models_filename = argv[i];
+                config.set_update_models(up_model_type::CUSTOM);
+                config.set_models_filename(std::string(argv[i]));
             }
         } else {
             print_usage(argv[0]);
         }
-
         i++;
     }
-
 }
 
-void launch_search(state_type state_struc, bool execute_given_action, bool results_file, heuristics used_heur, search_type used_search, std::vector<std::string> given_actions, short max_depth, short step)
-{
-    switch ( state_struc ) {
-        case KRIPKE:
-        {
+void launch_search(domain_config & config) {
+    switch (config.get_state_type()) {
+        case state_type::KRIPKE: {
             planner< state<kstate> > m_planner;
-            if (execute_given_action) {
-                if (results_file) {
-                    m_planner.execute_given_actions_timed(given_actions);
+
+            if (config.is_execute_given_actions()) {
+                if (config.is_results_file()) {
+                    m_planner.execute_given_actions_timed(config.get_given_actions());
                 } else {
-                    m_planner.execute_given_actions(given_actions);
+                    m_planner.execute_given_actions(config.get_given_actions());
                 }
                 std::cout << "\n\n\n*****THE END*****\n";
             } else {
-                if (m_planner.search(results_file, used_heur, used_search, max_depth, step)) {
+                if (m_planner.search(config.is_results_file(), config.get_used_heur(), config.get_used_search(), config.get_max_depth(), config.get_step())) {
                     std::cout << "\n\n\n*****THE END*****\n";
                 } else {
                     std::cout << "\n\n\n*****THE SAD END*****\n";
@@ -448,18 +407,18 @@ void launch_search(state_type state_struc, bool execute_given_action, bool resul
             }
             break;
         }
-        case POSSIBILITIES:
-        {
+        case state_type::POSSIBILITIES: {
             planner< state<pstate> > m_planner;
-            if (execute_given_action) {
-                if (results_file) {
-                    m_planner.execute_given_actions_timed(given_actions);
+
+            if (config.is_execute_given_actions()) {
+                if (config.is_results_file()) {
+                    m_planner.execute_given_actions_timed(config.get_given_actions());
                 } else {
-                    m_planner.execute_given_actions(given_actions);
+                    m_planner.execute_given_actions(config.get_given_actions());
                 }
                 std::cout << "\n\n\n*****THE END*****\n";
             } else {
-                if (m_planner.search(results_file, used_heur, used_search, max_depth, step)) {
+                if (m_planner.search(config.is_results_file(), config.get_used_heur(), config.get_used_search(), config.get_max_depth(), config.get_step())) {
                     std::cout << "\n\n\n*****THE END*****\n";
                 } else {
                     std::cout << "\n\n\n*****THE SAD END*****\n";
@@ -467,29 +426,29 @@ void launch_search(state_type state_struc, bool execute_given_action, bool resul
             }
             break;
         }
-        case OBDD:
         default:
             std::cerr << "\nNot implemented yet - 0\n";
             exit(1);
     }
 }
 
-void generate_domain(char** argv)
+void generate_domain(domain_config & config, char** argv)
 {
     std::string domain_name = argv[1];
     std::string used_name = domain_name;
 
-
-    if (update_models == CUSTOM) {
-        if (models_filename.compare("") == 0) {
+    if (config.get_update_models() == up_model_type::CUSTOM) {
+        if (config.get_models_filename().empty()) {
+            std::string models_filename;
             std::cout << "\nInsert the filename, with the path relative to the execution folder, that specifies the update models (press Enter to confirm): ";
             std::getline(std::cin, models_filename);
+            config.set_models_filename(models_filename);
         }
     } else {
-        models_filename = "include/update/marho_pem.txt";
+        config.set_models_filename("include/update/marho_pem.txt");
     }
 
-    if (input_lang == EPDDL) {
+    if (config.get_input_lang() == spec_lang_type::EPDDL) {
         //Execute script
         system(("sh scripts/EPDDL_scripts/generate_mar_from_epddl.sh " + domain_name).c_str());
 
@@ -498,39 +457,28 @@ void generate_domain(char** argv)
         std::string complete_filename = filename_path + filename_name;
         std::ifstream name_domain_file(complete_filename);
         if (name_domain_file.is_open()) {
-
             getline(name_domain_file, used_name);
-
             name_domain_file.close();
         } else {
             std::cerr << "\nThe file " << complete_filename << " does not exist.\n";
         }
     }
 
-    if (freopen(used_name.c_str(), "r", stdin) == NULL) {
-
+    if (freopen(used_name.c_str(), "r", stdin) == nullptr) {
         std::cerr << argv[0] << ": File " << used_name << " cannot be opened.\n";
         exit(1);
     }
 
     domain_name = domain_name.substr(domain_name.find_last_of("\\/") + 1);
-    domain_name = domain_name.substr(0, domain_name.find_last_of("."));
+    domain_name = domain_name.substr(0, domain_name.find_last_of('.'));
 
-
-
-    //timer.start(READ_TIMER);
-    if (update_models == CUSTOM) {
-        domain_reader->read(models_filename);
+    if (config.get_update_models() == up_model_type::CUSTOM) {
+        domain_reader->read(config.get_models_filename());
     } else {
         domain_reader->read();
     }
-    //	if (debug) {
-    //		domain_reader->print();
-    //	}
-    //Domain building
 
-    domain::get_instance().set_domain(domain_name, debug, state_struc, kopt, domain_reader, ini_restriction, goal_restriction, is_global_obsv, act_check, check_visited, bisimulation);
-
+    domain::get_instance().set_domain(config);
     domain::get_instance().build();
 }
 
@@ -544,35 +492,22 @@ void generate_domain(char** argv)
 	}
 }*/
 
-int main(int argc, char** argv)
-{
-    //Get build date
-//    std::cout << "EFP version " << VERSION << " - Built date: " << BUILT_DATE << std::endl;
-
-
-    //if arguments are too less
+int main(int argc, char** argv) {
+    // If there are too few arguments
     if (argc < 2) {
         print_usage(argv[0]);
     }
 
+    domain_config config;
 
-    //manage and prepare arguments for the planner
-    manage_arguments(argc, argv);
+    // manage and prepare arguments for the planner
+    build_domain_config(config, argc, argv);
 
     //check eventualy problem on input file and generate domain
-    generate_domain(argv);
-
-//	exit(0);
-
-
-    //check generation asp
-    //generate_asp_encoding();
+    generate_domain(config, argv);
 
     //launch search planner
-    launch_search(state_struc, execute_given_actions, results_file, used_heur, used_search, given_actions, max_depth, step);
-
-    //timer.end(READ_TIMER);
-    //planner.main();
+    launch_search(config);
 
     exit(0);
 }

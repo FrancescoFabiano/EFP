@@ -136,7 +136,7 @@ bool initially::check_restriction(const belief_formula & bf) //Apply the restric
 		}
 		break;
 	}
-	case K45:
+	case KD45:
 	{
 		ret = false;
 		break;
