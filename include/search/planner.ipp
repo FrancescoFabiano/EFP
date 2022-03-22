@@ -12,14 +12,19 @@
 #include "../actions/custom_event_models/cem_store.h"
 
 template <class T>
-void planner<T>::print_results(std::chrono::duration<double> elapsed_seconds, T goal, bool results_file, bool givenplan, search_type used_search, heuristics used_heur)
+void planner<T>::set_domain_config(const domain_config & to_set) {
+    config = to_set;
+}
+
+template <class T>
+void planner<T>::print_results(std::chrono::duration<double> elapsed_seconds, T goal, bool given_plan)
 {
 	std::cout << "\n\n\nWell Done, Goal found in " << elapsed_seconds.count() << " :)\n";
 	goal.print();
-	if (results_file) {
+	if (config.is_results_file()) {
 		std::ofstream result;
 		std::string folder = "out/EFP_comparison/";
-		if (givenplan) {
+		if (given_plan) {
 			folder = folder + "givenplan/";
 		} else {
 			folder = folder + "findingplan/";
@@ -51,42 +56,40 @@ void planner<T>::print_results(std::chrono::duration<double> elapsed_seconds, T 
 		}
 		result << ") ";
 
-		if (givenplan) {
+		if (given_plan) {
 			result << "with ";
-		} else if (used_heur != NO_H) {
+		} else if (config.get_used_heur() != NO_H) {
 			result << "with ";
 		} else {
-			switch ( used_search ) {
-			case DFS:
-				result << "with DFS ";
-				break;
-			case I_DFS:
-				result << "with I_DFS ";
-				break;
-			case BFS:
-			default:
-				result << "with BFS ";
-				break;
+			switch (config.get_used_search()) {
+                case DFS:
+                    result << "with DFS ";
+                    break;
+                case I_DFS:
+                    result << "with I_DFS ";
+                    break;
+                case BFS:
+                default:
+                    result << "with BFS ";
+                    break;
 			}
 		}
 
-
-
-		switch ( used_heur ) {
-		case S_PG:
-			result << "SUM_PG heuristic ";
-			break;
-		case L_PG:
-			result << "LENGTH_PG heuristic ";
-			break;
-		case C_PG:
-			result << "CLASSIC_PG heuristic ";
-			break;
-		case SUBGOALS:
-			result << "SUBGOALS heuristic ";
-			break;
-		case NO_H:
-		default: break;
+		switch (config.get_used_heur()) {
+            case S_PG:
+                result << "SUM_PG heuristic ";
+                break;
+            case L_PG:
+                result << "LENGTH_PG heuristic ";
+                break;
+            case C_PG:
+                result << "CLASSIC_PG heuristic ";
+                break;
+            case SUBGOALS:
+                result << "SUBGOALS heuristic ";
+                break;
+            case NO_H:
+            default: break;
 		}
 
 		if (domain::get_instance().check_visited()) {
@@ -101,21 +104,19 @@ void planner<T>::print_results(std::chrono::duration<double> elapsed_seconds, T 
 }
 
 template <class T>
-bool planner<T>::search(bool results_file, heuristics used_heur, search_type used_search, short IDFS_d, short IDFS_s)
-{
-
-	if (used_heur == NO_H) {
-		switch ( used_search ) {
-		case DFS:
-			return search_DFS(results_file);
-		case I_DFS:
-			return search_IterativeDFS(results_file, IDFS_d, IDFS_s);
-		case BFS:
-		default:
-			return search_BFS(results_file);
+bool planner<T>::search() {
+	if (config.get_used_heur() == NO_H) {
+		switch (config.get_used_search()) {
+            case DFS:
+                return search_DFS();
+            case I_DFS:
+                return search_IterativeDFS();
+            case BFS:
+            default:
+                return search_BFS();
 		}
 	} else {
-		return search_heur(results_file, used_heur);
+		return search_heur();
 	}
 
 	//non arrivo mai qui.
@@ -123,7 +124,7 @@ bool planner<T>::search(bool results_file, heuristics used_heur, search_type use
 }
 
 template <class T>
-bool planner<T>::search_BFS(bool results_file)
+bool planner<T>::search_BFS()
 {
 	T initial;
 	bool check_visited = domain::get_instance().check_visited();
@@ -156,7 +157,7 @@ bool planner<T>::search_BFS(bool results_file)
     if (initial.is_goal()) {
         end_timing = std::chrono::system_clock::now();
         elapsed_seconds = end_timing - start_timing;
-        print_results(elapsed_seconds, initial, results_file, false, BFS, NO_H);
+        print_results(elapsed_seconds, initial, false);
 
         return true;
     }
@@ -185,7 +186,7 @@ bool planner<T>::search_BFS(bool results_file)
 				if (tmp_state.is_goal()) {
 					end_timing = std::chrono::system_clock::now();
 					elapsed_seconds = end_timing - start_timing;
-					print_results(elapsed_seconds, tmp_state, results_file, false, BFS, NO_H);
+                    print_results(elapsed_seconds, tmp_state, false);
 					return true;
 				}
 				if (!check_visited || visited_states.insert(tmp_state).second) {
@@ -206,7 +207,7 @@ bool planner<T>::search_BFS(bool results_file)
 }
 
 template <class T>
-bool planner<T>::search_IterativeDFS(bool results_file, short maxDepth_, short step_)
+bool planner<T>::search_IterativeDFS()
 {
 	//stack di supporto per i risultati della ricerca.
 	std::stack<T> supportSearch;
@@ -225,8 +226,8 @@ bool planner<T>::search_IterativeDFS(bool results_file, short maxDepth_, short s
 		initial.calc_min_bisimilar();
 	}
 
-	int maxDepth = maxDepth_;
-	int step = step_;
+	int maxDepth = config.get_max_depth();
+	int step = config.get_step();
 
 	auto end_timing = std::chrono::system_clock::now();
 	std::chrono::duration<double> elapsed_seconds = end_timing - start_timing;
@@ -243,7 +244,7 @@ bool planner<T>::search_IterativeDFS(bool results_file, short maxDepth_, short s
 	if (initial.is_goal()) {
 		end_timing = std::chrono::system_clock::now();
 		elapsed_seconds = end_timing - start_timing;
-		print_results(elapsed_seconds, initial, results_file, false, I_DFS, NO_H);
+        print_results(elapsed_seconds, initial, false);
 
 		return true;
 	}
@@ -271,7 +272,7 @@ bool planner<T>::search_IterativeDFS(bool results_file, short maxDepth_, short s
 					if (tmp_state.is_goal()) {
 						end_timing = std::chrono::system_clock::now();
 						elapsed_seconds = end_timing - start_timing;
-						print_results(elapsed_seconds, tmp_state, results_file, false, I_DFS, NO_H);
+                        print_results(elapsed_seconds, tmp_state, false);
 						return true;
 					}
 
@@ -291,7 +292,7 @@ bool planner<T>::search_IterativeDFS(bool results_file, short maxDepth_, short s
 }
 
 template <class T>
-bool planner<T>::search_DFS(bool results_file)
+bool planner<T>::search_DFS()
 {
 	T initial;
 
@@ -323,7 +324,7 @@ bool planner<T>::search_DFS(bool results_file)
 	if (initial.is_goal()) {
 		end_timing = std::chrono::system_clock::now();
 		elapsed_seconds = end_timing - start_timing;
-		print_results(elapsed_seconds, initial, results_file, false, DFS, NO_H);
+        print_results(elapsed_seconds, initial, false);
 
 		return true;
 	}
@@ -346,7 +347,7 @@ bool planner<T>::search_DFS(bool results_file)
 				if (tmp_state.is_goal()) {
 					end_timing = std::chrono::system_clock::now();
 					elapsed_seconds = end_timing - start_timing;
-					print_results(elapsed_seconds, tmp_state, results_file, false, DFS, NO_H);
+                    print_results(elapsed_seconds, tmp_state, false);
 					return true;
 				}
 
@@ -362,7 +363,7 @@ bool planner<T>::search_DFS(bool results_file)
 }
 
 template <class T>
-bool planner<T>::search_heur(bool results_file, heuristics used_heur)
+bool planner<T>::search_heur()
 {
 
 	T initial;
@@ -382,7 +383,7 @@ bool planner<T>::search_heur(bool results_file, heuristics used_heur)
 	std::cout << "\nInitial Built in " << elapsed_seconds.count() << " seconds\n";
 
 	start_timing = std::chrono::system_clock::now();
-	heuristics_manager h_manager(used_heur, initial);
+	heuristics_manager h_manager(config.get_used_heur(), initial);
 	end_timing = std::chrono::system_clock::now();
 	elapsed_seconds = end_timing - start_timing;
 	std::cout << "\nHeuristic Built in " << elapsed_seconds.count() << " seconds\n";
@@ -398,7 +399,7 @@ bool planner<T>::search_heur(bool results_file, heuristics used_heur)
 	if (initial.is_goal()) {
 		end_timing = std::chrono::system_clock::now();
 		elapsed_seconds = end_timing - start_timing;
-		print_results(elapsed_seconds, initial, results_file, false, BFS, used_heur);
+        print_results(elapsed_seconds, initial, false);
 		return true;
 	}
 
@@ -421,13 +422,13 @@ bool planner<T>::search_heur(bool results_file, heuristics used_heur)
 				if (tmp_state.is_goal()) {
 					end_timing = std::chrono::system_clock::now();
 					elapsed_seconds = end_timing - start_timing;
-					print_results(elapsed_seconds, tmp_state, results_file, false, BFS, used_heur);
+                    print_results(elapsed_seconds, tmp_state, false);
 					return true;
 				}
 				if (!check_visited || visited_states.insert(tmp_state).second) {
 					h_manager.set_heuristic_value(tmp_state);
 
-					if ((tmp_state.get_heuristic_value() >= 0) || (used_heur == C_PG)) {
+					if ((tmp_state.get_heuristic_value() >= 0) || (config.get_used_heur() == C_PG)) {
 						//std::cerr << "\nDEBUG: Generated a state with heur = " << tmp_state.get_heuristic_value();
 						m_heur_search_space.push(tmp_state);
 					}
@@ -440,9 +441,8 @@ bool planner<T>::search_heur(bool results_file, heuristics used_heur)
 }
 
 template <class T>
-void planner<T>::execute_given_actions(const std::vector<std::string>& act_name)
-{
-	check_actions_names(act_name);
+void planner<T>::execute_given_actions() {
+	check_actions_names();
 	// DEBUG
 	std::set<T> visited_states;
 
@@ -459,7 +459,7 @@ void planner<T>::execute_given_actions(const std::vector<std::string>& act_name)
 		std::cout << "\n\n";
 	}
 
-	std::string bis_postfix = "";
+	std::string bis_postfix;
 	if (bisimulation) {
 		state.calc_min_bisimilar();
 		bis_postfix = "__b";
@@ -475,11 +475,9 @@ void planner<T>::execute_given_actions(const std::vector<std::string>& act_name)
 	std::vector<std::string>::const_iterator it_stset2;
 
 	action_set::const_iterator it_acset;
-	for (it_stset = act_name.begin(); it_stset != act_name.end(); it_stset++) {
+	for (it_stset = config.get_given_actions().begin(); it_stset != config.get_given_actions().end(); it_stset++) {
 		for (it_acset = domain::get_instance().get_actions().begin(); it_acset != domain::get_instance().get_actions().end(); it_acset++) {
-			if ((*it_acset).get_name().compare(*it_stset) == 0) {
-
-
+			if (it_acset->get_name() == *it_stset) {
 				if (state.is_executable(*it_acset)) {
 					state = state.compute_succ(*it_acset);
 					if (bisimulation) {
@@ -488,25 +486,9 @@ void planner<T>::execute_given_actions(const std::vector<std::string>& act_name)
 					if (domain::get_instance().is_debug()) {
 						state.print_graphviz(bis_postfix);
 					}
-
-					// DEBUG
-					//					if (!visited_states.insert(state).second) {
-					//						for (T tmp : visited_states) {
-					//							if (!(tmp < state) && !(state < tmp) && !domain::get_instance().is_debug()) {
-					//								state.min_with_print(tmp);
-					//							}
-					//
-					//							//std::cerr << "\nDEBUG: reached already visited state with action " << (*it_acset).get_name() << "\n";
-					//
-					//							// if ((*it_acset).get_name() == "shout_8") {
-					//							// 	state.print_graphviz(bis_postfix);
-					//							// }
-					//						}
-					//					}
-
 					if (state.is_goal()) {
 						std::cout << "\n\nWell Done, Goal found after the execution of ";
-						for (it_stset2 = act_name.begin(); it_stset2 != it_stset; it_stset2++) {
+						for (it_stset2 = config.get_given_actions().begin(); it_stset2 != it_stset; it_stset2++) {
 							std::cout << *it_stset2 << ", ";
 						}
 						std::cout << *it_stset << " :)\n\n\n";
@@ -525,30 +507,27 @@ void planner<T>::execute_given_actions(const std::vector<std::string>& act_name)
 		std::string name_folder_graphviz = "out/state/";
 		name_folder_graphviz += domain::get_instance().get_name();
 		switch ( domain::get_instance().get_stype() ) {
-		case KRIPKE:
-			name_folder_graphviz += "_kripke";
-			if (domain::get_instance().get_k_optimized()) {
-				name_folder_graphviz += "_opt";
-			}
-			break;
-		case POSSIBILITIES:
-			name_folder_graphviz += "_poss";
-			break;
-		default:
-			name_folder_graphviz += "_unknown";
-			break;
+            case KRIPKE:
+                name_folder_graphviz += "_kripke";
+                if (domain::get_instance().get_k_optimized()) {
+                    name_folder_graphviz += "_opt";
+                }
+                break;
+            case POSSIBILITIES:
+                name_folder_graphviz += "_poss";
+                break;
+            default:
+                name_folder_graphviz += "_unknown";
+                break;
 		}
 		system(("sh ../scripts/generate_pdf.sh " + name_folder_graphviz).c_str());
 	}
-
-	return;
 }
 
 template <class T>
 /**\todo just for confrontation with old*/
-void planner<T>::execute_given_actions_timed(const std::vector<std::string>& act_name)
-{
-	check_actions_names(act_name);
+void planner<T>::execute_given_actions_timed() {
+	check_actions_names();
 
 	T state;
 	state.build_initial();
@@ -558,10 +537,9 @@ void planner<T>::execute_given_actions_timed(const std::vector<std::string>& act
 
 	auto start_timing = std::chrono::system_clock::now();
 
-	for (it_stset = act_name.begin(); it_stset != act_name.end(); it_stset++) {
+	for (it_stset = config.get_given_actions().begin(); it_stset != config.get_given_actions().end(); it_stset++) {
 		for (it_acset = domain::get_instance().get_actions().begin(); it_acset != domain::get_instance().get_actions().end(); it_acset++) {
-			if ((*it_acset).get_name().compare(*it_stset) == 0) {
-				//std::cout << "\n\nTrying action " << (*it_acset).get_name() << "\n";
+			if (it_acset->get_name() == *it_stset) {
 				if (state.is_executable(*it_acset)) {
 					state = state.compute_succ(*it_acset);
 				}
@@ -572,15 +550,12 @@ void planner<T>::execute_given_actions_timed(const std::vector<std::string>& act
 	auto end_timing = std::chrono::system_clock::now();
 	std::chrono::duration<double> elapsed_seconds = end_timing - start_timing;
 
-	print_results(elapsed_seconds, state, true, true, BFS);
-
-	return;
+    print_results(elapsed_seconds, state, true);
 }
 
 template <class T>
 /**\todo just for confrontation with old*/
-void planner<T>::check_actions_names(const std::vector<std::string>& act_name)
-{
+void planner<T>::check_actions_names() {
 	string_set domain_act;
 	action_set::const_iterator it_acset;
 	std::vector<std::string>::const_iterator it_stset;
@@ -589,9 +564,7 @@ void planner<T>::check_actions_names(const std::vector<std::string>& act_name)
 		domain_act.insert(it_acset->get_name());
 	}
 
-	for (it_stset = act_name.begin(); it_stset != act_name.end(); it_stset++) {
-//		(*it_stset).erase(std::remove((*it_stset).begin(), (*it_stset).end(), ','), (*it_stset).end());
-
+	for (it_stset = config.get_given_actions().begin(); it_stset != config.get_given_actions().end(); it_stset++) {
 		if (domain_act.find(*it_stset) == domain_act.end()) {
 			std::cerr << "\nERROR in giving the action list: the action " << *it_stset << " does not exist.\n";
 			exit(1);
