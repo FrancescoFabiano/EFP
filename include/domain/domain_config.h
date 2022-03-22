@@ -9,6 +9,8 @@ class domain_config {
 private:
     boost::shared_ptr<reader> domain_reader;
 
+    /**\brief The given to the *this*. (The name of the file that contains the description of *this*)*/
+    std::string domain_name;
     bool debug;
     bool results_file;
     bool global_obsv;
@@ -42,6 +44,8 @@ public:
     domain_config(const boost::shared_ptr<reader> &reader);
 
     boost::shared_ptr<reader> get_domain_reader() const;
+
+    std::string get_domain_name() const;
 
     bool is_debug() const;
 
@@ -80,6 +84,8 @@ public:
     short get_max_depth() const;
 
     short get_step() const;
+
+    void set_domain_name(const std::string & to_set);
 
     void set_debug(bool to_set);
 

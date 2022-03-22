@@ -28,10 +28,6 @@
 class domain
 {
 private:
-
-    /**\brief The given to the *this*. (The name of the file that contains the description of *this*)*/
-    std::string m_name;
-
     /*All the useful info of the domain are store here:
      m_fluents -> all the fluents;
      m_actions -> all the actions 
@@ -114,11 +110,11 @@ public:
     /** \brief Returns the selected type of state.
      *
      * @return the boolean \ref m_stype.*/
-    const state_type get_stype() const;
+    state_type get_stype() const;
     /** \brief Returns whether the planner uses the optimized version of the transition function for Kripke states.
      *
      * @return the boolean \ref m_kopt.*/
-    const bool get_k_optimized() const;
+    bool get_k_optimized() const;
 
     /** \brief Getter of the field \ref m_grounder.
      *

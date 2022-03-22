@@ -390,16 +390,17 @@ void launch_search(domain_config & config) {
     switch (config.get_state_type()) {
         case state_type::KRIPKE: {
             planner< state<kstate> > m_planner;
+            m_planner.set_domain_config(config);
 
             if (config.is_execute_given_actions()) {
                 if (config.is_results_file()) {
-                    m_planner.execute_given_actions_timed(config.get_given_actions());
+                    m_planner.execute_given_actions_timed();
                 } else {
-                    m_planner.execute_given_actions(config.get_given_actions());
+                    m_planner.execute_given_actions();
                 }
                 std::cout << "\n\n\n*****THE END*****\n";
             } else {
-                if (m_planner.search(config.is_results_file(), config.get_used_heur(), config.get_used_search(), config.get_max_depth(), config.get_step())) {
+                if (m_planner.search()) {
                     std::cout << "\n\n\n*****THE END*****\n";
                 } else {
                     std::cout << "\n\n\n*****THE SAD END*****\n";
@@ -409,16 +410,17 @@ void launch_search(domain_config & config) {
         }
         case state_type::POSSIBILITIES: {
             planner< state<pstate> > m_planner;
+            m_planner.set_domain_config(config);
 
             if (config.is_execute_given_actions()) {
                 if (config.is_results_file()) {
-                    m_planner.execute_given_actions_timed(config.get_given_actions());
+                    m_planner.execute_given_actions_timed();
                 } else {
-                    m_planner.execute_given_actions(config.get_given_actions());
+                    m_planner.execute_given_actions();
                 }
                 std::cout << "\n\n\n*****THE END*****\n";
             } else {
-                if (m_planner.search(config.is_results_file(), config.get_used_heur(), config.get_used_search(), config.get_max_depth(), config.get_step())) {
+                if (m_planner.search()) {
                     std::cout << "\n\n\n*****THE END*****\n";
                 } else {
                     std::cout << "\n\n\n*****THE SAD END*****\n";
@@ -471,6 +473,7 @@ void generate_domain(domain_config & config, char** argv)
 
     domain_name = domain_name.substr(domain_name.find_last_of("\\/") + 1);
     domain_name = domain_name.substr(0, domain_name.find_last_of('.'));
+    config.set_domain_name(domain_name);
 
     if (config.get_update_models() == up_model_type::CUSTOM) {
         domain_reader->read(config.get_models_filename());

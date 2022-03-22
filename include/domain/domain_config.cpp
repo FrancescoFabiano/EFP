@@ -37,6 +37,10 @@ boost::shared_ptr<reader> domain_config::get_domain_reader() const {
     return domain_reader;
 }
 
+std::string domain_config::get_domain_name() const {
+    return domain_name;
+}
+
 bool domain_config::is_debug() const {
     return debug;
 }
@@ -111,6 +115,12 @@ short domain_config::get_max_depth() const {
 
 short domain_config::get_step() const {
     return step;
+}
+
+void domain_config::set_domain_name(const std::string & to_set) {
+    if (domain_name.empty()) {
+        domain_name = to_set;
+    }
 }
 
 void domain_config::set_domain_reader(const boost::shared_ptr<reader> & to_set) {

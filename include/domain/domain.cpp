@@ -9,9 +9,7 @@
 #include "domain.h"
 #include <boost/dynamic_bitset.hpp>
 
-domain::domain()
-{
-}
+domain::domain() = default;
 
 domain& domain::get_instance()
 {
@@ -36,12 +34,12 @@ void domain::set_domain(const domain_config & to_set_config) // (std::string nam
 //	m_bisimulation = bisimulation;
 }
 
-const state_type domain::get_stype() const
+state_type domain::get_stype() const
 {
 	return config.get_state_type();
 }
 
-const bool domain::get_k_optimized() const
+bool domain::get_k_optimized() const
 {
 	return config.is_kopt();
 }
@@ -94,7 +92,7 @@ bool domain::check_visited()
 
 std::string domain::get_name()
 {
-	return m_name;
+	return config.get_domain_name();
 }
 
 action_check domain::get_act_check()

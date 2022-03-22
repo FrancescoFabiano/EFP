@@ -1496,10 +1496,10 @@ pstate pstate::execute_sensing(const action & act) const
     pworld_ptr new_pointed = execute_sensing_announcement_helper(effects, ret, get_pointed(), calculated, partially_obs_agents, oblivious_obs_agents, entails(effects));
     ret.set_pointed(new_pointed); // Updating the pointed world
 
-    if (!check_properties(fully_obs_agents, partially_obs_agents, effects, ret)) {
-        std::cerr << "\nDEBUG: Some properties are not respected\n\n";
-        exit(1);
-    }
+//    if (!check_properties(fully_obs_agents, partially_obs_agents, effects, ret)) {
+//        std::cerr << "\nDEBUG: Some properties are not respected\n\n";
+//        exit(1);
+//    }
 
     return ret;
 }

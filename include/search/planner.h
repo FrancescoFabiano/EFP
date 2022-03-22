@@ -39,6 +39,8 @@ template <class T>
 class planner
 {
 private:
+    domain_config config;
+
     /**The queue that contains all the states<T> yet to be visited.*/
     std::queue< T > m_search_space;
     std::priority_queue<T, std::vector<T>, compare_heuristic<T> > m_heur_search_space;
@@ -51,14 +53,14 @@ private:
      * @param[in] results_file: if true print the plan time in a file to easy the confrontation with the old version.
      * @return true if a plan is found.
      * @return false otherwise.*/
-    bool search_BFS(bool results_file);
+    bool search_BFS();
 
     //ricerca con DFS
-    bool search_DFS(bool results_file);
+    bool search_DFS();
 
     //ricerca con dfs iterativa che scandisce a livelli la ricerca in profondita, maxDepth è il massimo cammino in profonidtà e step di quanto ad ogni giro incrementiamo
     //i nostri step in profondità
-    bool search_IterativeDFS(bool results_file, short maxDepth, short step);
+    bool search_IterativeDFS();
 
     /**Function that searches on m_search_space using Best First Search.
      * 
@@ -66,10 +68,11 @@ private:
      * @param[in] used_heur: used to determine if any heuristic has to be used and which one.
      * @return true if a plan is found.
      * @return false otherwise.*/
-    bool search_heur(bool results_file, heuristics used_heur);
+    bool search_heur();
     /* \brief The \ref state_type.*/
     //state_type m_state_type;
 public:
+    void set_domain_config(const domain_config & to_set);
 
     /**Function that searches on m_search_space.
      * 
@@ -80,34 +83,34 @@ public:
      * @param[in] IDFS_d: used as initial "max depth" parameter by I_DFS.
      * @param[in] IDFS_s: used "step" parameter by I_DFS.
      * @return true if a plan is found.*/
-    bool search(bool results_file, heuristics used_heur, search_type used_search, short IDFS_d, short IDFS_s);
+    bool search();
 
     /**Function print out the solution time.
      * 
      * @param[in] elapsed_seconds: the time of the search.
      * @param[in] goal: the goal state.
      * @param[in] results_file: if true print the plan time in a file to easy the confrontation with the old version.
-     * @param[in] givenplan: if true changes the name of the output folder for the comparison time.
+     * @param[in] given_plan: if true changes the name of the output folder for the comparison time.
      * @param[in] used_search: The type of serach used.
      * @param[in] used_heur: which heuristic has been used.*/
-    void print_results(std::chrono::duration<double> elapsed_seconds, T goal, bool results_file, bool givenplan, search_type used_serach, heuristics used_heur = NO_H);
+    void print_results(std::chrono::duration<double> elapsed_seconds, T goal, bool given_plan);
 
 
     /**Function that searches on m_search_space using the given actions.
      *@param[in] act_name: the names of the \ref action to execute (ordered).*/
-    void execute_given_actions(const std::vector<std::string>& act_name);
+    void execute_given_actions();
 
     /**Function that searches on m_search_space using the given actions and print out the execution time.
      * 
      * Every useless I\O step is removed for time accuracy
      * 
      *@param[in] act_name: the names of the \ref action to execute (ordered).*/
-    void execute_given_actions_timed(const std::vector<std::string>& act_name);
+    void execute_given_actions_timed();
 
     /**Function that checks whether the given actions exist. 
      * 
      * It also removes extra commas between actions
      * 
      *@param[in] act_name: the names of the \ref action to execute (ordered).*/
-    void check_actions_names(const std::vector<std::string>& act_name);
+    void check_actions_names();
 };
