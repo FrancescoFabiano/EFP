@@ -26,7 +26,7 @@ private:
     /** \brief The restriction to apply to the initial state
      * 
      * @see domain_restriction.*/
-    domain_restriction m_ini_restriction;
+    initial_state_mode mode;
 
     /**
      * \brief The \ref fluent_formula representation of \ref m_bf_intial_conditions if finitary-S5 is required.
@@ -54,15 +54,10 @@ public:
      * Initialize all the parameters with their default constructors.*/
     initially();
 
-    /** \brief  Constructor with a given restriction.
-     *
-     * @param[in] ini_restriction: the restriction that *this* should entail.*/
-    initially(domain_restriction ini_restriction);
-
     /** \brief  Getter for the field \ref m_ini_restriction.
      *
      * @return: the value of \ref m_ini_restriction.*/
-    domain_restriction get_ini_restriction() const;
+    initial_state_mode get_initial_state_mode() const;
 
 
     /** \brief  Function that adds a condition for the initial pointed \ref state.
@@ -126,6 +121,5 @@ public:
      * 
      * @return the \ref fluent_formula that all the initial worlds must entail if S5(\ref m_ff_forS5).*/
     const fluent_formula & get_ff_forS5() const;
-
 };
 

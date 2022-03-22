@@ -5,16 +5,16 @@ void domain_config::set_default_config() {
     results_file = false;
     global_obsv = true;
     check_visited = false;
-    bisimulation = BIS_NONE;
-    used_heur = NO_H;
-    used_search = BFS;
-    s_type = POSSIBILITIES; //default
-    ini_restriction = S5; //default
-    goal_restriction = NONE; //default
-    act_check = EXE_POINTED__COND_WORLD; //default
+    bisimulation = bis_type::BIS_NONE;
+    used_heur = heuristics::NO_H;
+    used_search = search_type::BFS;
+    s_type = state_type::POSSIBILITIES;
+    domain_logic = logic::KD45;
+    mode = initial_state_mode::FINITARY_S5_THEORY;
+    act_check = action_check::EXE_POINTED__COND_WORLD;
 
-    input_lang = MAR; // EPDDL;
-    update_models = STANDARD;
+    input_lang = spec_lang_type::MAR; // EPDDL;
+    update_models = up_model_type::STANDARD;
     models_filename = "";
 
     execute_given_actions = false;
@@ -73,12 +73,12 @@ state_type domain_config::get_state_type() const {
     return s_type;
 }
 
-domain_restriction domain_config::get_ini_restriction() const {
-    return ini_restriction;
+logic domain_config::get_domain_logic() const {
+    return domain_logic;
 }
 
-domain_restriction domain_config::get_goal_restriction() const {
-    return goal_restriction;
+initial_state_mode domain_config::get_initial_state_mode() const {
+    return mode;
 }
 
 action_check domain_config::get_act_check() const {
@@ -159,12 +159,12 @@ void domain_config::set_state_type(state_type to_set) {
     domain_config::s_type = to_set;
 }
 
-void domain_config::set_ini_restriction(domain_restriction to_set) {
-    domain_config::ini_restriction = to_set;
+void domain_config::set_domain_logic(logic to_set) {
+    domain_config::domain_logic = to_set;
 }
 
-void domain_config::set_goal_restriction(domain_restriction to_set) {
-    domain_config::goal_restriction = to_set;
+void domain_config::set_initial_state_mode(initial_state_mode to_set) {
+    mode = to_set;
 }
 
 void domain_config::set_act_check(action_check to_set) {

@@ -25,17 +25,7 @@ void domain::set_config(const domain_config & to_set_config) // (std::string nam
 {
     domain::config = to_set_config;
     domain::domain_grounder = grounder();
-	m_intial_description = initially(to_set_config.get_ini_restriction());
-//	m_name = name;
-//	m_debug = debug;
-//	m_stype = stype;
-//	m_kopt = k_opt;
-//	config.get_domain_reader() = reader;
-//	m_goal_restriction = goal_res;
-//	m_is_global_obsv = is_global_obsv;
-//	m_act_check = act_check;
-//	m_check_visited = check_visited;
-//	m_bisimulation = bisimulation;
+	m_intial_description = initially();
 }
 
 const grounder & domain::get_grounder()
@@ -95,8 +85,7 @@ void domain::build()
 	//exit(1);
 }
 
-void domain::build_agents()
-{
+void domain::build_agents() {
 	/*
 	 * This function set the grounder agent map with the correct values.
 	 */
@@ -122,8 +111,7 @@ void domain::build_agents()
 	domain::domain_grounder.set_agent_map(domain_agent_map);
 }
 
-void domain::build_fluents()
-{
+void domain::build_fluents() {
 	/*
 	 * This function set the grounder fluent map with the correct values.
 	 */
@@ -156,9 +144,7 @@ void domain::build_fluents()
 	domain::domain_grounder.set_fluent_map(domain_fluent_map);
 }
 
-void domain::build_actions()
-{
-
+void domain::build_actions() {
 	/*
 	 * This function set the grounder action map with the correct values.
 	 */
@@ -199,18 +185,14 @@ void domain::build_actions()
 
 }
 
-void domain::build_propositions()
-{
+void domain::build_propositions() {
 	//Adding propositions to actions list
 	std::cout << "\nAdding propositions to actions..." << std::endl;
 	proposition_list::iterator it_prop;
 	action_id action_to_modify;
 	for (it_prop = config.get_domain_reader()->m_propositions.begin();
 		it_prop != config.get_domain_reader()->m_propositions.end(); it_prop++) {
-
-
 		action_to_modify = domain::domain_grounder.ground_action(it_prop->get_action_name());
-
 		//To change remove and add the updated --> @TODO: find better like queue
 
 		for (std::set<action>::iterator actionsList = m_actions.begin();
@@ -218,7 +200,6 @@ void domain::build_propositions()
 			action_id actionTemp = action_to_modify;
 			actionTemp.set(actionTemp.size() - 1, 0);
 			if (m_actions.size() > actionTemp.to_ulong() && actionsList->get_id() == action_to_modify) {
-
 				action_set::iterator it_action_set = actionsList;
 				action tmp = *it_action_set;
 				tmp.add_proposition(*it_prop);
@@ -248,155 +229,75 @@ void domain::build_propositions()
 	}
 }
 
-void domain::build_initially()
-{
+void domain::build_initially() {
 	std::cout << "\nAdding to pointed world and initial conditions..." << std::endl;
 	formula_list::iterator it_fl;
 
 	for (it_fl = config.get_domain_reader()->m_bf_initially.begin(); it_fl != config.get_domain_reader()->m_bf_initially.end(); it_fl++) {
-
 		it_fl->ground();
 
-		switch ( it_fl->get_formula_type() ) //initially phi
-		{
+		switch ( it_fl->get_formula_type() ) { //initially phi
 			//S5 -> pointed world
-		case FLUENT_FORMULA:
-		{
-			m_intial_description.add_pointed_condition(it_fl->get_fluent_formula());
+            case FLUENT_FORMULA: {
+                m_intial_description.add_pointed_condition(it_fl->get_fluent_formula());
 
-			if (config.is_debug()) {
-				std::cout << "	Pointed world: ";
-				printer::get_instance().print_list(it_fl->get_fluent_formula());
-				std::cout << std::endl;
-			}
-
-			break;
-		}
-			//S5 -> Edge
-		case C_FORMULA:
-			//No more S5
-		case D_FORMULA:
-			//Possible S5 -> initally [C(phi2), C(phi2)]
-		case PROPOSITIONAL_FORMULA:
-			//No more S5
-		case BELIEF_FORMULA:
-			//No more S5
-		case E_FORMULA:
-		{
-			m_intial_description.add_initial_condition(*it_fl);
-			if (config.is_debug()) {
-				std::cout << "Added to initial conditions: ";
-				it_fl->print();
-				std::cout << std::endl;
-			}
-			break;
-		}
-		case BF_EMPTY:
-			break;
-		default:
-			std::cerr << "Error in the 'initially' conditions." << std::endl;
-			exit(1);
-			break;
+                if (config.is_debug()) {
+                    std::cout << "	Pointed world: ";
+                    printer::get_instance().print_list(it_fl->get_fluent_formula());
+                    std::cout << std::endl;
+                }
+                break;
+            }
+            //S5 -> Edge
+            case C_FORMULA:
+                //No more S5
+            case D_FORMULA:
+                //Possible S5 -> initally [C(phi2), C(phi2)]
+            case PROPOSITIONAL_FORMULA:
+                //No more S5
+            case BELIEF_FORMULA:
+                //No more S5
+            case E_FORMULA: {
+                m_intial_description.add_initial_condition(*it_fl);
+                if (config.is_debug()) {
+                    std::cout << "Added to initial conditions: ";
+                    it_fl->print();
+                    std::cout << std::endl;
+                }
+                break;
+            }
+            case BF_EMPTY:
+                break;
+            default:
+                std::cerr << "Error in the 'initially' conditions." << std::endl;
+                exit(1);
 		}
 	}
 
-
-	//Given the initial restriction the initial state might needs different function
-	switch ( m_intial_description.get_ini_restriction() ) {
-	case S5:
-	{
-		m_intial_description.set_ff_forS5();
-		break;
+	// Given the initial state mode, the initial state might need different function
+	switch (config.get_initial_state_mode()) {
+        case initial_state_mode::FINITARY_S5_THEORY: {
+            m_intial_description.set_ff_forS5();
+            break;
+        }
+        case initial_state_mode::CUSTOM_STATE:
+        default: {
+            break;
+        }
 	}
-	case KD45:
-	{
-		break;
-	}
-	case NONE:
-	{
-		break;
-	}
-	default:
-	{
-		break;
-	}
-	}
-
 }
 
-void domain::build_goal()
-{
+void domain::build_goal() {
 	std::cout << "\nAdding to Goal..." << std::endl;
-
-
 	formula_list::iterator it_fl;
 
 	for (it_fl = (config.get_domain_reader()->m_bf_goal).begin(); it_fl != (config.get_domain_reader()->m_bf_goal).end(); it_fl++) {
-		if (check_goal_restriction(*it_fl)) {
-			it_fl->ground();
-			m_goal_description.push_back(*it_fl);
-			if (config.is_debug()) {
-				std::cout << "	";
-				it_fl->print();
-				std::cout << std::endl;
-
-			}
-		} else {
-			std::cerr << "The Goal does not respect the conditions\n";
-			exit(1);
-		}
+        it_fl->ground();
+        m_goal_description.push_back(*it_fl);
+        if (config.is_debug()) {
+            std::cout << "	";
+            it_fl->print();
+            std::cout << std::endl;
+        }
 	}
 }
-
-bool domain::check_goal_restriction(const belief_formula& bf)//Apply the restriction
-{
-	/** \todo: Maybe a separated class?*/
-	bool ret = false;
-	switch (config.get_goal_restriction()) {
-		//We only admit non negative goals
-	case NONEG:
-		switch ( bf.get_formula_type() ) {
-		case FLUENT_FORMULA:
-			ret = true;
-			break;
-		case BELIEF_FORMULA:
-			ret = true;
-			break;
-		case D_FORMULA:
-		case C_FORMULA:
-		case E_FORMULA:
-			ret = check_goal_restriction(bf.get_bf1());
-			break;
-		case PROPOSITIONAL_FORMULA:
-			if (bf.get_operator() == BF_NOT) {
-				ret = false;
-			} else {
-				ret = check_goal_restriction(bf.get_bf1()) && check_goal_restriction(bf.get_bf2());
-			}
-			break;
-		default:
-			break;
-		}
-		break;
-	case NONE:
-		ret = true;
-		break;
-	default: /* static */
-		ret = false;
-		break;
-	}
-
-	return ret;
-
-}
-
-
-
-/*std::string domain::get_name();
-formula_list domain::get_initial_description();
-formula_list domain::get_goal_description();
-
-void domain::set_name(std::string domain_name);
-//@TODO: setter properly and constructors
-void domain::set_initial_description();
-void domain::set_goal_description();*/

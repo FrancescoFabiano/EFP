@@ -70,14 +70,6 @@ private:
     /** \brief Function that builds \ref m_goal_description.
      * \todo move to the goal class.*/
     void build_goal();
-    /** \brief Function that checks if \ref belief_formula respects \ref m_goal_restriction.
-     *
-     * @param[in] to_check: the \ref belief_formula to check.
-     * 
-     * @return true: if \p to_check respects \ref m_goal_restriction.
-     * @return false: if \p to_check doesn't respect \ref m_goal_restriction.
-     * \todo move to the goal class.*/
-    bool check_goal_restriction(const belief_formula & to_check);
 
 public:
 

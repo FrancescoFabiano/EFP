@@ -9,27 +9,13 @@
 #include <iostream>
 
 #include "initially.h"
+#include "domain.h"
 #include "../utilities/printer.h"
 
-initially::initially()
-{
-	m_ini_restriction = RESTRICTION_FAIL;
-}
+initially::initially() {}
 
-initially::initially(domain_restriction ini_restriction)
-{
-	m_ini_restriction = ini_restriction;
-}
-
-domain_restriction initially::get_ini_restriction() const
-{
-	return m_ini_restriction;
-}
-
-bool initially::check_restriction(const belief_formula & bf) //Apply the restriction
-{
-	bool ret = false;
-	switch ( m_ini_restriction ) {
+bool initially::check_restriction(const belief_formula & bf) { //Apply the restriction
+	switch (domain::get_instance().get_config().get_initial_state_mode()) {
 		//We only admit C(belief)
 		/**\todo Check if all the agents have to be in the C.*/
 		/* The possible cases are:
@@ -37,123 +23,79 @@ bool initially::check_restriction(const belief_formula & bf) //Apply the restric
 		 * - C(B(i,*phi*)) -> all worlds must entail *phi*.
 		 * - C(B(i,*phi*) \ref BF_OR B(i,-*phi*)) -> only edges conditions.
 		 * - C(-B(i,*phi*) \ref BF_AND -B(i,-*phi*)) -> only edges conditions.*/
-	case S5:
-	{
-		switch ( bf.get_formula_type() ) {
-			//To admit initially [S5_ok AND S5_ok AND ...]  (Also taken care of in the add_initial_condition)
+        case initial_state_mode::FINITARY_S5_THEORY: {
+            switch (bf.get_formula_type()) {
+                //To admit initially [S5_ok AND S5_ok AND ...]  (Also taken care of in the add_initial_condition)
+                case PROPOSITIONAL_FORMULA: {
+                    if (bf.get_operator() != BF_AND) {
+                        return false;
+                    } else {
+                        return check_restriction(bf.get_bf1()) && check_restriction(bf.get_bf2());
+                    }
+                }
+                case FLUENT_FORMULA: {
+                    return true;
+                }
+                case C_FORMULA: {
+                    //C(B(i, *phi*))
+                    const belief_formula& tmp = bf.get_bf1();
+                    switch ( tmp.get_formula_type() ) {
+                        case FLUENT_FORMULA: { //C(*phi*)
+                            return true;
+                        }
+                        case BELIEF_FORMULA: { //C(B(i,*phi*)
+                            return (tmp.get_bf1().get_formula_type() == FLUENT_FORMULA);
+                        }
+                        case PROPOSITIONAL_FORMULA: { //C(B(i,*phi*) \ref BF_OR B(i,-*phi*))
+                            //Check if C ( x1 **OR** x2 )
+                            if (tmp.get_operator() == BF_OR) {
+                                //Check if **x1** and **x2** are B(i,phi) and B(i,-phi)
+                                return helper::check_Bff_notBff(tmp.get_bf1(), tmp.get_bf2(), nullptr);
+                            }
+                            else if (tmp.get_operator() == BF_AND) { //C(-B(i,*phi*) \ref BF_AND -B(i,-*phi*))
+                                //Check if C ( x1 **AND** x2 )
+                                //Check if **x1** and **x2** are **NOT**(...)
+                                const belief_formula& tmp_nested1 = tmp.get_bf1();
+                                const belief_formula& tmp_nested2 = tmp.get_bf2();
+                                if (tmp_nested1.get_formula_type() == PROPOSITIONAL_FORMULA && tmp_nested2.get_formula_type() == PROPOSITIONAL_FORMULA) {
+                                    if (tmp_nested1.get_operator() == BF_NOT && tmp_nested2.get_operator() == BF_NOT) {
+                                        //Check tmp_nested1 and tmp_nested2 are B(i,phi) and B(i,-phi)
+                                        return helper::check_Bff_notBff(tmp_nested1.get_bf1(), tmp_nested2.get_bf1(), nullptr);
+                                    }
+                                }
+                            } else {
+                                return false;
+                            }
+                            break;
+                        }
+                        case BF_EMPTY: {
+                            return true;
+                        }
+                        default: {
+                            return false;
+                        }
+                    }
+                    /**\todo Check all the agents are present in C.
+                     * \todo Check that all the fluent are considered.*/
 
-		case PROPOSITIONAL_FORMULA:
-		{
-			if (bf.get_operator() != BF_AND) {
-				ret = false;
-			} else {
-				ret = check_restriction(bf.get_bf1()) && check_restriction(bf.get_bf2());
-			}
-			break;
-		}
-
-			//*phi*
-		case FLUENT_FORMULA:
-		{
-			ret = true;
-			break;
-		}
-
-			//C(..)
-		case C_FORMULA:
-		{
-			//C(B(i, *phi*))
-			belief_formula tmp = bf.get_bf1();
-			switch ( tmp.get_formula_type() ) {
-
-				//C(*phi*)
-			case FLUENT_FORMULA:
-			{
-				ret = true;
-				break;
-			}
-				//C(B(i,*phi*)
-			case BELIEF_FORMULA:
-			{
-				if (tmp.get_bf1().get_formula_type() == FLUENT_FORMULA) {
-					ret = true;
-				} else {
-					ret = false;
-				}
-				break;
-			}
-			case PROPOSITIONAL_FORMULA:
-			{
-				//C(B(i,*phi*) \ref BF_OR B(i,-*phi*))
-				//Check if C ( x1 **OR** x2 )
-				if (tmp.get_operator() == BF_OR) {
-					//Check if **x1** and **x2** are B(i,phi) and B(i,-phi)
-
-					ret = helper::check_Bff_notBff(tmp.get_bf1(), tmp.get_bf2(), nullptr);
-				} else if (tmp.get_operator() == BF_AND) { //C(-B(i,*phi*) \ref BF_AND -B(i,-*phi*))
-					//Check if C ( x1 **AND** x2 )
-					//Check if **x1** and **x2** are **NOT**(...)
-					belief_formula tmp_nested1 = tmp.get_bf1();
-					belief_formula tmp_nested2 = tmp.get_bf2();
-					if (tmp_nested1.get_formula_type() == PROPOSITIONAL_FORMULA && tmp_nested2.get_formula_type() == PROPOSITIONAL_FORMULA) {
-
-						if (tmp_nested1.get_operator() == BF_NOT && tmp_nested2.get_operator() == BF_NOT) {
-							//Check tmp_nested1 and tmp_nested2 are B(i,phi) and B(i,-phi)
-							ret = helper::check_Bff_notBff(tmp_nested1.get_bf1(), tmp_nested2.get_bf1(), nullptr);
-						}
-					}
-				} else {
-					ret = false;
-				}
-				break;
-			}
-			case BF_EMPTY:
-			{
-				ret = true;
-				break;
-			}
-			default:
-			{
-				ret = false;
-				break;
-			}
-			}
-			/**\todo Check all the agents are present in C.
-			 * \todo Check that all the fluent are considered.*/
-
-			break;
-		}
-		case BF_EMPTY:
-		{
-			ret = true;
-			break;
-		}
-		default:
-		{
-			ret = false;
-			break;
-		}
-		}
-		break;
-	}
-	case KD45:
-	{
-		ret = false;
-		break;
-	}
-	case NONE:
-	{
-		ret = true;
-		break;
-	}
-	default:
-	{
-		ret = false;
-		break;
-	}
+                    break;
+                }
+                case BF_EMPTY: {
+                    return true;
+                }
+                default: {
+                    return false;
+                }
+            }
+            break;
+	    }
+        case initial_state_mode::CUSTOM_STATE:
+        default: {
+            return false;
+        }
 	}
 
-	return ret;
+    return false;
 }
 //This type of parameter is fine because of we add the return value and not ff
 
@@ -195,9 +137,8 @@ const fluent_formula & initially::get_ff_forS5() const
 	return m_ff_forS5;
 }
 
-void initially::set_ff_forS5()
-{
-	if (m_ini_restriction == S5) {
+void initially::set_ff_forS5() {
+	if (domain::get_instance().get_config().get_initial_state_mode() == initial_state_mode::FINITARY_S5_THEORY) {
 		//The consistency with S5 is already checked
 		fluent_formula ret;
 		formula_list::const_iterator it_fl;

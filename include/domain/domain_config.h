@@ -19,8 +19,8 @@ private:
     heuristics used_heur;
     search_type used_search;
     state_type s_type;
-    domain_restriction ini_restriction;
-    domain_restriction goal_restriction;
+    logic domain_logic;
+    initial_state_mode mode;
     action_check act_check;
 
     spec_lang_type input_lang;
@@ -63,9 +63,9 @@ public:
 
     state_type get_state_type() const;
 
-    domain_restriction get_ini_restriction() const;
+    logic get_domain_logic() const;
 
-    domain_restriction get_goal_restriction() const;
+    initial_state_mode get_initial_state_mode() const;
 
     action_check get_act_check() const;
 
@@ -103,9 +103,9 @@ public:
 
     void set_state_type(state_type to_set);
 
-    void set_ini_restriction(domain_restriction to_set);
+    void set_domain_logic(logic to_set);
 
-    void set_goal_restriction(domain_restriction to_set);
+    void set_initial_state_mode(initial_state_mode to_set);
 
     void set_act_check(action_check to_set);
 

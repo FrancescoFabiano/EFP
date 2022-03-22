@@ -151,8 +151,7 @@ void print_usage(char* prog_name)
     exit(1);
 }
 
-void build_domain_config(domain_config & config, int argc, char **argv)
-{
+void build_domain_config(domain_config & config, int argc, char **argv) {
     int i = 2;
     while (i < argc) {
         //No case sensitivity
@@ -161,40 +160,64 @@ void build_domain_config(domain_config & config, int argc, char **argv)
             config.set_debug(true);
         } else if (strcmp(argv[i], "-results_file") == 0) {
             config.set_results_file(true);
-        }//No case sensitivity
-        else if (strcmp(argv[i], "-ir") == 0) {
+        } else if (strcmp(argv[i], "-l") == 0) {
             i++;
             if (i >= argc) {
-                std::cerr << "-ir needs specification (S5, K45, NONE)." << std::endl;
+                std::cerr << "-l needs specification (KD45, S5, K)." << std::endl;
                 exit(1);
-            } else if (strcmp(argv[i], "S5") == 0) {
-                std::cout << "Initial state must be an S5. (Default)" << std::endl;
-                config.set_ini_restriction(domain_restriction::S5);
             } else if (strcmp(argv[i], "KD45") == 0) {
-                std::cout << "Initial state must be a K45." << std::endl;
-                config.set_ini_restriction(domain_restriction::KD45);
-            } else if (strcmp(argv[i], "NONE") == 0) {
-                std::cout << "Initial state does not have restrictions." << std::endl;
-                config.set_ini_restriction(domain_restriction::NONE);
-            } else {
-                std::cerr << "Wrong specification for '-ir'; use 'S5' or 'K45' or 'NONE'." << std::endl;
-                exit(1);
+                std::cout << "Using KD45 logic. (Default)" << std::endl;
+                config.set_domain_logic(logic::KD45);
+            } else if (strcmp(argv[i], "S5") == 0) {
+                std::cout << "Using S5 logic." << std::endl;
+                config.set_domain_logic(logic::S5);
+            } else if (strcmp(argv[i], "K") == 0) {
+                std::cout << "Using K logic." << std::endl;
+                config.set_domain_logic(logic::K);
             }
-        } else if (strcmp(argv[i], "-gr") == 0) {
+        } else if (strcmp(argv[i], "-id") == 0) {
             i++;
             if (i >= argc) {
-                std::cerr << "-gr needs specification (NONE, NONEG)." << std::endl;
+                std::cerr << "-id needs specification (s5-theory, custom)." << std::endl;
                 exit(1);
-            } else if (strcmp(argv[i], "NONE") == 0) {
-                std::cout << "The Goal does not have restrictions. (Default)" << std::endl;
-                config.set_goal_restriction(domain_restriction::NONE);
-            } else if (strcmp(argv[i], "NONEG") == 0) {
-                std::cout << "The Goal does not accept negative belief formula (-B(i,phi))." << std::endl;
-                config.set_goal_restriction(domain_restriction::NONEG);
-            } else {
-                std::cerr << "Wrong specification for '-gr'; use 'S5' or 'K45' or 'NONE'." << std::endl;
-                exit(1);
+            } else if (strcmp(argv[i], "s5-theory") == 0) {
+                std::cout << "Initial state description must be a Finitary S5-Theory. (Default)" << std::endl;
+                config.set_initial_state_mode(initial_state_mode::FINITARY_S5_THEORY);
+            } else if (strcmp(argv[i], "custom") == 0) {
+                std::cout << "Initial state must be given by user." << std::endl;
+                config.set_initial_state_mode(initial_state_mode::CUSTOM_STATE);
             }
+            //No case sensitivity
+//        else if (strcmp(argv[i], "-ir") == 0) {
+//            i++;
+//            if (i >= argc) {
+//                std::cerr << "-ir needs specification (S5, K45, NONE)." << std::endl;
+//                exit(1);
+//            } else if (strcmp(argv[i], "S5") == 0) {
+//                std::cout << "Initial state must be an S5. (Default)" << std::endl;
+//                config.set_ini_restriction(domain_restriction::S5);
+//            } else if (strcmp(argv[i], "KD45") == 0) {
+//                std::cout << "Initial state must be a K45." << std::endl;
+//                config.set_ini_restriction(domain_restriction::KD45);
+//            } else if (strcmp(argv[i], "NONE") == 0) {
+//                std::cout << "Initial state does not have restrictions." << std::endl;
+//                config.set_ini_restriction(domain_restriction::NONE);
+//            } else {
+//                std::cerr << "Wrong specification for '-ir'; use 'S5' or 'K45' or 'NONE'." << std::endl;
+//                exit(1);
+//            }
+//        } else if (strcmp(argv[i], "-gr") == 0) {
+//            i++;
+//            if (i >= argc) {
+//                std::cerr << "-gr needs specification (NONE, NONEG)." << std::endl;
+//                exit(1);
+//            } else if (strcmp(argv[i], "NONE") == 0) {
+//                std::cout << "The Goal does not have restrictions. (Default)" << std::endl;
+//                config.set_goal_restriction(domain_restriction::NONE);
+//            } else {
+//                std::cerr << "Wrong specification for '-gr'; use 'S5' or 'K45' or 'NONE'." << std::endl;
+//                exit(1);
+//            }
         } else if (strcmp(argv[i], "-check_visited") == 0) {
             std::cout << "The planner will check for visited states" << std::endl;
             config.set_check_visited(true);

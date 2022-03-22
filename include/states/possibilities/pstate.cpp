@@ -502,35 +502,30 @@ void pstate::generate_initial_pworlds(fluent_set& permutation, int index, const 
 
 }
 
-void pstate::add_initial_pworld(const pworld & possible_add)
-{
+void pstate::add_initial_pworld(const pworld & possible_add) {
 	initially ini_conditions = domain::get_instance().get_initial_description();
 
-	switch ( ini_conditions.get_ini_restriction() ) {
-	case S5:
-	{
-		/* Since the common knowledge is on all the agent it means that every possible \ref pworld
-		 * in the initial state must entail *phi* where C(*phi*) is an initial condition.*/
+	switch (domain::get_instance().get_config().get_initial_state_mode()) {
+        case initial_state_mode::FINITARY_S5_THEORY: {
+            /* Since the common knowledge is on all the agent it means that every possible \ref pworld
+             * in the initial state must entail *phi* where C(*phi*) is an initial condition.*/
 
-		//Already setted in \ref domain::build_initially(bool).
-		if (possible_add.entails(ini_conditions.get_ff_forS5())) {
-			add_world(possible_add);
-			if (possible_add.entails(ini_conditions.get_pointed_world_conditions())) {
-				m_pointed = pworld_ptr(possible_add);
-			}
-		} else {
-			//Already generated so we save it on pstore
-			pstore::get_instance().add_world(possible_add);
-		}
-		break;
-	}
-	case KD45:
-	case NONE:
-	default:
-	{
-		std::cerr << "\nNot implemented yet\n";
-		exit(1);
-	}
+            //Already setted in \ref domain::build_initially(bool).
+            if (possible_add.entails(ini_conditions.get_ff_forS5())) {
+                add_world(possible_add);
+                if (possible_add.entails(ini_conditions.get_pointed_world_conditions())) {
+                    m_pointed = pworld_ptr(possible_add);
+                }
+            } else {
+                //Already generated so we save it on pstore
+                pstore::get_instance().add_world(possible_add);
+            }
+            break;
+        }
+        case initial_state_mode::CUSTOM_STATE:
+        default: {
+            break;
+        }
 	}
 }
 
@@ -590,62 +585,54 @@ void pstate::remove_initial_pedge(const fluent_formula &known_ff, const agent & 
 	}
 }
 
-void pstate::remove_initial_pedge_bf(const belief_formula & to_check)
-{
-	switch ( domain::get_instance().get_initial_description().get_ini_restriction() ) {
-	case S5:
-	{
-		/* Just check whenever is B(--) \/ B(--) and remove that edge*/
-		if (to_check.get_formula_type() == C_FORMULA) {
-			const belief_formula& tmp = to_check.get_bf1();
+void pstate::remove_initial_pedge_bf(const belief_formula & to_check) {
+	switch (domain::get_instance().get_config().get_initial_state_mode()) {
+        case initial_state_mode::FINITARY_S5_THEORY: {
+            /* Just check whenever is B(--) \/ B(--) and remove that edge*/
+            if (to_check.get_formula_type() == C_FORMULA) {
+                const belief_formula& tmp = to_check.get_bf1();
 
-			switch ( tmp.get_formula_type() ) {
-				//Only one for edges -- expresses that someone is ignorant.
-			case PROPOSITIONAL_FORMULA:
-			{
-				//We remove all the check on the formula since they have already been controlled when ini_conditions has been created
-				if (tmp.get_operator() == BF_OR) {
-					//fluent_formula known_ff;
-					auto known_ff_ptr = std::make_shared<fluent_formula>();
-					helper::check_Bff_notBff(tmp.get_bf1(), tmp.get_bf2(), known_ff_ptr);
-					if (known_ff_ptr != nullptr) {
-						remove_initial_pedge(*known_ff_ptr, tmp.get_bf2().get_agent());
-					}
-					return;
-				} else if (tmp.get_operator() == BF_AND) {
-					//This case doesn't add knowledge.
-					return;
-				} else {
-					std::cerr << "\nError in the type of initial formulae (FIFTH).\n";
-					exit(1);
-				}
-				return;
-			}
-			case FLUENT_FORMULA:
-			case BELIEF_FORMULA:
-			case BF_EMPTY:
-			{
-				return;
-			}
-			default:
-			{
-				std::cerr << "\nError in the type of initial formulae (SIXTH).\n";
-				exit(1);
-			}
-			}
-		} else {
-			std::cerr << "\nError in the type of initial formulae (SEVENTH).\n";
-			exit(1);
-		}
-		return;
-	}
-	case KD45:
-	case NONE:
-	default:
-	{
-		std::cerr << "\nNot implemented yet\n";
-		exit(1);
-	}
+                switch ( tmp.get_formula_type() ) {
+                    //Only one for edges -- expresses that someone is ignorant.
+                    case PROPOSITIONAL_FORMULA: {
+                        //We remove all the check on the formula since they have already been controlled when ini_conditions has been created
+                        if (tmp.get_operator() == BF_OR) {
+                            //fluent_formula known_ff;
+                            auto known_ff_ptr = std::make_shared<fluent_formula>();
+                            helper::check_Bff_notBff(tmp.get_bf1(), tmp.get_bf2(), known_ff_ptr);
+                            if (known_ff_ptr != nullptr) {
+                                remove_initial_pedge(*known_ff_ptr, tmp.get_bf2().get_agent());
+                            }
+                            return;
+                        } else if (tmp.get_operator() == BF_AND) {
+                            //This case doesn't add knowledge.
+                            return;
+                        } else {
+                            std::cerr << "\nError in the type of initial formulae (FIFTH).\n";
+                            exit(1);
+                        }
+                        return;
+                    }
+                    case FLUENT_FORMULA:
+                    case BELIEF_FORMULA:
+                    case BF_EMPTY: {
+                        return;
+                    }
+                    default: {
+                        std::cerr << "\nError in the type of initial formulae (SIXTH).\n";
+                        exit(1);
+                    }
+                }
+            } else {
+                std::cerr << "\nError in the type of initial formulae (SEVENTH).\n";
+                exit(1);
+            }
+            return;
+        }
+        case initial_state_mode::CUSTOM_STATE:
+        default: {
+            break;
+        }
 	}
 }
 

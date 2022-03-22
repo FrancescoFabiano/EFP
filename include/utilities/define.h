@@ -33,6 +33,12 @@
  * Language and Update Models
  ****************************************************************/
 
+enum logic {
+    K,
+    KD45,
+    S5
+};
+
 enum spec_lang_type
 {
     EPDDL, /**< The E-PDDL language is used to speficy the input file*/
@@ -164,31 +170,10 @@ enum bis_type
  * with the type of inference that you could do on them.
  *
  * It has been introduced because it helps with the computation of the initial state (Finitary S5).*/
-enum domain_restriction
-{
-    S5, /**< \brief Restricts only to S5 models.
-         *
-         * This is the default Initial description (\ref initially).
-         * When this flag is on only C(phi) are accepted and they must cover all the fluents.
-         * The possible cases are:
-         * - *phi* -> all worlds must entail *phi*.
-         * - C(B(i,*phi*)) -> all worlds must entail *phi*.
-         * - C(B(i,*phi*) \ref BF_OR B(i,-*phi*)) -> only edges conditions.
-         * - C(-B(i,*phi*) \ref BF_AND -B(i,-*phi*)) -> only edges conditions.
-         *
-         * With this type of model is associate the concept of *Knowledge* given
-         * that the model gurantee the relations to be equivalent.*/
-    KD45, /**< \brief Restricts only to KD45 models.
-         *
-         * With this type of model is associate the concept of *Belief*.*/
-    NONE, /**< \brief No restrictions applied.
-         */
-    NONEG, /**< \brief No negative belief_formula are accepted.
-            *
-            * This is used when the planning graph heuristic is involved
-            * because it cannot deal with negative \ref belief_formula
-            * in the goal (no mutex yet).*/
-    RESTRICTION_FAIL, /**< \brief The default case to guarantee consistency.*/
+
+enum initial_state_mode {
+    FINITARY_S5_THEORY,
+    CUSTOM_STATE
 };
 
 /** \brief The possible way of checking an action effects executability.*/
