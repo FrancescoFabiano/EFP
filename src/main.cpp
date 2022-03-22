@@ -498,7 +498,7 @@ int main(int argc, char** argv) {
         print_usage(argv[0]);
     }
 
-    domain_config config;
+    domain_config config(domain_reader);
 
     // manage and prepare arguments for the planner
     build_domain_config(config, argc, argv);

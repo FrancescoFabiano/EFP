@@ -19,15 +19,16 @@ domain& domain::get_instance()
 	return instance;
 }
 
-void domain::set_domain(const domain_config & set_config) // (std::string name, bool debug, state_type stype, bool k_opt, boost::shared_ptr<reader> reader, domain_restriction ini_res, domain_restriction goal_res, bool is_global_obsv, action_check act_check, bool check_visited, bis_type bisimulation)
+void domain::set_domain(const domain_config & to_set_config) // (std::string name, bool debug, state_type stype, bool k_opt, boost::shared_ptr<reader> reader, domain_restriction ini_res, domain_restriction goal_res, bool is_global_obsv, action_check act_check, bool check_visited, bis_type bisimulation)
 {
-    domain::config = set_config;
+    domain::config = to_set_config;
+    domain::domain_grounder = grounder();
+	m_intial_description = initially(to_set_config.get_ini_restriction());
 //	m_name = name;
 //	m_debug = debug;
 //	m_stype = stype;
 //	m_kopt = k_opt;
-//	m_reader = reader;
-//	m_intial_description = initially(ini_res);
+//	config.get_domain_reader() = reader;
 //	m_goal_restriction = goal_res;
 //	m_is_global_obsv = is_global_obsv;
 //	m_act_check = act_check;
@@ -35,19 +36,19 @@ void domain::set_domain(const domain_config & set_config) // (std::string name, 
 //	m_bisimulation = bisimulation;
 }
 
-const state_type & domain::get_stype() const
+const state_type domain::get_stype() const
 {
 	return config.get_state_type();
 }
 
-const bool & domain::get_k_optimized() const
+const bool domain::get_k_optimized() const
 {
-	return m_kopt;
+	return config.is_kopt();
 }
 
 const grounder & domain::get_grounder()
 {
-	return m_grounder;
+	return domain::domain_grounder;
 }
 
 const fluent_set & domain::get_fluents()
@@ -78,17 +79,17 @@ const agent_set & domain::get_agents()
 
 bool domain::get_is_global_obsv()
 {
-	return m_is_global_obsv;
+	return config.is_global_obsv();
 }
 
-bool domain::get_debug()
+bool domain::is_debug()
 {
-	return m_debug;
+	return config.is_debug();
 }
 
 bool domain::check_visited()
 {
-	return m_check_visited;
+	return config.is_check_visited();
 }
 
 std::string domain::get_name()
@@ -98,7 +99,7 @@ std::string domain::get_name()
 
 action_check domain::get_act_check()
 {
-	return m_act_check;
+	return config.get_act_check();
 }
 
 const initially & domain::get_initial_description()
@@ -108,7 +109,7 @@ const initially & domain::get_initial_description()
 
 domain_restriction domain::get_goal_restriction()
 {
-	return m_goal_restriction;
+	return config.get_goal_restriction();
 }
 
 const formula_list & domain::get_goal_description()
@@ -118,7 +119,7 @@ const formula_list & domain::get_goal_description()
 
 bis_type domain::get_bisimulation()
 {
-	return m_bisimulation;
+	return config.get_bisimulation();
 }
 
 void domain::build()
@@ -149,19 +150,19 @@ void domain::build_agents()
 
 	//ottengo il numero degli agenti e inizio a generare un bitset dinamico con n bit
 	//posizione x se bit a 1 esiste un agente altrimenti 0.
-	int agents_length = helper::lenght_to_power_two(m_reader->m_agents.size());
+	int agents_length = helper::lenght_to_power_two(config.get_domain_reader()->m_agents.size());
 
-	for (it_agents = m_reader->m_agents.begin(); it_agents != m_reader->m_agents.end(); it_agents++) {
+	for (it_agents = config.get_domain_reader()->m_agents.begin(); it_agents != config.get_domain_reader()->m_agents.end(); it_agents++) {
 		boost::dynamic_bitset<> agent(agents_length, i);
 		domain_agent_map.insert(agent_map::value_type(*it_agents, agent));
 		m_agents.insert(agent);
-		if (m_debug) {
+		if (domain::is_debug()) {
 			std::cout << "Agent " << *it_agents << " is " << agent << std::endl;
 
 		}
 		i++;
 	}
-	m_grounder.set_agent_map(domain_agent_map);
+	domain::domain_grounder.set_agent_map(domain_agent_map);
 }
 
 void domain::build_fluents()
@@ -173,16 +174,16 @@ void domain::build_fluents()
 	std::cout << "\nBuilding fluent literals..." << std::endl;
 	string_set::const_iterator it_fluents;
 	int i = 0;
-	int bit_size = helper::lenght_to_power_two(m_reader->m_fluents.size());
+	int bit_size = helper::lenght_to_power_two(config.get_domain_reader()->m_fluents.size());
 	//todo prende numero fluenti*2 e generare i bit necessari
-	for (it_fluents = m_reader->m_fluents.begin();
-		it_fluents != m_reader->m_fluents.end(); it_fluents++) {
+	for (it_fluents = config.get_domain_reader()->m_fluents.begin();
+		it_fluents != config.get_domain_reader()->m_fluents.end(); it_fluents++) {
 		boost::dynamic_bitset<> fluentReal(bit_size + 1, i);
 		fluentReal.set(fluentReal.size() - 1, 0);
 		domain_fluent_map.insert(fluent_map::value_type(*it_fluents, fluentReal));
 		m_fluents.insert(fluentReal);
 
-		if (m_debug) {
+		if (domain::is_debug()) {
 			std::cout << "Literal " << *it_fluents << " is " << " " << fluentReal << std::endl;
 		}
 
@@ -191,11 +192,11 @@ void domain::build_fluents()
 		domain_fluent_map.insert(fluent_map::value_type(NEGATION_SYMBOL + *it_fluents, fluent_negate_real));
 		m_fluents.insert(fluent_negate_real);
 		i++;
-		if (m_debug) {
+		if (domain::is_debug()) {
 			std::cout << "Literal not " << *it_fluents << " is " << (i - 1) << " " << fluent_negate_real << std::endl;
 		}
 	}
-	m_grounder.set_fluent_map(domain_fluent_map);
+	domain::domain_grounder.set_fluent_map(domain_fluent_map);
 }
 
 void domain::build_actions()
@@ -210,26 +211,26 @@ void domain::build_actions()
 	std::cout << "\nBuilding action list..." << std::endl;
 	string_set::const_iterator it_actions_name;
 	int i = 0;
-	int numberOfActions = m_reader->m_actions.size();
+	int numberOfActions = config.get_domain_reader()->m_actions.size();
 	int bit_size = helper::lenght_to_power_two(numberOfActions);
-	for (it_actions_name = m_reader->m_actions.begin();
-		it_actions_name != m_reader->m_actions.end(); it_actions_name++) {
+	for (it_actions_name = config.get_domain_reader()->m_actions.begin();
+		it_actions_name != config.get_domain_reader()->m_actions.end(); it_actions_name++) {
 		boost::dynamic_bitset<> action_bitset(bit_size, i);
 		action tmp_action(*it_actions_name, action_bitset, tot_ags, tot_fluents);
 		domain_action_name_map.insert(action_name_map::value_type(*it_actions_name, action_bitset));
 		i++;
 		m_actions.insert(tmp_action);
-		if (m_debug) {
+		if (domain::is_debug()) {
 			std::cout << "Action " << tmp_action.get_name() << " is " << tmp_action.get_id() << std::endl;
 		}
 	}
 
-	m_grounder.set_action_name_map(domain_action_name_map);
-	printer::get_instance().set_grounder(m_grounder);
+	domain::domain_grounder.set_action_name_map(domain_action_name_map);
+	printer::get_instance().set_grounder(domain::domain_grounder);
 
 	build_propositions();
 
-	if (m_debug) {
+	if (domain::is_debug()) {
 		std::cout << "\nPrinting complete action list..." << std::endl;
 		action_set::const_iterator it_actions;
 
@@ -247,11 +248,11 @@ void domain::build_propositions()
 	std::cout << "\nAdding propositions to actions..." << std::endl;
 	proposition_list::iterator it_prop;
 	action_id action_to_modify;
-	for (it_prop = m_reader->m_propositions.begin();
-		it_prop != m_reader->m_propositions.end(); it_prop++) {
+	for (it_prop = config.get_domain_reader()->m_propositions.begin();
+		it_prop != config.get_domain_reader()->m_propositions.end(); it_prop++) {
 
 
-		action_to_modify = m_grounder.ground_action(it_prop->get_action_name());
+		action_to_modify = domain::domain_grounder.ground_action(it_prop->get_action_name());
 
 		//To change remove and add the updated --> @TODO: find better like queue
 
@@ -273,10 +274,10 @@ void domain::build_propositions()
 		/*
 		 *
 		 *
-		 * 	for (it_prop = m_reader->m_propositions.begin();
-			it_prop != m_reader->m_propositions.end(); it_prop++) {
+		 * 	for (it_prop = config.get_domain_reader()->m_propositions.begin();
+			it_prop != config.get_domain_reader()->m_propositions.end(); it_prop++) {
 
-			action_to_modify = m_grounder.ground_action(it_prop->get_action_name());
+			action_to_modify = domain::domain_grounder.ground_action(it_prop->get_action_name());
 			if (m_actions.size() > action_to_modify) {
 				//To change remove and add the updated --> @TODO: find better like queue
 				action_set::iterator it_action_set = std::next(m_actions.begin(), action_to_modify);
@@ -295,7 +296,7 @@ void domain::build_initially()
 	std::cout << "\nAdding to pointed world and initial conditions..." << std::endl;
 	formula_list::iterator it_fl;
 
-	for (it_fl = m_reader->m_bf_initially.begin(); it_fl != m_reader->m_bf_initially.end(); it_fl++) {
+	for (it_fl = config.get_domain_reader()->m_bf_initially.begin(); it_fl != config.get_domain_reader()->m_bf_initially.end(); it_fl++) {
 
 		it_fl->ground();
 
@@ -306,7 +307,7 @@ void domain::build_initially()
 		{
 			m_intial_description.add_pointed_condition(it_fl->get_fluent_formula());
 
-			if (m_debug) {
+			if (domain::is_debug()) {
 				std::cout << "	Pointed world: ";
 				printer::get_instance().print_list(it_fl->get_fluent_formula());
 				std::cout << std::endl;
@@ -326,7 +327,7 @@ void domain::build_initially()
 		case E_FORMULA:
 		{
 			m_intial_description.add_initial_condition(*it_fl);
-			if (m_debug) {
+			if (domain::is_debug()) {
 				std::cout << "Added to initial conditions: ";
 				it_fl->print();
 				std::cout << std::endl;
@@ -373,11 +374,11 @@ void domain::build_goal()
 
 	formula_list::iterator it_fl;
 
-	for (it_fl = (m_reader->m_bf_goal).begin(); it_fl != (m_reader->m_bf_goal).end(); it_fl++) {
+	for (it_fl = (config.get_domain_reader()->m_bf_goal).begin(); it_fl != (config.get_domain_reader()->m_bf_goal).end(); it_fl++) {
 		if (check_goal_restriction(*it_fl)) {
 			it_fl->ground();
 			m_goal_description.push_back(*it_fl);
-			if (m_debug) {
+			if (domain::is_debug()) {
 				std::cout << "	";
 				it_fl->print();
 				std::cout << std::endl;
@@ -394,7 +395,7 @@ bool domain::check_goal_restriction(const belief_formula& bf)//Apply the restric
 {
 	/** \todo: Maybe a separated class?*/
 	bool ret = false;
-	switch ( m_goal_restriction ) {
+	switch (domain::get_goal_restriction()) {
 		//We only admit non negative goals
 	case NONEG:
 		switch ( bf.get_formula_type() ) {

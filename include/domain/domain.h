@@ -32,25 +32,6 @@ private:
     /**\brief The given to the *this*. (The name of the file that contains the description of *this*)*/
     std::string m_name;
 
-    /**\brief If this parameter is setted to true makes the functions verbose.*/
-    bool m_debug;
-    /**\brief The selected type of state. */
-    state_type m_stype;
-    /**\brief If this parameter is setted to true then we use the optimized version for Kripke states.*/
-    bool m_kopt;
-    /** \brief The pointer to a \ref reader object.
-     * 
-     * This is used to read the information from the the input file.
-     * The same object is used in the **main** class.
-     * 
-     * \todo Can be std::unique_ptr<reader>.*/
-    boost::shared_ptr<reader> m_reader;
-    /** \brief A \ref grounder object used to store the name of the information.
-     * 
-     * This is the \ref grounder obj used across the solver to ground and
-     * deground the information.*/
-    grounder m_grounder;
-
     /*All the useful info of the domain are store here:
      m_fluents -> all the fluents;
      m_actions -> all the actions 
@@ -64,23 +45,12 @@ private:
 
 
     domain_config config;
-
+    grounder domain_grounder;
 
     /** \brief The description of the initial state.*/
     initially m_intial_description;
-    /** \brief The restriction to apply to the goal description.*/
-    domain_restriction m_goal_restriction;
     /** \brief The formula that describes the goal.*/
     formula_list m_goal_description;
-
-    /** \brief If the \ref action consider a global visibility frame for their execution.*/
-    bool m_is_global_obsv;
-    /** \brief The \ref action_check used in *this*.*/
-    action_check m_act_check;
-    /** \brief If the \ref search process should check for already visited_states.*/
-    bool m_check_visited;
-    /** \brief If the \ref states are reduced in size with bisimulation and with which algorithm*/
-    bis_type m_bisimulation;
 
 
     /** \brief Function that from the file stores the \ref agent information.*/
@@ -135,7 +105,7 @@ public:
      * @param[in] act_check: the \ref action_check to assign to \ref m_act_check.
      * @param[in] check_visited: If the \ref search process should check for already visited_states.
      * @param[in] bisimulation: If the \ref states are reduced in size with bisimulation.*/
-    void set_domain(const domain_config & config); // std::string name, bool debug, state_type stype, bool k_opt, boost::shared_ptr<reader> reader, domain_restriction ini_res, domain_restriction goal_res, bool is_global_obsv, action_check act_check, bool check_visited, bis_type bisimulation);
+    void set_domain(const domain_config & to_set_config); // std::string name, bool debug, state_type stype, bool k_opt, boost::shared_ptr<reader> reader, domain_restriction ini_res, domain_restriction goal_res, bool is_global_obsv, action_check act_check, bool check_visited, bis_type bisimulation);
 
     /** \brief Function that builds all the domain information.
      *
@@ -144,11 +114,11 @@ public:
     /** \brief Returns the selected type of state.
      *
      * @return the boolean \ref m_stype.*/
-    const state_type & get_stype() const;
+    const state_type get_stype() const;
     /** \brief Returns whether the planner uses the optimized version of the transition function for Kripke states.
      *
      * @return the boolean \ref m_kopt.*/
-    const bool & get_k_optimized() const;
+    const bool get_k_optimized() const;
 
     /** \brief Getter of the field \ref m_grounder.
      *
@@ -182,7 +152,7 @@ public:
     /** \brief Getter of the field \ref m_debug.
      *
      * @return the field \ref m_debug.*/
-    bool get_debug();
+    bool is_debug();
     /** \brief Getter of the field \ref m_check_visited.
      *
      * @return the field \ref m_check_visited.*/

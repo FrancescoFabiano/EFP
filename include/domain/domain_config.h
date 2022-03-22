@@ -1,10 +1,14 @@
 #ifndef EFP_DOMAIN_CONFIG_H
 #define EFP_DOMAIN_CONFIG_H
 
+#include <boost/shared_ptr.hpp>
 #include "../utilities/define.h"
+#include "../utilities/reader.h"
 
 class domain_config {
 private:
+    boost::shared_ptr<reader> domain_reader;
+
     bool debug;
     bool results_file;
     bool global_obsv;
@@ -30,8 +34,14 @@ private:
 
     void set_default_config();
 
+    void set_domain_reader(const boost::shared_ptr<reader> & to_set);
+
 public:
     domain_config();
+
+    domain_config(const boost::shared_ptr<reader> &reader);
+
+    boost::shared_ptr<reader> get_domain_reader() const;
 
     bool is_debug() const;
 
@@ -71,44 +81,43 @@ public:
 
     short get_step() const;
 
-    void set_debug(bool set_debug);
+    void set_debug(bool to_set);
 
-    void set_results_file(bool set_results_file);
+    void set_results_file(bool to_set);
 
-    void set_is_global_obsv(bool set_global_obsv);
+    void set_is_global_obsv(bool to_set);
 
-    void set_check_visited(bool set_check_visited);
+    void set_check_visited(bool to_set);
 
-    void set_bisimulation(bis_type set_bisimulation);
+    void set_bisimulation(bis_type to_set);
 
-    void set_used_heur(heuristics set_used_heur);
+    void set_used_heur(heuristics to_set);
 
-    void set_used_search(search_type set_used_search);
+    void set_used_search(search_type to_set);
 
-    void set_state_type(state_type set_state_type);
+    void set_state_type(state_type to_set);
 
-    void set_ini_restriction(domain_restriction set_ini_restriction);
+    void set_ini_restriction(domain_restriction to_set);
 
-    void set_goal_restriction(domain_restriction set_goal_restriction);
+    void set_goal_restriction(domain_restriction to_set);
 
-    void set_act_check(action_check set_act_check);
+    void set_act_check(action_check to_set);
 
-    void set_input_lang(spec_lang_type set_input_lang);
+    void set_input_lang(spec_lang_type to_set);
 
-    void set_update_models(up_model_type set_update_models);
+    void set_update_models(up_model_type to_set);
 
     void set_models_filename(const std::string &models_filename);
 
-    void set_execute_given_actions(bool set_execute_given_actions);
+    void set_execute_given_actions(bool to_set);
 
-    void set_kopt(bool set_kopt);
+    void set_kopt(bool to_set);
 
     void add_given_action(const std::string & action_name);
 
-    void set_max_depth(short set_max_depth);
+    void set_max_depth(short to_set);
 
-    void set_step(short set_step);
-
+    void set_step(short to_set);
 };
 
 

@@ -229,7 +229,7 @@ template <class T>
 void state<T>::print() const
 {
 	std::cout << "\n";
-	if (domain::get_instance().get_debug()) {
+	if (domain::get_instance().is_debug()) {
 		m_representation.print();
 	}
 	//ret.set_representation(get_representation().compute_succ(act));

@@ -464,7 +464,7 @@ void planner<T>::execute_given_actions(const std::vector<std::string>& act_name)
 		state.calc_min_bisimilar();
 		bis_postfix = "__b";
 	}
-	if (domain::get_instance().get_debug()) {
+	if (domain::get_instance().is_debug()) {
 		state.print_graphviz(bis_postfix);
 
 	}
@@ -485,14 +485,14 @@ void planner<T>::execute_given_actions(const std::vector<std::string>& act_name)
 					if (bisimulation) {
 						state.calc_min_bisimilar();
 					}
-					if (domain::get_instance().get_debug()) {
+					if (domain::get_instance().is_debug()) {
 						state.print_graphviz(bis_postfix);
 					}
 
 					// DEBUG
 					//					if (!visited_states.insert(state).second) {
 					//						for (T tmp : visited_states) {
-					//							if (!(tmp < state) && !(state < tmp) && !domain::get_instance().get_debug()) {
+					//							if (!(tmp < state) && !(state < tmp) && !domain::get_instance().is_debug()) {
 					//								state.min_with_print(tmp);
 					//							}
 					//
@@ -519,7 +519,7 @@ void planner<T>::execute_given_actions(const std::vector<std::string>& act_name)
 		}
 	}
 
-	if (domain::get_instance().get_debug()) {
+	if (domain::get_instance().is_debug()) {
 		std::cout << "\nGenerating the graphical representation of the states ...\n";
 
 		std::string name_folder_graphviz = "out/state/";

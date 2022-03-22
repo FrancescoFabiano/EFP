@@ -28,6 +28,15 @@ domain_config::domain_config() {
     set_default_config();
 }
 
+domain_config::domain_config(const boost::shared_ptr<reader> &reader) {
+    set_domain_reader(reader);
+    set_default_config();
+}
+
+boost::shared_ptr<reader> domain_config::get_domain_reader() const {
+    return domain_reader;
+}
+
 bool domain_config::is_debug() const {
     return debug;
 }
@@ -104,78 +113,82 @@ short domain_config::get_step() const {
     return step;
 }
 
-void domain_config::set_debug(bool set_debug) {
-    domain_config::debug = set_debug;
+void domain_config::set_domain_reader(const boost::shared_ptr<reader> & to_set) {
+    domain_config::domain_reader = to_set;
 }
 
-void domain_config::set_results_file(bool set_results_file) {
-    domain_config::results_file = set_results_file;
+void domain_config::set_debug(bool to_set) {
+    domain_config::debug = to_set;
 }
 
-void domain_config::set_is_global_obsv(bool set_global_obsv) {
-    domain_config::global_obsv = set_global_obsv;
+void domain_config::set_results_file(bool to_set) {
+    domain_config::results_file = to_set;
 }
 
-void domain_config::set_check_visited(bool set_check_visited) {
-    domain_config::check_visited = set_check_visited;
+void domain_config::set_is_global_obsv(bool to_set) {
+    domain_config::global_obsv = to_set;
 }
 
-void domain_config::set_bisimulation(bis_type set_bisimulation) {
-    domain_config::bisimulation = set_bisimulation;
+void domain_config::set_check_visited(bool to_set) {
+    domain_config::check_visited = to_set;
 }
 
-void domain_config::set_used_heur(heuristics set_used_heur) {
-    domain_config::used_heur = set_used_heur;
+void domain_config::set_bisimulation(bis_type to_set) {
+    domain_config::bisimulation = to_set;
 }
 
-void domain_config::set_used_search(search_type set_used_search) {
-    domain_config::used_search = set_used_search;
+void domain_config::set_used_heur(heuristics to_set) {
+    domain_config::used_heur = to_set;
 }
 
-void domain_config::set_state_type(state_type set_state_type) {
-    domain_config::s_type = set_state_type;
+void domain_config::set_used_search(search_type to_set) {
+    domain_config::used_search = to_set;
 }
 
-void domain_config::set_ini_restriction(domain_restriction set_ini_restriction) {
-    domain_config::ini_restriction = set_ini_restriction;
+void domain_config::set_state_type(state_type to_set) {
+    domain_config::s_type = to_set;
 }
 
-void domain_config::set_goal_restriction(domain_restriction set_goal_restriction) {
-    domain_config::goal_restriction = set_goal_restriction;
+void domain_config::set_ini_restriction(domain_restriction to_set) {
+    domain_config::ini_restriction = to_set;
 }
 
-void domain_config::set_act_check(action_check set_act_check) {
-    domain_config::act_check = set_act_check;
+void domain_config::set_goal_restriction(domain_restriction to_set) {
+    domain_config::goal_restriction = to_set;
 }
 
-void domain_config::set_input_lang(spec_lang_type set_input_lang) {
-    domain_config::input_lang = set_input_lang;
+void domain_config::set_act_check(action_check to_set) {
+    domain_config::act_check = to_set;
 }
 
-void domain_config::set_update_models(up_model_type set_update_models) {
-    domain_config::update_models = set_update_models;
+void domain_config::set_input_lang(spec_lang_type to_set) {
+    domain_config::input_lang = to_set;
 }
 
-void domain_config::set_models_filename(const std::string &set_models_filename) {
-    domain_config::models_filename = set_models_filename;
+void domain_config::set_update_models(up_model_type to_set) {
+    domain_config::update_models = to_set;
 }
 
-void domain_config::set_execute_given_actions(bool set_execute_given_actions) {
-    domain_config::execute_given_actions = set_execute_given_actions;
+void domain_config::set_models_filename(const std::string &to_set) {
+    domain_config::models_filename = to_set;
 }
 
-void domain_config::set_kopt(bool set_kopt) {
-    domain_config::kopt = set_kopt;
+void domain_config::set_execute_given_actions(bool to_set) {
+    domain_config::execute_given_actions = to_set;
+}
+
+void domain_config::set_kopt(bool to_set) {
+    domain_config::kopt = to_set;
 }
 
 void domain_config::add_given_action(const std::string & action_name) {
     domain_config::given_actions.push_back(action_name);
 }
 
-void domain_config::set_max_depth(short set_max_depth) {
-    domain_config::max_depth = set_max_depth;
+void domain_config::set_max_depth(short to_set) {
+    domain_config::max_depth = to_set;
 }
 
-void domain_config::set_step(short set_step) {
-    domain_config::step = set_step;
+void domain_config::set_step(short to_set) {
+    domain_config::step = to_set;
 }
