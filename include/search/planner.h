@@ -39,8 +39,6 @@ template <class T>
 class planner
 {
 private:
-    domain_config config;
-
     /**The queue that contains all the states<T> yet to be visited.*/
     std::queue< T > m_search_space;
     std::priority_queue<T, std::vector<T>, compare_heuristic<T> > m_heur_search_space;
@@ -72,8 +70,6 @@ private:
     /* \brief The \ref state_type.*/
     //state_type m_state_type;
 public:
-    void set_domain_config(const domain_config & to_set);
-
     /**Function that searches on m_search_space.
      * 
      * Calls either \ref search_BFS(bool results_file) or \ref search_heur(bool results_file)

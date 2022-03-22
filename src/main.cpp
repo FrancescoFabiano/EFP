@@ -386,11 +386,12 @@ void build_domain_config(domain_config & config, int argc, char **argv)
     }
 }
 
-void launch_search(domain_config & config) {
+void launch_search() {
+    auto config = domain::get_instance().get_config();
+
     switch (config.get_state_type()) {
         case state_type::KRIPKE: {
             planner< state<kstate> > m_planner;
-            m_planner.set_domain_config(config);
 
             if (config.is_execute_given_actions()) {
                 if (config.is_results_file()) {
@@ -410,7 +411,6 @@ void launch_search(domain_config & config) {
         }
         case state_type::POSSIBILITIES: {
             planner< state<pstate> > m_planner;
-            m_planner.set_domain_config(config);
 
             if (config.is_execute_given_actions()) {
                 if (config.is_results_file()) {
@@ -481,7 +481,7 @@ void generate_domain(domain_config & config, char** argv)
         domain_reader->read();
     }
 
-    domain::get_instance().set_domain(config);
+    domain::get_instance().set_config(config);
     domain::get_instance().build();
 }
 
@@ -510,7 +510,7 @@ int main(int argc, char** argv) {
     generate_domain(config, argv);
 
     //launch search planner
-    launch_search(config);
+    launch_search();
 
     exit(0);
 }

@@ -285,7 +285,7 @@ public:
      *
      * @param [in] postfix: The postfix to give to the name of the file (default "").
      */
-    void print_graphviz(std::string postfix = "") const;
+    void print_graphviz(const std::string& postfix = "") const;
 
 
     /**Function that retrieves the observants w.r.t. the current state

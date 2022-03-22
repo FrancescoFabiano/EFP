@@ -229,7 +229,7 @@ template <class T>
 void state<T>::print() const
 {
 	std::cout << "\n";
-	if (domain::get_instance().is_debug()) {
+	if (domain::get_instance().get_config().is_debug()) {
 		m_representation.print();
 	}
 	//ret.set_representation(get_representation().compute_succ(act));
@@ -240,8 +240,9 @@ void state<T>::print() const
 }
 
 template <class T>
-void state<T>::print_graphviz(std::string postfix) const
-{
+void state<T>::print_graphviz(const std::string& postfix) const {
+    auto config = domain::get_instance().get_config();
+
 	std::cout << "\nGraphviz-Printing of ";
 	printer::get_instance().print_list(get_executed_actions());
 	std::string exec_act_names;
@@ -258,11 +259,11 @@ void state<T>::print_graphviz(std::string postfix) const
 
 	std::ofstream graphviz;
 	std::string folder = "out/state/";
-	folder += domain::get_instance().get_name();
-	switch ( domain::get_instance().get_stype() ) {
+	folder += config.get_domain_name();
+	switch (config.get_state_type()) {
 	case KRIPKE:
 		folder += "_kripke";
-		if (domain::get_instance().get_k_optimized()) {
+		if (config.is_kopt()) {
 			folder += "_opt";
 		}
 		break;

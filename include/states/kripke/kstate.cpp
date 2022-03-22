@@ -899,7 +899,7 @@ void kstate::calc_min_bisimilar()
 
 
 
-	if (domain::get_instance().get_bisimulation() == PaigeTarjan) {
+	if (domain::get_instance().get_config().get_bisimulation() == PaigeTarjan) {
 		if (b.MinimizeAutomaPT(&a)) {
 			//VisAutoma(a);
 

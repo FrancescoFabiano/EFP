@@ -197,16 +197,17 @@ std::string asp_maker::print_subformula(const belief_formula & bf, std::ofstream
 	return ret;
 }
 
-void asp_maker::print_all()
-{
+void asp_maker::print_all() {
+    auto config = domain::get_instance().get_config();
+
 	std::ofstream result;
 	std::string folder = "out/ASP_encoding/";
 	system(("mkdir -p " + folder).c_str());
-	std::string filename = folder + domain::get_instance().get_name() + ".lp";
+	std::string filename = folder + config.get_domain_name() + ".lp";
 	remove(filename.c_str());
 	result.open(filename, std::ofstream::out | std::ofstream::app);
 
-	std::string s = domain::get_instance().get_name();
+	std::string s = config.get_domain_name();
 	std::regex r(".+__pl_(\\d+)");
 	std::smatch m;
 	bool found = std::regex_search(s, m, r);

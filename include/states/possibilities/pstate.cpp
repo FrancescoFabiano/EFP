@@ -958,7 +958,7 @@ void pstate::calc_min_bisimilar()
 	//std::cout << "\nDEBUG: Printing automaton pre-Bisimulation\n";
 	//b.VisAutoma(&a);
 
-	if (domain::get_instance().get_bisimulation() == PaigeTarjan) {
+	if (domain::get_instance().get_config().get_bisimulation() == PaigeTarjan) {
 		if (b.MinimizeAutomaPT(&a)) {
 			//VisAutoma(a);
 

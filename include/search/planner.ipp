@@ -12,15 +12,13 @@
 #include "../actions/custom_event_models/cem_store.h"
 
 template <class T>
-void planner<T>::set_domain_config(const domain_config & to_set) {
-    config = to_set;
-}
-
-template <class T>
 void planner<T>::print_results(std::chrono::duration<double> elapsed_seconds, T goal, bool given_plan)
 {
 	std::cout << "\n\n\nWell Done, Goal found in " << elapsed_seconds.count() << " :)\n";
 	goal.print();
+    
+    auto config = domain::get_instance().get_config();
+    
 	if (config.is_results_file()) {
 		std::ofstream result;
 		std::string folder = "out/EFP_comparison/";
@@ -30,19 +28,19 @@ void planner<T>::print_results(std::chrono::duration<double> elapsed_seconds, T 
 			folder = folder + "findingplan/";
 		}
 		system(("mkdir -p " + folder).c_str());
-		result.open(folder + domain::get_instance().get_name() + ".txt", std::ofstream::out | std::ofstream::app);
+		result.open(folder + config.get_domain_name() + ".txt", std::ofstream::out | std::ofstream::app);
 		result << "EFP Version 2.0 (";
-		switch ( domain::get_instance().get_stype() ) {
+		switch ( config.get_state_type() ) {
 		case KRIPKE:
-			if (domain::get_instance().get_k_optimized()) {
+			if (config.is_kopt()) {
 				result << "on KRIPKE with OPTIMIZED transition function";
 			} else {
 				result << "on KRIPKE with STANDARD transition function";
 			}
 
-			if (domain::get_instance().get_bisimulation() == PaigeTarjan) {
+			if (config.get_bisimulation() == PaigeTarjan) {
 				result << " and Paige-Tarjan Bisimulation";
-			} else if (domain::get_instance().get_bisimulation() == FastBisimulation) {
+			} else if (config.get_bisimulation() == FastBisimulation) {
 				result << " and Fast Bismulation";
 			}
 
@@ -92,7 +90,7 @@ void planner<T>::print_results(std::chrono::duration<double> elapsed_seconds, T 
             default: break;
 		}
 
-		if (domain::get_instance().check_visited()) {
+		if (config.is_check_visited()) {
 			result << "and VISITED-STATE ";
 		}
 
@@ -105,6 +103,7 @@ void planner<T>::print_results(std::chrono::duration<double> elapsed_seconds, T 
 
 template <class T>
 bool planner<T>::search() {
+    auto config = domain::get_instance().get_config();
 	if (config.get_used_heur() == NO_H) {
 		switch (config.get_used_search()) {
             case DFS:
@@ -124,12 +123,13 @@ bool planner<T>::search() {
 }
 
 template <class T>
-bool planner<T>::search_BFS()
-{
+bool planner<T>::search_BFS() {
+    auto config = domain::get_instance().get_config();
 	T initial;
-	bool check_visited = domain::get_instance().check_visited();
+
+	bool check_visited = config.is_check_visited();
 	bool bisimulation = false;
-	if (domain::get_instance().get_bisimulation() != BIS_NONE) {
+	if (config.get_bisimulation() != BIS_NONE) {
 		bisimulation = true;
 	}
 	bisimulation = false;
@@ -207,14 +207,13 @@ bool planner<T>::search_BFS()
 }
 
 template <class T>
-bool planner<T>::search_IterativeDFS()
-{
-	//stack di supporto per i risultati della ricerca.
-	std::stack<T> supportSearch;
+bool planner<T>::search_IterativeDFS() {
+    auto config = domain::get_instance().get_config();
+	std::stack<T> supportSearch; //stack di supporto per i risultati della ricerca.
 	T initial;
 
 	bool bisimulation = false;
-	if (domain::get_instance().get_bisimulation() != BIS_NONE) {
+	if (config.get_bisimulation() != BIS_NONE) {
 		bisimulation = true;
 	}
 	bisimulation = false;
@@ -292,12 +291,12 @@ bool planner<T>::search_IterativeDFS()
 }
 
 template <class T>
-bool planner<T>::search_DFS()
-{
+bool planner<T>::search_DFS() {
+    auto config = domain::get_instance().get_config();
 	T initial;
 
 	bool bisimulation = false;
-	if (domain::get_instance().get_bisimulation() != BIS_NONE) {
+	if (config.get_bisimulation() != BIS_NONE) {
 		bisimulation = true;
 	}
 	bisimulation = false;
@@ -363,14 +362,14 @@ bool planner<T>::search_DFS()
 }
 
 template <class T>
-bool planner<T>::search_heur()
-{
+bool planner<T>::search_heur() {
+    auto config = domain::get_instance().get_config();
 
 	T initial;
-	bool check_visited = domain::get_instance().check_visited();
+	bool check_visited = config.is_check_visited();
 	std::set<T> visited_states;
 	bool bisimulation = false;
-	if (domain::get_instance().get_bisimulation() != BIS_NONE) {
+	if (config.get_bisimulation() != BIS_NONE) {
 		bisimulation = true;
 	}
 
@@ -442,12 +441,12 @@ bool planner<T>::search_heur()
 
 template <class T>
 void planner<T>::execute_given_actions() {
+    auto config = domain::get_instance().get_config();
 	check_actions_names();
-	// DEBUG
 	std::set<T> visited_states;
 
 	bool bisimulation = false;
-	if (domain::get_instance().get_bisimulation() != BIS_NONE) {
+	if (config.get_bisimulation() != BIS_NONE) {
 		bisimulation = true;
 	}
 	T state;
@@ -464,7 +463,7 @@ void planner<T>::execute_given_actions() {
 		state.calc_min_bisimilar();
 		bis_postfix = "__b";
 	}
-	if (domain::get_instance().is_debug()) {
+	if (config.is_debug()) {
 		state.print_graphviz(bis_postfix);
 
 	}
@@ -483,7 +482,7 @@ void planner<T>::execute_given_actions() {
 					if (bisimulation) {
 						state.calc_min_bisimilar();
 					}
-					if (domain::get_instance().is_debug()) {
+					if (config.is_debug()) {
 						state.print_graphviz(bis_postfix);
 					}
 					if (state.is_goal()) {
@@ -501,15 +500,15 @@ void planner<T>::execute_given_actions() {
 		}
 	}
 
-	if (domain::get_instance().is_debug()) {
+	if (config.is_debug()) {
 		std::cout << "\nGenerating the graphical representation of the states ...\n";
 
 		std::string name_folder_graphviz = "out/state/";
-		name_folder_graphviz += domain::get_instance().get_name();
-		switch ( domain::get_instance().get_stype() ) {
+		name_folder_graphviz += config.get_domain_name();
+		switch ( config.get_state_type() ) {
             case KRIPKE:
                 name_folder_graphviz += "_kripke";
-                if (domain::get_instance().get_k_optimized()) {
+                if (config.is_kopt()) {
                     name_folder_graphviz += "_opt";
                 }
                 break;
@@ -527,6 +526,7 @@ void planner<T>::execute_given_actions() {
 template <class T>
 /**\todo just for confrontation with old*/
 void planner<T>::execute_given_actions_timed() {
+    auto config = domain::get_instance().get_config();
 	check_actions_names();
 
 	T state;
@@ -556,6 +556,7 @@ void planner<T>::execute_given_actions_timed() {
 template <class T>
 /**\todo just for confrontation with old*/
 void planner<T>::check_actions_names() {
+    auto config = domain::get_instance().get_config();
 	string_set domain_act;
 	action_set::const_iterator it_acset;
 	std::vector<std::string>::const_iterator it_stset;
@@ -563,6 +564,7 @@ void planner<T>::check_actions_names() {
 	for (it_acset = domain::get_instance().get_actions().begin(); it_acset != domain::get_instance().get_actions().end(); it_acset++) {
 		domain_act.insert(it_acset->get_name());
 	}
+
 
 	for (it_stset = config.get_given_actions().begin(); it_stset != config.get_given_actions().end(); it_stset++) {
 		if (domain_act.find(*it_stset) == domain_act.end()) {

@@ -17,7 +17,11 @@ domain& domain::get_instance()
 	return instance;
 }
 
-void domain::set_domain(const domain_config & to_set_config) // (std::string name, bool debug, state_type stype, bool k_opt, boost::shared_ptr<reader> reader, domain_restriction ini_res, domain_restriction goal_res, bool is_global_obsv, action_check act_check, bool check_visited, bis_type bisimulation)
+const domain_config & domain::get_config() const {
+    return config;
+}
+
+void domain::set_config(const domain_config & to_set_config) // (std::string name, bool debug, state_type stype, bool k_opt, boost::shared_ptr<reader> reader, domain_restriction ini_res, domain_restriction goal_res, bool is_global_obsv, action_check act_check, bool check_visited, bis_type bisimulation)
 {
     domain::config = to_set_config;
     domain::domain_grounder = grounder();
@@ -32,16 +36,6 @@ void domain::set_domain(const domain_config & to_set_config) // (std::string nam
 //	m_act_check = act_check;
 //	m_check_visited = check_visited;
 //	m_bisimulation = bisimulation;
-}
-
-state_type domain::get_stype() const
-{
-	return config.get_state_type();
-}
-
-bool domain::get_k_optimized() const
-{
-	return config.is_kopt();
 }
 
 const grounder & domain::get_grounder()
@@ -75,49 +69,14 @@ const agent_set & domain::get_agents()
 	return m_agents;
 }
 
-bool domain::get_is_global_obsv()
-{
-	return config.is_global_obsv();
-}
-
-bool domain::is_debug()
-{
-	return config.is_debug();
-}
-
-bool domain::check_visited()
-{
-	return config.is_check_visited();
-}
-
-std::string domain::get_name()
-{
-	return config.get_domain_name();
-}
-
-action_check domain::get_act_check()
-{
-	return config.get_act_check();
-}
-
 const initially & domain::get_initial_description()
 {
 	return m_intial_description;
 }
 
-domain_restriction domain::get_goal_restriction()
-{
-	return config.get_goal_restriction();
-}
-
 const formula_list & domain::get_goal_description()
 {
 	return m_goal_description;
-}
-
-bis_type domain::get_bisimulation()
-{
-	return config.get_bisimulation();
 }
 
 void domain::build()
@@ -154,7 +113,7 @@ void domain::build_agents()
 		boost::dynamic_bitset<> agent(agents_length, i);
 		domain_agent_map.insert(agent_map::value_type(*it_agents, agent));
 		m_agents.insert(agent);
-		if (domain::is_debug()) {
+		if (config.is_debug()) {
 			std::cout << "Agent " << *it_agents << " is " << agent << std::endl;
 
 		}
@@ -181,7 +140,7 @@ void domain::build_fluents()
 		domain_fluent_map.insert(fluent_map::value_type(*it_fluents, fluentReal));
 		m_fluents.insert(fluentReal);
 
-		if (domain::is_debug()) {
+		if (config.is_debug()) {
 			std::cout << "Literal " << *it_fluents << " is " << " " << fluentReal << std::endl;
 		}
 
@@ -190,7 +149,7 @@ void domain::build_fluents()
 		domain_fluent_map.insert(fluent_map::value_type(NEGATION_SYMBOL + *it_fluents, fluent_negate_real));
 		m_fluents.insert(fluent_negate_real);
 		i++;
-		if (domain::is_debug()) {
+		if (config.is_debug()) {
 			std::cout << "Literal not " << *it_fluents << " is " << (i - 1) << " " << fluent_negate_real << std::endl;
 		}
 	}
@@ -218,7 +177,7 @@ void domain::build_actions()
 		domain_action_name_map.insert(action_name_map::value_type(*it_actions_name, action_bitset));
 		i++;
 		m_actions.insert(tmp_action);
-		if (domain::is_debug()) {
+		if (config.is_debug()) {
 			std::cout << "Action " << tmp_action.get_name() << " is " << tmp_action.get_id() << std::endl;
 		}
 	}
@@ -228,7 +187,7 @@ void domain::build_actions()
 
 	build_propositions();
 
-	if (domain::is_debug()) {
+	if (config.is_debug()) {
 		std::cout << "\nPrinting complete action list..." << std::endl;
 		action_set::const_iterator it_actions;
 
@@ -305,7 +264,7 @@ void domain::build_initially()
 		{
 			m_intial_description.add_pointed_condition(it_fl->get_fluent_formula());
 
-			if (domain::is_debug()) {
+			if (config.is_debug()) {
 				std::cout << "	Pointed world: ";
 				printer::get_instance().print_list(it_fl->get_fluent_formula());
 				std::cout << std::endl;
@@ -325,7 +284,7 @@ void domain::build_initially()
 		case E_FORMULA:
 		{
 			m_intial_description.add_initial_condition(*it_fl);
-			if (domain::is_debug()) {
+			if (config.is_debug()) {
 				std::cout << "Added to initial conditions: ";
 				it_fl->print();
 				std::cout << std::endl;
@@ -376,7 +335,7 @@ void domain::build_goal()
 		if (check_goal_restriction(*it_fl)) {
 			it_fl->ground();
 			m_goal_description.push_back(*it_fl);
-			if (domain::is_debug()) {
+			if (config.is_debug()) {
 				std::cout << "	";
 				it_fl->print();
 				std::cout << std::endl;
@@ -393,7 +352,7 @@ bool domain::check_goal_restriction(const belief_formula& bf)//Apply the restric
 {
 	/** \todo: Maybe a separated class?*/
 	bool ret = false;
-	switch (domain::get_goal_restriction()) {
+	switch (config.get_goal_restriction()) {
 		//We only admit non negative goals
 	case NONEG:
 		switch ( bf.get_formula_type() ) {
