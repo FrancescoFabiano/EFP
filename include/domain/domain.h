@@ -28,6 +28,9 @@
 class domain
 {
 private:
+    /** \brief Private constructor since it is a Singleton class.*/
+    domain();
+
     /*All the useful info of the domain are store here:
      m_fluents -> all the fluents;
      m_actions -> all the actions 
@@ -76,17 +79,16 @@ private:
      * \todo move to the goal class.*/
     bool check_goal_restriction(const belief_formula & to_check);
 
-    /** \brief Private constructor since it is a Singleton class.*/
-    domain();
-
-
-
 public:
 
     /** \brief To get always (the same instance of) *this* and the same instantiated fields.
      * \warning the \ref set_domain has to called in the main file only.*/
     static domain& get_instance();
 
+    /** \brief Copy constructor removed since is Singleton class. */
+    domain(domain const&) = delete;
+    /** \brief Copy operator removed since Singleton class. */
+    void operator=(domain const&) = delete;
 
     /** \brief Setter for the domains parameters.
      *
@@ -183,10 +185,7 @@ public:
 
 
 
-    /** \brief Copy constructor removed since is Singleton class. */
-    domain(domain const&) = delete;
-    /** \brief Copy operator removed since Singleton class. */
-    void operator=(domain const&) = delete;
+
 
     /*formula_list get_initial_description();
     formula_list get_goal_description();
