@@ -13,7 +13,7 @@
 #include <memory>
 #include <algorithm>
 
-#include "../include/search/planner.ipp"
+#include "search/planner.ipp"
 
 void print_usage(char* prog_name) {
     std::cout << "USAGE:" << std::endl;

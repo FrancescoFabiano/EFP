@@ -46,7 +46,7 @@ compile_commands.json
 .idea_original/
 
 # Doxygen
-Doxygen/Docs/
+docs/Docs/
 
 # Out files
 out/
@@ -79,8 +79,8 @@ results/
 .idea_original/modules.xml
 .idea_original/vcs.xml
 .idea_original/workspace.xml
-exp/.DS_Store
-exp/ICAPS20/.DS_Store
+data/.DS_Store
+data/ICAPS20/.DS_Store
 IDEA_ORIGINAL/customTargets.xml
 IDEA_ORIGINAL/EFP.iml
 IDEA_ORIGINAL/misc.xml

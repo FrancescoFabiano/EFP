@@ -4,7 +4,7 @@
 #include <boost/shared_ptr.hpp>
 #include "../utilities/define.h"
 #include "../utilities/reader.h"
-#include "../../src/command_line_option.h"
+#include "../command_line_option.h"
 
 class domain_config {
 private:
