@@ -8,10 +8,6 @@
 
 class domain_config {
 private:
-//    std::vector<command_line_option> options;
-
-//    boost::shared_ptr<reader> domain_reader;
-
     /**\brief The given to the *this*. (The name of the file that contains the description of *this*)*/
     std::string domain_name;
     bool debug;
@@ -41,14 +37,8 @@ private:
 
     void set_default_config();
 
-//    void set_domain_reader(const boost::shared_ptr<reader> & to_set);
-
 public:
     domain_config();
-
-//    domain_config(const boost::shared_ptr<reader> &reader);
-//
-//    boost::shared_ptr<reader> get_domain_reader() const;
 
     std::string get_domain_name() const;
 

@@ -29,12 +29,6 @@ domain_config::domain_config() {
     set_default_config();
 }
 
-//domain_config::domain_config() {
-//    build_command_line_options();
-//    set_domain_reader(reader);
-//    set_default_config();
-//}
-
 void domain_config::build_command_line_options() {
 //    const std::string help_debug = "\tMakes the solving process verbose.";
 //    const auto set_debug = [this](const std::string& option_value) {
@@ -82,10 +76,6 @@ void domain_config::build_command_line_options() {
 //    max_depth = 1;
 //    step = 1;
 }
-
-//boost::shared_ptr<reader> domain_config::get_domain_reader() const {
-//    return domain_reader;
-//}
 
 std::string domain_config::get_domain_name() const {
     return domain_name;
@@ -172,10 +162,6 @@ void domain_config::set_domain_name(const std::string & to_set) {
         domain_name = to_set;
     }
 }
-
-//void domain_config::set_domain_reader(const boost::shared_ptr<reader> & to_set) {
-//    domain_config::domain_reader = to_set;
-//}
 
 void domain_config::set_debug(bool to_set) {
     domain_config::debug = to_set;
