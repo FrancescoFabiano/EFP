@@ -12,7 +12,7 @@
  */
 #pragma once
 
-#include "../../utilities/define.h"
+#include "../../../include/definitions/delphic.h"
 #include "../../formulae/belief_formula.h"
 #include "../action.h"
 

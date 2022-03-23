@@ -15,7 +15,8 @@
  */
 #pragma once
 
-#include "define.h"
+#include "../../include/definitions/possibilities.h"
+#include "../../include/definitions/actions.h"
 #include "../formulae/belief_formula.h"
 
 class helper
@@ -163,6 +164,3 @@ public:
      * @return the effects that are feasible in \p state.*/
     static fluent_formula get_effects_if_entailed(const effects_map & map, const pstate & state);
 };
-
-
-

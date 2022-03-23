@@ -13,7 +13,7 @@
 
 #pragma once
 
-#include "../../utilities/define.h"
+#include "../../../include/definitions/delphic.h"
 
 class cem
 {

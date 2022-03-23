@@ -10,6 +10,7 @@
 
 #include "initially.h"
 #include "domain.h"
+#include "../../include/definitions/domain_config_def.h"
 #include "../utilities/printer.h"
 
 initially::initially() {}

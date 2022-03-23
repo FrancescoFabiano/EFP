@@ -20,10 +20,9 @@
 //#include <bits/stdc++.h>
 #include <boost/algorithm/string.hpp>
 #include <regex>
-#include "../utilities/define.h"
+#include "../../include/definitions/delphic.h"
 
-class cem_parser
-{
+class cem_parser {
 private:
     static void apply_spaces_regex(std::string & to_clean, const std::regex & pattern);
 

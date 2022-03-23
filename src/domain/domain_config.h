@@ -2,7 +2,8 @@
 #define EFP_DOMAIN_CONFIG_H
 
 #include <boost/shared_ptr.hpp>
-#include "../utilities/define.h"
+
+#include "../../include/definitions/domain_config_def.h"
 #include "../utilities/reader.h"
 
 class domain_config {
@@ -121,4 +122,4 @@ public:
 };
 
 
-#endif //EFP_DOMAIN_CONFIG_H
+#endif //EFP_DOMAIN_CONFIG_DEF_H

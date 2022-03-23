@@ -9,7 +9,7 @@
 %option noyywrap
 
 %{
-#include "../../src/utilities/define.h"
+#include "../../include/definitions/define.h"
 #include "../../src/actions/proposition.h"
 #include "../../src/formulae/belief_formula.h"
 #include "cem.tab.hh"

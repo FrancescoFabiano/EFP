@@ -16,7 +16,7 @@
 #pragma once
 #include <fstream>
 
-#include "define.h"
+#include "../../include/definitions/define.h"
 
 #include "../domain/grounder.h"
 #include "../formulae/belief_formula.h"

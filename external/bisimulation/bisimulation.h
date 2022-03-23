@@ -18,11 +18,12 @@
 
 #pragma once
 #include <iostream>
-#include <stdlib.h>
+#include <cstdlib>
 #include <cstring>
 
+#include "../../include/definitions/define.h"
+#include "../../include/definitions/bisimulation_def.h"
 #include "../../src/domain/domain.h"
-#include "../../src/utilities/define.h"
 #include "../../src/states/kripke/kworld.h"
 #include "../../src/states/kripke/kstate.h"
 

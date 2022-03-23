@@ -16,7 +16,7 @@
 #pragma once
 #include <set>
 
-#include "../../utilities/define.h"
+#include "../../../include/definitions/define.h"
 #include "../../utilities/printer.h"
 
 #include "../../domain/initially.h"

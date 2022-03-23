@@ -24,9 +24,8 @@
 #include <list>
 #include <boost/lexical_cast.hpp>
 
-
+#include "../../include/definitions/actions.h"
 #include "../formulae/belief_formula.h"
-#include "../utilities/define.h"
 #include "../utilities/printer.h"
 
 /**

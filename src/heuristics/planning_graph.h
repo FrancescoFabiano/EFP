@@ -18,7 +18,7 @@
 #include <utility>
 
 
-#include "../utilities/define.h"
+#include "../../include/definitions/define.h"
 #include "../actions/action.h"
 #include "../formulae/belief_formula.h"
 #include "../domain/domain.h"

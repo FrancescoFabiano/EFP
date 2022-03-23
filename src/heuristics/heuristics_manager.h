@@ -12,7 +12,7 @@
 #pragma once
 
 
-#include "../utilities/define.h"
+#include "../../include/definitions/define.h"
 #include "../domain/domain.h"
 #include "satisfied_goals.h"
 //#include "planning_graph.h"

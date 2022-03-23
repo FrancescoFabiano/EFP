@@ -12,18 +12,20 @@
  * \date April 1, 2019
  */
 #pragma once
+
 #include <memory>
+#include <boost/shared_ptr.hpp>
+#include <boost/make_shared.hpp>
 
 #include "domain_config.h"
+
 #include "grounder.h"
 #include "initially.h"
 
-#include "../utilities/define.h"
 #include "../utilities/reader.h"
 #include "../actions/action.h"
 #include "../actions/custom_event_models/cem_store.h"
-#include <boost/shared_ptr.hpp>
-#include <boost/make_shared.hpp>
+
 
 class domain
 {

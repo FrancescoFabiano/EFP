@@ -18,7 +18,7 @@
 
 #include <set>
 
-#include "../../utilities/define.h"
+#include "../../../include/definitions/kripke_models.h"
 #include "../../utilities/printer.h"
 
 class kworld

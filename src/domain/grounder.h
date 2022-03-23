@@ -17,8 +17,12 @@
  */
 #pragma once
 
-#include "../utilities/define.h"
+#include <iostream>
 #include <string>
+
+#include "../../include/definitions/domain_def.h"
+#include "../../include/definitions/formulae.h"
+#include "../../include/definitions/grounder_def.h"
 
 
 //@TODO: Double definition watch out

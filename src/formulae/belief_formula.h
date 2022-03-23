@@ -24,7 +24,7 @@
 
 #include <memory>
 
-#include "../utilities/define.h"
+#include "../../include/definitions/define.h"
 
 #include "../domain/grounder.h"
 

@@ -27,7 +27,7 @@
 #include "possibilities_opt/pstate_opt.h"
 
 
-#include "../utilities/define.h"
+#include "../../include/definitions/define.h"
 #include "../formulae/belief_formula.h"
 #include "../actions/action.h"
 #include "../domain/initially.h"

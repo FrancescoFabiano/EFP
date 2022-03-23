@@ -42,6 +42,16 @@ set(
 # Headers files to include in compilation -- To include all use: file(GLOB_RECURSE EFP_HEADERS ${CMAKE_SOURCE_DIR}/src/*.h)
 set(
         EFP_HEADERS
+        include/definitions/actions.h
+        include/definitions/bisimulation_def.h
+        include/definitions/define.h
+        include/definitions/delphic.h
+        include/definitions/domain_def.h
+        include/definitions/domain_config_def.h
+        include/definitions/formulae.h
+        include/definitions/grounder_def.h
+        include/definitions/kripke_models.h
+        include/definitions/possibilities.h
         src/actions/action.h
         src/actions/proposition.h
         src/actions/custom_event_models/cem.h
@@ -65,7 +75,6 @@ set(
         src/states/possibilities/pworld.h
         src/states/state_T.h
         src/update/product_update.h
-        src/utilities/define.h
         src/utilities/helper.h
         src/utilities/helper_t.h
         src/utilities/printer.h

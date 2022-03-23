@@ -13,7 +13,7 @@
 
 #include "proposition.h"
 
-#include "../utilities/define.h"
+#include "../../include/definitions/define.h"
 #include "../formulae/belief_formula.h"
 #include "../domain/grounder.h"
 

@@ -18,7 +18,7 @@
 #include "pworld.h"
 #include "pstore.h"
 
-#include "../../utilities/define.h"
+#include "../../../include/definitions/define.h"
 #include "../../domain/initially.h"
 #include "../../actions/action.h"
 #include "../../../external/bisimulation/bisimulation.h"

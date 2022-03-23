@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include "define.h"
+#include "../../include/definitions/define.h"
 #include "../formulae/belief_formula.h"
 #include "../actions/proposition.h"
 

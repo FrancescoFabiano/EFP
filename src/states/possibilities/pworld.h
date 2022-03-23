@@ -18,7 +18,7 @@
 
 #include <set>
 
-#include "../../utilities/define.h"
+#include "../../../include/definitions/possibilities.h"
 #include "../../utilities/printer.h"
 
 class pworld
