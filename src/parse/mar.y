@@ -6,7 +6,7 @@
 %define api.prefix {mar}
 
 %{
-#include "../../include/utilities/reader.h"
+#include "../../src/utilities/reader.h"
 
 int marerror(const char *s);
 int marlex(void);

@@ -21,10 +21,10 @@
 #include <stdlib.h>
 #include <cstring>
 
-#include "../../include/domain/domain.h"
-#include "../../include/utilities/define.h"
-#include "../../include/states/kripke/kworld.h"
-#include "../../include/states/kripke/kstate.h"
+#include "../../src/domain/domain.h"
+#include "../../src/utilities/define.h"
+#include "../../src/states/kripke/kworld.h"
+#include "../../src/states/kripke/kstate.h"
 
 //STRUCTURE DECLARATION
 //index is the type of the implicit pointers to the array

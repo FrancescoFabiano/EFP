@@ -24,7 +24,7 @@
 #include "../../utilities/define.h"
 #include "../../domain/initially.h"
 #include "../../actions/action.h"
-#include "../../../lib/bisimulation/bisimulation.h"
+#include "../../../external/bisimulation/bisimulation.h"
 
 class kstate
 {

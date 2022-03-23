@@ -6,7 +6,7 @@
 %define api.prefix {cem}
 
 %{
-#include "../../include/utilities/reader.h"
+#include "../../src/utilities/reader.h"
 
 int cemerror(const char *s);
 int cemlex(void);

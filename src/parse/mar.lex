@@ -9,9 +9,9 @@
 %option noyywrap
 
 %{
-#include "../../include/utilities/define.h"
-#include "../../include/actions/proposition.h"
-#include "../../include/formulae/belief_formula.h"
+#include "../../src/utilities/define.h"
+#include "../../src/actions/proposition.h"
+#include "../../src/formulae/belief_formula.h"
 #include "mar.tab.hh"
 
 /* seems like a bug that I have to do this, since flex
