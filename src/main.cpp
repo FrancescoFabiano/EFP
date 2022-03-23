@@ -225,7 +225,7 @@ void build_domain_config(domain_config & config, int argc, char **argv) {
                 std::cerr << "-s needs an integer value." << std::endl;
                 exit(1);
             } else {
-                config.set_iter_dfs_max_depth(atoi(argv[i]));
+                config.set_iter_dfs_max_depth(std::stoi(argv[i]));
             }
         } else if (strcmp(argv[i], "-mm") == 0) {
             i++;
@@ -233,7 +233,7 @@ void build_domain_config(domain_config & config, int argc, char **argv) {
                 std::cerr << "-m needs an integer value" << std::endl;
                 exit(1);
             } else {
-                config.set_iter_dfs_step(atoi(argv[i]));
+                config.set_iter_dfs_step(std::stoi(argv[i]));
             }
         } else if (strcmp(argv[i], "-act_obsv") == 0) {
             i++;

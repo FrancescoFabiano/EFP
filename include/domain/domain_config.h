@@ -34,8 +34,8 @@ private:
     bool kopt;
     std::vector<std::string> given_actions;
 
-    short iter_dfs_max_depth;
-    short iter_dfs_step;
+    int iter_dfs_max_depth;
+    int iter_dfs_step;
 
     void build_command_line_options();
 
@@ -86,9 +86,9 @@ public:
 
     const std::vector<std::string> &get_given_actions() const;
 
-    short get_iter_dfs_max_depth() const;
+    int get_iter_dfs_max_depth() const;
 
-    short get_iter_dfs_step() const;
+    int get_iter_dfs_step() const;
 
     void set_domain_name(const std::string & to_set);
 
@@ -126,9 +126,9 @@ public:
 
     void add_given_action(const std::string & action_name);
 
-    void set_iter_dfs_max_depth(short to_set);
+    void set_iter_dfs_max_depth(int to_set);
 
-    void set_iter_dfs_step(short to_set);
+    void set_iter_dfs_step(int to_set);
 };
 
 

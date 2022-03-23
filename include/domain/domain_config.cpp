@@ -159,11 +159,11 @@ const std::vector<std::string> &domain_config::get_given_actions() const {
     return given_actions;
 }
 
-short domain_config::get_iter_dfs_max_depth() const {
+int domain_config::get_iter_dfs_max_depth() const {
     return iter_dfs_max_depth;
 }
 
-short domain_config::get_iter_dfs_step() const {
+int domain_config::get_iter_dfs_step() const {
     return iter_dfs_step;
 }
 
@@ -245,10 +245,10 @@ void domain_config::add_given_action(const std::string & action_name) {
     domain_config::given_actions.push_back(action_name);
 }
 
-void domain_config::set_iter_dfs_max_depth(short to_set) {
+void domain_config::set_iter_dfs_max_depth(int to_set) {
     domain_config::iter_dfs_max_depth = to_set;
 }
 
-void domain_config::set_iter_dfs_step(short to_set) {
+void domain_config::set_iter_dfs_step(int to_set) {
     domain_config::iter_dfs_step = to_set;
 }
