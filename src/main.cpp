@@ -15,23 +15,6 @@
 
 #include "../include/search/planner.ipp"
 
-//#include "../include/utilities/asp_maker.h"
-//#include "../include/actions/cem_store.h"
-
-#include <boost/shared_ptr.hpp>
-#include <boost/make_shared.hpp>
-
-#define VERSION "2.0"
-
-reader generator()
-{
-    return reader();
-}
-
-using namespace boost;
-
-shared_ptr<reader> domain_reader = make_shared<reader>(generator());
-
 void print_usage(char* prog_name) {
     std::cout << "USAGE:" << std::endl;
     std::cout << prog_name << " input_domain [options]" << std::endl << std::endl;
@@ -404,28 +387,8 @@ void build_domain_config(domain_config & config, int argc, char **argv) {
     }
 }
 
-void launch_search() {
-    auto config = domain::get_instance().get_config();
-
-    switch (config.get_state_type()) {
-        case state_type::KRIPKE: {
-            planner< state<kstate> > m_planner;
-            m_planner.search();
-            break;
-        }
-        case state_type::POSSIBILITIES: {
-            planner< state<pstate> > m_planner;
-            m_planner.search();
-            break;
-        }
-        default:
-            std::cerr << "\nNot implemented yet - 0\n";
-            exit(1);
-    }
-}
-
 void build_domain(int argc, char** argv) {
-    domain_config config(domain_reader);
+    domain_config config;
     build_domain_config(config, argc, argv);
 
     std::string domain_name = argv[1];
@@ -468,13 +431,33 @@ void build_domain(int argc, char** argv) {
     config.set_domain_name(domain_name);
 
     if (config.get_update_models() == up_model_type::CUSTOM) {
-        domain_reader->read(config.get_models_filename());
+        reader::get_instance().read(config.get_models_filename());
     } else {
-        domain_reader->read();
+        reader::get_instance().read();
     }
 
     domain::get_instance().set_config(config);
     domain::get_instance().build();
+}
+
+void launch_search() {
+    auto config = domain::get_instance().get_config();
+
+    switch (config.get_state_type()) {
+        case state_type::KRIPKE: {
+            planner< state<kstate> > m_planner;
+            m_planner.search();
+            break;
+        }
+        case state_type::POSSIBILITIES: {
+            planner< state<pstate> > m_planner;
+            m_planner.search();
+            break;
+        }
+        default:
+            std::cerr << "\nNot implemented yet - 0\n";
+            exit(1);
+    }
 }
 
 int main(int argc, char** argv) {

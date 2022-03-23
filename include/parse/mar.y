@@ -20,7 +20,6 @@ string_set_set join_SL2(string_set_set, string_set_set);
 void print_string_set(string_set);
 void print_string_set_set(string_set_set);
 
-extern std::shared_ptr<reader> domain_reader;
 %}
 
 %union{
@@ -127,12 +126,12 @@ domain
 init_spec 
 goal_spec
  { 
-  domain_reader->m_fluents = *$1;
-  domain_reader->m_actions = *$2;
-  domain_reader->m_agents = *$3;
-  domain_reader->m_propositions = *$4;
-  domain_reader->m_bf_initially = *$5;
-  domain_reader->m_bf_goal = *$6;
+  reader::get_instance().m_fluents = *$1;
+  reader::get_instance().m_actions = *$2;
+  reader::get_instance().m_agents = *$3;
+  reader::get_instance().m_propositions = *$4;
+  reader::get_instance().m_bf_initially = *$5;
+  reader::get_instance().m_bf_goal = *$6;
 }
 ;
 

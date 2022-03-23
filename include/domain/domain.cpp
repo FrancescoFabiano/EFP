@@ -11,8 +11,7 @@
 
 domain::domain() = default;
 
-domain& domain::get_instance()
-{
+domain& domain::get_instance() {
 	static domain instance;
 	return instance;
 }
@@ -96,9 +95,9 @@ void domain::build_agents() {
 
 	//ottengo il numero degli agenti e inizio a generare un bitset dinamico con n bit
 	//posizione x se bit a 1 esiste un agente altrimenti 0.
-	int agents_length = helper::lenght_to_power_two(config.get_domain_reader()->m_agents.size());
+	int agents_length = helper::lenght_to_power_two(reader::get_instance().m_agents.size());
 
-	for (it_agents = config.get_domain_reader()->m_agents.begin(); it_agents != config.get_domain_reader()->m_agents.end(); it_agents++) {
+	for (it_agents = reader::get_instance().m_agents.begin(); it_agents != reader::get_instance().m_agents.end(); it_agents++) {
 		boost::dynamic_bitset<> agent(agents_length, i);
 		domain_agent_map.insert(agent_map::value_type(*it_agents, agent));
 		m_agents.insert(agent);
@@ -119,10 +118,10 @@ void domain::build_fluents() {
 	std::cout << "\nBuilding fluent literals..." << std::endl;
 	string_set::const_iterator it_fluents;
 	int i = 0;
-	int bit_size = helper::lenght_to_power_two(config.get_domain_reader()->m_fluents.size());
+	int bit_size = helper::lenght_to_power_two(reader::get_instance().m_fluents.size());
 	//todo prende numero fluenti*2 e generare i bit necessari
-	for (it_fluents = config.get_domain_reader()->m_fluents.begin();
-		it_fluents != config.get_domain_reader()->m_fluents.end(); it_fluents++) {
+	for (it_fluents = reader::get_instance().m_fluents.begin();
+		it_fluents != reader::get_instance().m_fluents.end(); it_fluents++) {
 		boost::dynamic_bitset<> fluentReal(bit_size + 1, i);
 		fluentReal.set(fluentReal.size() - 1, 0);
 		domain_fluent_map.insert(fluent_map::value_type(*it_fluents, fluentReal));
@@ -154,10 +153,10 @@ void domain::build_actions() {
 	std::cout << "\nBuilding action list..." << std::endl;
 	string_set::const_iterator it_actions_name;
 	int i = 0;
-	int numberOfActions = config.get_domain_reader()->m_actions.size();
+	int numberOfActions = reader::get_instance().m_actions.size();
 	int bit_size = helper::lenght_to_power_two(numberOfActions);
-	for (it_actions_name = config.get_domain_reader()->m_actions.begin();
-		it_actions_name != config.get_domain_reader()->m_actions.end(); it_actions_name++) {
+	for (it_actions_name = reader::get_instance().m_actions.begin();
+		it_actions_name != reader::get_instance().m_actions.end(); it_actions_name++) {
 		boost::dynamic_bitset<> action_bitset(bit_size, i);
 		action tmp_action(*it_actions_name, action_bitset, tot_ags, tot_fluents);
 		domain_action_name_map.insert(action_name_map::value_type(*it_actions_name, action_bitset));
@@ -190,8 +189,8 @@ void domain::build_propositions() {
 	std::cout << "\nAdding propositions to actions..." << std::endl;
 	proposition_list::iterator it_prop;
 	action_id action_to_modify;
-	for (it_prop = config.get_domain_reader()->m_propositions.begin();
-		it_prop != config.get_domain_reader()->m_propositions.end(); it_prop++) {
+	for (it_prop = reader::get_instance().m_propositions.begin();
+		it_prop != reader::get_instance().m_propositions.end(); it_prop++) {
 		action_to_modify = domain::domain_grounder.ground_action(it_prop->get_action_name());
 		//To change remove and add the updated --> @TODO: find better like queue
 
@@ -212,8 +211,8 @@ void domain::build_propositions() {
 		/*
 		 *
 		 *
-		 * 	for (it_prop = config.get_domain_reader()->m_propositions.begin();
-			it_prop != config.get_domain_reader()->m_propositions.end(); it_prop++) {
+		 * 	for (it_prop = reader::get_instance().m_propositions.begin();
+			it_prop != reader::get_instance().m_propositions.end(); it_prop++) {
 
 			action_to_modify = domain::domain_grounder.ground_action(it_prop->get_action_name());
 			if (m_actions.size() > action_to_modify) {
@@ -233,7 +232,7 @@ void domain::build_initially() {
 	std::cout << "\nAdding to pointed world and initial conditions..." << std::endl;
 	formula_list::iterator it_fl;
 
-	for (it_fl = config.get_domain_reader()->m_bf_initially.begin(); it_fl != config.get_domain_reader()->m_bf_initially.end(); it_fl++) {
+	for (it_fl = reader::get_instance().m_bf_initially.begin(); it_fl != reader::get_instance().m_bf_initially.end(); it_fl++) {
 		it_fl->ground();
 
 		switch ( it_fl->get_formula_type() ) { //initially phi
@@ -291,7 +290,7 @@ void domain::build_goal() {
 	std::cout << "\nAdding to Goal..." << std::endl;
 	formula_list::iterator it_fl;
 
-	for (it_fl = (config.get_domain_reader()->m_bf_goal).begin(); it_fl != (config.get_domain_reader()->m_bf_goal).end(); it_fl++) {
+	for (it_fl = (reader::get_instance().m_bf_goal).begin(); it_fl != (reader::get_instance().m_bf_goal).end(); it_fl++) {
         it_fl->ground();
         m_goal_description.push_back(*it_fl);
         if (config.is_debug()) {

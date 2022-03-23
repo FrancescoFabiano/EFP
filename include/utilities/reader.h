@@ -25,9 +25,20 @@
 #include "../formulae/belief_formula.h"
 #include "../actions/proposition.h"
 
-class reader
-{
+class reader {
+private:
+    reader();
+
 public:
+    /** \brief To get always (the same instance of) *this* and the same instantiated fields.
+     * \warning the \ref set_config has to called in the main file only.*/
+    static reader& get_instance();
+
+    /** \brief Copy constructor removed since is Singleton class. */
+    reader(reader const&) = delete;
+    /** \brief Copy operator removed since Singleton class. */
+    void operator=(reader const&) = delete;
+
     /** \brief Name of all the fluents (only positive) in the domain.*/
     string_set m_fluents;
     /** \brief Name of all the actions in the domain.*/
@@ -59,9 +70,6 @@ public:
      * @param[in] cem_filename: The name of the file that contains the specification of the update models.
      * @return The same int value returned from the parsing process.*/
     int read(const std::string & cem_filename);
-
-    reader();
-
 
     /** \brief Function used to print all the information stored inside the reader object.*/
     void print() const;

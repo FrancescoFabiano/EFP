@@ -50,8 +50,11 @@ std::string reader::name(fluent x)
 	return(NEGATION_SYMBOL + (*it));
 }*/
 
-reader::reader()
-{
+reader::reader() = default;
+
+reader& reader::get_instance() {
+    static reader instance;
+    return instance;
 }
 
 int reader::read()
