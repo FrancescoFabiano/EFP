@@ -5,7 +5,7 @@
 //heuristic Manager
 
 template <class T>
-heuristics_manager::heuristics_manager(heuristics used_heur, const T & eState)
+heuristics_manager::heuristics_manager(Heuristic used_heur, const T & eState)
 {
 	set_used_h(used_heur);
 	m_goals = domain::get_instance().get_goal_description();
@@ -30,7 +30,7 @@ heuristics_manager::heuristics_manager(heuristics used_heur, const T & eState)
 			}
 			break;
 		}*/
-	case SUBGOALS:
+	case SUB_GOALS:
 	{
 		expand_goals();
 		satisfied_goals::get_instance().set(m_goals);
@@ -88,7 +88,7 @@ void heuristics_manager::set_heuristic_value(T & eState)
 			eState.set_heuristic_value(-h_value);
 			break;
 		}*/
-	case SUBGOALS:
+	case SUB_GOALS:
 	{
 		eState.set_heuristic_value(satisfied_goals::get_instance().get_unsatisfied_goals(eState));
 		break;

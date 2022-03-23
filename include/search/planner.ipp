@@ -12,8 +12,7 @@
 #include "../actions/custom_event_models/cem_store.h"
 
 template <class T>
-void planner<T>::print_results(std::chrono::duration<double> elapsed_seconds, T goal, bool given_plan)
-{
+void planner<T>::print_results(std::chrono::duration<double> elapsed_seconds, T goal, bool given_plan) {
 	std::cout << "\n\n\nWell Done, Goal found in " << elapsed_seconds.count() << " :)\n";
 	goal.print();
     
@@ -38,9 +37,9 @@ void planner<T>::print_results(std::chrono::duration<double> elapsed_seconds, T 
 				result << "on KRIPKE with STANDARD transition function";
 			}
 
-			if (config.get_bisimulation() == PaigeTarjan) {
+			if (config.get_bisimulation() == PAIGE_TARJAN) {
 				result << " and Paige-Tarjan Bisimulation";
-			} else if (config.get_bisimulation() == FastBisimulation) {
+			} else if (config.get_bisimulation() == FAST_BISIMULATION) {
 				result << " and Fast Bismulation";
 			}
 
@@ -63,7 +62,7 @@ void planner<T>::print_results(std::chrono::duration<double> elapsed_seconds, T 
                 case DFS:
                     result << "with DFS ";
                     break;
-                case I_DFS:
+                case ITER_DFS:
                     result << "with I_DFS ";
                     break;
                 case BFS:
@@ -83,7 +82,7 @@ void planner<T>::print_results(std::chrono::duration<double> elapsed_seconds, T 
             case C_PG:
                 result << "CLASSIC_PG heuristic ";
                 break;
-            case SUBGOALS:
+            case SUB_GOALS:
                 result << "SUBGOALS heuristic ";
                 break;
             case NO_H:
@@ -104,22 +103,42 @@ void planner<T>::print_results(std::chrono::duration<double> elapsed_seconds, T 
 template <class T>
 bool planner<T>::search() {
     auto config = domain::get_instance().get_config();
-	if (config.get_used_heur() == NO_H) {
-		switch (config.get_used_search()) {
-            case DFS:
-                return search_DFS();
-            case I_DFS:
-                return search_IterativeDFS();
-            case BFS:
-            default:
-                return search_BFS();
-		}
-	} else {
-		return search_heur();
-	}
+    bool result;
 
-	//non arrivo mai qui.
-	return false;
+    if (config.is_execute_given_actions()) {
+        if (config.is_results_file()) {
+            result = execute_given_actions_timed();
+        } else {
+            result = execute_given_actions();
+        }
+        std::cout << "\n\n\n*****THE END*****\n";
+    } else {
+        if (config.get_used_heur() == Heuristic::NO_H) {
+            switch (config.get_used_search()) {
+                case Search_Strategy::DFS: {
+                    result = search_DFS();
+                    break;
+                }
+                case Search_Strategy::ITER_DFS: {
+                    result = search_iterative_DFS();
+                    break;
+                }
+                case Search_Strategy::BFS:
+                default: {
+                    result = search_BFS();
+                    break;
+                }
+            }
+        } else {
+            result = search_heuristic();
+        }
+        if (result) {
+            std::cout << "\n\n\n*****THE END*****\n";
+        } else {
+            std::cout << "\n\n\n*****THE SAD END*****\n";
+        }
+    }
+	return result;
 }
 
 template <class T>
@@ -129,7 +148,7 @@ bool planner<T>::search_BFS() {
 
 	bool check_visited = config.is_check_visited();
 	bool bisimulation = false;
-	if (config.get_bisimulation() != BIS_NONE) {
+	if (config.get_bisimulation() != Bisimulation_Algorithm::NO_BISIMULATION) {
 		bisimulation = true;
 	}
 	bisimulation = false;
@@ -207,26 +226,21 @@ bool planner<T>::search_BFS() {
 }
 
 template <class T>
-bool planner<T>::search_IterativeDFS() {
+bool planner<T>::search_iterative_DFS() {
     auto config = domain::get_instance().get_config();
 	std::stack<T> supportSearch; //stack di supporto per i risultati della ricerca.
 	T initial;
 
-	bool bisimulation = false;
-	if (config.get_bisimulation() != BIS_NONE) {
-		bisimulation = true;
-	}
-	bisimulation = false;
 	std::set<T> visited_states;
 
 	auto start_timing = std::chrono::system_clock::now();
 	initial.build_initial();
-	if (bisimulation) {
+	if (config.get_bisimulation() != Bisimulation_Algorithm::NO_BISIMULATION) {
 		initial.calc_min_bisimilar();
 	}
 
-	int maxDepth = config.get_max_depth();
-	int step = config.get_step();
+	int maxDepth = config.get_iter_dfs_max_depth();
+	int step = config.get_iter_dfs_step();
 
 	auto end_timing = std::chrono::system_clock::now();
 	std::chrono::duration<double> elapsed_seconds = end_timing - start_timing;
@@ -265,7 +279,7 @@ bool planner<T>::search_IterativeDFS() {
 				if (popped_state.is_executable(tmp_action)) {
 					tmp_state = popped_state.compute_succ(tmp_action);
 					//tmp_state.print();
-					if (bisimulation) {
+					if (config.get_bisimulation() != Bisimulation_Algorithm::NO_BISIMULATION) {
 						tmp_state.calc_min_bisimilar();
 					}
 					if (tmp_state.is_goal()) {
@@ -285,9 +299,6 @@ bool planner<T>::search_IterativeDFS() {
 
 		}
 	}
-	//anche qui non ci arrivo mai con il while true
-	std::cout << "\nNo plan found for this goal.\n";
-	return false;
 }
 
 template <class T>
@@ -295,16 +306,11 @@ bool planner<T>::search_DFS() {
     auto config = domain::get_instance().get_config();
 	T initial;
 
-	bool bisimulation = false;
-	if (config.get_bisimulation() != BIS_NONE) {
-		bisimulation = true;
-	}
-	bisimulation = false;
 	std::set<T> visited_states;
 
 	auto start_timing = std::chrono::system_clock::now();
 	initial.build_initial();
-	if (bisimulation) {
+	if (config.get_bisimulation() != Bisimulation_Algorithm::NO_BISIMULATION) {
 		initial.calc_min_bisimilar();
 	}
 
@@ -340,7 +346,7 @@ bool planner<T>::search_DFS() {
 			if (popped_state.is_executable(tmp_action)) {
 				tmp_state = popped_state.compute_succ(tmp_action);
 				//tmp_state.print();
-				if (bisimulation) {
+				if (config.get_bisimulation() != Bisimulation_Algorithm::NO_BISIMULATION) {
 					tmp_state.calc_min_bisimilar();
 				}
 				if (tmp_state.is_goal()) {
@@ -362,14 +368,14 @@ bool planner<T>::search_DFS() {
 }
 
 template <class T>
-bool planner<T>::search_heur() {
+bool planner<T>::search_heuristic() {
     auto config = domain::get_instance().get_config();
 
 	T initial;
 	bool check_visited = config.is_check_visited();
 	std::set<T> visited_states;
 	bool bisimulation = false;
-	if (config.get_bisimulation() != BIS_NONE) {
+	if (config.get_bisimulation() != NO_BISIMULATION) {
 		bisimulation = true;
 	}
 
@@ -440,46 +446,46 @@ bool planner<T>::search_heur() {
 }
 
 template <class T>
-void planner<T>::execute_given_actions() {
+bool planner<T>::execute_given_actions() {
     auto config = domain::get_instance().get_config();
 	check_actions_names();
 	std::set<T> visited_states;
 
-	bool bisimulation = false;
-	if (config.get_bisimulation() != BIS_NONE) {
-		bisimulation = true;
-	}
 	T state;
 	state.build_initial();
+    bool found_plan;
 
 	if (state.is_goal()) {
 		std::cout << "\nInitial was Goal:)\n";
+        found_plan = true;
 	} else {
 		std::cout << "\n\n";
 	}
 
 	std::string bis_postfix;
-	if (bisimulation) {
+	if (config.get_bisimulation() != Bisimulation_Algorithm::NO_BISIMULATION) {
 		state.calc_min_bisimilar();
 		bis_postfix = "__b";
 	}
 	if (config.is_debug()) {
 		state.print_graphviz(bis_postfix);
-
 	}
 	// DEBUG
 	visited_states.insert(state);
+
+    auto given_actions = config.get_given_actions();
+    auto action_library = domain::get_instance().get_actions();
 
 	std::vector<std::string>::const_iterator it_stset;
 	std::vector<std::string>::const_iterator it_stset2;
 
 	action_set::const_iterator it_acset;
-	for (it_stset = config.get_given_actions().begin(); it_stset != config.get_given_actions().end(); it_stset++) {
-		for (it_acset = domain::get_instance().get_actions().begin(); it_acset != domain::get_instance().get_actions().end(); it_acset++) {
+	for (it_stset = given_actions.begin(); it_stset != given_actions.end(); it_stset++) {
+		for (it_acset = action_library.begin(); it_acset != action_library.end(); it_acset++) {
 			if (it_acset->get_name() == *it_stset) {
 				if (state.is_executable(*it_acset)) {
 					state = state.compute_succ(*it_acset);
-					if (bisimulation) {
+					if (config.get_bisimulation() != Bisimulation_Algorithm::NO_BISIMULATION) {
 						state.calc_min_bisimilar();
 					}
 					if (config.is_debug()) {
@@ -487,14 +493,15 @@ void planner<T>::execute_given_actions() {
 					}
 					if (state.is_goal()) {
 						std::cout << "\n\nWell Done, Goal found after the execution of ";
-						for (it_stset2 = config.get_given_actions().begin(); it_stset2 != it_stset; it_stset2++) {
+						for (it_stset2 = given_actions.begin(); it_stset2 != it_stset; it_stset2++) {
 							std::cout << *it_stset2 << ", ";
 						}
 						std::cout << *it_stset << " :)\n\n\n";
+                        found_plan = true;
 					}
 				} else {
 					std::cout << "The action " << (*it_acset).get_name() << " was not executable\n";
-					return;
+					return false;
 				}
 			}
 		}
@@ -521,11 +528,12 @@ void planner<T>::execute_given_actions() {
 		}
 		system(("sh ../scripts/generate_pdf.sh " + name_folder_graphviz).c_str());
 	}
+    return found_plan;
 }
 
 template <class T>
 /**\todo just for confrontation with old*/
-void planner<T>::execute_given_actions_timed() {
+bool planner<T>::execute_given_actions_timed() {
     auto config = domain::get_instance().get_config();
 	check_actions_names();
 
@@ -551,6 +559,7 @@ void planner<T>::execute_given_actions_timed() {
 	std::chrono::duration<double> elapsed_seconds = end_timing - start_timing;
 
     print_results(elapsed_seconds, state, true);
+    return state.is_goal();
 }
 
 template <class T>

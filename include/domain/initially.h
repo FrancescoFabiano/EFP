@@ -26,7 +26,7 @@ private:
     /** \brief The restriction to apply to the initial state
      * 
      * @see domain_restriction.*/
-    initial_state_mode mode;
+    Initial_State_Mode mode;
 
     /**
      * \brief The \ref fluent_formula representation of \ref m_bf_intial_conditions if finitary-S5 is required.
@@ -57,7 +57,7 @@ public:
     /** \brief  Getter for the field \ref m_ini_restriction.
      *
      * @return: the value of \ref m_ini_restriction.*/
-    initial_state_mode get_initial_state_mode() const;
+    Initial_State_Mode get_initial_state_mode() const;
 
 
     /** \brief  Function that adds a condition for the initial pointed \ref state.

@@ -24,7 +24,7 @@ class heuristics_manager
 {
 private:
     /**The type of heuristic used*/
-    heuristics m_used_heur;
+    Heuristic m_used_heur;
     /*The goal description, possibly expanded to exploit the heuristic even more*/
     formula_list m_goals;
     pg_f_map m_fluents_score;
@@ -64,10 +64,10 @@ public:
     /** \brief Class constructor that uses the chosen heuristic to perform the operation
      * 
      * @param[in] used_heur: Which heuristic has to be used.*/
-    heuristics_manager(heuristics used_heur);
+    heuristics_manager(Heuristic used_heur);
 
     template <class T>
-    heuristics_manager(heuristics used_heur, const T & eState);
+    heuristics_manager(Heuristic used_heur, const T & eState);
 
     /** \brief The function that compute heuristic value
      * 
@@ -79,12 +79,12 @@ public:
      *
      * @param[in] used_h: The heuristics to assign to \ref m_used_heur
      */
-    void set_used_h(heuristics used_h);
+    void set_used_h(Heuristic used_h);
     /**Getter for the field \ref m_used_heur
      *
      * @return: The heuristics assigned to \ref m_used_heur
      */
-    heuristics get_used_h() const;
+    Heuristic get_used_h() const;
 
 
     /**Setter of the field \ref m_goals

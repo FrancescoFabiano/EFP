@@ -1,6 +1,6 @@
 #include "heuristics_manager.h"
 
-heuristics_manager::heuristics_manager(heuristics used_heur)
+heuristics_manager::heuristics_manager(Heuristic used_heur)
 {
 	set_used_h(used_heur);
 	m_goals = domain::get_instance().get_goal_description();
@@ -28,7 +28,7 @@ heuristics_manager::heuristics_manager(heuristics used_heur)
 			}
 			break;
 		}*/
-	case SUBGOALS:
+	case SUB_GOALS:
 	{
 		expand_goals();
 		satisfied_goals::get_instance().set(m_goals);
@@ -107,12 +107,12 @@ void heuristics_manager::produce_subgoals(unsigned short nesting, unsigned short
 	}
 }
 
-void heuristics_manager::set_used_h(heuristics used_h)
+void heuristics_manager::set_used_h(Heuristic used_h)
 {
 	m_used_heur = used_h;
 }
 
-heuristics heuristics_manager::get_used_h() const
+Heuristic heuristics_manager::get_used_h() const
 {
 	return m_used_heur;
 }

@@ -4,9 +4,12 @@
 #include <boost/shared_ptr.hpp>
 #include "../utilities/define.h"
 #include "../utilities/reader.h"
+#include "../../src/command_line_option.h"
 
 class domain_config {
 private:
+//    std::vector<command_line_option> options;
+
     boost::shared_ptr<reader> domain_reader;
 
     /**\brief The given to the *this*. (The name of the file that contains the description of *this*)*/
@@ -15,12 +18,12 @@ private:
     bool results_file;
     bool global_obsv;
     bool check_visited;
-    bis_type bisimulation;
-    heuristics used_heur;
-    search_type used_search;
+    Bisimulation_Algorithm bisimulation;
+    Heuristic used_heur;
+    Search_Strategy used_search;
     state_type s_type;
     logic domain_logic;
-    initial_state_mode mode;
+    Initial_State_Mode mode;
     action_check act_check;
 
     spec_lang_type input_lang;
@@ -31,8 +34,10 @@ private:
     bool kopt;
     std::vector<std::string> given_actions;
 
-    short max_depth;
-    short step;
+    short iter_dfs_max_depth;
+    short iter_dfs_step;
+
+    void build_command_line_options();
 
     void set_default_config();
 
@@ -55,17 +60,17 @@ public:
 
     bool is_check_visited() const;
 
-    bis_type get_bisimulation() const;
+    Bisimulation_Algorithm get_bisimulation() const;
 
-    heuristics get_used_heur() const;
+    Heuristic get_used_heur() const;
 
-    search_type get_used_search() const;
+    Search_Strategy get_used_search() const;
 
     state_type get_state_type() const;
 
     logic get_domain_logic() const;
 
-    initial_state_mode get_initial_state_mode() const;
+    Initial_State_Mode get_initial_state_mode() const;
 
     action_check get_act_check() const;
 
@@ -81,9 +86,9 @@ public:
 
     const std::vector<std::string> &get_given_actions() const;
 
-    short get_max_depth() const;
+    short get_iter_dfs_max_depth() const;
 
-    short get_step() const;
+    short get_iter_dfs_step() const;
 
     void set_domain_name(const std::string & to_set);
 
@@ -95,17 +100,17 @@ public:
 
     void set_check_visited(bool to_set);
 
-    void set_bisimulation(bis_type to_set);
+    void set_bisimulation(Bisimulation_Algorithm to_set);
 
-    void set_used_heur(heuristics to_set);
+    void set_used_heur(Heuristic to_set);
 
-    void set_used_search(search_type to_set);
+    void set_used_search(Search_Strategy to_set);
 
     void set_state_type(state_type to_set);
 
     void set_domain_logic(logic to_set);
 
-    void set_initial_state_mode(initial_state_mode to_set);
+    void set_initial_state_mode(Initial_State_Mode to_set);
 
     void set_act_check(action_check to_set);
 
@@ -121,9 +126,9 @@ public:
 
     void add_given_action(const std::string & action_name);
 
-    void set_max_depth(short to_set);
+    void set_iter_dfs_max_depth(short to_set);
 
-    void set_step(short to_set);
+    void set_iter_dfs_step(short to_set);
 };
 
 

@@ -495,7 +495,7 @@ void kstate::add_initial_kworld(const kworld & possible_add)
 	initially ini_conditions = domain::get_instance().get_initial_description();
 
 	switch (domain::get_instance().get_config().get_initial_state_mode()) {
-        case initial_state_mode::FINITARY_S5_THEORY: {
+        case Initial_State_Mode::FINITARY_S5_THEORY: {
             /* Since the common knowledge is on all the agent it means that every possible \ref kworld
              * in the initial state must entail *phi* where C(*phi*) is an initial condition.*/
 
@@ -514,7 +514,7 @@ void kstate::add_initial_kworld(const kworld & possible_add)
             }
             break;
 	    }
-        case initial_state_mode::CUSTOM_STATE:
+        case Initial_State_Mode::CUSTOM_INITIAL_STATE:
         default: {
             break;
         }
@@ -581,7 +581,7 @@ void kstate::remove_initial_kedge(const fluent_formula & known_ff, const agent &
 void kstate::remove_initial_kedge_bf(const belief_formula & to_check)
 {
 	switch (domain::get_instance().get_config().get_initial_state_mode()) {
-        case initial_state_mode::FINITARY_S5_THEORY: {
+        case Initial_State_Mode::FINITARY_S5_THEORY: {
             /* Just check whenever is B(--) \/ B(--) and remove that edge*/
             if (to_check.get_formula_type() == C_FORMULA) {
                 const belief_formula & tmp = to_check.get_bf1();
@@ -621,7 +621,7 @@ void kstate::remove_initial_kedge_bf(const belief_formula & to_check)
                 exit(1);
             }
         }
-        case initial_state_mode::CUSTOM_STATE:
+        case Initial_State_Mode::CUSTOM_INITIAL_STATE:
         default: {
             break;
         }
@@ -868,7 +868,7 @@ void kstate::calc_min_bisimilar()
 
 
 
-	if (domain::get_instance().get_config().get_bisimulation() == PaigeTarjan) {
+	if (domain::get_instance().get_config().get_bisimulation() == PAIGE_TARJAN) {
 		if (b.MinimizeAutomaPT(&a)) {
 			//VisAutoma(a);
 

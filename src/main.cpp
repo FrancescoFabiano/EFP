@@ -8,12 +8,10 @@
  */
 
 #include <iostream>
-#include <stdio.h>
-#include <string.h>
+#include <cstdio>
+#include <string>
 #include <memory>
-#include <vector>
 #include <algorithm>
-
 
 #include "../include/search/planner.ipp"
 
@@ -34,8 +32,7 @@ using namespace boost;
 
 shared_ptr<reader> domain_reader = make_shared<reader>(generator());
 
-void print_usage(char* prog_name)
-{
+void print_usage(char* prog_name) {
     std::cout << "USAGE:" << std::endl;
     std::cout << prog_name << " input_domain [options]" << std::endl << std::endl;
     std::cout << "OPTIONS:" << std::endl;
@@ -182,10 +179,10 @@ void build_domain_config(domain_config & config, int argc, char **argv) {
                 exit(1);
             } else if (strcmp(argv[i], "s5-theory") == 0) {
                 std::cout << "Initial state description must be a Finitary S5-Theory. (Default)" << std::endl;
-                config.set_initial_state_mode(initial_state_mode::FINITARY_S5_THEORY);
+                config.set_initial_state_mode(Initial_State_Mode::FINITARY_S5_THEORY);
             } else if (strcmp(argv[i], "custom") == 0) {
                 std::cout << "Initial state must be given by user." << std::endl;
-                config.set_initial_state_mode(initial_state_mode::CUSTOM_STATE);
+                config.set_initial_state_mode(Initial_State_Mode::CUSTOM_INITIAL_STATE);
             }
             //No case sensitivity
 //        else if (strcmp(argv[i], "-ir") == 0) {
@@ -247,7 +244,7 @@ void build_domain_config(domain_config & config, int argc, char **argv) {
                 std::cerr << "-s needs an integer value." << std::endl;
                 exit(1);
             } else {
-                config.set_max_depth(atoi(argv[i]));
+                config.set_iter_dfs_max_depth(atoi(argv[i]));
             }
         } else if (strcmp(argv[i], "-mm") == 0) {
             i++;
@@ -255,7 +252,7 @@ void build_domain_config(domain_config & config, int argc, char **argv) {
                 std::cerr << "-m needs an integer value" << std::endl;
                 exit(1);
             } else {
-                config.set_step(atoi(argv[i]));
+                config.set_iter_dfs_step(atoi(argv[i]));
             }
         } else if (strcmp(argv[i], "-act_obsv") == 0) {
             i++;
@@ -297,19 +294,19 @@ void build_domain_config(domain_config & config, int argc, char **argv) {
                 exit(1);
             } else if (strcmp(argv[i], "NONE") == 0) {
                 std::cout << "Breadth first search. (Default)" << std::endl;
-                config.set_used_heur(heuristics::NO_H);
+                config.set_used_heur(Heuristic::NO_H);
             } else if (strcmp(argv[i], "L_PG") == 0) {
                 std::cout << "A planning graph is used to calculate the distance of each state from the goal." << std::endl;
-                config.set_used_heur(heuristics::L_PG);
+                config.set_used_heur(Heuristic::L_PG);
             } else if (strcmp(argv[i], "S_PG") == 0) {
                 std::cout << "A planning graph is used to calculate the sum of each sub-goal distance starting from the state." << std::endl;
-                config.set_used_heur(heuristics::S_PG);
+                config.set_used_heur(Heuristic::S_PG);
             } else if (strcmp(argv[i], "C_PG") == 0) {
                 std::cout << "A single planning graph is used to calculate the sum of each 'grounded' belief formula." << std::endl;
-                config.set_used_heur(heuristics::C_PG);
+                config.set_used_heur(Heuristic::C_PG);
             } else if (strcmp(argv[i], "SUBGOALS") == 0) {
                 std::cout << "We select the state with the highest number of satisfied subgoals." << std::endl;
-                config.set_used_heur(heuristics::SUBGOALS);
+                config.set_used_heur(Heuristic::SUB_GOALS);
             } else {
                 std::cerr << "Wrong specification for '-h'; use 'NONE' or 'L_PG' or 'S_PG' or 'C_PG' or 'SUBGOALS'." << std::endl;
                 exit(1);
@@ -321,13 +318,13 @@ void build_domain_config(domain_config & config, int argc, char **argv) {
                 exit(1);
             } else if (strcmp(argv[i], "BFS") == 0) {
                 std::cout << "The solving process will use Breadth first search. (Default)" << std::endl;
-                config.set_used_search(search_type::BFS);
+                config.set_used_search(Search_Strategy::BFS);
             } else if (strcmp(argv[i], "DFS") == 0) {
                 std::cout << "The solving process will use Depth first search." << std::endl;
-                config.set_used_search(search_type::DFS);
+                config.set_used_search(Search_Strategy::DFS);
             } else if (strcmp(argv[i], "I_DFS") == 0) {
                 std::cout << "The solving process will use Iterative Depth First Search (-mm to set max_depth and -ss to set the step)" << std::endl;
-                config.set_used_search(search_type::I_DFS);
+                config.set_used_search(Search_Strategy::ITER_DFS);
             } else {
                 std::cerr << "Wrong specification for '-search_type'; use 'BFS' or 'DFS' or 'I_DFS'." << std::endl;
                 exit(1);
@@ -339,13 +336,13 @@ void build_domain_config(domain_config & config, int argc, char **argv) {
                 exit(1);
             } else if (strcmp(argv[i], "NONE") == 0) {
                 std::cout << "No Bisimulation is used for the reduction. (Default)" << std::endl;
-                config.set_bisimulation(bis_type::BIS_NONE);
+                config.set_bisimulation(Bisimulation_Algorithm::NO_BISIMULATION);
             } else if (strcmp(argv[i], "PT") == 0) {
                 std::cout << "The Paige-Tarjan Algorithm is used for kstate reduction." << std::endl;
-                config.set_bisimulation(bis_type::PaigeTarjan);
+                config.set_bisimulation(Bisimulation_Algorithm::PAIGE_TARJAN);
             } else if (strcmp(argv[i], "FB") == 0) {
                 std::cout << "The Fast-Bisimulation Algorithm introduced by Dovier et al, 2001 is used for kstate reduction." << std::endl;
-                config.set_bisimulation(bis_type::FastBisimulation);
+                config.set_bisimulation(Bisimulation_Algorithm::FAST_BISIMULATION);
             } else {
                 std::cerr << "Wrong specification for '-bis'; use 'NONE' or 'PT' or 'FB'." << std::endl;
                 exit(1);
@@ -415,40 +412,12 @@ void launch_search() {
     switch (config.get_state_type()) {
         case state_type::KRIPKE: {
             planner< state<kstate> > m_planner;
-
-            if (config.is_execute_given_actions()) {
-                if (config.is_results_file()) {
-                    m_planner.execute_given_actions_timed();
-                } else {
-                    m_planner.execute_given_actions();
-                }
-                std::cout << "\n\n\n*****THE END*****\n";
-            } else {
-                if (m_planner.search()) {
-                    std::cout << "\n\n\n*****THE END*****\n";
-                } else {
-                    std::cout << "\n\n\n*****THE SAD END*****\n";
-                }
-            }
+            m_planner.search();
             break;
         }
         case state_type::POSSIBILITIES: {
             planner< state<pstate> > m_planner;
-
-            if (config.is_execute_given_actions()) {
-                if (config.is_results_file()) {
-                    m_planner.execute_given_actions_timed();
-                } else {
-                    m_planner.execute_given_actions();
-                }
-                std::cout << "\n\n\n*****THE END*****\n";
-            } else {
-                if (m_planner.search()) {
-                    std::cout << "\n\n\n*****THE END*****\n";
-                } else {
-                    std::cout << "\n\n\n*****THE SAD END*****\n";
-                }
-            }
+            m_planner.search();
             break;
         }
         default:

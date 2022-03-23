@@ -5,12 +5,12 @@ void domain_config::set_default_config() {
     results_file = false;
     global_obsv = true;
     check_visited = false;
-    bisimulation = bis_type::BIS_NONE;
-    used_heur = heuristics::NO_H;
-    used_search = search_type::BFS;
+    bisimulation = Bisimulation_Algorithm::NO_BISIMULATION;
+    used_heur = Heuristic::NO_H;
+    used_search = Search_Strategy::BFS;
     s_type = state_type::POSSIBILITIES;
     domain_logic = logic::KD45;
-    mode = initial_state_mode::FINITARY_S5_THEORY;
+    mode = Initial_State_Mode::FINITARY_S5_THEORY;
     act_check = action_check::EXE_POINTED__COND_WORLD;
 
     input_lang = spec_lang_type::MAR; // EPDDL;
@@ -20,17 +20,67 @@ void domain_config::set_default_config() {
     execute_given_actions = false;
     kopt = false;
 
-    max_depth = 1;
-    step = 1;
+    iter_dfs_max_depth = 1;
+    iter_dfs_step = 1;
 }
 
 domain_config::domain_config() {
+    build_command_line_options();
     set_default_config();
 }
 
 domain_config::domain_config(const boost::shared_ptr<reader> &reader) {
+    build_command_line_options();
     set_domain_reader(reader);
     set_default_config();
+}
+
+void domain_config::build_command_line_options() {
+//    const std::string help_debug = "\tMakes the solving process verbose.";
+//    const auto set_debug = [this](const std::string& option_value) {
+//        this->set_debug(true);
+//        std::cout << "haha" << std::endl;
+//    };
+//
+//    command_line_option debug_option("-d", "--debug", help_debug, set_debug);
+//    options.emplace_back(debug_option);
+//
+//    const std::string help_results_file = "\tPrint the plan time in a file to make the tests confrontations easier.";
+//    const auto set_results_file = [this](const std::string& option_value) {
+//        this->set_results_file(true);
+//    };
+//
+//    command_line_option results_file_option("", "--results-file", help_results_file, set_results_file);
+//    options.emplace_back(results_file_option);
+//
+//    debug_option.get_config_parameter().operator()((std::string &) "");    // Does this fire lambda?
+//
+//    const std::string help_global_obsv = "\t";
+//    const auto set_global_obsv = [this](const std::string& option_value) {
+//        this->set_debug(true);
+//        std::cout << "haha" << std::endl;
+//    };
+//    command_line_option global_obsv_option("-d", "--debug", help_global_obsv, set_global_obsv);
+
+//    global_obsv = true;
+//    check_visited = false;
+//    bisimulation = bis_type::BIS_NONE;
+//    used_heur = heuristics::NO_H;
+//    used_search = search_type::BFS;
+//    s_type = state_type::POSSIBILITIES;
+//    domain_logic = logic::KD45;
+//    mode = initial_state_mode::FINITARY_S5_THEORY;
+//    act_check = action_check::EXE_POINTED__COND_WORLD;
+//
+//    input_lang = spec_lang_type::MAR; // EPDDL;
+//    update_models = up_model_type::STANDARD;
+//    models_filename = "";
+//
+//    execute_given_actions = false;
+//    kopt = false;
+//
+//    max_depth = 1;
+//    step = 1;
 }
 
 boost::shared_ptr<reader> domain_config::get_domain_reader() const {
@@ -57,15 +107,15 @@ bool domain_config::is_check_visited() const {
     return check_visited;
 }
 
-bis_type domain_config::get_bisimulation() const {
+Bisimulation_Algorithm domain_config::get_bisimulation() const {
     return bisimulation;
 }
 
-heuristics domain_config::get_used_heur() const {
+Heuristic domain_config::get_used_heur() const {
     return used_heur;
 }
 
-search_type domain_config::get_used_search() const {
+Search_Strategy domain_config::get_used_search() const {
     return used_search;
 }
 
@@ -77,7 +127,7 @@ logic domain_config::get_domain_logic() const {
     return domain_logic;
 }
 
-initial_state_mode domain_config::get_initial_state_mode() const {
+Initial_State_Mode domain_config::get_initial_state_mode() const {
     return mode;
 }
 
@@ -109,12 +159,12 @@ const std::vector<std::string> &domain_config::get_given_actions() const {
     return given_actions;
 }
 
-short domain_config::get_max_depth() const {
-    return max_depth;
+short domain_config::get_iter_dfs_max_depth() const {
+    return iter_dfs_max_depth;
 }
 
-short domain_config::get_step() const {
-    return step;
+short domain_config::get_iter_dfs_step() const {
+    return iter_dfs_step;
 }
 
 void domain_config::set_domain_name(const std::string & to_set) {
@@ -143,15 +193,15 @@ void domain_config::set_check_visited(bool to_set) {
     domain_config::check_visited = to_set;
 }
 
-void domain_config::set_bisimulation(bis_type to_set) {
+void domain_config::set_bisimulation(Bisimulation_Algorithm to_set) {
     domain_config::bisimulation = to_set;
 }
 
-void domain_config::set_used_heur(heuristics to_set) {
+void domain_config::set_used_heur(Heuristic to_set) {
     domain_config::used_heur = to_set;
 }
 
-void domain_config::set_used_search(search_type to_set) {
+void domain_config::set_used_search(Search_Strategy to_set) {
     domain_config::used_search = to_set;
 }
 
@@ -163,7 +213,7 @@ void domain_config::set_domain_logic(logic to_set) {
     domain_config::domain_logic = to_set;
 }
 
-void domain_config::set_initial_state_mode(initial_state_mode to_set) {
+void domain_config::set_initial_state_mode(Initial_State_Mode to_set) {
     mode = to_set;
 }
 
@@ -195,10 +245,10 @@ void domain_config::add_given_action(const std::string & action_name) {
     domain_config::given_actions.push_back(action_name);
 }
 
-void domain_config::set_max_depth(short to_set) {
-    domain_config::max_depth = to_set;
+void domain_config::set_iter_dfs_max_depth(short to_set) {
+    domain_config::iter_dfs_max_depth = to_set;
 }
 
-void domain_config::set_step(short to_set) {
-    domain_config::step = to_set;
+void domain_config::set_iter_dfs_step(short to_set) {
+    domain_config::iter_dfs_step = to_set;
 }

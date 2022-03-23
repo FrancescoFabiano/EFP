@@ -125,18 +125,17 @@ typedef std::map<action_id, std::string> reverse_action_name_map; /**< \brief Th
                                                            * @see grounder.*/
 
 /** \brief The possible heuristics applicable to the domain.*/
-enum heuristics
-{
+enum Heuristic {
     NO_H, /**< Breadth first search is executed*/
     L_PG, /**< A planning graph is used to calculate the distance of each state from the goal.
                     * 
-                    * For now for every state is computed a planning graph and then the lenght of it is returned.
+                    * For now for every state is computed a planning graph and then the length of it is returned.
                     * 
                     * \todo Optimize and maybe create only one planning graph and check where the state belongs.
                     * .*/
-    S_PG, /**< A planning graph is used to calculate the sungoals distance of each state from the goal.
+    S_PG, /**< A planning graph is used to calculate the sub-goals distance of each state from the goal.
                     * 
-                    * For now for every state is computed a planning graph and then the sum of the distances of each subgoals is returned
+                    * For now for every state is computed a planning graph and then the sum of the distances of each sub-goals is returned
                     * 
                     * \todo Optimize and maybe create only one planning graph and check where the state belongs.
                     * .*/
@@ -144,24 +143,22 @@ enum heuristics
                     * 
                     * This follows the idea of converting belief formula in fluent and just execute classical planning graph.
                     * .*/
-    SUBGOALS /**< For each state is calculate dthe number of (found or) missing subgoals
+    SUB_GOALS /**< For each state is calculate the number of (found or) missing sub-goals
                     * 
-                    * The group operator C is splitted in more belief_formulae.*/
+                    * The group operator C is split in more belief_formulae.*/
 };
 
-enum search_type
-{
+enum Search_Strategy {
     BFS, /** Breadth first search is executed*/
     DFS, /** Depth first search is executed*/
-    I_DFS /** Iterative Depth first search is executed*/
+    ITER_DFS /** Iterative Depth first search is executed*/
 };
 
 /** \brief The possible types of bisimulation algorithms.*/
-enum bis_type
-{
-    BIS_NONE, /**< No Bisimulation is used*/
-    PaigeTarjan, /**< The standard Paige-Tarjan Algorithm..*/
-    FastBisimulation /**< The Fast-Bisimulation Algorithm introduced by Dovier et al, 2001.*/
+enum Bisimulation_Algorithm {
+    NO_BISIMULATION, /**< No Bisimulation is used*/
+    PAIGE_TARJAN, /**< The standard Paige-Tarjan Algorithm..*/
+    FAST_BISIMULATION /**< The Fast-Bisimulation Algorithm introduced by Dovier et al, 2001.*/
 };
 
 /** \brief The possible restriction applicable to the domain.
@@ -171,9 +168,9 @@ enum bis_type
  *
  * It has been introduced because it helps with the computation of the initial state (Finitary S5).*/
 
-enum initial_state_mode {
+enum Initial_State_Mode {
     FINITARY_S5_THEORY,
-    CUSTOM_STATE
+    CUSTOM_INITIAL_STATE
 };
 
 /** \brief The possible way of checking an action effects executability.*/

@@ -23,7 +23,7 @@ bool initially::check_restriction(const belief_formula & bf) { //Apply the restr
 		 * - C(B(i,*phi*)) -> all worlds must entail *phi*.
 		 * - C(B(i,*phi*) \ref BF_OR B(i,-*phi*)) -> only edges conditions.
 		 * - C(-B(i,*phi*) \ref BF_AND -B(i,-*phi*)) -> only edges conditions.*/
-        case initial_state_mode::FINITARY_S5_THEORY: {
+        case Initial_State_Mode::FINITARY_S5_THEORY: {
             switch (bf.get_formula_type()) {
                 //To admit initially [S5_ok AND S5_ok AND ...]  (Also taken care of in the add_initial_condition)
                 case PROPOSITIONAL_FORMULA: {
@@ -89,7 +89,7 @@ bool initially::check_restriction(const belief_formula & bf) { //Apply the restr
             }
             break;
 	    }
-        case initial_state_mode::CUSTOM_STATE:
+        case Initial_State_Mode::CUSTOM_INITIAL_STATE:
         default: {
             return false;
         }
@@ -138,7 +138,7 @@ const fluent_formula & initially::get_ff_forS5() const
 }
 
 void initially::set_ff_forS5() {
-	if (domain::get_instance().get_config().get_initial_state_mode() == initial_state_mode::FINITARY_S5_THEORY) {
+	if (domain::get_instance().get_config().get_initial_state_mode() == Initial_State_Mode::FINITARY_S5_THEORY) {
 		//The consistency with S5 is already checked
 		fluent_formula ret;
 		formula_list::const_iterator it_fl;

@@ -276,11 +276,11 @@ void domain::build_initially() {
 
 	// Given the initial state mode, the initial state might need different function
 	switch (config.get_initial_state_mode()) {
-        case initial_state_mode::FINITARY_S5_THEORY: {
+        case Initial_State_Mode::FINITARY_S5_THEORY: {
             m_intial_description.set_ff_forS5();
             break;
         }
-        case initial_state_mode::CUSTOM_STATE:
+        case Initial_State_Mode::CUSTOM_INITIAL_STATE:
         default: {
             break;
         }
