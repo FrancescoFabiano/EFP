@@ -144,8 +144,6 @@ void print_usage(char* prog_name) {
     std::cout << prog_name << " ex.al -e open_a peek_a" << std::endl;
     std::cout << "	Execute the plan [open_a; peek_a]." << std::endl;
     std::cout << "	As no e-state representation is selected the solver will use Possibilities." << std::endl << std::endl;
-
-    exit(1);
 }
 
 void build_domain_config(domain_config & config, int argc, char **argv) {
@@ -426,8 +424,10 @@ void launch_search() {
     }
 }
 
-void generate_domain(domain_config & config, char** argv)
-{
+void build_domain(int argc, char** argv) {
+    domain_config config(domain_reader);
+    build_domain_config(config, argc, argv);
+
     std::string domain_name = argv[1];
     std::string used_name = domain_name;
 
@@ -477,31 +477,13 @@ void generate_domain(domain_config & config, char** argv)
     domain::get_instance().build();
 }
 
-/*void generate_asp_encoding()
-{
-	if (generate_asp) {
-
-		asp_maker aspm;
-		aspm.print_all();
-		exit(0);
-	}
-}*/
-
 int main(int argc, char** argv) {
-    // If there are too few arguments
     if (argc < 2) {
         print_usage(argv[0]);
+        exit(1);
     }
 
-    domain_config config(domain_reader);
-
-    // manage and prepare arguments for the planner
-    build_domain_config(config, argc, argv);
-
-    //check eventualy problem on input file and generate domain
-    generate_domain(config, argv);
-
-    //launch search planner
+    build_domain(argc, argv);
     launch_search();
 
     exit(0);
