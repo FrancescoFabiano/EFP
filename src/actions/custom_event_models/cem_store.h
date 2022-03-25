@@ -15,12 +15,8 @@
 
 #pragma once
 
-#include <set>
 #include "cem.h"
-
-typedef act_type cem_id;
-typedef std::set<cevent> cevent_set; /**< \brief A set of \ref cevent, used to store all the created ones.*/
-typedef std::set<cem> cem_set; /**< \brief A set of \ref cem, used to store all the created ones.*/
+#include "../../../include/definitions/delphic.h"
 
 class cem_store {
 private:

@@ -15,12 +15,7 @@
 
 #include "cevent.h"
 
-//#include "../../../include/definitions/delphic.h"
-
-typedef act_type cem_id;
-typedef std::set<cevent_ptr> cevent_ptr_set;
-typedef std::map<agent_group_id, cevent_ptr_set> cevent_map;
-typedef std::map<cevent_ptr, cevent_map> cem_edges;
+#include "../../../include/definitions/delphic.h"
 
 class cem {
     friend class cem_ptr;

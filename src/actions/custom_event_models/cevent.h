@@ -16,19 +16,6 @@
 #include "../../formulae/belief_formula.h"
 #include "../action.h"
 
-//typedef short event_id;
-//
-//enum e_meta_condition {
-//    act_eff,
-//    neg_act_eff,
-//    act_pre,
-//    neg_act_pre,
-//    none
-//};
-//
-//typedef std::set<e_meta_condition> event_metacond;
-//typedef fluent_formula event_postconditions;
-
 class cevent {
     friend class cevent_ptr;
 

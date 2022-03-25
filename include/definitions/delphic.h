@@ -31,14 +31,12 @@ typedef std::map<agent, agent_group_id> agent_group_map;
  * \TODO: RICONTROLLA DEPENDENCIES DEGLI HEADER
  */
 // Possibilities
-//class cevent;
 typedef short event_id;
 
 class cevent_ptr;
 typedef std::set<cevent_ptr> cevent_ptr_set;
 
 
-//class cem;
 typedef act_type cem_id;
 
 class cem_ptr;
@@ -50,7 +48,10 @@ class pworld_ptr;
 typedef std::map<std::pair<pworld_ptr, cevent_ptr>, pworld_ptr> cupdate_map;
 
 //class cem_store;
-//typedef std::set<cevent> cevent_set; /**< \brief A set of \ref cevent, used to store all the created ones.*/
-//typedef std::set<cem> cem_set; /**< \brief A set of \ref cem, used to store all the created ones.*/
+class cevent;
+class cem;
+
+typedef std::set<cevent> cevent_set; /**< \brief A set of \ref cevent, used to store all the created ones.*/
+typedef std::set<cem> cem_set; /**< \brief A set of \ref cem, used to store all the created ones.*/
 
 #endif //EFP_DELPHIC_H
