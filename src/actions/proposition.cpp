@@ -24,12 +24,12 @@ act_type proposition::get_action_type() const {
     return m_act_type;
 }
 
-fluent_formula proposition::get_action_effect() const {
-    return domain::get_instance().get_grounder().ground_fluent(m_action_effect);
+fluent_formula proposition::get_action_effect(const grounder& grounder) const {
+    return grounder.ground_fluent(m_action_effect);
 }
 
-agent proposition::get_agent() const {
-    return domain::get_instance().get_grounder().ground_agent(m_agent);
+agent proposition::get_agent(const grounder& grounder) const {
+    return grounder.ground_agent(m_agent);
 }
 
 agent_group_id proposition::get_agent_group() const {
@@ -40,8 +40,8 @@ const belief_formula &proposition::get_conditions() const {
     return m_conditions;
 }
 
-const belief_formula &proposition::get_grounded_conditions() {
-    m_conditions.ground();
+const belief_formula &proposition::get_grounded_conditions(const grounder& grounder) {
+    m_conditions.ground(grounder);
     return m_conditions;
 }
 
@@ -83,34 +83,34 @@ void proposition::set_conditions(const belief_formula &to_set) {
 }
 
 void proposition::print() const {
-    switch (m_type) {
-        case EFFECTS:
-            std::cout << get_action_name() << " has_effects ";
-            printer::get_instance().print_list(get_action_effect());
-            std::cout << " if ";
-            get_conditions().print();
-            break;
-        case EXECUTABILITY:
-            std::cout << get_action_name() << " executable if ";
-            get_conditions().print();
-            break;
-        case OBSERVABILITY:
-            std::cout << get_agent() << " belongs to group "
-                      << cem_store::get_instance().get_agent_group_name(get_agent_group()) << " if ";
-            get_conditions().print();
-            break;
-        case TYPE:
-            std::cout << get_action_name() << " has_type " << cem_store::get_instance().get_cem_name(get_action_type());
-            break;
-            /*******FOR MAL OPTIMIZATION******/
-        case MAL_EFF:
-            std::cout << get_action_name() << " has_type " << cem_store::get_instance().get_cem_name(get_action_type());
-            std::cout << get_action_name() << " has_effects ";
-            printer::get_instance().print_list(get_action_effect());
-            std::cout << " if ";
-            get_conditions().print();
-            break;
-        default: /* static */
-            break;
-    }
+//    switch (m_type) {
+//        case EFFECTS:
+//            std::cout << get_action_name() << " has_effects ";
+//            printer::get_instance().print_list(get_action_effect());
+//            std::cout << " if ";
+//            get_conditions().print();
+//            break;
+//        case EXECUTABILITY:
+//            std::cout << get_action_name() << " executable if ";
+//            get_conditions().print();
+//            break;
+//        case OBSERVABILITY:
+//            std::cout << get_agent() << " belongs to group "
+//                      << cem_store::get_instance().get_agent_group_name(get_agent_group()) << " if ";
+//            get_conditions().print();
+//            break;
+//        case TYPE:
+//            std::cout << get_action_name() << " has_type " << cem_store::get_instance().get_cem_name(get_action_type());
+//            break;
+//            /*******FOR MAL OPTIMIZATION******/
+//        case MAL_EFF:
+//            std::cout << get_action_name() << " has_type " << cem_store::get_instance().get_cem_name(get_action_type());
+//            std::cout << get_action_name() << " has_effects ";
+//            printer::get_instance().print_list(get_action_effect());
+//            std::cout << " if ";
+//            get_conditions().print();
+//            break;
+//        default: /* static */
+//            break;
+//    }
 };

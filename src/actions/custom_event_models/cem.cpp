@@ -1,7 +1,6 @@
 #include "cem.h"
 
-#include "cevent.h"
-#include "cem_store.h"
+//#include "cem_store.h"
 
 cem::cem()
 {
@@ -82,17 +81,16 @@ bool cem::operator=(const cem & to_copy)
 	return true;
 }
 
-void cem::print() const
-{
-	std::cout << "\nModel (" << get_id() << ") has:\n\tPointed cevent = " << get_pointed_id() << ";\n\tEdges:\n";
-
-	for (auto it_fl = m_edges.begin(); it_fl != m_edges.end(); ++it_fl) {
-		for (auto it_edge = it_fl->second.begin(); it_edge != it_fl->second.end(); ++it_edge) {
-			for (auto it_internal = it_edge->second.begin(); it_internal != it_edge->second.end(); ++it_internal) {
-				std::cout << "\t\t- " << it_fl->first.get_id() << "-" << cem_store::get_instance().get_agent_group_name(it_edge->first) << "-" << it_internal->get_id() << std::endl;
-			}
-		}
-	}
+void cem::print() const {
+//	std::cout << "\nModel (" << get_id() << ") has:\n\tPointed cevent = " << get_pointed_id() << ";\n\tEdges:\n";
+//
+//	for (auto it_fl = m_edges.begin(); it_fl != m_edges.end(); ++it_fl) {
+//		for (auto it_edge = it_fl->second.begin(); it_edge != it_fl->second.end(); ++it_edge) {
+//			for (auto it_internal = it_edge->second.begin(); it_internal != it_edge->second.end(); ++it_internal) {
+//				std::cout << "\t\t- " << it_fl->first.get_id() << "-" << cem_store::get_instance().get_agent_group_name(it_edge->first) << "-" << it_internal->get_id() << std::endl;
+//			}
+//		}
+//	}
 }
 
 /****************************************************************************/

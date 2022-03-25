@@ -1,9 +1,9 @@
 #include "heuristics_manager.h"
 
-heuristics_manager::heuristics_manager(Heuristic used_heur)
+heuristics_manager::heuristics_manager(const domain& domain, Heuristic used_heur)
 {
 	set_used_h(used_heur);
-	m_goals = domain::get_instance().get_goal_description();
+	m_goals = domain.get_goal_description();
 	switch ( m_used_heur ) {
 		/*case L_PG:
 		case S_PG:

@@ -39,7 +39,7 @@ private:
      * 
      * @return true: if \p to_check respects \ref m_ini_restriction.
      * @return false: if \p to_check doesn't respect \ref m_ini_restriction.*/
-    bool check_restriction(const belief_formula & to_check);
+    bool check_restriction(Initial_State_Mode initial_state_mode, const belief_formula & to_check);
 
     /**
      * \brief The set of \ref fluent know by formulae of the type C([ags], f).
@@ -72,7 +72,7 @@ public:
      * @param[in] to_add: a \ref belief_formula that the initial \ref state must entail.
      *
      * \todo is parameter passing ok?*/
-    void add_initial_condition(const belief_formula & to_add);
+    void add_initial_condition(Initial_State_Mode initial_state_mode, const belief_formula & to_add);
 
     /**
      * \brief getter for the field m_pointed_world_conditions.
@@ -106,7 +106,7 @@ public:
      * - C(B(i,*phi*)) -> all worlds must entail *phi*.
      * - C(B(i,*phi*) \ref BF_OR B(i,-*phi*)) -> only edges conditions.
      * - C(-B(i,*phi*) \ref BF_AND -B(i,-*phi*)) -> only edges conditions.*/
-    void set_ff_forS5();
+    void set_ff_forS5(Initial_State_Mode initial_state_mode);
 
     /**\brief  Getter of the field \ref m_ff_forS5.
      * 

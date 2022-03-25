@@ -93,6 +93,7 @@ struct automa_struct
 {
     unsigned long Nvertex;
     unsigned long Nbehavs;
+    unsigned long Nagents;
     v_elem *Vertex;
 };
 

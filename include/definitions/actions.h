@@ -3,6 +3,11 @@
 
 #include "domain_def.h"
 
+class action;
+typedef std::set<action> action_set; /**< \brief A representation a set of \ref action.*/
+
+typedef std::vector<action> action_list; /**< \brief A representation of a sequential executution of \ref action*/
+
 class belief_formula;
 
 typedef short agent_group_id;

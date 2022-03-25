@@ -1880,8 +1880,7 @@ bisimulation::bisimulation()
 
 /*\***KRIPKE RELATED ONLY***/
 
-automaton* bisimulation::merge_kstate_to_automaton(const kstate & ks1, const kstate & ks2, /*const std::map<kworld_ptr, kworld_ptr_set> & adj_list1, const std::map<kworld_ptr, kworld_ptr_set> & adj_list2,*/ int & root2, const std::map<agent, bis_label> & agent_to_label) const
-{
+automaton* bisimulation::merge_kstate_to_automaton(const kstate & ks1, const kstate & ks2, unsigned long ag_set_size, int & root2, const std::map<agent, bis_label> & agent_to_label) const {
 
 	std::map<int, int> compact_indices;
 	std::map<kworld_ptr, int> index_map1, index_map2;
@@ -1889,7 +1888,6 @@ automaton* bisimulation::merge_kstate_to_automaton(const kstate & ks1, const kst
 
 	automaton *a;
 	int Nvertex = ks1.get_worlds().size() + ks2.get_worlds().size();
-	int ag_set_size = domain::get_instance().get_agents().size();
 	//BIS_ADAPTATION For the loop that identifies the id (We add one edge for each node)
 	v_elem *Vertex;
 
@@ -2027,14 +2025,11 @@ automaton* bisimulation::merge_kstate_to_automaton(const kstate & ks1, const kst
 	return a;
 }
 
-bool bisimulation::compare_automata(const kstate & ks1, const kstate & ks2)
-{
+bool bisimulation::compare_automata(const kstate &ks1, const kstate &ks2, const agent_set &agents) {
 	int root1 = 0, root2;
 
 	std::map<agent, bis_label> agent_to_label;
 
-
-	auto agents = domain::get_instance().get_agents();
 	auto it_ag = agents.begin();
 	bis_label ag_label = 0;
 	agent lab_agent;
@@ -2045,7 +2040,7 @@ bool bisimulation::compare_automata(const kstate & ks1, const kstate & ks2)
 	}
 	
 	// std::cerr << "\nDEBUG: Entering merge_automata...\n";
-	automaton* a = merge_kstate_to_automaton(ks1, ks2, root2, agent_to_label);
+	automaton* a = merge_kstate_to_automaton(ks1, ks2, agents.size(), root2, agent_to_label);
 
 	if (a == nullptr) {
 		// std::cerr << "\nDEBUG: Returned null automaton...\n";
@@ -2076,13 +2071,11 @@ bool bisimulation::compare_automata(const kstate & ks1, const kstate & ks2)
 	return ret;
 }
 
-bool bisimulation::compare_automata_eq(const kstate & ks1, const kstate & ks2)
-{
+bool bisimulation::compare_automata_eq(const kstate &ks1, const kstate &ks2, const agent_set &agents) {
 	int root1 = 0, root2;
 	
 	std::map<agent, bis_label> agent_to_label;
 
-	auto agents = domain::get_instance().get_agents();
 	auto it_ag = agents.begin();
 	bis_label ag_label = 0;
 	agent lab_agent;
@@ -2093,7 +2086,7 @@ bool bisimulation::compare_automata_eq(const kstate & ks1, const kstate & ks2)
 	}
 
 	// std::cerr << "\nDEBUG: Entering merge_automata...\n";
-	automaton* a = merge_kstate_to_automaton(ks1, ks2, root2, agent_to_label);
+	automaton* a = merge_kstate_to_automaton(ks1, ks2, agents.size(), root2, agent_to_label);
 
 	if (a == nullptr) {
 		return true;
@@ -2140,7 +2133,7 @@ bool bisimulation::compare_automata_eq(const kstate & ks1, const kstate & ks2)
 //
 //	automaton *a;
 //	int Nvertex = ks1.get_worlds().size() + ks2.get_worlds().size();
-//	int ag_set_size = domain::get_instance().get_agents().size();
+//	int ag_set_size = domain.get_agents().size();
 //	//BIS_ADAPTATION For the loop that identifies the id (We add one edge for each node)
 //	v_elem *Vertex;
 //

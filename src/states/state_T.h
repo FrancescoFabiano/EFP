@@ -220,7 +220,7 @@ public:
     /* @param ini_conditions: the conditions that the initial state must respect.
      * @param fluent_number: the number of fluent in the domain, used for the prune construction.
      * @param[in] agent_number: the number of \ref agent in the \ref domain, used for the prune construction.*/
-    void build_initial();
+    void build_initial(const initially& initial_conditions);
 
     /** \brief Function that checks if a given action is executable in *this*.
      *  
@@ -235,7 +235,7 @@ public:
      *
      * @return true: if *this* is a goal state.
      * @return false: otherwise.*/
-    bool is_goal() const;
+    bool is_goal(const formula_list& goal_description) const;
 
 
     /** \brief Function that computes the successor of *this* given an \ref action.
@@ -259,7 +259,7 @@ public:
      * The function depends on the type of e-state.
      *
      * @return the minimum bisimilar e-state to *this*.*/
-    void calc_min_bisimilar();
+    void calc_min_bisimilar(Bisimulation_Algorithm algorithm);
 
     /** \brief The copy operator.
      *   

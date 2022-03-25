@@ -64,10 +64,10 @@ public:
     /** \brief Class constructor that uses the chosen heuristic to perform the operation
      * 
      * @param[in] used_heur: Which heuristic has to be used.*/
-    heuristics_manager(Heuristic used_heur);
+    heuristics_manager(const domain& domain, Heuristic used_heur);
 
     template <class T>
-    heuristics_manager(Heuristic used_heur, const T & eState);
+    heuristics_manager(const domain& domain, Heuristic used_heur, const T & eState);
 
     /** \brief The function that compute heuristic value
      * 

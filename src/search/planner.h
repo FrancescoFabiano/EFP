@@ -47,14 +47,14 @@ private:
      * @param[in] results_file: if true print the plan time in a file to easy the confrontation with the old version.
      * @return true if a plan is found.
      * @return false otherwise.*/
-    bool search_BFS();
+    bool search_BFS(const domain& domain);
 
     //ricerca con DFS
-    bool search_DFS();
+    bool search_DFS(const domain& domain);
 
     //ricerca con dfs iterativa che scandisce a livelli la ricerca in profondita, maxDepth è il massimo cammino in profonidtà e step di quanto ad ogni giro incrementiamo
     //i nostri step in profondità
-    bool search_iterative_DFS();
+    bool search_iterative_DFS(const domain& domain);
 
     /**Function that searches on m_search_space using Best First Search.
      * 
@@ -62,27 +62,27 @@ private:
      * @param[in] used_heur: used to determine if any heuristic has to be used and which one.
      * @return true if a plan is found.
      * @return false otherwise.*/
-    bool search_heuristic();
+    bool search_heuristic(const domain& domain);
     /* \brief The \ref state_type.*/
     //state_type m_state_type;
 
     /**Function that searches on m_search_space using the given actions.
      *@param[in] act_name: the names of the \ref action to execute (ordered).*/
-    bool execute_given_actions();
+    bool execute_given_actions(const domain& domain);
 
     /**Function that searches on m_search_space using the given actions and print out the execution time.
      *
      * Every useless I\O step is removed for time accuracy
      *
      *@param[in] act_name: the names of the \ref action to execute (ordered).*/
-    bool execute_given_actions_timed();
+    bool execute_given_actions_timed(const domain& domain);
 
     /**Function that checks whether the given actions exist.
      *
      * It also removes extra commas between actions
      *
      *@param[in] act_name: the names of the \ref action to execute (ordered).*/
-    void check_actions_names();
+    void check_actions_names(const domain& domain);
 public:
     /**Function that searches on m_search_space.
      * 
@@ -93,7 +93,7 @@ public:
      * @param[in] IDFS_d: used as initial "max depth" parameter by I_DFS.
      * @param[in] IDFS_s: used "step" parameter by I_DFS.
      * @return true if a plan is found.*/
-    bool search();
+    bool search(const domain& domain);
 
     /**Function print out the solution time.
      * 
@@ -103,5 +103,6 @@ public:
      * @param[in] given_plan: if true changes the name of the output folder for the comparison time.
      * @param[in] used_search: The type of serach used.
      * @param[in] used_heur: which heuristic has been used.*/
-    void print_results(std::chrono::duration<double> elapsed_seconds, T goal, bool given_plan);
+    void print_results(const domain &domain, std::chrono::duration<double> elapsed_seconds, T goal,
+                       bool given_plan);
 };

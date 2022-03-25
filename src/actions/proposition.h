@@ -78,11 +78,11 @@ public:
     /** Getter of the field \ref m_action_effect grounded.
      * 
      * @return the grounded value of \ref m_action_effect.*/
-    fluent_formula get_action_effect() const;
+    fluent_formula get_action_effect(const grounder& grounder) const;
     /** Getter of the field \ref m_agent grounded.
      * 
      * @return the grounded value of \ref m_agent.*/
-    agent get_agent() const;
+    agent get_agent(const grounder& grounder) const;
 
     /** Getter of the field \ref m_agent_group.
      * 
@@ -97,7 +97,7 @@ public:
     /** Getter of the field \ref m_conditions grounded.
      * 
      * @return the grounded value of \ref m_conditions.*/
-    const belief_formula & get_grounded_conditions();
+    const belief_formula & get_grounded_conditions(const grounder& grounder);
 
 
     /** Setter for the field \ref m_type.

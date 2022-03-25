@@ -26,18 +26,17 @@
 #include "../actions/proposition.h"
 
 class reader {
-private:
-    reader();
-
 public:
+    reader();
     /** \brief To get always (the same instance of) *this* and the same instantiated fields.
      * \warning the \ref set_config has to called in the main file only.*/
     static reader& get_instance();
 
-    /** \brief Copy constructor removed since is Singleton class. */
     reader(reader const&) = delete;
-    /** \brief Copy operator removed since Singleton class. */
-    void operator=(reader const&) = delete;
+    reader(reader const&&) = delete;
+
+    reader& operator=(reader const&) = delete;
+    reader& operator=(reader const&&) = delete;
 
     /** \brief Name of all the fluents (only positive) in the domain.*/
     string_set m_fluents;

@@ -218,7 +218,7 @@ private:
      * @return the automaton equivalent to *this*.*/
     //     * @param[in] index_map: a map that associates a unique id to each \ref kworld.
     //     * @param[in] compact_indices: we associate to the \ref kworld numerical ids a second kind of numerical ids. These new ids are consecutive numbers (hence, they are compact).
-    automaton kstate_to_automaton(/*const std::map<kworld_ptr, kworld_ptr_set> & adj_list,*/ std::vector<kworld_ptr> & kworld_vec, const std::map<agent, bis_label> & agent_to_label) const;
+    automaton kstate_to_automaton(std::vector<kworld_ptr> & kworld_vec, const std::map<agent, bis_label> & agent_to_label) const;
     /** \brief Function that transforms the given automaton into an equivalent \ref kstate.
      * 
      * @param[in] a: the automaton to transform.
@@ -226,17 +226,6 @@ private:
      * 
      * @return the \ref kstate.*/
     void automaton_to_kstate(const automaton & a, const std::vector<kworld_ptr> & kworld_vec, const std::map<bis_label, agent> & label_to_agent);
-
-
-    /** \brief Function that builds the initial Kripke structure given the initial conditions in a structural way.
-     *
-     *         -# Compute the set of *phi* not know by \ref agent ag for each \ref agent;
-     *         -# for each set compute the all the consistent \ref kworld where *phi* changes;
-     *         -# create a \ref kedge between all this \ref kworld (transitively closed) labeled with ag;
-     *         -# link all the classes of \ref kworld with an ongoing \ref kedge labeled with the ag of the reaching class.
-     * 
-     * @see kworld, kedge and initially.*/
-    void build_initial_structural();
 
     /** \brief Function that builds the initial Kripke structure given the initial conditions pruning from a complete K structure.
      *
@@ -247,7 +236,7 @@ private:
      *  
      * \todo If this method is the one is implemented the add functions in \ref kstore must be changed to not create the object
      *       every time but just to retrieve the object since all of them are already created.*/
-    void build_initial_prune();
+    void build_initial_prune(const initially& initial_conditions);
     /** \brief Function used to build all the possible permutations of the \ref domain's \ref fluent.
      *  
      * The function creates all the permutation recursively and adds to *this* only the ones that respect \p ini_conditions.
@@ -256,7 +245,7 @@ private:
      * @param[out] permutation: the permutation in construction.
      * @param[in] index: the index of the \ref fluent to add.*/
 
-    void generate_initial_kworlds(fluent_set& permutation, int index, const fluent_set & initially_known);
+    void generate_initial_kworlds(fluent_set& permutation, int index, const initially& initial_conditions);
     /** \brief Function check if the \ref kworld respect the initial conditions and adds it to *this* if it does.
      *  
      * The function checks if the \ref kworld created by \ref generate_initial_kworlds(fluent_set&, int)
@@ -265,13 +254,13 @@ private:
      * - If it doesn't the \ref kworld is added only to \ref kstore.
      * 
      * @param[in] possible_add: the \ref kworld to check.*/
-    void add_initial_kworld(const kworld & possible_add);
+    void add_initial_kworld(const kworld & possible_add, const initially& initial_conditions);
 
     /** \brief Function used to build the \ref kedge of the initial \ref kstate.
      *  
      * The function creates all the edges and adds to *this* only the ones that respect \p ini_conditions.
      * All the other ones are stored in \ref kstore for future usees.*/
-    void generate_initial_kedges();
+    void generate_initial_kedges(const initially& initial_conditions);
     /** \brief Function that removes the a \ref kedge_ptr from \ref m_information_state.
      * 
      * @param[in] to_remove: the \ref kedge which pointer has to be removed.*/
@@ -421,7 +410,7 @@ public:
      * 
      * \todo if first method is implemented the add functions in \ref kstore must be changed to not create 
      *       the object every time but just to retrieve the object since all of them are already created.*/
-    void build_initial();
+    void build_initial(const initially& initial_conditions);
 
     /** \brief Function that applies the transition function on *this* given an action.
      *
@@ -440,7 +429,7 @@ public:
     /** \brief Function that sets *this* as the mimimum \ref kstate that is bisimilar to the current one.
      *
      * The function follows the approach of the algorithm described in Paige and Tarjan (1986).*/
-    void calc_min_bisimilar();
+    void calc_min_bisimilar(Bisimulation_Algorithm algorithm);
 
     /** \brief Function that prints the information of *this*.*/
     void print() const;

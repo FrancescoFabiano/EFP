@@ -213,90 +213,87 @@ void belief_formula::set_bf2(const belief_formula & to_set)
 	//m_bf2 = std::shared_ptr<belief_formula>(&to_set);
 }
 
-void belief_formula::print() const
-{
-
-	/*if (!m_is_grounded) {
-		std::cerr << "\nError in reading a belief_formula, it must be grounded";
-		std::cerr << std::endl;
-		exit(1);
-	}*/
-
-	switch ( m_formula_type ) {
-
-	case FLUENT_FORMULA:
-		printer::get_instance().print_list(m_fluent_formula);
-		break;
-	case BELIEF_FORMULA:
-		std::cout << "B(" << domain::get_instance().get_grounder().deground_agent(m_agent) << ",(";
-		m_bf1->print();
-		std::cout << "))";
-		break;
-
-	case D_FORMULA:
-		std::cout << "D([";
-		printer::get_instance().print_list_ag(m_group_agents);
-		std::cout << "],";
-		m_bf1->print();
-		std::cout << ")";
-		break;
-
-	case C_FORMULA:
-		std::cout << "C([";
-		printer::get_instance().print_list_ag(m_group_agents);
-		std::cout << "],";
-		m_bf1->print();
-		std::cout << ")";
-		break;
-
-	case E_FORMULA:
-		std::cout << "E([";
-		printer::get_instance().print_list_ag(m_group_agents);
-		std::cout << "],";
-		m_bf1->print();
-		std::cout << ")";
-		std::cout << ")";
-		break;
-
-	case PROPOSITIONAL_FORMULA:
-		if (m_operator == BF_NOT)
-			std::cout << "NOT(";
-		m_bf1->print();
-		if (m_operator == BF_NOT)
-			std::cout << ")";
-		if (m_operator == BF_AND)
-			std::cout << " AND ";
-		if (m_operator == BF_OR)
-			std::cout << " OR ";
-		else if (m_operator == BF_FAIL) {
-			std::cerr << "\n ERROR IN DELCARATION\n.";
-			exit(1);
-		}
-		if (m_bf2 != nullptr) {
-			//std::cout << "(";
-			m_bf2->print();
-		}
-		//std::cout << ")";
-		break;
-	case BF_EMPTY:
-		std::cout << "Empty\n";
-		break;
-	case BF_TYPE_FAIL:
-	default:
-		std::cerr << "\n Unknown belief_formula type.";
-		exit(1);
-		break;
-
-	}
+void belief_formula::print() const {
+//
+//	/*if (!m_is_grounded) {
+//		std::cerr << "\nError in reading a belief_formula, it must be grounded";
+//		std::cerr << std::endl;
+//		exit(1);
+//	}*/
+//
+//	switch ( m_formula_type ) {
+//
+//	case FLUENT_FORMULA:
+//		printer::get_instance().print_list(m_fluent_formula);
+//		break;
+//	case BELIEF_FORMULA:
+//		std::cout << "B(" << domain::get_instance().get_grounder().deground_agent(m_agent) << ",(";
+//		m_bf1->print();
+//		std::cout << "))";
+//		break;
+//
+//	case D_FORMULA:
+//		std::cout << "D([";
+//		printer::get_instance().print_list_ag(m_group_agents);
+//		std::cout << "],";
+//		m_bf1->print();
+//		std::cout << ")";
+//		break;
+//
+//	case C_FORMULA:
+//		std::cout << "C([";
+//		printer::get_instance().print_list_ag(m_group_agents);
+//		std::cout << "],";
+//		m_bf1->print();
+//		std::cout << ")";
+//		break;
+//
+//	case E_FORMULA:
+//		std::cout << "E([";
+//		printer::get_instance().print_list_ag(m_group_agents);
+//		std::cout << "],";
+//		m_bf1->print();
+//		std::cout << ")";
+//		std::cout << ")";
+//		break;
+//
+//	case PROPOSITIONAL_FORMULA:
+//		if (m_operator == BF_NOT)
+//			std::cout << "NOT(";
+//		m_bf1->print();
+//		if (m_operator == BF_NOT)
+//			std::cout << ")";
+//		if (m_operator == BF_AND)
+//			std::cout << " AND ";
+//		if (m_operator == BF_OR)
+//			std::cout << " OR ";
+//		else if (m_operator == BF_FAIL) {
+//			std::cerr << "\n ERROR IN DELCARATION\n.";
+//			exit(1);
+//		}
+//		if (m_bf2 != nullptr) {
+//			//std::cout << "(";
+//			m_bf2->print();
+//		}
+//		//std::cout << ")";
+//		break;
+//	case BF_EMPTY:
+//		std::cout << "Empty\n";
+//		break;
+//	case BF_TYPE_FAIL:
+//	default:
+//		std::cerr << "\n Unknown belief_formula type.";
+//		exit(1);
+//		break;
+//
+//	}
 };
 
-void belief_formula::print_deground()
-{
-
-	ground();
-	m_is_grounded = true;
-
-	print();
+void belief_formula::print_deground() {
+//	ground();
+//	m_is_grounded = true;
+//
+//	print();
 };
 
 /*void belief_formula::print_grounded(const grounder& grounder) const
@@ -393,40 +390,35 @@ void belief_formula::print_deground()
 	} //switch
 }; print*/
 
-void belief_formula::ground()
-{
-
-	//std::cout << "\nDEBUG: ground bf..." << std::endl;
-
-	grounder gr = domain::get_instance().get_grounder();
+void belief_formula::ground(const grounder& grounder) {
 	if (!m_is_grounded) {
 		switch ( m_formula_type ) {
 
 		case FLUENT_FORMULA:
 
-			set_fluent_formula(gr.ground_fluent(get_string_fluent_formula()));
+			set_fluent_formula(grounder.ground_fluent(get_string_fluent_formula()));
 			//m_fluent_formula = gr.ground_fluent(m_string_fluent_formula);
 			break;
 
 		case BELIEF_FORMULA:
 
-			set_agent(gr.ground_agent(get_string_agent()));
+			set_agent(grounder.ground_agent(get_string_agent()));
 			//m_agent = gr.ground_agent(m_string_agent_op);
-			m_bf1->ground();
+			m_bf1->ground(grounder);
 			break;
 
 		case E_FORMULA:
 		case C_FORMULA:
 		case D_FORMULA:
-			set_group_agents(gr.ground_agent(get_string_group_agents()));
+			set_group_agents(grounder.ground_agent(get_string_group_agents()));
 			//m_group_agents = gr.ground_agent(m_string_group_agents);
-			m_bf1->ground();
+			m_bf1->ground(grounder);
 			break;
 
 		case PROPOSITIONAL_FORMULA:
-			m_bf1->ground();
+			m_bf1->ground(grounder);
 			if (m_operator == BF_AND || m_operator == BF_OR) {
-				m_bf2->ground();
+				m_bf2->ground(grounder);
 			}
 			break;
 		case BF_EMPTY:
@@ -442,49 +434,48 @@ void belief_formula::ground()
 
 }
 
-void belief_formula::deground()
-{
+void belief_formula::deground() {
 
 	//std::cout << "\nDEBUG: ground bf..." << std::endl;
-
-	grounder gr = domain::get_instance().get_grounder();
-	switch ( m_formula_type ) {
-
-	case FLUENT_FORMULA:
-
-		set_string_fluent_formula(gr.deground_fluent(get_fluent_formula()));
-		//m_fluent_formula = gr.ground_fluent(m_string_fluent_formula);
-		break;
-
-	case BELIEF_FORMULA:
-
-		set_string_agent(gr.deground_agent(get_agent()));
-		//m_agent = gr.ground_agent(m_string_agent_op);
-		m_bf1->deground();
-		break;
-
-	case E_FORMULA:
-	case C_FORMULA:
-	case D_FORMULA:
-		set_string_group_agents(gr.deground_agents(get_group_agents()));
-		//m_group_agents = gr.ground_agent(m_string_group_agents);
-		m_bf1->deground();
-		break;
-
-	case PROPOSITIONAL_FORMULA:
-		m_bf1->deground();
-		if (m_operator == BF_AND || m_operator == BF_OR) {
-			m_bf2->deground();
-		}
-		break;
-	case BF_EMPTY:
-		break;
-	case BF_TYPE_FAIL:
-	default:
-		std::cerr << "\n Unknown belief_formula type.";
-		exit(1);
-		break;
-	}
+//
+//	grounder gr = domain::get_instance().get_grounder();
+//	switch ( m_formula_type ) {
+//
+//	case FLUENT_FORMULA:
+//
+//		set_string_fluent_formula(gr.deground_fluent(get_fluent_formula()));
+//		//m_fluent_formula = gr.ground_fluent(m_string_fluent_formula);
+//		break;
+//
+//	case BELIEF_FORMULA:
+//
+//		set_string_agent(gr.deground_agent(get_agent()));
+//		//m_agent = gr.ground_agent(m_string_agent_op);
+//		m_bf1->deground();
+//		break;
+//
+//	case E_FORMULA:
+//	case C_FORMULA:
+//	case D_FORMULA:
+//		set_string_group_agents(gr.deground_agents(get_group_agents()));
+//		//m_group_agents = gr.ground_agent(m_string_group_agents);
+//		m_bf1->deground();
+//		break;
+//
+//	case PROPOSITIONAL_FORMULA:
+//		m_bf1->deground();
+//		if (m_operator == BF_AND || m_operator == BF_OR) {
+//			m_bf2->deground();
+//		}
+//		break;
+//	case BF_EMPTY:
+//		break;
+//	case BF_TYPE_FAIL:
+//	default:
+//		std::cerr << "\n Unknown belief_formula type.";
+//		exit(1);
+//		break;
+//	}
 }
 
 bool belief_formula::operator==(const belief_formula & to_compare) const

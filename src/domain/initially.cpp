@@ -15,8 +15,8 @@
 
 initially::initially() {}
 
-bool initially::check_restriction(const belief_formula & bf) { //Apply the restriction
-	switch (domain::get_instance().get_config().get_initial_state_mode()) {
+bool initially::check_restriction(Initial_State_Mode initial_state_mode, const belief_formula & bf) { //Apply the restriction
+	switch (initial_state_mode) {
 		//We only admit C(belief)
 		/**\todo Check if all the agents have to be in the C.*/
 		/* The possible cases are:
@@ -31,7 +31,7 @@ bool initially::check_restriction(const belief_formula & bf) { //Apply the restr
                     if (bf.get_operator() != BF_AND) {
                         return false;
                     } else {
-                        return check_restriction(bf.get_bf1()) && check_restriction(bf.get_bf2());
+                        return check_restriction(initial_state_mode, bf.get_bf1()) && check_restriction(initial_state_mode, bf.get_bf2());
                     }
                 }
                 case FLUENT_FORMULA: {
@@ -108,13 +108,13 @@ void initially::add_pointed_condition(const fluent_formula & ff)
 
 //This type of parameter is fine because of the push back (makes a copy))
 
-void initially::add_initial_condition(const belief_formula & bf)
+void initially::add_initial_condition(Initial_State_Mode initial_state_mode, const belief_formula & bf)
 {
 	//Normalize the and and keep only bf_1, bf_2 and not (bf_1 AND bf_2)
 	if (bf.get_formula_type() == PROPOSITIONAL_FORMULA && bf.get_operator() == BF_AND) {
-		add_initial_condition(bf.get_bf1());
-		add_initial_condition(bf.get_bf2());
-	} else if (check_restriction(bf)) {
+		add_initial_condition(initial_state_mode, bf.get_bf1());
+		add_initial_condition(initial_state_mode, bf.get_bf2());
+	} else if (check_restriction(initial_state_mode, bf)) {
 		m_bf_intial_conditions.push_back(bf);
 	} else {
 		std::cerr << "The initial state does not respect the conditions\n";
@@ -138,8 +138,8 @@ const fluent_formula & initially::get_ff_forS5() const
 	return m_ff_forS5;
 }
 
-void initially::set_ff_forS5() {
-	if (domain::get_instance().get_config().get_initial_state_mode() == Initial_State_Mode::FINITARY_S5_THEORY) {
+void initially::set_ff_forS5(Initial_State_Mode initial_state_mode) {
+	if (initial_state_mode == Initial_State_Mode::FINITARY_S5_THEORY) {
 		//The consistency with S5 is already checked
 		fluent_formula ret;
 		formula_list::const_iterator it_fl;

@@ -251,7 +251,7 @@ public:
     /** \brief Function that grounds the fields of *this*.
      * 
      * \todo Call on costruction from outside, maybe a static function in \ref grounder.*/
-    void ground();
+    void ground(const grounder& grounder);
 
     /** \brief Function that degrounds the fields of *this*.*/
     void deground();

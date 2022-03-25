@@ -406,24 +406,24 @@ pworld_ptr_set pstate::get_D_reachable_worlds(const agent_set & ags, const pworl
 	return ret;
 }
 
-void pstate::get_all_reachable_worlds_edges(const pworld_ptr & world, pworld_ptr_set & reached_worlds, pedges & reached_edges) const
-{
-	pworld_ptr_set::const_iterator it_pws;
-	pworld_ptr_set pw_list;
+void pstate::get_all_reachable_worlds_edges(const pworld_ptr & world, pworld_ptr_set & reached_worlds, pedges & reached_edges) const {
+    // \todo: TEST
+    auto adjacent_worlds = m_beliefs.at(world);
+    pworld_ptr_set pw_list;
 
-	auto ag_set = domain::get_instance().get_agents();
-	auto ag_it = ag_set.begin();
+    std::map<agent, pworld_ptr_set>::const_iterator it_pwmap;
+    pworld_ptr_set::const_iterator it_pws;
 
-	for (; ag_it != ag_set.end(); ag_it++) {
-		pw_list = m_beliefs.at(world).at(*ag_it);
+    for (it_pwmap = adjacent_worlds.begin(); it_pwmap != adjacent_worlds.end(); it_pwmap++) {
+        pw_list = it_pwmap->second;
 
-		for (it_pws = pw_list.begin(); it_pws != pw_list.end(); it_pws++) {
-			if (reached_worlds.insert(*it_pws).second) {
-				reached_edges[*it_pws] = m_beliefs.at(*it_pws);
-				get_all_reachable_worlds_edges(*it_pws, reached_worlds, reached_edges);
-			}
-		}
-	}
+        for (it_pws = pw_list.begin(); it_pws != pw_list.end(); it_pws++) {
+            if (reached_worlds.insert(*it_pws).second) {
+                reached_edges[*it_pws] = m_beliefs.at(*it_pws);
+                get_all_reachable_worlds_edges(*it_pws, reached_worlds, reached_edges);
+            }
+        }
+    }
 }
 
 void pstate::clean_unreachable_pworlds()
@@ -441,11 +441,11 @@ void pstate::clean_unreachable_pworlds()
 }
 
 /**** INITIAL STATE ****/
-void pstate::build_initial()
+void pstate::build_initial(const initially& initial_conditions)
 {
 	/** \todo for now prune building.*/
 	std::cout << "\nBuilding initial possibility...\n";
-	build_initial_prune();
+	build_initial_prune(initial_conditions);
 }
 
 void pstate::build_initial_structural()
@@ -453,32 +453,28 @@ void pstate::build_initial_structural()
 
 }
 
-void pstate::build_initial_prune()
-{
-
+void pstate::build_initial_prune(const initially& initial_conditions) {
 	/*Building of all the possible consistent \ref pworld and setting the pointed world.
 	 * Creation of all the \ref fluent combinations. All the consistent ones are added to \ref pstore.*/
 	fluent_set permutation;
-	initially ini_conditions = domain::get_instance().get_initial_description();
-	//	std::cerr << "\nDEBUG: Initially known fluents: ";
-	//	printer::get_instance().print_list(domain::get_instance().get_grounder().deground_fluent(ini_conditions.get_initially_known_fluents()));
-	generate_initial_pworlds(permutation, 0, ini_conditions.get_initially_known_fluents());
-
+	generate_initial_pworlds(permutation, 0, initial_conditions);
 
 	/*Building of all the consistent edges.*/
-	generate_initial_pedges();
+	generate_initial_pedges(initial_conditions);
 }
 
 /*From https://www.geeksforgeeks.org/generate-all-the-binary-strings-of-n-bits/ since is like generating all the binary numbers.*/
-void pstate::generate_initial_pworlds(fluent_set& permutation, int index, const fluent_set & initially_known)
-{
+void pstate::generate_initial_pworlds(fluent_set& permutation, int index, const initially& initial_conditions) {
 	//todo non usare indici ma bitset prima positivo fluent poi negativo
-	unsigned int fluent_number = domain::get_instance().get_fluent_number();
-	unsigned int bit_size = domain::get_instance().get_size_fluent();
+    // \todo: SISTEMA
+    unsigned int fluent_number = 0; // domain.get_fluent_number();
+    unsigned int bit_size = 0; // domain.get_size_fluent();
+
+    const fluent_set & initially_known = initial_conditions.get_initially_known_fluents();
 
 	if (index == fluent_number) {
 		pworld to_add(permutation);
-		add_initial_pworld(to_add);
+		add_initial_pworld(to_add, initial_conditions);
 
 		return;
 	}
@@ -490,48 +486,36 @@ void pstate::generate_initial_pworlds(fluent_set& permutation, int index, const 
 	bitSetToFindNegative.set(bitSetToFindPositve.size() - 1, true);
 	bitSetToFindPositve.set(bitSetToFindPositve.size() - 1, false);
 
-
 	if (initially_known.find(bitSetToFindNegative) == initially_known.end()) {
 		permutation.insert(bitSetToFindPositve);
-		generate_initial_pworlds(permutation, index + 1, initially_known);
+		generate_initial_pworlds(permutation, index + 1, initial_conditions);
 	}
 	if (initially_known.find(bitSetToFindPositve) == initially_known.end()) {
 		permutation_2.insert(bitSetToFindNegative);
-		generate_initial_pworlds(permutation_2, index + 1, initially_known);
+		generate_initial_pworlds(permutation_2, index + 1, initial_conditions);
 	}
 
 }
 
-void pstate::add_initial_pworld(const pworld & possible_add) {
-	initially ini_conditions = domain::get_instance().get_initial_description();
+void pstate::add_initial_pworld(const pworld & possible_add, const initially& initial_conditions) {
+    /* Since the common knowledge is on all the agent it means that every possible \ref kworld
+     * in the initial state must entail *phi* where C(*phi*) is an initial condition.*/
 
-	switch (domain::get_instance().get_config().get_initial_state_mode()) {
-        case Initial_State_Mode::FINITARY_S5_THEORY: {
-            /* Since the common knowledge is on all the agent it means that every possible \ref pworld
-             * in the initial state must entail *phi* where C(*phi*) is an initial condition.*/
-
-            //Already setted in \ref domain::build_initially(bool).
-            if (possible_add.entails(ini_conditions.get_ff_forS5())) {
-                add_world(possible_add);
-                if (possible_add.entails(ini_conditions.get_pointed_world_conditions())) {
-                    m_pointed = pworld_ptr(possible_add);
-                }
-            } else {
-                //Already generated so we save it on pstore
-                pstore::get_instance().add_world(possible_add);
-            }
-            break;
+    //Already setted in \ref domain::build_initially(bool).
+    if (possible_add.entails(initial_conditions.get_ff_forS5())) {
+        add_world(possible_add);
+        if (possible_add.entails(initial_conditions.get_pointed_world_conditions())) {
+            m_pointed = pworld_ptr(possible_add);
         }
-        case Initial_State_Mode::CUSTOM_INITIAL_STATE:
-        default: {
-            break;
-        }
-	}
+    } else {
+        //Already generated so we save it on pstore
+        pstore::get_instance().add_world(possible_add);
+    }
 }
 
-void pstate::generate_initial_pedges()
-{
-	agent_set agents = domain::get_instance().get_agents();
+void pstate::generate_initial_pedges(const initially& initial_conditions) {
+    // \todo: SISTEMA
+	agent_set agents; // = domain.get_agents();
 	pworld_ptr pwptr_tmp1, pwptr_tmp2;
 
 	pworld_ptr_set::const_iterator it_pwps_1, it_pwps_2;
@@ -551,10 +535,9 @@ void pstate::generate_initial_pedges()
 		}
 	}
 
-	initially ini_conditions = domain::get_instance().get_initial_description();
 	formula_list::const_iterator it_fl;
 
-	for (it_fl = ini_conditions.get_initial_conditions().begin(); it_fl != ini_conditions.get_initial_conditions().end(); it_fl++) {
+	for (it_fl = initial_conditions.get_initial_conditions().begin(); it_fl != initial_conditions.get_initial_conditions().end(); it_fl++) {
 		remove_initial_pedge_bf(*it_fl);
 	}
 }
@@ -586,54 +569,45 @@ void pstate::remove_initial_pedge(const fluent_formula &known_ff, const agent & 
 }
 
 void pstate::remove_initial_pedge_bf(const belief_formula & to_check) {
-	switch (domain::get_instance().get_config().get_initial_state_mode()) {
-        case Initial_State_Mode::FINITARY_S5_THEORY: {
-            /* Just check whenever is B(--) \/ B(--) and remove that edge*/
-            if (to_check.get_formula_type() == C_FORMULA) {
-                const belief_formula& tmp = to_check.get_bf1();
+    /* Just check whenever is B(--) \/ B(--) and remove that edge*/
+    if (to_check.get_formula_type() == C_FORMULA) {
+        const belief_formula& tmp = to_check.get_bf1();
 
-                switch ( tmp.get_formula_type() ) {
-                    //Only one for edges -- expresses that someone is ignorant.
-                    case PROPOSITIONAL_FORMULA: {
-                        //We remove all the check on the formula since they have already been controlled when ini_conditions has been created
-                        if (tmp.get_operator() == BF_OR) {
-                            //fluent_formula known_ff;
-                            auto known_ff_ptr = std::make_shared<fluent_formula>();
-                            helper::check_Bff_notBff(tmp.get_bf1(), tmp.get_bf2(), known_ff_ptr);
-                            if (known_ff_ptr != nullptr) {
-                                remove_initial_pedge(*known_ff_ptr, tmp.get_bf2().get_agent());
-                            }
-                            return;
-                        } else if (tmp.get_operator() == BF_AND) {
-                            //This case doesn't add knowledge.
-                            return;
-                        } else {
-                            std::cerr << "\nError in the type of initial formulae (FIFTH).\n";
-                            exit(1);
-                        }
-                        return;
+        switch ( tmp.get_formula_type() ) {
+            //Only one for edges -- expresses that someone is ignorant.
+            case PROPOSITIONAL_FORMULA: {
+                //We remove all the check on the formula since they have already been controlled when ini_conditions has been created
+                if (tmp.get_operator() == BF_OR) {
+                    //fluent_formula known_ff;
+                    auto known_ff_ptr = std::make_shared<fluent_formula>();
+                    helper::check_Bff_notBff(tmp.get_bf1(), tmp.get_bf2(), known_ff_ptr);
+                    if (known_ff_ptr != nullptr) {
+                        remove_initial_pedge(*known_ff_ptr, tmp.get_bf2().get_agent());
                     }
-                    case FLUENT_FORMULA:
-                    case BELIEF_FORMULA:
-                    case BF_EMPTY: {
-                        return;
-                    }
-                    default: {
-                        std::cerr << "\nError in the type of initial formulae (SIXTH).\n";
-                        exit(1);
-                    }
+                    return;
+                } else if (tmp.get_operator() == BF_AND) {
+                    //This case doesn't add knowledge.
+                    return;
+                } else {
+                    std::cerr << "\nError in the type of initial formulae (FIFTH).\n";
+                    exit(1);
                 }
-            } else {
-                std::cerr << "\nError in the type of initial formulae (SEVENTH).\n";
+                return;
+            }
+            case FLUENT_FORMULA:
+            case BELIEF_FORMULA:
+            case BF_EMPTY: {
+                return;
+            }
+            default: {
+                std::cerr << "\nError in the type of initial formulae (SIXTH).\n";
                 exit(1);
             }
-            return;
         }
-        case Initial_State_Mode::CUSTOM_INITIAL_STATE:
-        default: {
-            break;
-        }
-	}
+    } else {
+        std::cerr << "\nError in the type of initial formulae (SEVENTH).\n";
+        exit(1);
+    }
 }
 
 /**** TRANSITION FUNCTION ****/
@@ -671,17 +645,17 @@ pstate pstate::compute_succ(const action & act) const
     }
 }
 
-void pstate::maintain_oblivious_believed_pworlds(pstate &ret, const agent_set & oblivious_obs_agents) const
-{
+void pstate::maintain_oblivious_believed_pworlds(pstate &ret, const agent_set & oblivious_obs_agents) const {
     agent_set::const_iterator it_agset;
     pworld_ptr_set world_oblivious;
     pworld_ptr_set tmp_world_set;
 
     pworld_ptr_set::const_iterator it_wo_ob;
-
+    // \todo: SISTEMA
+    agent_set agents; // = domain.get_agents();
     if (!oblivious_obs_agents.empty()) {
         tmp_world_set = get_E_reachable_worlds(oblivious_obs_agents, get_pointed());
-        for (it_agset = domain::get_instance().get_agents().begin(); it_agset != domain::get_instance().get_agents().end(); it_agset++) {
+        for (it_agset = agents.begin(); it_agset != agents.end(); it_agset++) {
             for (it_wo_ob = tmp_world_set.begin(); it_wo_ob != tmp_world_set.end(); it_wo_ob++) {
                 sum_set(world_oblivious, get_B_reachable_worlds(*it_agset, *it_wo_ob));
             }
@@ -744,16 +718,15 @@ fluent_formula pstate::get_effects_if_entailed(const effects_map & map, const pw
 }
 
 /**** BISIMULATION ****/
-automaton pstate::pstate_to_automaton(std::vector<pworld_ptr> & pworld_vec, const std::map<agent, bis_label> & agent_to_label) const
-{
-
+automaton pstate::pstate_to_automaton(std::vector<pworld_ptr> & pworld_vec, const std::map<agent, bis_label> & agent_to_label) const {
 	std::map<int, int> compact_indices;
 	std::map<pworld_ptr, int> index_map;
 	pbislabel_map label_map; // Map: from -> (to -> ag_set)
 
 	automaton *a;
 	unsigned long Nvertex = get_worlds().size();
-	unsigned long ag_set_size = domain::get_instance().get_agents().size();
+    // \todo: SISTEMA
+	unsigned long ag_set_size = 0; // domain.get_agents().size();
 	//BIS_ADAPTATION For the loop that identifies the id (We add one edge for each node)
 	v_elem *Vertex;
 
@@ -886,7 +859,8 @@ void pstate::automaton_to_pstate(const automaton & a, const std::vector<pworld_p
 	// Hence we do not need to update it
 
 	int i, j, k, label;
-	unsigned long agents_size = domain::get_instance().get_agents().size();
+    // \todo: SISTEMA
+	unsigned long agents_size = 0; // domain.get_agents().size();
 
 	for (i = 0; i < a.Nvertex; i++) {
 		if (a.Vertex[i].ne > 0) {
@@ -905,8 +879,7 @@ void pstate::automaton_to_pstate(const automaton & a, const std::vector<pworld_p
 	set_worlds(worlds);
 }
 
-void pstate::calc_min_bisimilar()
-{
+void pstate::calc_min_bisimilar(Bisimulation_Algorithm algorithm) {
 	//std::cerr << "\nDEBUG: INIZIO BISIMULATION IN PSTATE\n" << std::flush;
 
 	// ************* Cleaning unreachable pworlds *************
@@ -926,18 +899,20 @@ void pstate::calc_min_bisimilar()
 	std::map<bis_label, agent> label_to_agent;
 	std::map<agent, bis_label> agent_to_label;
 
-
-	auto agents = domain::get_instance().get_agents();
-	auto it_ag = agents.begin();
-	bis_label ag_label = 0;
-	agent lab_agent;
-	for (; it_ag != agents.end(); it_ag++) {
-		lab_agent = *it_ag;
-		label_to_agent.insert(std::make_pair(ag_label, lab_agent));
-		agent_to_label.insert(std::make_pair(lab_agent, ag_label));
-		ag_label++;
-
-	}
+    /**
+     * \todo: SISTEMARE QUESTO BLOCCO DI CODICE COMMENTATO!!!
+     *        SENZA DI QUESTO BISIMULATION _NON_ FUNZIONA!!!
+     */
+//	auto agents = domain.get_agents();
+//	auto it_ag = agents.begin();
+//	bis_label ag_label = 0;
+//	agent lab_agent;
+//	for (; it_ag != agents.end(); it_ag++) {
+//		lab_agent = *it_ag;
+//		label_to_agent.insert(std::make_pair(ag_label, lab_agent));
+//		agent_to_label.insert(std::make_pair(lab_agent, ag_label));
+//		ag_label++;
+//	}
 
 	a = pstate_to_automaton(pworld_vec, agent_to_label);
 
@@ -945,7 +920,7 @@ void pstate::calc_min_bisimilar()
 	//std::cout << "\nDEBUG: Printing automaton pre-Bisimulation\n";
 	//b.VisAutoma(&a);
 
-	if (domain::get_instance().get_config().get_bisimulation() == PAIGE_TARJAN) {
+	if (algorithm == Bisimulation_Algorithm::PAIGE_TARJAN) {
 		if (b.MinimizeAutomaPT(&a)) {
 			//VisAutoma(a);
 
@@ -972,319 +947,316 @@ void pstate::calc_min_bisimilar()
 }
 
 /**** UTILITIES ****/
-bool pstate::check_properties(const agent_set & fully, const agent_set & partially, const fluent_formula & effects, const pstate & updated) const
-{
-	if (!fully.empty()) {
-		/************Formulae Building************/
-		/******Formulae containing the effects of the sensing******/
-		belief_formula effects_formula;
-		effects_formula.set_formula_type(FLUENT_FORMULA);
-		effects_formula.set_fluent_formula(effects);
-		effects_formula.set_is_grounded(true);
-		effects_formula.deground();
-
-		/******First Property C(Fully, eff)******/
-		belief_formula property1;
-		property1.set_group_agents(fully);
-		property1.set_formula_type(C_FORMULA);
-		property1.set_bf1(effects_formula);
-		property1.set_is_grounded(true);
-		property1.deground();
-
-		if (!updated.entails(property1)) {
-			std::cerr << "\nDEBUG: First property not respected";
-			return false;
-		}
-
-		if (!partially.empty()) {
-			/******Second Property C(P, (C(Fully,eff) | C(Fully, -eff)))******/
-			belief_formula inner_nested2, nested2, disjunction, property2;
-			//First nested formula is equal to First Property C(Fully, eff)
-			//Second nested formula C(Fully, -f) is comprised of two layer (the NOT and C)
-			inner_nested2.set_group_agents(fully);
-			inner_nested2.set_formula_type(C_FORMULA);
-			inner_nested2.set_bf1(effects_formula);
-			inner_nested2.set_is_grounded(true);
-			inner_nested2.deground();
-
-			nested2.set_formula_type(PROPOSITIONAL_FORMULA);
-			nested2.set_operator(BF_NOT);
-			nested2.set_bf1(inner_nested2);
-			nested2.set_is_grounded(true);
-			nested2.deground();
-
-			//The disjunction (C(Fully,eff) | C(Fully, -eff)) is made with property1 and nested2
-			disjunction.set_formula_type(PROPOSITIONAL_FORMULA);
-			disjunction.set_operator(BF_OR);
-			disjunction.set_bf1(property1);
-			disjunction.set_bf2(nested2);
-			disjunction.set_is_grounded(true);
-			disjunction.deground();
-
-			//Finally we can construct the second property
-			property2.set_group_agents(partially);
-			property2.set_formula_type(C_FORMULA);
-			property2.set_bf1(disjunction);
-			property2.set_is_grounded(true);
-			property2.deground();
-
-			/******Third Property C(F, C(P, (C(Fully,eff) | C(Fully, -eff))))******/
-			//This formula is just C(Fully, property2)
-			belief_formula property3;
-			property3.set_group_agents(fully);
-			property3.set_formula_type(C_FORMULA);
-			property3.set_bf1(property2);
-			property3.set_is_grounded(true);
-			property3.deground();
-
-			if (!updated.entails(property2)) {
-				std::cerr << "\nDEBUG: Second property not respected in the formula: ";
-				property2.print_deground();
-				return false;
-			}
-
-			if (!updated.entails(property3)) {
-				std::cerr << "\nDEBUG: Third property not respected in the formula: ";
-				property3.print_deground();
-				return false;
-			}
-		}
-	}
+bool pstate::check_properties(const agent_set & fully, const agent_set & partially, const fluent_formula & effects, const pstate & updated) const {
+//	if (!fully.empty()) {
+//		/************Formulae Building************/
+//		/******Formulae containing the effects of the sensing******/
+//		belief_formula effects_formula;
+//		effects_formula.set_formula_type(FLUENT_FORMULA);
+//		effects_formula.set_fluent_formula(effects);
+//		effects_formula.set_is_grounded(true);
+//		effects_formula.deground();
+//
+//		/******First Property C(Fully, eff)******/
+//		belief_formula property1;
+//		property1.set_group_agents(fully);
+//		property1.set_formula_type(C_FORMULA);
+//		property1.set_bf1(effects_formula);
+//		property1.set_is_grounded(true);
+//		property1.deground();
+//
+//		if (!updated.entails(property1)) {
+//			std::cerr << "\nDEBUG: First property not respected";
+//			return false;
+//		}
+//
+//		if (!partially.empty()) {
+//			/******Second Property C(P, (C(Fully,eff) | C(Fully, -eff)))******/
+//			belief_formula inner_nested2, nested2, disjunction, property2;
+//			//First nested formula is equal to First Property C(Fully, eff)
+//			//Second nested formula C(Fully, -f) is comprised of two layer (the NOT and C)
+//			inner_nested2.set_group_agents(fully);
+//			inner_nested2.set_formula_type(C_FORMULA);
+//			inner_nested2.set_bf1(effects_formula);
+//			inner_nested2.set_is_grounded(true);
+//			inner_nested2.deground();
+//
+//			nested2.set_formula_type(PROPOSITIONAL_FORMULA);
+//			nested2.set_operator(BF_NOT);
+//			nested2.set_bf1(inner_nested2);
+//			nested2.set_is_grounded(true);
+//			nested2.deground();
+//
+//			//The disjunction (C(Fully,eff) | C(Fully, -eff)) is made with property1 and nested2
+//			disjunction.set_formula_type(PROPOSITIONAL_FORMULA);
+//			disjunction.set_operator(BF_OR);
+//			disjunction.set_bf1(property1);
+//			disjunction.set_bf2(nested2);
+//			disjunction.set_is_grounded(true);
+//			disjunction.deground();
+//
+//			//Finally we can construct the second property
+//			property2.set_group_agents(partially);
+//			property2.set_formula_type(C_FORMULA);
+//			property2.set_bf1(disjunction);
+//			property2.set_is_grounded(true);
+//			property2.deground();
+//
+//			/******Third Property C(F, C(P, (C(Fully,eff) | C(Fully, -eff))))******/
+//			//This formula is just C(Fully, property2)
+//			belief_formula property3;
+//			property3.set_group_agents(fully);
+//			property3.set_formula_type(C_FORMULA);
+//			property3.set_bf1(property2);
+//			property3.set_is_grounded(true);
+//			property3.deground();
+//
+//			if (!updated.entails(property2)) {
+//				std::cerr << "\nDEBUG: Second property not respected in the formula: ";
+//				property2.print_deground();
+//				return false;
+//			}
+//
+//			if (!updated.entails(property3)) {
+//				std::cerr << "\nDEBUG: Third property not respected in the formula: ";
+//				property3.print_deground();
+//				return false;
+//			}
+//		}
+//	}
 
 	return true;
 }
 
-void pstate::print() const
-{
-	int counter = 1;
-	std::cout << std::endl;
-	std::cout << "The Pointed World has id ";
-	printer::get_instance().print_list(get_pointed().get_fluent_set());
-	std::cout << "-" << get_pointed().get_repetition();
-	std::cout << std::endl;
-	std::cout << "*******************************************************************" << std::endl;
-
-	pworld_ptr_set::const_iterator it_pwset;
-	std::cout << "World List:" << std::endl;
-
-	for (it_pwset = get_worlds().begin(); it_pwset != get_worlds().end(); it_pwset++) {
-		std::cout << "W-" << counter << ": ";
-		printer::get_instance().print_list(it_pwset->get_fluent_set());
-		std::cout << " rep:" << it_pwset->get_repetition();
-		std::cout << std::endl;
-		counter++;
-	}
-	counter = 1;
-	std::cout << std::endl;
-	std::cout << "*******************************************************************" << std::endl;
-	pedges::const_iterator it_pwtm;
-	pworld_map::const_iterator it_pwm;
-	std::cout << "Edge List:" << std::endl;
-	for (it_pwtm = get_beliefs().begin(); it_pwtm != get_beliefs().end(); it_pwtm++) {
-		pworld_ptr from = it_pwtm->first;
-		pworld_map from_map = it_pwtm->second;
-
-		for (it_pwm = from_map.begin(); it_pwm != from_map.end(); it_pwm++) {
-			agent ag = it_pwm->first;
-			pworld_ptr_set to_set = it_pwm->second;
-
-			for (it_pwset = to_set.begin(); it_pwset != to_set.end(); it_pwset++) {
-
-				pworld_ptr to = *it_pwset;
-
-				std::cout << "E-" << counter << ": (";
-				printer::get_instance().print_list(from.get_fluent_set());
-				std::cout << "," << from.get_repetition();
-				std::cout << ") - (";
-				printer::get_instance().print_list(to.get_fluent_set());
-				std::cout << "," << to.get_repetition();
-				std::cout << ") ag:" << domain::get_instance().get_grounder().deground_agent(ag);
-				std::cout << std::endl;
-				counter++;
-			}
-		}
-	}
-	std::cout << "*******************************************************************" << std::endl;
+void pstate::print() const {
+//	int counter = 1;
+//	std::cout << std::endl;
+//	std::cout << "The Pointed World has id ";
+//	printer::get_instance().print_list(get_pointed().get_fluent_set());
+//	std::cout << "-" << get_pointed().get_repetition();
+//	std::cout << std::endl;
+//	std::cout << "*******************************************************************" << std::endl;
+//
+//	pworld_ptr_set::const_iterator it_pwset;
+//	std::cout << "World List:" << std::endl;
+//
+//	for (it_pwset = get_worlds().begin(); it_pwset != get_worlds().end(); it_pwset++) {
+//		std::cout << "W-" << counter << ": ";
+//		printer::get_instance().print_list(it_pwset->get_fluent_set());
+//		std::cout << " rep:" << it_pwset->get_repetition();
+//		std::cout << std::endl;
+//		counter++;
+//	}
+//	counter = 1;
+//	std::cout << std::endl;
+//	std::cout << "*******************************************************************" << std::endl;
+//	pedges::const_iterator it_pwtm;
+//	pworld_map::const_iterator it_pwm;
+//	std::cout << "Edge List:" << std::endl;
+//	for (it_pwtm = get_beliefs().begin(); it_pwtm != get_beliefs().end(); it_pwtm++) {
+//		pworld_ptr from = it_pwtm->first;
+//		pworld_map from_map = it_pwtm->second;
+//
+//		for (it_pwm = from_map.begin(); it_pwm != from_map.end(); it_pwm++) {
+//			agent ag = it_pwm->first;
+//			pworld_ptr_set to_set = it_pwm->second;
+//
+//			for (it_pwset = to_set.begin(); it_pwset != to_set.end(); it_pwset++) {
+//
+//				pworld_ptr to = *it_pwset;
+//
+//				std::cout << "E-" << counter << ": (";
+//				printer::get_instance().print_list(from.get_fluent_set());
+//				std::cout << "," << from.get_repetition();
+//				std::cout << ") - (";
+//				printer::get_instance().print_list(to.get_fluent_set());
+//				std::cout << "," << to.get_repetition();
+//				std::cout << ") ag:" << domain.get_grounder().deground_agent(ag);
+//				std::cout << std::endl;
+//				counter++;
+//			}
+//		}
+//	}
+//	std::cout << "*******************************************************************" << std::endl;
 }
 
-void pstate::print_graphviz(std::ostream & graphviz) const
-{
-	string_set::const_iterator it_st_set;
-	fluent_set::const_iterator it_fs;
-
-
-	graphviz << "//WORLDS List:" << std::endl;
-	std::map<fluent_set, int> map_world_to_index;
-	std::map<unsigned short, char> map_rep_to_name;
-	char found_rep = (char) ((char) domain::get_instance().get_agents().size() + 'A');
-	int found_fs = 0;
-	fluent_set tmp_fs;
-	char tmp_unsh;
-	string_set tmp_stset;
-	bool print_first;
-	pworld_ptr_set::const_iterator it_pwset;
-	for (it_pwset = get_worlds().begin(); it_pwset != get_worlds().end(); it_pwset++) {
-		if (*it_pwset == get_pointed())
-			graphviz << "	node [shape = doublecircle] ";
-		else
-			graphviz << "	node [shape = circle] ";
-
-		print_first = false;
-		tmp_fs = it_pwset->get_fluent_set();
-		if (map_world_to_index.count(tmp_fs) == 0) {
-			map_world_to_index[tmp_fs] = found_fs;
-			found_fs++;
-		}
-		tmp_unsh = static_cast<char> (it_pwset->get_repetition());
-		if (map_rep_to_name.count(tmp_unsh) == 0) {
-			map_rep_to_name[tmp_unsh] = found_rep;
-			found_rep++;
-		}
-		graphviz << "\"" << map_rep_to_name[tmp_unsh] << "_" << map_world_to_index[tmp_fs] << "\";";
-		graphviz << "// (";
-		tmp_stset = domain::get_instance().get_grounder().deground_fluent(tmp_fs);
-		for (it_st_set = tmp_stset.begin(); it_st_set != tmp_stset.end(); it_st_set++) {
-			if (print_first) {
-				graphviz << ",";
-			}
-			print_first = true;
-			graphviz << *it_st_set;
-		}
-		graphviz << ")\n";
-	}
-
-	graphviz << "\n\n";
-	graphviz << "//RANKS List:" << std::endl;
-
-	std::map<int, pworld_ptr_set> for_rank_print;
-	for (it_pwset = get_worlds().begin(); it_pwset != get_worlds().end(); it_pwset++) {
-		for_rank_print[it_pwset->get_repetition()].insert(*it_pwset);
-	}
-
-	std::map<int, pworld_ptr_set>::const_iterator it_map_rank;
-	for (it_map_rank = for_rank_print.begin(); it_map_rank != for_rank_print.end(); it_map_rank++) {
-		graphviz << "	{rank = same; ";
-		for (it_pwset = it_map_rank->second.begin(); it_pwset != it_map_rank->second.end(); it_pwset++) {
-			graphviz << "\"" << map_rep_to_name[it_pwset->get_repetition()] << "_" << map_world_to_index[it_pwset->get_fluent_set()] << "\"; ";
-		}
-		graphviz << "}\n";
-	}
-
-
-	graphviz << "\n\n";
-	graphviz << "//EDGES List:" << std::endl;
-
-	std::map < std::tuple<std::string, std::string>, std::set<std::string> > edges;
-
-	pedges::const_iterator it_pwtm;
-	pworld_map::const_iterator it_pwm;
-	std::tuple<std::string, std::string> tmp_tuple;
-	std::string tmp_string;
-
-	for (it_pwtm = get_beliefs().begin(); it_pwtm != get_beliefs().end(); it_pwtm++) {
-		pworld_ptr from = it_pwtm->first;
-		pworld_map from_map = it_pwtm->second;
-
-		for (it_pwm = from_map.begin(); it_pwm != from_map.end(); it_pwm++) {
-			agent ag = it_pwm->first;
-			pworld_ptr_set to_set = it_pwm->second;
-
-			for (it_pwset = to_set.begin(); it_pwset != to_set.end(); it_pwset++) {
-				pworld_ptr to = *it_pwset;
-
-				tmp_string = "_" + std::to_string(map_world_to_index[from.get_fluent_set()]);
-				tmp_string.insert(0, 1, map_rep_to_name[from.get_repetition()]);
-				std::get<0>(tmp_tuple) = tmp_string;
-
-				tmp_string = "_" + std::to_string(map_world_to_index[to.get_fluent_set()]);
-				tmp_string.insert(0, 1, map_rep_to_name[to.get_repetition()]);
-				std::get<1>(tmp_tuple) = tmp_string;
-
-				edges[tmp_tuple].insert(domain::get_instance().get_grounder().deground_agent(ag));
-
-			}
-		}
-	}
-
-	std::map < std::tuple<std::string, std::string>, std::set < std::string>>::iterator it_map;
-	std::map < std::tuple<std::string, std::string>, std::set < std::string>>::const_iterator it_map_2;
-
-	std::map < std::tuple<std::string, std::string>, std::set < std::string>> to_print_double;
-	for (it_map = edges.begin(); it_map != edges.end(); it_map++) {
-		for (it_map_2 = it_map; it_map_2 != edges.end(); it_map_2++) {
-			if (std::get<0>(it_map->first) == std::get<1>(it_map_2->first)) {
-				if (std::get<1>(it_map->first) == std::get<0>(it_map_2->first)) {
-					if (it_map->second == it_map_2->second) {
-						if (std::get<0>(it_map->first) != std::get<1>(it_map->first)) {
-							to_print_double[it_map->first] = it_map->second;
-							it_map_2 = edges.erase(it_map_2);
-							it_map = edges.erase(it_map);
-						}
-					}
-				}
-			}
-		}
-	}
-
-	std::set<std::string>::const_iterator it_stset;
-	for (it_map = edges.begin(); it_map != edges.end(); it_map++) {
-		graphviz << "	\"";
-		graphviz << std::get<0>(it_map->first);
-		graphviz << "\" -> \"";
-		graphviz << std::get<1>(it_map->first);
-		graphviz << "\" ";
-		graphviz << "[ label = \"";
-		tmp_string = "";
-		for (it_stset = it_map->second.begin(); it_stset != it_map->second.end(); it_stset++) {
-			tmp_string += *it_stset;
-			tmp_string += ",";
-		}
-		tmp_string.pop_back();
-		graphviz << tmp_string;
-		graphviz << "\" ];\n";
-	}
-
-	for (it_map = to_print_double.begin(); it_map != to_print_double.end(); it_map++) {
-		graphviz << "	\"";
-		graphviz << std::get<0>(it_map->first);
-		graphviz << "\" -> \"";
-		graphviz << std::get<1>(it_map->first);
-		graphviz << "\" ";
-		graphviz << "[ dir=both label = \"";
-		tmp_string = "";
-		for (it_stset = it_map->second.begin(); it_stset != it_map->second.end(); it_stset++) {
-
-			tmp_string += *it_stset;
-			tmp_string += ",";
-		}
-		tmp_string.pop_back();
-		graphviz << tmp_string;
-		graphviz << "\" ];\n";
-	}
-
-	std::string color = "<font color=\"#ffffff\">";
-	graphviz << "\n\n//WORLDS description Table:" << std::endl;
-	graphviz << "	node [shape = plain]\n\n";
-	graphviz << "	description[label=<\n";
-	graphviz << "	<table border = \"0\" cellborder = \"1\" cellspacing = \"0\" >\n";
-	for (it_pwset = get_worlds().begin(); it_pwset != get_worlds().end(); it_pwset++) {
-		tmp_fs = it_pwset->get_fluent_set();
-		print_first = false;
-		graphviz << "		<tr><td>" << map_rep_to_name[it_pwset->get_repetition()] << "_" << map_world_to_index[tmp_fs] << "</td> <td>";
-		for (it_fs = tmp_fs.begin(); it_fs != tmp_fs.end(); it_fs++) {
-			if (print_first) {
-
-				graphviz << ", ";
-			}
-			print_first = true;
-			if (helper::is_negate(*it_fs)) color = "<font color=\"#0000ff\"> ";
-			else color = "<font color=\"#ff1020\">";
-			graphviz << color << domain::get_instance().get_grounder().deground_fluent(*it_fs) << "</font>";
-		}
-		graphviz << "</td></tr>\n";
-	}
-	graphviz << "	</table>>]\n";
-	graphviz << "	{rank = max; description};\n";
+void pstate::print_graphviz(std::ostream & graphviz) const {
+//	string_set::const_iterator it_st_set;
+//	fluent_set::const_iterator it_fs;
+//
+//
+//	graphviz << "//WORLDS List:" << std::endl;
+//	std::map<fluent_set, int> map_world_to_index;
+//	std::map<unsigned short, char> map_rep_to_name;
+//	char found_rep = (char) ((char) domain.get_agents().size() + 'A');
+//	int found_fs = 0;
+//	fluent_set tmp_fs;
+//	char tmp_unsh;
+//	string_set tmp_stset;
+//	bool print_first;
+//	pworld_ptr_set::const_iterator it_pwset;
+//	for (it_pwset = get_worlds().begin(); it_pwset != get_worlds().end(); it_pwset++) {
+//		if (*it_pwset == get_pointed())
+//			graphviz << "	node [shape = doublecircle] ";
+//		else
+//			graphviz << "	node [shape = circle] ";
+//
+//		print_first = false;
+//		tmp_fs = it_pwset->get_fluent_set();
+//		if (map_world_to_index.count(tmp_fs) == 0) {
+//			map_world_to_index[tmp_fs] = found_fs;
+//			found_fs++;
+//		}
+//		tmp_unsh = static_cast<char> (it_pwset->get_repetition());
+//		if (map_rep_to_name.count(tmp_unsh) == 0) {
+//			map_rep_to_name[tmp_unsh] = found_rep;
+//			found_rep++;
+//		}
+//		graphviz << "\"" << map_rep_to_name[tmp_unsh] << "_" << map_world_to_index[tmp_fs] << "\";";
+//		graphviz << "// (";
+//		tmp_stset = domain.get_grounder().deground_fluent(tmp_fs);
+//		for (it_st_set = tmp_stset.begin(); it_st_set != tmp_stset.end(); it_st_set++) {
+//			if (print_first) {
+//				graphviz << ",";
+//			}
+//			print_first = true;
+//			graphviz << *it_st_set;
+//		}
+//		graphviz << ")\n";
+//	}
+//
+//	graphviz << "\n\n";
+//	graphviz << "//RANKS List:" << std::endl;
+//
+//	std::map<int, pworld_ptr_set> for_rank_print;
+//	for (it_pwset = get_worlds().begin(); it_pwset != get_worlds().end(); it_pwset++) {
+//		for_rank_print[it_pwset->get_repetition()].insert(*it_pwset);
+//	}
+//
+//	std::map<int, pworld_ptr_set>::const_iterator it_map_rank;
+//	for (it_map_rank = for_rank_print.begin(); it_map_rank != for_rank_print.end(); it_map_rank++) {
+//		graphviz << "	{rank = same; ";
+//		for (it_pwset = it_map_rank->second.begin(); it_pwset != it_map_rank->second.end(); it_pwset++) {
+//			graphviz << "\"" << map_rep_to_name[it_pwset->get_repetition()] << "_" << map_world_to_index[it_pwset->get_fluent_set()] << "\"; ";
+//		}
+//		graphviz << "}\n";
+//	}
+//
+//
+//	graphviz << "\n\n";
+//	graphviz << "//EDGES List:" << std::endl;
+//
+//	std::map < std::tuple<std::string, std::string>, std::set<std::string> > edges;
+//
+//	pedges::const_iterator it_pwtm;
+//	pworld_map::const_iterator it_pwm;
+//	std::tuple<std::string, std::string> tmp_tuple;
+//	std::string tmp_string;
+//
+//	for (it_pwtm = get_beliefs().begin(); it_pwtm != get_beliefs().end(); it_pwtm++) {
+//		pworld_ptr from = it_pwtm->first;
+//		pworld_map from_map = it_pwtm->second;
+//
+//		for (it_pwm = from_map.begin(); it_pwm != from_map.end(); it_pwm++) {
+//			agent ag = it_pwm->first;
+//			pworld_ptr_set to_set = it_pwm->second;
+//
+//			for (it_pwset = to_set.begin(); it_pwset != to_set.end(); it_pwset++) {
+//				pworld_ptr to = *it_pwset;
+//
+//				tmp_string = "_" + std::to_string(map_world_to_index[from.get_fluent_set()]);
+//				tmp_string.insert(0, 1, map_rep_to_name[from.get_repetition()]);
+//				std::get<0>(tmp_tuple) = tmp_string;
+//
+//				tmp_string = "_" + std::to_string(map_world_to_index[to.get_fluent_set()]);
+//				tmp_string.insert(0, 1, map_rep_to_name[to.get_repetition()]);
+//				std::get<1>(tmp_tuple) = tmp_string;
+//
+//				edges[tmp_tuple].insert(domain.get_grounder().deground_agent(ag));
+//
+//			}
+//		}
+//	}
+//
+//	std::map < std::tuple<std::string, std::string>, std::set < std::string>>::iterator it_map;
+//	std::map < std::tuple<std::string, std::string>, std::set < std::string>>::const_iterator it_map_2;
+//
+//	std::map < std::tuple<std::string, std::string>, std::set < std::string>> to_print_double;
+//	for (it_map = edges.begin(); it_map != edges.end(); it_map++) {
+//		for (it_map_2 = it_map; it_map_2 != edges.end(); it_map_2++) {
+//			if (std::get<0>(it_map->first) == std::get<1>(it_map_2->first)) {
+//				if (std::get<1>(it_map->first) == std::get<0>(it_map_2->first)) {
+//					if (it_map->second == it_map_2->second) {
+//						if (std::get<0>(it_map->first) != std::get<1>(it_map->first)) {
+//							to_print_double[it_map->first] = it_map->second;
+//							it_map_2 = edges.erase(it_map_2);
+//							it_map = edges.erase(it_map);
+//						}
+//					}
+//				}
+//			}
+//		}
+//	}
+//
+//	std::set<std::string>::const_iterator it_stset;
+//	for (it_map = edges.begin(); it_map != edges.end(); it_map++) {
+//		graphviz << "	\"";
+//		graphviz << std::get<0>(it_map->first);
+//		graphviz << "\" -> \"";
+//		graphviz << std::get<1>(it_map->first);
+//		graphviz << "\" ";
+//		graphviz << "[ label = \"";
+//		tmp_string = "";
+//		for (it_stset = it_map->second.begin(); it_stset != it_map->second.end(); it_stset++) {
+//			tmp_string += *it_stset;
+//			tmp_string += ",";
+//		}
+//		tmp_string.pop_back();
+//		graphviz << tmp_string;
+//		graphviz << "\" ];\n";
+//	}
+//
+//	for (it_map = to_print_double.begin(); it_map != to_print_double.end(); it_map++) {
+//		graphviz << "	\"";
+//		graphviz << std::get<0>(it_map->first);
+//		graphviz << "\" -> \"";
+//		graphviz << std::get<1>(it_map->first);
+//		graphviz << "\" ";
+//		graphviz << "[ dir=both label = \"";
+//		tmp_string = "";
+//		for (it_stset = it_map->second.begin(); it_stset != it_map->second.end(); it_stset++) {
+//
+//			tmp_string += *it_stset;
+//			tmp_string += ",";
+//		}
+//		tmp_string.pop_back();
+//		graphviz << tmp_string;
+//		graphviz << "\" ];\n";
+//	}
+//
+//	std::string color = "<font color=\"#ffffff\">";
+//	graphviz << "\n\n//WORLDS description Table:" << std::endl;
+//	graphviz << "	node [shape = plain]\n\n";
+//	graphviz << "	description[label=<\n";
+//	graphviz << "	<table border = \"0\" cellborder = \"1\" cellspacing = \"0\" >\n";
+//	for (it_pwset = get_worlds().begin(); it_pwset != get_worlds().end(); it_pwset++) {
+//		tmp_fs = it_pwset->get_fluent_set();
+//		print_first = false;
+//		graphviz << "		<tr><td>" << map_rep_to_name[it_pwset->get_repetition()] << "_" << map_world_to_index[tmp_fs] << "</td> <td>";
+//		for (it_fs = tmp_fs.begin(); it_fs != tmp_fs.end(); it_fs++) {
+//			if (print_first) {
+//
+//				graphviz << ", ";
+//			}
+//			print_first = true;
+//			if (helper::is_negate(*it_fs)) color = "<font color=\"#0000ff\"> ";
+//			else color = "<font color=\"#ff1020\">";
+//			graphviz << color << domain.get_grounder().deground_fluent(*it_fs) << "</font>";
+//		}
+//		graphviz << "</td></tr>\n";
+//	}
+//	graphviz << "	</table>>]\n";
+//	graphviz << "	{rank = max; description};\n";
 
 }
 
@@ -1304,8 +1276,7 @@ agent_set pstate::get_agents_if_entailed(const mal_observability_map& map, const
     return ret;
 }
 
-pworld_ptr pstate::execute_ontic_helper(const action &act, pstate &ret, const pworld_ptr &current_pw, transition_map &calculated, agent_set & oblivious_obs_agents) const
-{
+pworld_ptr pstate::execute_ontic_helper(const action &act, pstate &ret, const pworld_ptr &current_pw, transition_map &calculated, agent_set & oblivious_obs_agents) const {
     // Execute the all the effects
     fluent_formula current_pw_effects = get_effects_if_entailed(act.get_effects(), current_pw);
     fluent_set world_description = current_pw.get_fluent_set();
@@ -1313,14 +1284,7 @@ pworld_ptr pstate::execute_ontic_helper(const action &act, pstate &ret, const pw
 
     for (it_eff = current_pw_effects.begin(); it_eff != current_pw_effects.end(); it_eff++) {
         world_description = helper::ontic_exec(*it_eff, world_description);
-        //		if (act.get_name().compare("distract_c_a") == 0) {
-        //			std::cerr << "\nDEBUG: Inside the first ONTIC loop " << act.get_name();
-        //		}
     }
-
-    //	if (act.get_name().compare("distract_c_a") == 0) {
-    //		std::cerr << "\nDEBUG: Out the first ONTIC loop " << act.get_name();
-    //	}
 
     pworld_ptr new_pw = ret.add_rep_world(pworld(world_description), current_pw.get_repetition()); // We add the corresponding pworld in ret
     calculated.insert(transition_map::value_type(current_pw, new_pw)); // And we update the calculated map
@@ -1333,19 +1297,9 @@ pworld_ptr pstate::execute_ontic_helper(const action &act, pstate &ret, const pw
 
         for (it_pwm = it_pwtm->second.begin(); it_pwm != it_pwtm->second.end(); it_pwm++) {
             agent ag = it_pwm->first;
-
-            //			if (act.get_name().compare("distract_c_a") == 0) {
-            //				std::cerr << "\nDEBUG: Inside the SECOND ONTIC loop " << act.get_name();
-            //			}
-
             bool is_oblivious_obs = oblivious_obs_agents.find(ag) != oblivious_obs_agents.end();
 
             for (it_pws = it_pwm->second.begin(); it_pws != it_pwm->second.end(); it_pws++) {
-
-                //				if (act.get_name().compare("distract_c_a") == 0) {
-                //					std::cerr << "\nDEBUG: Inside the Third ONTIC loop " << act.get_name();
-                //				}
-
                 if (is_oblivious_obs) { // If we are dealing with an OBLIVIOUS agent we maintain its beliefs as they were
                     auto maintained_pworld = ret.get_worlds().find(*it_pws);
 
@@ -1358,7 +1312,6 @@ pworld_ptr pstate::execute_ontic_helper(const action &act, pstate &ret, const pw
                     if (calculated_pworld != calculated.end()) { // If we already calculated the transition function for this pworld
                         ret.add_edge(new_pw, calculated_pworld->second, ag); // Then we update agents' beliefs
                     } else {
-
                         pworld_ptr believed_pw = execute_ontic_helper(act, ret, *it_pws, calculated, oblivious_obs_agents);
                         ret.add_edge(new_pw, believed_pw, ag);
 
@@ -1366,15 +1319,8 @@ pworld_ptr pstate::execute_ontic_helper(const action &act, pstate &ret, const pw
                     }
                 }
             }
-            //			if (act.get_name().compare("distract_c_a") == 0) {
-            //				std::cerr << "\nDEBUG: Out the Second ONTIC loop " << act.get_name();
-            //			}
         }
-        //std::cerr << "\nDEBUG: Out the THIRD ONTIC loop " << act.get_name();
-
     }
-    //std::cerr << "\nDEBUG: RETURN TO " << act.get_name();
-
     return new_pw;
 }
 
@@ -1441,7 +1387,8 @@ pstate pstate::execute_ontic(const action & act) const
 
     //This finds all the worlds that are reachable from the initial state following
     //the edges labeled with fully observant agents.
-    agent_set agents = domain::get_instance().get_agents();
+    // \todo: SISTEMA
+    agent_set agents; // = domain.get_agents();
     agent_set fully_obs_agents = get_agents_if_entailed(act.get_fully_observants(), get_pointed());
 
     agent_set oblivious_obs_agents = agents;
@@ -1463,7 +1410,8 @@ pstate pstate::execute_sensing(const action & act) const
 
     //This finds all the worlds that are reachable from the initial state following
     //the edges labeled with fully observant agents.
-    agent_set agents = domain::get_instance().get_agents();
+    // \todo: SISTEMA
+    agent_set agents; // = domain.get_agents();
     agent_set fully_obs_agents = get_agents_if_entailed(act.get_fully_observants(), get_pointed());
     agent_set partially_obs_agents = get_agents_if_entailed(act.get_partially_observants(), get_pointed());
 

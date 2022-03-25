@@ -32,6 +32,7 @@ typedef boost::dynamic_bitset<> agent; /**< \brief A representation of an agent 
                                       *
                                       *  This representation is derived by applying \ref grounder::ground_agent(const std::string&) const
                                       * to the element of \ref reader::m_agents.*/
+
 typedef std::set<agent> agent_set; /**< \brief A set of \ref agent.*/
 typedef std::vector<agent> agent_list; /**< \brief A list of \ref agent.*/
 

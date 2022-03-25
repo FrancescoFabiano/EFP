@@ -90,7 +90,9 @@ bool kstate::operator==(const kstate & to_compare) const
 	}
 
 	bisimulation b;
-	return b.compare_automata_eq(*this, to_compare);
+    // \todo: SISTEMA
+    agent_set to_fix;
+	return b.compare_automata_eq(to_compare, *this, to_fix); // domain.get_agents());
 }
 
 bool kstate::operator<(const kstate & to_compare) const
@@ -399,24 +401,24 @@ kworld_ptr_set kstate::get_D_reachable_worlds(const agent_set & ags, const kworl
 	return ret;*/
 }
 
-void kstate::get_all_reachable_worlds_edges(const kworld_ptr & world, kworld_ptr_set & reached_worlds, kedge_map & reached_edges) const
-{
-	kworld_ptr_set::const_iterator it_kws;
+void kstate::get_all_reachable_worlds_edges(const kworld_ptr & world, kworld_ptr_set & reached_worlds, kedge_map & reached_edges) const {
+    // \todo: TEST
+    auto adjacent_worlds = m_edges.at(world);
 	kworld_ptr_set kw_list;
 
-	auto ag_set = domain::get_instance().get_agents();
-	auto ag_it = ag_set.begin();
+    std::map<agent, kworld_ptr_set>::const_iterator it_kwmap;
+    kworld_ptr_set::const_iterator it_kws;
 
-	for (; ag_it != ag_set.end(); ag_it++) {
-		kw_list = m_edges.at(world).at(*ag_it);
+    for (it_kwmap = adjacent_worlds.begin(); it_kwmap != adjacent_worlds.end(); it_kwmap++) {
+        kw_list = it_kwmap->second;
 
-		for (it_kws = kw_list.begin(); it_kws != kw_list.end(); it_kws++) {
-			if (reached_worlds.insert(*it_kws).second) {
-				reached_edges[*it_kws] = m_edges.at(*it_kws);
-				get_all_reachable_worlds_edges(*it_kws, reached_worlds, reached_edges);
-			}
-		}
-	}
+        for (it_kws = kw_list.begin(); it_kws != kw_list.end(); it_kws++) {
+            if (reached_worlds.insert(*it_kws).second) {
+                reached_edges[*it_kws] = m_edges.at(*it_kws);
+                get_all_reachable_worlds_edges(*it_kws, reached_worlds, reached_edges);
+            }
+        }
+    }
 }
 
 void kstate::clean_unreachable_kworlds()
@@ -434,39 +436,35 @@ void kstate::clean_unreachable_kworlds()
 }
 
 /**** INITIAL STATE ****/
-void kstate::build_initial()
+void kstate::build_initial(const initially& initial_conditions)
 {
 	/** \todo for now prune building.*/
 	std::cout << "\nBuilding initial Kripke structure...\n";
-	build_initial_prune();
+	build_initial_prune(initial_conditions);
 }
 
-void kstate::build_initial_structural()
-{
-
-}
-
-void kstate::build_initial_prune()
+void kstate::build_initial_prune(const initially& initial_conditions)
 {
 	/*Building of all the possible consistent \ref kworld and setting the pointed world.
 	 * Creation of all the \ref fluent combinations. All the consistent ones are added to \ref kstore.*/
 	fluent_set permutation;
-	initially ini_conditions = domain::get_instance().get_initial_description();
-	generate_initial_kworlds(permutation, 0, ini_conditions.get_initially_known_fluents());
+	generate_initial_kworlds(permutation, 0, initial_conditions);
 
 	/*Building of all the consistent \ref kedge.*/
-	generate_initial_kedges();
+	generate_initial_kedges(initial_conditions);
 }
 
 /*From https://www.geeksforgeeks.org/generate-all-the-binary-strings-of-n-bits/ since is like generating all the binary numbers.*/
-void kstate::generate_initial_kworlds(fluent_set& permutation, int index, const fluent_set & initially_known)
-{
-	unsigned int fluent_number = domain::get_instance().get_fluent_number();
-	unsigned int bit_size = domain::get_instance().get_size_fluent();
+void kstate::generate_initial_kworlds(fluent_set& permutation, int index, const initially& initial_conditions) {
+    // \todo: SISTEMA
+	unsigned int fluent_number = 0; // domain.get_fluent_number();
+	unsigned int bit_size = 0; // domain.get_size_fluent();
 
-	if (index == fluent_number) {
+    const fluent_set & initially_known = initial_conditions.get_initially_known_fluents();
+
+    if (index == fluent_number) {
 		kworld to_add(permutation);
-		add_initial_kworld(to_add);
+		add_initial_kworld(to_add, initial_conditions);
 
 		return;
 	}
@@ -478,52 +476,36 @@ void kstate::generate_initial_kworlds(fluent_set& permutation, int index, const 
 	bitSetToFindNegative.set(bitSetToFindPositve.size() - 1, true);
 	bitSetToFindPositve.set(bitSetToFindPositve.size() - 1, false);
 
-
 	if (initially_known.find(bitSetToFindNegative) == initially_known.end()) {
 		permutation.insert(bitSetToFindPositve);
-		generate_initial_kworlds(permutation, index + 1, initially_known);
+		generate_initial_kworlds(permutation, index + 1, initial_conditions);
 	}
 	if (initially_known.find(bitSetToFindPositve) == initially_known.end()) {
 		permutation_2.insert(bitSetToFindNegative);
-		generate_initial_kworlds(permutation_2, index + 1, initially_known);
+		generate_initial_kworlds(permutation_2, index + 1, initial_conditions);
 	}
 
 }
 
-void kstate::add_initial_kworld(const kworld & possible_add)
-{
-	initially ini_conditions = domain::get_instance().get_initial_description();
+void kstate::add_initial_kworld(const kworld & possible_add, const initially& initial_conditions) {
+    /* Since the common knowledge is on all the agent it means that every possible \ref kworld
+     * in the initial state must entail *phi* where C(*phi*) is an initial condition.*/
 
-	switch (domain::get_instance().get_config().get_initial_state_mode()) {
-        case Initial_State_Mode::FINITARY_S5_THEORY: {
-            /* Since the common knowledge is on all the agent it means that every possible \ref kworld
-             * in the initial state must entail *phi* where C(*phi*) is an initial condition.*/
-
-            //Already setted in \ref domain::build_initially(bool).
-            if (possible_add.entails(ini_conditions.get_ff_forS5())) {
-                add_world(possible_add);
-                if (possible_add.entails(ini_conditions.get_pointed_world_conditions())) {
-                    m_pointed = kworld_ptr(possible_add);
-                    /*std::cout << "pointed world: ";
-                    printer::get_instance().print_list(possible_add.get_fluent_set());
-                    std::cout << std::endl;*/
-                }
-            } else {
-                //Already generated so we save it on kstore
-                kstore::get_instance().add_world(possible_add);
-            }
-            break;
-	    }
-        case Initial_State_Mode::CUSTOM_INITIAL_STATE:
-        default: {
-            break;
+    //Already setted in \ref domain::build_initially(bool).
+    if (possible_add.entails(initial_conditions.get_ff_forS5())) {
+        add_world(possible_add);
+        if (possible_add.entails(initial_conditions.get_pointed_world_conditions())) {
+            m_pointed = kworld_ptr(possible_add);
         }
-	}
+    } else {
+        //Already generated so we save it on kstore
+        kstore::get_instance().add_world(possible_add);
+    }
 }
 
-void kstate::generate_initial_kedges()
-{
-	agent_set agents = domain::get_instance().get_agents();
+void kstate::generate_initial_kedges(const initially& initial_conditions) {
+    // \todo: SISTEMA
+	agent_set agents; // = domain.get_agents();
 	kworld_ptr kwptr_tmp1, kwptr_tmp2;
 
 	kworld_ptr_set::const_iterator it_kwps_1, it_kwps_2;
@@ -542,10 +524,9 @@ void kstate::generate_initial_kedges()
 		}
 	}
 
-	initially ini_conditions = domain::get_instance().get_initial_description();
 	formula_list::const_iterator it_fl;
 
-	for (it_fl = ini_conditions.get_initial_conditions().begin(); it_fl != ini_conditions.get_initial_conditions().end(); it_fl++) {
+	for (it_fl = initial_conditions.get_initial_conditions().begin(); it_fl != initial_conditions.get_initial_conditions().end(); it_fl++) {
 		remove_initial_kedge_bf(*it_fl);
 	}
 }
@@ -578,54 +559,45 @@ void kstate::remove_initial_kedge(const fluent_formula & known_ff, const agent &
 
 }
 
-void kstate::remove_initial_kedge_bf(const belief_formula & to_check)
-{
-	switch (domain::get_instance().get_config().get_initial_state_mode()) {
-        case Initial_State_Mode::FINITARY_S5_THEORY: {
-            /* Just check whenever is B(--) \/ B(--) and remove that edge*/
-            if (to_check.get_formula_type() == C_FORMULA) {
-                const belief_formula & tmp = to_check.get_bf1();
+void kstate::remove_initial_kedge_bf(const belief_formula & to_check) {
+    /* Just check whenever is B(--) \/ B(--) and remove that edge*/
+    if (to_check.get_formula_type() == C_FORMULA) {
+        const belief_formula & tmp = to_check.get_bf1();
 
-                switch ( tmp.get_formula_type() ) {
-                    //Only one for edges -- expresses that someone is ignorant.
-                    case PROPOSITIONAL_FORMULA: {
-                        //We remove all the check on the formula since they have already been controlled when ini_conditions has been created
-                        if (tmp.get_operator() == BF_OR) {
-                            auto known_ff_ptr = std::make_shared<fluent_formula>();
-                            helper::check_Bff_notBff(tmp.get_bf1(), tmp.get_bf2(), known_ff_ptr);
-                            if (known_ff_ptr != nullptr) {
-                                remove_initial_kedge(*known_ff_ptr, tmp.get_bf2().get_agent());
-                            }
-                            return;
+        switch ( tmp.get_formula_type() ) {
+            //Only one for edges -- expresses that someone is ignorant.
+            case PROPOSITIONAL_FORMULA: {
+                //We remove all the check on the formula since they have already been controlled when ini_conditions has been created
+                if (tmp.get_operator() == BF_OR) {
+                    auto known_ff_ptr = std::make_shared<fluent_formula>();
+                    helper::check_Bff_notBff(tmp.get_bf1(), tmp.get_bf2(), known_ff_ptr);
+                    if (known_ff_ptr != nullptr) {
+                        remove_initial_kedge(*known_ff_ptr, tmp.get_bf2().get_agent());
+                    }
+                    return;
 
-                        } else if (tmp.get_operator() == BF_AND) {
-                            //This case doesn't add knowledge.
-                            return;
-                        } else {
-                            std::cerr << "\nError in the type of initial formulae (FIFTH).\n";
-                            exit(1);
-                        }
-                    }
-                    case FLUENT_FORMULA:
-                    case BELIEF_FORMULA:
-                    case BF_EMPTY: {
-                        return;
-                    }
-                    default: {
-                        std::cerr << "\nError in the type of initial formulae (SIXTH).\n";
-                        exit(1);
-                    }
+                } else if (tmp.get_operator() == BF_AND) {
+                    //This case doesn't add knowledge.
+                    return;
+                } else {
+                    std::cerr << "\nError in the type of initial formulae (FIFTH).\n";
+                    exit(1);
                 }
-            } else {
-                std::cerr << "\nError in the type of initial formulae (SEVENTH).\n";
+            }
+            case FLUENT_FORMULA:
+            case BELIEF_FORMULA:
+            case BF_EMPTY: {
+                return;
+            }
+            default: {
+                std::cerr << "\nError in the type of initial formulae (SIXTH).\n";
                 exit(1);
             }
         }
-        case Initial_State_Mode::CUSTOM_INITIAL_STATE:
-        default: {
-            break;
-        }
-	}
+    } else {
+        std::cerr << "\nError in the type of initial formulae (SEVENTH).\n";
+        exit(1);
+    }
 }
 
 /**** TRANSITION FUNCTION ****/
@@ -638,16 +610,15 @@ kstate kstate::compute_succ(const action & act) const
 }
 
 /**** BISIMULATION ****/
-automaton kstate::kstate_to_automaton(std::vector<kworld_ptr> & kworld_vec, const std::map<agent, bis_label> & agent_to_label) const
-{
-
+automaton kstate::kstate_to_automaton(std::vector<kworld_ptr> & kworld_vec, const std::map<agent, bis_label> & agent_to_label) const {
 	std::map<int, int> compact_indices;
 	std::map<kworld_ptr, int> index_map;
 	kbislabel_map label_map; // Map: from -> (to -> ag_set)
 
 	automaton *a;
 	unsigned long Nvertex = get_worlds().size();
-	unsigned long ag_set_size = domain::get_instance().get_agents().size();
+    // \todo: SISTEMA
+	unsigned long ag_set_size = 0; // domain.get_agents().size();
 	//BIS_ADAPTATION For the loop that identifies the id (We add one edge for each node)
 	v_elem *Vertex;
 
@@ -793,6 +764,7 @@ automaton kstate::kstate_to_automaton(std::vector<kworld_ptr> & kworld_vec, cons
 	a->Nvertex = Nvertex;
 	a->Nbehavs = Nbehavs;
 	a->Vertex = Vertex;
+    a->Nagents = ag_set_size;
 
 	//	std::cerr << "\nDEBUG: \n\tNvertex = " << Nvertex << std::endl;
 	//	std::cerr << "\tNbehavs = " << Nbehavs << std::endl;
@@ -807,7 +779,8 @@ void kstate::automaton_to_kstate(const automaton & a, const std::vector<kworld_p
 	// The pointed world does not change when we calculate the minimum bisimilar state
 	// Hence we do not need to update it
 
-	unsigned long agents_size = domain::get_instance().get_agents().size();
+    // \todo: SISTEMA
+	unsigned long agents_size = 0; // domain.get_agents().size();
 	int i, j, k, label;
 
 	for (i = 0; i < a.Nvertex; i++) {
@@ -829,23 +802,25 @@ void kstate::automaton_to_kstate(const automaton & a, const std::vector<kworld_p
 	set_worlds(worlds);
 }
 
-void kstate::calc_min_bisimilar()
-{
+void kstate::calc_min_bisimilar(Bisimulation_Algorithm algorithm) {
 	// ************* Cleaning unreachable kworlds *************
 	std::map<bis_label, agent> label_to_agent;
 	std::map<agent, bis_label> agent_to_label;
 
-	auto agents = domain::get_instance().get_agents();
-	auto it_ag = agents.begin();
-	bis_label ag_label = 0;
-	agent lab_agent;
-	for (; it_ag != agents.end(); it_ag++) {
-		lab_agent = *it_ag;
-		label_to_agent.insert(std::make_pair(ag_label, lab_agent));
-		agent_to_label.insert(std::make_pair(lab_agent, ag_label));
-		ag_label++;
-
-	}
+    /**
+     * \todo: SISTEMARE QUESTO BLOCCO DI CODICE COMMENTATO!!!
+     *        SENZA DI QUESTO BISIMULATION _NON_ FUNZIONA!!!
+     */
+//	auto agents = domain.get_agents();
+//	auto it_ag = agents.begin();
+//	bis_label ag_label = 0;
+//	agent lab_agent;
+//	for (; it_ag != agents.end(); it_ag++) {
+//		lab_agent = *it_ag;
+//		label_to_agent.insert(std::make_pair(ag_label, lab_agent));
+//		agent_to_label.insert(std::make_pair(lab_agent, ag_label));
+//		ag_label++;
+//	}
 
 	clean_unreachable_kworlds();
 
@@ -868,7 +843,7 @@ void kstate::calc_min_bisimilar()
 
 
 
-	if (domain::get_instance().get_config().get_bisimulation() == PAIGE_TARJAN) {
+	if (algorithm == PAIGE_TARJAN) {
 		if (b.MinimizeAutomaPT(&a)) {
 			//VisAutoma(a);
 
@@ -897,367 +872,221 @@ void kstate::calc_min_bisimilar()
 /**** UTILITIES ****/
 void kstate::print() const
 {
-	int counter = 1;
-	std::cout << std::endl;
-	std::cout << "The Pointed World has id ";
-	printer::get_instance().print_list(get_pointed().get_fluent_set());
-	std::cout << std::endl;
-	std::cout << "*******************************************************************" << std::endl;
-
-	kworld_ptr_set::const_iterator it_kwset;
-	std::cout << "World List:" << std::endl;
-
-	for (it_kwset = get_worlds().begin(); it_kwset != get_worlds().end(); it_kwset++) {
-		std::cout << "W-" << counter << ": ";
-		printer::get_instance().print_list(it_kwset->get_fluent_set());
-		std::cout << " rep:" << it_kwset->get_repetition();
-		std::cout << std::endl;
-		counter++;
-	}
-	counter = 1;
-	std::cout << std::endl;
-	std::cout << "*******************************************************************" << std::endl;
-
-	kedge_map::const_iterator it_kem;
-	std::map<agent, kworld_ptr_set>::const_iterator it_agkw;
-
-	std::cout << "Edge List:" << std::endl;
-
-	for (it_kem = m_edges.begin(); it_kem != m_edges.end(); it_kem++) {
-		for (it_agkw = it_kem->second.begin(); it_agkw != it_kem->second.end(); it_agkw++) {
-			for (it_kwset = it_agkw->second.begin(); it_kwset != it_agkw->second.end(); it_kwset++) {
-				std::cout << "E-" << counter << ": (";
-				printer::get_instance().print_list(it_kem->first.get_fluent_set());
-				std::cout << "," << it_kem->first.get_repetition();
-				std::cout << ") - (";
-				printer::get_instance().print_list(it_kwset->get_fluent_set());
-				std::cout << "," << it_kwset->get_repetition();
-				std::cout << ") ag:" << domain::get_instance().get_grounder().deground_agent(it_agkw->first);
-				std::cout << std::endl;
-				counter++;
-			}
-		}
-	}
-	std::cout << "*******************************************************************" << std::endl;
+//	int counter = 1;
+//	std::cout << std::endl;
+//	std::cout << "The Pointed World has id ";
+//	printer::get_instance().print_list(get_pointed().get_fluent_set());
+//	std::cout << std::endl;
+//	std::cout << "*******************************************************************" << std::endl;
+//
+//	kworld_ptr_set::const_iterator it_kwset;
+//	std::cout << "World List:" << std::endl;
+//
+//	for (it_kwset = get_worlds().begin(); it_kwset != get_worlds().end(); it_kwset++) {
+//		std::cout << "W-" << counter << ": ";
+//		printer::get_instance().print_list(it_kwset->get_fluent_set());
+//		std::cout << " rep:" << it_kwset->get_repetition();
+//		std::cout << std::endl;
+//		counter++;
+//	}
+//	counter = 1;
+//	std::cout << std::endl;
+//	std::cout << "*******************************************************************" << std::endl;
+//
+//	kedge_map::const_iterator it_kem;
+//	std::map<agent, kworld_ptr_set>::const_iterator it_agkw;
+//
+//	std::cout << "Edge List:" << std::endl;
+//
+//	for (it_kem = m_edges.begin(); it_kem != m_edges.end(); it_kem++) {
+//		for (it_agkw = it_kem->second.begin(); it_agkw != it_kem->second.end(); it_agkw++) {
+//			for (it_kwset = it_agkw->second.begin(); it_kwset != it_agkw->second.end(); it_kwset++) {
+//				std::cout << "E-" << counter << ": (";
+//				printer::get_instance().print_list(it_kem->first.get_fluent_set());
+//				std::cout << "," << it_kem->first.get_repetition();
+//				std::cout << ") - (";
+//				printer::get_instance().print_list(it_kwset->get_fluent_set());
+//				std::cout << "," << it_kwset->get_repetition();
+//				std::cout << ") ag:" << domain.get_grounder().deground_agent(it_agkw->first);
+//				std::cout << std::endl;
+//				counter++;
+//			}
+//		}
+//	}
+//	std::cout << "*******************************************************************" << std::endl;
 }
 
 void kstate::print_graphviz(std::ostream & graphviz) const
 {
-	string_set::const_iterator it_st_set;
-	fluent_set::const_iterator it_fs;
-
-
-	graphviz << "//WORLDS List:" << std::endl;
-
-	kworld_ptr_set::const_iterator it_kpset;
-	std::map<fluent_set, int> map_world_to_index;
-	std::map<unsigned short, char> map_rep_to_name;
-	char found_rep = (char) ((char) domain::get_instance().get_agents().size() + 'A');
-	int found_fs = 0;
-	fluent_set tmp_fs;
-	char tmp_unsh;
-	string_set tmp_stset;
-	bool print_first;
-	kworld_ptr_set::const_iterator it_kwset;
-	for (it_kwset = get_worlds().begin(); it_kwset != get_worlds().end(); it_kwset++) {
-		if (*it_kwset == get_pointed())
-			graphviz << "	node [shape = doublecircle] ";
-		else
-			graphviz << "	node [shape = circle] ";
-
-		print_first = false;
-		tmp_fs = it_kwset->get_fluent_set();
-		if (map_world_to_index.count(tmp_fs) == 0) {
-			map_world_to_index[tmp_fs] = found_fs;
-			found_fs++;
-		}
-		tmp_unsh = static_cast<char> (it_kwset->get_repetition());
-		if (map_rep_to_name.count(tmp_unsh) == 0) {
-			map_rep_to_name[tmp_unsh] = found_rep;
-			found_rep++;
-		}
-		graphviz << "\"" << map_rep_to_name[tmp_unsh] << "_" << map_world_to_index[tmp_fs] << "\";";
-		graphviz << "// (";
-		tmp_stset = domain::get_instance().get_grounder().deground_fluent(tmp_fs);
-		for (it_st_set = tmp_stset.begin(); it_st_set != tmp_stset.end(); it_st_set++) {
-			if (print_first) {
-				graphviz << ",";
-			}
-			print_first = true;
-			graphviz << *it_st_set;
-		}
-		graphviz << ")\n";
-	}
-
-	graphviz << "\n\n";
-	graphviz << "//RANKS List:" << std::endl;
-
-	std::map<int, kworld_ptr_set> for_rank_print;
-	for (it_kwset = get_worlds().begin(); it_kwset != get_worlds().end(); it_kwset++) {
-		for_rank_print[it_kwset->get_repetition()].insert(*it_kwset);
-	}
-
-	std::map<int, kworld_ptr_set>::const_iterator it_map_rank;
-	for (it_map_rank = for_rank_print.begin(); it_map_rank != for_rank_print.end(); it_map_rank++) {
-		graphviz << "	{rank = same; ";
-		for (it_kwset = it_map_rank->second.begin(); it_kwset != it_map_rank->second.end(); it_kwset++) {
-			graphviz << "\"" << map_rep_to_name[it_kwset->get_repetition()] << "_" << map_world_to_index[it_kwset->get_fluent_set()] << "\"; ";
-		}
-		graphviz << "}\n";
-	}
-
-
-	graphviz << "\n\n";
-	graphviz << "//EDGES List:" << std::endl;
-
-	std::map < std::tuple<std::string, std::string>, std::set<std::string> > edges;
-
-	std::tuple<std::string, std::string> tmp_tuple;
-	std::string tmp_string;
-
-	kedge_map::const_iterator it_kem;
-	std::map<agent, kworld_ptr_set>::const_iterator it_agkw;
-
-	for (it_kem = m_edges.begin(); it_kem != m_edges.end(); it_kem++) {
-		for (it_agkw = it_kem->second.begin(); it_agkw != it_kem->second.end(); it_agkw++) {
-			for (it_kwset = it_agkw->second.begin(); it_kwset != it_agkw->second.end(); it_kwset++) {
-				tmp_string = "_" + std::to_string(map_world_to_index[it_kem->first.get_fluent_set()]);
-				tmp_string.insert(0, 1, map_rep_to_name[it_kem->first.get_repetition()]);
-				std::get<0>(tmp_tuple) = tmp_string;
-
-				tmp_string = "_" + std::to_string(map_world_to_index[it_kwset->get_fluent_set()]);
-				tmp_string.insert(0, 1, map_rep_to_name[it_kwset->get_repetition()]);
-				std::get<1>(tmp_tuple) = tmp_string;
-
-				edges[tmp_tuple].insert(domain::get_instance().get_grounder().deground_agent(it_agkw->first));
-			}
-		}
-	}
-
-	std::map < std::tuple<std::string, std::string>, std::set < std::string>>::iterator it_map;
-	std::map < std::tuple<std::string, std::string>, std::set < std::string>>::const_iterator it_map_2;
-
-	std::map < std::tuple<std::string, std::string>, std::set < std::string>> to_print_double;
-	for (it_map = edges.begin(); it_map != edges.end(); it_map++) {
-		for (it_map_2 = it_map; it_map_2 != edges.end(); it_map_2++) {
-			if (std::get<0>(it_map->first) == std::get<1>(it_map_2->first)) {
-				if (std::get<1>(it_map->first) == std::get<0>(it_map_2->first)) {
-					if (it_map->second == it_map_2->second) {
-						if (std::get<0>(it_map->first) != std::get<1>(it_map->first)) {
-							to_print_double[it_map->first] = it_map->second;
-							it_map_2 = edges.erase(it_map_2);
-							it_map = edges.erase(it_map);
-						}
-					}
-				}
-			}
-		}
-	}
-
-	std::set<std::string>::const_iterator it_stset;
-	for (it_map = edges.begin(); it_map != edges.end(); it_map++) {
-		graphviz << "	\"";
-		graphviz << std::get<0>(it_map->first);
-		graphviz << "\" -> \"";
-		graphviz << std::get<1>(it_map->first);
-		graphviz << "\" ";
-		graphviz << "[ label = \"";
-		tmp_string = "";
-		for (it_stset = it_map->second.begin(); it_stset != it_map->second.end(); it_stset++) {
-			tmp_string += *it_stset;
-			tmp_string += ",";
-		}
-		tmp_string.pop_back();
-		graphviz << tmp_string;
-		graphviz << "\" ];\n";
-	}
-
-	for (it_map = to_print_double.begin(); it_map != to_print_double.end(); it_map++) {
-		graphviz << "	\"";
-		graphviz << std::get<0>(it_map->first);
-		graphviz << "\" -> \"";
-		graphviz << std::get<1>(it_map->first);
-		graphviz << "\" ";
-		graphviz << "[ dir=both label = \"";
-		tmp_string = "";
-		for (it_stset = it_map->second.begin(); it_stset != it_map->second.end(); it_stset++) {
-
-			tmp_string += *it_stset;
-			tmp_string += ",";
-		}
-		tmp_string.pop_back();
-		graphviz << tmp_string;
-		graphviz << "\" ];\n";
-	}
-
-
-	std::string color = "<font color=\"#ffffff\">";
-	graphviz << "\n\n//WORLDS description Table:" << std::endl;
-	graphviz << "	node [shape = plain]\n\n";
-	graphviz << "	description[label=<\n";
-	graphviz << "	<table border = \"0\" cellborder = \"1\" cellspacing = \"0\" >\n";
-	for (it_kwset = get_worlds().begin(); it_kwset != get_worlds().end(); it_kwset++) {
-		tmp_fs = it_kwset->get_fluent_set();
-		print_first = false;
-		graphviz << "		<tr><td>" << map_rep_to_name[it_kwset->get_repetition()] << "_" << map_world_to_index[tmp_fs] << "</td> <td>";
-		for (it_fs = tmp_fs.begin(); it_fs != tmp_fs.end(); it_fs++) {
-			if (print_first) {
-				graphviz << ", ";
-			}
-			print_first = true;
-			if (!helper::is_negate(*it_fs)) color = "<font color=\"#0000ff\"> ";
-			else color = "<font color=\"#ff1020\">";
-			graphviz << color << domain::get_instance().get_grounder().deground_fluent(*it_fs) << "</font>";
-		}
-		graphviz << "</td></tr>\n";
-	}
-	graphviz << "	</table>>]\n";
-	graphviz << "	{rank = max; description};\n";
-
-}
-
-/*fluent_formula kstate::get_sensing_effects_if_entailed(const effects_map & map, const kworld_ptr & start) const
-{ 	fluent_formula ret;
-	fluent_formula retret;
-	fluent_set ret_tmp;
-
-	effects_map::const_iterator it_map;
-	for (it_map = map.begin(); it_map != map.end(); it_map++) {
-		if (entails(it_map->second, start)) {
-			if (start.get_ptr()->entails(it_map->first))
-				ret = helper::and_ff(ret, it_map->first);
-			else {
-				fluent_formula tmpp = it_map->first;
-				if (tmpp.size() == 1) {
-					fluent_set tmp = *(tmpp.begin());
-					if (tmp.size() == 1) {
-						fluent temp = *(tmp.begin());
-						if (temp % 2 == 0) {
-							temp = temp + 1;
-						} else {
-							temp = temp - 1;
-						}
-						ret_tmp.insert(temp);
-						retret.insert(ret_tmp);
-
-					} else {
-						std::cerr << "DEBUG--ERROR in sensing;";
-						exit(1);
-					}
-				} else {
-					std::cerr << "DEBUG--ERROR in sensing;";
-					exit(1);
-				}
-				ret = helper::and_ff(ret, retret);
-				retret.erase(ret_tmp);
-			}
-
-		}
-
-	}
-	if (ret.size() > 1) {
-
-		std::cerr << "\nNon determinism in action effect is not supported-2.\n";
-		exit(1);
-	}
-	return ret;
-}*/
-
-
-//void kstate::DEBUG_add_extra_world()
-//{
-//
-//	kworld_ptr tmp_ptr = *m_worlds.begin();
-//	kworld extra(tmp_ptr.get_fluent_set());
-//	unsigned short depth = tmp_ptr.get_repetition() + 4;
-//	//std::cout << "\n\nDEBUG: Depth: " << depth << "\n\n";
-//	kworld_ptr extra_ptr = add_rep_world(extra, depth);
-//	set_max_depth(get_max_depth() + depth);
+//	string_set::const_iterator it_st_set;
+//	fluent_set::const_iterator it_fs;
 //
 //
+//	graphviz << "//WORLDS List:" << std::endl;
+//
+//	kworld_ptr_set::const_iterator it_kpset;
+//	std::map<fluent_set, int> map_world_to_index;
+//	std::map<unsigned short, char> map_rep_to_name;
+//	char found_rep = (char) ((char) domain.get_agents().size() + 'A');
+//	int found_fs = 0;
+//	fluent_set tmp_fs;
+//	char tmp_unsh;
+//	string_set tmp_stset;
+//	bool print_first;
+//	kworld_ptr_set::const_iterator it_kwset;
+//	for (it_kwset = get_worlds().begin(); it_kwset != get_worlds().end(); it_kwset++) {
+//		if (*it_kwset == get_pointed())
+//			graphviz << "	node [shape = doublecircle] ";
+//		else
+//			graphviz << "	node [shape = circle] ";
+//
+//		print_first = false;
+//		tmp_fs = it_kwset->get_fluent_set();
+//		if (map_world_to_index.count(tmp_fs) == 0) {
+//			map_world_to_index[tmp_fs] = found_fs;
+//			found_fs++;
+//		}
+//		tmp_unsh = static_cast<char> (it_kwset->get_repetition());
+//		if (map_rep_to_name.count(tmp_unsh) == 0) {
+//			map_rep_to_name[tmp_unsh] = found_rep;
+//			found_rep++;
+//		}
+//		graphviz << "\"" << map_rep_to_name[tmp_unsh] << "_" << map_world_to_index[tmp_fs] << "\";";
+//		graphviz << "// (";
+//		tmp_stset = domain.get_grounder().deground_fluent(tmp_fs);
+//		for (it_st_set = tmp_stset.begin(); it_st_set != tmp_stset.end(); it_st_set++) {
+//			if (print_first) {
+//				graphviz << ",";
+//			}
+//			print_first = true;
+//			graphviz << *it_st_set;
+//		}
+//		graphviz << ")\n";
+//	}
+//
+//	graphviz << "\n\n";
+//	graphviz << "//RANKS List:" << std::endl;
+//
+//	std::map<int, kworld_ptr_set> for_rank_print;
+//	for (it_kwset = get_worlds().begin(); it_kwset != get_worlds().end(); it_kwset++) {
+//		for_rank_print[it_kwset->get_repetition()].insert(*it_kwset);
+//	}
+//
+//	std::map<int, kworld_ptr_set>::const_iterator it_map_rank;
+//	for (it_map_rank = for_rank_print.begin(); it_map_rank != for_rank_print.end(); it_map_rank++) {
+//		graphviz << "	{rank = same; ";
+//		for (it_kwset = it_map_rank->second.begin(); it_kwset != it_map_rank->second.end(); it_kwset++) {
+//			graphviz << "\"" << map_rep_to_name[it_kwset->get_repetition()] << "_" << map_world_to_index[it_kwset->get_fluent_set()] << "\"; ";
+//		}
+//		graphviz << "}\n";
+//	}
 //
 //
-//	kedge_ptr_set::const_iterator it_kep;
-//	for (it_kep = m_information_state.begin(); it_kep != m_information_state.end(); it_kep++) {
-//		if (it_kep->get_from() == tmp_ptr && !(it_kep->get_to() == tmp_ptr)) {
-//			kedge extra_ed(extra_ptr, it_kep->get_to(), it_kep->get_label());
-//			add_edge(extra_ed);
-//		} else if (it_kep->get_to() == tmp_ptr && !(it_kep->get_from() == tmp_ptr)) {
-//			kedge extra_ed(it_kep->get_from(), extra_ptr, it_kep->get_label());
-//			add_edge(extra_ed);
-//		} else if (it_kep->get_to() == tmp_ptr && it_kep->get_from() == tmp_ptr) {
-//			kedge extra_ed(extra_ptr, extra_ptr, it_kep->get_label());
-//			add_edge(extra_ed);
+//	graphviz << "\n\n";
+//	graphviz << "//EDGES List:" << std::endl;
+//
+//	std::map < std::tuple<std::string, std::string>, std::set<std::string> > edges;
+//
+//	std::tuple<std::string, std::string> tmp_tuple;
+//	std::string tmp_string;
+//
+//	kedge_map::const_iterator it_kem;
+//	std::map<agent, kworld_ptr_set>::const_iterator it_agkw;
+//
+//	for (it_kem = m_edges.begin(); it_kem != m_edges.end(); it_kem++) {
+//		for (it_agkw = it_kem->second.begin(); it_agkw != it_kem->second.end(); it_agkw++) {
+//			for (it_kwset = it_agkw->second.begin(); it_kwset != it_agkw->second.end(); it_kwset++) {
+//				tmp_string = "_" + std::to_string(map_world_to_index[it_kem->first.get_fluent_set()]);
+//				tmp_string.insert(0, 1, map_rep_to_name[it_kem->first.get_repetition()]);
+//				std::get<0>(tmp_tuple) = tmp_string;
+//
+//				tmp_string = "_" + std::to_string(map_world_to_index[it_kwset->get_fluent_set()]);
+//				tmp_string.insert(0, 1, map_rep_to_name[it_kwset->get_repetition()]);
+//				std::get<1>(tmp_tuple) = tmp_string;
+//
+//				edges[tmp_tuple].insert(domain.get_grounder().deground_agent(it_agkw->first));
+//			}
 //		}
 //	}
 //
-//}
-
-
-
-
-
-
-
-
-//DEBUG
-
-//void kstate::debug_print(const kstate & to_compare)
-//{
+//	std::map < std::tuple<std::string, std::string>, std::set < std::string>>::iterator it_map;
+//	std::map < std::tuple<std::string, std::string>, std::set < std::string>>::const_iterator it_map_2;
 //
-//	bisimulation b;
-//	std::vector<kworld_ptr> kworld_vec;
-//	automaton a;
-//
-//	//std::cerr << "\nDEBUG:HERE\n";
-//
-//
-//	if (m_information_state < to_compare.get_information_state()) {
-//		//std::cerr << "\nDEBUG:HERE 1\n";
-//
-//		a = b.compare_automata_debug(*this, to_compare, kworld_vec);
-//	} else {
-//		//std::cerr << "\nDEBUG:HERE 1\n";
-//
-//		a = b.compare_automata_debug(to_compare, *this, kworld_vec);
-//	}
-//	automaton_to_kstate_debug(a, kworld_vec);
-//}
-//
-//void kstate::automaton_to_kstate_debug(const automaton & a, std::vector<kworld_ptr> & kworld_vec)
-//{
-//	kworld_ptr_set worlds;
-//	kedge_ptr_set edges;
-//	// The pointed world does not change when we calculate the minimum bisimilar state
-//	// Hence we do not need to update it
-//
-//	int i, j, k, label, agents_size = domain::get_instance().get_agents().size();
-//
-//	for (i = 0; i < a.Nvertex; i++) {
-//		if (a.Vertex[i].ne > 0) {
-//			kworld_vec[i].set_repetition(i);
-//			std::cerr << "\nDEBUG: Analyzing the " << i << "^th world with num_id = " << kworld_vec[i].get_numerical_id() << " and repetition = " << kworld_vec[i].get_repetition() << std::endl;
-//			worlds.insert(kworld_vec[i]);
-//
-//			for (j = 0; j < a.Vertex[i].ne; j++) {
-//				for (k = 0; k < a.Vertex[i].e[j].nbh; k++) {
-//					label = a.Vertex[i].e[j].bh[k];
-//					if (label < agents_size) {
-//						
-//							kedge_ptr tmp_edge = kstore::get_instance().add_edge(kedge(kworld_vec[i], kworld_vec[a.Vertex[i].e[j].tv], label));
-//							edges.insert(tmp_edge);
-//							//tmp_edge.print();
-//							//std::cerr << "\n";
-//						
+//	std::map < std::tuple<std::string, std::string>, std::set < std::string>> to_print_double;
+//	for (it_map = edges.begin(); it_map != edges.end(); it_map++) {
+//		for (it_map_2 = it_map; it_map_2 != edges.end(); it_map_2++) {
+//			if (std::get<0>(it_map->first) == std::get<1>(it_map_2->first)) {
+//				if (std::get<1>(it_map->first) == std::get<0>(it_map_2->first)) {
+//					if (it_map->second == it_map_2->second) {
+//						if (std::get<0>(it_map->first) != std::get<1>(it_map->first)) {
+//							to_print_double[it_map->first] = it_map->second;
+//							it_map_2 = edges.erase(it_map_2);
+//							it_map = edges.erase(it_map);
+//						}
 //					}
 //				}
 //			}
 //		}
-//
 //	}
 //
-//	set_pointed(*worlds.begin());
-//	
-//	set_worlds(worlds);
-//	set_edges(edges);
-//}
+//	std::set<std::string>::const_iterator it_stset;
+//	for (it_map = edges.begin(); it_map != edges.end(); it_map++) {
+//		graphviz << "	\"";
+//		graphviz << std::get<0>(it_map->first);
+//		graphviz << "\" -> \"";
+//		graphviz << std::get<1>(it_map->first);
+//		graphviz << "\" ";
+//		graphviz << "[ label = \"";
+//		tmp_string = "";
+//		for (it_stset = it_map->second.begin(); it_stset != it_map->second.end(); it_stset++) {
+//			tmp_string += *it_stset;
+//			tmp_string += ",";
+//		}
+//		tmp_string.pop_back();
+//		graphviz << tmp_string;
+//		graphviz << "\" ];\n";
+//	}
+//
+//	for (it_map = to_print_double.begin(); it_map != to_print_double.end(); it_map++) {
+//		graphviz << "	\"";
+//		graphviz << std::get<0>(it_map->first);
+//		graphviz << "\" -> \"";
+//		graphviz << std::get<1>(it_map->first);
+//		graphviz << "\" ";
+//		graphviz << "[ dir=both label = \"";
+//		tmp_string = "";
+//		for (it_stset = it_map->second.begin(); it_stset != it_map->second.end(); it_stset++) {
+//
+//			tmp_string += *it_stset;
+//			tmp_string += ",";
+//		}
+//		tmp_string.pop_back();
+//		graphviz << tmp_string;
+//		graphviz << "\" ];\n";
+//	}
+//
+//
+//	std::string color = "<font color=\"#ffffff\">";
+//	graphviz << "\n\n//WORLDS description Table:" << std::endl;
+//	graphviz << "	node [shape = plain]\n\n";
+//	graphviz << "	description[label=<\n";
+//	graphviz << "	<table border = \"0\" cellborder = \"1\" cellspacing = \"0\" >\n";
+//	for (it_kwset = get_worlds().begin(); it_kwset != get_worlds().end(); it_kwset++) {
+//		tmp_fs = it_kwset->get_fluent_set();
+//		print_first = false;
+//		graphviz << "		<tr><td>" << map_rep_to_name[it_kwset->get_repetition()] << "_" << map_world_to_index[tmp_fs] << "</td> <td>";
+//		for (it_fs = tmp_fs.begin(); it_fs != tmp_fs.end(); it_fs++) {
+//			if (print_first) {
+//				graphviz << ", ";
+//			}
+//			print_first = true;
+//			if (!helper::is_negate(*it_fs)) color = "<font color=\"#0000ff\"> ";
+//			else color = "<font color=\"#ff1020\">";
+//			graphviz << color << domain.get_grounder().deground_fluent(*it_fs) << "</font>";
+//		}
+//		graphviz << "</td></tr>\n";
+//	}
+//	graphviz << "	</table>>]\n";
+//	graphviz << "	{rank = max; description};\n";
+
+}

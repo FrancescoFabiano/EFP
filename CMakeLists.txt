@@ -22,7 +22,7 @@ set(
         src/heuristics/heuristics_template.ipp
         src/heuristics/satisfied_goals.cpp
         src/parse/cem_parser.cpp
-        src/refactor/asp_maker.cpp
+#        src/refactor/asp_maker.cpp
         src/search/planner.ipp
         src/states/kripke/kstate.cpp
         src/states/kripke/kstore.cpp
@@ -65,7 +65,7 @@ set(
         src/heuristics/heuristics_manager.h
         src/heuristics/satisfied_goals.h
         src/parse/cem_parser.h
-        src/refactor/asp_maker.h
+#        src/refactor/asp_maker.h
         src/search/planner.h
         src/states/kripke/kstate.h
         src/states/kripke/kstore.h

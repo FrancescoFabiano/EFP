@@ -8,16 +8,17 @@
  */
 #include <algorithm>
 #include "planner.h"
-#include "../update/product_update.h"
-#include "../actions/custom_event_models/cem_store.h"
+//#include "../update/product_update.h"
+//#include "../actions/custom_event_models/cem_store.h"
 
 template <class T>
-void planner<T>::print_results(std::chrono::duration<double> elapsed_seconds, T goal, bool given_plan) {
+void planner<T>::print_results(const domain& domain, std::chrono::duration<double> elapsed_seconds, T goal,
+                               bool given_plan) {
 	std::cout << "\n\n\nWell Done, Goal found in " << elapsed_seconds.count() << " :)\n";
 	goal.print();
-    
-    auto config = domain::get_instance().get_config();
-    
+
+    const auto& config = domain.get_config();
+
 	if (config.is_results_file()) {
 		std::ofstream result;
 		std::string folder = "out/EFP_comparison/";
@@ -101,36 +102,36 @@ void planner<T>::print_results(std::chrono::duration<double> elapsed_seconds, T 
 }
 
 template <class T>
-bool planner<T>::search() {
-    auto config = domain::get_instance().get_config();
+bool planner<T>::search(const domain& domain) {
+    const auto& config = domain.get_config();
     bool result;
 
     if (config.is_execute_given_actions()) {
         if (config.is_results_file()) {
-            result = execute_given_actions_timed();
+            result = execute_given_actions_timed(domain);
         } else {
-            result = execute_given_actions();
+            result = execute_given_actions(domain);
         }
         std::cout << "\n\n\n*****THE END*****\n";
     } else {
         if (config.get_used_heur() == Heuristic::NO_H) {
             switch (config.get_used_search()) {
                 case Search_Strategy::DFS: {
-                    result = search_DFS();
+                    result = search_DFS(domain);
                     break;
                 }
                 case Search_Strategy::ITER_DFS: {
-                    result = search_iterative_DFS();
+                    result = search_iterative_DFS(domain);
                     break;
                 }
                 case Search_Strategy::BFS:
                 default: {
-                    result = search_BFS();
+                    result = search_BFS(domain);
                     break;
                 }
             }
         } else {
-            result = search_heuristic();
+            result = search_heuristic(domain);
         }
         if (result) {
             std::cout << "\n\n\n*****THE END*****\n";
@@ -142,8 +143,8 @@ bool planner<T>::search() {
 }
 
 template <class T>
-bool planner<T>::search_BFS() {
-    auto config = domain::get_instance().get_config();
+bool planner<T>::search_BFS(const domain& domain) {
+    const auto& config = domain.get_config();
 	T initial;
 
 	bool check_visited = config.is_check_visited();
@@ -156,27 +157,33 @@ bool planner<T>::search_BFS() {
 
 	auto start_timing = std::chrono::system_clock::now();
 
-	initial.build_initial();
+    if (config.get_initial_state_mode() == Initial_State_Mode::FINITARY_S5_THEORY) {
+        initial.build_initial(domain.get_initial_description());
+    }
+
+    /**
+     * \todo: IMPLEMENTARE CASO CON USER-PROVIDED CUSTOM INITIAL STATE
+     */
 
 	if (bisimulation) {
-		initial.calc_min_bisimilar();
+        initial.calc_min_bisimilar(NO_BISIMULATION);
 	}
 	auto end_timing = std::chrono::system_clock::now();
 	std::chrono::duration<double> elapsed_seconds = end_timing - start_timing;
 
 	std::cout << "\nInitial Built in " << elapsed_seconds.count() << " seconds" << std::endl;
 
-    action_set actions = domain::get_instance().get_actions();
+    const action_set& actions = domain.get_actions();
     action_set::const_iterator it_acset;
     T popped_state;
     T tmp_state;
     action tmp_action;
 
     start_timing = std::chrono::system_clock::now();
-    if (initial.is_goal()) {
+    if (initial.is_goal(domain.get_goal_description())) {
         end_timing = std::chrono::system_clock::now();
         elapsed_seconds = end_timing - start_timing;
-        print_results(elapsed_seconds, initial, false);
+        print_results(domain, elapsed_seconds, initial, false);
 
         return true;
     }
@@ -190,53 +197,53 @@ bool planner<T>::search_BFS() {
 	while (!m_search_space.empty()) {
 		popped_state = m_search_space.front();
 		m_search_space.pop();
-		//std::cerr << "\nDEBUG: Plan length is " << popped_state.get_plan_length();
+
 		for (it_acset = actions.begin(); it_acset != actions.end(); it_acset++) {
 			tmp_action = *it_acset;
 
 			if (popped_state.is_executable(tmp_action)) {
 
 				tmp_state = popped_state.compute_succ(tmp_action);
-				//tmp_state.print();
 				if (bisimulation) {
-					tmp_state.calc_min_bisimilar();
+                    tmp_state.calc_min_bisimilar(NO_BISIMULATION);
 				}
 
-				if (tmp_state.is_goal()) {
+				if (tmp_state.is_goal(domain.get_goal_description())) {
 					end_timing = std::chrono::system_clock::now();
 					elapsed_seconds = end_timing - start_timing;
-                    print_results(elapsed_seconds, tmp_state, false);
+                    print_results(domain, elapsed_seconds, tmp_state, false);
 					return true;
 				}
 				if (!check_visited || visited_states.insert(tmp_state).second) {
 					m_search_space.push(tmp_state);
 				}
-			} /*else {
-				if (tmp_state.get_plan_length() == count) {
-					std::cerr << "\nDEBUG: Plan length is " << count;
-					count++;
-				}
-			}*/
-
+			}
 		}
-
 	}
 	std::cout << "\nNo plan found for this goal.\n";
 	return false;
 }
 
 template <class T>
-bool planner<T>::search_iterative_DFS() {
-    auto config = domain::get_instance().get_config();
+bool planner<T>::search_iterative_DFS(const domain& domain) {
+    const auto& config = domain.get_config();
 	std::stack<T> supportSearch; //stack di supporto per i risultati della ricerca.
 	T initial;
 
 	std::set<T> visited_states;
 
 	auto start_timing = std::chrono::system_clock::now();
-	initial.build_initial();
+
+    if (config.get_initial_state_mode() == Initial_State_Mode::FINITARY_S5_THEORY) {
+        initial.build_initial(domain.get_initial_description());
+    }
+
+    /**
+     * \todo: IMPLEMENTARE CASO CON USER-PROVIDED CUSTOM INITIAL STATE
+     */
+
 	if (config.get_bisimulation() != Bisimulation_Algorithm::NO_BISIMULATION) {
-		initial.calc_min_bisimilar();
+        initial.calc_min_bisimilar(NO_BISIMULATION);
 	}
 
 	int maxDepth = config.get_iter_dfs_max_depth();
@@ -247,17 +254,17 @@ bool planner<T>::search_iterative_DFS() {
 
 	std::cout << "\nInitial Built in " << elapsed_seconds.count() << " seconds\n";
 
-	action_set actions = domain::get_instance().get_actions();
+	action_set actions = domain.get_actions();
 	action_set::const_iterator it_acset;
 	T popped_state, popped_state2;
 	T tmp_state;
 	action tmp_action;
 
 	start_timing = std::chrono::system_clock::now();
-	if (initial.is_goal()) {
+	if (initial.is_goal(domain.get_goal_description())) {
 		end_timing = std::chrono::system_clock::now();
 		elapsed_seconds = end_timing - start_timing;
-        print_results(elapsed_seconds, initial, false);
+        print_results(domain, elapsed_seconds, initial, false);
 
 		return true;
 	}
@@ -280,12 +287,12 @@ bool planner<T>::search_iterative_DFS() {
 					tmp_state = popped_state.compute_succ(tmp_action);
 					//tmp_state.print();
 					if (config.get_bisimulation() != Bisimulation_Algorithm::NO_BISIMULATION) {
-						tmp_state.calc_min_bisimilar();
+                        tmp_state.calc_min_bisimilar(NO_BISIMULATION);
 					}
-					if (tmp_state.is_goal()) {
+					if (tmp_state.is_goal(domain.get_goal_description())) {
 						end_timing = std::chrono::system_clock::now();
 						elapsed_seconds = end_timing - start_timing;
-                        print_results(elapsed_seconds, tmp_state, false);
+                        print_results(domain, elapsed_seconds, tmp_state, false);
 						return true;
 					}
 
@@ -302,16 +309,24 @@ bool planner<T>::search_iterative_DFS() {
 }
 
 template <class T>
-bool planner<T>::search_DFS() {
-    auto config = domain::get_instance().get_config();
+bool planner<T>::search_DFS(const domain& domain) {
+    const auto& config = domain.get_config();
 	T initial;
 
 	std::set<T> visited_states;
 
 	auto start_timing = std::chrono::system_clock::now();
-	initial.build_initial();
+
+    if (config.get_initial_state_mode() == Initial_State_Mode::FINITARY_S5_THEORY) {
+        initial.build_initial(domain.get_initial_description());
+    }
+
+    /**
+     * \todo: IMPLEMENTARE CASO CON USER-PROVIDED CUSTOM INITIAL STATE
+     */
+
 	if (config.get_bisimulation() != Bisimulation_Algorithm::NO_BISIMULATION) {
-		initial.calc_min_bisimilar();
+        initial.calc_min_bisimilar(NO_BISIMULATION);
 	}
 
 	auto end_timing = std::chrono::system_clock::now();
@@ -319,17 +334,17 @@ bool planner<T>::search_DFS() {
 
 	std::cout << "\nInitial Built in " << elapsed_seconds.count() << " seconds\n";
 
-	action_set actions = domain::get_instance().get_actions();
+	action_set actions = domain.get_actions();
 	action_set::const_iterator it_acset;
 	T popped_state, popped_state2;
 	T tmp_state;
 	action tmp_action;
 
 	start_timing = std::chrono::system_clock::now();
-	if (initial.is_goal()) {
+	if (initial.is_goal(domain.get_goal_description())) {
 		end_timing = std::chrono::system_clock::now();
 		elapsed_seconds = end_timing - start_timing;
-        print_results(elapsed_seconds, initial, false);
+        print_results(domain, elapsed_seconds, initial, false);
 
 		return true;
 	}
@@ -347,12 +362,12 @@ bool planner<T>::search_DFS() {
 				tmp_state = popped_state.compute_succ(tmp_action);
 				//tmp_state.print();
 				if (config.get_bisimulation() != Bisimulation_Algorithm::NO_BISIMULATION) {
-					tmp_state.calc_min_bisimilar();
+                    tmp_state.calc_min_bisimilar(NO_BISIMULATION);
 				}
-				if (tmp_state.is_goal()) {
+				if (tmp_state.is_goal(domain.get_goal_description())) {
 					end_timing = std::chrono::system_clock::now();
 					elapsed_seconds = end_timing - start_timing;
-                    print_results(elapsed_seconds, tmp_state, false);
+                    print_results(domain, elapsed_seconds, tmp_state, false);
 					return true;
 				}
 
@@ -368,8 +383,8 @@ bool planner<T>::search_DFS() {
 }
 
 template <class T>
-bool planner<T>::search_heuristic() {
-    auto config = domain::get_instance().get_config();
+bool planner<T>::search_heuristic(const domain& domain) {
+    const auto& config = domain.get_config();
 
 	T initial;
 	bool check_visited = config.is_check_visited();
@@ -380,31 +395,39 @@ bool planner<T>::search_heuristic() {
 	}
 
 	auto start_timing = std::chrono::system_clock::now();
-	initial.build_initial();
-	if (bisimulation) initial.calc_min_bisimilar();
+
+    if (config.get_initial_state_mode() == Initial_State_Mode::FINITARY_S5_THEORY) {
+        initial.build_initial(domain.get_initial_description());
+    }
+
+    /**
+     * \todo: IMPLEMENTARE CASO CON USER-PROVIDED CUSTOM INITIAL STATE
+     */
+
+	if (bisimulation) initial.calc_min_bisimilar(NO_BISIMULATION);
 	auto end_timing = std::chrono::system_clock::now();
 	std::chrono::duration<double> elapsed_seconds = end_timing - start_timing;
 
 	std::cout << "\nInitial Built in " << elapsed_seconds.count() << " seconds\n";
 
 	start_timing = std::chrono::system_clock::now();
-	heuristics_manager h_manager(config.get_used_heur(), initial);
+	heuristics_manager h_manager(domain, config.get_used_heur());
 	end_timing = std::chrono::system_clock::now();
 	elapsed_seconds = end_timing - start_timing;
 	std::cout << "\nHeuristic Built in " << elapsed_seconds.count() << " seconds\n";
 
 
-	action_set actions = domain::get_instance().get_actions();
+	action_set actions = domain.get_actions();
 	action_set::const_iterator it_acset;
 	T popped_state;
 	T tmp_state;
 	action tmp_action;
 
 	start_timing = std::chrono::system_clock::now();
-	if (initial.is_goal()) {
+	if (initial.is_goal(domain.get_goal_description())) {
 		end_timing = std::chrono::system_clock::now();
 		elapsed_seconds = end_timing - start_timing;
-        print_results(elapsed_seconds, initial, false);
+        print_results(domain, elapsed_seconds, initial, false);
 		return true;
 	}
 
@@ -422,12 +445,12 @@ bool planner<T>::search_heuristic() {
 			if (popped_state.is_executable(tmp_action)) {
 				tmp_state = popped_state.compute_succ(tmp_action);
 				if (bisimulation) {
-					tmp_state.calc_min_bisimilar();
+                    tmp_state.calc_min_bisimilar(NO_BISIMULATION);
 				}
-				if (tmp_state.is_goal()) {
+				if (tmp_state.is_goal(domain.get_goal_description())) {
 					end_timing = std::chrono::system_clock::now();
 					elapsed_seconds = end_timing - start_timing;
-                    print_results(elapsed_seconds, tmp_state, false);
+                    print_results(domain, elapsed_seconds, tmp_state, false);
 					return true;
 				}
 				if (!check_visited || visited_states.insert(tmp_state).second) {
@@ -446,16 +469,16 @@ bool planner<T>::search_heuristic() {
 }
 
 template <class T>
-bool planner<T>::execute_given_actions() {
-    auto config = domain::get_instance().get_config();
-	check_actions_names();
+bool planner<T>::execute_given_actions(const domain& domain) {
+    const auto& config = domain.get_config();
+	check_actions_names(domain);
 	std::set<T> visited_states;
 
 	T state;
-	state.build_initial();
+	state.build_initial(domain.get_initial_description());
     bool found_plan;
 
-	if (state.is_goal()) {
+	if (state.is_goal(domain.get_goal_description())) {
 		std::cout << "\nInitial was Goal:)\n";
         found_plan = true;
 	} else {
@@ -464,7 +487,7 @@ bool planner<T>::execute_given_actions() {
 
 	std::string bis_postfix;
 	if (config.get_bisimulation() != Bisimulation_Algorithm::NO_BISIMULATION) {
-		state.calc_min_bisimilar();
+        state.calc_min_bisimilar(NO_BISIMULATION);
 		bis_postfix = "__b";
 	}
 	if (config.is_debug()) {
@@ -474,7 +497,7 @@ bool planner<T>::execute_given_actions() {
 	visited_states.insert(state);
 
     auto given_actions = config.get_given_actions();
-    auto action_library = domain::get_instance().get_actions();
+    auto action_library = domain.get_actions();
 
 	std::vector<std::string>::const_iterator it_stset;
 	std::vector<std::string>::const_iterator it_stset2;
@@ -486,12 +509,12 @@ bool planner<T>::execute_given_actions() {
 				if (state.is_executable(*it_acset)) {
 					state = state.compute_succ(*it_acset);
 					if (config.get_bisimulation() != Bisimulation_Algorithm::NO_BISIMULATION) {
-						state.calc_min_bisimilar();
+                        state.calc_min_bisimilar(NO_BISIMULATION);
 					}
 					if (config.is_debug()) {
 						state.print_graphviz(bis_postfix);
 					}
-					if (state.is_goal()) {
+					if (state.is_goal(domain.get_goal_description())) {
 						std::cout << "\n\nWell Done, Goal found after the execution of ";
 						for (it_stset2 = given_actions.begin(); it_stset2 != it_stset; it_stset2++) {
 							std::cout << *it_stset2 << ", ";
@@ -533,12 +556,12 @@ bool planner<T>::execute_given_actions() {
 
 template <class T>
 /**\todo just for confrontation with old*/
-bool planner<T>::execute_given_actions_timed() {
-    auto config = domain::get_instance().get_config();
-	check_actions_names();
+bool planner<T>::execute_given_actions_timed(const domain& domain) {
+    const auto& config = domain.get_config();
+	check_actions_names(domain);
 
 	T state;
-	state.build_initial();
+	state.build_initial(domain.get_initial_description());
 
 	std::vector<std::string>::const_iterator it_stset;
 	action_set::const_iterator it_acset;
@@ -546,7 +569,7 @@ bool planner<T>::execute_given_actions_timed() {
 	auto start_timing = std::chrono::system_clock::now();
 
 	for (it_stset = config.get_given_actions().begin(); it_stset != config.get_given_actions().end(); it_stset++) {
-		for (it_acset = domain::get_instance().get_actions().begin(); it_acset != domain::get_instance().get_actions().end(); it_acset++) {
+		for (it_acset = domain.get_actions().begin(); it_acset != domain.get_actions().end(); it_acset++) {
 			if (it_acset->get_name() == *it_stset) {
 				if (state.is_executable(*it_acset)) {
 					state = state.compute_succ(*it_acset);
@@ -558,19 +581,20 @@ bool planner<T>::execute_given_actions_timed() {
 	auto end_timing = std::chrono::system_clock::now();
 	std::chrono::duration<double> elapsed_seconds = end_timing - start_timing;
 
-    print_results(elapsed_seconds, state, true);
-    return state.is_goal();
+    print_results(domain, elapsed_seconds, state, true);
+    return state.is_goal(domain.get_goal_description());
 }
 
 template <class T>
 /**\todo just for confrontation with old*/
-void planner<T>::check_actions_names() {
-    auto config = domain::get_instance().get_config();
+void planner<T>::check_actions_names(const domain& domain) {
+    const auto& config = domain.get_config();
+
 	string_set domain_act;
 	action_set::const_iterator it_acset;
 	std::vector<std::string>::const_iterator it_stset;
 
-	for (it_acset = domain::get_instance().get_actions().begin(); it_acset != domain::get_instance().get_actions().end(); it_acset++) {
+	for (it_acset = domain.get_actions().begin(); it_acset != domain.get_actions().end(); it_acset++) {
 		domain_act.insert(it_acset->get_name());
 	}
 

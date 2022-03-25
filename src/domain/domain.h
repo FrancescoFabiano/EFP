@@ -17,22 +17,17 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
 
+#include "../../include/definitions/domain_def.h"
+#include "../../include/definitions/actions.h"
 #include "domain_config.h"
-
 #include "grounder.h"
 #include "initially.h"
-
 #include "../utilities/reader.h"
-#include "../actions/action.h"
-#include "../actions/custom_event_models/cem_store.h"
+//#include "../actions/custom_event_models/cem_store.h"
 
 
-class domain
-{
+class domain {
 private:
-    /** \brief Private constructor since it is a Singleton class.*/
-    domain();
-
     /*All the useful info of the domain are store here:
      m_fluents -> all the fluents;
      m_actions -> all the actions 
@@ -60,29 +55,28 @@ private:
     void build_fluents();
 
     /** \brief Function that from the file stores the \ref action information.*/
-    void build_actions();
+    void build_actions(const grounder& grounder);
 
 
     /** \brief Function that adds to the right \ref action each \ref proposition.*/
-    void build_propositions();
+    void build_propositions(const grounder& grounder);
 
     /** \brief Function that builds \ref m_intial_description.*/
-    void build_initially();
+    void build_initially(const grounder& grounder);
 
     /** \brief Function that builds \ref m_goal_description.
      * \todo move to the goal class.*/
-    void build_goal();
+    void build_goal(const grounder& grounder);
 
 public:
+//    /** \brief Private constructor since it is a Singleton class.*/
+    domain();
 
-    /** \brief To get always (the same instance of) *this* and the same instantiated fields.
-     * \warning the \ref set_config has to called in the main file only.*/
-    static domain& get_instance();
-
-    /** \brief Copy constructor removed since is Singleton class. */
     domain(domain const&) = delete;
-    /** \brief Copy operator removed since Singleton class. */
-    void operator=(domain const&) = delete;
+    domain(domain const&&) = delete;
+
+    domain& operator=(domain const&) = delete;
+    domain& operator=(domain const&&) = delete;
 
     const domain_config & get_config() const;
 
@@ -91,39 +85,39 @@ public:
     /** \brief Function that builds all the domain information.
      *
      * This function calls \ref build_fluents, \ref build_agents and \ref build_actions.*/
-    void build();
+    void build(const grounder& grounder);
 
     /** \brief Getter of the field \ref m_grounder.
      *
      * @return the ref to \ref m_grounder.*/
-    const grounder & get_grounder();
+    const grounder & get_grounder() const;
     /** \brief Getter of the field \ref m_fluents.
      *
      * @return the ref to \ref m_fluents.*/
-    const fluent_set & get_fluents();
+    const fluent_set & get_fluents() const;
     /** \brief Function that return the number of \ref fluent in the domain.
      *
      * @return the number of \ref fluent.*/
-    unsigned int get_fluent_number();
+    unsigned int get_fluent_number() const;
 
-    unsigned int get_size_fluent();
+    unsigned int get_size_fluent() const;
 
     /** \brief Getter of the field \ref m_actions.
      *
      * @return the ref to \ref m_actions.*/
-    const action_set & get_actions();
+    const action_set & get_actions() const;
 
     /** \brief Getter of the field \ref m_agents.
      *
      * @return the ref to \ref m_agents.*/
-    const agent_set & get_agents();
+    const agent_set & get_agents() const;
 
     /** \brief Getter of the field \ref m_intial_description.
      *
      * @return the ref to \ref m_intial_description.*/
-    const initially & get_initial_description();
+    const initially & get_initial_description() const;
     /** \brief Getter of the field \ref m_goal_description.
      *
      * @return the ref to \ref m_goal_description.*/
-    const formula_list & get_goal_description();
+    const formula_list & get_goal_description() const;
 };

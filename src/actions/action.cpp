@@ -5,38 +5,35 @@
  * Created on April 4, 2019, 2:58 PM
  */
 #include "action.h"
-#include "../domain/domain.h"
+
+#include <utility>
 #include "custom_event_models/cem_store.h"
 
 /*********************************************************************
  Action implementation
  **********************************************************************/
 
-/* constructor and destructor */
+action::action() = default;
 
-action::action() {
-    m_type = -1;
-    initialize_obs_table();
-}
+//action::action(const fluent_set& fluents, const agent_set& agents) {
+//    m_type = -1;
+//    initialize_obs_table(fluents, agents);
+//}
 
-action::action(const std::string &name, action_id id, const agent_set &tot_ags, const fluent_set &tot_fl) {
+action::action(const std::string& name, const action_id& id, const fluent_set& fluents, const agent_set& agents) {
     set_name(name);
     set_id(id);
     m_type = -1;
-    initialize_obs_table(tot_ags, tot_fl);
+    initialize_obs_table(fluents, agents);
 }
 
-void action::initialize_obs_table() {
-    initialize_obs_table(domain::get_instance().get_agents(), domain::get_instance().get_fluents());
-}
-
-void action::initialize_obs_table(const agent_set &tot_ags, const fluent_set &tot_fl) {
+void action::initialize_obs_table(const fluent_set& fluents, const agent_set& agents) {
     agent_set::const_iterator it_ag;
 
     belief_formula false_bf;
     fluent_formula false_ff;
 
-    fluent f1 = *(tot_fl.begin());
+    fluent f1 = *(fluents.begin());
     fluent f1_negated = helper::negate_fluent(f1);
 
     //The formula is "fluent_number_1 and -fluent_number_1" which is always false
@@ -56,7 +53,7 @@ void action::initialize_obs_table(const agent_set &tot_ags, const fluent_set &to
     //std::map<agent, std::map<agent_group_id, belief_formula>> map_mid;
     std::map<agent_group_id, belief_formula> map_internal;
 
-    for (it_ag = tot_ags.begin(); it_ag != tot_ags.end(); ++it_ag) {
+    for (it_ag = agents.begin(); it_ag != agents.end(); ++it_ag) {
         for (short it_ag_group = 0; it_ag_group != cem_store::get_instance().get_agent_group_number(); ++it_ag_group) {
             //Everyone set to false, then in the function that retrieves set the rules that if everything is false you get the last
             map_internal.insert(std::make_pair(it_ag_group, false_bf));
@@ -131,23 +128,23 @@ void action::add_observant(agent ag, agent_group_id ag_group, const belief_formu
     m_observants[ag][ag_group] = condition; //.insert(observability_map::value_type(fully, condition));
 }
 
-void action::add_proposition(proposition &prop) {
+void action::add_proposition(const grounder& grounder, proposition &prop) {
     ///Parameter Passing ok because its methods all make copies
 
     switch (prop.get_type()) {
 
         //Add action to the the list (name as identifier, then set id) then update the conditions and the awareness of the action so it's complete)
         case EFFECTS:
-            add_effect(prop.get_action_effect(), prop.get_grounded_conditions());
+            add_effect(prop.get_action_effect(grounder), prop.get_grounded_conditions(grounder));
             break;
 
         case OBSERVABILITY:
-            add_observant(prop.get_agent(), prop.get_agent_group(), prop.get_grounded_conditions());
+            add_observant(prop.get_agent(grounder), prop.get_agent_group(), prop.get_grounded_conditions(grounder));
             break;
 
         case EXECUTABILITY:
             //@TODO:What if there is more than one? Then CNF or DNF
-            add_executability(prop.get_grounded_conditions());
+            add_executability(prop.get_grounded_conditions(grounder));
             break;
         case TYPE:
             //@TODO:What if there is more than one? Then CNF or DNF
@@ -155,7 +152,7 @@ void action::add_proposition(proposition &prop) {
             break;
             /*******FOR MAL OPTIMIZATION******/
         case MAL_EFF:
-            add_effect(prop.get_action_effect(), prop.get_grounded_conditions());
+            add_effect(prop.get_action_effect(grounder), prop.get_grounded_conditions(grounder));
             set_type(prop.get_action_type());
             break;
         default:
@@ -180,54 +177,54 @@ bool action::operator=(const action &act) {
 }
 
 void action::print() const {
-    grounder grounder = domain::get_instance().get_grounder();
-    std::cout << "\nAction " << get_name() << ":" << std::endl;
-    std::cout << "	ID: " << get_id() << ":" << std::endl;
-    std::cout << "	Type: " << cem_store::get_instance().get_cem_name(get_type()) << std::endl;
-
-    std::cout << "	Executability:";
-    formula_list::const_iterator it_fl;
-    for (it_fl = m_executability.begin(); it_fl != m_executability.end(); ++it_fl) {
-        std::cout << " | ";
-        it_fl->print();
-        //std::cout << std::endl;
-    }
-
-    std::cout << "\n	Effects:";
-    effects_map::const_iterator it_effmap;
-    for (it_effmap = m_effects.begin(); it_effmap != m_effects.end(); ++it_effmap) {
-        std::cout << " | ";
-        printer::get_instance().print_list(it_effmap->first);
-        std::cout << " if ";
-        it_effmap->second.print();
-    }
-
-
-    std::cout << "\n	Observants:";
-    for (auto it_obsmap = m_observants.begin(); it_obsmap != m_observants.end(); ++it_obsmap) {
-        auto internal_map = it_obsmap->second;
-        auto ag_string = grounder.deground_agent(it_obsmap->first);
-        for (auto internal_it = internal_map.begin(); internal_it != internal_map.end(); ++internal_it) {
-            std::cout << " | " << ag_string << " belongs to "
-                      << cem_store::get_instance().get_agent_group_name(internal_it->first) << " if ";
-            //printer::get_instance().print_list(it_obsmap->second);
-            belief_formula cond_temp = internal_it->second;
-            if (cond_temp.get_formula_type() == FLUENT_FORMULA) {
-                auto ff_temp = cond_temp.get_fluent_formula();
-                auto init_fluent = domain::get_instance().get_fluents().begin();
-                auto neg_init_fluent = helper::negate_fluent(*init_fluent);
-                if (ff_temp.begin()->find(*init_fluent) != ff_temp.begin()->end() &&
-                    ff_temp.begin()->find(neg_init_fluent) != ff_temp.begin()->end()) {
-                    std::cout << "False";
-                } else {
-                    internal_it->second.print();
-                }
-            } else {
-                internal_it->second.print();
-            }
-        }
-    }
-    std::cout << std::endl;
+//    grounder grounder = domain::get_instance().get_grounder();
+//    std::cout << "\nAction " << get_name() << ":" << std::endl;
+//    std::cout << "	ID: " << get_id() << ":" << std::endl;
+//    std::cout << "	Type: " << cem_store::get_instance().get_cem_name(get_type()) << std::endl;
+//
+//    std::cout << "	Executability:";
+//    formula_list::const_iterator it_fl;
+//    for (it_fl = m_executability.begin(); it_fl != m_executability.end(); ++it_fl) {
+//        std::cout << " | ";
+//        it_fl->print();
+//        //std::cout << std::endl;
+//    }
+//
+//    std::cout << "\n	Effects:";
+//    effects_map::const_iterator it_effmap;
+//    for (it_effmap = m_effects.begin(); it_effmap != m_effects.end(); ++it_effmap) {
+//        std::cout << " | ";
+//        printer::get_instance().print_list(it_effmap->first);
+//        std::cout << " if ";
+//        it_effmap->second.print();
+//    }
+//
+//
+//    std::cout << "\n	Observants:";
+//    for (auto it_obsmap = m_observants.begin(); it_obsmap != m_observants.end(); ++it_obsmap) {
+//        auto internal_map = it_obsmap->second;
+//        auto ag_string = grounder.deground_agent(it_obsmap->first);
+//        for (auto internal_it = internal_map.begin(); internal_it != internal_map.end(); ++internal_it) {
+//            std::cout << " | " << ag_string << " belongs to "
+//                      << cem_store::get_instance().get_agent_group_name(internal_it->first) << " if ";
+//            //printer::get_instance().print_list(it_obsmap->second);
+//            belief_formula cond_temp = internal_it->second;
+//            if (cond_temp.get_formula_type() == FLUENT_FORMULA) {
+//                auto ff_temp = cond_temp.get_fluent_formula();
+//                auto init_fluent = domain::get_instance().get_fluents().begin();
+//                auto neg_init_fluent = helper::negate_fluent(*init_fluent);
+//                if (ff_temp.begin()->find(*init_fluent) != ff_temp.begin()->end() &&
+//                    ff_temp.begin()->find(neg_init_fluent) != ff_temp.begin()->end()) {
+//                    std::cout << "False";
+//                } else {
+//                    internal_it->second.print();
+//                }
+//            } else {
+//                internal_it->second.print();
+//            }
+//        }
+//    }
+//    std::cout << std::endl;
 }
 
 

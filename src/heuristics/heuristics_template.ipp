@@ -5,10 +5,10 @@
 //heuristic Manager
 
 template <class T>
-heuristics_manager::heuristics_manager(Heuristic used_heur, const T & eState)
+heuristics_manager::heuristics_manager(const domain& domain, Heuristic used_heur, const T & eState)
 {
 	set_used_h(used_heur);
-	m_goals = domain::get_instance().get_goal_description();
+	m_goals = domain.get_goal_description();
 	switch ( m_used_heur ) {
 		/*case L_PG:
 		case S_PG:

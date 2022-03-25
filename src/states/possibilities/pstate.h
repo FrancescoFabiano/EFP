@@ -155,7 +155,7 @@ private:
      *  
      * \todo If this method is the one is implemented the add functions in \ref pstore must be changed to not create the object
      *       every time but just to retrieve the object since all of them are already created.*/
-    void build_initial_prune();
+    void build_initial_prune(const initially& initial_conditions);
 
     /** \brief Function used to build all the possible permutations of the \ref domain's \ref fluent.
      *  
@@ -166,7 +166,7 @@ private:
      * @param[in] index: the index of the \ref fluent to add.
      * @param[in] index: the set of initialky known \ref fluent to reduce the possible permutations.*/
 
-    void generate_initial_pworlds(fluent_set &permutation, int index, const fluent_set &initially_known);
+    void generate_initial_pworlds(fluent_set &permutation, int index, const initially& initial_conditions);
 
     /** \brief Function check if the \ref pworld respect the initial conditions and adds it to *this* if it does.
      *  
@@ -176,13 +176,13 @@ private:
      * - If it doesn't the \ref pworld is added only to \ref pstore.
      * 
      * @param[in] possible_add: the \ref pworld to check.*/
-    void add_initial_pworld(const pworld &possible_add);
+    void add_initial_pworld(const pworld &possible_add, const initially& initial_conditions);
 
     /** \brief Function used to build the \ref kedge of the initial \ref pstate.
      *  
      * The function creates all the edges and adds to *this* only the ones that respect \p ini_conditions.
      * All the other ones are stored in \ref pstore for future usees.*/
-    void generate_initial_pedges();
+    void generate_initial_pedges(const initially& initial_conditions);
 
     /** \brief Function that removes the belief of \ref agent "ag" from \ref pworld "from" to \ref pworld "to".
      * 
@@ -455,7 +455,7 @@ public:
      * 
      * \todo if first method is implemented the add functions in \ref pstore must be changed to not create 
      *       the object every time but just to retrieve the object since all of them are already created.*/
-    void build_initial();
+    void build_initial(const initially& initial_conditions);
 
     /** \brief Function that applies the transition function on *this* given an action.
      *
@@ -486,7 +486,7 @@ public:
     /** \brief Function that makes *this* the mimimum \ref poss that is bisimilar to the current one.
      *
      * Not yet implemented.*/
-    void calc_min_bisimilar();
+    void calc_min_bisimilar(Bisimulation_Algorithm algorithm);
 
     /** \brief Function that return the sum_set of the two parameters by modifying the first one.
      *

@@ -16,11 +16,13 @@
 #pragma once
 
 #include <set>
-#include "cevent.h"
 #include "cem.h"
 
-class cem_store
-{
+typedef act_type cem_id;
+typedef std::set<cevent> cevent_set; /**< \brief A set of \ref cevent, used to store all the created ones.*/
+typedef std::set<cem> cem_set; /**< \brief A set of \ref cem, used to store all the created ones.*/
+
+class cem_store {
 private:
 
     /** \brief The cevent representing the perspective of oblivious agents.*/

@@ -387,7 +387,7 @@ void build_domain_config(domain_config & config, int argc, char **argv) {
     }
 }
 
-void build_domain(int argc, char** argv) {
+void build_domain(domain& domain, reader& reader, grounder& grounder, int argc, char** argv) {
     domain_config config;
     build_domain_config(config, argc, argv);
 
@@ -431,27 +431,27 @@ void build_domain(int argc, char** argv) {
     config.set_domain_name(domain_name);
 
     if (config.get_update_models() == up_model_type::CUSTOM) {
-        reader::get_instance().read(config.get_models_filename());
+        reader.read(config.get_models_filename());
     } else {
-        reader::get_instance().read();
+        reader.read();
     }
 
-    domain::get_instance().set_config(config);
-    domain::get_instance().build();
+    domain.set_config(config);
+    domain.build(grounder);
 }
 
-void launch_search() {
-    auto config = domain::get_instance().get_config();
+void launch_search(domain& domain) {
+    const auto& config = domain.get_config();
 
     switch (config.get_state_type()) {
         case state_type::KRIPKE: {
             planner< state<kstate> > m_planner;
-            m_planner.search();
+            m_planner.search(domain);
             break;
         }
         case state_type::POSSIBILITIES: {
             planner< state<pstate> > m_planner;
-            m_planner.search();
+            m_planner.search(domain);
             break;
         }
         default:
@@ -466,8 +466,12 @@ int main(int argc, char** argv) {
         exit(1);
     }
 
-    build_domain(argc, argv);
-    launch_search();
+    domain domain;
+    reader reader;
+    grounder grounder;
+
+    build_domain(domain, reader, grounder, argc, argv);
+    launch_search(domain);
 
     exit(0);
 }

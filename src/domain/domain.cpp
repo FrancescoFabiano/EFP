@@ -7,14 +7,10 @@
  * \date April 1, 2019
  */
 #include "domain.h"
+#include "../actions/action.h"
 #include <boost/dynamic_bitset.hpp>
 
 domain::domain() = default;
-
-domain& domain::get_instance() {
-	static domain instance;
-	return instance;
-}
 
 const domain_config & domain::get_config() const {
     return config;
@@ -27,61 +23,45 @@ void domain::set_config(const domain_config & to_set_config) // (std::string nam
 	m_intial_description = initially();
 }
 
-const grounder & domain::get_grounder()
-{
+const grounder & domain::get_grounder() const {
 	return domain::domain_grounder;
 }
 
-const fluent_set & domain::get_fluents()
-{
+const fluent_set & domain::get_fluents() const {
 	return m_fluents;
 }
 
-unsigned int domain::get_fluent_number()
-{
+unsigned int domain::get_fluent_number() const {
 	return(m_fluents.size() / 2);
 }
 
-unsigned int domain::get_size_fluent()
-{
+unsigned int domain::get_size_fluent()  const {
 	auto fluent_first = m_fluents.begin();
 	return(fluent_first->size());
 }
 
-const action_set & domain::get_actions()
-{
+const action_set & domain::get_actions() const {
 	return m_actions;
 }
 
-const agent_set & domain::get_agents()
-{
+const agent_set & domain::get_agents() const {
 	return m_agents;
 }
 
-const initially & domain::get_initial_description()
-{
+const initially & domain::get_initial_description() const {
 	return m_intial_description;
 }
 
-const formula_list & domain::get_goal_description()
-{
+const formula_list & domain::get_goal_description() const {
 	return m_goal_description;
 }
 
-void domain::build()
-{
-	//std::cout << "Agenti" <<std::endl;
+void domain::build(const grounder& grounder) {
 	build_agents();
-	//std::cout << "Fluenti" <<std::endl;
 	build_fluents();
-	// std::cout << "Azioni" <<std::endl;
-	build_actions();
-	//std::cout << "Initially" <<std::endl;
-	build_initially();
-	// std::cout << "Goal" <<std::endl;
-	build_goal();
-	//DEBUG
-	//exit(1);
+	build_actions(grounder);
+	build_initially(grounder);
+	build_goal(grounder);
 }
 
 void domain::build_agents() {
@@ -143,7 +123,7 @@ void domain::build_fluents() {
 	domain::domain_grounder.set_fluent_map(domain_fluent_map);
 }
 
-void domain::build_actions() {
+void domain::build_actions(const grounder& grounder) {
 	/*
 	 * This function set the grounder action map with the correct values.
 	 */
@@ -153,12 +133,13 @@ void domain::build_actions() {
 	std::cout << "\nBuilding action list..." << std::endl;
 	string_set::const_iterator it_actions_name;
 	int i = 0;
-	int numberOfActions = reader::get_instance().m_actions.size();
+	unsigned long numberOfActions = reader::get_instance().m_actions.size();
 	int bit_size = helper::lenght_to_power_two(numberOfActions);
+
 	for (it_actions_name = reader::get_instance().m_actions.begin();
 		it_actions_name != reader::get_instance().m_actions.end(); it_actions_name++) {
 		boost::dynamic_bitset<> action_bitset(bit_size, i);
-		action tmp_action(*it_actions_name, action_bitset, tot_ags, tot_fluents);
+		action tmp_action(*it_actions_name, action_bitset, m_fluents, m_agents);
 		domain_action_name_map.insert(action_name_map::value_type(*it_actions_name, action_bitset));
 		i++;
 		m_actions.insert(tmp_action);
@@ -170,7 +151,7 @@ void domain::build_actions() {
 	domain::domain_grounder.set_action_name_map(domain_action_name_map);
 	printer::get_instance().set_grounder(domain::domain_grounder);
 
-	build_propositions();
+	build_propositions(grounder);
 
 	if (config.is_debug()) {
 		std::cout << "\nPrinting complete action list..." << std::endl;
@@ -184,7 +165,7 @@ void domain::build_actions() {
 
 }
 
-void domain::build_propositions() {
+void domain::build_propositions(const grounder& grounder) {
 	//Adding propositions to actions list
 	std::cout << "\nAdding propositions to actions..." << std::endl;
 	proposition_list::iterator it_prop;
@@ -201,39 +182,21 @@ void domain::build_propositions() {
 			if (m_actions.size() > actionTemp.to_ulong() && actionsList->get_id() == action_to_modify) {
 				action_set::iterator it_action_set = actionsList;
 				action tmp = *it_action_set;
-				tmp.add_proposition(*it_prop);
+				tmp.add_proposition(grounder,*it_prop);
 				m_actions.erase(it_action_set);
 				m_actions.insert(tmp);
 				break;
 			}
 		}
-
-		/*
-		 *
-		 *
-		 * 	for (it_prop = reader::get_instance().m_propositions.begin();
-			it_prop != reader::get_instance().m_propositions.end(); it_prop++) {
-
-			action_to_modify = domain::domain_grounder.ground_action(it_prop->get_action_name());
-			if (m_actions.size() > action_to_modify) {
-				//To change remove and add the updated --> @TODO: find better like queue
-				action_set::iterator it_action_set = std::next(m_actions.begin(), action_to_modify);
-				action tmp = *it_action_set;
-				tmp.add_proposition(*it_prop);
-				m_actions.erase(it_action_set);
-				m_actions.insert(tmp);
-			}
-		}
-		 * */
 	}
 }
 
-void domain::build_initially() {
+void domain::build_initially(const grounder& grounder) {
 	std::cout << "\nAdding to pointed world and initial conditions..." << std::endl;
 	formula_list::iterator it_fl;
 
 	for (it_fl = reader::get_instance().m_bf_initially.begin(); it_fl != reader::get_instance().m_bf_initially.end(); it_fl++) {
-		it_fl->ground();
+		it_fl->ground(grounder);
 
 		switch ( it_fl->get_formula_type() ) { //initially phi
 			//S5 -> pointed world
@@ -257,7 +220,7 @@ void domain::build_initially() {
             case BELIEF_FORMULA:
                 //No more S5
             case E_FORMULA: {
-                m_intial_description.add_initial_condition(*it_fl);
+                m_intial_description.add_initial_condition(config.get_initial_state_mode(), *it_fl);
                 if (config.is_debug()) {
                     std::cout << "Added to initial conditions: ";
                     it_fl->print();
@@ -276,7 +239,7 @@ void domain::build_initially() {
 	// Given the initial state mode, the initial state might need different function
 	switch (config.get_initial_state_mode()) {
         case Initial_State_Mode::FINITARY_S5_THEORY: {
-            m_intial_description.set_ff_forS5();
+            m_intial_description.set_ff_forS5(config.get_initial_state_mode());
             break;
         }
         case Initial_State_Mode::CUSTOM_INITIAL_STATE:
@@ -286,12 +249,12 @@ void domain::build_initially() {
 	}
 }
 
-void domain::build_goal() {
+void domain::build_goal(const grounder& grounder) {
 	std::cout << "\nAdding to Goal..." << std::endl;
 	formula_list::iterator it_fl;
 
 	for (it_fl = (reader::get_instance().m_bf_goal).begin(); it_fl != (reader::get_instance().m_bf_goal).end(); it_fl++) {
-        it_fl->ground();
+        it_fl->ground(grounder);
         m_goal_description.push_back(*it_fl);
         if (config.is_debug()) {
             std::cout << "	";

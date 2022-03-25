@@ -16,8 +16,20 @@
 #include "../../formulae/belief_formula.h"
 #include "../action.h"
 
-class cevent
-{
+//typedef short event_id;
+//
+//enum e_meta_condition {
+//    act_eff,
+//    neg_act_eff,
+//    act_pre,
+//    neg_act_pre,
+//    none
+//};
+//
+//typedef std::set<e_meta_condition> event_metacond;
+//typedef fluent_formula event_postconditions;
+
+class cevent {
     friend class cevent_ptr;
 
 private:
@@ -212,8 +224,7 @@ public:
  * \author Francesco Fabiano, Alessandro Burigana.
  * \date April 28, 2021
  */
-class cevent_ptr
-{
+class cevent_ptr {
 private:
     /**\brief the pointer that is wrapped by *this*.*/
     std::shared_ptr <cevent> m_ptr;

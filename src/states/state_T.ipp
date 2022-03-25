@@ -11,6 +11,7 @@
 
 #include "state_T.h"
 #include "../domain/domain.h"
+#include "../actions/custom_event_models/cem_store.h"
 
 template <class T>
 state<T>::state()
@@ -158,11 +159,10 @@ bool state<T>::entails(const formula_list & to_check) const
 }
 
 template <class T>
-void state<T>::build_initial()
-{
+void state<T>::build_initial(const initially& initial_conditions) {
 	//To implement constructor
 	//representation = T(init);
-	m_representation.build_initial();
+	m_representation.build_initial(initial_conditions);
 	set_plan_length(0);
 	//set_heuristic_value(get_representation().compute_heuristic_value());
 }
@@ -203,10 +203,10 @@ state<T> state<T>::compute_succ(const action & act) const
 }
 
 template <class T>
-void state<T>::calc_min_bisimilar()
+void state<T>::calc_min_bisimilar(Bisimulation_Algorithm algorithm)
 {
 	//std::cerr << "\nDEBUG: ENTRATO IN STATE<T> BISIMULATION\n";
-	m_representation.calc_min_bisimilar();
+    m_representation.calc_min_bisimilar(algorithm);
 	//		std::cerr << "\nDEBUG: DONE BIS\n" << std::flush;
 
 	//std::cerr << "\nDEBUG: FINE STATE<T> BISIMULATION\n";
@@ -220,82 +220,78 @@ bool state<T>::is_executable(const action & act) const
 }
 
 template <class T>
-bool state<T>::is_goal() const
-{
-	return entails(domain::get_instance().get_goal_description());
+bool state<T>::is_goal(const formula_list& goal_description) const {
+	return entails(goal_description);
 }
 
 template <class T>
-void state<T>::print() const
-{
-	std::cout << "\n";
-	if (domain::get_instance().get_config().is_debug()) {
-		m_representation.print();
-	}
-	//ret.set_representation(get_representation().compute_succ(act));
-	std::cout << "Plan Length: " << get_plan_length();
-	std::cout << "\n\nExecuted actions: ";
-	printer::get_instance().print_list(get_executed_actions());
-	//std::cout << "\nHeuristic Value Length: " << get_heuristic_value();
+void state<T>::print() const {
+//	std::cout << "\n";
+//	if (domain.get_config().is_debug()) {
+//		m_representation.print();
+//	}
+//	//ret.set_representation(get_representation().compute_succ(act));
+//	std::cout << "Plan Length: " << get_plan_length();
+//	std::cout << "\n\nExecuted actions: ";
+//	printer::get_instance().print_list(get_executed_actions());
+//	//std::cout << "\nHeuristic Value Length: " << get_heuristic_value();
 }
 
 template <class T>
 void state<T>::print_graphviz(const std::string& postfix) const {
-    auto config = domain::get_instance().get_config();
-
-	std::cout << "\nGraphviz-Printing of ";
-	printer::get_instance().print_list(get_executed_actions());
-	std::string exec_act_names;
-	action_id_list::const_iterator it_act;
-	if (get_executed_actions().size() == 0) {
-		exec_act_names = "ini";
-	} else {
-		for (it_act = get_executed_actions().begin(); it_act != get_executed_actions().end(); it_act++) {
-			exec_act_names += domain::get_instance().get_grounder().deground_action(*it_act);
-			exec_act_names += "_";
-		}
-		exec_act_names.pop_back();
-	}
-
-	std::ofstream graphviz;
-	std::string folder = "out/state/";
-	folder += config.get_domain_name();
-	switch (config.get_state_type()) {
-	case KRIPKE:
-		folder += "_kripke";
-		if (config.is_kopt()) {
-			folder += "_opt";
-		}
-		break;
-	case POSSIBILITIES:
-		folder += "_poss";
-		break;
-	default:
-		folder += "_unknown";
-		break;
-	}
-	system(("mkdir -p " + folder).c_str());
-	graphviz.open(folder + "/" + exec_act_names + postfix + ".dot");
-	graphviz << "digraph K_structure{\n";
-	graphviz << "	rankdir=BT;\n";
-	graphviz << "	size=\"8,5\"\n";
-	m_representation.print_graphviz(graphviz);
-	graphviz << "}";
-	graphviz.close();
-	std::cout << postfix << " done.";
-
+//    auto config = domain.get_config();
+//
+//	std::cout << "\nGraphviz-Printing of ";
+//	printer::get_instance().print_list(get_executed_actions());
+//	std::string exec_act_names;
+//	action_id_list::const_iterator it_act;
+//	if (get_executed_actions().size() == 0) {
+//		exec_act_names = "ini";
+//	} else {
+//		for (it_act = get_executed_actions().begin(); it_act != get_executed_actions().end(); it_act++) {
+//			exec_act_names += domain.get_grounder().deground_action(*it_act);
+//			exec_act_names += "_";
+//		}
+//		exec_act_names.pop_back();
+//	}
+//
+//	std::ofstream graphviz;
+//	std::string folder = "out/state/";
+//	folder += config.get_domain_name();
+//	switch (config.get_state_type()) {
+//	case KRIPKE:
+//		folder += "_kripke";
+//		if (config.is_kopt()) {
+//			folder += "_opt";
+//		}
+//		break;
+//	case POSSIBILITIES:
+//		folder += "_poss";
+//		break;
+//	default:
+//		folder += "_unknown";
+//		break;
+//	}
+//	system(("mkdir -p " + folder).c_str());
+//	graphviz.open(folder + "/" + exec_act_names + postfix + ".dot");
+//	graphviz << "digraph K_structure{\n";
+//	graphviz << "	rankdir=BT;\n";
+//	graphviz << "	size=\"8,5\"\n";
+//	m_representation.print_graphviz(graphviz);
+//	graphviz << "}";
+//	graphviz.close();
+//	std::cout << postfix << " done.";
 }
 
 template <class T>
-single_observability_map state<T>::get_observants(const observability_map & table) const
-{
-	agent_set agents = domain::get_instance().get_agents();
+single_observability_map state<T>::get_observants(const observability_map & table) const {
 	single_observability_map ret;
-	for (auto it_ag = agents.begin(); it_ag != agents.end(); it_ag++) {
-		//if (*it_ag != executor) {
-		ret.insert(std::pair<agent, agent_group_id>(*it_ag, get_obs_group(*it_ag, table)));
-		//}
-	}
+//	agent_set agents = domain.get_agents();
+//	for (auto it_ag = agents.begin(); it_ag != agents.end(); it_ag++) {
+//		//if (*it_ag != executor) {
+//		ret.insert(std::pair<agent, agent_group_id>(*it_ag, get_obs_group(*it_ag, table)));
+//		//}
+//	}
 
 	return ret;
 }

@@ -58,6 +58,8 @@ class bisimulation
 {
 private:
     int numberOfNodes;
+    int numberOfAgents;
+
     //pointer to the complete structure of the graph (G,Q,X)
     BIS_indexType C;
 
@@ -156,10 +158,10 @@ public:
     bisimulation();
 
     /*\***KRIPKE RELATED ONLY***/
-    automaton* merge_kstate_to_automaton(const kstate & ks1, const kstate & ks2, int & root2, const std::map<agent, bis_label> & agent_to_label) const;
+    automaton* merge_kstate_to_automaton(const kstate & ks1, const kstate & ks2, unsigned long ag_set_size, int & root2, const std::map<agent, bis_label> & agent_to_label) const;
     //automaton* merge_automata(const kstate & ks1, const kstate & ks2, int & root2);
-    bool compare_automata(const kstate & ks1, const kstate & ks2);
-    bool compare_automata_eq(const kstate & ks1, const kstate & ks2);
+    bool compare_automata(const kstate &ks1, const kstate &ks2, const agent_set &agents);
+    bool compare_automata_eq(const kstate &ks1, const kstate &ks2, const agent_set &agents);
     //DEBUG
     //    const automaton compare_automata_debug(const kstate & ks1, const kstate & ks2, std::vector<kworld_ptr> & kworld_vec);
     //    automaton* merge_kstate_to_automaton_debug(const kstate & ks1, const kstate & ks2, std::vector<kworld_ptr> & kworld_vec) const;

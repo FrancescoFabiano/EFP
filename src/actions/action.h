@@ -16,9 +16,9 @@
 #include "../../include/definitions/define.h"
 #include "../formulae/belief_formula.h"
 #include "../domain/grounder.h"
+#include "../domain/domain.h"
 
-class action
-{
+class action {
 private:
     /**
      * \brief The name of *this*.
@@ -70,21 +70,17 @@ private:
     void add_observant(agent ag, agent_group_id ag_group, const belief_formula& condition);
 
     /* \brief Function that initializes the observability tables with each agent_group_id set to false.*/
-    void initialize_obs_table();
-
-
-    void initialize_obs_table(const agent_set & tot_ags, const fluent_set &tot_fl);
-
-
+    void initialize_obs_table(const fluent_set& fluents, const agent_set& agents);
 
 public:
-    /**\brief Constructor without parameters.*/
     action();
+
+//    action(const fluent_set& fluents, const agent_set& agents);
     /**\brief Constructor with a given name and id.
      *
      * @param[in] name: the value to assign to \ref m_name.
      * @param[in] id: the value to assign to \ref m_id.*/
-    action(const std::string & name, action_id id, const agent_set & tot_ags, const fluent_set &tot_fl);
+    action(const std::string& name, const action_id& id, const fluent_set& fluents, const agent_set& agents);
 
     /* \brief Getter of the field \ref m_name.*/
     std::string get_name() const;
@@ -131,7 +127,7 @@ public:
      * the appropriate behavior to the *this*.
      *
      * @param[in] to_add: The \ref proposition to add to *this*.*/
-    void add_proposition(proposition & to_add);
+    void add_proposition(const grounder& grounder, proposition & to_add);
 
     /* \brief Function that  prints *this*.*/
     void print() const;
@@ -153,9 +149,3 @@ public:
     mal_observability_map get_partially_observants() const;
 
 };
-
-
-
-typedef std::set<action> action_set; /**< \brief A representation a set of \ref action.*/
-
-typedef std::vector<action> action_list; /**< \brief A representation of a sequential executution of \ref action*/
