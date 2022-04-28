@@ -36,7 +36,7 @@ set(
         src/utilities/helper_t.ipp
         src/utilities/printer.cpp
         src/utilities/reader.cpp
-        external/bisimulation/bisimulation.cpp
+        external-lib/bisimulation/bisimulation.cpp
 )
 
 # Headers files to include in compilation -- To include all use: file(GLOB_RECURSE EFP_HEADERS ${CMAKE_SOURCE_DIR}/src/*.h)
@@ -79,7 +79,7 @@ set(
         src/utilities/helper_t.h
         src/utilities/printer.h
         src/utilities/reader.h
-        external/bisimulation/bisimulation.h
+        external-lib/bisimulation/bisimulation.h
 )
 
 # FLEX & BISON

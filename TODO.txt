@@ -23,3 +23,5 @@ Refactor:
 
 - Improve graphical representation
 - ASP integration for plan correctness verification
+
+- Fai shell interattiva: adatta parsing cem
