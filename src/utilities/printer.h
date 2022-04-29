@@ -1,5 +1,5 @@
 /**
- * \brief Singleton class used to facilitate the printing.
+ * \brief Class used to handle the printing.
  *
  * \details   Class used to print \ref string_set and \ref string_set_set.
  *            Only std::string are printed because are more informative than their grounded counterpart,
@@ -105,10 +105,4 @@ public:
      * 
      * @param[in] to_print: the \ref agent_set to be printed.*/
     void print_list_ag(const agent_set& to_print) const;
-
-
-    /** \brief Copy constructor removed since is Singleton class. */
-    printer(printer const&) = delete;
-    /** \brief Copy operator removed since Singleton class. */
-    void operator=(printer const&) = delete;
 };
