@@ -24,7 +24,7 @@
 
 #include "kripke/kstate.h"
 #include "possibilities/pstate.h"
-#include "possibilities_opt/pstate_opt.h"
+//#include "possibilities_opt/pstate_opt.h"
 
 
 #include "../../include/definitions/define.h"
