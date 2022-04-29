@@ -13,17 +13,17 @@ printer::printer()
 {
 }
 
-printer& printer::get_instance()
-{
-	static printer instance;
-	return instance;
-}
+//printer& printer::get_instance()
+//{
+//	static printer instance;
+//	return instance;
+//}
 
-void printer::set_grounder(const grounder & gr)
-{
-	m_grounder = gr;
-	setted_grounder = true;
-}
+//void printer::set_grounder(const grounder & gr)
+//{
+//	m_grounder = gr;
+//	setted_grounder = true;
+//}
 
 void printer::print_list(const string_set& to_print) const
 {
@@ -58,9 +58,9 @@ void printer::print_list(const string_set_set& to_print) const
 
 void printer::print_list(const fluent_set& to_print) const
 {
-	if (setted_grounder) {
-		print_list(m_grounder.deground_fluent(to_print));
-	} else {
+//	if (setted_grounder) {
+//		print_list(m_grounder.deground_fluent(to_print));
+//	} else {
 		bool first_print = true;
 
 		//Iterate on the \p to_print and print its content separated by a comma to represent a conjunctive set of \ref fluent.
@@ -72,14 +72,14 @@ void printer::print_list(const fluent_set& to_print) const
 			first_print = false;
 			std::cout << *it_sl;
 		}
-	}
+//	}
 }
 
 void printer::print_list(const fluent_formula& to_print) const
 {
-	if (setted_grounder) {
-		print_list(m_grounder.deground_fluent(to_print));
-	} else {
+//	if (setted_grounder) {
+//		print_list(m_grounder.deground_fluent(to_print));
+//	} else {
 		bool first_print = true;
 		fluent_formula::const_iterator it_sll;
 		//Iterate on the \p to_print and print its content using ::to_print(const string_set&) seprated by a OR to represent a DNF.
@@ -92,7 +92,7 @@ void printer::print_list(const fluent_formula& to_print) const
 			print_list(*it_sll);
 
 		}
-	}
+//	}
 }
 
 void printer::print_list(const formula_list& to_print) const
@@ -152,11 +152,11 @@ void printer::print_list(const action_id_list& to_print) const
 		}
 		first_print = false;
 
-		if (setted_grounder) {
-			std::cout << (m_grounder.deground_action(*it_sll));
-		} else {
+//		if (setted_grounder) {
+//			std::cout << (m_grounder.deground_action(*it_sll));
+//		} else {
 			std::cout << *it_sll;
-		}
+//		}
 	}
 }
 
@@ -172,11 +172,11 @@ void printer::print_list_ag(const agent_set& to_print) const
 		}
 		first_print = false;
 
-		if (setted_grounder) {
-			std::cout << (m_grounder.deground_agent(*it_sll));
-		} else {
+//		if (setted_grounder) {
+//			std::cout << (m_grounder.deground_agent(*it_sll));
+//		} else {
 			std::cout << *it_sll;
-		}
+//		}
 	}
 }
 

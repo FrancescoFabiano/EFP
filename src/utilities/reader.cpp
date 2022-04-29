@@ -83,71 +83,71 @@ int reader::read(const std::string & filename)
  This function print out all the information that are stored as std::string in the
  * reader object. @see printer, belief_formula::print() const, \ref proposition::print() const
  */
-void reader::print() const
-{
-
-	//Printing of all the agent with the \ref kstore::get_instance().print functions
-	proposition_list::const_iterator it_porplist;
-	std::cout << std::endl << std::endl;
-	std::cout << "AGENT DECLARATION" << std::endl;
-	std::cout << "---------------------------" << std::endl;
-	printer::get_instance().print_list(m_agents);
-	std::cout << std::endl << std::endl;
-
-
-	//Printing of all the fluents with the \ref printer functions
-	std::cout << "FLUENT DECLARATION" << std::endl;
-	std::cout << "----------------------------" << std::endl;
-	printer::get_instance().print_list(m_fluents);
-	std::cout << std::endl << std::endl;
-
-	//Printing of all the proposition with the \ref proposition functions
-	std::cout << "PROPOSITIONS" << std::endl;
-	std::cout << "----------------------------" << std::endl;
-	for (it_porplist = m_propositions.begin(); it_porplist != m_propositions.end(); it_porplist++) {
-		it_porplist->print();
-		std::cout << std::endl;
-	}
-
-	//Printing of all the proposition with the \ref belief_formula functions
-	formula_list::const_iterator it_formlist;
-	std::cout << "INIT" << std::endl;
-	std::cout << "----------------------------" << std::endl;
-
-	for (it_formlist = m_bf_initially.begin(); it_formlist != m_bf_initially.end(); it_formlist++) {
-		it_formlist->print();
-		std::cout << std::endl;
-	}
-
-	std::cout << std::endl;
-
-	//Printing of all the goal with the \ref belief_formula functions
-	std::cout << "GOAL " << std::endl;
-	std::cout << "----------------------------" << std::endl;
-	for (it_formlist = m_bf_goal.begin(); it_formlist != m_bf_goal.end(); it_formlist++) {
-		it_formlist->print();
-		std::cout << std::endl;
-	}
-
-	std::cout << std::endl << std::endl << std::endl;
-
-	/*
-	 * // print statistics
-	std::cout << "STATISTICS " << std::endl;
-	std::cout << "----------------------------" << std::endl;
-	//std::cout << "Total actions: " << m_actions.size() << std::endl;
-	//std::cout << "\tSensing actions: " << sensing_actions.size() << std::endl;	//Ben
-	//std::cout << "\tOntic actions: " << ontic_actions.size() << std::endl;		//Ben
-	//std::cout << "\tAnnouncement actions: " << ann_actions.size() << std::endl;	//Ben
-	std::cout << "Total fluents: " << m_fluents.size() << std::endl;
-	//std::cout << "Unknown fluents: " << std::endl;
-	unsigned int i = 0;
-	string_set_set::const_iterator it_fll;
-
-	for (it_fll = m_initially.begin(); it_fll != m_initially.end(); it_fll++) {
-		std::cout << "\tState " << i++ << ": ";
-		std::cout << m_fluents.size() - (*it_fll).size();
-		std::cout << std::endl;
-	}
-	//std::cout << "done" << std::endl;*/
-}
+//void reader::print() const
+//{
+//
+//	//Printing of all the agent with the \ref kstore::get_instance().print functions
+//	proposition_list::const_iterator it_porplist;
+//	std::cout << std::endl << std::endl;
+//	std::cout << "AGENT DECLARATION" << std::endl;
+//	std::cout << "---------------------------" << std::endl;
+//	printer::get_instance().print_list(m_agents);
+//	std::cout << std::endl << std::endl;
+//
+//
+//	//Printing of all the fluents with the \ref printer functions
+//	std::cout << "FLUENT DECLARATION" << std::endl;
+//	std::cout << "----------------------------" << std::endl;
+//	printer::get_instance().print_list(m_fluents);
+//	std::cout << std::endl << std::endl;
+//
+//	//Printing of all the proposition with the \ref proposition functions
+//	std::cout << "PROPOSITIONS" << std::endl;
+//	std::cout << "----------------------------" << std::endl;
+//	for (it_porplist = m_propositions.begin(); it_porplist != m_propositions.end(); it_porplist++) {
+//		it_porplist->print();
+//		std::cout << std::endl;
+//	}
+//
+//	//Printing of all the proposition with the \ref belief_formula functions
+//	formula_list::const_iterator it_formlist;
+//	std::cout << "INIT" << std::endl;
+//	std::cout << "----------------------------" << std::endl;
+//
+//	for (it_formlist = m_bf_initially.begin(); it_formlist != m_bf_initially.end(); it_formlist++) {
+//		it_formlist->print();
+//		std::cout << std::endl;
+//	}
+//
+//	std::cout << std::endl;
+//
+//	//Printing of all the goal with the \ref belief_formula functions
+//	std::cout << "GOAL " << std::endl;
+//	std::cout << "----------------------------" << std::endl;
+//	for (it_formlist = m_bf_goal.begin(); it_formlist != m_bf_goal.end(); it_formlist++) {
+//		it_formlist->print();
+//		std::cout << std::endl;
+//	}
+//
+//	std::cout << std::endl << std::endl << std::endl;
+//
+//	/*
+//	 * // print statistics
+//	std::cout << "STATISTICS " << std::endl;
+//	std::cout << "----------------------------" << std::endl;
+//	//std::cout << "Total actions: " << m_actions.size() << std::endl;
+//	//std::cout << "\tSensing actions: " << sensing_actions.size() << std::endl;	//Ben
+//	//std::cout << "\tOntic actions: " << ontic_actions.size() << std::endl;		//Ben
+//	//std::cout << "\tAnnouncement actions: " << ann_actions.size() << std::endl;	//Ben
+//	std::cout << "Total fluents: " << m_fluents.size() << std::endl;
+//	//std::cout << "Unknown fluents: " << std::endl;
+//	unsigned int i = 0;
+//	string_set_set::const_iterator it_fll;
+//
+//	for (it_fll = m_initially.begin(); it_fll != m_initially.end(); it_fll++) {
+//		std::cout << "\tState " << i++ << ": ";
+//		std::cout << m_fluents.size() - (*it_fll).size();
+//		std::cout << std::endl;
+//	}
+//	//std::cout << "done" << std::endl;*/
+//}

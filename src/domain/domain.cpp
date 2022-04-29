@@ -56,11 +56,11 @@ const formula_list & domain::get_goal_description() const {
 	return m_goal_description;
 }
 
-void domain::build(const grounder& grounder) {
+void domain::build(const grounder &grounder, const printer &printer) {
 	build_agents();
 	build_fluents();
 	build_actions(grounder);
-	build_initially(grounder);
+    build_initially(grounder, printer);
 	build_goal(grounder);
 }
 
@@ -149,7 +149,7 @@ void domain::build_actions(const grounder& grounder) {
 	}
 
 	domain::domain_grounder.set_action_name_map(domain_action_name_map);
-	printer::get_instance().set_grounder(domain::domain_grounder);
+//	printer::get_instance().set_grounder(domain::domain_grounder);
 
 	build_propositions(grounder);
 
@@ -191,7 +191,7 @@ void domain::build_propositions(const grounder& grounder) {
 	}
 }
 
-void domain::build_initially(const grounder& grounder) {
+void domain::build_initially(const grounder &grounder, const printer &printer) {
 	std::cout << "\nAdding to pointed world and initial conditions..." << std::endl;
 	formula_list::iterator it_fl;
 
@@ -205,7 +205,7 @@ void domain::build_initially(const grounder& grounder) {
 
                 if (config.is_debug()) {
                     std::cout << "	Pointed world: ";
-                    printer::get_instance().print_list(it_fl->get_fluent_formula());
+                    printer.print_list(it_fl->get_fluent_formula());
                     std::cout << std::endl;
                 }
                 break;

@@ -27,24 +27,22 @@ class printer
 private:
 
     /** \brief A \ref grounder to deground the \ref fluent to print.*/
-    grounder m_grounder;
+//    grounder m_grounder;
     /** \brief A check if \ref m_grounder has been setted.*/
-    bool setted_grounder;
-
-    /** \brief Private constructor since it is a Singleton class.*/
-    printer();
+//    bool setted_grounder;
 
 public:
+    printer();
 
     /** \brief To get always (the same instance of) *this* and the same instantiated fields.*/
-    static printer& get_instance();
+//    static printer& get_instance();
 
     /** \brief Setter of the field \ref m_grounder.
      *
      * @param[in] gr: the \ref grounder to set as \ref m_grounder.
      *
      * \todo   Is the const reference the best type of parameter passing?*/
-    void set_grounder(const grounder & gr);
+//    void set_grounder(const grounder & gr);
 
     /** \brief Function used to print all the std::string inside \p to_print.
      *

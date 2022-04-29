@@ -203,11 +203,11 @@ bool pworld::operator=(const pworld & to_assign)
 	return true;
 }
 
-void pworld::print() const
-{
-	std::cout << "\nFluents: " << get_id();
-	printer::get_instance().print_list(m_fluent_set);
-}
+//void pworld::print() const
+//{
+//	std::cout << "\nFluents: " << get_id();
+//	printer::get_instance().print_list(m_fluent_set);
+//}
 
 /*-***************************************************************************************************************-*/
 

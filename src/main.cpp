@@ -387,7 +387,7 @@ void build_domain_config(domain_config & config, int argc, char **argv) {
     }
 }
 
-void build_domain(domain& domain, reader& reader, grounder& grounder, int argc, char** argv) {
+void build_domain(domain &domain, reader &reader, grounder &grounder, const printer &printer, int argc, char **argv) {
     domain_config config;
     build_domain_config(config, argc, argv);
 
@@ -437,7 +437,7 @@ void build_domain(domain& domain, reader& reader, grounder& grounder, int argc, 
     }
 
     domain.set_config(config);
-    domain.build(grounder);
+    domain.build(grounder, printer);
 }
 
 void launch_search(domain& domain) {
@@ -469,8 +469,9 @@ int main(int argc, char** argv) {
     domain domain;
     reader reader;
     grounder grounder;
+    printer printer;
 
-    build_domain(domain, reader, grounder, argc, argv);
+    build_domain(domain, reader, grounder, printer, argc, argv);
     launch_search(domain);
 
     exit(0);

@@ -62,7 +62,7 @@ private:
     void build_propositions(const grounder& grounder);
 
     /** \brief Function that builds \ref m_intial_description.*/
-    void build_initially(const grounder& grounder);
+    void build_initially(const grounder &grounder, const printer &printer);
 
     /** \brief Function that builds \ref m_goal_description.
      * \todo move to the goal class.*/
@@ -85,7 +85,7 @@ public:
     /** \brief Function that builds all the domain information.
      *
      * This function calls \ref build_fluents, \ref build_agents and \ref build_actions.*/
-    void build(const grounder& grounder);
+    void build(const grounder &grounder, const printer &printer);
 
     /** \brief Getter of the field \ref m_grounder.
      *

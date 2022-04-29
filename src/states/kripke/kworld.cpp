@@ -202,11 +202,11 @@ bool kworld::operator=(const kworld & to_assign)
 	return true;
 }
 
-void kworld::print() const
-{
-	std::cout << "\nFluents: " << get_id();
-	printer::get_instance().print_list(m_fluent_set);
-}
+//void kworld::print() const
+//{
+//	std::cout << "\nFluents: " << get_id();
+//	printer::get_instance().print_list(m_fluent_set);
+//}
 
 /*-***************************************************************************************************************-*/
 
