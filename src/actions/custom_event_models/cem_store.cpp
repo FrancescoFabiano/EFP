@@ -16,12 +16,6 @@ cem_store::cem_store()
 	//m_epsilon = cem_store::get_instance().add_event(cevent(EPSILON, false, {TRUE}));
 }
 
-cem_store& cem_store::get_instance()
-{
-	static cem_store instance;
-	return instance;
-}
-
 //void cem_store::generate(const std::string & file)
 //{
 //    cem_parser::parse(<#initializer#>, file);

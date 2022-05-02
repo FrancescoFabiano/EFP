@@ -40,11 +40,16 @@ private:
 
 public:
     cem_store();
+
+//    cem_store(cem_store const&) = delete;
+//    cem_store(cem_store const&&) = delete;
+//
+//    cem_store& operator=(cem_store const&) = delete;
+//    cem_store& operator=(cem_store const&&) = delete;
+    
     /**Function that populates the list m_created_cems with the cevent model given as input in \ref file*/
 //    void generate(const std::string & file);
 
-    /** \brief To get always (the same instance of) *this* and the same instantiated fields.*/
-    static cem_store& get_instance();
     //    /** \brief Function that inserts a \ref cevent given its id to \ref m_created_cems.
     //     * @param[in] to_add: The cevent model that represent the graph of an action.
     //     * @parma[in] id: The id associated to \ref to_add.

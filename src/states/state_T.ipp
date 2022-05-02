@@ -297,7 +297,7 @@ single_observability_map state<T>::get_observants(const observability_map & tabl
 }
 
 template <class T>
-agent_group_id state<T>::get_obs_group(agent ag, const observability_map & table) const
+agent_group_id state<T>::get_obs_group(const cem_store &store, agent ag, const observability_map &table) const
 {
 //	auto it_ag = table.find(ag);
 //	if (it_ag != table.end()) {
@@ -309,7 +309,7 @@ agent_group_id state<T>::get_obs_group(agent ag, const observability_map & table
 //		}
 //	}
 	//The last declared observability group
-	return cem_store::get_instance().get_agent_group_number();
+	return store.get_agent_group_number();
 
 	//std::cerr << "\nError: Some observability declaration is missing, the agent has not any agent group specified.";
 	//exit(1);
