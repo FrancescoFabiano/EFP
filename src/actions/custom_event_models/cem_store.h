@@ -38,12 +38,10 @@ private:
 
     //  std::map<agent_group_id, std::string> m_inverse_agent_group_ids;
 
-
-    /** \brief Private constructor since it is a Singleton class.*/
-    cem_store();
 public:
+    cem_store();
     /**Function that populates the list m_created_cems with the cevent model given as input in \ref file*/
-    void generate(const std::string & file);
+//    void generate(const std::string & file);
 
     /** \brief To get always (the same instance of) *this* and the same instantiated fields.*/
     static cem_store& get_instance();
@@ -112,20 +110,13 @@ public:
     std::string get_agent_group_name(agent_group_id id) const;
 
     cem_id get_cem_id(const std::string & to_get);
-    bool exist_cem(cem_id to_check);
+    bool exists_cem(cem_id to_check) const;
 
     std::string get_cem_name(cem_id id) const;
 
     event_id get_event_id(const std::string & to_get);
 
     short get_agent_group_number() const;
-
-
-    /** \brief Copy constructor removed since is Singleton class. */
-    cem_store(cem_store const&) = delete;
-    /** \brief Copy operator removed since Singleton class. */
-    void operator=(cem_store const&) = delete;
-
 
     /*******FOR MAL OPTIMIZATION******/
 

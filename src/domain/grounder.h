@@ -7,9 +7,7 @@
  *  - fluents (string) are associated to a \ref fluent;
  *
  * \see define, action.
- * 
- * \todo Singleton class?.
- * 
+ *
  * \copyright GNU Public License.
  *
  * \author Francesco Fabiano, Alessandro Burigana.

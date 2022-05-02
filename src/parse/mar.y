@@ -117,21 +117,22 @@ void print_string_set_set(string_set_set);
 
 %%
 
-input:		
+input:
 |
-fluent_decls 
+fluent_decls
 action_decls
 agent_decls 
-domain 
-init_spec 
+domain
+init_spec
 goal_spec
- { 
-  reader::get_instance().m_fluents = *$1;
-  reader::get_instance().m_actions = *$2;
-  reader::get_instance().m_agents = *$3;
-  reader::get_instance().m_propositions = *$4;
-  reader::get_instance().m_bf_initially = *$5;
-  reader::get_instance().m_bf_goal = *$6;
+{
+  // \todo: FIX
+  // reader.set_fluents(*$1);
+  // reader.set_actions(*$2);
+  // reader.set_agents(*$3);
+  // reader.set_propositions(*$4);
+  // reader.set_bf_initially(*$5);
+  // reader.set_bf_goal(*$6);
 }
 ;
 

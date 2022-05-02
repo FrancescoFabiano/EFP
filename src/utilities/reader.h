@@ -24,13 +24,12 @@
 #include "../../include/definitions/define.h"
 #include "../formulae/belief_formula.h"
 #include "../actions/proposition.h"
+#include "../actions/custom_event_models/cem_store.h"
+#include "../parse/cem_parser.h"
 
 class reader {
 public:
     reader();
-    /** \brief To get always (the same instance of) *this* and the same instantiated fields.
-     * \warning the \ref set_config has to called in the main file only.*/
-    static reader& get_instance();
 
     reader(reader const&) = delete;
     reader(reader const&&) = delete;
@@ -40,6 +39,7 @@ public:
 
     /** \brief Name of all the fluents (only positive) in the domain.*/
     string_set m_fluents;
+
     /** \brief Name of all the actions in the domain.*/
     string_set m_actions;
     /** \brief String description of all the agents in the domain.*/
@@ -60,15 +60,40 @@ public:
     /** \brief String description of propositions, each one of these specifies an action conditions (yet to ground).*/
     proposition_list m_propositions;
 
+    const string_set &get_fluents() const;
 
-    int read();
+    const string_set &get_actions() const;
+
+    const string_set &get_agents() const;
+
+    const formula_list &get_bf_initially() const;
+
+    const formula_list &get_bf_goal() const;
+
+    const proposition_list &get_propositions() const;
+
+    void set_fluents(const string_set &fluents);
+
+    void set_actions(const string_set &actions);
+
+    void set_agents(const string_set &agents);
+
+    void set_bf_initially(const formula_list &bf_initially);
+
+    void set_bf_goal(const formula_list &bf_goal);
+
+    void set_propositions(const proposition_list &propositions);
+
+    int read_mar();
     /** \brief Function that reads the info from the domain file.
      * 
      * Function called to parse the file containing the domain
      * and store the information into the fields of the \ref reader class. 
      * @param[in] cem_filename: The name of the file that contains the specification of the update models.
      * @return The same int value returned from the parsing process.*/
-    int read(const std::string & cem_filename);
+    int read_cem();
+
+    void generate(const std::string & file);
 
     /** \brief Function used to print all the information stored inside the reader object.*/
     void print() const;

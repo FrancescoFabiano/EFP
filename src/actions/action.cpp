@@ -20,14 +20,15 @@ action::action() = default;
 //    initialize_obs_table(fluents, agents);
 //}
 
-action::action(const std::string& name, const action_id& id, const fluent_set& fluents, const agent_set& agents) {
+action::action(const std::string &name, const action_id &id, const fluent_set &fluents, const agent_set &agents,
+               int agent_groups_no) {
     set_name(name);
     set_id(id);
     m_type = -1;
-    initialize_obs_table(fluents, agents);
+    initialize_obs_table(fluents, agents, agent_groups_no);
 }
 
-void action::initialize_obs_table(const fluent_set& fluents, const agent_set& agents) {
+void action::initialize_obs_table(const fluent_set &fluents, const agent_set &agents, int agent_groups_no) {
     agent_set::const_iterator it_ag;
 
     belief_formula false_bf;
@@ -54,7 +55,7 @@ void action::initialize_obs_table(const fluent_set& fluents, const agent_set& ag
     std::map<agent_group_id, belief_formula> map_internal;
 
     for (it_ag = agents.begin(); it_ag != agents.end(); ++it_ag) {
-        for (short it_ag_group = 0; it_ag_group != cem_store::get_instance().get_agent_group_number(); ++it_ag_group) {
+        for (short it_ag_group = 0; it_ag_group != agent_groups_no; ++it_ag_group) {
             //Everyone set to false, then in the function that retrieves set the rules that if everything is false you get the last
             map_internal.insert(std::make_pair(it_ag_group, false_bf));
         }
@@ -87,14 +88,14 @@ act_type action::get_type() const {
 void action::set_type(act_type type) {
     if (type != -1) {
         if (m_type == -1) {
-            if (cem_store::get_instance().exist_cem(type)) {
+//            if (cem_store::get_instance().exist_cem(type)) {
                 m_type = type;
                 return;
             } else {
                 std::cerr << "The specified action type: " << type << " does not match any cem specification."
                           << std::endl;
                 exit(1);
-            }
+//            }
         }
     }
 }

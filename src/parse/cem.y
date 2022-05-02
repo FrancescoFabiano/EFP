@@ -120,12 +120,12 @@ domain
 init_spec 
 goal_spec
  { 
-  reader::get_instance().m_fluents = *$1;
-  reader::get_instance().m_actions = *$2;
-  reader::get_instance().m_agents = *$3;
-  reader::get_instance().m_propositions = *$4;
-  reader::get_instance().m_bf_initially = *$5;
-  reader::get_instance().m_bf_goal = *$6;
+  // reader.set_fluents(*$1);
+  // reader.set_actions(*$2);
+  // reader.set_agents(*$3);
+  // reader.set_propositions(*$4);
+  // reader.set_bf_initially(*$5);
+  // reader.set_bf_goal(*$6);
 }
 ;
 

@@ -1,5 +1,5 @@
 /**
- * \brief Singleton class that stores all the domain information.
+ * \brief Class that stores all the domain information.
  * 
  * All the information are read from the file given in input and are then processed into 
  * appropriate data structures.
@@ -39,8 +39,10 @@ private:
     /** \brief Set containing all the (grounded) \ref agent of the domain.*/
     agent_set m_agents;
 
+    cem_store m_store;
 
     domain_config config;
+
     grounder domain_grounder;
 
     /** \brief The description of the initial state.*/
@@ -50,26 +52,25 @@ private:
 
 
     /** \brief Function that from the file stores the \ref agent information.*/
-    void build_agents();
+    void build_agents(const reader &reader);
     /** \brief Function that from the file stores the \ref fluent information.*/
-    void build_fluents();
+    void build_fluents(const reader &reader);
 
     /** \brief Function that from the file stores the \ref action information.*/
-    void build_actions(const grounder& grounder);
+    void build_actions(const grounder &grounder, reader &reader);
 
 
     /** \brief Function that adds to the right \ref action each \ref proposition.*/
-    void build_propositions(const grounder& grounder);
+    void build_propositions(const grounder &grounder, reader &reader);
 
     /** \brief Function that builds \ref m_intial_description.*/
-    void build_initially(const grounder &grounder, const printer &printer);
+    void build_initially(const grounder &grounder, reader &reader, const printer &printer);
 
     /** \brief Function that builds \ref m_goal_description.
      * \todo move to the goal class.*/
-    void build_goal(const grounder& grounder);
+    void build_goal(const grounder &grounder, reader &reader);
 
 public:
-//    /** \brief Private constructor since it is a Singleton class.*/
     domain();
 
     domain(domain const&) = delete;
@@ -80,12 +81,16 @@ public:
 
     const domain_config & get_config() const;
 
+    const cem_store get_store() const;
+
     void set_config(const domain_config & to_set_config);
+
+    void set_store(const cem_store &store);
 
     /** \brief Function that builds all the domain information.
      *
      * This function calls \ref build_fluents, \ref build_agents and \ref build_actions.*/
-    void build(const grounder &grounder, const printer &printer);
+    void build(const grounder &grounder, reader &reader, const printer &printer);
 
     /** \brief Getter of the field \ref m_grounder.
      *

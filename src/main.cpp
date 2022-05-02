@@ -387,7 +387,7 @@ void build_domain_config(domain_config & config, int argc, char **argv) {
     }
 }
 
-void build_domain(domain &domain, reader &reader, grounder &grounder, const printer &printer, int argc, char **argv) {
+void build_domain(domain &domain, cem_store &store, reader &reader, grounder &grounder, const printer &printer, int argc, char **argv) {
     domain_config config;
     build_domain_config(config, argc, argv);
 
@@ -431,13 +431,27 @@ void build_domain(domain &domain, reader &reader, grounder &grounder, const prin
     config.set_domain_name(domain_name);
 
     if (config.get_update_models() == up_model_type::CUSTOM) {
-        reader.read(config.get_models_filename());
+        //Call to the parser function.
+        //Generation of action groups and events (after agents declaration but before actions declaration)
+        std::cout << "\nBuilding event models..." << std::endl;
+        cem_parser::parse(store, config.get_models_filename());
+        
+        reader.read_cem();
     } else {
-        reader.read();
+        /*to dynamically generate id of groups and actions type*/
+        store.add_cem_name("ontic");
+        store.add_cem_name("sensing");
+        store.add_cem_name("announcement");
+
+        store.add_agent_group("fully");
+        store.add_agent_group("partially");
+
+        reader.read_mar();
     }
 
     domain.set_config(config);
-    domain.build(grounder, printer);
+    domain.set_store(store);
+    domain.build(grounder, reader, printer);
 }
 
 void launch_search(domain& domain) {
@@ -467,11 +481,12 @@ int main(int argc, char** argv) {
     }
 
     domain domain;
+    cem_store store;
     reader reader;
     grounder grounder;
     printer printer;
 
-    build_domain(domain, reader, grounder, printer, argc, argv);
+    build_domain(domain, store, reader, grounder, printer, argc, argv);
     launch_search(domain);
 
     exit(0);

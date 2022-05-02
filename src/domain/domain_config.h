@@ -1,10 +1,12 @@
 #ifndef EFP_DOMAIN_CONFIG_H
 #define EFP_DOMAIN_CONFIG_H
 
+#include <string>
+#include <vector>
 #include <boost/shared_ptr.hpp>
 
 #include "../../include/definitions/domain_config_def.h"
-#include "../utilities/reader.h"
+//#include "../utilities/reader.h"
 
 class domain_config {
 private:

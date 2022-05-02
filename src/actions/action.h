@@ -17,6 +17,7 @@
 #include "../formulae/belief_formula.h"
 #include "../domain/grounder.h"
 #include "../domain/domain.h"
+#include "custom_event_models/cem_store.h"
 
 class action {
 private:
@@ -70,7 +71,7 @@ private:
     void add_observant(agent ag, agent_group_id ag_group, const belief_formula& condition);
 
     /* \brief Function that initializes the observability tables with each agent_group_id set to false.*/
-    void initialize_obs_table(const fluent_set& fluents, const agent_set& agents);
+    void initialize_obs_table(const fluent_set &fluents, const agent_set &agents, int agent_groups_no);
 
 public:
     action();
@@ -80,7 +81,8 @@ public:
      *
      * @param[in] name: the value to assign to \ref m_name.
      * @param[in] id: the value to assign to \ref m_id.*/
-    action(const std::string& name, const action_id& id, const fluent_set& fluents, const agent_set& agents);
+    action(const std::string &name, const action_id &id, const fluent_set &fluents, const agent_set &agents,
+           int agent_groups_no);
 
     /* \brief Getter of the field \ref m_name.*/
     std::string get_name() const;

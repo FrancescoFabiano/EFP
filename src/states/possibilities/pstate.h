@@ -20,7 +20,7 @@
 
 #include "../../../include/definitions/define.h"
 #include "../../domain/initially.h"
-#include "../../actions/action.h"
+//#include "../../actions/action.h"
 #include "../../../external-lib/bisimulation/bisimulation.h"
 
 class pstate {

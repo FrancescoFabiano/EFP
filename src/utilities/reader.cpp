@@ -11,8 +11,7 @@
 #include <iostream>
 
 #include "reader.h"
-#include "printer.h" //Used in \ref print as a support
-#include "../actions/custom_event_models/cem_store.h"
+//#include "printer.h" //Used in \ref print as a support
 
 //prototype of bison-generated parser function
 int marparse();
@@ -52,31 +51,64 @@ std::string reader::name(fluent x)
 
 reader::reader() = default;
 
-reader& reader::get_instance() {
-    static reader instance;
-    return instance;
-}
-
-int reader::read()
-{
-    /*to dynamically generate id of groups and actions type*/
-    cem_store::get_instance().add_cem_name("ontic");
-    cem_store::get_instance().add_cem_name("sensing");
-    cem_store::get_instance().add_cem_name("announcement");
-
-    cem_store::get_instance().add_agent_group("fully");
-    cem_store::get_instance().add_agent_group("partially");
-
+int reader::read_mar() {
     return marparse();
 }
 
-int reader::read(const std::string & filename)
-{
-	//Call to the parser function.
-	//Generation of action groups and events (after agents declaration but before actions declaration)
-	std::cout << "\nBuilding event models..." << std::endl;
-	cem_store::get_instance().generate(filename);
+int reader::read_cem() {
 	return cemparse();
+}
+
+void reader::generate(const std::string &file) {
+
+}
+
+const string_set &reader::get_fluents() const {
+    return m_fluents;
+}
+
+const string_set &reader::get_actions() const {
+    return m_actions;
+}
+
+const string_set &reader::get_agents() const {
+    return m_agents;
+}
+
+const formula_list &reader::get_bf_initially() const {
+    return m_bf_initially;
+}
+
+const formula_list &reader::get_bf_goal() const {
+    return m_bf_goal;
+}
+
+const proposition_list &reader::get_propositions() const {
+    return m_propositions;
+}
+
+void reader::set_fluents(const string_set &fluents) {
+    m_fluents = fluents;
+}
+
+void reader::set_actions(const string_set &actions) {
+    m_actions = actions;
+}
+
+void reader::set_agents(const string_set &agents) {
+    m_agents = agents;
+}
+
+void reader::set_bf_initially(const formula_list &bf_initially) {
+    m_bf_initially = bf_initially;
+}
+
+void reader::set_bf_goal(const formula_list &bf_goal) {
+    m_bf_goal = bf_goal;
+}
+
+void reader::set_propositions(const proposition_list &propositions) {
+    m_propositions = propositions;
 }
 
 /**

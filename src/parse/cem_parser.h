@@ -1,6 +1,6 @@
 /**
  * \class cem_parser
- * \brief Singleton class that parse the file that described the custom cems.
+ * \brief Class that parse the file that described the custom cems.
  * 
  * 
  * @see cevent, cem, cem_store.
@@ -21,6 +21,7 @@
 #include <boost/algorithm/string.hpp>
 #include <regex>
 #include "../../include/definitions/delphic.h"
+#include "../actions/custom_event_models/cem_store.h"
 
 class cem_parser {
 private:
@@ -28,15 +29,15 @@ private:
 
     static void parse_conditions(const std::string & line, event_metacond & cond, int line_count);
 
-    static void parse_ag_list(const std::string & line);
+    static void parse_ag_list(cem_store &store, const std::string &line);
 
-    static void parse_edge(const std::string & edge, cem_edges & edges);
+    static void parse_edge(cem_store &store, const std::string &edge, cem_edges &edges);
 
-    static void parse_edges_list(const std::string & line, cem_edges & edges);
+    static void parse_edges_list(cem_store &store, const std::string &line, cem_edges &edges);
 
 public:
 
-    static void parse(const std::string & filename);
+    static void parse(cem_store &store, const std::string &filename);
 
 };
 

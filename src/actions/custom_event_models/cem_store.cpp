@@ -7,9 +7,6 @@
  */
 
 #include "cem_store.h"
-#include "cem.h"
-#include "../../parse/cem_parser.h"
-
 #include <boost/algorithm/string.hpp>
 
 cem_store::cem_store()
@@ -25,11 +22,11 @@ cem_store& cem_store::get_instance()
 	return instance;
 }
 
-void cem_store::generate(const std::string & file)
-{
-	cem_parser::parse(file);
-	return;
-}
+//void cem_store::generate(const std::string & file)
+//{
+//    cem_parser::parse(<#initializer#>, file);
+//	return;
+//}
 
 const cevent_ptr cem_store::add_event(const cevent & to_add)
 {
@@ -121,7 +118,7 @@ cem_id cem_store::get_cem_id(const std::string & to_get)
 	//}
 }
 
-bool cem_store::exist_cem(cem_id to_check)
+bool cem_store::exists_cem(cem_id to_check) const
 {
 	//if (m_cem_ids_map.find(to_add) == m_cem_ids_map.end()) {
 	//Insert does not override

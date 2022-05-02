@@ -9,8 +9,6 @@
 #include <iostream>
 
 #include "proposition.h"
-#include "../domain/domain.h"
-#include "custom_event_models/cem_store.h"
 
 proposition_type proposition::get_type() const {
     return m_type;
@@ -55,7 +53,11 @@ void proposition::set_action_name(const std::string &to_set) {
 
 void proposition::set_action_type(const std::string &to_set) {
     //if (cem_store::get_instance().get_cem_name(to_set)) {
-    m_act_type = cem_store::get_instance().get_cem_id(to_set);
+
+
+//    m_act_type = cem_store::get_instance().get_cem_id(to_set);
+
+
     //} else {
     //	std::cerr << "The specified cem name: " << to_set << " does not match any cem specification." << std::endl;
     //	exit(1);
@@ -75,7 +77,7 @@ void proposition::set_agent(const std::string &to_set) {
 }
 
 void proposition::set_agent_group(const std::string &to_set) {
-    m_agent_group = cem_store::get_instance().get_agent_group(to_set);
+//    m_agent_group = cem_store::get_instance().get_agent_group(to_set);
 }
 
 void proposition::set_conditions(const belief_formula &to_set) {
