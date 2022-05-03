@@ -9,6 +9,7 @@
 %option noyywrap
 
 %{
+#include "../../src/utilities/reader.h"
 #include "../../include/definitions/define.h"
 #include "../../src/actions/proposition.h"
 #include "../../src/formulae/belief_formula.h"
@@ -18,7 +19,7 @@
    should know prefix=mar and match bison's CEMSTYPE */
 #define YYSTYPE CEMSTYPE
 
-int cemerror(const char* s);
+int cemerror(reader *reader, const char* s);
 //int cemlineno = 1;
 %}
 
@@ -64,5 +65,5 @@ comment %.*$
 [\n]		{ cemlineno++;	}
 {comment} ;
 
-.		{std::cerr << "SCANNER "; cemerror(""); exit(1);	}
+.		{std::cerr << "SCANNER "; cemerror(nullptr,""); exit(1);	}
 

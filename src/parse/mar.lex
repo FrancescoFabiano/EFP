@@ -9,6 +9,7 @@
 %option noyywrap
 
 %{
+#include "../../src/utilities/reader.h"
 #include "../../include/definitions/define.h"
 #include "../../src/actions/proposition.h"
 #include "../../src/formulae/belief_formula.h"
@@ -18,7 +19,7 @@
    should know prefix=mar and match bison's MARSTYPE */
 #define YYSTYPE MARSTYPE
 
-int marerror(const char* s);
+int marerror(reader *reader, const char* s);
 //int marlineno = 1;
 %}
 
@@ -64,5 +65,5 @@ comment %.*$
 [\n]		{ marlineno++;	}
 {comment} ;
 
-.		{std::cerr << "SCANNER "; marerror(""); exit(1);	}
+.		{std::cerr << "SCANNER "; marerror(nullptr,""); exit(1);	}
 

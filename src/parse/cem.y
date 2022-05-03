@@ -4,11 +4,12 @@
    clashes with any other parsers we may want to link */
 
 %define api.prefix {cem}
+%parse-param {reader *reader}
 
 %{
 #include "../../src/utilities/reader.h"
 
-int cemerror(const char *s);
+int cemerror(reader *reader, const char *s);
 int cemlex(void);
 
 std::string get_negation(const std::string*);
@@ -120,12 +121,12 @@ domain
 init_spec 
 goal_spec
  { 
-  // reader.set_fluents(*$1);
-  // reader.set_actions(*$2);
-  // reader.set_agents(*$3);
-  // reader.set_propositions(*$4);
-  // reader.set_bf_initially(*$5);
-  // reader.set_bf_goal(*$6);
+   reader->set_fluents(*$1);
+   reader->set_actions(*$2);
+   reader->set_agents(*$3);
+   reader->set_propositions(*$4);
+   reader->set_bf_initially(*$5);
+   reader->set_bf_goal(*$6);
 }
 ;
 
@@ -611,7 +612,7 @@ goal_spec:
 };
 %%
 
-int cemerror(std::string s)
+int cemerror(reader *reader, std::string s)
 {
   extern int cemlineno;	// defined and maintained in lex.c
   extern char *cemtext;	// defined and maintained in lex.c
@@ -622,9 +623,9 @@ int cemerror(std::string s)
   return 0;
 }
 
-int cemerror(const char *s)
+int cemerror(reader *reader, const char *s)
 {
-  return cemerror(std::string(s));
+  return cemerror(reader, std::string(s));
 }
 
 bool is_consistent(string_set sl1, string_set sl2)

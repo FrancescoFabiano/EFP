@@ -14,8 +14,8 @@
 //#include "printer.h" //Used in \ref print as a support
 
 //prototype of bison-generated parser function
-int marparse();
-int cemparse();
+int marparse(reader *reader);
+int cemparse(reader *reader);
 
 /*string_set reader::name(const fluent_set &x)
 {
@@ -52,11 +52,11 @@ std::string reader::name(fluent x)
 reader::reader() = default;
 
 int reader::read_mar() {
-    return marparse();
+    return marparse(this);
 }
 
 int reader::read_cem() {
-	return cemparse();
+	return cemparse(this);
 }
 
 void reader::generate(const std::string &file) {

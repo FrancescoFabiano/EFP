@@ -4,11 +4,12 @@
    clashes with any other parsers we may want to link */
 
 %define api.prefix {mar}
+%parse-param {reader *reader}
 
 %{
 #include "../../src/utilities/reader.h"
 
-int marerror(const char *s);
+int marerror(reader *reader, const char *s);
 int marlex(void);
 
 std::string get_negation(const std::string*);
@@ -126,13 +127,12 @@ domain
 init_spec
 goal_spec
 {
-  // \todo: FIX
-  // reader.set_fluents(*$1);
-  // reader.set_actions(*$2);
-  // reader.set_agents(*$3);
-  // reader.set_propositions(*$4);
-  // reader.set_bf_initially(*$5);
-  // reader.set_bf_goal(*$6);
+  reader->set_fluents(*$1);
+  reader->set_actions(*$2);
+  reader->set_agents(*$3);
+  reader->set_propositions(*$4);
+  reader->set_bf_initially(*$5);
+  reader->set_bf_goal(*$6);
 }
 ;
 
@@ -614,7 +614,7 @@ goal_spec:
 };
 %%
 
-int marerror(std::string s)
+int marerror(reader *reader, std::string s)
 {
   extern int marlineno;	// defined and maintained in lex.c
   extern char *martext;	// defined and maintained in lex.c
@@ -625,9 +625,9 @@ int marerror(std::string s)
   return 0;
 }
 
-int marerror(const char *s)
+int marerror(reader *reader, const char *s)
 {
-  return marerror(std::string(s));
+  return marerror(reader, std::string(s));
 }
 //
 //bool is_consistent(string_set sl1, string_set sl2)
