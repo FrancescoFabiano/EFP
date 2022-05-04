@@ -17,6 +17,14 @@ set(
         src/domain/domain_config.cpp
         src/domain/grounder.cpp
         src/domain/initially.cpp
+        src/formulae/formula.cpp
+        src/formulae/modal/box_formula.cpp
+        src/formulae/modal/diamond_formula.cpp
+        src/formulae/modal/ck_formula.cpp
+        src/formulae/propositional/literal.cpp
+        src/formulae/propositional/not_formula.cpp
+        src/formulae/propositional/and_formula.cpp
+        src/formulae/propositional/or_formula.cpp
         src/formulae/belief_formula.cpp
         src/heuristics/heuristics_manager.cpp
         src/heuristics/heuristics_template.ipp
@@ -61,6 +69,14 @@ set(
         src/domain/domain_config.h
         src/domain/grounder.h
         src/domain/initially.h
+        src/formulae/formula.h
+        src/formulae/modal/box_formula.h
+        src/formulae/modal/diamond_formula.h
+        src/formulae/modal/ck_formula.h
+        src/formulae/propositional/literal.h
+        src/formulae/propositional/not_formula.h
+        src/formulae/propositional/and_formula.h
+        src/formulae/propositional/or_formula.h
         src/formulae/belief_formula.h
         src/heuristics/heuristics_manager.h
         src/heuristics/satisfied_goals.h

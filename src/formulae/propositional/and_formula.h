@@ -1,0 +1,23 @@
+#ifndef EFP_AND_FORMULA_H
+#define EFP_AND_FORMULA_H
+
+
+#include "../formula.h"
+
+class and_formula : public formula {
+private:
+    formula m_f1, m_f2;
+//    formula *m_f1, *m_f2;     \todo: USARE PUNTATORI?
+
+protected:
+    unsigned long calc_modal_depth() const override;
+
+public:
+    and_formula(const formula &f1, const formula &f2);
+
+    bool is_entailed(const kstate &state, const kworld_ptr &world) const override;
+    bool is_entailed(const pstate &state, const pworld_ptr &world) const override;
+};
+
+
+#endif //EFP_AND_FORMULA_H
