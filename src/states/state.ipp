@@ -1,5 +1,5 @@
 /**
- * \brief Implementation of \ref state_T.h
+ * \brief Implementation of \ref state.h
  *
  * \copyright GNU Public License.
  *
@@ -9,7 +9,7 @@
 #include <fstream>
 #include <stdlib.h>
 
-#include "state_T.h"
+#include "state.h"
 #include "../domain/domain.h"
 #include "../actions/custom_event_models/cem_store.h"
 
