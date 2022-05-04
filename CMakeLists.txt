@@ -30,7 +30,7 @@ set(
         src/states/possibilities/pstate.cpp
         src/states/possibilities/pstore.cpp
         src/states/possibilities/pworld.cpp
-        src/states/state_T.ipp
+        src/states/state.ipp
         src/update/product_update.cpp
         src/utilities/helper.cpp
         src/utilities/helper_t.ipp
@@ -73,7 +73,7 @@ set(
         src/states/possibilities/pstate.h
         src/states/possibilities/pstore.h
         src/states/possibilities/pworld.h
-        src/states/state_T.h
+        src/states/state.h
         src/update/product_update.h
         src/utilities/helper.h
         src/utilities/helper_t.h
