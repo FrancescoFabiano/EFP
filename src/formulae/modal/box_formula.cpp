@@ -1,12 +1,14 @@
 #include "box_formula.h"
 
-box_formula::box_formula(const agent &ag, const formula &f) {
+template<class M>
+box_formula<M>::box_formula(const agent &ag, const formula &f) {
     m_ag = ag;
     m_f = f;
     m_modal_depth = box_formula::calc_modal_depth();
 }
 
-bool box_formula::is_entailed(const kstate &state, const kworld_ptr &world) const {
+template<class M>
+bool box_formula<M>::is_entailed(const kstate &state, const kworld_ptr &world) const {
     kworld_ptr_set ag_worlds = state.get_edges().at(world).at(m_ag);
     kworld_ptr_set::const_iterator it_kws;
 
@@ -19,7 +21,8 @@ bool box_formula::is_entailed(const kstate &state, const kworld_ptr &world) cons
     return true;
 }
 
-bool box_formula::is_entailed(const pstate &state, const pworld_ptr &world) const {
+template<class M>
+bool box_formula<M>::is_entailed(const pstate &state, const pworld_ptr &world) const {
     pworld_ptr_set ag_worlds = state.get_beliefs().at(world).at(m_ag);
     pworld_ptr_set::const_iterator it_pws;
 
@@ -32,10 +35,12 @@ bool box_formula::is_entailed(const pstate &state, const pworld_ptr &world) cons
     return true;
 }
 
-unsigned long box_formula::calc_modal_depth() const {
+template<class M>
+unsigned long box_formula<M>::calc_modal_depth() const {
     return 1 + m_f.calc_modal_depth();
 }
 
-bool box_formula::is_propositional() const {
+template<class M>
+bool box_formula<M>::is_propositional() const {
     return false;
 }

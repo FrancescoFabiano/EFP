@@ -1,12 +1,14 @@
 #include "ck_formula.h"
 
-ck_formula::ck_formula(const agent_set &ags, const formula &f) {
+template<class M>
+ck_formula<M>::ck_formula(const agent_set &ags, const formula &f) {
     m_ags = ags;
     m_f = f;
     m_modal_depth = ck_formula::calc_modal_depth();
 }
 
-bool ck_formula::is_entailed(const kstate &state, const kworld_ptr &world) const {
+template<class M>
+bool ck_formula<M>::is_entailed(const kstate &state, const kworld_ptr &world) const {
     std::queue<kworld_ptr> to_visit_worlds;
     kworld_ptr_set visited_worlds, ag_worlds;
 
@@ -44,7 +46,8 @@ bool ck_formula::is_entailed(const kstate &state, const kworld_ptr &world) const
     return true;
 }
 
-bool ck_formula::is_entailed(const pstate &state, const pworld_ptr &world) const {
+template<class M>
+bool ck_formula<M>::is_entailed(const pstate &state, const pworld_ptr &world) const {
     std::queue<pworld_ptr> to_visit_worlds;
     pworld_ptr_set visited_worlds, ag_worlds;
 
@@ -82,10 +85,12 @@ bool ck_formula::is_entailed(const pstate &state, const pworld_ptr &world) const
     return true;
 }
 
-unsigned long ck_formula::calc_modal_depth() const {
+template<class M>
+unsigned long ck_formula<M>::calc_modal_depth() const {
     return 1 + m_f.calc_modal_depth();
 }
 
-bool ck_formula::is_propositional() const {
+template<class M>
+bool ck_formula<M>::is_propositional() const {
     return false;
 }

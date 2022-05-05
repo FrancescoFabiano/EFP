@@ -1,12 +1,14 @@
 #include "diamond_formula.h"
 
-diamond_formula::diamond_formula(const agent &ag, const formula &f) {
+template<class M>
+diamond_formula<M>::diamond_formula(const agent &ag, const formula &f) {
     m_ag = ag;
     m_f = f;
     m_modal_depth = diamond_formula::calc_modal_depth();
 }
 
-bool diamond_formula::is_entailed(const kstate &state, const kworld_ptr &world) const {
+template<class M>
+bool diamond_formula<M>::is_entailed(const kstate &state, const kworld_ptr &world) const {
     kworld_ptr_set ag_worlds = state.get_edges().at(world).at(m_ag);
     kworld_ptr_set::const_iterator it_kws;
 
@@ -19,7 +21,8 @@ bool diamond_formula::is_entailed(const kstate &state, const kworld_ptr &world) 
     return false;
 }
 
-bool diamond_formula::is_entailed(const pstate &state, const pworld_ptr &world) const {
+template<class M>
+bool diamond_formula<M>::is_entailed(const pstate &state, const pworld_ptr &world) const {
     pworld_ptr_set ag_worlds = state.get_beliefs().at(world).at(m_ag);
     pworld_ptr_set::const_iterator it_pws;
 
@@ -32,10 +35,12 @@ bool diamond_formula::is_entailed(const pstate &state, const pworld_ptr &world) 
     return false;
 }
 
-unsigned long diamond_formula::calc_modal_depth() const {
+template<class M>
+unsigned long diamond_formula<M>::calc_modal_depth() const {
     return 1 + m_f.calc_modal_depth();
 }
 
-bool diamond_formula::is_propositional() const {
+template<class M>
+bool diamond_formula<M>::is_propositional() const {
     return false;
 }
