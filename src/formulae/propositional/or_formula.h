@@ -6,13 +6,10 @@
 
 class or_formula : public formula {
 private:
-    formula m_f1, m_f2;
-
-protected:
-    unsigned long calc_modal_depth() const override;
+    const formula *m_f1, *m_f2;
 
 public:
-    or_formula(const formula &f1, const formula &f2);
+    or_formula(const formula *f1, const formula *f2);
 
     bool is_entailed(const kstate &state, const kworld_ptr &world) const override;
     bool is_entailed(const pstate &state, const pworld_ptr &world) const override;

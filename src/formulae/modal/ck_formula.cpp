@@ -1,10 +1,8 @@
 #include "ck_formula.h"
 
 template<class M>
-ck_formula<M>::ck_formula(const agent_set &ags, const formula &f) {
-    m_ags = ags;
-    m_f = f;
-    m_modal_depth = ck_formula::calc_modal_depth();
+ck_formula<M>::ck_formula(const agent_set *ags, const formula *f) : m_ags(ags), m_f(f) {
+    m_modal_depth = 1 + f->get_modal_depth();
 }
 
 template<class M>
@@ -26,10 +24,10 @@ bool ck_formula<M>::is_entailed(const kstate &state, const kworld_ptr &world) co
 
         visited_worlds.insert(current_world);
 
-        if (!m_f.is_entailed(state, current_world)) {
+        if (!m_f->is_entailed(state, current_world)) {
             return false;
         } else {
-            for (it_ags = m_ags.begin(); it_ags != m_ags.end(); it_ags++) {
+            for (it_ags = m_ags->begin(); it_ags != m_ags->end(); it_ags++) {
                 ag_worlds = world_edges.at(*it_ags);
 
                 for (it_kws = ag_worlds.begin(); it_kws != ag_worlds.end(); it_kws++) {
@@ -38,7 +36,6 @@ bool ck_formula<M>::is_entailed(const kstate &state, const kworld_ptr &world) co
                     }
                 }
             }
-
             to_visit_worlds.pop();
         }
     }
@@ -65,10 +62,10 @@ bool ck_formula<M>::is_entailed(const pstate &state, const pworld_ptr &world) co
 
         visited_worlds.insert(current_world);
 
-        if (!m_f.is_entailed(state, current_world)) {
+        if (!m_f->is_entailed(state, current_world)) {
             return false;
         } else {
-            for (it_ags = m_ags.begin(); it_ags != m_ags.end(); it_ags++) {
+            for (it_ags = m_ags->begin(); it_ags != m_ags->end(); it_ags++) {
                 ag_worlds = world_edges.at(*it_ags);
 
                 for (it_pws = ag_worlds.begin(); it_pws != ag_worlds.end(); it_pws++) {
@@ -77,17 +74,11 @@ bool ck_formula<M>::is_entailed(const pstate &state, const pworld_ptr &world) co
                     }
                 }
             }
-
             to_visit_worlds.pop();
         }
     }
 
     return true;
-}
-
-template<class M>
-unsigned long ck_formula<M>::calc_modal_depth() const {
-    return 1 + m_f.calc_modal_depth();
 }
 
 template<class M>

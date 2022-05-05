@@ -1,15 +1,11 @@
 #include "formula.h"
 
 bool formula::is_entailed(const kstate &state, const kworld_ptr &world) const {
-    return false;
+    return true;
 }
 
 bool formula::is_entailed(const pstate &state, const pworld_ptr &world) const {
-    return false;
-}
-
-unsigned long formula::calc_modal_depth() const {
-    return 0;
+    return true;
 }
 
 unsigned long formula::get_modal_depth() const {
