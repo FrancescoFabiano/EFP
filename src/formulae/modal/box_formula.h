@@ -17,6 +17,9 @@ public:
     bool is_entailed(const pstate &state, const pworld_ptr &world) const override;
 
     bool is_propositional() const override;
+
+    bool operator==(const box_formula<M> &to_compare) const;
+    bool operator<(const box_formula<M> &to_compare) const;
 };
 
 

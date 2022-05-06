@@ -18,6 +18,9 @@ public:
     virtual bool is_propositional() const;
 
     unsigned long get_modal_depth() const;
+
+    virtual bool operator==(const formula &to_compare) const = 0;
+    virtual bool operator<(const formula &to_compare) const = 0;
 };
 
 

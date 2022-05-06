@@ -84,3 +84,14 @@ template<class M>
 bool ck_formula<M>::is_propositional() const {
     return false;
 }
+
+template<class M>
+bool ck_formula<M>::operator==(const ck_formula<M> &to_compare) const {
+    return m_ags == to_compare.m_ags && m_f == to_compare.m_f;
+}
+
+template<class M>
+bool ck_formula<M>::operator<(const ck_formula<M> &to_compare) const {
+    return (m_ags <  to_compare.m_ags) ||
+           (m_ags == to_compare.m_ags && m_f < to_compare.m_f);
+}

@@ -13,6 +13,9 @@ public:
 
     bool is_entailed(const kstate &state, const kworld_ptr &world) const override;
     bool is_entailed(const pstate &state, const pworld_ptr &world) const override;
+
+    bool operator==(const and_formula &to_compare) const;
+    bool operator<(const and_formula &to_compare) const;
 };
 
 

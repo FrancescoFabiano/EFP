@@ -17,6 +17,9 @@ public:
     bool is_entailed(const pstate &state, const pworld_ptr &world) const override;
 
     bool is_propositional() const override;
+
+    bool operator==(const diamond_formula<M> &to_compare) const;
+    bool operator<(const diamond_formula<M> &to_compare) const;
 };
 
 #endif //EFP_DIAMOND_FORMULA_H

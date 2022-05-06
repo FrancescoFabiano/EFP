@@ -37,3 +37,14 @@ template<class M>
 bool box_formula<M>::is_propositional() const {
     return false;
 }
+
+template<class M>
+bool box_formula<M>::operator==(const box_formula &to_compare) const {
+    return m_ag == to_compare.m_ag && m_f == to_compare.m_f;
+}
+
+template<class M>
+bool box_formula<M>::operator<(const box_formula &to_compare) const {
+    return (m_ag <  to_compare.m_ag) ||
+           (m_ag == to_compare.m_ag && m_f < to_compare.m_f);
+}
