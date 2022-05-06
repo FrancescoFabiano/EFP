@@ -1,12 +1,6 @@
 #include "formula.h"
 
-bool formula::is_entailed(const kstate &state, const kworld_ptr &world) const {
-    return true;
-}
-
-bool formula::is_entailed(const pstate &state, const pworld_ptr &world) const {
-    return true;
-}
+formula::formula() : m_modal_depth(0) {}
 
 unsigned long formula::get_modal_depth() const {
     return m_modal_depth;

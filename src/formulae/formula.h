@@ -10,8 +10,10 @@ protected:
     unsigned long m_modal_depth;
 
 public:
-    virtual bool is_entailed(const kstate &state, const kworld_ptr &world) const;
-    virtual bool is_entailed(const pstate &state, const pworld_ptr &world) const;
+    formula();
+
+    virtual bool is_entailed(const kstate &state, const kworld_ptr &world) const = 0;
+    virtual bool is_entailed(const pstate &state, const pworld_ptr &world) const = 0;
 
     virtual bool is_propositional() const;
 

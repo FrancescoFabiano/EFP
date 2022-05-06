@@ -28,6 +28,7 @@ typedef std::set<fluent_set> fluent_formula; /**< \brief A representation of a f
                                       * \todo How the set of fluent has < implemented?
                                       * Each element of the set is a \ref fluent_set*/
 
+// \todo: make agent static
 typedef boost::dynamic_bitset<> agent; /**< \brief A representation of an agent through an unique id (short).
                                       *
                                       *  This representation is derived by applying \ref grounder::ground_agent(const std::string&) const
