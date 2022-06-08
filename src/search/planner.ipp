@@ -158,7 +158,7 @@ bool planner<T>::search_BFS(const domain& domain) {
 	auto start_timing = std::chrono::system_clock::now();
 
     if (config.get_initial_state_mode() == Initial_State_Mode::FINITARY_S5_THEORY) {
-        initial.build_initial(domain.get_initial_description());
+        initial.generate_from_theory(domain.get_initial_description());
     }
 
     /**
@@ -235,7 +235,7 @@ bool planner<T>::search_iterative_DFS(const domain& domain) {
 	auto start_timing = std::chrono::system_clock::now();
 
     if (config.get_initial_state_mode() == Initial_State_Mode::FINITARY_S5_THEORY) {
-        initial.build_initial(domain.get_initial_description());
+        initial.generate_from_theory(domain.get_initial_description());
     }
 
     /**
@@ -318,7 +318,7 @@ bool planner<T>::search_DFS(const domain& domain) {
 	auto start_timing = std::chrono::system_clock::now();
 
     if (config.get_initial_state_mode() == Initial_State_Mode::FINITARY_S5_THEORY) {
-        initial.build_initial(domain.get_initial_description());
+        initial.generate_from_theory(domain.get_initial_description());
     }
 
     /**
@@ -397,7 +397,7 @@ bool planner<T>::search_heuristic(const domain& domain) {
 	auto start_timing = std::chrono::system_clock::now();
 
     if (config.get_initial_state_mode() == Initial_State_Mode::FINITARY_S5_THEORY) {
-        initial.build_initial(domain.get_initial_description());
+        initial.generate_from_theory(domain.get_initial_description());
     }
 
     /**
@@ -475,7 +475,7 @@ bool planner<T>::execute_given_actions(const domain& domain) {
 	std::set<T> visited_states;
 
 	T state;
-	state.build_initial(domain.get_initial_description());
+    state.generate_from_theory(domain.get_initial_description());
     bool found_plan;
 
 	if (state.is_goal(domain.get_goal_description())) {
@@ -561,7 +561,8 @@ bool planner<T>::execute_given_actions_timed(const domain& domain) {
 	check_actions_names(domain);
 
 	T state;
-	state.build_initial(domain.get_initial_description());
+    // todo: sistema
+//    state.generate_from_theory(domain.get_initial_description());
 
 	std::vector<std::string>::const_iterator it_stset;
 	action_set::const_iterator it_acset;

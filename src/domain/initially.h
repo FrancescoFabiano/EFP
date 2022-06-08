@@ -12,7 +12,6 @@
 
 #include "../../include/definitions/domain_config_def.h"
 #include "../formulae/belief_formula.h"
-#include "../utilities/helper.h"
 
 class initially
 {

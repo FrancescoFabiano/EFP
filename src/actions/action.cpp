@@ -8,6 +8,7 @@
 
 #include <utility>
 #include "custom_event_models/cem_store.h"
+#include "../utilities/helper.h"
 
 /*********************************************************************
  Action implementation
@@ -29,40 +30,40 @@ action::action(const std::string &name, const action_id &id, const fluent_set &f
 }
 
 void action::initialize_obs_table(const fluent_set &fluents, const agent_set &agents, int agent_groups_no) {
-    agent_set::const_iterator it_ag;
-
-    belief_formula false_bf;
-    fluent_formula false_ff;
-
-    fluent f1 = *(fluents.begin());
-    fluent f1_negated = helper::negate_fluent(f1);
-
-    //The formula is "fluent_number_1 and -fluent_number_1" which is always false
-    fluent_set true_fs;
-
-    true_fs.insert(f1);
-    true_fs.insert(f1_negated);
-
-    false_ff.insert(true_fs);
-
-    false_bf.set_formula_type(FLUENT_FORMULA);
-    false_bf.set_fluent_formula(false_ff);
-    false_bf.set_is_grounded(true);
-    false_bf.deground();
-
-
-    //std::map<agent, std::map<agent_group_id, belief_formula>> map_mid;
-    std::map<agent_group_id, belief_formula> map_internal;
-
-    for (it_ag = agents.begin(); it_ag != agents.end(); ++it_ag) {
-        for (short it_ag_group = 0; it_ag_group != agent_groups_no; ++it_ag_group) {
-            //Everyone set to false, then in the function that retrieves set the rules that if everything is false you get the last
-            map_internal.insert(std::make_pair(it_ag_group, false_bf));
-        }
-
-        m_observants.insert(std::make_pair(*it_ag, map_internal));
-        map_internal.clear();
-    }
+//    agent_set::const_iterator it_ag;
+//
+//    belief_formula false_bf;
+//    fluent_formula false_ff;
+//
+//    const fluent *f1 = *(fluents.begin());
+//    fluent f1_negated = helper::negate_fluent(f1);
+//
+//    //The formula is "fluent_number_1 and -fluent_number_1" which is always false
+//    fluent_set true_fs;
+//
+//    true_fs.insert(f1);
+//    true_fs.insert(f1_negated);
+//
+//    false_ff.insert(true_fs);
+//
+//    false_bf.set_formula_type(FLUENT_FORMULA);
+//    false_bf.set_fluent_formula(false_ff);
+//    false_bf.set_is_grounded(true);
+//    false_bf.deground();
+//
+//
+//    //std::map<agent, std::map<agent_group_id, belief_formula>> map_mid;
+//    std::map<agent_group_id, belief_formula> map_internal;
+//
+//    for (it_ag = agents.begin(); it_ag != agents.end(); ++it_ag) {
+//        for (short it_ag_group = 0; it_ag_group != agent_groups_no; ++it_ag_group) {
+//            //Everyone set to false, then in the function that retrieves set the rules that if everything is false you get the last
+//            map_internal.insert(std::make_pair(it_ag_group, false_bf));
+//        }
+//
+//        m_observants.insert(std::make_pair(*it_ag, map_internal));
+//        map_internal.clear();
+//    }
 }
 
 std::string action::get_name() const {
@@ -123,7 +124,7 @@ void action::add_effect(const fluent_formula &effect, const belief_formula &cond
     m_effects.insert(effects_map::value_type(effect, condition));
 }
 
-void action::add_observant(agent ag, agent_group_id ag_group, const belief_formula &condition) {
+void action::add_observant(const agent *ag, agent_group_id ag_group, const belief_formula &condition) {
     //std::pair<agent_group_id, belief_formula> tmp_obs(ag_group, condition);
 
     m_observants[ag][ag_group] = condition; //.insert(observability_map::value_type(fully, condition));

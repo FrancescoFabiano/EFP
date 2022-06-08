@@ -7,19 +7,15 @@
 
 #include "grounder.h"
 
-grounder::grounder()
-{
-}
+grounder::grounder() = default;
 
-grounder::grounder(const fluent_map & fluent_map, const agent_map & agent_map, const action_name_map & action_name_map)
-{
+grounder::grounder(const fluent_map & fluent_map, const agent_map & agent_map, const action_name_map & action_name_map) {
 	set_fluent_map(fluent_map);
 	set_agent_map(agent_map);
 	set_action_name_map(action_name_map);
 
 	//@TODO:Remove for efficency; just for printing reasons (pass debug maybe)
 	//reverse();
-
 }
 
 /*void grounder::reverse()
@@ -83,9 +79,8 @@ const action_name_map & grounder::get_action_name_map() const
 	return m_action_name_map;
 }
 
-fluent grounder::ground_fluent(const std::string& x) const
-{
-	fluent_map::const_iterator p = m_fluent_map.find(x);
+const fluent* grounder::ground_fluent(const std::string& x) const {
+    auto p = m_fluent_map.find(x);
 
 	if (p != m_fluent_map.end()) {
 		return(p->second);
@@ -119,20 +114,18 @@ fluent_formula grounder::ground_fluent(const string_set_set& x) const
 	return y;
 }
 
-agent grounder::ground_agent(const std::string& x) const
-{
-	agent_map::const_iterator p = m_agent_map.find(x);
+const agent * grounder::ground_agent(const std::string& to_ground) const {
+	auto p = m_agent_map.find(to_ground);
 
 	if (p != m_agent_map.end()) {
 		return(p->second);
 	}
 
-	std::cerr << "ERROR: Agent " << x << " is undeclared." << std::endl;
+	std::cerr << "ERROR: Agent " << to_ground << " is undeclared." << std::endl;
 	exit(1);
 }
 
-agent_set grounder::ground_agent(const string_set& x) const
-{
+agent_set grounder::ground_agent(const string_set& x) const {
 	string_set::iterator it;
 	agent_set y;
 
@@ -143,9 +136,8 @@ agent_set grounder::ground_agent(const string_set& x) const
 	return y;
 }
 
-action_id grounder::ground_action(const std::string& x) const
-{
-	action_name_map::const_iterator p = m_action_name_map.find(x);
+action_id grounder::ground_action(const std::string& x) const {
+	auto p = m_action_name_map.find(x);
 
 	if (p != m_action_name_map.end()) {
 		return(p->second);
@@ -155,21 +147,18 @@ action_id grounder::ground_action(const std::string& x) const
 	exit(1);
 }
 
-std::string grounder::deground_fluent(fluent x) const
-{
-	reverse_fluent_map::const_iterator p = r_fluent_map.find(x);
+std::string grounder::deground_fluent(const fluent *to_deground) const {
+	auto p = r_fluent_map.find(to_deground);
 
 	if (p != r_fluent_map.end()) {
 		return(p->second);
 	}
 
-	std::cerr << "ERROR: Fluent " << x << " is undeclared." << std::endl;
+	std::cerr << "ERROR: Fluent " << to_deground << " is undeclared." << std::endl;
 	exit(1);
 }
 
-string_set grounder::deground_fluent(const fluent_set& x) const
-{
-
+string_set grounder::deground_fluent(const fluent_set& x) const {
 	fluent_set::iterator it;
 	string_set y;
 
@@ -180,8 +169,7 @@ string_set grounder::deground_fluent(const fluent_set& x) const
 	return y;
 }
 
-string_set_set grounder::deground_fluent(const fluent_formula& x) const
-{
+string_set_set grounder::deground_fluent(const fluent_formula& x) const {
 	fluent_formula::iterator it;
 	string_set_set y;
 
@@ -192,20 +180,18 @@ string_set_set grounder::deground_fluent(const fluent_formula& x) const
 	return y;
 }
 
-std::string grounder::deground_agent(agent x) const
-{
-	reverse_agent_map::const_iterator p = r_agent_map.find(x);
+std::string grounder::deground_agent(const agent *to_deground) const {
+	auto p = r_agent_map.find(to_deground);
 
 	if (p != r_agent_map.end()) {
 		return(p->second);
 	}
 
-	std::cerr << "ERROR: Agent " << x << " is undeclared." << std::endl;
+	std::cerr << "ERROR: Agent " << to_deground << " is undeclared." << std::endl;
 	exit(1);
 }
 
-string_set grounder::deground_agents(const agent_set & x) const
-{
+string_set grounder::deground_agents(const agent_set & x) const {
 	agent_set::iterator it;
 	string_set y;
 
@@ -216,9 +202,8 @@ string_set grounder::deground_agents(const agent_set & x) const
 	return y;
 }
 
-std::string grounder::deground_action(action_id x) const
-{
-	reverse_action_name_map::const_iterator p = r_action_name_map.find(x);
+std::string grounder::deground_action(action_id x) const {
+	auto p = r_action_name_map.find(x);
 
 	if (p != r_action_name_map.end()) {
 		return(p->second);
@@ -238,8 +223,7 @@ void grounder::print_ff(const fluent_formula& to_print) const
 	printer::get_instance().print_list(deground_fluent(to_print));
 }*/
 
-bool grounder::operator=(const grounder& to_assign)
-{
+bool grounder::operator=(const grounder& to_assign) {
 	set_fluent_map(to_assign.get_fluent_map());
 	set_agent_map(to_assign.get_agent_map());
 	set_action_name_map(to_assign.get_action_name_map());

@@ -18,9 +18,11 @@
 #include "../../include/definitions/possibilities.h"
 #include "../../include/definitions/actions.h"
 #include "../formulae/belief_formula.h"
+#include "../states/possibilities/pstate.h"
 
-class helper
-{
+class pstate;
+
+class helper {
 public:
 
     /** \brief Function that checks if two \ref fluent_set are consistent.

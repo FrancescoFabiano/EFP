@@ -93,7 +93,7 @@ public:
     /** \brief Function used to print all the \ref kworld_ptr inside \p to_print.
      * 
      * @param[in] to_print: the \ref kworld_ptr_set to be printed.*/
-    void print_list(const pworld_ptr_set& to_print) const;
+    void print_list(const pworld_set& to_print) const;
 
 
     /** \brief Function used to print all the \ref action name inside \p to_print.

@@ -18,7 +18,7 @@
 #include <set>
 #include "pworld.h"
 
-typedef std::set<pworld> pworld_set; /**< \brief A set of \ref pworld, used to store all the created ones.*/
+//typedef std::set<pworld> pworld_set; /**< \brief A set of \ref pworld, used to store all the created ones.*/
 
 class pstore
 {

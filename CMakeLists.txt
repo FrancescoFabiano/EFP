@@ -96,7 +96,7 @@ set(
         src/utilities/printer.h
         src/utilities/reader.h
         external-lib/bisimulation/bisimulation.h
-)
+        src/formulae/finitary_theory/finitary_theory.cpp src/formulae/finitary_theory/finitary_theory.h src/formulae/finitary_theory/box_whether_formula.cpp src/formulae/finitary_theory/box_whether_formula.h)
 
 # FLEX & BISON
 find_package(FLEX REQUIRED)

@@ -13,8 +13,8 @@ private:
 public:
     ck_formula<M>(const agent_set *ags, const formula *f);
 
-    bool is_entailed(const kstate &state, const kworld_ptr &world) const override;
-    bool is_entailed(const pstate &state, const pworld_ptr &world) const override;
+    bool is_entailed(const kstate *state, const kworld *world) const override;
+    bool is_entailed(const pstate *state, const pworld *world) const override;
 
     bool is_propositional() const override;
 

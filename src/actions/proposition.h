@@ -82,7 +82,7 @@ public:
     /** Getter of the field \ref m_agent grounded.
      * 
      * @return the grounded value of \ref m_agent.*/
-    agent get_agent(const grounder& grounder) const;
+    const agent* get_agent(const grounder& grounder) const;
 
     /** Getter of the field \ref m_agent_group.
      * 

@@ -26,7 +26,7 @@ fluent_formula proposition::get_action_effect(const grounder& grounder) const {
     return grounder.ground_fluent(m_action_effect);
 }
 
-agent proposition::get_agent(const grounder& grounder) const {
+const agent* proposition::get_agent(const grounder& grounder) const {
     return grounder.ground_agent(m_agent);
 }
 

@@ -74,7 +74,7 @@ private:
     /** \brief If *this* is a \ref BELIEF_FORMULA in this field is contained the \ref agent of the formula.
      *
      * Given the \ref belief_formula B(**ag**, *phi*) this field contains **ag**.*/
-    agent m_agent;
+    const agent *m_agent;
     /** \brief In this field is contained the operator if *this* is \ref PROPOSITIONAL_FORMULA.
      *
      * - Given the \ref PROPOSITIONAL_FORMULA *phi_1* **op** *phi_2* \ref m_operator contains **op**.*/
@@ -95,12 +95,12 @@ private:
      * - if *this* is \ref E_FORMULA, i.e., E(ags, *phi*), \ref m_bf1 contains *phi*;
      * - if *this* is \ref C_FORMULA, i.e., C(ags, *phi*), \ref m_bf1 contains *phi*;
      * - if *this* is \ref D_FORMULA, i.e., D(ags, *phi*), \ref m_bf1 contains *phi*;
-     * - null_ptr otherwise.*/
+     * - null otherwise.*/
     std::shared_ptr<belief_formula> m_bf1;
     /** \brief In this field is contained the second nested \ref belief_formula of *this*.
      *
      * - If *this* is \ref PROPOSITIONAL_FORMULA, i.e. *phi_1* **op** *phi_2*, \ref m_bf2 contains *phi_2*;
-     * - null_ptr otherwise.*/
+     * - null otherwise.*/
     std::shared_ptr<belief_formula> m_bf2;
 
 
@@ -135,7 +135,7 @@ public:
     /** \brief Setter for the field \ref m_fluent_formula.
      *
      * @param[in] to_set: the \ref fluent object to insert in \ref m_fluent_formula.*/
-    void set_fluent_formula_from_fluent(fluent to_set);
+    void set_fluent_formula_from_fluent(const fluent *to_set);
 
     /** \brief Setter of the field \ref m_string_fluent_formula.
      * 
@@ -149,7 +149,7 @@ public:
     /** \brief Setter for the field \ref m_agent.
      *
      * @param[in] to_set: the \ref agent object to copy in \ref m_agent.*/
-    void set_agent(agent to_set);
+    void set_agent(const agent *to_set);
 
     /** \brief Setter for the field \ref m_group_agents.
      *
@@ -209,7 +209,7 @@ public:
     /** \brief Getter for the field \ref m_agent.
      *
      * @return the value of the field \ref m_agent.*/
-    agent get_agent() const;
+    const agent * get_agent() const;
     /** \brief Getter of the \ref belief_formula pointed by \ref m_bf1.
      *
      * @return the \ref belief_formula pointed by \ref m_bf1.*/

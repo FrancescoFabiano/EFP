@@ -26,8 +26,6 @@
 #include <set>
 #include "kworld.h"
 
-typedef std::set<kworld> kworld_set; /**< \brief A set of \ref kworld, used to store all the created ones.*/
-
 class kstore
 {
 private:
@@ -53,7 +51,7 @@ public:
      * @return the \ref kworld_ptr to \p to_add.
      * 
      * \todo Param ok because set makes copy?*/
-    const kworld_ptr add_world(const kworld & to_add);
+    const kworld* add_world(const kworld *to_add);
 
     /*\brief Function that add a created \ref kworld without returning its pointer.
      * 

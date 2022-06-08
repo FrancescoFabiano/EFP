@@ -68,7 +68,7 @@ private:
      * @param[in] ag: The \ref agent that is in \p ag_group observant of this if \p condition.
      * @param[in] ag_group: The \ref agent_group_id in which \p ag belongs if \p condition.
      * @param[in] condition: The condition for \p ag to be in \p ag_group of *this*.*/
-    void add_observant(agent ag, agent_group_id ag_group, const belief_formula& condition);
+    void add_observant(const agent *ag, agent_group_id ag_group, const belief_formula& condition);
 
     /* \brief Function that initializes the observability tables with each agent_group_id set to false.*/
     void initialize_obs_table(const fluent_set &fluents, const agent_set &agents, int agent_groups_no);

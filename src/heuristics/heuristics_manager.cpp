@@ -79,32 +79,32 @@ void heuristics_manager::expand_goals(unsigned short nesting)
 
 void heuristics_manager::produce_subgoals(unsigned short nesting, unsigned short depth, const belief_formula & to_explore, const agent_set & agents)
 {
-
-	agent_set::const_iterator it_agset;
-
-	//unsigned short added_subgoals = 0;
-
-	if ((to_explore.get_formula_type() == C_FORMULA && depth == 0)
-		|| (to_explore.get_formula_type() == BELIEF_FORMULA && depth > 0)) {
-		for (it_agset = agents.begin(); it_agset != agents.end(); it_agset++) {
-			if ((to_explore.get_agent() != *it_agset) || (depth == 0)) {
-				belief_formula new_subgoal;
-				new_subgoal.set_formula_type(BELIEF_FORMULA);
-				if (depth == 0) {
-					new_subgoal.set_bf1(to_explore.get_bf1());
-				} else {
-					new_subgoal.set_bf1(to_explore);
-				}
-				new_subgoal.set_agent(*it_agset);
-				new_subgoal.set_is_grounded(true);
-				m_goals.push_back(new_subgoal);
-
-				if (nesting > (depth + 1)) {
-					produce_subgoals(nesting, (depth + 1), new_subgoal, agents);
-				}
-			}
-		}
-	}
+// todo: reimplement
+//	agent_set::const_iterator it_agset;
+//
+//	//unsigned short added_subgoals = 0;
+//
+//	if ((to_explore.get_formula_type() == C_FORMULA && depth == 0)
+//		|| (to_explore.get_formula_type() == BELIEF_FORMULA && depth > 0)) {
+//		for (it_agset = agents.begin(); it_agset != agents.end(); it_agset++) {
+//			if ((to_explore.get_agent() != *it_agset) || (depth == 0)) {
+//				belief_formula new_subgoal;
+//				new_subgoal.set_formula_type(BELIEF_FORMULA);
+//				if (depth == 0) {
+//					new_subgoal.set_bf1(to_explore.get_bf1());
+//				} else {
+//					new_subgoal.set_bf1(to_explore);
+//				}
+//				new_subgoal.set_agent(*it_agset);
+//				new_subgoal.set_is_grounded(true);
+//				m_goals.push_back(new_subgoal);
+//
+//				if (nesting > (depth + 1)) {
+//					produce_subgoals(nesting, (depth + 1), new_subgoal, agents);
+//				}
+//			}
+//		}
+//	}
 }
 
 void heuristics_manager::set_used_h(Heuristic used_h)

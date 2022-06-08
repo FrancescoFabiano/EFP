@@ -14,8 +14,10 @@
 
 #include "../../../include/definitions/delphic.h"
 #include "../../formulae/belief_formula.h"
-#include "../../states/possibilities/pstate.h"
+//#include "../../states/possibilities/pstate.h"
 //#include "../action.h"
+
+class pstate;
 
 class cevent {
     friend class cevent_ptr;

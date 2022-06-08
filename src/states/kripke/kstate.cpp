@@ -1,4 +1,4 @@
-/*
+/**
  * \brief Implementation of \ref kstate.h
  *
  * \copyright GNU Public License.
@@ -8,1085 +8,733 @@
  */
 
 #include <iostream>
-#include <tuple>
-#include <stack>
 
 #include "kstate.h"
 #include "../../update/product_update.h"
 #include "../../utilities/helper_t.ipp"
 
-/**** GETTERS/SETTERS ****/
-void kstate::set_worlds(const kworld_ptr_set & to_set)
-{
-	m_worlds.clear();
-	m_worlds = to_set;
+
+kstate::kstate() = default;
+
+template<class M>
+kstate::kstate(const domain &domain, const finitary_theory<M> &theory) {
+    generate_from_theory(theory);
 }
 
-void kstate::set_edges(const kedge_map & to_set)
-{
-	m_edges.clear();
-	m_edges = to_set;
+kstate::kstate(const kstate &previous, const action &action) {
+    update(previous, action);
 }
 
-void kstate::set_pointed(const kworld_ptr & to_set)
-{
-	m_pointed = to_set;
+/**** GETTERS ****/
+const kworld_set &kstate::get_worlds() const {
+    return m_worlds;
 }
 
-const kworld_ptr_set & kstate::get_worlds() const
-{
-	return m_worlds;
+const kedge_map &kstate::get_edges() const {
+    return m_edges;
 }
 
-const kedge_map & kstate::get_edges() const
-{
-	return m_edges;
-}
-
-const kworld_ptr & kstate::get_pointed() const
-{
-	return m_pointed;
-}
-
-/**** ADD/REMOVE WORLDS/EDGES ****/
-kworld_ptr kstate::add_world(const kworld & world)
-{
-	kworld_ptr tmp = kstore::get_instance().add_world(world);
-	m_worlds.insert(tmp);
-	return tmp;
-}
-
-void kstate::add_edge(const kworld_ptr & from, const kworld_ptr & to, const agent & ag)
-{
-	m_edges[from][ag].insert(to);
-}
-
-void kstate::remove_kedge(const kworld_ptr & from, const kworld_ptr & to, const agent & ag)
-{
-	auto from_edges = m_edges.at(from);
-
-	if (!from_edges.empty()) {
-		kworld_ptr_set kwset = from_edges.at(ag);
-
-		if (!kwset.empty()) {
-			kwset.erase(to);
-		}
-	}
+const kworld *kstate::get_pointed() const {
+    return m_pointed;
 }
 
 /**** OPERATORS ****/
-bool kstate::operator=(const kstate & to_copy)
-{
-	set_edges(to_copy.get_edges());
-	set_worlds(to_copy.get_worlds());
-	set_pointed(to_copy.get_pointed());
-	return true;
-}
-
-bool kstate::operator==(const kstate & to_compare) const
-{
-	if (m_pointed.get_numerical_id() == to_compare.get_pointed().get_numerical_id()) {
-		return true;
-	}
-
-	bisimulation b;
-    // \todo: SISTEMA
-    agent_set to_fix;
-	return b.compare_automata_eq(to_compare, *this, to_fix); // domain.get_agents());
-}
-
-bool kstate::operator<(const kstate & to_compare) const
-{
-	if (m_pointed.get_numerical_id() < to_compare.get_pointed().get_numerical_id()) {
-		return true;
-	} else if (m_pointed.get_numerical_id() > to_compare.get_pointed().get_numerical_id()) {
-		return false;
-	}
-
-	//	bisimulation b;
-	//
-	//	if (m_information_state < to_compare.get_information_state()) {
-	//		return b.compare_automata(*this, to_compare);
-	//	} else {
-	//		return b.compare_automata(to_compare, *this);
-	//	}
-
-	if (m_worlds < to_compare.get_worlds()) {
-		return true;
-	} else if (m_worlds > to_compare.get_worlds()) {
-		return false;
-	}
-
-	if (m_edges < to_compare.get_edges()) {
-		return true;
-	} else if (m_edges > to_compare.get_edges()) {
-		return false;
-	}
-
-	//These are implemented in std
-
-	//	if (m_worlds.size() < to_compare.get_worlds().size()) {
-	//		return true;
-	//	} else if (m_worlds.size() > to_compare.get_worlds().size()) {
-	//		return false;
-	//	}
-	//
-	//	if (m_information_state.size() < to_compare.get_information_state().size()) {
-	//		return true;
-	//	} else if (m_information_state.size() > to_compare.get_information_state().size()) {
-	//		return false;
-	//	}
-
-	//	kworld_ptr_set::const_iterator it_kwpts1, it_kwpts2;
-	//	it_kwpts2 = to_compare.get_worlds().begin();
-	//	for (it_kwpts1 = m_worlds.begin(); it_kwpts1 != m_worlds.end(); it_kwpts1++) {
-	//		if ((*it_kwpts1) < (*it_kwpts2)) {
-	//			return true;
-	//		} else if ((*it_kwpts1) > (*it_kwpts2)) {
-	//			return false;
-	//		}
-	//		//The case when to compare has less world than this
-	//		it_kwpts2++;
-	//	}
-
-	//	kedge_ptr_set::const_iterator it_kepts1, it_kepts2;
-	//	it_kepts2 = to_compare.get_information_state().begin();
-	//	for (it_kepts1 = m_information_state.begin(); it_kepts1 != m_information_state.end(); it_kepts1++) {
-	//		if ((*it_kepts1) < (*it_kepts2)) {
-	//			return true;
-	//		} else if ((*it_kepts1) > (*it_kepts2)) {
-	//			return false;
-	//		}
-	//		it_kepts2++;
-	//	}
-
-	return false;
-}
-
-/**** ENTAILMENT ****/
-bool kstate::entails(const fluent & f) const
-{
-	return entails(f, m_pointed);
-}
-
-bool kstate::entails(const fluent & f, const kworld_ptr & world)
-{
-	return world.get_ptr()->entails(f);
-}
-
-bool kstate::entails(const fluent_set & fl) const
-{
-	return entails(fl, m_pointed);
-}
-
-bool kstate::entails(const fluent_set & fl, const kworld_ptr & world)
-{
-	return world.get_ptr()->entails(fl);
-}
-
-bool kstate::entails(const fluent_formula & ff) const
-{
-	return entails(ff, m_pointed);
-}
-
-bool kstate::entails(const fluent_formula & ff, const kworld_ptr & world)
-{
-	return world.get_ptr()->entails(ff);
-}
-
-bool kstate::entails(const belief_formula & bf) const
-{
-	return entails(bf, m_pointed);
-}
-
-bool kstate::entails(const belief_formula & bf, const kworld_ptr & world) const
-{
-	switch ( bf.get_formula_type() ) {
-	case FLUENT_FORMULA:
-	{
-		/** \todo Make sure its grounded. Maybe add to \ref belief_formula a bool that store if grounded or not or maybe ground
-		 * when \ref domain created.
-		 * @see belief_formula::ground(const grounder &).*/
-		return entails(bf.get_fluent_formula(), world);
-	}
-	case BELIEF_FORMULA:
-	{
-		/** \todo what was the at_lest_one of the previous version?*/
-		return entails(bf.get_bf1(), get_B_reachable_worlds(bf.get_agent(), world));
-	}
-	case PROPOSITIONAL_FORMULA:
-	{
-		switch ( bf.get_operator() ) {
-		case BF_NOT:
-			return !entails(bf.get_bf1(), world);
-		case BF_OR:
-			return entails(bf.get_bf1(), world) || entails(bf.get_bf2(), world);
-		case BF_AND:
-			return entails(bf.get_bf1(), world) && entails(bf.get_bf2(), world);
-		case BF_FAIL:
-		default:
-			std::cerr << "Something went wrong in checking entailment for Propositional formula";
-			exit(1);
-		}
-	}
-	case E_FORMULA:
-	{
-		return entails(bf.get_bf1(), get_E_reachable_worlds(bf.get_group_agents(), world));
-	}
-	case D_FORMULA:
-	{
-		kworld_ptr_set D_reachable = get_D_reachable_worlds(bf.get_group_agents(), world);
-		if (D_reachable.empty()) {
-			return false;
-		}
-		return entails(bf.get_bf1(), D_reachable);
-	}
-	case C_FORMULA:
-	{
-		return entails(bf.get_bf1(), get_C_reachable_worlds(bf.get_group_agents(), world));
-	}
-	case BF_EMPTY:
-	{
-		return true;
-	}
-	case BF_TYPE_FAIL:
-	default:
-	{
-		std::cerr << "Something went wrong in checking entailment for Belief formula";
-		exit(1);
-	}
-	}
-}
-
-bool kstate::entails(const belief_formula & to_check, const kworld_ptr_set & reachable) const
-{
-	kworld_ptr_set::const_iterator it_kwl;
-	for (it_kwl = reachable.begin(); it_kwl != reachable.end(); it_kwl++) {
-		/**\todo why setted contary?*/
-		if (!entails(to_check, (*it_kwl)))
-			return false;
-	}
-	return true;
-}
-
-bool kstate::entails(const formula_list & to_check, const kworld_ptr & world) const
-{
-	formula_list::const_iterator it_fl;
-	for (it_fl = to_check.begin(); it_fl != to_check.end(); it_fl++) {
-		if (!entails((*it_fl), world)) {
-			return false;
-		}
-	}
-	return true;
-}
-
-/**** REACHABILITY ****/
-kworld_ptr_set kstate::get_B_reachable_worlds(const agent & ag, const kworld_ptr & world) const
-{
-	return m_edges.at(world).at(ag);
-}
-
-//bool kstate::get_B_reachable_worlds_recursive(const agent & ag, const kworld_ptr & world, kworld_ptr_set & ret) const
-//{
-//	/** \todo check: If a--i-->b, b--i-->c then a--i-->c must be there*/
-//	bool is_fixed_point = true;
-//	kedge_ptr_set::const_iterator it_kedge;
-//	for (it_kedge = m_information_state.begin(); it_kedge != m_information_state.end(); it_kedge++) {
-//		if (((*it_kedge).get_from() == world) && ((*it_kedge).get_label() == ag)) {
-//			//We use the pair of insert, if we add a new world (true in the set::insert) then is not a fixed point
-//			//if (std::get<1>(ret.insert((*it_kedge).get_to()))) {
-//			if ((ret.insert((*it_kedge).get_to())).second) {
-//				is_fixed_point = false;
-//			}
-//		}
-//	}
-//	return is_fixed_point;
+//bool kstate::operator=(const kstate & to_copy) {
+//    set_edges(to_copy.get_edges());
+//    set_worlds(to_copy.get_worlds());
+//    set_pointed(to_copy.get_pointed());
+//    return true;
+//}
+//
+//bool kstate::operator==(const kstate & to_compare) const {
+//    if (m_pointed->get_id() == to_compare.get_pointed()->get_id()) {
+//        return true;
+//    }
+//
+//    bisimulation b;
+//    // \todo: SISTEMA
+//    agent_set to_fix;
+//    return b.compare_automata_eq(to_compare, *this, to_fix); // domain.get_agents());
+//}
+//
+//bool kstate::operator<(const kstate & to_compare) const {
+//    if (m_pointed->get_id() < to_compare.get_pointed()->get_id()) {
+//        return true;
+//    } else if (m_pointed->get_id() > to_compare.get_pointed()->get_id()) {
+//        return false;
+//    }
+//
+//    if (m_worlds < to_compare.get_worlds()) {
+//        return true;
+//    } else if (m_worlds > to_compare.get_worlds()) {
+//        return false;
+//    }
+//
+//    if (m_edges < to_compare.get_edges()) {
+//        return true;
+//    } else if (m_edges > to_compare.get_edges()) {
+//        return false;
+//    }
+//
+//    return false;
 //}
 
-kworld_ptr_set kstate::get_E_reachable_worlds(const agent_set & ags, const kworld_ptr & world) const
-{
-	/*Optimized, the K^0 call of this function
-	 *
-	 * Not calling B_reachability iteratively for optimization
-	 */
-	kworld_ptr_set ret, tmp;
-	agent_set::const_iterator it_ags;
-	auto world_edges = m_edges.at(world);
-
-	for (it_ags = ags.begin(); it_ags != ags.end(); it_ags++) {
-		tmp = world_edges.at(*it_ags);
-		std::merge(ret.begin(), ret.end(),
-			tmp.begin(), tmp.end(),
-			std::inserter(ret, ret.begin()));
-	}
-	return ret;
+bool kstate::entails(const formula &formula, const kworld &world) const {
+    return false;
+//    return formula.is_entailed(this, world);
 }
 
-bool kstate::get_E_reachable_worlds_recursive(const agent_set & ags, const kworld_ptr_set & worlds, kworld_ptr_set & reached) const
-{
-	/*Optimized, the K^i (recursive) call of this function*/
-	bool is_fixed_point = true;
-
-	kworld_ptr_set::const_iterator it_kws1, it_kws2;
-	agent_set::const_iterator it_ags;
-
-	std::map<agent, kworld_ptr_set> world_edges;
-	kworld_ptr_set kw_set;
-	/*\bug What if the pointed is not reachable, correct this*/
-	for (it_kws1 = worlds.begin(); it_kws1 != worlds.end(); it_kws1++) {
-		world_edges = m_edges.at(*it_kws1);
-
-		for (it_ags = ags.begin(); it_ags != ags.end(); it_ags++) {
-			kw_set = world_edges.at(*it_ags);
-
-			for (it_kws2 = kw_set.begin(); it_kws2 != kw_set.end(); it_kws2++) {
-				if (reached.insert(*it_kws2).second) {
-					is_fixed_point = false;
-				}
-			}
-		}
-	}
-	return is_fixed_point;
-}
-
-kworld_ptr_set kstate::get_C_reachable_worlds(const agent_set & ags, const kworld_ptr & world) const
-{
-	//Use of fixed point to stop.
-	bool is_fixed_point = false;
-	//THIS IS K^0
-	kworld_ptr_set newly_reached = get_E_reachable_worlds(ags, world);
-	kworld_ptr_set already_reached;
-	kworld_ptr_set ret;
-	//FROM HERE K^i UNTIL FIXED_POINT
-	while (!is_fixed_point) {
-		helper_t::sum_set(newly_reached, ret);
-		helper_t::minus_set(newly_reached, already_reached);
-		is_fixed_point = get_E_reachable_worlds_recursive(ags, newly_reached, ret);
-		already_reached = newly_reached;
-	}
-	return ret;
-}
-
-kworld_ptr_set kstate::get_D_reachable_worlds(const agent_set & ags, const kworld_ptr & world) const
-{
-	/**@bug: Notion of D-Reachable is correct (page 24 of Reasoning about Knowledge)*/
-	std::cerr << "\nERROR: D_REACHABLILITY not yet Implemented correctly\n";
-	exit(1);
-	/*auto it_agset = ags.begin();
-	kworld_ptr_set ret = get_B_reachable_worlds((*it_agset), world);
-	it_agset++;
-
-	for (; it_agset != ags.end(); it_agset++) {
-
-		auto it_pwset1 = ret.begin();
-		kworld_ptr_set to_intersect = get_B_reachable_worlds((*it_agset), world);
-		auto it_pwset2 = to_intersect.begin();
-		while ((it_pwset1 != ret.end()) && (it_pwset2 != to_intersect.end())) {
-
-			if ((*it_pwset1 < *it_pwset2) && (it_pwset1->get_fluent_based_id() != it_pwset2->get_fluent_based_id())) {
-				ret.erase(it_pwset1++);
-			} else if ((*it_pwset2 < *it_pwset1) && (it_pwset1->get_fluent_based_id() != it_pwset2->get_fluent_based_id())) {
-				++it_pwset2;
-			} else { // *it_pwset1 == *it_pwset2
-				++it_pwset1;
-				++it_pwset2;
-			}
-		}
-
-		// Anything left in ret from here on did not appear in to_intersect,
-		// so we remove it.
-		ret.erase(it_pwset1, ret.end());
-
-	}
-	return ret;*/
-}
-
-void kstate::get_all_reachable_worlds_edges(const kworld_ptr & world, kworld_ptr_set & reached_worlds, kedge_map & reached_edges) const {
-    // \todo: TEST
+void kstate::get_all_reachable_worlds_edges(const kworld *world, kworld_set &reached_worlds, kedge_map &reached_edges) const {
+    // todo: TEST
     auto adjacent_worlds = m_edges.at(world);
-	kworld_ptr_set kw_list;
+    kworld_set kw_list;
 
-    std::map<agent, kworld_ptr_set>::const_iterator it_kwmap;
-    kworld_ptr_set::const_iterator it_kws;
+    std::map<const agent*, kworld_set>::const_iterator it_kwmap;
+    kworld_set::const_iterator it_kws;
 
-    for (it_kwmap = adjacent_worlds.begin(); it_kwmap != adjacent_worlds.end(); it_kwmap++) {
-        kw_list = it_kwmap->second;
-
-        for (it_kws = kw_list.begin(); it_kws != kw_list.end(); it_kws++) {
-            if (reached_worlds.insert(*it_kws).second) {
-                reached_edges[*it_kws] = m_edges.at(*it_kws);
-                get_all_reachable_worlds_edges(*it_kws, reached_worlds, reached_edges);
-            }
-        }
-    }
+    // todo: SISTEMA
+//    for (it_kwmap = adjacent_worlds.begin(); it_kwmap != adjacent_worlds.end(); it_kwmap++) {
+//        kw_list = it_kwmap->second;
+//
+//        for (it_kws = kw_list.begin(); it_kws != kw_list.end(); it_kws++) {
+//            if (reached_worlds.insert(*it_kws).second) {
+//                reached_edges[*it_kws] = m_edges.at(*it_kws);
+//                get_all_reachable_worlds_edges(*it_kws, reached_worlds, reached_edges);
+//            }
+//        }
+//    }
 }
 
-void kstate::clean_unreachable_kworlds()
-{
-	kworld_ptr_set reached_worlds;
-	kedge_map reached_edges;
+void kstate::clean_unreachable_kworlds() {
+    kworld_set reached_worlds;
+    kedge_map reached_edges;
 
-	reached_worlds.insert(get_pointed());
-	reached_edges[get_pointed()] = m_edges.at(get_pointed());
+    reached_worlds.insert(m_pointed);
+    reached_edges[m_pointed] = m_edges.at(m_pointed);
 
-	get_all_reachable_worlds_edges(get_pointed(), reached_worlds, reached_edges);
+    get_all_reachable_worlds_edges(m_pointed, reached_worlds, reached_edges);
 
-	set_worlds(reached_worlds);
-	set_edges(reached_edges);
+//    set_worlds(reached_worlds);
+//    set_edges(reached_edges);
 }
 
 /**** INITIAL STATE ****/
-void kstate::build_initial(const initially& initial_conditions)
-{
-	/** \todo for now prune building.*/
-	std::cout << "\nBuilding initial Kripke structure...\n";
-	build_initial_prune(initial_conditions);
+template<class M>
+void kstate::generate_from_theory(const domain &domain, const finitary_theory<M> &theory) {
+    generate_initial_pointed(theory);
+    generate_initial_worlds(domain, theory);
+    generate_initial_edges(domain, theory);
 }
 
-void kstate::build_initial_prune(const initially& initial_conditions)
-{
-	/*Building of all the possible consistent \ref kworld and setting the pointed world.
-	 * Creation of all the \ref fluent combinations. All the consistent ones are added to \ref kstore.*/
-	fluent_set permutation;
-	generate_initial_kworlds(permutation, 0, initial_conditions);
+template<class M>
+void kstate::generate_initial_pointed(const finitary_theory<M> &theory) {
+    fluent_set pointed_fluent_set;
+    std::list<literal>::const_iterator it_ls;
 
-	/*Building of all the consistent \ref kedge.*/
-	generate_initial_kedges(initial_conditions);
-}
-
-/*From https://www.geeksforgeeks.org/generate-all-the-binary-strings-of-n-bits/ since is like generating all the binary numbers.*/
-void kstate::generate_initial_kworlds(fluent_set& permutation, int index, const initially& initial_conditions) {
-    // \todo: SISTEMA
-	unsigned int fluent_number = 0; // domain.get_fluent_number();
-	unsigned int bit_size = 0; // domain.get_size_fluent();
-
-    const fluent_set & initially_known = initial_conditions.get_initially_known_fluents();
-
-    if (index == fluent_number) {
-		kworld to_add(permutation);
-		add_initial_kworld(to_add, initial_conditions);
-
-		return;
-	}
-
-	fluent_set permutation_2 = permutation;
-	//Add the \ref fluent in positive version
-	boost::dynamic_bitset<> bitSetToFindPositve(bit_size, index);
-	boost::dynamic_bitset<> bitSetToFindNegative(bit_size, index);
-	bitSetToFindNegative.set(bitSetToFindPositve.size() - 1, true);
-	bitSetToFindPositve.set(bitSetToFindPositve.size() - 1, false);
-
-	if (initially_known.find(bitSetToFindNegative) == initially_known.end()) {
-		permutation.insert(bitSetToFindPositve);
-		generate_initial_kworlds(permutation, index + 1, initial_conditions);
-	}
-	if (initially_known.find(bitSetToFindPositve) == initially_known.end()) {
-		permutation_2.insert(bitSetToFindNegative);
-		generate_initial_kworlds(permutation_2, index + 1, initial_conditions);
-	}
-
-}
-
-void kstate::add_initial_kworld(const kworld & possible_add, const initially& initial_conditions) {
-    /* Since the common knowledge is on all the agent it means that every possible \ref kworld
-     * in the initial state must entail *phi* where C(*phi*) is an initial condition.*/
-
-    //Already setted in \ref domain::build_initially(bool).
-    if (possible_add.entails(initial_conditions.get_ff_forS5())) {
-        add_world(possible_add);
-        if (possible_add.entails(initial_conditions.get_pointed_world_conditions())) {
-            m_pointed = kworld_ptr(possible_add);
+    for (it_ls = theory.get_pointed_literals().begin(); it_ls != theory.get_pointed_literals().end(); ++it_ls) {
+        if (it_ls->is_positive()) {
+            pointed_fluent_set.insert(it_ls->get_fluent());
         }
-    } else {
-        //Already generated so we save it on kstore
-        kstore::get_instance().add_world(possible_add);
     }
+
+    kworld tmp = kworld(&pointed_fluent_set, nullptr, 0);
+    // todo: utilizza store per ottenere il puntatore
+    m_pointed = &tmp;
+    m_worlds.insert(m_pointed);
 }
 
-void kstate::generate_initial_kedges(const initially& initial_conditions) {
-    // \todo: SISTEMA
-	agent_set agents; // = domain.get_agents();
-	kworld_ptr kwptr_tmp1, kwptr_tmp2;
+template<class M>
+void kstate::generate_initial_worlds(const domain &domain, const finitary_theory<M> &theory) {
+    fluent_set initially_unknown_fluents;
+    std::set_difference(domain.get_fluents().begin(), domain.get_fluents().end(),
+                        theory.get_ck_literals().begin(), theory.get_ck_literals().end(), initially_unknown_fluents);
 
-	kworld_ptr_set::const_iterator it_kwps_1, it_kwps_2;
-	agent_set::const_iterator it_ags;
+    // We generate all the combinations of fluents that are not known initially
+    // This is equivalent to generating the power set of initially_unknown_fluents
+    // Power set generation: https://rosettacode.org/wiki/Power_set#C.2B.2B
+    std::set<fluent_set> power_set;
+    power_set.emplace();
 
-	/*This for add to *this* all the possible edges.*/
-	for (it_kwps_1 = m_worlds.begin(); it_kwps_1 != m_worlds.end(); it_kwps_1++) {
-		for (it_kwps_2 = it_kwps_1; it_kwps_2 != m_worlds.end(); it_kwps_2++) {
-			for (it_ags = agents.begin(); it_ags != agents.end(); it_ags++) {
-				kwptr_tmp1 = *it_kwps_1;
-				kwptr_tmp2 = *it_kwps_2;
+    for (auto&& f : initially_unknown_fluents) {
+        std::set<fluent_set> subset;
 
-				add_edge(kwptr_tmp1, kwptr_tmp2, *it_ags);
-				add_edge(kwptr_tmp2, kwptr_tmp1, *it_ags);
-			}
-		}
-	}
+        for (auto s : power_set) {
+            s.insert(f);
+            subset.insert(s);
+        }
+        power_set.insert(begin(subset), end(subset));
+    }
 
-	formula_list::const_iterator it_fl;
+    auto ps_it = power_set.begin();
+    auto form_it = theory.get_ck_formulae().begin();
+    bool is_consistent = true;
 
-	for (it_fl = initial_conditions.get_initial_conditions().begin(); it_fl != initial_conditions.get_initial_conditions().end(); it_fl++) {
-		remove_initial_kedge_bf(*it_fl);
-	}
+    // We add the set of initially known fluents to each combination of initially unknown fluents
+    // And we create a world for each resulting fluent set
+    for (; ps_it != power_set.end(); ++ps_it) {
+        ps_it->insert(theory.get_ck_literals());
+        // todo: implementa set di fluent set (store); probabilmente va messo in domain
+
+        // We check that the current fluent set is consistent with the fluent formulae that are
+        // Commonly known by all agents according to the theory
+        while (is_consistent && form_it != theory.get_ck_formulae().end()) {
+            if (!form_it->is_entailed(*ps_it)) {
+                is_consistent = false;
+            }
+            ++form_it;
+        }
+
+        if (is_consistent) {
+            kworld tmp = kworld(&*ps_it, nullptr);
+            // todo: utilizza store per ottenere il puntatore
+            m_worlds.insert(&tmp);
+            // todo: inserisco due volte il pointed?
+        }
+
+        form_it = theory.get_ck_formulae().begin();
+        is_consistent = true;
+    }
+/*//    fluent_set::const_iterator fs_it;
+//
+//    for (fs_it = initially_unknown_fluents.begin(); fs_it != initially_unknown_fluents.end(); ++fs_it) {
+//        for (ps_it = power_set.begin(); ps_it != power_set.end(); ++ps_it) {
+//            auto x = *ps_it;
+//            auto y = (*fs_it);
+//            x.insert(*fs_it);
+//            (*ps_it).insert(&(*fs_it));
+//            ps_it->insert(*(fs_it));
+//        }
+//    }*/
 }
 
-void kstate::remove_initial_kedge(const fluent_formula & known_ff, const agent & ag)
-{
+template<class M>
+void kstate::generate_initial_edges(const domain &domain, const finitary_theory<M> &theory) {
+    // todo: implementa classe template 'store' per collezionare elementi in un set (world, fluent_set, formule...)
+    kedge_map no_good;
+    std::map<const agent*, kworld_set> ag_worlds, ng_ag_worlds;
+    kworld_set ws, ng_ws;
 
-	kworld_ptr_set::const_iterator it_kwps_1, it_kwps_2;
+    // In 'no_good' we keep track of what edges we don't want to include
+    for (const auto w1 : m_worlds) {
+        ng_ag_worlds = no_good[w1];
 
-	kworld_ptr kwptr_tmp1, kwptr_tmp2;
+        for (const auto knows_whether : theory.get_knows_whether()) {
+            assert(knows_whether->get_formula()->is_propositional());
+            ng_ws = ng_ag_worlds[knows_whether->get_agent()];
 
-	/** \todo maybe don't loop twice on the world but exploit using it_kwps_2 = it_kwps_1:
-	 * - remove (_1, _2).
-	 * - remove (_2, _1).*/
-	for (it_kwps_1 = m_worlds.begin(); it_kwps_1 != m_worlds.end(); it_kwps_1++) {
-		for (it_kwps_2 = it_kwps_1; it_kwps_2 != m_worlds.end(); it_kwps_2++) {
-			/** \todo or entails(-known_ff)?*/
-			kwptr_tmp1 = *it_kwps_1;
-			kwptr_tmp2 = *it_kwps_2;
-			if (kwptr_tmp1.get_ptr()->entails(known_ff) && !kwptr_tmp2.get_ptr()->entails(known_ff)) {
-				remove_kedge(kwptr_tmp1, kwptr_tmp2, ag);
-				remove_kedge(kwptr_tmp2, kwptr_tmp1, ag);
-			} else if (kwptr_tmp2.get_ptr()->entails(known_ff) && !kwptr_tmp1.get_ptr()->entails(known_ff)) {
-
-				remove_kedge(kwptr_tmp2, kwptr_tmp1, ag);
-				remove_kedge(kwptr_tmp1, kwptr_tmp2, ag);
-			}
-		}
-	}
-
-}
-
-void kstate::remove_initial_kedge_bf(const belief_formula & to_check) {
-    /* Just check whenever is B(--) \/ B(--) and remove that edge*/
-    if (to_check.get_formula_type() == C_FORMULA) {
-        const belief_formula & tmp = to_check.get_bf1();
-
-        switch ( tmp.get_formula_type() ) {
-            //Only one for edges -- expresses that someone is ignorant.
-            case PROPOSITIONAL_FORMULA: {
-                //We remove all the check on the formula since they have already been controlled when ini_conditions has been created
-                if (tmp.get_operator() == BF_OR) {
-                    auto known_ff_ptr = std::make_shared<fluent_formula>();
-                    helper::check_Bff_notBff(tmp.get_bf1(), tmp.get_bf2(), known_ff_ptr);
-                    if (known_ff_ptr != nullptr) {
-                        remove_initial_kedge(*known_ff_ptr, tmp.get_bf2().get_agent());
-                    }
-                    return;
-
-                } else if (tmp.get_operator() == BF_AND) {
-                    //This case doesn't add knowledge.
-                    return;
-                } else {
-                    std::cerr << "\nError in the type of initial formulae (FIFTH).\n";
-                    exit(1);
+            for (const auto w2 : m_worlds) {
+                // We insert an edge (w1 --ag--> w2) in the map of no-goods iff w1 and w2 disagree on the formula
+                if (knows_whether->get_formula()->is_entailed(w1->get_fluent_set()) !=
+                    knows_whether->get_formula()->is_entailed(w2->get_fluent_set())) {
+                    ng_ws.insert(w2);
                 }
             }
-            case FLUENT_FORMULA:
-            case BELIEF_FORMULA:
-            case BF_EMPTY: {
-                return;
-            }
-            default: {
-                std::cerr << "\nError in the type of initial formulae (SIXTH).\n";
-                exit(1);
+        }
+    }
+
+    for (const auto w1 : m_worlds) {
+        ag_worlds = m_edges[w1];
+        ng_ag_worlds = no_good[w1];
+
+        for (const auto ag : domain.get_agents()) {
+            ws = ag_worlds[ag];
+            ng_ws = ng_ag_worlds[ag];
+
+            // We store only edges that are *not* in the no-goods map
+            for (const auto w2 : m_worlds) {
+                std::set_difference(m_worlds.begin(), m_worlds.end(), ng_ws.begin(), ng_ws.end(), ws.begin());
             }
         }
-    } else {
-        std::cerr << "\nError in the type of initial formulae (SEVENTH).\n";
-        exit(1);
     }
 }
 
 /**** TRANSITION FUNCTION ****/
-kstate kstate::compute_succ(const action & act) const
-{
-	/** \warning executability should be check in \ref state (or \ref planner).*/
-	kstate tmp;
-	return tmp;
-	//return product_update::update(*this, act);
+void kstate::update(const kstate &previous, const action &action) {
+    // todo: implement
+}
+
+kstate kstate::compute_succ(const action & act) const {
+    /** \warning executability should be check in \ref state (or \ref planner).*/
+    kstate tmp;
+    return tmp;
+    //return product_update::update(*this, act);
 }
 
 /**** BISIMULATION ****/
-automaton kstate::kstate_to_automaton(std::vector<kworld_ptr> & kworld_vec, const std::map<agent, bis_label> & agent_to_label) const {
-	std::map<int, int> compact_indices;
-	std::map<kworld_ptr, int> index_map;
-	kbislabel_map label_map; // Map: from -> (to -> ag_set)
+automaton kstate::kstate_to_automaton(std::vector<kworld*> & kworld_vec, const std::map<agent, bis_label> & agent_to_label) const {
+//    std::map<int, int> compact_indices;
+//    std::map<kworld*, int> index_map;
+//    kbislabel_map label_map; // Map: from -> (to -> ag_set)
 
-	automaton *a;
-	unsigned long Nvertex = get_worlds().size();
-    // \todo: SISTEMA
-	unsigned long ag_set_size = 0; // domain.get_agents().size();
-	//BIS_ADAPTATION For the loop that identifies the id (We add one edge for each node)
-	v_elem *Vertex;
+    automaton *a;
+//    unsigned long Nvertex = get_worlds().size();
+//    // \todo: SISTEMA
+//    unsigned long ag_set_size = 0; // domain.get_agents().size();
+//    //BIS_ADAPTATION For the loop that identifies the id (We add one edge for each node)
+//    v_elem *Vertex;
+//
+//    Vertex = (v_elem *) malloc(sizeof(v_elem) * Nvertex);
+//
+//    // Initializating vertices
+//    kworld_set::const_iterator it_kwps;
+//    kbislabel_map::const_iterator it_klm;
+//    bis_label_set::const_iterator it_bislab;
+//    std::map<kworld*, bis_label_set>::const_iterator it_kw_bislab;
+//
+//    //std::cerr << "\nDEBUG: Inizializzazione Edges\n";
+//
+//    // The pointed world is set to the index 0. This ensures that, when deleting the bisimilar nodes, the pointed kworld
+//    // is always chosen as the first of its block. Therefore, we do not need to update it when converting back to a kstate
+//    index_map[get_pointed()] = 0;
+//    kworld_vec.push_back(get_pointed());
+//    compact_indices[static_cast<int> (get_pointed()->get_id())] = 0;
+//
+//    //For the loop that identifies the id
+//    //BIS_ADAPTATION For the loop that identifies the id (+1)
+//    ///@bug: If the pointed has no self-loop to add
+//    //kworld_ptr_set pointed_adj = adj_list.at(get_pointed());
+//
+//    Vertex[0].ne = 0; // pointed_adj.size(); // edge_counter[get_pointed()];
+//    //    if (pointed_adj.find(get_pointed()) == pointed_adj.end()) {
+//    //        Vertex[0].ne++;
+//    //    }
+//    //    Vertex[0].e = (e_elem *) malloc(sizeof(e_elem) * Vertex[0].ne);
+//
+//    int i = 1, c = 1;
+//
+//    //std::cerr << "\nDEBUG: Inizializzazione Vertex\n";
+//
+//    for (it_kwps = m_worlds.begin(); it_kwps != m_worlds.end(); it_kwps++) {
+//        if (!(*it_kwps == get_pointed())) {
+//            index_map[*it_kwps] = i;
+//            kworld_vec.push_back(*it_kwps);
+//
+//            // if (compact_indices.find(it_kwps->get_id()) == compact_indices.end()) {
+//            if (compact_indices.insert({it_kwps->get_id(), c}).second) {
+//                // compact_indices[it_kwps->get_id()] = c;
+//                c++;
+//                //std::cerr << "\nDEBUG: Added:" << it_kwps->get_id() << "\n";
+//            }
+//
+//            //BIS_ADAPTATION For the loop that identifies the id (+1)
+//            Vertex[i].ne = 0; //adj_list.at(*it_kwps).size(); // edge_counter[*it_kwps];
+//            //            Vertex[i].e = (e_elem *) malloc(sizeof(e_elem) * Vertex[i].ne);
+//            i++;
+//        }
+//        //BIS_ADAPTATION (Added self-loop)
+//        label_map[*it_kwps][*it_kwps].insert(compact_indices[static_cast<int> (it_kwps->get_id())] + ag_set_size);
+//        //std::cerr << "\nDEBUG: Added to " << it_kwps->get_id() << " the label " << compact_indices[it_kwps->get_id()] + ag_set_size << std::endl;
+//    }
+//
+//
+//    //BIS_ADAPTATION For the loop that identifies the id (We add one potential label for each node)
+//    unsigned long bhtabSize = ag_set_size + c;
+//
+//    //std::cerr << "\nDEBUG: Inizializzazione Behavs\n";
+//
+//    //BIS_ADAPTATION (Moved down here)
+//    kedge_map::const_iterator it_kem;
+//    std::map<agent, kworld_set>::const_iterator it_agkw;
+//
+//    for (it_kem = m_edges.begin(); it_kem != m_edges.end(); it_kem++) {
+//        for (it_agkw = it_kem->second.begin(); it_agkw != it_kem->second.end(); it_agkw++) {
+//            for (it_kwps = it_agkw->second.begin(); it_kwps != it_agkw->second.end(); it_kwps++) {
+//                label_map[it_kem->first][*it_kwps].insert(agent_to_label.at(it_agkw->first));
+//                Vertex[index_map[it_kem->first]].ne++;
+//            }
+//        }
+//    }
+//
+//    /*for (it_keps = m_information_state.begin(); it_keps != m_information_state.end(); it_keps++) {
+//
+//        //DEBUG:Change this
+//        // if (adj_list[it_keps->get_from()][it_keps->get_to()].empty())
+//        // {
+//        //     edge_counter[it_keps->get_from()]++;
+//        // }
+//
+//        label_map[it_keps->get_from()][it_keps->get_to()].insert(agent_to_label.at(it_keps->get_label()));
+//        Vertex[index_map[it_keps->get_from()]].ne++;
+//    }*/
+//
+//    i = 0;
+//    for (it_kwps = m_worlds.begin(); it_kwps != m_worlds.end(); it_kwps++) {
+//        Vertex[i].ne++; //Self loop bisimulation
+//        Vertex[i].e = (e_elem *) malloc(sizeof(e_elem) * Vertex[i].ne);
+//        i++;
+//    }
+//
+//    //std::cerr << "\nDEBUG: Fine Inizializzazione Vertex\n";
+//
+//
+//    int from, to, j = 0; //, k = 0, nbh;
+//
+//    //std::cerr << "\nDEBUG: Inizializzazione Mappa\n";
+//    for (it_klm = label_map.begin(); it_klm != label_map.end(); it_klm++) {
+//        from = index_map[it_klm->first]; // For each kworld 'from'
+//
+//        //std::cerr << "\nDEBUG: Inizializzazione K\n";
+//
+//        for (it_kw_bislab = it_klm->second.begin(); it_kw_bislab != it_klm->second.end(); it_kw_bislab++) { // For each edge that reaches the kworld 'to'
+//            to = index_map[it_kw_bislab->first];
+//            //nbh = it_kw_bislab->second.size();
+//
+//            for (it_bislab = it_kw_bislab->second.begin(); it_bislab != it_kw_bislab->second.end(); it_bislab++) { // For each agent 'ag' in the label of the kedge
+//                //std::cerr << "\nDEBUG: j is: " << j << " and k is: " << k << "\n";
+//                //nbh = 1;
+//                Vertex[from].e[j].nbh = 1; // Let j be the index of the adjacency list of from that stores the kedge (from, to)
+//                Vertex[from].e[j].bh = (int *) malloc(sizeof(int)); // Let nbh be the number of agents in such kedge
+//                Vertex[from].e[j].tv = to; // Update the value of the reache kworld
+//                Vertex[from].e[j].bh[0] = *it_bislab; // Update the value of the label at index k to 'ag'
+//                //std::cerr << "\nDEBUG: j is: " << j << " and k is: " << k << "\n";
+//
+//                j++; // Update the value of the index j
+//            }
+//
+//            //std::cerr << "\nDEBUG J: " << j-1 << "\n";
+//
+//            //k = 0; // Reset k
+//        }
+//        //std::cerr << "\nDEBUG: Fine Inizializzazione K\n";
+//
+//        j = 0; // Reset j
+//    }
+//
+//    //std::cerr << "\nDEBUG: Fine Inizializzazione Mappa\n";
+//
+//    //        std::vector<kworld*>::const_iterator it_kwp;
+//    //    int temp_counter = 0;
+//    //    for (it_kwp = kworld_vec.begin(); it_kwp != kworld_vec.end(); it_kwp++) {
+//    //        //std::cerr << "DEBUG: World " << temp_counter << " has ID: " << it_kwp->get_id() << std::endl;
+//    //        temp_counter++;
+//    //    }
+//    //
+//    // Building the automaton
+//    unsigned long Nbehavs = bhtabSize;
+//    a = (automaton *) malloc(sizeof(automaton));
+//    a->Nvertex = Nvertex;
+//    a->Nbehavs = Nbehavs;
+//    a->Vertex = Vertex;
+//    a->Nagents = ag_set_size;
 
-	Vertex = (v_elem *) malloc(sizeof(v_elem) * Nvertex);
+    //    std::cerr << "\nDEBUG: \n\tNvertex = " << Nvertex << std::endl;
+    //    std::cerr << "\tNbehavs = " << Nbehavs << std::endl;
 
-	// Initializating vertices
-	kworld_ptr_set::const_iterator it_kwps;
-	kbislabel_map::const_iterator it_klm;
-	bis_label_set::const_iterator it_bislab;
-	std::map<kworld_ptr, bis_label_set>::const_iterator it_kw_bislab;
-
-	//std::cerr << "\nDEBUG: Inizializzazione Edges\n";
-
-	// The pointed world is set to the index 0. This ensures that, when deleting the bisimilar nodes, the pointed kworld
-	// is always chosen as the first of its block. Therefore, we do not need to update it when converting back to a kstate
-	index_map[get_pointed()] = 0;
-	kworld_vec.push_back(get_pointed());
-	compact_indices[static_cast<int> (get_pointed().get_numerical_id())] = 0;
-
-	//For the loop that identifies the id
-	//BIS_ADAPTATION For the loop that identifies the id (+1)
-	///@bug: If the pointed has no self-loop to add
-	//kworld_ptr_set pointed_adj = adj_list.at(get_pointed());
-
-	Vertex[0].ne = 0; // pointed_adj.size(); // edge_counter[get_pointed()];
-	//	if (pointed_adj.find(get_pointed()) == pointed_adj.end()) {
-	//		Vertex[0].ne++;
-	//	}
-	//	Vertex[0].e = (e_elem *) malloc(sizeof(e_elem) * Vertex[0].ne);
-
-	int i = 1, c = 1;
-
-	//std::cerr << "\nDEBUG: Inizializzazione Vertex\n";
-
-	for (it_kwps = m_worlds.begin(); it_kwps != m_worlds.end(); it_kwps++) {
-		if (!(*it_kwps == get_pointed())) {
-			index_map[*it_kwps] = i;
-			kworld_vec.push_back(*it_kwps);
-
-			// if (compact_indices.find(it_kwps->get_numerical_id()) == compact_indices.end()) {
-			if (compact_indices.insert({it_kwps->get_numerical_id(), c}).second) {
-				// compact_indices[it_kwps->get_numerical_id()] = c;
-				c++;
-				//std::cerr << "\nDEBUG: Added:" << it_kwps->get_id() << "\n";
-			}
-
-			//BIS_ADAPTATION For the loop that identifies the id (+1)
-			Vertex[i].ne = 0; //adj_list.at(*it_kwps).size(); // edge_counter[*it_kwps];
-			//			Vertex[i].e = (e_elem *) malloc(sizeof(e_elem) * Vertex[i].ne);
-			i++;
-		}
-		//BIS_ADAPTATION (Added self-loop)
-		label_map[*it_kwps][*it_kwps].insert(compact_indices[static_cast<int> (it_kwps->get_numerical_id())] + ag_set_size);
-		//std::cerr << "\nDEBUG: Added to " << it_kwps->get_numerical_id() << " the label " << compact_indices[it_kwps->get_numerical_id()] + ag_set_size << std::endl;
-	}
-
-
-	//BIS_ADAPTATION For the loop that identifies the id (We add one potential label for each node)
-	unsigned long bhtabSize = ag_set_size + c;
-
-	//std::cerr << "\nDEBUG: Inizializzazione Behavs\n";
-
-	//BIS_ADAPTATION (Moved down here)
-	kedge_map::const_iterator it_kem;
-	std::map<agent, kworld_ptr_set>::const_iterator it_agkw;
-
-	for (it_kem = m_edges.begin(); it_kem != m_edges.end(); it_kem++) {
-		for (it_agkw = it_kem->second.begin(); it_agkw != it_kem->second.end(); it_agkw++) {
-			for (it_kwps = it_agkw->second.begin(); it_kwps != it_agkw->second.end(); it_kwps++) {
-				label_map[it_kem->first][*it_kwps].insert(agent_to_label.at(it_agkw->first));
-				Vertex[index_map[it_kem->first]].ne++;
-			}
-		}
-	}
-
-	/*for (it_keps = m_information_state.begin(); it_keps != m_information_state.end(); it_keps++) {
-
-	    //DEBUG:Change this
-	    // if (adj_list[it_keps->get_from()][it_keps->get_to()].empty())
-	    // {
-	    // 	edge_counter[it_keps->get_from()]++;
-	    // }
-
-	    label_map[it_keps->get_from()][it_keps->get_to()].insert(agent_to_label.at(it_keps->get_label()));
-	    Vertex[index_map[it_keps->get_from()]].ne++;
-	}*/
-
-	i = 0;
-	for (it_kwps = m_worlds.begin(); it_kwps != m_worlds.end(); it_kwps++) {
-		Vertex[i].ne++; //Self loop bisimulation
-		Vertex[i].e = (e_elem *) malloc(sizeof(e_elem) * Vertex[i].ne);
-		i++;
-	}
-
-	//std::cerr << "\nDEBUG: Fine Inizializzazione Vertex\n";
-
-
-	int from, to, j = 0; //, k = 0, nbh;
-
-	//std::cerr << "\nDEBUG: Inizializzazione Mappa\n";
-	for (it_klm = label_map.begin(); it_klm != label_map.end(); it_klm++) {
-		from = index_map[it_klm->first]; // For each kworld 'from'
-
-		//std::cerr << "\nDEBUG: Inizializzazione K\n";
-
-		for (it_kw_bislab = it_klm->second.begin(); it_kw_bislab != it_klm->second.end(); it_kw_bislab++) { // For each edge that reaches the kworld 'to'
-			to = index_map[it_kw_bislab->first];
-			//nbh = it_kw_bislab->second.size();
-
-			for (it_bislab = it_kw_bislab->second.begin(); it_bislab != it_kw_bislab->second.end(); it_bislab++) { // For each agent 'ag' in the label of the kedge
-				//std::cerr << "\nDEBUG: j is: " << j << " and k is: " << k << "\n";
-				//nbh = 1;
-				Vertex[from].e[j].nbh = 1; // Let j be the index of the adjacency list of from that stores the kedge (from, to)
-				Vertex[from].e[j].bh = (int *) malloc(sizeof(int)); // Let nbh be the number of agents in such kedge
-				Vertex[from].e[j].tv = to; // Update the value of the reache kworld
-				Vertex[from].e[j].bh[0] = *it_bislab; // Update the value of the label at index k to 'ag'
-				//std::cerr << "\nDEBUG: j is: " << j << " and k is: " << k << "\n";
-
-				j++; // Update the value of the index j
-			}
-
-			//std::cerr << "\nDEBUG J: " << j-1 << "\n";
-
-			//k = 0; // Reset k
-		}
-		//std::cerr << "\nDEBUG: Fine Inizializzazione K\n";
-
-		j = 0; // Reset j
-	}
-
-	//std::cerr << "\nDEBUG: Fine Inizializzazione Mappa\n";
-
-	//		std::vector<kworld_ptr>::const_iterator it_kwp;
-	//	int temp_counter = 0;
-	//	for (it_kwp = kworld_vec.begin(); it_kwp != kworld_vec.end(); it_kwp++) {
-	//		//std::cerr << "DEBUG: World " << temp_counter << " has ID: " << it_kwp->get_numerical_id() << std::endl;
-	//		temp_counter++;
-	//	}
-	//
-	// Building the automaton
-	unsigned long Nbehavs = bhtabSize;
-	a = (automaton *) malloc(sizeof(automaton));
-	a->Nvertex = Nvertex;
-	a->Nbehavs = Nbehavs;
-	a->Vertex = Vertex;
-    a->Nagents = ag_set_size;
-
-	//	std::cerr << "\nDEBUG: \n\tNvertex = " << Nvertex << std::endl;
-	//	std::cerr << "\tNbehavs = " << Nbehavs << std::endl;
-
-	return *a;
+    return *a;
 }
 
-void kstate::automaton_to_kstate(const automaton & a, const std::vector<kworld_ptr> & kworld_vec, const std::map<bis_label, agent> & label_to_agent)
-{
-	kworld_ptr_set worlds;
-	m_edges.clear();
-	// The pointed world does not change when we calculate the minimum bisimilar state
-	// Hence we do not need to update it
-
-    // \todo: SISTEMA
-	unsigned long agents_size = 0; // domain.get_agents().size();
-	int i, j, k, label;
-
-	for (i = 0; i < a.Nvertex; i++) {
-		if (a.Vertex[i].ne > 0) {
-			worlds.insert(kworld_vec[i]);
-
-			for (j = 0; j < a.Vertex[i].ne; j++) {
-				for (k = 0; k < a.Vertex[i].e[j].nbh; k++) {
-					label = a.Vertex[i].e[j].bh[k];
-					if (label < agents_size) {
-						add_edge(kworld_vec[i], kworld_vec[a.Vertex[i].e[j].tv], label_to_agent.at(label));
-						//						edges.insert(kstore::get_instance().add_edge(kedge(kworld_vec[i], kworld_vec[a.Vertex[i].e[j].tv], label_to_agent.at(label))));
-					}
-				}
-			}
-		}
-	}
-
-	set_worlds(worlds);
+void kstate::automaton_to_kstate(const automaton & a, const std::vector<kworld*> & kworld_vec, const std::map<bis_label, agent> & label_to_agent) {
+//    kworld_set worlds;
+//    m_edges.clear();
+//    // The pointed world does not change when we calculate the minimum bisimilar state
+//    // Hence we do not need to update it
+//
+//    // \todo: SISTEMA
+//    unsigned long agents_size = 0; // domain.get_agents().size();
+//    int i, j, k, label;
+//
+//    for (i = 0; i < a.Nvertex; i++) {
+//        if (a.Vertex[i].ne > 0) {
+//            worlds.insert(kworld_vec[i]);
+//
+//            for (j = 0; j < a.Vertex[i].ne; j++) {
+//                for (k = 0; k < a.Vertex[i].e[j].nbh; k++) {
+//                    label = a.Vertex[i].e[j].bh[k];
+//                    if (label < agents_size) {
+//                        add_edge(kworld_vec[i], kworld_vec[a.Vertex[i].e[j].tv], label_to_agent.at(label));
+//                        //                        edges.insert(kstore::get_instance().add_edge(kedge(kworld_vec[i], kworld_vec[a.Vertex[i].e[j].tv], label_to_agent.at(label))));
+//                    }
+//                }
+//            }
+//        }
+//    }
+//
+//    set_worlds(worlds);
 }
 
 void kstate::calc_min_bisimilar(Bisimulation_Algorithm algorithm) {
-	// ************* Cleaning unreachable kworlds *************
-	std::map<bis_label, agent> label_to_agent;
-	std::map<agent, bis_label> agent_to_label;
+    // ************* Cleaning unreachable kworlds *************
+    std::map<bis_label, agent> label_to_agent;
+    std::map<agent, bis_label> agent_to_label;
 
     /**
      * \todo: SISTEMARE QUESTO BLOCCO DI CODICE COMMENTATO!!!
      *        SENZA DI QUESTO BISIMULATION _NON_ FUNZIONA!!!
      */
-//	auto agents = domain.get_agents();
-//	auto it_ag = agents.begin();
-//	bis_label ag_label = 0;
-//	agent lab_agent;
-//	for (; it_ag != agents.end(); it_ag++) {
-//		lab_agent = *it_ag;
-//		label_to_agent.insert(std::make_pair(ag_label, lab_agent));
-//		agent_to_label.insert(std::make_pair(lab_agent, ag_label));
-//		ag_label++;
-//	}
+//    auto agents = domain.get_agents();
+//    auto it_ag = agents.begin();
+//    bis_label ag_label = 0;
+//    agent lab_agent;
+//    for (; it_ag != agents.end(); it_ag++) {
+//        lab_agent = *it_ag;
+//        label_to_agent.insert(std::make_pair(ag_label, lab_agent));
+//        agent_to_label.insert(std::make_pair(lab_agent, ag_label));
+//        ag_label++;
+//    }
 
-	clean_unreachable_kworlds();
+    clean_unreachable_kworlds();
 
-	//std::cerr << "\nDEBUG: INIZIO BISIMULATION IN KSTATE\n" << std::flush;
-	std::vector<kworld_ptr> kworld_vec; // Vector of all kworld_ptr
-	//std::cerr << "\nDEBUG: PRE-ALLOCAZIONE AUTOMA\n" << std::flush;
-
-
-	//	std::cerr << "\nDEBUG: \n\tNvertex_before = " << m_worlds.size() << std::endl;
-	//	std::cerr << "\tNbehavs_before = " << m_information_state.size() << std::endl;
-
-	automaton a;
-	kworld_vec.reserve(get_worlds().size());
-
-	a = kstate_to_automaton(/*adj_list,*/ kworld_vec, agent_to_label);
-
-	bisimulation b;
-	//std::cout << "\nDEBUG: Printing automaton pre-Bisimulation\n";
-	//b.VisAutoma(&a);
+    //std::cerr << "\nDEBUG: INIZIO BISIMULATION IN KSTATE\n" << std::flush;
+    std::vector<kworld*> kworld_vec; // Vector of all kworld*
+    //std::cerr << "\nDEBUG: PRE-ALLOCAZIONE AUTOMA\n" << std::flush;
 
 
+    //    std::cerr << "\nDEBUG: \n\tNvertex_before = " << m_worlds.size() << std::endl;
+    //    std::cerr << "\tNbehavs_before = " << m_information_state.size() << std::endl;
 
-	if (algorithm == PAIGE_TARJAN) {
-		if (b.MinimizeAutomaPT(&a)) {
-			//VisAutoma(a);
+    automaton a;
+    kworld_vec.reserve(get_worlds().size());
 
-			//std::cout << "\nDEBUG: Printing automaton post-Bisimulation\n";
-			//b.VisAutoma(&a);
-			//std::cout << "Done\n";
-			automaton_to_kstate(a, kworld_vec, label_to_agent);
+    a = kstate_to_automaton(/*adj_list,*/ kworld_vec, agent_to_label);
 
-			//b.DisposeAutoma(&a);
-		}
-	} else {
-		if (b.MinimizeAutomaFB(&a)) {
+    bisimulation b;
+    //std::cout << "\nDEBUG: Printing automaton pre-Bisimulation\n";
+    //b.VisAutoma(&a);
 
-			//std::cerr << "\nDEBUG: Printing automaton post-Bisimulation\n";
-			//b.VisAutoma(&a);
-			//std::cerr << "Done\n";
-			automaton_to_kstate(a, kworld_vec, label_to_agent);
-			//b.DisposeAutoma(&a);
-		}
-	}
 
-	//std::cerr << "\nDEBUG: PRe Clean" << std::endl;
+
+    if (algorithm == PAIGE_TARJAN) {
+        if (b.MinimizeAutomaPT(&a)) {
+            //VisAutoma(a);
+
+            //std::cout << "\nDEBUG: Printing automaton post-Bisimulation\n";
+            //b.VisAutoma(&a);
+            //std::cout << "Done\n";
+            automaton_to_kstate(a, kworld_vec, label_to_agent);
+
+            //b.DisposeAutoma(&a);
+        }
+    } else {
+        if (b.MinimizeAutomaFB(&a)) {
+
+            //std::cerr << "\nDEBUG: Printing automaton post-Bisimulation\n";
+            //b.VisAutoma(&a);
+            //std::cerr << "Done\n";
+            automaton_to_kstate(a, kworld_vec, label_to_agent);
+            //b.DisposeAutoma(&a);
+        }
+    }
+
+    //std::cerr << "\nDEBUG: PRe Clean" << std::endl;
 
 }
 
 /**** UTILITIES ****/
-void kstate::print() const
-{
-//	int counter = 1;
-//	std::cout << std::endl;
-//	std::cout << "The Pointed World has id ";
-//	printer::get_instance().print_list(get_pointed().get_fluent_set());
-//	std::cout << std::endl;
-//	std::cout << "*******************************************************************" << std::endl;
+void kstate::print() const {
+//    int counter = 1;
+//    std::cout << std::endl;
+//    std::cout << "The Pointed World has id ";
+//    printer::get_instance().print_list(get_pointed().get_fluent_set());
+//    std::cout << std::endl;
+//    std::cout << "*******************************************************************" << std::endl;
 //
-//	kworld_ptr_set::const_iterator it_kwset;
-//	std::cout << "World List:" << std::endl;
+//    kworld_ptr_set::const_iterator it_kwset;
+//    std::cout << "World List:" << std::endl;
 //
-//	for (it_kwset = get_worlds().begin(); it_kwset != get_worlds().end(); it_kwset++) {
-//		std::cout << "W-" << counter << ": ";
-//		printer::get_instance().print_list(it_kwset->get_fluent_set());
-//		std::cout << " rep:" << it_kwset->get_repetition();
-//		std::cout << std::endl;
-//		counter++;
-//	}
-//	counter = 1;
-//	std::cout << std::endl;
-//	std::cout << "*******************************************************************" << std::endl;
+//    for (it_kwset = get_worlds().begin(); it_kwset != get_worlds().end(); it_kwset++) {
+//        std::cout << "W-" << counter << ": ";
+//        printer::get_instance().print_list(it_kwset->get_fluent_set());
+//        std::cout << " rep:" << it_kwset->get_repetition();
+//        std::cout << std::endl;
+//        counter++;
+//    }
+//    counter = 1;
+//    std::cout << std::endl;
+//    std::cout << "*******************************************************************" << std::endl;
 //
-//	kedge_map::const_iterator it_kem;
-//	std::map<agent, kworld_ptr_set>::const_iterator it_agkw;
+//    kedge_map::const_iterator it_kem;
+//    std::map<agent, kworld_ptr_set>::const_iterator it_agkw;
 //
-//	std::cout << "Edge List:" << std::endl;
+//    std::cout << "Edge List:" << std::endl;
 //
-//	for (it_kem = m_edges.begin(); it_kem != m_edges.end(); it_kem++) {
-//		for (it_agkw = it_kem->second.begin(); it_agkw != it_kem->second.end(); it_agkw++) {
-//			for (it_kwset = it_agkw->second.begin(); it_kwset != it_agkw->second.end(); it_kwset++) {
-//				std::cout << "E-" << counter << ": (";
-//				printer::get_instance().print_list(it_kem->first.get_fluent_set());
-//				std::cout << "," << it_kem->first.get_repetition();
-//				std::cout << ") - (";
-//				printer::get_instance().print_list(it_kwset->get_fluent_set());
-//				std::cout << "," << it_kwset->get_repetition();
-//				std::cout << ") ag:" << domain.get_grounder().deground_agent(it_agkw->first);
-//				std::cout << std::endl;
-//				counter++;
-//			}
-//		}
-//	}
-//	std::cout << "*******************************************************************" << std::endl;
+//    for (it_kem = m_edges.begin(); it_kem != m_edges.end(); it_kem++) {
+//        for (it_agkw = it_kem->second.begin(); it_agkw != it_kem->second.end(); it_agkw++) {
+//            for (it_kwset = it_agkw->second.begin(); it_kwset != it_agkw->second.end(); it_kwset++) {
+//                std::cout << "E-" << counter << ": (";
+//                printer::get_instance().print_list(it_kem->first.get_fluent_set());
+//                std::cout << "," << it_kem->first.get_repetition();
+//                std::cout << ") - (";
+//                printer::get_instance().print_list(it_kwset->get_fluent_set());
+//                std::cout << "," << it_kwset->get_repetition();
+//                std::cout << ") ag:" << domain.get_grounder().deground_agent(it_agkw->first);
+//                std::cout << std::endl;
+//                counter++;
+//            }
+//        }
+//    }
+//    std::cout << "*******************************************************************" << std::endl;
 }
 
-void kstate::print_graphviz(std::ostream & graphviz) const
-{
-//	string_set::const_iterator it_st_set;
-//	fluent_set::const_iterator it_fs;
+void kstate::print_graphviz(std::ostream & graphviz) const {
+//    string_set::const_iterator it_st_set;
+//    fluent_set::const_iterator it_fs;
 //
 //
-//	graphviz << "//WORLDS List:" << std::endl;
+//    graphviz << "//WORLDS List:" << std::endl;
 //
-//	kworld_ptr_set::const_iterator it_kpset;
-//	std::map<fluent_set, int> map_world_to_index;
-//	std::map<unsigned short, char> map_rep_to_name;
-//	char found_rep = (char) ((char) domain.get_agents().size() + 'A');
-//	int found_fs = 0;
-//	fluent_set tmp_fs;
-//	char tmp_unsh;
-//	string_set tmp_stset;
-//	bool print_first;
-//	kworld_ptr_set::const_iterator it_kwset;
-//	for (it_kwset = get_worlds().begin(); it_kwset != get_worlds().end(); it_kwset++) {
-//		if (*it_kwset == get_pointed())
-//			graphviz << "	node [shape = doublecircle] ";
-//		else
-//			graphviz << "	node [shape = circle] ";
+//    kworld_ptr_set::const_iterator it_kpset;
+//    std::map<fluent_set, int> map_world_to_index;
+//    std::map<unsigned short, char> map_rep_to_name;
+//    char found_rep = (char) ((char) domain.get_agents().size() + 'A');
+//    int found_fs = 0;
+//    fluent_set tmp_fs;
+//    char tmp_unsh;
+//    string_set tmp_stset;
+//    bool print_first;
+//    kworld_ptr_set::const_iterator it_kwset;
+//    for (it_kwset = get_worlds().begin(); it_kwset != get_worlds().end(); it_kwset++) {
+//        if (*it_kwset == get_pointed())
+//            graphviz << "    node [shape = doublecircle] ";
+//        else
+//            graphviz << "    node [shape = circle] ";
 //
-//		print_first = false;
-//		tmp_fs = it_kwset->get_fluent_set();
-//		if (map_world_to_index.count(tmp_fs) == 0) {
-//			map_world_to_index[tmp_fs] = found_fs;
-//			found_fs++;
-//		}
-//		tmp_unsh = static_cast<char> (it_kwset->get_repetition());
-//		if (map_rep_to_name.count(tmp_unsh) == 0) {
-//			map_rep_to_name[tmp_unsh] = found_rep;
-//			found_rep++;
-//		}
-//		graphviz << "\"" << map_rep_to_name[tmp_unsh] << "_" << map_world_to_index[tmp_fs] << "\";";
-//		graphviz << "// (";
-//		tmp_stset = domain.get_grounder().deground_fluent(tmp_fs);
-//		for (it_st_set = tmp_stset.begin(); it_st_set != tmp_stset.end(); it_st_set++) {
-//			if (print_first) {
-//				graphviz << ",";
-//			}
-//			print_first = true;
-//			graphviz << *it_st_set;
-//		}
-//		graphviz << ")\n";
-//	}
+//        print_first = false;
+//        tmp_fs = it_kwset->get_fluent_set();
+//        if (map_world_to_index.count(tmp_fs) == 0) {
+//            map_world_to_index[tmp_fs] = found_fs;
+//            found_fs++;
+//        }
+//        tmp_unsh = static_cast<char> (it_kwset->get_repetition());
+//        if (map_rep_to_name.count(tmp_unsh) == 0) {
+//            map_rep_to_name[tmp_unsh] = found_rep;
+//            found_rep++;
+//        }
+//        graphviz << "\"" << map_rep_to_name[tmp_unsh] << "_" << map_world_to_index[tmp_fs] << "\";";
+//        graphviz << "// (";
+//        tmp_stset = domain.get_grounder().deground_fluent(tmp_fs);
+//        for (it_st_set = tmp_stset.begin(); it_st_set != tmp_stset.end(); it_st_set++) {
+//            if (print_first) {
+//                graphviz << ",";
+//            }
+//            print_first = true;
+//            graphviz << *it_st_set;
+//        }
+//        graphviz << ")\n";
+//    }
 //
-//	graphviz << "\n\n";
-//	graphviz << "//RANKS List:" << std::endl;
+//    graphviz << "\n\n";
+//    graphviz << "//RANKS List:" << std::endl;
 //
-//	std::map<int, kworld_ptr_set> for_rank_print;
-//	for (it_kwset = get_worlds().begin(); it_kwset != get_worlds().end(); it_kwset++) {
-//		for_rank_print[it_kwset->get_repetition()].insert(*it_kwset);
-//	}
+//    std::map<int, kworld_ptr_set> for_rank_print;
+//    for (it_kwset = get_worlds().begin(); it_kwset != get_worlds().end(); it_kwset++) {
+//        for_rank_print[it_kwset->get_repetition()].insert(*it_kwset);
+//    }
 //
-//	std::map<int, kworld_ptr_set>::const_iterator it_map_rank;
-//	for (it_map_rank = for_rank_print.begin(); it_map_rank != for_rank_print.end(); it_map_rank++) {
-//		graphviz << "	{rank = same; ";
-//		for (it_kwset = it_map_rank->second.begin(); it_kwset != it_map_rank->second.end(); it_kwset++) {
-//			graphviz << "\"" << map_rep_to_name[it_kwset->get_repetition()] << "_" << map_world_to_index[it_kwset->get_fluent_set()] << "\"; ";
-//		}
-//		graphviz << "}\n";
-//	}
-//
-//
-//	graphviz << "\n\n";
-//	graphviz << "//EDGES List:" << std::endl;
-//
-//	std::map < std::tuple<std::string, std::string>, std::set<std::string> > edges;
-//
-//	std::tuple<std::string, std::string> tmp_tuple;
-//	std::string tmp_string;
-//
-//	kedge_map::const_iterator it_kem;
-//	std::map<agent, kworld_ptr_set>::const_iterator it_agkw;
-//
-//	for (it_kem = m_edges.begin(); it_kem != m_edges.end(); it_kem++) {
-//		for (it_agkw = it_kem->second.begin(); it_agkw != it_kem->second.end(); it_agkw++) {
-//			for (it_kwset = it_agkw->second.begin(); it_kwset != it_agkw->second.end(); it_kwset++) {
-//				tmp_string = "_" + std::to_string(map_world_to_index[it_kem->first.get_fluent_set()]);
-//				tmp_string.insert(0, 1, map_rep_to_name[it_kem->first.get_repetition()]);
-//				std::get<0>(tmp_tuple) = tmp_string;
-//
-//				tmp_string = "_" + std::to_string(map_world_to_index[it_kwset->get_fluent_set()]);
-//				tmp_string.insert(0, 1, map_rep_to_name[it_kwset->get_repetition()]);
-//				std::get<1>(tmp_tuple) = tmp_string;
-//
-//				edges[tmp_tuple].insert(domain.get_grounder().deground_agent(it_agkw->first));
-//			}
-//		}
-//	}
-//
-//	std::map < std::tuple<std::string, std::string>, std::set < std::string>>::iterator it_map;
-//	std::map < std::tuple<std::string, std::string>, std::set < std::string>>::const_iterator it_map_2;
-//
-//	std::map < std::tuple<std::string, std::string>, std::set < std::string>> to_print_double;
-//	for (it_map = edges.begin(); it_map != edges.end(); it_map++) {
-//		for (it_map_2 = it_map; it_map_2 != edges.end(); it_map_2++) {
-//			if (std::get<0>(it_map->first) == std::get<1>(it_map_2->first)) {
-//				if (std::get<1>(it_map->first) == std::get<0>(it_map_2->first)) {
-//					if (it_map->second == it_map_2->second) {
-//						if (std::get<0>(it_map->first) != std::get<1>(it_map->first)) {
-//							to_print_double[it_map->first] = it_map->second;
-//							it_map_2 = edges.erase(it_map_2);
-//							it_map = edges.erase(it_map);
-//						}
-//					}
-//				}
-//			}
-//		}
-//	}
-//
-//	std::set<std::string>::const_iterator it_stset;
-//	for (it_map = edges.begin(); it_map != edges.end(); it_map++) {
-//		graphviz << "	\"";
-//		graphviz << std::get<0>(it_map->first);
-//		graphviz << "\" -> \"";
-//		graphviz << std::get<1>(it_map->first);
-//		graphviz << "\" ";
-//		graphviz << "[ label = \"";
-//		tmp_string = "";
-//		for (it_stset = it_map->second.begin(); it_stset != it_map->second.end(); it_stset++) {
-//			tmp_string += *it_stset;
-//			tmp_string += ",";
-//		}
-//		tmp_string.pop_back();
-//		graphviz << tmp_string;
-//		graphviz << "\" ];\n";
-//	}
-//
-//	for (it_map = to_print_double.begin(); it_map != to_print_double.end(); it_map++) {
-//		graphviz << "	\"";
-//		graphviz << std::get<0>(it_map->first);
-//		graphviz << "\" -> \"";
-//		graphviz << std::get<1>(it_map->first);
-//		graphviz << "\" ";
-//		graphviz << "[ dir=both label = \"";
-//		tmp_string = "";
-//		for (it_stset = it_map->second.begin(); it_stset != it_map->second.end(); it_stset++) {
-//
-//			tmp_string += *it_stset;
-//			tmp_string += ",";
-//		}
-//		tmp_string.pop_back();
-//		graphviz << tmp_string;
-//		graphviz << "\" ];\n";
-//	}
+//    std::map<int, kworld_ptr_set>::const_iterator it_map_rank;
+//    for (it_map_rank = for_rank_print.begin(); it_map_rank != for_rank_print.end(); it_map_rank++) {
+//        graphviz << "    {rank = same; ";
+//        for (it_kwset = it_map_rank->second.begin(); it_kwset != it_map_rank->second.end(); it_kwset++) {
+//            graphviz << "\"" << map_rep_to_name[it_kwset->get_repetition()] << "_" << map_world_to_index[it_kwset->get_fluent_set()] << "\"; ";
+//        }
+//        graphviz << "}\n";
+//    }
 //
 //
-//	std::string color = "<font color=\"#ffffff\">";
-//	graphviz << "\n\n//WORLDS description Table:" << std::endl;
-//	graphviz << "	node [shape = plain]\n\n";
-//	graphviz << "	description[label=<\n";
-//	graphviz << "	<table border = \"0\" cellborder = \"1\" cellspacing = \"0\" >\n";
-//	for (it_kwset = get_worlds().begin(); it_kwset != get_worlds().end(); it_kwset++) {
-//		tmp_fs = it_kwset->get_fluent_set();
-//		print_first = false;
-//		graphviz << "		<tr><td>" << map_rep_to_name[it_kwset->get_repetition()] << "_" << map_world_to_index[tmp_fs] << "</td> <td>";
-//		for (it_fs = tmp_fs.begin(); it_fs != tmp_fs.end(); it_fs++) {
-//			if (print_first) {
-//				graphviz << ", ";
-//			}
-//			print_first = true;
-//			if (!helper::is_negate(*it_fs)) color = "<font color=\"#0000ff\"> ";
-//			else color = "<font color=\"#ff1020\">";
-//			graphviz << color << domain.get_grounder().deground_fluent(*it_fs) << "</font>";
-//		}
-//		graphviz << "</td></tr>\n";
-//	}
-//	graphviz << "	</table>>]\n";
-//	graphviz << "	{rank = max; description};\n";
+//    graphviz << "\n\n";
+//    graphviz << "//EDGES List:" << std::endl;
+//
+//    std::map < std::tuple<std::string, std::string>, std::set<std::string> > edges;
+//
+//    std::tuple<std::string, std::string> tmp_tuple;
+//    std::string tmp_string;
+//
+//    kedge_map::const_iterator it_kem;
+//    std::map<agent, kworld_ptr_set>::const_iterator it_agkw;
+//
+//    for (it_kem = m_edges.begin(); it_kem != m_edges.end(); it_kem++) {
+//        for (it_agkw = it_kem->second.begin(); it_agkw != it_kem->second.end(); it_agkw++) {
+//            for (it_kwset = it_agkw->second.begin(); it_kwset != it_agkw->second.end(); it_kwset++) {
+//                tmp_string = "_" + std::to_string(map_world_to_index[it_kem->first.get_fluent_set()]);
+//                tmp_string.insert(0, 1, map_rep_to_name[it_kem->first.get_repetition()]);
+//                std::get<0>(tmp_tuple) = tmp_string;
+//
+//                tmp_string = "_" + std::to_string(map_world_to_index[it_kwset->get_fluent_set()]);
+//                tmp_string.insert(0, 1, map_rep_to_name[it_kwset->get_repetition()]);
+//                std::get<1>(tmp_tuple) = tmp_string;
+//
+//                edges[tmp_tuple].insert(domain.get_grounder().deground_agent(it_agkw->first));
+//            }
+//        }
+//    }
+//
+//    std::map < std::tuple<std::string, std::string>, std::set < std::string>>::iterator it_map;
+//    std::map < std::tuple<std::string, std::string>, std::set < std::string>>::const_iterator it_map_2;
+//
+//    std::map < std::tuple<std::string, std::string>, std::set < std::string>> to_print_double;
+//    for (it_map = edges.begin(); it_map != edges.end(); it_map++) {
+//        for (it_map_2 = it_map; it_map_2 != edges.end(); it_map_2++) {
+//            if (std::get<0>(it_map->first) == std::get<1>(it_map_2->first)) {
+//                if (std::get<1>(it_map->first) == std::get<0>(it_map_2->first)) {
+//                    if (it_map->second == it_map_2->second) {
+//                        if (std::get<0>(it_map->first) != std::get<1>(it_map->first)) {
+//                            to_print_double[it_map->first] = it_map->second;
+//                            it_map_2 = edges.erase(it_map_2);
+//                            it_map = edges.erase(it_map);
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//    }
+//
+//    std::set<std::string>::const_iterator it_stset;
+//    for (it_map = edges.begin(); it_map != edges.end(); it_map++) {
+//        graphviz << "    \"";
+//        graphviz << std::get<0>(it_map->first);
+//        graphviz << "\" -> \"";
+//        graphviz << std::get<1>(it_map->first);
+//        graphviz << "\" ";
+//        graphviz << "[ label = \"";
+//        tmp_string = "";
+//        for (it_stset = it_map->second.begin(); it_stset != it_map->second.end(); it_stset++) {
+//            tmp_string += *it_stset;
+//            tmp_string += ",";
+//        }
+//        tmp_string.pop_back();
+//        graphviz << tmp_string;
+//        graphviz << "\" ];\n";
+//    }
+//
+//    for (it_map = to_print_double.begin(); it_map != to_print_double.end(); it_map++) {
+//        graphviz << "    \"";
+//        graphviz << std::get<0>(it_map->first);
+//        graphviz << "\" -> \"";
+//        graphviz << std::get<1>(it_map->first);
+//        graphviz << "\" ";
+//        graphviz << "[ dir=both label = \"";
+//        tmp_string = "";
+//        for (it_stset = it_map->second.begin(); it_stset != it_map->second.end(); it_stset++) {
+//
+//            tmp_string += *it_stset;
+//            tmp_string += ",";
+//        }
+//        tmp_string.pop_back();
+//        graphviz << tmp_string;
+//        graphviz << "\" ];\n";
+//    }
+//
+//
+//    std::string color = "<font color=\"#ffffff\">";
+//    graphviz << "\n\n//WORLDS description Table:" << std::endl;
+//    graphviz << "    node [shape = plain]\n\n";
+//    graphviz << "    description[label=<\n";
+//    graphviz << "    <table border = \"0\" cellborder = \"1\" cellspacing = \"0\" >\n";
+//    for (it_kwset = get_worlds().begin(); it_kwset != get_worlds().end(); it_kwset++) {
+//        tmp_fs = it_kwset->get_fluent_set();
+//        print_first = false;
+//        graphviz << "        <tr><td>" << map_rep_to_name[it_kwset->get_repetition()] << "_" << map_world_to_index[tmp_fs] << "</td> <td>";
+//        for (it_fs = tmp_fs.begin(); it_fs != tmp_fs.end(); it_fs++) {
+//            if (print_first) {
+//                graphviz << ", ";
+//            }
+//            print_first = true;
+//            if (!helper::is_negate(*it_fs)) color = "<font color=\"#0000ff\"> ";
+//            else color = "<font color=\"#ff1020\">";
+//            graphviz << color << domain.get_grounder().deground_fluent(*it_fs) << "</font>";
+//        }
+//        graphviz << "</td></tr>\n";
+//    }
+//    graphviz << "    </table>>]\n";
+//    graphviz << "    {rank = max; description};\n";
 
 }

@@ -7,234 +7,90 @@
  * \date April 11, 2019
  */
 #include <fstream>
-#include <stdlib.h>
+#include <cstdlib>
 
 #include "state.h"
-#include "../domain/domain.h"
-#include "../actions/custom_event_models/cem_store.h"
 
 template <class T>
-state<T>::state()
-{
-	//T m_representation;
-}
-
-/*template <class T>
-state<T>::state(const state<T> & given_state)
-{
-	(*this) = given_state;
-}*/
-
-template <class T>
-state<T>::state(const state<T> & prev_state, const action & executed_action)
-{
-	(*this) = prev_state.compute_succ(executed_action);
-}
-
-/*template <class T>
-state<T>::state(const action_id_list & executed_actions, unsigned short length)
-{
-	set_executed_actions(executed_actions);
-	set_plan_length(length);
-	set_heuristic_value();
+template <class M>
+state<T>::state(const finitary_theory<M> &theory) : m_previous_state(nullptr), m_action(nullptr) {
+    generate_from_theory(theory);
+    m_plan_length = 0;
 }
 
 template <class T>
-state<T>::state(const action_id_list & executed_actions, unsigned short length, int heuristic_value)
-{
-	set_executed_actions(executed_actions);
-	set_plan_length(length);
-	set_heuristic_value(heuristic_value);
-}*/
+state<T>::state(const state<T> *previous_state, const action *action) : m_previous_state(previous_state), m_action(action) {
+    generate_from_update(m_previous_state, m_action);
+    m_plan_length = 1 + m_previous_state->get_plan_length();
+//    (*this) = m_previous_state->compute_succ(*m_action);
+}
 
-template <class T>
-const action_id_list & state<T>::get_executed_actions() const
-{
-	return m_executed_actions_id;
+template<class T>
+template<class M>
+void state<T>::generate_from_theory(const finitary_theory<M> &theory) {
+    m_state.generate_from_theory(theory);
+}
+
+template<class T>
+void state<T>::generate_from_update(const state<T> *previous_state, const action *action) {
+    m_state.generate_from_update(previous_state, action);
 }
 
 template <class T>
-unsigned short state<T>::get_plan_length() const
-{
+const T &state<T>::get_state() const {
+    return m_state;
+}
+
+template <class T>
+const state<T> *state<T>::get_previous_state() const {
+    return m_previous_state;
+}
+
+template <class T>
+const action *state<T>::get_action() const {
+    return m_action;
+}
+
+template <class T>
+unsigned short state<T>::get_plan_length() const {
 	return m_plan_length;
 }
 
 template <class T>
-short state<T>::get_heuristic_value() const
-{
+short state<T>::get_heuristic_value() const {
 	return m_heuristic_value;
 }
 
 template <class T>
-const T & state<T>::get_representation() const
-{
-	return m_representation;
+bool state<T>::entails(const formula &formula) const {
+    return formula.is_entailed(m_state);
 }
 
 template <class T>
-bool state<T>::operator=(const state<T> & given_state)
-{
-	/**\warning each T must implement the operator =*/
-	set_representation(given_state.get_representation());
-	set_executed_actions(given_state.get_executed_actions());
-	set_plan_length(given_state.get_plan_length());
-	set_heuristic_value(given_state.get_heuristic_value());
-	return true;
-}
-
-template <class T>
-bool state<T>::operator<(const state<T> & to_compare) const
-{
-	/**\warning each T must implement the operator <*/
-	return m_representation < to_compare.get_representation();
-
-}
-
-template <class T>
-void state<T>::set_executed_actions(const action_id_list & executed)
-{
-	m_executed_actions_id = executed;
-}
-
-template <class T>
-void state<T>::add_executed_action(const action & executed)
-{
-	m_executed_actions_id.push_back(executed.get_id());
-}
-
-template <class T>
-void state<T>::set_plan_length(unsigned short length)
-{
-	m_plan_length = length;
-}
-
-template <class T>
-void state<T>::set_heuristic_value(short heuristic_value)
-{
-	m_heuristic_value = heuristic_value;
-}
-
-template <class T>
-void state<T>::set_representation(const T & to_set)
-{
-	m_representation = to_set;
-}
-
-template <class T>
-bool state<T>::entails(const fluent & to_check) const
-{
-	return m_representation.entails(to_check);
-}
-
-template <class T>
-bool state<T>::entails(const fluent_set & to_check) const
-{
-	return m_representation.entails(to_check);
-}
-
-template <class T>
-bool state<T>::entails(const fluent_formula & to_check) const
-{
-	return m_representation.entails(to_check);
-}
-
-template <class T>
-bool state<T>::entails(const belief_formula & to_check) const
-{
-	return m_representation.entails(to_check);
-}
-
-template <class T>
-bool state<T>::entails(const formula_list & to_check) const
-{
-	//formula_list expresses CNF formula
-	formula_list::const_iterator it_fl;
-	for (it_fl = to_check.begin(); it_fl != to_check.end(); it_fl++) {
-
-		if (!m_representation.entails(*it_fl)) {
-			return false;
-		}
-	}
-	return true;
-}
-
-template <class T>
-void state<T>::build_initial(const initially& initial_conditions) {
-	//To implement constructor
-	//representation = T(init);
-	m_representation.build_initial(initial_conditions);
-	set_plan_length(0);
-	//set_heuristic_value(get_representation().compute_heuristic_value());
-}
-
-template <class T>
-fluent_set state<T>::compute_succ2(const action & act) const
-{
-	state<T> ret;
-	//if (is_executable(act)) {
-	ret.set_representation(get_representation().compute_succ(act));
-	ret.set_executed_actions(get_executed_actions());
-	ret.add_executed_action(act);
-
-	pworld_ptr repr = ret.get_representation();
-	fluent_set repr_set = repr.get_fluent_set();
-	ret.set_plan_length(get_plan_length() + 1);
-
-
-	return repr_set;
-}
-
-template <class T>
-state<T> state<T>::compute_succ(const action & act) const
-{
-	/**\todo Myabe is better if used in \ref planner or \ref domain (myabe a bool as **param[out]**.*/
-	state<T> ret;
-	//if (is_executable(act)) {
-	ret.set_representation(get_representation().compute_succ(act));
-	ret.set_executed_actions(get_executed_actions());
-	ret.add_executed_action(act);
-	ret.set_plan_length(get_plan_length() + 1);
-	//set_heuristic_value(get_representation().compute_heuristic_value());
-	return ret;
-	/*} else {
-		ret = (*this);
-	}
-	return ret;*/
-}
-
-template <class T>
-void state<T>::calc_min_bisimilar(Bisimulation_Algorithm algorithm)
-{
-	//std::cerr << "\nDEBUG: ENTRATO IN STATE<T> BISIMULATION\n";
-    m_representation.calc_min_bisimilar(algorithm);
-	//		std::cerr << "\nDEBUG: DONE BIS\n" << std::flush;
-
-	//std::cerr << "\nDEBUG: FINE STATE<T> BISIMULATION\n";
-
-}
-
-template <class T>
-bool state<T>::is_executable(const action & act) const
-{
-	return entails(act.get_executability());
+bool state<T>::is_executable(const action & act) const {
+    return false;
+//    return entails(act.get_executability());
 }
 
 template <class T>
 bool state<T>::is_goal(const formula_list& goal_description) const {
-	return entails(goal_description);
+    return false;
+//    return entails(goal_description);
+}
+
+template <class T>
+void state<T>::calc_min_bisimilar(Bisimulation_Algorithm algorithm) {
+    m_state.calc_min_bisimilar(algorithm);
+}
+
+template <class T>
+void state<T>::set_heuristic_value(short heuristic_value) {
+    m_heuristic_value = heuristic_value;
 }
 
 template <class T>
 void state<T>::print() const {
-//	std::cout << "\n";
-//	if (domain.get_config().is_debug()) {
-//		m_representation.print();
-//	}
-//	//ret.set_representation(get_representation().compute_succ(act));
-//	std::cout << "Plan Length: " << get_plan_length();
-//	std::cout << "\n\nExecuted actions: ";
-//	printer::get_instance().print_list(get_executed_actions());
-//	//std::cout << "\nHeuristic Value Length: " << get_heuristic_value();
+    m_state.print();
 }
 
 template <class T>
@@ -284,37 +140,142 @@ void state<T>::print_graphviz(const std::string& postfix) const {
 }
 
 template <class T>
-single_observability_map state<T>::get_observants(const observability_map & table) const {
-	single_observability_map ret;
-//	agent_set agents = domain.get_agents();
-//	for (auto it_ag = agents.begin(); it_ag != agents.end(); it_ag++) {
-//		//if (*it_ag != executor) {
-//		ret.insert(std::pair<agent, agent_group_id>(*it_ag, get_obs_group(*it_ag, table)));
-//		//}
-//	}
-
-	return ret;
+bool state<T>::operator<(const state<T> & to_compare) const {
+    /**\warning each T must implement the operator <*/
+    return m_state < to_compare.get_state();
 }
 
-template <class T>
-agent_group_id state<T>::get_obs_group(const cem_store &store, agent ag, const observability_map &table) const
-{
-//	auto it_ag = table.find(ag);
-//	if (it_ag != table.end()) {
-//		auto it_int = it_ag->second.begin();
-//		for (; it_int != it_ag->second.end(); ++it_ag) {
-//			if (entails(it_int->second)) {
-//				return it_int->first;
-//			}
+//template <class T>
+//bool state<T>::entails(const fluent_set & to_check) const
+//{
+//	return m_representation.entails(to_check);
+//}
+//
+//template <class T>
+//bool state<T>::entails(const fluent_formula & to_check) const
+//{
+//	return m_representation.entails(to_check);
+//}
+//
+//template <class T>
+//bool state<T>::entails(const belief_formula & to_check) const
+//{
+//	return m_representation.entails(to_check);
+//}
+//
+//template <class T>
+//bool state<T>::entails(const formula_list & to_check) const
+//{
+//	//formula_list expresses CNF formula
+//	formula_list::const_iterator it_fl;
+//	for (it_fl = to_check.begin(); it_fl != to_check.end(); it_fl++) {
+//
+//		if (!m_representation.entails(*it_fl)) {
+//			return false;
 //		}
 //	}
-	//The last declared observability group
-	return store.get_agent_group_number();
+//	return true;
+//}
 
-	//std::cerr << "\nError: Some observability declaration is missing, the agent has not any agent group specified.";
-	//exit(1);
+//template <class T>
+//void state<T>::build_initial(const initially& initial_conditions) {
+//	m_state.build_initial(initial_conditions);
+//	set_plan_length(0);
+//}
 
-}
+//template <class T>
+//fluent_set state<T>::compute_succ2(const action & act) const
+//{
+//	state<T> ret;
+//	//if (is_executable(act)) {
+//	ret.set_representation(get_representation().compute_succ(act));
+//	ret.set_executed_actions(get_executed_actions());
+//	ret.add_executed_action(act);
+//
+//	pworld_ptr repr = ret.get_representation();
+//	fluent_set repr_set = repr.get_fluent_set();
+//	ret.set_plan_length(get_plan_length() + 1);
+//
+//
+//	return repr_set;
+//}
+
+//template <class T>
+//state<T> state<T>::compute_succ(const action & act) const {
+//	/**\todo Myabe is better if used in \ref planner or \ref domain (myabe a bool as **param[out]**.*/
+//	state<T> ret;
+//	//if (is_executable(act)) {
+//	ret.set_representation(get_state().compute_succ(act));
+////	ret.set_executed_actions(get_executed_actions());
+//	ret.add_executed_action(act);
+//	ret.set_plan_length(get_plan_length() + 1);
+//	//set_heuristic_value(get_representation().compute_heuristic_value());
+//	return ret;
+//}
+
+//template <class T>
+//bool state<T>::operator=(const state<T> & given_state){
+//	/**\warning each T must implement the operator =*/
+//	set_representation(given_state.get_representation());
+//	set_executed_actions(given_state.get_executed_actions());
+//	set_plan_length(given_state.get_plan_length());
+//	set_heuristic_value(given_state.get_heuristic_value());
+//	return true;
+//}
+
+//template <class T>
+//void state<T>::set_executed_actions(const action_id_list & executed) {
+//	m_executed_actions_id = executed;
+//}
+
+//template <class T>
+//void state<T>::add_executed_action(const action & executed) {
+//	m_executed_actions_id.push_back(executed.get_id());
+//}
+
+//template <class T>
+//void state<T>::set_plan_length(unsigned short length) {
+//	m_plan_length = length;
+//}
+
+//template <class T>
+//void state<T>::set_representation(const T & to_set) {
+//    m_state = to_set;
+//}
+
+
+//template <class T>
+//single_observability_map state<T>::get_observants(const observability_map & table) const {
+//	single_observability_map ret;
+////	agent_set agents = domain.get_agents();
+////	for (auto it_ag = agents.begin(); it_ag != agents.end(); it_ag++) {
+////		//if (*it_ag != executor) {
+////		ret.insert(std::pair<agent, agent_group_id>(*it_ag, get_obs_group(*it_ag, table)));
+////		//}
+////	}
+//
+//	return ret;
+//}
+
+//template <class T>
+//agent_group_id state<T>::get_obs_group(const cem_store &store, agent ag, const observability_map &table) const
+//{
+////	auto it_ag = table.find(ag);
+////	if (it_ag != table.end()) {
+////		auto it_int = it_ag->second.begin();
+////		for (; it_int != it_ag->second.end(); ++it_ag) {
+////			if (entails(it_int->second)) {
+////				return it_int->first;
+////			}
+////		}
+////	}
+//	//The last declared observability group
+//	return store.get_agent_group_number();
+//
+//	//std::cerr << "\nError: Some observability declaration is missing, the agent has not any agent group specified.";
+//	//exit(1);
+//
+//}
 
 //DEBUG
 //

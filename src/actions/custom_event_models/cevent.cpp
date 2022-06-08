@@ -123,66 +123,66 @@ const event_id cevent::get_id() const
 	return m_id;
 }
 
-formula_list cevent::get_precondition(const pstate & s, const action & act) const
-{
+formula_list cevent::get_precondition(const pstate & s, const action & act) const {
 	formula_list ret;
-	formula_list action_pre = act.get_executability();
-	fluent_formula action_eff = helper_t::get_effects_if_entailed(act.get_effects(), s);
-
-	event_metacond::const_iterator it_meta_pre;
-	formula_list::const_iterator it_act_pre;
-
-	for (it_meta_pre = get_meta_precondition().begin(); it_meta_pre != get_meta_precondition().end(); ++it_meta_pre) {
-		belief_formula tmp_bf;
-
-		switch ( *it_meta_pre ) {
-		case act_eff:
-			tmp_bf.set_from_ff(action_eff);
-			ret.push_back(tmp_bf);
-			break;
-		case neg_act_eff:
-			tmp_bf.set_from_ff(helper::negate_fluent_formula(action_eff));
-			ret.push_back(tmp_bf);
-			break;
-		case act_pre:
-			for (it_act_pre = action_pre.begin(); it_act_pre != action_pre.end(); ++it_act_pre) {
-				ret.push_back(*it_act_pre);
-			}
-			break;
-		case none:
-		default:
-			ret.clear();
-			return ret;
-		}
-	}
+//	formula_list action_pre = act.get_executability();
+//	fluent_formula action_eff = helper_t::get_effects_if_entailed(act.get_effects(), s);
+//
+//	event_metacond::const_iterator it_meta_pre;
+//	formula_list::const_iterator it_act_pre;
+//
+//	for (it_meta_pre = get_meta_precondition().begin(); it_meta_pre != get_meta_precondition().end(); ++it_meta_pre) {
+//		belief_formula tmp_bf;
+//
+//		switch ( *it_meta_pre ) {
+//		case act_eff:
+//			tmp_bf.set_from_ff(action_eff);
+//			ret.push_back(tmp_bf);
+//			break;
+//		case neg_act_eff:
+//			tmp_bf.set_from_ff(helper::negate_fluent_formula(action_eff));
+//			ret.push_back(tmp_bf);
+//			break;
+//		case act_pre:
+//			for (it_act_pre = action_pre.begin(); it_act_pre != action_pre.end(); ++it_act_pre) {
+//				ret.push_back(*it_act_pre);
+//			}
+//			break;
+//		case none:
+//		default:
+//			ret.clear();
+//			return ret;
+//		}
+//	}
 
 	return ret;
 }
 
-event_postconditions cevent::get_postconditions(const pstate & s, const action & act) const
-{
-	fluent_formula action_eff = helper_t::get_effects_if_entailed(act.get_effects(), s);
+event_postconditions cevent::get_postconditions(const pstate & s, const action & act) const {
+//	fluent_formula action_eff = helper_t::get_effects_if_entailed(act.get_effects(), s);
+//
+//	if (get_meta_postconditions().size() > 1) {
+//		std::cerr << "Error: malformed action postcondition in cevent " << get_id() << std::endl;
+//		exit(1);
+//	} else if (get_meta_postconditions().empty()) {
+//		fluent_formula empty;
+//		return empty;
+//	} else {
+//		switch ( *(get_meta_postconditions().begin()) ) {
+//		case act_eff:
+//			return action_eff;
+//		case neg_act_eff:
+//			return helper::negate_fluent_formula(action_eff);
+//			//Not break because it means it is empty
+//		case none:
+//		default:
+//			fluent_formula empty;
+//			return empty;
+//		}
+//	}
 
-	if (get_meta_postconditions().size() > 1) {
-		std::cerr << "Error: malformed action postcondition in cevent " << get_id() << std::endl;
-		exit(1);
-	} else if (get_meta_postconditions().empty()) {
-		fluent_formula empty;
-		return empty;
-	} else {
-		switch ( *(get_meta_postconditions().begin()) ) {
-		case act_eff:
-			return action_eff;
-		case neg_act_eff:
-			return helper::negate_fluent_formula(action_eff);
-			//Not break because it means it is empty
-		case none:
-		default:
-			fluent_formula empty;
-			return empty;
-		}
-	}
-
+    fluent_formula empty;
+    return empty;
 	//Need to insert the merge with specific postcondition
 }
 

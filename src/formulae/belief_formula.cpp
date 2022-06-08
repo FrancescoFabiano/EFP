@@ -62,7 +62,7 @@ void belief_formula::set_fluent_formula(const fluent_formula & to_set)
 	m_fluent_formula = to_set;
 }
 
-void belief_formula::set_fluent_formula_from_fluent(fluent to_set)
+void belief_formula::set_fluent_formula_from_fluent(const fluent *to_set)
 {
 	fluent_set tmp;
 	tmp.insert(to_set);
@@ -80,12 +80,12 @@ const fluent_formula & belief_formula::get_fluent_formula() const
 	return m_fluent_formula;
 }
 
-void belief_formula::set_agent(agent to_set)
+void belief_formula::set_agent(const agent *to_set)
 {
 	m_agent = to_set;
 }
 
-agent belief_formula::get_agent() const
+const agent * belief_formula::get_agent() const
 {
 	if (!m_is_grounded) {
 		std::cerr << "\nError in reading a belief_formula, it must be grounded";
@@ -204,13 +204,13 @@ void belief_formula::set_string_group_agents(const string_set & to_set)
 void belief_formula::set_bf1(const belief_formula & to_set)
 {
 	m_bf1 = std::make_shared<belief_formula>(to_set);
-	//m_bf1 = std::shared_ptr<belief_formula>(to_set);
+	//m_bf1 = std::shared<belief_formula>(to_set);
 }
 
 void belief_formula::set_bf2(const belief_formula & to_set)
 {
 	m_bf2 = std::make_shared<belief_formula>(to_set);
-	//m_bf2 = std::shared_ptr<belief_formula>(&to_set);
+	//m_bf2 = std::shared<belief_formula>(&to_set);
 }
 
 void belief_formula::print() const {

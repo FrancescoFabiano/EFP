@@ -124,7 +124,7 @@ public:
      *
      * @param[in] to_ground: the \ref fluent name to ground.
      * @return: the \p to_ground grounded value.*/
-    fluent ground_fluent(const std::string& to_ground) const;
+    const fluent* ground_fluent(const std::string& to_ground) const;
     /** \brief Function that given a \ref fluent set returns its grounded value.
      *
      * This function calls recursively \ref ground_fluent(const std::string&) const.
@@ -150,7 +150,7 @@ public:
      *
      * @param[in] to_ground: the \ref agent name to ground.
      * @return: the \p to_ground grounded value.*/
-    agent ground_agent(const std::string& to_ground) const;
+    const agent * ground_agent(const std::string& to_ground) const;
     /** \brief Function that given an \ref agent set returns its grounded value.
      * 
      * This function calls recursively \ref ground_agent(const std::string&) const.
@@ -174,7 +174,7 @@ public:
      *
      * @param[in] to_deground: the \ref fluent name to deground.
      * @return: the name of \p to_deground.*/
-    std::string deground_fluent(fluent to_deground) const;
+    std::string deground_fluent(const fluent *to_deground) const;
     /** \brief Function that given a set of \ref fluent grounded value returns the set with their names. 
      * 
      * The function uses \ref deground_fluent(fluent) const.
@@ -196,7 +196,7 @@ public:
      *
      * @param[in] to_deground: the \ref agent name to deground.
      * @return: the name of \p to_deground.*/
-    std::string deground_agent(agent to_deground) const;
+    std::string deground_agent(const agent *to_deground) const;
 
     /** \brief Function that given an \ref agent_set grounded value returns the set of names. 
      * 

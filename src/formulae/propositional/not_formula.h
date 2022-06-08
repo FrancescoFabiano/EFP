@@ -11,8 +11,9 @@ private:
 public:
     explicit not_formula(const formula *f);
 
-    bool is_entailed(const kstate &state, const kworld_ptr &world) const override;
-    bool is_entailed(const pstate &state, const pworld_ptr &world) const override;
+    bool is_entailed(const fluent_set *fluent_set) const override;
+    bool is_entailed(const kstate *state, const kworld *world) const override;
+    bool is_entailed(const pstate *state, const pworld *world) const override;
 
     bool operator==(const not_formula &to_compare) const;
     bool operator<(const not_formula &to_compare) const;

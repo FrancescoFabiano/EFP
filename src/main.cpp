@@ -14,6 +14,8 @@
 #include <algorithm>
 
 #include "search/planner.ipp"
+#include "states/kripke/kstate.h"
+#include "states/possibilities/pstate.h"
 
 void print_usage(char* prog_name) {
     std::cout << "USAGE:" << std::endl;

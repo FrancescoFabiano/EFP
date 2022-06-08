@@ -21,8 +21,7 @@
 #include "../../../include/definitions/possibilities.h"
 #include "../../utilities/printer.h"
 
-class pworld
-{
+class pworld {
     friend class pworld_ptr;
 
 private:
@@ -70,24 +69,10 @@ private:
     void set_id();
 
 
-    /** \brief Getter of \ref m_fluent_set.
-     * 
-     * Only accessible by the \ref pworld_ptr.
-     *     
-     * @return the \ref pworld_ptr to the pworld where *this* is from.*/
-    const fluent_set & get_fluent_set() const;
-
-    /** \brief Getter of \ref m_id.
-     *     
-     * Only accessible by the \ref pworld_ptr.
-     * 
-     * @return the int that is the unique id of *this*.*/
-    pworld_id get_id() const;
-
 public:
+
     /** \brief Empty constructor, call the default constructor of all the fields.*/
     pworld();
-
     /** \brief Constructor with parameters.
      * Construct an object with the given info and then set the unique id.
      * the set of \ref fluent to set as \ref m_fluent_set.
@@ -98,9 +83,23 @@ public:
     pworld(const fluent_set & description);
 
     /** \brief Copy constructor.
-     * 
+     *
      * @param[in] world: the \ref pworld to copy into *this*.*/
     pworld(const pworld & world);
+
+    /** \brief Getter of \ref m_fluent_set.
+     *
+     * Only accessible by the \ref pworld_ptr.
+     *
+     * @return the \ref pworld_ptr to the pworld where *this* is from.*/
+    const fluent_set *get_fluent_set() const;
+
+    /** \brief Getter of \ref m_id.
+     *
+     * Only accessible by the \ref pworld_ptr.
+     *
+     * @return the int that is the unique id of *this*.*/
+    pworld_id get_id() const;
 
     /** \brief Function that check the entailment of a single \ref fluent in *this*.
      * 

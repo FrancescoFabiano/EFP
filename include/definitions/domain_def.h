@@ -1,7 +1,7 @@
 #ifndef EFP_DOMAIN_DEF_H
 #define EFP_DOMAIN_DEF_H
 
-#include <cstdio>
+//#include <cstdio>
 #include <boost/dynamic_bitset.hpp>
 
 typedef boost::dynamic_bitset<> fluent; /**< \brief A representation of a fluent through an unique id (short).
@@ -14,7 +14,7 @@ typedef boost::dynamic_bitset<> fluent; /**< \brief A representation of a fluent
                                 *
                                 * \todo is maybe better to store only the positive?
                                 */
-typedef std::set<fluent> fluent_set; /**< \brief A representation of a conjunctive set of \ref fluent.
+typedef std::set<const fluent*> fluent_set; /**< \brief A representation of a conjunctive set of \ref fluent.
                                       *
                                       * This representation is used, for example, to represent
                                       * a world \ref kworld in a Kripke structure (\ref kstate).
@@ -28,14 +28,13 @@ typedef std::set<fluent_set> fluent_formula; /**< \brief A representation of a f
                                       * \todo How the set of fluent has < implemented?
                                       * Each element of the set is a \ref fluent_set*/
 
-// \todo: make agent static
+// \todo: make agent static... is 'const boost::dynamic_bitset<>' enough?
 typedef boost::dynamic_bitset<> agent; /**< \brief A representation of an agent through an unique id (short).
                                       *
                                       *  This representation is derived by applying \ref grounder::ground_agent(const std::string&) const
                                       * to the element of \ref reader::m_agents.*/
 
-typedef std::set<agent> agent_set; /**< \brief A set of \ref agent.*/
-typedef std::vector<agent> agent_list; /**< \brief A list of \ref agent.*/
+typedef std::set<const agent*> agent_set; /**< \brief A set of \ref agent.*/
 
 typedef boost::dynamic_bitset<> action_id; /**< \brief The unique id (short) associated with each action.
                                       *

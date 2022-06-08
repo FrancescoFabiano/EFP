@@ -12,10 +12,14 @@ private:
 public:
     literal(const fluent *fluent, bool is_negated);
 
-    bool is_entailed(const kstate &state, const kworld_ptr &world) const override;
-    bool is_entailed(const pstate &state, const pworld_ptr &world) const override;
+    bool is_entailed(const fluent_set *fluent_set) const override;
+    bool is_entailed(const kstate *state, const kworld *world) const override;
+    bool is_entailed(const pstate *state, const pworld *world) const override;
 
     bool is_propositional() const override;
+
+    const fluent *get_fluent() const;
+    bool is_positive() const;
 
     bool operator==(const literal &to_compare) const;
     bool operator<(const literal &to_compare) const;

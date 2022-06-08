@@ -30,7 +30,7 @@ pstate::pstate(const pstate & to_copy)
 }
 
 /**** GETTERS/SETTERS ****/
-void pstate::set_worlds(const pworld_ptr_set & to_set)
+void pstate::set_worlds(const pworld_set & to_set)
 {
 	m_worlds = to_set;
 }
@@ -55,7 +55,7 @@ unsigned int pstate::get_max_depth() const
 	return m_max_depth;
 }
 
-const pworld_ptr_set & pstate::get_worlds() const
+const pworld_set & pstate::get_worlds() const
 {
 	return m_worlds;
 }
@@ -210,9 +210,9 @@ bool pstate::entails(const belief_formula & bf) const
 	return entails(bf, m_pointed);
 }
 
-bool pstate::entails(const belief_formula & to_check, const pworld_ptr_set & reachable) const
+bool pstate::entails(const belief_formula & to_check, const pworld_set & reachable) const
 {
-	pworld_ptr_set::const_iterator it_pws;
+	pworld_set::const_iterator it_pws;
 	for (it_pws = reachable.begin(); it_pws != reachable.end(); it_pws++) {
 		if (!entails(to_check, *it_pws))
 			return false;
@@ -257,7 +257,7 @@ bool pstate::entails(const belief_formula & bf, const pworld_ptr & world) const
 	}
 	case D_FORMULA:
 	{
-		pworld_ptr_set D_reachable = get_D_reachable_worlds(bf.get_group_agents(), world);
+		pworld_set D_reachable = get_D_reachable_worlds(bf.get_group_agents(), world);
 		if (D_reachable.empty()) {
 			return false;
 		}
@@ -297,9 +297,9 @@ bool pstate::entails(const formula_list & to_check) const
 }
 
 /**** REACHABILITY ****/
-pworld_ptr_set pstate::get_B_reachable_worlds(const agent & ag, const pworld_ptr & world) const
+pworld_set pstate::get_B_reachable_worlds(const agent & ag, const pworld_ptr & world) const
 {
-	pworld_ptr_set ret;
+	pworld_set ret;
 	auto pw_map = m_beliefs.find(world);
 
 	if (pw_map != m_beliefs.end()) {
@@ -311,7 +311,7 @@ pworld_ptr_set pstate::get_B_reachable_worlds(const agent & ag, const pworld_ptr
 	return ret;
 }
 
-bool pstate::get_B_reachable_worlds_recursive(const agent & ag, const pworld_ptr & world, pworld_ptr_set& ret) const
+bool pstate::get_B_reachable_worlds_recursive(const agent & ag, const pworld_ptr & world, pworld_set& ret) const
 {
 	/** \todo check: If a--i-->b, b--i-->c then a--i-->c must be there*/
 	auto pw_map = m_beliefs.find(world);
@@ -330,10 +330,10 @@ bool pstate::get_B_reachable_worlds_recursive(const agent & ag, const pworld_ptr
 	return true;
 }
 
-pworld_ptr_set pstate::get_E_reachable_worlds(const agent_set & ags, const pworld_ptr & world) const
+pworld_set pstate::get_E_reachable_worlds(const agent_set & ags, const pworld_ptr & world) const
 {
 	/*The K^0 call of this function*/
-	pworld_ptr_set ret;
+	pworld_set ret;
 	agent_set::const_iterator it_agset;
 	for (it_agset = ags.begin(); it_agset != ags.end(); it_agset++) {
 		helper_t::sum_set<pworld_ptr>(ret, get_B_reachable_worlds(*it_agset, world));
@@ -341,11 +341,11 @@ pworld_ptr_set pstate::get_E_reachable_worlds(const agent_set & ags, const pworl
 	return ret;
 }
 
-bool pstate::get_E_reachable_worlds_recoursive(const agent_set & ags, const pworld_ptr_set & worlds, pworld_ptr_set & ret) const
+bool pstate::get_E_reachable_worlds_recoursive(const agent_set & ags, const pworld_set & worlds, pworld_set & ret) const
 {
 	/*The K^i (recoursive) call of this function*/
 	bool is_fixed_point = true;
-	pworld_ptr_set::const_iterator it_pwptr;
+	pworld_set::const_iterator it_pwptr;
 	agent_set::const_iterator it_agset;
 	for (it_pwptr = worlds.begin(); it_pwptr != worlds.end(); it_pwptr++) {
 		for (it_agset = ags.begin(); it_agset != ags.end(); it_agset++) {
@@ -357,13 +357,13 @@ bool pstate::get_E_reachable_worlds_recoursive(const agent_set & ags, const pwor
 	return is_fixed_point;
 }
 
-pworld_ptr_set pstate::get_C_reachable_worlds(const agent_set & ags, const pworld_ptr & world) const
+pworld_set pstate::get_C_reachable_worlds(const agent_set & ags, const pworld_ptr & world) const
 {
 	//Use of fixed point to stop.
 	bool is_fixed_point = false;
-	pworld_ptr_set newly_reached = get_E_reachable_worlds(ags, world);
-	pworld_ptr_set already_reached;
-	pworld_ptr_set ret;
+	pworld_set newly_reached = get_E_reachable_worlds(ags, world);
+	pworld_set already_reached;
+	pworld_set ret;
 	while (!is_fixed_point) {
 		helper_t::sum_set<pworld_ptr>(newly_reached, ret);
 		helper_t::minus_set<pworld_ptr>(newly_reached, already_reached);
@@ -373,16 +373,16 @@ pworld_ptr_set pstate::get_C_reachable_worlds(const agent_set & ags, const pworl
 	return ret;
 }
 
-pworld_ptr_set pstate::get_D_reachable_worlds(const agent_set & ags, const pworld_ptr & world) const
+pworld_set pstate::get_D_reachable_worlds(const agent_set & ags, const pworld_ptr & world) const
 {
 	/**@bug: Notion of D-Reachable is correct (page 24 of Reasoning about Knowledge)*/
 	auto it_agset = ags.begin();
-	pworld_ptr_set ret = get_B_reachable_worlds((*it_agset), world);
+	pworld_set ret = get_B_reachable_worlds((*it_agset), world);
 	it_agset++;
 
 	for (; it_agset != ags.end(); it_agset++) {
 		auto it_pwset1 = ret.begin();
-		pworld_ptr_set to_intersect = get_B_reachable_worlds((*it_agset), world);
+		pworld_set to_intersect = get_B_reachable_worlds((*it_agset), world);
 		auto it_pwset2 = to_intersect.begin();
 		while ((it_pwset1 != ret.end()) && (it_pwset2 != to_intersect.end())) {
 
@@ -406,13 +406,13 @@ pworld_ptr_set pstate::get_D_reachable_worlds(const agent_set & ags, const pworl
 	return ret;
 }
 
-void pstate::get_all_reachable_worlds_edges(const pworld_ptr & world, pworld_ptr_set & reached_worlds, pedges & reached_edges) const {
+void pstate::get_all_reachable_worlds_edges(const pworld_ptr & world, pworld_set & reached_worlds, pedges & reached_edges) const {
     // \todo: TEST
     auto adjacent_worlds = m_beliefs.at(world);
-    pworld_ptr_set pw_list;
+    pworld_set pw_list;
 
-    std::map<agent, pworld_ptr_set>::const_iterator it_pwmap;
-    pworld_ptr_set::const_iterator it_pws;
+    std::map<agent, pworld_set>::const_iterator it_pwmap;
+    pworld_set::const_iterator it_pws;
 
     for (it_pwmap = adjacent_worlds.begin(); it_pwmap != adjacent_worlds.end(); it_pwmap++) {
         pw_list = it_pwmap->second;
@@ -428,7 +428,7 @@ void pstate::get_all_reachable_worlds_edges(const pworld_ptr & world, pworld_ptr
 
 void pstate::clean_unreachable_pworlds()
 {
-	pworld_ptr_set reached_worlds;
+	pworld_set reached_worlds;
 	pedges reached_edges;
 
 	reached_worlds.insert(get_pointed());
@@ -518,7 +518,7 @@ void pstate::generate_initial_pedges(const initially& initial_conditions) {
 	agent_set agents; // = domain.get_agents();
 	pworld_ptr pwptr_tmp1, pwptr_tmp2;
 
-	pworld_ptr_set::const_iterator it_pwps_1, it_pwps_2;
+	pworld_set::const_iterator it_pwps_1, it_pwps_2;
 	agent_set::const_iterator it_ags;
 
 	/*This for add to *this* all the possible edges.*/
@@ -544,7 +544,7 @@ void pstate::generate_initial_pedges(const initially& initial_conditions) {
 
 void pstate::remove_initial_pedge(const fluent_formula &known_ff, const agent & ag)
 {
-	pworld_ptr_set::const_iterator it_pwps_1, it_pwps_2;
+	pworld_set::const_iterator it_pwps_1, it_pwps_2;
 
 	pworld_ptr pwptr_tmp1, pwptr_tmp2;
 
@@ -647,10 +647,10 @@ pstate pstate::compute_succ(const action & act) const
 
 void pstate::maintain_oblivious_believed_pworlds(pstate &ret, const agent_set & oblivious_obs_agents) const {
     agent_set::const_iterator it_agset;
-    pworld_ptr_set world_oblivious;
-    pworld_ptr_set tmp_world_set;
+    pworld_set world_oblivious;
+    pworld_set tmp_world_set;
 
-    pworld_ptr_set::const_iterator it_wo_ob;
+    pworld_set::const_iterator it_wo_ob;
     // \todo: SISTEMA
     agent_set agents; // = domain.get_agents();
     if (!oblivious_obs_agents.empty()) {
@@ -733,7 +733,7 @@ automaton pstate::pstate_to_automaton(std::vector<pworld_ptr> & pworld_vec, cons
 	Vertex = (v_elem *) malloc(sizeof(v_elem) * Nvertex);
 
 	// Initializating vertices
-	pworld_ptr_set::const_iterator it_pwps;
+	pworld_set::const_iterator it_pwps;
 	pedges::const_iterator it_peps;
 	pbislabel_map::const_iterator it_plm;
 	bis_label_set::const_iterator it_bislab;
@@ -853,7 +853,7 @@ automaton pstate::pstate_to_automaton(std::vector<pworld_ptr> & pworld_vec, cons
 
 void pstate::automaton_to_pstate(const automaton & a, const std::vector<pworld_ptr> & pworld_vec, const std::map<bis_label, agent> & label_to_agent)
 {
-	pworld_ptr_set worlds;
+	pworld_set worlds;
 	m_beliefs.clear();
 	// The pointed world does not change when we calculate the minimum bisimilar state
 	// Hence we do not need to update it
@@ -1293,7 +1293,7 @@ pworld_ptr pstate::execute_ontic_helper(const action &act, pstate &ret, const pw
 
     if (it_pwtm != get_beliefs().end()) {
         pworld_map::const_iterator it_pwm;
-        pworld_ptr_set::const_iterator it_pws;
+        pworld_set::const_iterator it_pws;
 
         for (it_pwm = it_pwtm->second.begin(); it_pwm != it_pwtm->second.end(); it_pwm++) {
             agent ag = it_pwm->first;
@@ -1333,7 +1333,7 @@ pworld_ptr pstate::execute_sensing_announcement_helper(const fluent_formula &eff
 
     if (it_pwtm != get_beliefs().end()) {
         pworld_map::const_iterator it_pwm;
-        pworld_ptr_set::const_iterator it_pws;
+        pworld_set::const_iterator it_pws;
 
         for (it_pwm = it_pwtm->second.begin(); it_pwm != it_pwtm->second.end(); it_pwm++) {
             agent ag = it_pwm->first;

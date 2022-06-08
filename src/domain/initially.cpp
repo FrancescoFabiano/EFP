@@ -12,6 +12,7 @@
 #include "domain.h"
 #include "../../include/definitions/domain_config_def.h"
 #include "../utilities/printer.h"
+#include "../utilities/helper.h"
 
 initially::initially() {}
 

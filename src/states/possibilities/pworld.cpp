@@ -25,8 +25,7 @@ pworld::pworld(const fluent_set & description)
 }
 //generate an unique id given the state information -> the literals
 
-pworld::pworld(const pworld & world)
-{
+pworld::pworld(const pworld & world) {
 	set_fluent_set(world.get_fluent_set());
 	set_id();
 }
@@ -121,7 +120,7 @@ void pworld::set_id()
 	m_id = hash_fluents_into_id();
 }
 
-const fluent_set & pworld::get_fluent_set() const
+const fluent_set * pworld::get_fluent_set() const
 {
 	return m_fluent_set;
 }

@@ -1894,7 +1894,7 @@ automaton* bisimulation::merge_kstate_to_automaton(const kstate & ks1, const kst
 	Vertex = (v_elem *) malloc(sizeof(v_elem) * Nvertex);
 
 	// Initializating vertices
-	kworld_ptr_set::const_iterator it_kwps;
+	kworld_set::const_iterator it_kwps;
 	kbislabel_map::const_iterator it_klm;
 	bis_label_set::const_iterator it_bislab;
 	std::map<kworld_ptr, bis_label_set>::const_iterator it_kw_bislab;
@@ -1950,7 +1950,7 @@ automaton* bisimulation::merge_kstate_to_automaton(const kstate & ks1, const kst
 	int bhtabSize = ag_set_size + c;
 
     kedge_map::const_iterator it_kem;
-    std::map<agent, kworld_ptr_set>::const_iterator it_agkw;
+    std::map<agent, kworld_set>::const_iterator it_agkw;
 
     for (it_kem = ks1.get_edges().begin(); it_kem != ks1.get_edges().end(); it_kem++) {
         for (it_agkw = it_kem->second.begin(); it_agkw != it_kem->second.end(); it_agkw++) {

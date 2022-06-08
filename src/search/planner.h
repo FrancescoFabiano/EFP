@@ -14,7 +14,7 @@
  */
 #pragma once
 #include <queue>
-#include <stdlib.h>
+#include <cstdlib>
 #include <chrono>
 #include <ctime>
 

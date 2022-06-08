@@ -125,10 +125,10 @@ void printer::print_list(const formula_list& to_print) const
 	}
 }*/
 
-void printer::print_list(const pworld_ptr_set& to_print) const
+void printer::print_list(const pworld_set& to_print) const
 {
 	bool first_print = true;
-	pworld_ptr_set::const_iterator it_sll;
+	pworld_set::const_iterator it_sll;
 	//Iterate on the \p to_print and print its content using ::to_print(const string_set&) seprated by a OR to represent a DNF.
 
 	for (it_sll = to_print.begin(); it_sll != to_print.end(); it_sll++) {
@@ -136,7 +136,7 @@ void printer::print_list(const pworld_ptr_set& to_print) const
 			std::cout << "\n";
 		}
 		first_print = false;
-		std::cout << it_sll->get_id();
+		std::cout << (*it_sll)->get_id();
 	}
 }
 
