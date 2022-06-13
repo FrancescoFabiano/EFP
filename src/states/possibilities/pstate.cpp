@@ -8,12 +8,9 @@
  */
 
 #include <iostream>
-#include <tuple>
-#include <boost/dynamic_bitset.hpp>
 
 #include "pstate.h"
 #include "../../domain/domain.h"
-#include "../../utilities/helper_t.ipp"
 
 pstate::pstate() = default;
 
@@ -101,13 +98,6 @@ void pstate::generate_initial_pointed(const finitary_theory &theory) {
     m_worlds.insert(m_pointed);
 }
 
-void pstate::generate_initially_unknown_fluents(const domain &domain, fluent_ptr_set &initially_unknown_fluents) {
-//    std::set_difference(domain.get_fluent_set().begin(), domain.get_fluent_set().end(),
-//                        domain.get_finitary_theory().get_ck_fluents().begin(), domain.get_finitary_theory().get_ck_fluents().end(),
-//                        initially_unknown_fluents.begin());
-    // todo: SISTEMA
-}
-
 // Power set generation: https://rosettacode.org/wiki/Power_set#C.2B.2B
 template<class S>
 void pstate::power_set(S &set, std::set<S> &power_set) {
@@ -159,7 +149,11 @@ void pstate::generate_initial_worlds(const domain &domain, const finitary_theory
     fluent_ptr_set initially_unknown_fluents;
     std::set<fluent_ptr_set> initial_fluent_sets;
 
-    generate_initially_unknown_fluents(domain, initially_unknown_fluents);
+    /// The field \ref m_ck_fluents represents the set of fluents that are common knowledge in the initial state
+    std::set_difference(domain.get_fluent_set().begin(), domain.get_fluent_set().end(),
+                        domain.get_finitary_theory().get_ck_fluents().begin(), domain.get_finitary_theory().get_ck_fluents().end(),
+                        std::inserter(initially_unknown_fluents, initially_unknown_fluents.end()));
+
     // We generate all the combinations of fluents that are not known initially
     // This is equivalent to generating the power set of initially_unknown_fluents
     power_set(initially_unknown_fluents, initial_fluent_sets);

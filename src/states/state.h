@@ -23,8 +23,10 @@
 #include <fstream>
 
 #include "../actions/action.h"
-#include "../formulae/formula.h"
-#include "../formulae/finitary_theory/finitary_theory.h"
+//#include "../formulae/formula.h"
+//#include "../formulae/finitary_theory/finitary_theory.h"
+
+class finitary_theory;
 
 /**
  * @tparam T:
@@ -53,39 +55,20 @@ private:
      * This value is given by the chosen implementation of \ref heuristic.*/
     short m_heuristic_value = 0;
 
-    template<class M>
-    void generate_from_theory(const finitary_theory<M> &theory);
-
-    void generate_from_update(const state<T> *previous_state, const action *action);
-
 public:
     /** \brief Constructor without parameters.
      * 
      * It creates \ref m_representation calling its **T** constructor.*/
     state<T>() = default;   // todo: rimuovi
 
-    template<class M>
-    explicit state<T>(const finitary_theory<M> &theory);
-    /* \brief Constructor with a given \ref state.
-     * 
-     * @param given_state: the \ref state to copy into *this*.*/
-    /*state<T>(const state<T> & given_state);
-     \brief Constructor with a given state-representation object (**T**).
-     * 
-     * @param given_representation: the **T** object state to copy into \ref m_representation.*/
-    /*state<T>(const T & given_representation);
-     * \brief Constructor with that set *this* as successor of the given one.
-     * 
-     * @param prev_state: the \ref state that is the predecessor of *this*.
-     *  @param act: the \ref action applied to \p prev_state.
-     *
-     * \todo what if the action is not executable?*/
+    state<T>(const domain &domain, const finitary_theory &theory);
+
     state<T>(const state<T> *previous_state, const action *action);
 
     /** \brief Getter of \ref m_representation.
      *
      * @return the m_representation of *this*.*/
-    const T &get_state() const;
+    const T *get_state() const;
 
     const state<T> *get_previous_state() const;
 

@@ -54,8 +54,6 @@ private:
 
     void generate_initial_pointed(const finitary_theory &theory);
 
-    void generate_initially_unknown_fluents(const domain &domain, fluent_ptr_set &initially_unknown_fluents);
-
     void generate_initial_fluent_sets(const finitary_theory &theory, std::set<fluent_ptr_set> &initial_fluent_sets);
 
     void generate_initial_worlds(const domain &domain, const finitary_theory &theory);

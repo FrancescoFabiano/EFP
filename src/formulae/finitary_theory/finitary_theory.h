@@ -26,9 +26,9 @@ public:
 
     finitary_theory();
 
-    const std::set<const fluent*>& get_pointed_fluents() const;
+    const fluent_ptr_set &get_pointed_fluents() const;
 
-    const std::set<const fluent*>& get_ck_fluents() const;
+    const fluent_ptr_set &get_ck_fluents() const;
 
     const std::set<const formula*>& get_ck_formulae() const;
 

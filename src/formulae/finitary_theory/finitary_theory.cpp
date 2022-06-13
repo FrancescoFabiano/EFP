@@ -17,12 +17,12 @@ finitary_theory::finitary_theory(fluent_ptr_set pointed_fluents, fluent_ptr_set 
         m_knows_whether(std::move(knows_whether)) {}
 
 
-const std::set<const fluent*> &finitary_theory::get_pointed_fluents() const {
+const fluent_ptr_set &finitary_theory::get_pointed_fluents() const {
     return m_pointed_fluents;
 }
 
 
-const std::set<const fluent*> &finitary_theory::get_ck_fluents() const {
+const fluent_ptr_set &finitary_theory::get_ck_fluents() const {
     return m_ck_fluents;
 }
 

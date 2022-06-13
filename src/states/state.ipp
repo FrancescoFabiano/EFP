@@ -10,35 +10,29 @@
 #include <cstdlib>
 
 #include "state.h"
+//#include "kripke/kstate.h"
+//#include "possibilities/pstate.h"
 
 template <class T>
-template <class M>
-state<T>::state(const finitary_theory<M> &theory) : m_previous_state(nullptr), m_action(nullptr) {
-    generate_from_theory(theory);
+state<T>::state(const domain &domain, const finitary_theory &theory) :
+    m_state(domain, theory),
+    m_previous_state(nullptr),
+    m_action(nullptr) {
     m_plan_length = 0;
 }
 
 template <class T>
-state<T>::state(const state<T> *previous_state, const action *action) : m_previous_state(previous_state), m_action(action) {
-    generate_from_update(m_previous_state, m_action);
-    m_plan_length = 1 + m_previous_state->get_plan_length();
+state<T>::state(const state<T> *previous_state, const action *action) :
+    m_state(previous_state->get_state(), action),
+    m_previous_state(previous_state),
+    m_action(action) {
+    m_plan_length = 1 + previous_state->get_plan_length();
 //    (*this) = m_previous_state->compute_succ(*m_action);
 }
 
-template<class T>
-template<class M>
-void state<T>::generate_from_theory(const finitary_theory<M> &theory) {
-    m_state.generate_from_theory(theory);
-}
-
-template<class T>
-void state<T>::generate_from_update(const state<T> *previous_state, const action *action) {
-    m_state.generate_from_update(previous_state, action);
-}
-
 template <class T>
-const T &state<T>::get_state() const {
-    return m_state;
+const T *state<T>::get_state() const {
+    return &m_state;
 }
 
 template <class T>
@@ -63,7 +57,7 @@ short state<T>::get_heuristic_value() const {
 
 template <class T>
 bool state<T>::entails(const formula &formula) const {
-    return formula.is_entailed(m_state);
+    return formula.is_entailed(m_state, m_state.get_pointed());
 }
 
 template <class T>
@@ -142,7 +136,7 @@ void state<T>::print_graphviz(const std::string& postfix) const {
 template <class T>
 bool state<T>::operator<(const state<T> & to_compare) const {
     /**\warning each T must implement the operator <*/
-    return m_state < to_compare.get_state();
+    return m_state < *to_compare.get_state();
 }
 
 //template <class T>

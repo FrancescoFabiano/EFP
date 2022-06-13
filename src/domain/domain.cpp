@@ -24,7 +24,7 @@ const domain_config & domain::get_config() const {
 void domain::set_config(const domain_config & to_set_config) {
     domain::m_config = to_set_config;
     domain::m_grounder = grounder();
-	m_intial_description = initially();
+    m_intial_description = initially();
 }
 
 void domain::set_store(const cem_store &store) {
@@ -39,7 +39,7 @@ const grounder & domain::get_grounder() const {
 	return domain::m_grounder;
 }
 
-const fluent_ptr_set & domain::get_fluent_set() const {
+const fluent_ptr_set &domain::get_fluent_set() const {
 	return m_fluent_ptr_set;
 }
 
