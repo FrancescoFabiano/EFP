@@ -5,36 +5,36 @@
 #include <utility>
 
 #include "../formula.h"
-#include "../propositional/literal.h"
 #include "../propositional/or_formula.h"
 #include "../modal/box_formula.h"
-#include "box_whether_formula.h"
+#include "box_whether_formula.ipp"
 
-template<class M>
 class finitary_theory {
 private:
-    std::list<const literal*> m_pointed_literals;
+    const fluent_ptr_set m_pointed_fluents;
 
-    std::list<const literal*> m_ck_literals;
-    std::list<const formula*> m_ck_formulae;
+    const fluent_ptr_set m_ck_fluents;
+    const std::set<const formula*> m_ck_formulae;
 
-    std::list<const box_formula<M>*> m_knows;
-    std::list<const box_whether_formula<M>*> m_knows_whether;
+    const std::set<const box_formula<logic>*> m_knows;
+    const std::set<const box_whether_formula<logic>*> m_knows_whether;
 
 public:
-    finitary_theory(std::list<const literal*> &pointed_literals, std::list<const literal*> &ck_literals,
-                    std::list<const formula*> ck_formulae, std::list<const box_formula<M>*> &knows,
-                    std::list<const box_whether_formula<M>*> &knows_whether);
+    finitary_theory(fluent_ptr_set pointed_fluents, fluent_ptr_set ck_fluents,
+                    std::set<const formula*>  ck_formulae, std::set<const box_formula<logic>*> knows,
+                    std::set<const box_whether_formula<logic>*> knows_whether);
 
-    const std::list<const literal*>& get_pointed_literals() const;
+    finitary_theory();
 
-    const std::list<const literal*>& get_ck_literals() const;
+    const std::set<const fluent*>& get_pointed_fluents() const;
 
-    const std::list<const formula*>& get_ck_formulae() const;
+    const std::set<const fluent*>& get_ck_fluents() const;
 
-    const std::list<const box_formula<M>*>& get_knows() const;
+    const std::set<const formula*>& get_ck_formulae() const;
 
-    const std::list<const box_whether_formula<M>*> &get_knows_whether() const;
+    const std::set<const box_formula<logic>*>& get_knows() const;
+
+    const std::set<const box_whether_formula<logic>*> &get_knows_whether() const;
 };
 
 

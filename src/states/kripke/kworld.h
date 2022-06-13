@@ -20,13 +20,13 @@
 
 #include "../../../include/definitions/kripke_models.h"
 #include "../../utilities/printer.h"
-#include "../../formulae/formula.h"
+//#include "../../formulae/formula.h"
 #include "../../actions/custom_event_models/cevent.h"
 
 class kworld {
 private:
     /** \brief The set of  \ref fluent that describes how these are interpreted in *this*.*/
-    const fluent_set *m_fluent_set;
+    const fluent_ptr_set *m_fluent_set;
 
     const cevent *m_event;
 
@@ -42,7 +42,7 @@ public:
      * @param[in] description: the set of \ref fluent to set as \ref m_fluent_set.
      *
      * \todo is the parameter passing the best one? Copy?*/
-    kworld(const fluent_set *fluent_set, const cevent *event, unsigned long id = 0);
+    kworld(const fluent_ptr_set *fluent_set, const cevent *event, const unsigned long id = 0);
 
 
     /** \brief Getter of \ref m_fluent_set.
@@ -50,7 +50,7 @@ public:
      * Only accessible by the \ref kworld_ptr.
      *
      * @return the \ref kworld_ptr to the world where *this* is from.*/
-    const fluent_set *get_fluent_set() const;
+    const fluent_ptr_set * get_fluent_set() const;
 
     /** \brief Getter of \ref m_id.
      *

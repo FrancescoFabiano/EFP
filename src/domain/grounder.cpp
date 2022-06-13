@@ -96,7 +96,7 @@ fluent_set grounder::ground_fluent(const string_set& x) const
 	fluent_set y;
 
 	for (it = x.begin(); it != x.end(); it++) {
-		y.insert(ground_fluent(*it));
+		y.insert(*ground_fluent(*it));
 	}
 
 	return y;
@@ -130,7 +130,7 @@ agent_set grounder::ground_agent(const string_set& x) const {
 	agent_set y;
 
 	for (it = x.begin(); it != x.end(); it++) {
-		y.insert(ground_agent(*it));
+		y.insert(*ground_agent(*it));
 	}
 
 	return y;
@@ -163,7 +163,7 @@ string_set grounder::deground_fluent(const fluent_set& x) const {
 	string_set y;
 
 	for (it = x.begin(); it != x.end(); it++) {
-		y.insert(deground_fluent(*it));
+		y.insert(deground_fluent(&*it));
 	}
 
 	return y;
@@ -196,7 +196,7 @@ string_set grounder::deground_agents(const agent_set & x) const {
 	string_set y;
 
 	for (it = x.begin(); it != x.end(); it++) {
-		y.insert(deground_agent(*it));
+		y.insert(deground_agent(&*it));
 	}
 
 	return y;

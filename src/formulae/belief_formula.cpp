@@ -59,13 +59,13 @@ void belief_formula::set_fluent_formula(const fluent_formula & to_set)
 		std::cerr << std::endl;
 		exit(1);
 	}
-	m_fluent_formula = to_set;
+//	m_fluent_formula = to_set;
 }
 
 void belief_formula::set_fluent_formula_from_fluent(const fluent *to_set)
 {
 	fluent_set tmp;
-	tmp.insert(to_set);
+//	tmp.insert(to_set);
 	m_fluent_formula.insert(tmp);
 }
 
@@ -142,7 +142,7 @@ void belief_formula::set_group_agents(const agent_set & to_set)
 		std::cerr << std::endl;
 		exit(1);
 	}
-	m_group_agents = to_set;
+//	m_group_agents = to_set;
 }
 
 const agent_set & belief_formula::get_group_agents() const

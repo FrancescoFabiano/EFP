@@ -80,12 +80,6 @@ enum action_check
     EXE_WORLD__COND_WORLD/**< \brief Both the executability and the conditional effects are checked in every world.*/
 };
 
-enum logic {
-    K,
-    KD45,
-    S5
-};
-
 enum spec_lang_type
 {
     EPDDL, /**< The E-PDDL language is used to speficy the input file*/

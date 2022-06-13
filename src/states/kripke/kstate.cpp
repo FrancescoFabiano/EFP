@@ -10,19 +10,19 @@
 #include <iostream>
 
 #include "kstate.h"
-#include "../../update/product_update.h"
+#include "../../domain/domain.h"
 #include "../../utilities/helper_t.ipp"
 
 
 kstate::kstate() = default;
 
-template<class M>
-kstate::kstate(const domain &domain, const finitary_theory<M> &theory) {
-    generate_from_theory(theory);
+
+kstate::kstate(const domain &domain, const finitary_theory &theory) {
+    generate_from_theory(domain, theory);
 }
 
-kstate::kstate(const kstate &previous, const action &action) {
-    update(previous, action);
+kstate::kstate(const kstate *previous, const action *act) {
+    update(previous, act);
 }
 
 /**** GETTERS ****/
@@ -38,46 +38,9 @@ const kworld *kstate::get_pointed() const {
     return m_pointed;
 }
 
-/**** OPERATORS ****/
-//bool kstate::operator=(const kstate & to_copy) {
-//    set_edges(to_copy.get_edges());
-//    set_worlds(to_copy.get_worlds());
-//    set_pointed(to_copy.get_pointed());
-//    return true;
-//}
-//
-//bool kstate::operator==(const kstate & to_compare) const {
-//    if (m_pointed->get_id() == to_compare.get_pointed()->get_id()) {
-//        return true;
-//    }
-//
-//    bisimulation b;
-//    // \todo: SISTEMA
-//    agent_set to_fix;
-//    return b.compare_automata_eq(to_compare, *this, to_fix); // domain.get_agents());
-//}
-//
-//bool kstate::operator<(const kstate & to_compare) const {
-//    if (m_pointed->get_id() < to_compare.get_pointed()->get_id()) {
-//        return true;
-//    } else if (m_pointed->get_id() > to_compare.get_pointed()->get_id()) {
-//        return false;
-//    }
-//
-//    if (m_worlds < to_compare.get_worlds()) {
-//        return true;
-//    } else if (m_worlds > to_compare.get_worlds()) {
-//        return false;
-//    }
-//
-//    if (m_edges < to_compare.get_edges()) {
-//        return true;
-//    } else if (m_edges > to_compare.get_edges()) {
-//        return false;
-//    }
-//
-//    return false;
-//}
+bool kstate::operator<(const kstate &to_compare) const {
+    return false;
+}
 
 bool kstate::entails(const formula &formula, const kworld &world) const {
     return false;
@@ -119,22 +82,17 @@ void kstate::clean_unreachable_kworlds() {
 }
 
 /**** INITIAL STATE ****/
-template<class M>
-void kstate::generate_from_theory(const domain &domain, const finitary_theory<M> &theory) {
+void kstate::generate_from_theory(const domain &domain, const finitary_theory &theory) {
     generate_initial_pointed(theory);
     generate_initial_worlds(domain, theory);
     generate_initial_edges(domain, theory);
 }
 
-template<class M>
-void kstate::generate_initial_pointed(const finitary_theory<M> &theory) {
-    fluent_set pointed_fluent_set;
-    std::list<literal>::const_iterator it_ls;
+void kstate::generate_initial_pointed(const finitary_theory &theory) {
+    fluent_ptr_set pointed_fluent_set;
 
-    for (it_ls = theory.get_pointed_literals().begin(); it_ls != theory.get_pointed_literals().end(); ++it_ls) {
-        if (it_ls->is_positive()) {
-            pointed_fluent_set.insert(it_ls->get_fluent());
-        }
+    for (const auto f : theory.get_pointed_fluents()) {
+        pointed_fluent_set.insert(f);
     }
 
     kworld tmp = kworld(&pointed_fluent_set, nullptr, 0);
@@ -143,49 +101,50 @@ void kstate::generate_initial_pointed(const finitary_theory<M> &theory) {
     m_worlds.insert(m_pointed);
 }
 
-template<class M>
-void kstate::generate_initial_worlds(const domain &domain, const finitary_theory<M> &theory) {
-    fluent_set initially_unknown_fluents;
-    std::set_difference(domain.get_fluents().begin(), domain.get_fluents().end(),
-                        theory.get_ck_literals().begin(), theory.get_ck_literals().end(), initially_unknown_fluents);
+void kstate::generate_initially_unknown_fluents(const domain &domain, fluent_ptr_set &initially_unknown_fluents) {
+//    std::set_difference(domain.get_fluent_set().begin(), domain.get_fluent_set().end(),
+//                        domain.get_finitary_theory().get_ck_fluents().begin(), domain.get_finitary_theory().get_ck_fluents().end(),
+//                        initially_unknown_fluents.begin());
+    // todo: SISTEMA
+}
 
-    // We generate all the combinations of fluents that are not known initially
-    // This is equivalent to generating the power set of initially_unknown_fluents
-    // Power set generation: https://rosettacode.org/wiki/Power_set#C.2B.2B
-    std::set<fluent_set> power_set;
+// Power set generation: https://rosettacode.org/wiki/Power_set#C.2B.2B
+template<class S>
+void kstate::power_set(S &set, std::set<S> &power_set) {
     power_set.emplace();
 
-    for (auto&& f : initially_unknown_fluents) {
-        std::set<fluent_set> subset;
+    for (auto&& item : set) {
+        std::set<S> subset;
 
         for (auto s : power_set) {
-            s.insert(f);
+            s.insert(item);
             subset.insert(s);
         }
-        power_set.insert(begin(subset), end(subset));
+        power_set.insert(subset.begin(), subset.end());
     }
+}
 
-    auto ps_it = power_set.begin();
+void kstate::generate_initial_fluent_sets(const finitary_theory &theory, std::set<fluent_ptr_set> &initial_fluent_sets) {
     auto form_it = theory.get_ck_formulae().begin();
     bool is_consistent = true;
 
     // We add the set of initially known fluents to each combination of initially unknown fluents
     // And we create a world for each resulting fluent set
-    for (; ps_it != power_set.end(); ++ps_it) {
-        ps_it->insert(theory.get_ck_literals());
+    for (auto fps : initial_fluent_sets) {
+        fps.insert(theory.get_ck_fluents().begin(), theory.get_ck_fluents().end());
         // todo: implementa set di fluent set (store); probabilmente va messo in domain
 
         // We check that the current fluent set is consistent with the fluent formulae that are
         // Commonly known by all agents according to the theory
         while (is_consistent && form_it != theory.get_ck_formulae().end()) {
-            if (!form_it->is_entailed(*ps_it)) {
+            if (!(*form_it)->is_entailed(&fps)) {
                 is_consistent = false;
             }
             ++form_it;
         }
 
         if (is_consistent) {
-            kworld tmp = kworld(&*ps_it, nullptr);
+            kworld tmp(&fps, nullptr);
             // todo: utilizza store per ottenere il puntatore
             m_worlds.insert(&tmp);
             // todo: inserisco due volte il pointed?
@@ -194,29 +153,25 @@ void kstate::generate_initial_worlds(const domain &domain, const finitary_theory
         form_it = theory.get_ck_formulae().begin();
         is_consistent = true;
     }
-/*//    fluent_set::const_iterator fs_it;
-//
-//    for (fs_it = initially_unknown_fluents.begin(); fs_it != initially_unknown_fluents.end(); ++fs_it) {
-//        for (ps_it = power_set.begin(); ps_it != power_set.end(); ++ps_it) {
-//            auto x = *ps_it;
-//            auto y = (*fs_it);
-//            x.insert(*fs_it);
-//            (*ps_it).insert(&(*fs_it));
-//            ps_it->insert(*(fs_it));
-//        }
-//    }*/
 }
 
-template<class M>
-void kstate::generate_initial_edges(const domain &domain, const finitary_theory<M> &theory) {
-    // todo: implementa classe template 'store' per collezionare elementi in un set (world, fluent_set, formule...)
-    kedge_map no_good;
-    std::map<const agent*, kworld_set> ag_worlds, ng_ag_worlds;
-    kworld_set ws, ng_ws;
+void kstate::generate_initial_worlds(const domain &domain, const finitary_theory &theory) {
+    fluent_ptr_set initially_unknown_fluents;
+    std::set<fluent_ptr_set> initial_fluent_sets;
 
-    // In 'no_good' we keep track of what edges we don't want to include
+    generate_initially_unknown_fluents(domain, initially_unknown_fluents);
+    // We generate all the combinations of fluents that are not known initially
+    // This is equivalent to generating the power set of initially_unknown_fluents
+    power_set(initially_unknown_fluents, initial_fluent_sets);
+    generate_initial_fluent_sets(theory, initial_fluent_sets);
+}
+
+void kstate::calculate_no_good_edges(const finitary_theory &theory, kedge_map &no_goods) {
+    std::map<const agent*, kworld_set> ng_ag_worlds;
+    kworld_set ng_ws;
+
     for (const auto w1 : m_worlds) {
-        ng_ag_worlds = no_good[w1];
+        ng_ag_worlds = no_goods[w1];
 
         for (const auto knows_whether : theory.get_knows_whether()) {
             assert(knows_whether->get_formula()->is_propositional());
@@ -231,25 +186,38 @@ void kstate::generate_initial_edges(const domain &domain, const finitary_theory<
             }
         }
     }
+}
+
+void kstate::filter_no_good_edges(const domain &domain, kedge_map &no_goods) {
+    std::map<const agent*, kworld_set> ag_worlds, ng_ag_worlds;
+    kworld_set ws, ng_ws;
 
     for (const auto w1 : m_worlds) {
         ag_worlds = m_edges[w1];
-        ng_ag_worlds = no_good[w1];
+        ng_ag_worlds = no_goods[w1];
 
-        for (const auto ag : domain.get_agents()) {
-            ws = ag_worlds[ag];
+        for (const auto& ag : domain.get_agent_set()) {
+//            ws = ag_worlds[ag];
             ng_ws = ng_ag_worlds[ag];
 
             // We store only edges that are *not* in the no-goods map
-            for (const auto w2 : m_worlds) {
-                std::set_difference(m_worlds.begin(), m_worlds.end(), ng_ws.begin(), ng_ws.end(), ws.begin());
-            }
+//            std::set_difference(m_worlds.begin(), m_worlds.end(), ng_ws.begin(), ng_ws.end(), ag_worlds[ag].begin());
+            // todo: SISTEMA
         }
     }
 }
 
+void kstate::generate_initial_edges(const domain &domain, const finitary_theory &theory) {
+    // todo: implementa classe template 'store' per collezionare elementi in un set (world, fluent_set, formule...)
+    kedge_map no_goods;
+
+    // In 'no_good' we keep track of what edges we don't want to include
+    calculate_no_good_edges(theory, no_goods);
+    filter_no_good_edges(domain, no_goods);
+}
+
 /**** TRANSITION FUNCTION ****/
-void kstate::update(const kstate &previous, const action &action) {
+void kstate::update(const kstate *previous, const action *action) {
     // todo: implement
 }
 

@@ -11,7 +11,7 @@ private:
 public:
     or_formula(const formula *f1, const formula *f2);
 
-    bool is_entailed(const fluent_set *fluent_set) const override;
+    bool is_entailed(const fluent_ptr_set *fluent_set) const override;
     bool is_entailed(const kstate *state, const kworld *world) const override;
     bool is_entailed(const pstate *state, const pworld *world) const override;
 

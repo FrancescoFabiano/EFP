@@ -34,7 +34,7 @@ typedef std::map<const agent*, pworld_set> pworld_map; /**< \brief A map between
                                                     *
                                                     * @see pworld and pstate.*/
 
-typedef std::map<const pworld*, pworld_map> pedges; /**< \brief A map, for every \ref pworld, of the beleifs of its agents.
+typedef std::map<const pworld*, pworld_map> pedge_map; /**< \brief A map, for every \ref pworld, of the beleifs of its agents.
 //                                                                 *
 //                                                                 * @see pworld and pstate.*/
 

@@ -81,21 +81,21 @@ fluent_set helper::and_ff(const fluent_set& fl1, const fluent_set& fl2)
 	///\todo The return should be const fluent_set & for efficency? Or move?
 
 	fluent_set ret;
-	if (!fl1.empty() && !fl2.empty()) {
-
-		if (is_consistent(fl1, fl2)) {
-			ret = fl1;
-			ret.insert(fl2.begin(), fl2.end());
-		}
-
-	} else if (fl1.empty()) {
-		return fl2;
-	} else if (fl2.empty()) {
-		return fl1;
-	} else {
-		std::cerr << "Bad formula declaration." << std::endl;
-	}
-
+//	if (!fl1.empty() && !fl2.empty()) {
+//
+//		if (is_consistent(fl1, fl2)) {
+//			ret = fl1;
+//			ret.insert(fl2.begin(), fl2.end());
+//		}
+//
+//	} else if (fl1.empty()) {
+//		return fl2;
+//	} else if (fl2.empty()) {
+//		return fl1;
+//	} else {
+//		std::cerr << "Bad formula declaration." << std::endl;
+//	}
+    // todo: eliminare?
 	return ret;
 }
 
@@ -137,41 +137,41 @@ bool helper::check_Bff_notBff(const belief_formula& to_check_1, const belief_for
 	 * \todo we assume that the fluent_formula has just one element (the fluent).
 	 */
 
-	if (to_check_1.get_formula_type() == BELIEF_FORMULA && to_check_2.get_formula_type() == BELIEF_FORMULA) {
-		belief_formula to_check_nested_1 = to_check_1.get_bf1();
-		belief_formula to_check_nested_2 = to_check_2.get_bf1();
-
-		if (to_check_nested_1.get_formula_type() == FLUENT_FORMULA && to_check_nested_2.get_formula_type() == PROPOSITIONAL_FORMULA) {
-			if (to_check_nested_2.get_operator() == BF_NOT) {
-				fluent_set tmp = *((to_check_nested_1.get_fluent_formula()).begin());
-				fluent f_to_check_1 = *(tmp.begin());
-				tmp = *((to_check_nested_2.get_bf1().get_fluent_formula()).begin());
-				fluent f_to_check_2 = *(tmp.begin());
-				if (f_to_check_1 == f_to_check_2) {
-
-					if (ret != nullptr) {
-						ret->insert(tmp);
-					}
-					return true;
-				}
-			}
-		} else if (to_check_nested_2.get_formula_type() == FLUENT_FORMULA && to_check_nested_1.get_formula_type() == PROPOSITIONAL_FORMULA) {
-			if (to_check_nested_1.get_operator() == BF_NOT) {
-				fluent_set tmp = *((to_check_nested_1.get_bf1().get_fluent_formula()).begin());
-				fluent f_to_check_1 = *(tmp.begin());
-				tmp = *((to_check_nested_2.get_fluent_formula()).begin());
-				fluent f_to_check_2 = *(tmp.begin());
-				if (f_to_check_1 == f_to_check_2) {
-
-					if (ret != nullptr) {
-						ret->insert(tmp);
-					}
-					return true;
-				}
-			}
-		}
-
-	}
+//	if (to_check_1.get_formula_type() == BELIEF_FORMULA && to_check_2.get_formula_type() == BELIEF_FORMULA) {
+//		belief_formula to_check_nested_1 = to_check_1.get_bf1();
+//		belief_formula to_check_nested_2 = to_check_2.get_bf1();
+//
+//		if (to_check_nested_1.get_formula_type() == FLUENT_FORMULA && to_check_nested_2.get_formula_type() == PROPOSITIONAL_FORMULA) {
+//			if (to_check_nested_2.get_operator() == BF_NOT) {
+//				fluent_set tmp = *((to_check_nested_1.get_fluent_formula()).begin());
+//				fluent f_to_check_1 = *(tmp.begin());
+//				tmp = *((to_check_nested_2.get_bf1().get_fluent_formula()).begin());
+//				fluent f_to_check_2 = *(tmp.begin());
+//				if (f_to_check_1 == f_to_check_2) {
+//
+//					if (ret != nullptr) {
+//						ret->insert(tmp);
+//					}
+//					return true;
+//				}
+//			}
+//		} else if (to_check_nested_2.get_formula_type() == FLUENT_FORMULA && to_check_nested_1.get_formula_type() == PROPOSITIONAL_FORMULA) {
+//			if (to_check_nested_1.get_operator() == BF_NOT) {
+//				fluent_set tmp = *((to_check_nested_1.get_bf1().get_fluent_formula()).begin());
+//				fluent f_to_check_1 = *(tmp.begin());
+//				tmp = *((to_check_nested_2.get_fluent_formula()).begin());
+//				fluent f_to_check_2 = *(tmp.begin());
+//				if (f_to_check_1 == f_to_check_2) {
+//
+//					if (ret != nullptr) {
+//						ret->insert(tmp);
+//					}
+//					return true;
+//				}
+//			}
+//		}
+//
+//	}
 	return false;
 }
 

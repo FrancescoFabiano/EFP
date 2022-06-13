@@ -21,12 +21,13 @@
 #include "kworld.h"
 #include "kstore.h"
 
-#include "../../../include/definitions/define.h"
-//#include "../../domain/initially.h"
-//#include "../../actions/action.h"
+#include "../../../include/definitions/domain_def.h"
+#include "../../../include/definitions/domain_config_def.h"
 #include "../../../external-lib/bisimulation/bisimulation.h"
-#include "../../formulae/finitary_theory/finitary_theory.h"
-#include "../../domain/domain.h"
+
+class domain;
+class formula;
+class finitary_theory;
 
 class kstate {
 private:
@@ -43,27 +44,27 @@ private:
      * @see kworld and kstore.*/
     kworld *m_pointed;
 
-    /** \brief Function that builds the initial Kripke structure given the initial conditions.
-     *
-     * The building of the initial Kripke structure can be done in two different ways:
-     *    - A method using a pruning techniques(\ref build_initial_prune).
-     *    - A structural build (\ref build_initial_structural).
-     *
-     * @see kworld, kedge and initially.
-     *
-     * \todo if first method is implemented the add functions in \ref kstore must be changed to not create
-     *       the object every time but just to retrieve the object since all of them are already created.*/
-    template<class M>
-    void generate_from_theory(const domain &domain, const finitary_theory<M> &theory);
+//    kstate *previous_state;
+//    action *act;
 
-    template<class M>
-    void generate_initial_pointed(const finitary_theory<M> &theory);
+    template<class S>
+    void power_set(S &set, std::set<S> &power_set);
 
-    template<class M>
-    void generate_initial_worlds(const domain &domain, const finitary_theory<M> &theory);
+    void generate_from_theory(const domain &domain, const finitary_theory &theory);
 
-    template<class M>
-    void generate_initial_edges(const domain &domain, const finitary_theory<M> &theory);
+    void generate_initial_pointed(const finitary_theory &theory);
+
+    void generate_initially_unknown_fluents(const domain &domain, fluent_ptr_set &initially_unknown_fluents);
+
+    void generate_initial_fluent_sets(const finitary_theory &theory, std::set<fluent_ptr_set> &initial_fluent_sets);
+
+    void generate_initial_worlds(const domain &domain, const finitary_theory &theory);
+
+    void calculate_no_good_edges(const finitary_theory &theory, kedge_map &no_goods);
+
+    void filter_no_good_edges(const domain &domain, kedge_map &no_goods);
+
+    void generate_initial_edges(const domain &domain, const finitary_theory &theory);
 
     /** \brief Function that checks the entailment of a \ref fluent in a given \ref kworld.
      *
@@ -74,7 +75,7 @@ private:
      * @return false: \p -to_check is entailed in \p world.*/
     bool entails(const formula &formula, const kworld &world) const;
 
-    void update(const kstate &previous, const action &action);
+    void update(const kstate *previous, const action *action);
 
     /** Function that calculates all the reachable \ref kworld.
      * 
@@ -107,10 +108,9 @@ private:
 public:
     kstate();
 
-    template<class M>
-    kstate(const domain &domain, const finitary_theory<M> &theory);
+    kstate(const domain &domain, const finitary_theory &theory);
 
-    kstate(const kstate &previous, const action &action);
+    kstate(const kstate *previous, const action *act);
     /** \brief Getter of the field \ref m_worlds.
      *
      * @return: the value of \ref m_worlds.*/
@@ -140,7 +140,7 @@ public:
      * @return true: if *this* is smaller than \p to_compare.
      * @return false: otherwise.*/
     bool operator<(const kstate & to_compare) const;
-    bool operator==(const kstate & to_compare) const;
+//    bool operator==(const kstate & to_compare) const;
 
     /** \brief Function that applies the transition function on *this* given an action.
      *
@@ -171,6 +171,4 @@ public:
 
     //    void debug_print(const kstate & to_compare);
     //    void automaton_to_kstate_debug(const automaton & a, std::vector<kworld*> & kworld_vec);
-
-
 };

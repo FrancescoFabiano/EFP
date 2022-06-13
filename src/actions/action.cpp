@@ -173,7 +173,8 @@ bool action::operator=(const action &act) {
 
     m_executability = act.get_executability();
     m_observants = act.get_observants();
-    m_effects = act.get_effects();
+//    m_effects = act.get_effects();
+    // todo: controlla operatore =
 
     return true;
 }
@@ -213,7 +214,7 @@ void action::print() const {
 //            belief_formula cond_temp = internal_it->second;
 //            if (cond_temp.get_formula_type() == FLUENT_FORMULA) {
 //                auto ff_temp = cond_temp.get_fluent_formula();
-//                auto init_fluent = domain::get_instance().get_fluents().begin();
+//                auto init_fluent = domain::get_instance().get_fluent_set().begin();
 //                auto neg_init_fluent = helper::negate_fluent(*init_fluent);
 //                if (ff_temp.begin()->find(*init_fluent) != ff_temp.begin()->end() &&
 //                    ff_temp.begin()->find(neg_init_fluent) != ff_temp.begin()->end()) {

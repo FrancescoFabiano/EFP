@@ -44,8 +44,8 @@ class cem_ptr;
 typedef std::map<agent_group_id, cevent_ptr_set> cevent_map;
 typedef std::map<cevent_ptr, cevent_map> cem_edges;
 
-class pworld_ptr;
-typedef std::map<std::pair<pworld_ptr, cevent_ptr>, pworld_ptr> cupdate_map;
+class pworld;
+typedef std::map<std::pair<const pworld*, cevent_ptr>, const pworld*> cupdate_map;
 
 //class cem_store;
 class cevent;

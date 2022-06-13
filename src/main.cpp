@@ -13,9 +13,13 @@
 #include <memory>
 #include <algorithm>
 
+//#include "formulae/finitary_theory/finitary_theory.cpp"
 #include "search/planner.ipp"
-#include "states/kripke/kstate.h"
-#include "states/possibilities/pstate.h"
+
+class kstate;
+class pstate;
+//#include "states/kripke/kstate.h"
+//#include "states/possibilities/pstate.h"
 
 void print_usage(char* prog_name) {
     std::cout << "USAGE:" << std::endl;
@@ -389,10 +393,7 @@ void build_domain_config(domain_config & config, int argc, char **argv) {
     }
 }
 
-void build_domain(domain &domain, cem_store &store, reader &reader, grounder &grounder, const printer &printer, int argc, char **argv) {
-    domain_config config;
-    build_domain_config(config, argc, argv);
-
+void build_store(domain_config &config, cem_store &store, reader &reader, grounder &grounder, const printer &printer, char **argv) {
     std::string domain_name = argv[1];
     std::string used_name = domain_name;
 
@@ -450,10 +451,6 @@ void build_domain(domain &domain, cem_store &store, reader &reader, grounder &gr
 
         reader.read_mar();
     }
-
-    domain.set_config(config);
-    domain.set_store(store);
-    domain.build(grounder, reader, printer);
 }
 
 void launch_search(domain& domain) {
@@ -482,13 +479,19 @@ int main(int argc, char** argv) {
         exit(1);
     }
 
-    domain domain;
+    domain_config config;
     cem_store store;
     reader reader;
     grounder grounder;
     printer printer;
+    finitary_theory theory;
 
-    build_domain(domain, store, reader, grounder, printer, argc, argv);
+    build_domain_config(config, argc, argv);
+    build_store(config, store, reader, grounder, printer, argv);
+
+    domain domain(config, store, theory);
+    domain.build(grounder, reader, printer);
+
     launch_search(domain);
 
     exit(0);

@@ -7,11 +7,11 @@
 template<class M>
 class ck_formula : public formula {
 private:
-    const agent_set *m_ags;
+    const agent_ptr_set *m_ags;
     const formula *m_f;
 
 public:
-    ck_formula<M>(const agent_set *ags, const formula *f);
+    ck_formula<M>(const agent_ptr_set *ags, const formula *f);
 
     bool is_entailed(const kstate *state, const kworld *world) const override;
     bool is_entailed(const pstate *state, const pworld *world) const override;

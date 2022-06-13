@@ -20,8 +20,8 @@ public:
     const agent* get_agent() const;
     const formula* get_formula() const;
 
-    bool operator==(const box_formula<M> &to_compare) const;
-    bool operator<(const box_formula<M> &to_compare) const;
+    bool operator==(const box_whether_formula<M> &to_compare) const;
+    bool operator<(const box_whether_formula<M> &to_compare) const;
 };
 
 #endif //EFP_BOX_WHETHER_FORMULA_H

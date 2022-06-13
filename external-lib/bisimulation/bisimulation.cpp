@@ -1,4 +1,6 @@
 #include "bisimulation.h"
+#include "../../src/states/kripke/kworld.h"
+#include "../../src/states/kripke/kstate.h"
 
 /*\***IO_FC2.cpp****/
 void bisimulation::DisposeAutoma(automaton *a)
@@ -1882,145 +1884,145 @@ bisimulation::bisimulation()
 
 automaton* bisimulation::merge_kstate_to_automaton(const kstate & ks1, const kstate & ks2, unsigned long ag_set_size, int & root2, const std::map<agent, bis_label> & agent_to_label) const {
 
-	std::map<int, int> compact_indices;
-	std::map<kworld_ptr, int> index_map1, index_map2;
-	kbislabel_map label_map1, label_map2; // Map: from -> (to -> ag_set)
+//	std::map<int, int> compact_indices;
+//	std::map<kworld_ptr, int> index_map1, index_map2;
+//	kbislabel_map label_map1, label_map2; // Map: from -> (to -> ag_set)
 
 	automaton *a;
-	int Nvertex = ks1.get_worlds().size() + ks2.get_worlds().size();
-	//BIS_ADAPTATION For the loop that identifies the id (We add one edge for each node)
-	v_elem *Vertex;
-
-	Vertex = (v_elem *) malloc(sizeof(v_elem) * Nvertex);
-
-	// Initializating vertices
-	kworld_set::const_iterator it_kwps;
-	kbislabel_map::const_iterator it_klm;
-	bis_label_set::const_iterator it_bislab;
-	std::map<kworld_ptr, bis_label_set>::const_iterator it_kw_bislab;
-
-	//std::cerr << "\nDEBUG: Inizializzazione Edges\n";
-
-	// The pointed world is set to the index 0. This ensures that, when deleting the bisimilar nodes, the pointed kworld
-	// is always chosen as the first of its block. Therefore, we do not need to update it when converting back to a kstate
-	index_map1[ks1.get_pointed()] = 0;
-	compact_indices[ks1.get_pointed().get_numerical_id()] = 0;
-	Vertex[0].ne = 0;
-
-	int i = 1, c = 1;
-
-	for (it_kwps = ks1.get_worlds().begin(); it_kwps != ks1.get_worlds().end(); it_kwps++) {
-		if (!(*it_kwps == ks1.get_pointed())) {
-			index_map1[*it_kwps] = i;
-			// DEBUG
-
-			if (compact_indices.insert({it_kwps->get_numerical_id(), c}).second) {
-				c++;
-			}
-
-			Vertex[i].ne = 0;
-			i++;
-		}
-		label_map1[*it_kwps][*it_kwps].insert(compact_indices[it_kwps->get_numerical_id()] + ag_set_size);
-	}
-
-	index_map2[ks2.get_pointed()] = root2 = i;
-	Vertex[i].ne = 0;
-	i++;
-
-	if (compact_indices.insert({ks2.get_pointed().get_numerical_id(), c}).second) {
-		c++;
-	}
-
-	for (it_kwps = ks2.get_worlds().begin(); it_kwps != ks2.get_worlds().end(); it_kwps++) {
-		if (!(*it_kwps == ks2.get_pointed())) {
-			index_map2[*it_kwps] = i;
-
-			if (compact_indices.insert({it_kwps->get_numerical_id(), c}).second) {
-				return nullptr;
-				// c++;
-			}
-
-			Vertex[i].ne = 0;
-			i++;
-		}
-		label_map2[*it_kwps][*it_kwps].insert(compact_indices[it_kwps->get_numerical_id()] + ag_set_size);
-	}
-
-	int bhtabSize = ag_set_size + c;
-
-    kedge_map::const_iterator it_kem;
-    std::map<agent, kworld_set>::const_iterator it_agkw;
-
-    for (it_kem = ks1.get_edges().begin(); it_kem != ks1.get_edges().end(); it_kem++) {
-        for (it_agkw = it_kem->second.begin(); it_agkw != it_kem->second.end(); it_agkw++) {
-            for (it_kwps = it_agkw->second.begin(); it_kwps != it_agkw->second.end(); it_kwps++) {
-                label_map1[it_kem->first][*it_kwps].insert(agent_to_label.at(it_agkw->first));
-                Vertex[index_map1[it_kem->first]].ne++;
-            }
-        }
-    }
-
-    for (it_kem = ks2.get_edges().begin(); it_kem != ks2.get_edges().end(); it_kem++) {
-        for (it_agkw = it_kem->second.begin(); it_agkw != it_kem->second.end(); it_agkw++) {
-            for (it_kwps = it_agkw->second.begin(); it_kwps != it_agkw->second.end(); it_kwps++) {
-                label_map2[it_kem->first][*it_kwps].insert(agent_to_label.at(it_agkw->first));
-                Vertex[index_map2[it_kem->first]].ne++;
-            }
-        }
-    }
-
-	for (i = 0; i < Nvertex; i++) {
-		Vertex[i].ne++; //Self loop bisimulation
-		Vertex[i].e = (e_elem *) malloc(sizeof(e_elem) * Vertex[i].ne);
-	}
-
-	int from, to, j = 0;
-
-	for (it_klm = label_map1.begin(); it_klm != label_map1.end(); it_klm++) {
-		from = index_map1[it_klm->first]; // For each kworld 'from'
-
-		for (it_kw_bislab = it_klm->second.begin(); it_kw_bislab != it_klm->second.end(); it_kw_bislab++) { // For each edge that reaches the kworld 'to'
-			to = index_map1[it_kw_bislab->first];
-
-			for (it_bislab = it_kw_bislab->second.begin(); it_bislab != it_kw_bislab->second.end(); it_bislab++) { // For each agent 'ag' in the label of the kedge
-				Vertex[from].e[j].nbh = 1; // Let j be the index of the adjacency list of from that stores the kedge (from, to)
-				Vertex[from].e[j].bh = (int *) malloc(sizeof(int)); // Let nbh be the number of agents in such kedge
-				Vertex[from].e[j].tv = to; // Update the value of the reache kworld
-				Vertex[from].e[j].bh[0] = *it_bislab; // Update the value of the label at index k to 'ag'
-
-				j++; // Update the value of the index j
-			}
-		}
-		j = 0; // Reset j
-	}
-
-	j = 0;
-
-	for (it_klm = label_map2.begin(); it_klm != label_map2.end(); it_klm++) {
-		from = index_map2[it_klm->first]; // For each kworld 'from'
-
-		for (it_kw_bislab = it_klm->second.begin(); it_kw_bislab != it_klm->second.end(); it_kw_bislab++) { // For each edge that reaches the kworld 'to'
-			to = index_map2[it_kw_bislab->first];
-
-			for (it_bislab = it_kw_bislab->second.begin(); it_bislab != it_kw_bislab->second.end(); it_bislab++) { // For each agent 'ag' in the label of the kedge
-				Vertex[from].e[j].nbh = 1; // Let j be the index of the adjacency list of from that stores the kedge (from, to)
-				Vertex[from].e[j].bh = (int *) malloc(sizeof(int)); // Let nbh be the number of agents in such kedge
-				Vertex[from].e[j].tv = to; // Update the value of the reache kworld
-				Vertex[from].e[j].bh[0] = *it_bislab; // Update the value of the label at index k to 'ag'
-
-				j++; // Update the value of the index j
-			}
-		}
-		j = 0; // Reset j
-	}
-
-	// Building the automaton
-	int Nbehavs = bhtabSize;
-	a = (automaton *) malloc(sizeof(automaton));
-	a->Nvertex = Nvertex;
-	a->Nbehavs = Nbehavs;
-	a->Vertex = Vertex;
+//	int Nvertex = ks1.get_worlds().size() + ks2.get_worlds().size();
+//	//BIS_ADAPTATION For the loop that identifies the id (We add one edge for each node)
+//	v_elem *Vertex;
+//
+//	Vertex = (v_elem *) malloc(sizeof(v_elem) * Nvertex);
+//
+//	// Initializating vertices
+//	kworld_set::const_iterator it_kwps;
+//	kbislabel_map::const_iterator it_klm;
+//	bis_label_set::const_iterator it_bislab;
+//	std::map<kworld_ptr, bis_label_set>::const_iterator it_kw_bislab;
+//
+//	//std::cerr << "\nDEBUG: Inizializzazione Edges\n";
+//
+//	// The pointed world is set to the index 0. This ensures that, when deleting the bisimilar nodes, the pointed kworld
+//	// is always chosen as the first of its block. Therefore, we do not need to update it when converting back to a kstate
+//	index_map1[ks1.get_pointed()] = 0;
+//	compact_indices[ks1.get_pointed().get_numerical_id()] = 0;
+//	Vertex[0].ne = 0;
+//
+//	int i = 1, c = 1;
+//
+//	for (it_kwps = ks1.get_worlds().begin(); it_kwps != ks1.get_worlds().end(); it_kwps++) {
+//		if (!(*it_kwps == ks1.get_pointed())) {
+//			index_map1[*it_kwps] = i;
+//			// DEBUG
+//
+//			if (compact_indices.insert({it_kwps->get_numerical_id(), c}).second) {
+//				c++;
+//			}
+//
+//			Vertex[i].ne = 0;
+//			i++;
+//		}
+//		label_map1[*it_kwps][*it_kwps].insert(compact_indices[it_kwps->get_numerical_id()] + ag_set_size);
+//	}
+//
+//	index_map2[ks2.get_pointed()] = root2 = i;
+//	Vertex[i].ne = 0;
+//	i++;
+//
+//	if (compact_indices.insert({ks2.get_pointed().get_numerical_id(), c}).second) {
+//		c++;
+//	}
+//
+//	for (it_kwps = ks2.get_worlds().begin(); it_kwps != ks2.get_worlds().end(); it_kwps++) {
+//		if (!(*it_kwps == ks2.get_pointed())) {
+//			index_map2[*it_kwps] = i;
+//
+//			if (compact_indices.insert({it_kwps->get_numerical_id(), c}).second) {
+//				return nullptr;
+//				// c++;
+//			}
+//
+//			Vertex[i].ne = 0;
+//			i++;
+//		}
+//		label_map2[*it_kwps][*it_kwps].insert(compact_indices[it_kwps->get_numerical_id()] + ag_set_size);
+//	}
+//
+//	int bhtabSize = ag_set_size + c;
+//
+//    kedge_map::const_iterator it_kem;
+//    std::map<agent, kworld_set>::const_iterator it_agkw;
+//
+//    for (it_kem = ks1.get_edges().begin(); it_kem != ks1.get_edges().end(); it_kem++) {
+//        for (it_agkw = it_kem->second.begin(); it_agkw != it_kem->second.end(); it_agkw++) {
+//            for (it_kwps = it_agkw->second.begin(); it_kwps != it_agkw->second.end(); it_kwps++) {
+//                label_map1[it_kem->first][*it_kwps].insert(agent_to_label.at(it_agkw->first));
+//                Vertex[index_map1[it_kem->first]].ne++;
+//            }
+//        }
+//    }
+//
+//    for (it_kem = ks2.get_edges().begin(); it_kem != ks2.get_edges().end(); it_kem++) {
+//        for (it_agkw = it_kem->second.begin(); it_agkw != it_kem->second.end(); it_agkw++) {
+//            for (it_kwps = it_agkw->second.begin(); it_kwps != it_agkw->second.end(); it_kwps++) {
+//                label_map2[it_kem->first][*it_kwps].insert(agent_to_label.at(it_agkw->first));
+//                Vertex[index_map2[it_kem->first]].ne++;
+//            }
+//        }
+//    }
+//
+//	for (i = 0; i < Nvertex; i++) {
+//		Vertex[i].ne++; //Self loop bisimulation
+//		Vertex[i].e = (e_elem *) malloc(sizeof(e_elem) * Vertex[i].ne);
+//	}
+//
+//	int from, to, j = 0;
+//
+//	for (it_klm = label_map1.begin(); it_klm != label_map1.end(); it_klm++) {
+//		from = index_map1[it_klm->first]; // For each kworld 'from'
+//
+//		for (it_kw_bislab = it_klm->second.begin(); it_kw_bislab != it_klm->second.end(); it_kw_bislab++) { // For each edge that reaches the kworld 'to'
+//			to = index_map1[it_kw_bislab->first];
+//
+//			for (it_bislab = it_kw_bislab->second.begin(); it_bislab != it_kw_bislab->second.end(); it_bislab++) { // For each agent 'ag' in the label of the kedge
+//				Vertex[from].e[j].nbh = 1; // Let j be the index of the adjacency list of from that stores the kedge (from, to)
+//				Vertex[from].e[j].bh = (int *) malloc(sizeof(int)); // Let nbh be the number of agents in such kedge
+//				Vertex[from].e[j].tv = to; // Update the value of the reache kworld
+//				Vertex[from].e[j].bh[0] = *it_bislab; // Update the value of the label at index k to 'ag'
+//
+//				j++; // Update the value of the index j
+//			}
+//		}
+//		j = 0; // Reset j
+//	}
+//
+//	j = 0;
+//
+//	for (it_klm = label_map2.begin(); it_klm != label_map2.end(); it_klm++) {
+//		from = index_map2[it_klm->first]; // For each kworld 'from'
+//
+//		for (it_kw_bislab = it_klm->second.begin(); it_kw_bislab != it_klm->second.end(); it_kw_bislab++) { // For each edge that reaches the kworld 'to'
+//			to = index_map2[it_kw_bislab->first];
+//
+//			for (it_bislab = it_kw_bislab->second.begin(); it_bislab != it_kw_bislab->second.end(); it_bislab++) { // For each agent 'ag' in the label of the kedge
+//				Vertex[from].e[j].nbh = 1; // Let j be the index of the adjacency list of from that stores the kedge (from, to)
+//				Vertex[from].e[j].bh = (int *) malloc(sizeof(int)); // Let nbh be the number of agents in such kedge
+//				Vertex[from].e[j].tv = to; // Update the value of the reache kworld
+//				Vertex[from].e[j].bh[0] = *it_bislab; // Update the value of the label at index k to 'ag'
+//
+//				j++; // Update the value of the index j
+//			}
+//		}
+//		j = 0; // Reset j
+//	}
+//
+//	// Building the automaton
+//	int Nbehavs = bhtabSize;
+//	a = (automaton *) malloc(sizeof(automaton));
+//	a->Nvertex = Nvertex;
+//	a->Nbehavs = Nbehavs;
+//	a->Vertex = Vertex;
 
 	return a;
 }

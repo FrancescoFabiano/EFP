@@ -16,7 +16,7 @@
 #include "../../include/definitions/define.h"
 #include "../formulae/belief_formula.h"
 #include "../domain/grounder.h"
-#include "../domain/domain.h"
+//#include "../domain/domain.h"
 #include "custom_event_models/cem_store.h"
 
 class action {

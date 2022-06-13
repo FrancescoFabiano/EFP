@@ -9,7 +9,7 @@
 #include <iostream>
 
 #include "initially.h"
-#include "domain.h"
+//#include "domain.h"
 #include "../../include/definitions/domain_config_def.h"
 #include "../utilities/printer.h"
 #include "../utilities/helper.h"
@@ -207,7 +207,8 @@ void initially::set_ff_forS5(Initial_State_Mode initial_state_mode) {
 			}
 		}
 		//So if called twice is still correct
-		m_ff_forS5 = ret;
+//		m_ff_forS5 = ret;
+        // todo: controlla
 	}
 }
 

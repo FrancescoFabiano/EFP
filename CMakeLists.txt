@@ -18,6 +18,8 @@ set(
         src/domain/grounder.cpp
         src/domain/initially.cpp
         src/formulae/formula.cpp
+        src/formulae/finitary_theory/finitary_theory.cpp
+        src/formulae/finitary_theory/box_whether_formula.ipp
         src/formulae/modal/box_formula.cpp
         src/formulae/modal/diamond_formula.cpp
         src/formulae/modal/ck_formula.cpp
@@ -26,9 +28,9 @@ set(
         src/formulae/propositional/and_formula.cpp
         src/formulae/propositional/or_formula.cpp
         src/formulae/belief_formula.cpp
-        src/heuristics/heuristics_manager.cpp
-        src/heuristics/heuristics_template.ipp
-        src/heuristics/satisfied_goals.cpp
+#        src/heuristics/heuristics_manager.cpp
+#        src/heuristics/heuristics_template.ipp
+#        src/heuristics/satisfied_goals.cpp
         src/parse/cem_parser.cpp
 #        src/refactor/asp_maker.cpp
         src/search/planner.ipp
@@ -70,6 +72,8 @@ set(
         src/domain/grounder.h
         src/domain/initially.h
         src/formulae/formula.h
+        src/formulae/finitary_theory/finitary_theory.h
+        src/formulae/finitary_theory/box_whether_formula.h
         src/formulae/modal/box_formula.h
         src/formulae/modal/diamond_formula.h
         src/formulae/modal/ck_formula.h
@@ -78,8 +82,8 @@ set(
         src/formulae/propositional/and_formula.h
         src/formulae/propositional/or_formula.h
         src/formulae/belief_formula.h
-        src/heuristics/heuristics_manager.h
-        src/heuristics/satisfied_goals.h
+#        src/heuristics/heuristics_manager.h
+#        src/heuristics/satisfied_goals.h
         src/parse/cem_parser.h
 #        src/refactor/asp_maker.h
         src/search/planner.h
@@ -96,7 +100,7 @@ set(
         src/utilities/printer.h
         src/utilities/reader.h
         external-lib/bisimulation/bisimulation.h
-        src/formulae/finitary_theory/finitary_theory.cpp src/formulae/finitary_theory/finitary_theory.h src/formulae/finitary_theory/box_whether_formula.cpp src/formulae/finitary_theory/box_whether_formula.h)
+)
 
 # FLEX & BISON
 find_package(FLEX REQUIRED)

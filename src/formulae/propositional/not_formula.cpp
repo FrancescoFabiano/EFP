@@ -4,7 +4,7 @@ not_formula::not_formula(const formula *f) : m_f(f) {
     m_modal_depth = f->get_modal_depth();
 }
 
-bool not_formula::is_entailed(const fluent_set *fluent_set) const {
+bool not_formula::is_entailed(const fluent_ptr_set *fluent_set) const {
     assert(m_modal_depth == 0);
     return !m_f->is_entailed(fluent_set);
 }

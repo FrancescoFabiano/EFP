@@ -23,7 +23,7 @@ bool box_formula<M>::is_entailed(const kstate *state, const kworld *world) const
 
 template<class M>
 bool box_formula<M>::is_entailed(const pstate *state, const pworld *world) const {
-    auto ag_worlds = state->get_beliefs().at(world).at(m_ag);
+    auto ag_worlds = state->get_edges().at(world).at(m_ag);
     auto it_pws = ag_worlds.begin();
 
     while (it_pws != ag_worlds.end()) {

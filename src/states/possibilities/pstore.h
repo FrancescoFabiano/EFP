@@ -45,7 +45,7 @@ public:
      * @return the \ref pworld_ptr to \p to_add.
      * 
      * \todo Param ok because set makes copy?*/
-    const pworld_ptr add_world(const pworld & to_add);
+    const pworld *add_world(const pworld *to_add);
 
     /*\brief Function that add a created \ref pworld without returning its pointer.
      * 

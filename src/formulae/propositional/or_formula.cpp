@@ -4,7 +4,7 @@ or_formula::or_formula(const formula *f1, const formula *f2) : m_f1(f1), m_f2(f2
     m_modal_depth = std::max(m_f1->get_modal_depth(), m_f2->get_modal_depth());
 }
 
-bool or_formula::is_entailed(const fluent_set *fluent_set) const {
+bool or_formula::is_entailed(const fluent_ptr_set *fluent_set) const {
     assert(m_modal_depth == 0);
     return m_f1->is_entailed(fluent_set) || m_f2->is_entailed(fluent_set);
 }

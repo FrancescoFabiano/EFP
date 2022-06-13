@@ -14,12 +14,16 @@ typedef boost::dynamic_bitset<> fluent; /**< \brief A representation of a fluent
                                 *
                                 * \todo is maybe better to store only the positive?
                                 */
-typedef std::set<const fluent*> fluent_set; /**< \brief A representation of a conjunctive set of \ref fluent.
+typedef std::set<const fluent> fluent_set; /**< \brief A representation of a conjunctive set of \ref fluent.
                                       *
                                       * This representation is used, for example, to represent
                                       * a world \ref kworld in a Kripke structure (\ref kstate).
                                       *
                                       * Each element of the set is a \ref fluent*/
+
+typedef std::set<const fluent*> fluent_ptr_set;
+typedef std::set<const fluent**> fluent_ptr_ptr_set;
+
 typedef std::set<fluent_set> fluent_formula; /**< \brief A representation of a fluent formula in DNF.
                                       *
                                       * This representation is used, for example, to represent
@@ -34,12 +38,19 @@ typedef boost::dynamic_bitset<> agent; /**< \brief A representation of an agent 
                                       *  This representation is derived by applying \ref grounder::ground_agent(const std::string&) const
                                       * to the element of \ref reader::m_agents.*/
 
-typedef std::set<const agent*> agent_set; /**< \brief A set of \ref agent.*/
+typedef std::set<const agent> agent_set; /**< \brief A set of \ref agent.*/
+typedef std::set<const agent*> agent_ptr_set; /**< \brief A set of \ref agent.*/
 
 typedef boost::dynamic_bitset<> action_id; /**< \brief The unique id (short) associated with each action.
                                       *
                                       *  This id is derived by applying \ref grounder::ground_action(const std::string&) const
                                       * to the element of \ref reader::m_actions.*/
 typedef std::vector<action_id> action_id_list; /**< \brief A list of \ref action_id.*/
+
+enum logic {
+    K,
+    KD45,
+    S5
+};
 
 #endif //EFP_DOMAIN_DEF_H

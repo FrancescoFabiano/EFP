@@ -145,21 +145,18 @@ bool planner<T>::search(const domain& domain) {
 template <class T>
 bool planner<T>::search_BFS(const domain& domain) {
     const auto& config = domain.get_config();
-	T initial;
+    assert(config.get_initial_state_mode() == Initial_State_Mode::FINITARY_S5_THEORY);
 
-	bool check_visited = config.is_check_visited();
-	bool bisimulation = false;
-	if (config.get_bisimulation() != Bisimulation_Algorithm::NO_BISIMULATION) {
-		bisimulation = true;
-	}
-	bisimulation = false;
-	std::set<T> visited_states;
-
-	auto start_timing = std::chrono::system_clock::now();
-
-    if (config.get_initial_state_mode() == Initial_State_Mode::FINITARY_S5_THEORY) {
-        initial.generate_from_theory(domain.get_initial_description());
+    bool check_visited = config.is_check_visited();
+    bool bisimulation = false;
+    if (config.get_bisimulation() != Bisimulation_Algorithm::NO_BISIMULATION) {
+        bisimulation = true;
     }
+    bisimulation = false;
+    std::set<T> visited_states;
+
+    T initial(domain, domain.get_finitary_theory());
+    auto start_timing = std::chrono::system_clock::now();
 
     /**
      * \todo: IMPLEMENTARE CASO CON USER-PROVIDED CUSTOM INITIAL STATE
@@ -176,7 +173,7 @@ bool planner<T>::search_BFS(const domain& domain) {
     const action_set& actions = domain.get_actions();
     action_set::const_iterator it_acset;
     T popped_state;
-    T tmp_state;
+//    T tmp_state;
     action tmp_action;
 
     start_timing = std::chrono::system_clock::now();
@@ -203,7 +200,7 @@ bool planner<T>::search_BFS(const domain& domain) {
 
 			if (popped_state.is_executable(tmp_action)) {
 
-				tmp_state = popped_state.compute_succ(tmp_action);
+				T tmp_state(&popped_state, &tmp_action);
 				if (bisimulation) {
                     tmp_state.calc_min_bisimilar(NO_BISIMULATION);
 				}
@@ -227,16 +224,13 @@ bool planner<T>::search_BFS(const domain& domain) {
 template <class T>
 bool planner<T>::search_iterative_DFS(const domain& domain) {
     const auto& config = domain.get_config();
+    assert(config.get_initial_state_mode() == Initial_State_Mode::FINITARY_S5_THEORY);
+
 	std::stack<T> supportSearch; //stack di supporto per i risultati della ricerca.
-	T initial;
+    std::set<T> visited_states;
 
-	std::set<T> visited_states;
-
-	auto start_timing = std::chrono::system_clock::now();
-
-    if (config.get_initial_state_mode() == Initial_State_Mode::FINITARY_S5_THEORY) {
-        initial.generate_from_theory(domain.get_initial_description());
-    }
+    T initial(domain, domain.get_finitary_theory());
+    auto start_timing = std::chrono::system_clock::now();
 
     /**
      * \todo: IMPLEMENTARE CASO CON USER-PROVIDED CUSTOM INITIAL STATE
@@ -257,7 +251,7 @@ bool planner<T>::search_iterative_DFS(const domain& domain) {
 	action_set actions = domain.get_actions();
 	action_set::const_iterator it_acset;
 	T popped_state, popped_state2;
-	T tmp_state;
+//	T tmp_state;
 	action tmp_action;
 
 	start_timing = std::chrono::system_clock::now();
@@ -284,7 +278,7 @@ bool planner<T>::search_iterative_DFS(const domain& domain) {
 			for (it_acset = actions.begin(); it_acset != actions.end(); it_acset++) {
 				tmp_action = *it_acset;
 				if (popped_state.is_executable(tmp_action)) {
-					tmp_state = popped_state.compute_succ(tmp_action);
+					T tmp_state(&popped_state, &tmp_action);
 					//tmp_state.print();
 					if (config.get_bisimulation() != Bisimulation_Algorithm::NO_BISIMULATION) {
                         tmp_state.calc_min_bisimilar(NO_BISIMULATION);
@@ -311,22 +305,21 @@ bool planner<T>::search_iterative_DFS(const domain& domain) {
 template <class T>
 bool planner<T>::search_DFS(const domain& domain) {
     const auto& config = domain.get_config();
-	T initial;
-
-	std::set<T> visited_states;
-
-	auto start_timing = std::chrono::system_clock::now();
-
-    if (config.get_initial_state_mode() == Initial_State_Mode::FINITARY_S5_THEORY) {
-        initial.generate_from_theory(domain.get_initial_description());
-    }
+    assert(config.get_initial_state_mode() == Initial_State_Mode::FINITARY_S5_THEORY);
 
     /**
      * \todo: IMPLEMENTARE CASO CON USER-PROVIDED CUSTOM INITIAL STATE
      */
 
+    std::set<T> visited_states;
+
+    T initial(domain, domain.get_finitary_theory());;
+    auto start_timing = std::chrono::system_clock::now();
+
 	if (config.get_bisimulation() != Bisimulation_Algorithm::NO_BISIMULATION) {
         initial.calc_min_bisimilar(NO_BISIMULATION);
+        // todo: metti parametro bisimulation nel costruttore di state
+        //   --> così calcolo direttamente la versione contracted e mantengo la constness
 	}
 
 	auto end_timing = std::chrono::system_clock::now();
@@ -337,7 +330,7 @@ bool planner<T>::search_DFS(const domain& domain) {
 	action_set actions = domain.get_actions();
 	action_set::const_iterator it_acset;
 	T popped_state, popped_state2;
-	T tmp_state;
+//	T tmp_state;
 	action tmp_action;
 
 	start_timing = std::chrono::system_clock::now();
@@ -359,7 +352,7 @@ bool planner<T>::search_DFS(const domain& domain) {
 		for (it_acset = actions.begin(); it_acset != actions.end(); it_acset++) {
 			tmp_action = *it_acset;
 			if (popped_state.is_executable(tmp_action)) {
-				tmp_state = popped_state.compute_succ(tmp_action);
+				T tmp_state(&popped_state, &tmp_action);
 				//tmp_state.print();
 				if (config.get_bisimulation() != Bisimulation_Algorithm::NO_BISIMULATION) {
                     tmp_state.calc_min_bisimilar(NO_BISIMULATION);
@@ -384,87 +377,84 @@ bool planner<T>::search_DFS(const domain& domain) {
 
 template <class T>
 bool planner<T>::search_heuristic(const domain& domain) {
-    const auto& config = domain.get_config();
-
-	T initial;
-	bool check_visited = config.is_check_visited();
-	std::set<T> visited_states;
-	bool bisimulation = false;
-	if (config.get_bisimulation() != NO_BISIMULATION) {
-		bisimulation = true;
-	}
-
-	auto start_timing = std::chrono::system_clock::now();
-
-    if (config.get_initial_state_mode() == Initial_State_Mode::FINITARY_S5_THEORY) {
-        initial.generate_from_theory(domain.get_initial_description());
-    }
-
-    /**
-     * \todo: IMPLEMENTARE CASO CON USER-PROVIDED CUSTOM INITIAL STATE
-     */
-
-	if (bisimulation) initial.calc_min_bisimilar(NO_BISIMULATION);
-	auto end_timing = std::chrono::system_clock::now();
-	std::chrono::duration<double> elapsed_seconds = end_timing - start_timing;
-
-	std::cout << "\nInitial Built in " << elapsed_seconds.count() << " seconds\n";
-
-	start_timing = std::chrono::system_clock::now();
-	heuristics_manager h_manager(domain, config.get_used_heur());
-	end_timing = std::chrono::system_clock::now();
-	elapsed_seconds = end_timing - start_timing;
-	std::cout << "\nHeuristic Built in " << elapsed_seconds.count() << " seconds\n";
-
-
-	action_set actions = domain.get_actions();
-	action_set::const_iterator it_acset;
-	T popped_state;
-	T tmp_state;
-	action tmp_action;
-
-	start_timing = std::chrono::system_clock::now();
-	if (initial.is_goal(domain.get_goal_description())) {
-		end_timing = std::chrono::system_clock::now();
-		elapsed_seconds = end_timing - start_timing;
-        print_results(domain, elapsed_seconds, initial, false);
-		return true;
-	}
-
-	if (check_visited) {
-		visited_states.insert(initial);
-	}
-	m_heur_search_space.push(initial);
-	while (!m_heur_search_space.empty()) {
-		popped_state = m_heur_search_space.top();
-		//std::cerr << "\nDEBUG: Picked the state with heur = " << popped_state.get_heuristic_value() << "\n\n\n";
-		m_heur_search_space.pop();
-
-		for (it_acset = actions.begin(); it_acset != actions.end(); it_acset++) {
-			tmp_action = *it_acset;
-			if (popped_state.is_executable(tmp_action)) {
-				tmp_state = popped_state.compute_succ(tmp_action);
-				if (bisimulation) {
-                    tmp_state.calc_min_bisimilar(NO_BISIMULATION);
-				}
-				if (tmp_state.is_goal(domain.get_goal_description())) {
-					end_timing = std::chrono::system_clock::now();
-					elapsed_seconds = end_timing - start_timing;
-                    print_results(domain, elapsed_seconds, tmp_state, false);
-					return true;
-				}
-				if (!check_visited || visited_states.insert(tmp_state).second) {
-					h_manager.set_heuristic_value(tmp_state);
-
-					if ((tmp_state.get_heuristic_value() >= 0) || (config.get_used_heur() == C_PG)) {
-						//std::cerr << "\nDEBUG: Generated a state with heur = " << tmp_state.get_heuristic_value();
-						m_heur_search_space.push(tmp_state);
-					}
-				}
-			}
-		}
-	}
-	std::cout << "\n\nIt does not exists any Plan for this domain instance:(\n";
+//    const auto& config = domain.get_config();
+//    assert(config.get_initial_state_mode() == Initial_State_Mode::FINITARY_S5_THEORY);
+//
+//	bool check_visited = config.is_check_visited();
+//    std::set<T> visited_states;
+//    bool bisimulation = false;
+//    if (config.get_bisimulation() != NO_BISIMULATION) {
+//        bisimulation = true;
+//    }
+//
+//    T initial(domain, domain.get_finitary_theory());
+//    auto start_timing = std::chrono::system_clock::now();
+//
+//    /**
+//     * \todo: IMPLEMENTARE CASO CON USER-PROVIDED CUSTOM INITIAL STATE
+//     */
+//
+//	if (bisimulation) initial.calc_min_bisimilar(NO_BISIMULATION);
+//	auto end_timing = std::chrono::system_clock::now();
+//	std::chrono::duration<double> elapsed_seconds = end_timing - start_timing;
+//
+//	std::cout << "\nInitial Built in " << elapsed_seconds.count() << " seconds\n";
+//
+//	start_timing = std::chrono::system_clock::now();
+//	heuristics_manager h_manager(domain, config.get_used_heur());
+//	end_timing = std::chrono::system_clock::now();
+//	elapsed_seconds = end_timing - start_timing;
+//	std::cout << "\nHeuristic Built in " << elapsed_seconds.count() << " seconds\n";
+//
+//
+//	action_set actions = domain.get_actions();
+//	action_set::const_iterator it_acset;
+////	T *popped_state;
+////	T tmp_state;
+//	action tmp_action;
+//
+//	start_timing = std::chrono::system_clock::now();
+//	if (initial.is_goal(domain.get_goal_description())) {
+//		end_timing = std::chrono::system_clock::now();
+//		elapsed_seconds = end_timing - start_timing;
+//        print_results(domain, elapsed_seconds, initial, false);
+//		return true;
+//	}
+//
+//	if (check_visited) {
+//		visited_states.insert(initial);
+//	}
+//	m_heur_search_space.push(initial);
+//	while (!m_heur_search_space.empty()) {
+//		const T *popped_state = &m_heur_search_space.top();
+//		//std::cerr << "\nDEBUG: Picked the state with heur = " << popped_state.get_heuristic_value() << "\n\n\n";
+//		m_heur_search_space.pop();
+//
+//		for (it_acset = actions.begin(); it_acset != actions.end(); it_acset++) {
+//			tmp_action = *it_acset;
+//			if (popped_state->is_executable(tmp_action)) {
+//				T tmp_state(popped_state, &tmp_action);
+//				if (bisimulation) {
+//                    tmp_state.calc_min_bisimilar(NO_BISIMULATION);
+//				}
+//				if (tmp_state.is_goal(domain.get_goal_description())) {
+//					end_timing = std::chrono::system_clock::now();
+//					elapsed_seconds = end_timing - start_timing;
+//                    print_results(domain, elapsed_seconds, tmp_state, false);
+//					return true;
+//				}
+//				if (!check_visited || visited_states.insert(tmp_state).second) {
+//					h_manager.set_heuristic_value(tmp_state);
+//
+//					if ((tmp_state.get_heuristic_value() >= 0) || (config.get_used_heur() == C_PG)) {
+//						//std::cerr << "\nDEBUG: Generated a state with heur = " << tmp_state.get_heuristic_value();
+//						m_heur_search_space.push(tmp_state);
+//					}
+//				}
+//			}
+//		}
+//	}
+//	std::cout << "\n\nIt does not exists any Plan for this domain instance:(\n";
 	return false;
 }
 
@@ -474,8 +464,7 @@ bool planner<T>::execute_given_actions(const domain& domain) {
 	check_actions_names(domain);
 	std::set<T> visited_states;
 
-	T state;
-    state.generate_from_theory(domain.get_initial_description());
+	T state(domain, domain.get_finitary_theory());
     bool found_plan;
 
 	if (state.is_goal(domain.get_goal_description())) {
@@ -507,7 +496,8 @@ bool planner<T>::execute_given_actions(const domain& domain) {
 		for (it_acset = action_library.begin(); it_acset != action_library.end(); it_acset++) {
 			if (it_acset->get_name() == *it_stset) {
 				if (state.is_executable(*it_acset)) {
-					state = state.compute_succ(*it_acset);
+                    T next(&state, &*it_acset);
+//					state(&state, &*it_acset);
 					if (config.get_bisimulation() != Bisimulation_Algorithm::NO_BISIMULATION) {
                         state.calc_min_bisimilar(NO_BISIMULATION);
 					}
@@ -560,7 +550,8 @@ bool planner<T>::execute_given_actions_timed(const domain& domain) {
     const auto& config = domain.get_config();
 	check_actions_names(domain);
 
-	T state;
+	const T st(domain, domain.get_finitary_theory());
+    auto x = st;
     // todo: sistema
 //    state.generate_from_theory(domain.get_initial_description());
 
@@ -572,8 +563,9 @@ bool planner<T>::execute_given_actions_timed(const domain& domain) {
 	for (it_stset = config.get_given_actions().begin(); it_stset != config.get_given_actions().end(); it_stset++) {
 		for (it_acset = domain.get_actions().begin(); it_acset != domain.get_actions().end(); it_acset++) {
 			if (it_acset->get_name() == *it_stset) {
-				if (state.is_executable(*it_acset)) {
-					state = state.compute_succ(*it_acset);
+				if (st.is_executable(*it_acset)) {
+					const T next(&st, &*it_acset);
+                    // todo: FINISCI DI SISTEMARE TEMPLATES IN STATE
 				}
 			}
 		}
@@ -582,8 +574,8 @@ bool planner<T>::execute_given_actions_timed(const domain& domain) {
 	auto end_timing = std::chrono::system_clock::now();
 	std::chrono::duration<double> elapsed_seconds = end_timing - start_timing;
 
-    print_results(domain, elapsed_seconds, state, true);
-    return state.is_goal(domain.get_goal_description());
+    print_results(domain, elapsed_seconds, st, true);
+    return st.is_goal(domain.get_goal_description());
 }
 
 template <class T>

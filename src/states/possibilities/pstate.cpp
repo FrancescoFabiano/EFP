@@ -12,838 +12,349 @@
 #include <boost/dynamic_bitset.hpp>
 
 #include "pstate.h"
+#include "../../domain/domain.h"
 #include "../../utilities/helper_t.ipp"
-#include "../../update/product_update.h"
 
-pstate::pstate()
-{
-	m_max_depth = 0;
+pstate::pstate() = default;
+
+pstate::pstate(const domain &domain, const finitary_theory &theory) {
+    generate_from_theory(domain, theory);
 }
 
-pstate::pstate(const pstate & to_copy)
-{
-	m_max_depth = 0;
-	set_worlds(to_copy.get_worlds());
-	set_max_depth(to_copy.get_max_depth());
-	set_beliefs(to_copy.get_beliefs());
-	set_pointed(to_copy.get_pointed());
+pstate::pstate(const pstate *previous, const action *action) {
+    update(previous, action);
 }
 
-/**** GETTERS/SETTERS ****/
-void pstate::set_worlds(const pworld_set & to_set)
-{
-	m_worlds = to_set;
+/**** GETTERS ****/
+const pworld_set &pstate::get_worlds() const {
+    return m_worlds;
 }
 
-void pstate::set_pointed(const pworld_ptr & to_set)
-{
-	m_pointed = to_set;
+const pedge_map &pstate::get_edges() const {
+    return m_edges;
 }
 
-void pstate::set_beliefs(const pedges & to_set)
-{
-	m_beliefs = to_set;
+const pworld *pstate::get_pointed() const {
+    return m_pointed;
 }
 
-void pstate::set_max_depth(unsigned int to_set)
-{
-	if (to_set > m_max_depth) m_max_depth = to_set;
+bool pstate::operator<(const pstate &to_compare) const {
+    return false;
 }
 
-unsigned int pstate::get_max_depth() const
-{
-	return m_max_depth;
+bool pstate::entails(const formula &formula, const pworld &world) const {
+    return false;
+//    return formula.is_entailed(this, world);
 }
 
-const pworld_set & pstate::get_worlds() const
-{
-	return m_worlds;
+void pstate::get_all_reachable_worlds_edges(const pworld *world, pworld_set &reached_worlds, pedge_map &reached_edges) const {
+    // todo: TEST
+    auto adjacent_worlds = m_edges.at(world);
+    pworld_set kw_list;
+
+    std::map<const agent*, pworld_set>::const_iterator it_kwmap;
+    pworld_set::const_iterator it_kws;
+
+    // todo: SISTEMA
+//    for (it_kwmap = adjacent_worlds.begin(); it_kwmap != adjacent_worlds.end(); it_kwmap++) {
+//        kw_list = it_kwmap->second;
+//
+//        for (it_kws = kw_list.begin(); it_kws != kw_list.end(); it_kws++) {
+//            if (reached_worlds.insert(*it_kws).second) {
+//                reached_edges[*it_kws] = m_edges.at(*it_kws);
+//                get_all_reachable_worlds_edges(*it_kws, reached_worlds, reached_edges);
+//            }
+//        }
+//    }
 }
 
-const pworld_ptr & pstate::get_pointed() const
-{
-	return m_pointed;
-}
+void pstate::clean_unreachable_pworlds() {
+    pworld_set reached_worlds;
+    pedge_map reached_edges;
 
-const pedges & pstate::get_beliefs() const
-{
-	return m_beliefs;
-}
+    reached_worlds.insert(m_pointed);
+    reached_edges[m_pointed] = m_edges.at(m_pointed);
 
-/**** ADD/REMOVE WORLDS/EDGES ****/
-pworld_ptr pstate::add_world(const pworld & world)
-{
-	pworld_ptr tmp = pstore::get_instance().add_world(world);
-	m_worlds.insert(tmp);
-	return tmp;
-}
+    get_all_reachable_worlds_edges(m_pointed, reached_worlds, reached_edges);
 
-pworld_ptr pstate::add_rep_world(const pworld & world, unsigned short repetition)
-{
-	pworld_ptr tmp = pstore::get_instance().add_world(world);
-	tmp.set_repetition(repetition);
-	m_worlds.insert(tmp);
-	return tmp;
-}
-
-void pstate::add_edge(const pworld_ptr & from, const pworld_ptr & to, const agent & ag)
-{
-	m_beliefs[from][ag].insert(to);
-}
-
-void pstate::add_pworld_beliefs(const pworld_ptr & world, const pworld_map & beliefs)
-{
-    m_beliefs[world] = beliefs;
-}
-
-void pstate::remove_edge(const pworld_ptr & from, const pworld_ptr & to, const agent & ag)
-{
-	auto from_beliefs = m_beliefs.find(from);
-
-	if (from_beliefs != m_beliefs.end()) {
-		auto ag_beliefs = from_beliefs->second.find(ag);
-
-		if (ag_beliefs != from_beliefs->second.end()) {
-			ag_beliefs->second.erase(to);
-		}
-	}
-}
-
-/**** OPERATORS ****/
-bool pstate::operator=(const pstate & to_copy)
-{
-	m_max_depth = 0;
-	set_worlds(to_copy.get_worlds());
-	set_max_depth(to_copy.get_max_depth());
-	set_beliefs(to_copy.get_beliefs());
-	set_pointed(to_copy.get_pointed());
-	return true;
-}
-
-bool pstate::operator<(const pstate & to_compare) const
-{
-	if (m_pointed < to_compare.get_pointed()) {
-		return true;
-	} else if (m_pointed > to_compare.get_pointed()) {
-		return false;
-	}
-
-	if (m_worlds < to_compare.get_worlds()) {
-		return true;
-	} else if (m_worlds > to_compare.get_worlds()) {
-		return false;
-	}
-
-	pedges::const_iterator it_tramap1;
-	auto it_tramap2 = to_compare.get_beliefs().begin();
-
-	pworld_map tmp_pwmap1, tmp_pwmap2;
-	pworld_map::const_iterator it_pwmap1, it_pwmap2;
-	//The same size is assured by the same size of m_worlds
-	for (it_tramap1 = m_beliefs.begin(); it_tramap1 != m_beliefs.end(); it_tramap1++) {
-		if (it_tramap1->first < it_tramap2->first) {
-			return true;
-		} else if (it_tramap1->first > it_tramap2->first) {
-			return false;
-		}
-
-		tmp_pwmap1 = it_tramap1->second;
-		tmp_pwmap2 = it_tramap2->second;
-		if (tmp_pwmap1.size() < tmp_pwmap2.size()) {
-			return true;
-		} else if (tmp_pwmap1.size() > tmp_pwmap2.size()) {
-			return false;
-		}
-		it_pwmap2 = tmp_pwmap2.begin();
-		for (it_pwmap1 = tmp_pwmap1.begin(); it_pwmap1 != tmp_pwmap1.end(); it_pwmap1++) {
-			if (it_pwmap1->first < it_pwmap2->first) {
-				return true;
-			} else if (it_pwmap1->first > it_pwmap2->first) {
-				return false;
-			}
-
-			if (it_pwmap1->second < it_pwmap2->second) {
-				return true;
-			} else if (it_pwmap1->second > it_pwmap2->second) {
-				return false;
-			}
-			it_pwmap2++;
-		}
-		it_tramap2++;
-	}
-	return false;
-}
-
-/**** ENTAILMENT ****/
-bool pstate::entails(const fluent & f) const
-{
-	return entails(f, m_pointed);
-}
-
-bool pstate::entails(const fluent & f, const pworld_ptr & world)
-{
-	return world.get_ptr()->entails(f);
-}
-
-bool pstate::entails(const fluent_set & fl) const
-{
-	return entails(fl, m_pointed);
-}
-
-bool pstate::entails(const fluent_set & fl, const pworld_ptr & world)
-{
-	return world.get_ptr()->entails(fl);
-}
-
-bool pstate::entails(const fluent_formula & ff) const
-{
-	return entails(ff, m_pointed);
-}
-
-bool pstate::entails(const fluent_formula & ff, const pworld_ptr & world)
-{
-	return world.get_ptr()->entails(ff);
-}
-
-bool pstate::entails(const belief_formula & bf) const
-{
-	return entails(bf, m_pointed);
-}
-
-bool pstate::entails(const belief_formula & to_check, const pworld_set & reachable) const
-{
-	pworld_set::const_iterator it_pws;
-	for (it_pws = reachable.begin(); it_pws != reachable.end(); it_pws++) {
-		if (!entails(to_check, *it_pws))
-			return false;
-	}
-	return true;
-}
-
-bool pstate::entails(const belief_formula & bf, const pworld_ptr & world) const
-{
-	switch ( bf.get_formula_type() ) {
-	case FLUENT_FORMULA:
-	{
-		/** \todo Make sure its grounded. Maybe add to \ref belief_formula a bool that store if grounded or not or maybe ground
-		 * when \ref domain created.
-		 * @see belief_formula::ground(const grounder &).*/
-		return entails(bf.get_fluent_formula(), world);
-	}
-
-	case BELIEF_FORMULA:
-	{
-		/** \todo what was the at_lest_one of the previous version?*/
-		return entails(bf.get_bf1(), get_B_reachable_worlds(bf.get_agent(), world));
-	}
-	case PROPOSITIONAL_FORMULA:
-	{
-		switch ( bf.get_operator() ) {
-		case BF_NOT:
-			return !entails(bf.get_bf1(), world);
-		case BF_OR:
-			return entails(bf.get_bf1(), world) || entails(bf.get_bf2(), world);
-		case BF_AND:
-			return entails(bf.get_bf1(), world) && entails(bf.get_bf2(), world);
-		case BF_FAIL:
-		default:
-			std::cerr << "Something went wrong in checking entailment for Propositional formula";
-			exit(1);
-		}
-	}
-	case E_FORMULA:
-	{
-		return entails(bf.get_bf1(), get_E_reachable_worlds(bf.get_group_agents(), world));
-	}
-	case D_FORMULA:
-	{
-		pworld_set D_reachable = get_D_reachable_worlds(bf.get_group_agents(), world);
-		if (D_reachable.empty()) {
-			return false;
-		}
-		return entails(bf.get_bf1(), D_reachable);
-	}
-	case C_FORMULA:
-	{
-		return entails(bf.get_bf1(), get_C_reachable_worlds(bf.get_group_agents(), world));
-	}
-	case BF_EMPTY:
-	{
-		return true;
-	}
-	case BF_TYPE_FAIL:
-	default:
-	{
-		std::cerr << "Something went wrong in checking entailment for Belief formula";
-		exit(1);
-	}
-	}
-}
-
-bool pstate::entails(const formula_list & to_check, const pworld_ptr & world) const
-{
-	formula_list::const_iterator it_fl;
-	for (it_fl = to_check.begin(); it_fl != to_check.end(); it_fl++) {
-		if (!entails(*it_fl, world)) {
-			return false;
-		}
-	}
-	return true;
-}
-
-bool pstate::entails(const formula_list & to_check) const
-{
-	return entails(to_check, m_pointed);
-}
-
-/**** REACHABILITY ****/
-pworld_set pstate::get_B_reachable_worlds(const agent & ag, const pworld_ptr & world) const
-{
-	pworld_set ret;
-	auto pw_map = m_beliefs.find(world);
-
-	if (pw_map != m_beliefs.end()) {
-		auto pw_set = pw_map->second.find(ag);
-		if (pw_set != pw_map->second.end()) {
-			helper_t::sum_set<pworld_ptr>(ret, pw_set->second);
-		}
-	}
-	return ret;
-}
-
-bool pstate::get_B_reachable_worlds_recursive(const agent & ag, const pworld_ptr & world, pworld_set& ret) const
-{
-	/** \todo check: If a--i-->b, b--i-->c then a--i-->c must be there*/
-	auto pw_map = m_beliefs.find(world);
-
-	if (pw_map != m_beliefs.end()) {
-		auto pw_set = pw_map->second.find(ag);
-		if (pw_set != pw_map->second.end()) {
-			unsigned long previous_size = ret.size();
-			helper_t::sum_set<pworld_ptr>(ret, pw_set->second);
-			unsigned long current_size = ret.size();
-
-			return previous_size == current_size;
-		}
-		/**@bug: We don't know why sometimes is outside the two if cases.*/
-	}
-	return true;
-}
-
-pworld_set pstate::get_E_reachable_worlds(const agent_set & ags, const pworld_ptr & world) const
-{
-	/*The K^0 call of this function*/
-	pworld_set ret;
-	agent_set::const_iterator it_agset;
-	for (it_agset = ags.begin(); it_agset != ags.end(); it_agset++) {
-		helper_t::sum_set<pworld_ptr>(ret, get_B_reachable_worlds(*it_agset, world));
-	}
-	return ret;
-}
-
-bool pstate::get_E_reachable_worlds_recoursive(const agent_set & ags, const pworld_set & worlds, pworld_set & ret) const
-{
-	/*The K^i (recoursive) call of this function*/
-	bool is_fixed_point = true;
-	pworld_set::const_iterator it_pwptr;
-	agent_set::const_iterator it_agset;
-	for (it_pwptr = worlds.begin(); it_pwptr != worlds.end(); it_pwptr++) {
-		for (it_agset = ags.begin(); it_agset != ags.end(); it_agset++) {
-			if (!get_B_reachable_worlds_recursive(*it_agset, *it_pwptr, ret)) {
-				is_fixed_point = false;
-			}
-		}
-	}
-	return is_fixed_point;
-}
-
-pworld_set pstate::get_C_reachable_worlds(const agent_set & ags, const pworld_ptr & world) const
-{
-	//Use of fixed point to stop.
-	bool is_fixed_point = false;
-	pworld_set newly_reached = get_E_reachable_worlds(ags, world);
-	pworld_set already_reached;
-	pworld_set ret;
-	while (!is_fixed_point) {
-		helper_t::sum_set<pworld_ptr>(newly_reached, ret);
-		helper_t::minus_set<pworld_ptr>(newly_reached, already_reached);
-		is_fixed_point = get_E_reachable_worlds_recoursive(ags, newly_reached, ret);
-		already_reached = newly_reached;
-	}
-	return ret;
-}
-
-pworld_set pstate::get_D_reachable_worlds(const agent_set & ags, const pworld_ptr & world) const
-{
-	/**@bug: Notion of D-Reachable is correct (page 24 of Reasoning about Knowledge)*/
-	auto it_agset = ags.begin();
-	pworld_set ret = get_B_reachable_worlds((*it_agset), world);
-	it_agset++;
-
-	for (; it_agset != ags.end(); it_agset++) {
-		auto it_pwset1 = ret.begin();
-		pworld_set to_intersect = get_B_reachable_worlds((*it_agset), world);
-		auto it_pwset2 = to_intersect.begin();
-		while ((it_pwset1 != ret.end()) && (it_pwset2 != to_intersect.end())) {
-
-			if ((*it_pwset1 < *it_pwset2) && (((*it_pwset1).get_fluent_based_id()) == ((*it_pwset2).get_fluent_based_id()))) {
-				ret.erase(it_pwset1++);
-			} else if ((*it_pwset2 < *it_pwset1) && ((((*it_pwset1).get_fluent_based_id()) == ((*it_pwset2).get_fluent_based_id())))) {
-				++it_pwset2;
-			} else { // *it_pwset1 == *it_pwset2
-				++it_pwset1;
-				++it_pwset2;
-			}
-		}
-
-		// Anything left in ret from here on did not appear in to_intersect,
-		// so we remove it.
-		ret.erase(it_pwset1, ret.end());
-
-	}
-	std::cerr << "\nERROR: D_REACHABLILITY not yet Implemented correctly\n";
-	exit(1);
-	return ret;
-}
-
-void pstate::get_all_reachable_worlds_edges(const pworld_ptr & world, pworld_set & reached_worlds, pedges & reached_edges) const {
-    // \todo: TEST
-    auto adjacent_worlds = m_beliefs.at(world);
-    pworld_set pw_list;
-
-    std::map<agent, pworld_set>::const_iterator it_pwmap;
-    pworld_set::const_iterator it_pws;
-
-    for (it_pwmap = adjacent_worlds.begin(); it_pwmap != adjacent_worlds.end(); it_pwmap++) {
-        pw_list = it_pwmap->second;
-
-        for (it_pws = pw_list.begin(); it_pws != pw_list.end(); it_pws++) {
-            if (reached_worlds.insert(*it_pws).second) {
-                reached_edges[*it_pws] = m_beliefs.at(*it_pws);
-                get_all_reachable_worlds_edges(*it_pws, reached_worlds, reached_edges);
-            }
-        }
-    }
-}
-
-void pstate::clean_unreachable_pworlds()
-{
-	pworld_set reached_worlds;
-	pedges reached_edges;
-
-	reached_worlds.insert(get_pointed());
-	reached_edges[get_pointed()] = m_beliefs.at(get_pointed());
-
-	get_all_reachable_worlds_edges(get_pointed(), reached_worlds, reached_edges);
-
-	set_worlds(reached_worlds);
-	set_beliefs(reached_edges);
+//    set_worlds(reached_worlds);
+//    set_edges(reached_edges);
 }
 
 /**** INITIAL STATE ****/
-void pstate::build_initial(const initially& initial_conditions)
-{
-	/** \todo for now prune building.*/
-	std::cout << "\nBuilding initial possibility...\n";
-	build_initial_prune(initial_conditions);
+void pstate::generate_from_theory(const domain &domain, const finitary_theory &theory) {
+    generate_initial_pointed(theory);
+    generate_initial_worlds(domain, theory);
+    generate_initial_edges(domain, theory);
 }
 
-void pstate::build_initial_structural()
-{
+void pstate::generate_initial_pointed(const finitary_theory &theory) {
+    fluent_ptr_set pointed_fluent_set;
 
+    for (const auto f : theory.get_pointed_fluents()) {
+        pointed_fluent_set.insert(f);
+    }
+
+    pworld tmp = pworld(&pointed_fluent_set, nullptr, 0);
+    // todo: utilizza store per ottenere il puntatore
+    m_pointed = &tmp;
+    m_worlds.insert(m_pointed);
 }
 
-void pstate::build_initial_prune(const initially& initial_conditions) {
-	/*Building of all the possible consistent \ref pworld and setting the pointed world.
-	 * Creation of all the \ref fluent combinations. All the consistent ones are added to \ref pstore.*/
-	fluent_set permutation;
-	generate_initial_pworlds(permutation, 0, initial_conditions);
-
-	/*Building of all the consistent edges.*/
-	generate_initial_pedges(initial_conditions);
+void pstate::generate_initially_unknown_fluents(const domain &domain, fluent_ptr_set &initially_unknown_fluents) {
+//    std::set_difference(domain.get_fluent_set().begin(), domain.get_fluent_set().end(),
+//                        domain.get_finitary_theory().get_ck_fluents().begin(), domain.get_finitary_theory().get_ck_fluents().end(),
+//                        initially_unknown_fluents.begin());
+    // todo: SISTEMA
 }
 
-/*From https://www.geeksforgeeks.org/generate-all-the-binary-strings-of-n-bits/ since is like generating all the binary numbers.*/
-void pstate::generate_initial_pworlds(fluent_set& permutation, int index, const initially& initial_conditions) {
-	//todo non usare indici ma bitset prima positivo fluent poi negativo
-    // \todo: SISTEMA
-    unsigned int fluent_number = 0; // domain.get_fluent_number();
-    unsigned int bit_size = 0; // domain.get_size_fluent();
+// Power set generation: https://rosettacode.org/wiki/Power_set#C.2B.2B
+template<class S>
+void pstate::power_set(S &set, std::set<S> &power_set) {
+    power_set.emplace();
 
-    const fluent_set & initially_known = initial_conditions.get_initially_known_fluents();
+    for (auto&& item : set) {
+        std::set<S> subset;
 
-	if (index == fluent_number) {
-		pworld to_add(permutation);
-		add_initial_pworld(to_add, initial_conditions);
-
-		return;
-	}
-
-	fluent_set permutation_2 = permutation;
-	//Add the \ref fluent in positive version
-	boost::dynamic_bitset<> bitSetToFindPositve(bit_size, index);
-	boost::dynamic_bitset<> bitSetToFindNegative(bit_size, index);
-	bitSetToFindNegative.set(bitSetToFindPositve.size() - 1, true);
-	bitSetToFindPositve.set(bitSetToFindPositve.size() - 1, false);
-
-	if (initially_known.find(bitSetToFindNegative) == initially_known.end()) {
-		permutation.insert(bitSetToFindPositve);
-		generate_initial_pworlds(permutation, index + 1, initial_conditions);
-	}
-	if (initially_known.find(bitSetToFindPositve) == initially_known.end()) {
-		permutation_2.insert(bitSetToFindNegative);
-		generate_initial_pworlds(permutation_2, index + 1, initial_conditions);
-	}
-
-}
-
-void pstate::add_initial_pworld(const pworld & possible_add, const initially& initial_conditions) {
-    /* Since the common knowledge is on all the agent it means that every possible \ref kworld
-     * in the initial state must entail *phi* where C(*phi*) is an initial condition.*/
-
-    //Already setted in \ref domain::build_initially(bool).
-    if (possible_add.entails(initial_conditions.get_ff_forS5())) {
-        add_world(possible_add);
-        if (possible_add.entails(initial_conditions.get_pointed_world_conditions())) {
-            m_pointed = pworld_ptr(possible_add);
+        for (auto s : power_set) {
+            s.insert(item);
+            subset.insert(s);
         }
-    } else {
-        //Already generated so we save it on pstore
-        pstore::get_instance().add_world(possible_add);
+        power_set.insert(subset.begin(), subset.end());
     }
 }
 
-void pstate::generate_initial_pedges(const initially& initial_conditions) {
-    // \todo: SISTEMA
-	agent_set agents; // = domain.get_agents();
-	pworld_ptr pwptr_tmp1, pwptr_tmp2;
+void pstate::generate_initial_fluent_sets(const finitary_theory &theory, std::set<fluent_ptr_set> &initial_fluent_sets) {
+    auto form_it = theory.get_ck_formulae().begin();
+    bool is_consistent = true;
 
-	pworld_set::const_iterator it_pwps_1, it_pwps_2;
-	agent_set::const_iterator it_ags;
+    // We add the set of initially known fluents to each combination of initially unknown fluents
+    // And we create a world for each resulting fluent set
+    for (auto fps : initial_fluent_sets) {
+        fps.insert(theory.get_ck_fluents().begin(), theory.get_ck_fluents().end());
+        // todo: implementa set di fluent set (store); probabilmente va messo in domain
 
-	/*This for add to *this* all the possible edges.*/
-	for (it_pwps_1 = m_worlds.begin(); it_pwps_1 != m_worlds.end(); it_pwps_1++) {
-		for (it_pwps_2 = it_pwps_1; it_pwps_2 != m_worlds.end(); it_pwps_2++) {
-			for (it_ags = agents.begin(); it_ags != agents.end(); it_ags++) {
-				pwptr_tmp1 = *it_pwps_1;
-				pwptr_tmp2 = *it_pwps_2;
+        // We check that the current fluent set is consistent with the fluent formulae that are
+        // Commonly known by all agents according to the theory
+        while (is_consistent && form_it != theory.get_ck_formulae().end()) {
+            if (!(*form_it)->is_entailed(&fps)) {
+                is_consistent = false;
+            }
+            ++form_it;
+        }
 
-				add_edge(pwptr_tmp1, pwptr_tmp2, *it_ags);
-				add_edge(pwptr_tmp2, pwptr_tmp1, *it_ags);
+        if (is_consistent) {
+            pworld tmp(&fps, nullptr);
+            // todo: utilizza store per ottenere il puntatore
+            m_worlds.insert(&tmp);
+            // todo: inserisco due volte il pointed?
+        }
 
-			}
-		}
-	}
-
-	formula_list::const_iterator it_fl;
-
-	for (it_fl = initial_conditions.get_initial_conditions().begin(); it_fl != initial_conditions.get_initial_conditions().end(); it_fl++) {
-		remove_initial_pedge_bf(*it_fl);
-	}
+        form_it = theory.get_ck_formulae().begin();
+        is_consistent = true;
+    }
 }
 
-void pstate::remove_initial_pedge(const fluent_formula &known_ff, const agent & ag)
-{
-	pworld_set::const_iterator it_pwps_1, it_pwps_2;
+void pstate::generate_initial_worlds(const domain &domain, const finitary_theory &theory) {
+    fluent_ptr_set initially_unknown_fluents;
+    std::set<fluent_ptr_set> initial_fluent_sets;
 
-	pworld_ptr pwptr_tmp1, pwptr_tmp2;
-
-	/** \todo maybe don't loop twice on the world but exploit using it_pwps_2 = it_pwps_1:
-	 * - remove (_1, _2).
-	 * - remove (_2, _1).*/
-	for (it_pwps_1 = m_worlds.begin(); it_pwps_1 != m_worlds.end(); it_pwps_1++) {
-		for (it_pwps_2 = it_pwps_1; it_pwps_2 != m_worlds.end(); it_pwps_2++) {
-			/** \todo or entails(-known_ff)?*/
-			pwptr_tmp1 = *it_pwps_1;
-			pwptr_tmp2 = *it_pwps_2;
-			if (pwptr_tmp1.get_ptr()->entails(known_ff) && !pwptr_tmp2.get_ptr()->entails(known_ff)) {
-				remove_edge(pwptr_tmp1, pwptr_tmp2, ag);
-				remove_edge(pwptr_tmp2, pwptr_tmp1, ag);
-			} else if (pwptr_tmp2.get_ptr()->entails(known_ff) && !pwptr_tmp1.get_ptr()->entails(known_ff)) {
-
-				remove_edge(pwptr_tmp2, pwptr_tmp1, ag);
-				remove_edge(pwptr_tmp1, pwptr_tmp2, ag);
-			}
-		}
-	}
+    generate_initially_unknown_fluents(domain, initially_unknown_fluents);
+    // We generate all the combinations of fluents that are not known initially
+    // This is equivalent to generating the power set of initially_unknown_fluents
+    power_set(initially_unknown_fluents, initial_fluent_sets);
+    generate_initial_fluent_sets(theory, initial_fluent_sets);
 }
 
-void pstate::remove_initial_pedge_bf(const belief_formula & to_check) {
-    /* Just check whenever is B(--) \/ B(--) and remove that edge*/
-    if (to_check.get_formula_type() == C_FORMULA) {
-        const belief_formula& tmp = to_check.get_bf1();
+void pstate::calculate_no_good_edges(const finitary_theory &theory, pedge_map &no_goods) {
+    std::map<const agent*, pworld_set> ng_ag_worlds;
+    pworld_set ng_ws;
 
-        switch ( tmp.get_formula_type() ) {
-            //Only one for edges -- expresses that someone is ignorant.
-            case PROPOSITIONAL_FORMULA: {
-                //We remove all the check on the formula since they have already been controlled when ini_conditions has been created
-                if (tmp.get_operator() == BF_OR) {
-                    //fluent_formula known_ff;
-                    auto known_ff_ptr = std::make_shared<fluent_formula>();
-                    helper::check_Bff_notBff(tmp.get_bf1(), tmp.get_bf2(), known_ff_ptr);
-                    if (known_ff_ptr != nullptr) {
-                        remove_initial_pedge(*known_ff_ptr, tmp.get_bf2().get_agent());
-                    }
-                    return;
-                } else if (tmp.get_operator() == BF_AND) {
-                    //This case doesn't add knowledge.
-                    return;
-                } else {
-                    std::cerr << "\nError in the type of initial formulae (FIFTH).\n";
-                    exit(1);
+    for (const auto w1 : m_worlds) {
+        ng_ag_worlds = no_goods[w1];
+
+        for (const auto knows_whether : theory.get_knows_whether()) {
+            assert(knows_whether->get_formula()->is_propositional());
+            ng_ws = ng_ag_worlds[knows_whether->get_agent()];
+
+            for (const auto w2 : m_worlds) {
+                // We insert an edge (w1 --ag--> w2) in the map of no-goods iff w1 and w2 disagree on the formula
+                if (knows_whether->get_formula()->is_entailed(w1->get_fluent_set()) !=
+                    knows_whether->get_formula()->is_entailed(w2->get_fluent_set())) {
+                    ng_ws.insert(w2);
                 }
-                return;
-            }
-            case FLUENT_FORMULA:
-            case BELIEF_FORMULA:
-            case BF_EMPTY: {
-                return;
-            }
-            default: {
-                std::cerr << "\nError in the type of initial formulae (SIXTH).\n";
-                exit(1);
             }
         }
-    } else {
-        std::cerr << "\nError in the type of initial formulae (SEVENTH).\n";
-        exit(1);
     }
+}
+
+void pstate::filter_no_good_edges(const domain &domain, pedge_map &no_goods) {
+    std::map<const agent*, pworld_set> ag_worlds, ng_ag_worlds;
+    pworld_set ws, ng_ws;
+
+    for (const auto w1 : m_worlds) {
+        ag_worlds = m_edges[w1];
+        ng_ag_worlds = no_goods[w1];
+
+        for (const auto& ag : domain.get_agent_set()) {
+//            ws = ag_worlds[ag];
+            ng_ws = ng_ag_worlds[ag];
+
+            // We store only edges that are *not* in the no-goods map
+//            std::set_difference(m_worlds.begin(), m_worlds.end(), ng_ws.begin(), ng_ws.end(), ag_worlds[ag].begin());
+            // todo: SISTEMA
+        }
+    }
+}
+
+void pstate::generate_initial_edges(const domain &domain, const finitary_theory &theory) {
+    // todo: implementa classe template 'store' per collezionare elementi in un set (world, fluent_set, formule...)
+    pedge_map no_goods;
+
+    // In 'no_good' we keep track of what edges we don't want to include
+    calculate_no_good_edges(theory, no_goods);
+    filter_no_good_edges(domain, no_goods);
 }
 
 /**** TRANSITION FUNCTION ****/
-pstate pstate::compute_succ(const action & act) const
-{
-	/** \warning executability should be check in \ref state (or \ref planner).*/
-//	pstate ret = product_update::update(*this, act);
-//	ret.clean_unreachable_pworlds();
-//	return ret;
-    switch ( act.get_type() ) {
-        case ONTIC:
-        {
-            return execute_ontic(act);
-            break;
-        }
-        case SENSING:
-        {
-            return execute_sensing(act);
-            break;
-        }
-        case ANNOUNCEMENT:
-        {
-            return execute_announcement(act);
-            break;
-        }
-        default:
-        {
-            std::cerr << "Error in executing an action: " << act.get_name();
-            std::cerr << " the type of the action is not defined correctly1";
-            std::cerr << std::endl;
-            exit(1);
-
-            break;
-        }
-    }
+void pstate::update(const pstate *previous, const action *action) {
+    // todo: implement
 }
 
-void pstate::maintain_oblivious_believed_pworlds(pstate &ret, const agent_set & oblivious_obs_agents) const {
-    agent_set::const_iterator it_agset;
-    pworld_set world_oblivious;
-    pworld_set tmp_world_set;
-
-    pworld_set::const_iterator it_wo_ob;
-    // \todo: SISTEMA
-    agent_set agents; // = domain.get_agents();
-    if (!oblivious_obs_agents.empty()) {
-        tmp_world_set = get_E_reachable_worlds(oblivious_obs_agents, get_pointed());
-        for (it_agset = agents.begin(); it_agset != agents.end(); it_agset++) {
-            for (it_wo_ob = tmp_world_set.begin(); it_wo_ob != tmp_world_set.end(); it_wo_ob++) {
-                sum_set(world_oblivious, get_B_reachable_worlds(*it_agset, *it_wo_ob));
-            }
-        }
-        sum_set(world_oblivious, tmp_world_set);
-        ret.set_max_depth(get_max_depth() + 1);
-        ret.set_worlds(world_oblivious);
-
-        for (it_wo_ob = world_oblivious.begin(); it_wo_ob != world_oblivious.end(); it_wo_ob++) {
-            auto it_pwmap = m_beliefs.find(*it_wo_ob);
-
-            if (it_pwmap != m_beliefs.end()) {
-
-                ret.add_pworld_beliefs(*it_wo_ob, it_pwmap->second);
-            }
-        }
-    }
-}
-
-/******************************MOVE TO HELPER*********************************/
-
-template <class T>
-void pstate::sum_set(std::set<T> & to_modify, const std::set<T> & factor2) const
-{
-    /**\todo move to helper*/
-    typename std::set<T>::const_iterator it_kwset;
-    for (it_kwset = factor2.begin(); it_kwset != factor2.end(); it_kwset++) {
-
-        to_modify.insert(*it_kwset);
-    }
-}
-
-template <class T>
-void pstate::minus_set(std::set<T> & to_modify, const std::set<T> & factor2) const
-{ /**\todo move to helper*/
-
-    typename std::set<T>::const_iterator it_kwset;
-    for (it_kwset = factor2.begin(); it_kwset != factor2.end(); it_kwset++) {
-
-        to_modify.erase(*it_kwset);
-    }
-}
-
-fluent_formula pstate::get_effects_if_entailed(const effects_map & map, const pworld_ptr & start) const
-{ /**\todo move to helper*/
-
-    fluent_formula ret;
-    effects_map::const_iterator it_map;
-    for (it_map = map.begin(); it_map != map.end(); it_map++) {
-        if (entails(it_map->second, start)) {
-            ret = helper::and_ff(ret, it_map->first);
-        }
-    }
-    if (ret.size() > 1) {
-
-        std::cerr << "\nNon determinism in action effect is not supported-1.\n";
-        exit(1);
-    }
-    return ret;
-}
+//pstate pstate::compute_succ(const action & act) const {
+//    /** \warning executability should be check in \ref state (or \ref planner).*/
+//    pstate tmp;
+//    return tmp;
+//    //return product_update::update(*this, act);
+//}
 
 /**** BISIMULATION ****/
-automaton pstate::pstate_to_automaton(std::vector<pworld_ptr> & pworld_vec, const std::map<agent, bis_label> & agent_to_label) const {
-	std::map<int, int> compact_indices;
-	std::map<pworld_ptr, int> index_map;
-	pbislabel_map label_map; // Map: from -> (to -> ag_set)
+automaton pstate::pstate_to_automaton(std::vector<pworld *> &pworld_vec, const std::map<agent, bis_label> & agent_to_label) const {
+//	std::map<int, int> compact_indices;
+//	std::map<pworld_ptr, int> index_map;
+//	pbislabel_map label_map; // Map: from -> (to -> ag_set)
 
 	automaton *a;
-	unsigned long Nvertex = get_worlds().size();
-    // \todo: SISTEMA
-	unsigned long ag_set_size = 0; // domain.get_agents().size();
-	//BIS_ADAPTATION For the loop that identifies the id (We add one edge for each node)
-	v_elem *Vertex;
-
-	Vertex = (v_elem *) malloc(sizeof(v_elem) * Nvertex);
-
-	// Initializating vertices
-	pworld_set::const_iterator it_pwps;
-	pedges::const_iterator it_peps;
-	pbislabel_map::const_iterator it_plm;
-	bis_label_set::const_iterator it_bislab;
-	std::map<pworld_ptr, bis_label_set>::const_iterator it_pw_bislab;
-
-	//std::cerr << "\nDEBUG: Inizializzazione Edges\n";
-
-	// The pointed world is set to the index 0. This ensures that, when deleting the bisimilar nodes, the pointed pworld
-	// is always chosen as the first of its block. Therefore, we do not need to update it when converting back to a kstate
-	index_map[get_pointed()] = 0;
-	pworld_vec.push_back(get_pointed());
-	compact_indices[static_cast<int> (get_pointed().get_numerical_id())] = 0;
-
-	//For the loop that identifies the id
-	//BIS_ADAPTATION For the loop that identifies the id (+1)
-	///@bug: If the pointed has no self-loop to add
-	//pworld_ptr_set pointed_adj = adj_list.at(get_pointed());
-
-	Vertex[0].ne = 0; // pointed_adj.size(); // edge_counter[get_pointed()];
-	//	if (pointed_adj.find(get_pointed()) == pointed_adj.end()) {
-	//		Vertex[0].ne++;
-	//	}
-	//	Vertex[0].e = (e_elem *) malloc(sizeof(e_elem) * Vertex[0].ne);
-
-	int i = 1, c = 1;
-
-	//std::cerr << "\nDEBUG: Inizializzazione Vertex\n";
-
-	for (it_pwps = m_worlds.begin(); it_pwps != m_worlds.end(); it_pwps++) {
-		if (!(*it_pwps == get_pointed())) {
-			index_map[*it_pwps] = i;
-			pworld_vec.push_back(*it_pwps);
-
-			// if (compact_indices.find(it_pwps->get_numerical_id()) == compact_indices.end()) {
-			if (compact_indices.insert({it_pwps->get_numerical_id(), c}).second) {
-				// compact_indices[it_pwps->get_numerical_id()] = c;
-				c++;
-				//std::cerr << "\nDEBUG: Added:" << it_pwps->get_id() << "\n";
-			}
-			Vertex[i].ne = 0;
-			i++;
-		}
-		//BIS_ADAPTATION (Added self-loop)
-		label_map[*it_pwps][*it_pwps].insert(compact_indices[static_cast<int> (it_pwps->get_numerical_id())] + ag_set_size);
-		//std::cerr << "\nDEBUG: Added to " << it_pwps->get_numerical_id() << " the label " << compact_indices[it_pwps->get_numerical_id()] + ag_set_size << std::endl;
-	}
-
-
-	//BIS_ADAPTATION For the loop that identifies the id (We add one potential label for each node)
-	unsigned long bhtabSize = ag_set_size + c;
-
-	//std::cerr << "\nDEBUG: Inizializzazione Behavs\n";
-
-	//BIS_ADAPTATION (Moved down here)
-
-	for (it_peps = m_beliefs.begin(); it_peps != m_beliefs.end(); it_peps++) {
-
-		for (auto it_mid_bel = it_peps->second.begin(); it_mid_bel != it_peps->second.end(); it_mid_bel++) {
-			for (auto it_int_ed = it_mid_bel->second.begin(); it_int_ed != it_mid_bel->second.end(); it_int_ed++) {
-				label_map[it_peps->first][*it_int_ed].insert(agent_to_label.at(it_mid_bel->first));
-				Vertex[index_map[it_peps->first]].ne++;
-			}
-		}
-	}
-
-	i = 0;
-	for (it_pwps = m_worlds.begin(); it_pwps != m_worlds.end(); it_pwps++) {
-		Vertex[i].ne++; //Self loop bisimulation
-		Vertex[i].e = (e_elem *) malloc(sizeof(e_elem) * Vertex[i].ne);
-		i++;
-	}
-
-	//std::cerr << "\nDEBUG: Fine Inizializzazione Vertex\n";
-
-
-	int from, to, j = 0; //, k = 0, nbh;
-
-	//std::cerr << "\nDEBUG: Inizializzazione Mappa\n";
-	for (it_plm = label_map.begin(); it_plm != label_map.end(); it_plm++) {
-		from = index_map[it_plm->first]; // For each pworld 'from'
-
-		//std::cerr << "\nDEBUG: Inizializzazione K\n";
-
-		for (it_pw_bislab = it_plm->second.begin(); it_pw_bislab != it_plm->second.end(); it_pw_bislab++) { // For each edge that reaches the pworld 'to'
-			to = index_map[it_pw_bislab->first];
-			//nbh = it_pw_bislab->second.size();
-
-			for (it_bislab = it_pw_bislab->second.begin(); it_bislab != it_pw_bislab->second.end(); it_bislab++) { // For each agent 'ag' in the label of the kedge
-				//std::cerr << "\nDEBUG: j is: " << j << " and k is: " << k << "\n";
-				//nbh = 1;
-				Vertex[from].e[j].nbh = 1; // Let j be the index of the adjacency list of from that stores the kedge (from, to)
-				Vertex[from].e[j].bh = (int *) malloc(sizeof(int)); // Let nbh be the number of agents in such kedge
-				Vertex[from].e[j].tv = to; // Update the value of the reache pworld
-				Vertex[from].e[j].bh[0] = *it_bislab; // Update the value of the label at index k to 'ag'
-				//std::cerr << "\nDEBUG: j is: " << j << " and k is: " << k << "\n";
-
-				j++; // Update the value of the index j
-			}
-
-
-		}
-
-		j = 0; // Reset j
-	}
-
-	unsigned long Nbehavs = bhtabSize;
-	a = (automaton *) malloc(sizeof(automaton));
-	a->Nvertex = Nvertex;
-	a->Nbehavs = Nbehavs;
-	a->Vertex = Vertex;
+//	unsigned long Nvertex = get_worlds().size();
+//    // \todo: SISTEMA
+//	unsigned long ag_set_size = 0; // domain.get_agents().size();
+//	//BIS_ADAPTATION For the loop that identifies the id (We add one edge for each node)
+//	v_elem *Vertex;
+//
+//	Vertex = (v_elem *) malloc(sizeof(v_elem) * Nvertex);
+//
+//	// Initializating vertices
+//	pworld_set::const_iterator it_pwps;
+//	pedge_map::const_iterator it_peps;
+//	pbislabel_map::const_iterator it_plm;
+//	bis_label_set::const_iterator it_bislab;
+//	std::map<pworld_ptr, bis_label_set>::const_iterator it_pw_bislab;
+//
+//	//std::cerr << "\nDEBUG: Inizializzazione Edges\n";
+//
+//	// The pointed world is set to the index 0. This ensures that, when deleting the bisimilar nodes, the pointed pworld
+//	// is always chosen as the first of its block. Therefore, we do not need to update it when converting back to a pstate
+//	index_map[get_pointed()] = 0;
+//	pworld_vec.push_back(get_pointed());
+//	compact_indices[static_cast<int> (get_pointed().get_numerical_id())] = 0;
+//
+//	//For the loop that identifies the id
+//	//BIS_ADAPTATION For the loop that identifies the id (+1)
+//	///@bug: If the pointed has no self-loop to add
+//	//pworld_ptr_set pointed_adj = adj_list.at(get_pointed());
+//
+//	Vertex[0].ne = 0; // pointed_adj.size(); // edge_counter[get_pointed()];
+//	//	if (pointed_adj.find(get_pointed()) == pointed_adj.end()) {
+//	//		Vertex[0].ne++;
+//	//	}
+//	//	Vertex[0].e = (e_elem *) malloc(sizeof(e_elem) * Vertex[0].ne);
+//
+//	int i = 1, c = 1;
+//
+//	//std::cerr << "\nDEBUG: Inizializzazione Vertex\n";
+//
+//	for (it_pwps = m_worlds.begin(); it_pwps != m_worlds.end(); it_pwps++) {
+//		if (!(*it_pwps == get_pointed())) {
+//			index_map[*it_pwps] = i;
+//			pworld_vec.push_back(*it_pwps);
+//
+//			// if (compact_indices.find(it_pwps->get_numerical_id()) == compact_indices.end()) {
+//			if (compact_indices.insert({it_pwps->get_numerical_id(), c}).second) {
+//				// compact_indices[it_pwps->get_numerical_id()] = c;
+//				c++;
+//				//std::cerr << "\nDEBUG: Added:" << it_pwps->get_id() << "\n";
+//			}
+//			Vertex[i].ne = 0;
+//			i++;
+//		}
+//		//BIS_ADAPTATION (Added self-loop)
+//		label_map[*it_pwps][*it_pwps].insert(compact_indices[static_cast<int> (it_pwps->get_numerical_id())] + ag_set_size);
+//		//std::cerr << "\nDEBUG: Added to " << it_pwps->get_numerical_id() << " the label " << compact_indices[it_pwps->get_numerical_id()] + ag_set_size << std::endl;
+//	}
+//
+//
+//	//BIS_ADAPTATION For the loop that identifies the id (We add one potential label for each node)
+//	unsigned long bhtabSize = ag_set_size + c;
+//
+//	//std::cerr << "\nDEBUG: Inizializzazione Behavs\n";
+//
+//	//BIS_ADAPTATION (Moved down here)
+//
+//	for (it_peps = m_beliefs.begin(); it_peps != m_beliefs.end(); it_peps++) {
+//
+//		for (auto it_mid_bel = it_peps->second.begin(); it_mid_bel != it_peps->second.end(); it_mid_bel++) {
+//			for (auto it_int_ed = it_mid_bel->second.begin(); it_int_ed != it_mid_bel->second.end(); it_int_ed++) {
+//				label_map[it_peps->first][*it_int_ed].insert(agent_to_label.at(it_mid_bel->first));
+//				Vertex[index_map[it_peps->first]].ne++;
+//			}
+//		}
+//	}
+//
+//	i = 0;
+//	for (it_pwps = m_worlds.begin(); it_pwps != m_worlds.end(); it_pwps++) {
+//		Vertex[i].ne++; //Self loop bisimulation
+//		Vertex[i].e = (e_elem *) malloc(sizeof(e_elem) * Vertex[i].ne);
+//		i++;
+//	}
+//
+//	//std::cerr << "\nDEBUG: Fine Inizializzazione Vertex\n";
+//
+//
+//	int from, to, j = 0; //, k = 0, nbh;
+//
+//	//std::cerr << "\nDEBUG: Inizializzazione Mappa\n";
+//	for (it_plm = label_map.begin(); it_plm != label_map.end(); it_plm++) {
+//		from = index_map[it_plm->first]; // For each pworld 'from'
+//
+//		//std::cerr << "\nDEBUG: Inizializzazione K\n";
+//
+//		for (it_pw_bislab = it_plm->second.begin(); it_pw_bislab != it_plm->second.end(); it_pw_bislab++) { // For each edge that reaches the pworld 'to'
+//			to = index_map[it_pw_bislab->first];
+//			//nbh = it_pw_bislab->second.size();
+//
+//			for (it_bislab = it_pw_bislab->second.begin(); it_bislab != it_pw_bislab->second.end(); it_bislab++) { // For each agent 'ag' in the label of the pedge
+//				//std::cerr << "\nDEBUG: j is: " << j << " and k is: " << k << "\n";
+//				//nbh = 1;
+//				Vertex[from].e[j].nbh = 1; // Let j be the index of the adjacency list of from that stores the pedge (from, to)
+//				Vertex[from].e[j].bh = (int *) malloc(sizeof(int)); // Let nbh be the number of agents in such pedge
+//				Vertex[from].e[j].tv = to; // Update the value of the reache pworld
+//				Vertex[from].e[j].bh[0] = *it_bislab; // Update the value of the label at index k to 'ag'
+//				//std::cerr << "\nDEBUG: j is: " << j << " and k is: " << k << "\n";
+//
+//				j++; // Update the value of the index j
+//			}
+//
+//
+//		}
+//
+//		j = 0; // Reset j
+//	}
+//
+//	unsigned long Nbehavs = bhtabSize;
+//	a = (automaton *) malloc(sizeof(automaton));
+//	a->Nvertex = Nvertex;
+//	a->Nbehavs = Nbehavs;
+//	a->Vertex = Vertex;
 
 	//	std::cerr << "\nDEBUG: \n\tNvertex = " << Nvertex << std::endl;
 	//	std::cerr << "\tNbehavs = " << Nbehavs << std::endl;
@@ -851,32 +362,31 @@ automaton pstate::pstate_to_automaton(std::vector<pworld_ptr> & pworld_vec, cons
 	return *a;
 }
 
-void pstate::automaton_to_pstate(const automaton & a, const std::vector<pworld_ptr> & pworld_vec, const std::map<bis_label, agent> & label_to_agent)
-{
-	pworld_set worlds;
-	m_beliefs.clear();
-	// The pointed world does not change when we calculate the minimum bisimilar state
-	// Hence we do not need to update it
-
-	int i, j, k, label;
-    // \todo: SISTEMA
-	unsigned long agents_size = 0; // domain.get_agents().size();
-
-	for (i = 0; i < a.Nvertex; i++) {
-		if (a.Vertex[i].ne > 0) {
-			worlds.insert(pworld_vec[i]);
-			for (j = 0; j < a.Vertex[i].ne; j++) {
-				for (k = 0; k < a.Vertex[i].e[j].nbh; k++) {
-					label = a.Vertex[i].e[j].bh[k];
-					if (label < agents_size) {
-						add_edge(pworld_vec[i], pworld_vec[a.Vertex[i].e[j].tv], label_to_agent.at(label));
-					}
-				}
-			}
-		}
-	}
-
-	set_worlds(worlds);
+void pstate::automaton_to_pstate(const automaton & a, const std::vector<pworld *> &pworld_vec, const std::map<bis_label, agent> & label_to_agent) {
+//	pworld_set worlds;
+//	m_beliefs.clear();
+//	// The pointed world does not change when we calculate the minimum bisimilar state
+//	// Hence we do not need to update it
+//
+//	int i, j, k, label;
+//    // \todo: SISTEMA
+//	unsigned long agents_size = 0; // domain.get_agents().size();
+//
+//	for (i = 0; i < a.Nvertex; i++) {
+//		if (a.Vertex[i].ne > 0) {
+//			worlds.insert(pworld_vec[i]);
+//			for (j = 0; j < a.Vertex[i].ne; j++) {
+//				for (k = 0; k < a.Vertex[i].e[j].nbh; k++) {
+//					label = a.Vertex[i].e[j].bh[k];
+//					if (label < agents_size) {
+//						add_edge(pworld_vec[i], pworld_vec[a.Vertex[i].e[j].tv], label_to_agent.at(label));
+//					}
+//				}
+//			}
+//		}
+//	}
+//
+//	set_worlds(worlds);
 }
 
 void pstate::calc_min_bisimilar(Bisimulation_Algorithm algorithm) {
@@ -886,7 +396,7 @@ void pstate::calc_min_bisimilar(Bisimulation_Algorithm algorithm) {
 
 	clean_unreachable_pworlds();
 
-	std::vector<pworld_ptr> pworld_vec; // Vector of all pworld_ptr
+	std::vector<pworld*> pworld_vec; // Vector of all pworld_ptr
 	//std::cerr << "\nDEBUG: PRE-ALLOCAZIONE AUTOMA\n" << std::flush;
 
 
@@ -947,87 +457,6 @@ void pstate::calc_min_bisimilar(Bisimulation_Algorithm algorithm) {
 }
 
 /**** UTILITIES ****/
-bool pstate::check_properties(const agent_set & fully, const agent_set & partially, const fluent_formula & effects, const pstate & updated) const {
-//	if (!fully.empty()) {
-//		/************Formulae Building************/
-//		/******Formulae containing the effects of the sensing******/
-//		belief_formula effects_formula;
-//		effects_formula.set_formula_type(FLUENT_FORMULA);
-//		effects_formula.set_fluent_formula(effects);
-//		effects_formula.set_is_grounded(true);
-//		effects_formula.deground();
-//
-//		/******First Property C(Fully, eff)******/
-//		belief_formula property1;
-//		property1.set_group_agents(fully);
-//		property1.set_formula_type(C_FORMULA);
-//		property1.set_bf1(effects_formula);
-//		property1.set_is_grounded(true);
-//		property1.deground();
-//
-//		if (!updated.entails(property1)) {
-//			std::cerr << "\nDEBUG: First property not respected";
-//			return false;
-//		}
-//
-//		if (!partially.empty()) {
-//			/******Second Property C(P, (C(Fully,eff) | C(Fully, -eff)))******/
-//			belief_formula inner_nested2, nested2, disjunction, property2;
-//			//First nested formula is equal to First Property C(Fully, eff)
-//			//Second nested formula C(Fully, -f) is comprised of two layer (the NOT and C)
-//			inner_nested2.set_group_agents(fully);
-//			inner_nested2.set_formula_type(C_FORMULA);
-//			inner_nested2.set_bf1(effects_formula);
-//			inner_nested2.set_is_grounded(true);
-//			inner_nested2.deground();
-//
-//			nested2.set_formula_type(PROPOSITIONAL_FORMULA);
-//			nested2.set_operator(BF_NOT);
-//			nested2.set_bf1(inner_nested2);
-//			nested2.set_is_grounded(true);
-//			nested2.deground();
-//
-//			//The disjunction (C(Fully,eff) | C(Fully, -eff)) is made with property1 and nested2
-//			disjunction.set_formula_type(PROPOSITIONAL_FORMULA);
-//			disjunction.set_operator(BF_OR);
-//			disjunction.set_bf1(property1);
-//			disjunction.set_bf2(nested2);
-//			disjunction.set_is_grounded(true);
-//			disjunction.deground();
-//
-//			//Finally we can construct the second property
-//			property2.set_group_agents(partially);
-//			property2.set_formula_type(C_FORMULA);
-//			property2.set_bf1(disjunction);
-//			property2.set_is_grounded(true);
-//			property2.deground();
-//
-//			/******Third Property C(F, C(P, (C(Fully,eff) | C(Fully, -eff))))******/
-//			//This formula is just C(Fully, property2)
-//			belief_formula property3;
-//			property3.set_group_agents(fully);
-//			property3.set_formula_type(C_FORMULA);
-//			property3.set_bf1(property2);
-//			property3.set_is_grounded(true);
-//			property3.deground();
-//
-//			if (!updated.entails(property2)) {
-//				std::cerr << "\nDEBUG: Second property not respected in the formula: ";
-//				property2.print_deground();
-//				return false;
-//			}
-//
-//			if (!updated.entails(property3)) {
-//				std::cerr << "\nDEBUG: Third property not respected in the formula: ";
-//				property3.print_deground();
-//				return false;
-//			}
-//		}
-//	}
-
-	return true;
-}
-
 void pstate::print() const {
 //	int counter = 1;
 //	std::cout << std::endl;
@@ -1262,184 +691,184 @@ void pstate::print_graphviz(std::ostream & graphviz) const {
 
 
 /*******FOR MAL OPTIMIZATION******/
-
-agent_set pstate::get_agents_if_entailed(const mal_observability_map& map, const pworld_ptr & start) const
-{ /**\todo move to helper*/
-
-    agent_set ret;
-    for (auto it_map = map.begin(); it_map != map.end(); it_map++) {
-        if (entails(it_map->second, start)) {
-
-            ret.insert(it_map->first);
-        }
-    }
-    return ret;
-}
-
-pworld_ptr pstate::execute_ontic_helper(const action &act, pstate &ret, const pworld_ptr &current_pw, transition_map &calculated, agent_set & oblivious_obs_agents) const {
-    // Execute the all the effects
-    fluent_formula current_pw_effects = get_effects_if_entailed(act.get_effects(), current_pw);
-    fluent_set world_description = current_pw.get_fluent_set();
-    fluent_formula::const_iterator it_eff;
-
-    for (it_eff = current_pw_effects.begin(); it_eff != current_pw_effects.end(); it_eff++) {
-        world_description = helper::ontic_exec(*it_eff, world_description);
-    }
-
-    pworld_ptr new_pw = ret.add_rep_world(pworld(world_description), current_pw.get_repetition()); // We add the corresponding pworld in ret
-    calculated.insert(transition_map::value_type(current_pw, new_pw)); // And we update the calculated map
-
-    auto it_pwtm = get_beliefs().find(current_pw);
-
-    if (it_pwtm != get_beliefs().end()) {
-        pworld_map::const_iterator it_pwm;
-        pworld_set::const_iterator it_pws;
-
-        for (it_pwm = it_pwtm->second.begin(); it_pwm != it_pwtm->second.end(); it_pwm++) {
-            agent ag = it_pwm->first;
-            bool is_oblivious_obs = oblivious_obs_agents.find(ag) != oblivious_obs_agents.end();
-
-            for (it_pws = it_pwm->second.begin(); it_pws != it_pwm->second.end(); it_pws++) {
-                if (is_oblivious_obs) { // If we are dealing with an OBLIVIOUS agent we maintain its beliefs as they were
-                    auto maintained_pworld = ret.get_worlds().find(*it_pws);
-
-                    if (maintained_pworld != ret.get_worlds().end()) {
-                        ret.add_edge(new_pw, *it_pws, ag);
-                    }
-                } else { // Otherwise, if we have a FULLY OBS agent
-                    auto calculated_pworld = calculated.find(*it_pws);
-
-                    if (calculated_pworld != calculated.end()) { // If we already calculated the transition function for this pworld
-                        ret.add_edge(new_pw, calculated_pworld->second, ag); // Then we update agents' beliefs
-                    } else {
-                        pworld_ptr believed_pw = execute_ontic_helper(act, ret, *it_pws, calculated, oblivious_obs_agents);
-                        ret.add_edge(new_pw, believed_pw, ag);
-
-                        ret.set_max_depth(ret.get_max_depth() + 1 + current_pw.get_repetition());
-                    }
-                }
-            }
-        }
-    }
-    return new_pw;
-}
-
-pworld_ptr pstate::execute_sensing_announcement_helper(const fluent_formula &effects, pstate &ret, const pworld_ptr &current_pw, transition_map &calculated, agent_set &partially_obs_agents, agent_set &oblivious_obs_agents, bool previous_entailment) const
-{
-    pworld_ptr new_pw = ret.add_rep_world(pworld(current_pw.get_fluent_set()), current_pw.get_repetition()); // We add the corresponding pworld in ret
-    calculated.insert(transition_map::value_type(current_pw, new_pw)); // And we update the calculated map
-
-    auto it_pwtm = get_beliefs().find(current_pw);
-
-    if (it_pwtm != get_beliefs().end()) {
-        pworld_map::const_iterator it_pwm;
-        pworld_set::const_iterator it_pws;
-
-        for (it_pwm = it_pwtm->second.begin(); it_pwm != it_pwtm->second.end(); it_pwm++) {
-            agent ag = it_pwm->first;
-
-            bool is_oblivious_obs = oblivious_obs_agents.find(ag) != oblivious_obs_agents.end();
-            bool is_partially_obs = partially_obs_agents.find(ag) != partially_obs_agents.end();
-            bool is_fully_obs = !is_oblivious_obs && !is_partially_obs;
-
-            for (it_pws = it_pwm->second.begin(); it_pws != it_pwm->second.end(); it_pws++) {
-                if (is_oblivious_obs) { // If we are dealing with an OBLIVIOUS agent we maintain its beliefs as they were
-                    auto maintained_pworld = ret.get_worlds().find(*it_pws);
-
-                    if (maintained_pworld != ret.get_worlds().end()) {
-                        ret.add_edge(new_pw, *it_pws, ag);
-                    }
-                } else { // Otherwise, if we have a FULLY/PARTIALLY observant agent
-                    auto calculated_pworld = calculated.find(*it_pws);
-                    //fluent_formula effects = get_effects_if_entailed(act.get_effects(), get_pointed());
-                    //bool ent = act.get_type() == SENSING ? entails(effects, *it_pws) == entails(effects, get_pointed()) : entails(effects, *it_pws);
-                    bool ent = entails(effects, *it_pws); // == entails(effects, get_pointed());
-
-
-                    bool is_consistent_belief = is_partially_obs || // If "ag" is PARTIALLY OBS, we always add an edge; If "ag" is FULLY OBS, we add an edge if he believes that "calculated" may be true (i.e., when "ent" holds) XOR
-                                                (is_fully_obs && (ent == previous_entailment)); // if a PARTIALLY OBS agent believes that "ag" thinks that "calculated" may be true (i.e., when "previous_entailment" holds)
-
-                    if (calculated_pworld != calculated.end()) { // If we already calculated the transition function for this pworld
-                        if (is_consistent_belief) {
-                            ret.add_edge(new_pw, calculated_pworld->second, ag);
-                        }
-                    } else { // If we did not already calculate the transition function
-                        if (is_consistent_belief) { // We calculate it if it would result in a consistent belief...
-
-                            pworld_ptr believed_pw = execute_sensing_announcement_helper(effects, ret, *it_pws, calculated, partially_obs_agents, oblivious_obs_agents, ent);
-                            ret.add_edge(new_pw, believed_pw, ag);
-                        }
-                        //						else if (is_partially_obs && (ent != previous_entailment)) { // ...and when it does not entail the action effects, but a PARTIALLY OBS agent believes that it may be true
-                        //							pworld_ptr believed_pw_neg = execute_sensing_announcement_helper(act, ret, *it_pws, calculated, partially_obs_agents, oblivious_obs_agents, ent);
-                        //							ret.add_edge(new_pw, believed_pw_neg, ag);
-                        //						}
-                    }
-                }
-            }
-        }
-    }
-    return new_pw;
-}
-
-pstate pstate::execute_ontic(const action & act) const
-{
-    pstate ret;
-
-    //This finds all the worlds that are reachable from the initial state following
-    //the edges labeled with fully observant agents.
-    // \todo: SISTEMA
-    agent_set agents; // = domain.get_agents();
-    agent_set fully_obs_agents = get_agents_if_entailed(act.get_fully_observants(), get_pointed());
-
-    agent_set oblivious_obs_agents = agents;
-    minus_set(oblivious_obs_agents, fully_obs_agents);
-
-    transition_map calculated; // A map that links the pworlds of *this* to the corresponding ones of ret
-    maintain_oblivious_believed_pworlds(ret, oblivious_obs_agents);
-
-    pworld_ptr new_pointed = execute_ontic_helper(act, ret, get_pointed(), calculated, oblivious_obs_agents);
-    ret.set_pointed(new_pointed); // Updating the pointed world
-    //std::cerr << "\nDEBUG: Out ONTIC " << act.get_name();
-
-    return ret;
-}
-
-pstate pstate::execute_sensing(const action & act) const
-{
-    pstate ret;
-
-    //This finds all the worlds that are reachable from the initial state following
-    //the edges labeled with fully observant agents.
-    // \todo: SISTEMA
-    agent_set agents; // = domain.get_agents();
-    agent_set fully_obs_agents = get_agents_if_entailed(act.get_fully_observants(), get_pointed());
-    agent_set partially_obs_agents = get_agents_if_entailed(act.get_partially_observants(), get_pointed());
-
-    agent_set oblivious_obs_agents = agents;
-    minus_set(oblivious_obs_agents, fully_obs_agents);
-    minus_set(oblivious_obs_agents, partially_obs_agents);
-
-    if (!oblivious_obs_agents.empty()) {
-        ret.set_max_depth(get_max_depth() + 1);
-    }
-
-    transition_map calculated; // A map that links the pworlds of *this* to the corresponding ones of ret
-    maintain_oblivious_believed_pworlds(ret, oblivious_obs_agents);
-
-    fluent_formula effects = get_effects_if_entailed(act.get_effects(), get_pointed());
-
-    pworld_ptr new_pointed = execute_sensing_announcement_helper(effects, ret, get_pointed(), calculated, partially_obs_agents, oblivious_obs_agents, entails(effects));
-    ret.set_pointed(new_pointed); // Updating the pointed world
-
-//    if (!check_properties(fully_obs_agents, partially_obs_agents, effects, ret)) {
-//        std::cerr << "\nDEBUG: Some properties are not respected\n\n";
-//        exit(1);
+//
+//agent_set pstate::get_agents_if_entailed(const mal_observability_map& map, const pworld_ptr & start) const
+//{ /**\todo move to helper*/
+//
+//    agent_set ret;
+//    for (auto it_map = map.begin(); it_map != map.end(); it_map++) {
+//        if (entails(it_map->second, start)) {
+//
+//            ret.insert(it_map->first);
+//        }
 //    }
-
-    return ret;
-}
-
-pstate pstate::execute_announcement(const action &act) const
-{
-    return execute_sensing(act);
-}
+//    return ret;
+//}
+//
+//pworld_ptr pstate::execute_ontic_helper(const action &act, pstate &ret, const pworld_ptr &current_pw, transition_map &calculated, agent_set & oblivious_obs_agents) const {
+//    // Execute the all the effects
+//    fluent_formula current_pw_effects = get_effects_if_entailed(act.get_effects(), current_pw);
+//    fluent_set world_description = current_pw.get_fluent_set();
+//    fluent_formula::const_iterator it_eff;
+//
+//    for (it_eff = current_pw_effects.begin(); it_eff != current_pw_effects.end(); it_eff++) {
+//        world_description = helper::ontic_exec(*it_eff, world_description);
+//    }
+//
+//    pworld_ptr new_pw = ret.add_rep_world(pworld(world_description), current_pw.get_repetition()); // We add the corresponding pworld in ret
+//    calculated.insert(transition_map::value_type(current_pw, new_pw)); // And we update the calculated map
+//
+//    auto it_pwtm = get_beliefs().find(current_pw);
+//
+//    if (it_pwtm != get_beliefs().end()) {
+//        pworld_map::const_iterator it_pwm;
+//        pworld_set::const_iterator it_pws;
+//
+//        for (it_pwm = it_pwtm->second.begin(); it_pwm != it_pwtm->second.end(); it_pwm++) {
+//            agent ag = it_pwm->first;
+//            bool is_oblivious_obs = oblivious_obs_agents.find(ag) != oblivious_obs_agents.end();
+//
+//            for (it_pws = it_pwm->second.begin(); it_pws != it_pwm->second.end(); it_pws++) {
+//                if (is_oblivious_obs) { // If we are dealing with an OBLIVIOUS agent we maintain its beliefs as they were
+//                    auto maintained_pworld = ret.get_worlds().find(*it_pws);
+//
+//                    if (maintained_pworld != ret.get_worlds().end()) {
+//                        ret.add_edge(new_pw, *it_pws, ag);
+//                    }
+//                } else { // Otherwise, if we have a FULLY OBS agent
+//                    auto calculated_pworld = calculated.find(*it_pws);
+//
+//                    if (calculated_pworld != calculated.end()) { // If we already calculated the transition function for this pworld
+//                        ret.add_edge(new_pw, calculated_pworld->second, ag); // Then we update agents' beliefs
+//                    } else {
+//                        pworld_ptr believed_pw = execute_ontic_helper(act, ret, *it_pws, calculated, oblivious_obs_agents);
+//                        ret.add_edge(new_pw, believed_pw, ag);
+//
+//                        ret.set_max_depth(ret.get_max_depth() + 1 + current_pw.get_repetition());
+//                    }
+//                }
+//            }
+//        }
+//    }
+//    return new_pw;
+//}
+//
+//pworld_ptr pstate::execute_sensing_announcement_helper(const fluent_formula &effects, pstate &ret, const pworld_ptr &current_pw, transition_map &calculated, agent_set &partially_obs_agents, agent_set &oblivious_obs_agents, bool previous_entailment) const
+//{
+//    pworld_ptr new_pw = ret.add_rep_world(pworld(current_pw.get_fluent_set()), current_pw.get_repetition()); // We add the corresponding pworld in ret
+//    calculated.insert(transition_map::value_type(current_pw, new_pw)); // And we update the calculated map
+//
+//    auto it_pwtm = get_beliefs().find(current_pw);
+//
+//    if (it_pwtm != get_beliefs().end()) {
+//        pworld_map::const_iterator it_pwm;
+//        pworld_set::const_iterator it_pws;
+//
+//        for (it_pwm = it_pwtm->second.begin(); it_pwm != it_pwtm->second.end(); it_pwm++) {
+//            agent ag = it_pwm->first;
+//
+//            bool is_oblivious_obs = oblivious_obs_agents.find(ag) != oblivious_obs_agents.end();
+//            bool is_partially_obs = partially_obs_agents.find(ag) != partially_obs_agents.end();
+//            bool is_fully_obs = !is_oblivious_obs && !is_partially_obs;
+//
+//            for (it_pws = it_pwm->second.begin(); it_pws != it_pwm->second.end(); it_pws++) {
+//                if (is_oblivious_obs) { // If we are dealing with an OBLIVIOUS agent we maintain its beliefs as they were
+//                    auto maintained_pworld = ret.get_worlds().find(*it_pws);
+//
+//                    if (maintained_pworld != ret.get_worlds().end()) {
+//                        ret.add_edge(new_pw, *it_pws, ag);
+//                    }
+//                } else { // Otherwise, if we have a FULLY/PARTIALLY observant agent
+//                    auto calculated_pworld = calculated.find(*it_pws);
+//                    //fluent_formula effects = get_effects_if_entailed(act.get_effects(), get_pointed());
+//                    //bool ent = act.get_type() == SENSING ? entails(effects, *it_pws) == entails(effects, get_pointed()) : entails(effects, *it_pws);
+//                    bool ent = entails(effects, *it_pws); // == entails(effects, get_pointed());
+//
+//
+//                    bool is_consistent_belief = is_partially_obs || // If "ag" is PARTIALLY OBS, we always add an edge; If "ag" is FULLY OBS, we add an edge if he believes that "calculated" may be true (i.e., when "ent" holds) XOR
+//                                                (is_fully_obs && (ent == previous_entailment)); // if a PARTIALLY OBS agent believes that "ag" thinks that "calculated" may be true (i.e., when "previous_entailment" holds)
+//
+//                    if (calculated_pworld != calculated.end()) { // If we already calculated the transition function for this pworld
+//                        if (is_consistent_belief) {
+//                            ret.add_edge(new_pw, calculated_pworld->second, ag);
+//                        }
+//                    } else { // If we did not already calculate the transition function
+//                        if (is_consistent_belief) { // We calculate it if it would result in a consistent belief...
+//
+//                            pworld_ptr believed_pw = execute_sensing_announcement_helper(effects, ret, *it_pws, calculated, partially_obs_agents, oblivious_obs_agents, ent);
+//                            ret.add_edge(new_pw, believed_pw, ag);
+//                        }
+//                        //						else if (is_partially_obs && (ent != previous_entailment)) { // ...and when it does not entail the action effects, but a PARTIALLY OBS agent believes that it may be true
+//                        //							pworld_ptr believed_pw_neg = execute_sensing_announcement_helper(act, ret, *it_pws, calculated, partially_obs_agents, oblivious_obs_agents, ent);
+//                        //							ret.add_edge(new_pw, believed_pw_neg, ag);
+//                        //						}
+//                    }
+//                }
+//            }
+//        }
+//    }
+//    return new_pw;
+//}
+//
+//pstate pstate::execute_ontic(const action & act) const
+//{
+//    pstate ret;
+//
+//    //This finds all the worlds that are reachable from the initial state following
+//    //the edges labeled with fully observant agents.
+//    // \todo: SISTEMA
+//    agent_set agents; // = domain.get_agents();
+//    agent_set fully_obs_agents = get_agents_if_entailed(act.get_fully_observants(), get_pointed());
+//
+//    agent_set oblivious_obs_agents = agents;
+//    minus_set(oblivious_obs_agents, fully_obs_agents);
+//
+//    transition_map calculated; // A map that links the pworlds of *this* to the corresponding ones of ret
+//    maintain_oblivious_believed_pworlds(ret, oblivious_obs_agents);
+//
+//    pworld_ptr new_pointed = execute_ontic_helper(act, ret, get_pointed(), calculated, oblivious_obs_agents);
+//    ret.set_pointed(new_pointed); // Updating the pointed world
+//    //std::cerr << "\nDEBUG: Out ONTIC " << act.get_name();
+//
+//    return ret;
+//}
+//
+//pstate pstate::execute_sensing(const action & act) const
+//{
+//    pstate ret;
+//
+//    //This finds all the worlds that are reachable from the initial state following
+//    //the edges labeled with fully observant agents.
+//    // \todo: SISTEMA
+//    agent_set agents; // = domain.get_agents();
+//    agent_set fully_obs_agents = get_agents_if_entailed(act.get_fully_observants(), get_pointed());
+//    agent_set partially_obs_agents = get_agents_if_entailed(act.get_partially_observants(), get_pointed());
+//
+//    agent_set oblivious_obs_agents = agents;
+//    minus_set(oblivious_obs_agents, fully_obs_agents);
+//    minus_set(oblivious_obs_agents, partially_obs_agents);
+//
+//    if (!oblivious_obs_agents.empty()) {
+//        ret.set_max_depth(get_max_depth() + 1);
+//    }
+//
+//    transition_map calculated; // A map that links the pworlds of *this* to the corresponding ones of ret
+//    maintain_oblivious_believed_pworlds(ret, oblivious_obs_agents);
+//
+//    fluent_formula effects = get_effects_if_entailed(act.get_effects(), get_pointed());
+//
+//    pworld_ptr new_pointed = execute_sensing_announcement_helper(effects, ret, get_pointed(), calculated, partially_obs_agents, oblivious_obs_agents, entails(effects));
+//    ret.set_pointed(new_pointed); // Updating the pointed world
+//
+////    if (!check_properties(fully_obs_agents, partially_obs_agents, effects, ret)) {
+////        std::cerr << "\nDEBUG: Some properties are not respected\n\n";
+////        exit(1);
+////    }
+//
+//    return ret;
+//}
+//
+//pstate pstate::execute_announcement(const action &act) const
+//{
+//    return execute_sensing(act);
+//}

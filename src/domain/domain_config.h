@@ -6,6 +6,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include "../../include/definitions/domain_config_def.h"
+#include "../../include/definitions/domain_def.h"
 //#include "../utilities/reader.h"
 
 class domain_config {

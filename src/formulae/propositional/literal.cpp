@@ -6,7 +6,7 @@ literal::literal(const fluent *fluent, const bool is_negated) : m_fluent(fluent)
     m_modal_depth = 0;
 }
 
-bool literal::is_entailed(const fluent_set *fluent_set) const {
+bool literal::is_entailed(const fluent_ptr_set *fluent_set) const {
     assert(m_modal_depth == 0);
     return (fluent_set->find(m_fluent) != fluent_set->end()) != m_is_negated;
 }

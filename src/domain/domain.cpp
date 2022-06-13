@@ -6,20 +6,24 @@
  * \author Francesco Fabiano, Alessandro Burigana.
  * \date April 1, 2019
  */
-#include "domain.h"
-#include "../actions/action.h"
 #include <boost/dynamic_bitset.hpp>
+#include <utility>
 
-domain::domain() = default;
+#include "domain.h"
+#include "../../include/definitions/domain_def.h"
+#include "../actions/action.h"
+#include "../utilities/helper.h"
+
+domain::domain(domain_config config, cem_store store, finitary_theory theory)
+        : m_finitary_theory(std::move(theory)), m_store(std::move(store)), m_config(std::move(config)) {}
 
 const domain_config & domain::get_config() const {
-    return config;
+    return m_config;
 }
 
-void domain::set_config(const domain_config & to_set_config) // (std::string name, bool debug, state_type stype, bool k_opt, boost::shared_ptr<reader> reader, domain_restriction ini_res, domain_restriction goal_res, bool is_global_obsv, action_check act_check, bool check_visited, bis_type bisimulation)
-{
-    domain::config = to_set_config;
-    domain::domain_grounder = grounder();
+void domain::set_config(const domain_config & to_set_config) {
+    domain::m_config = to_set_config;
+    domain::m_grounder = grounder();
 	m_intial_description = initially();
 }
 
@@ -32,28 +36,31 @@ const cem_store domain::get_store() const {
 }
 
 const grounder & domain::get_grounder() const {
-	return domain::domain_grounder;
+	return domain::m_grounder;
 }
 
-const fluent_set & domain::get_fluents() const {
-	return m_fluents;
+const fluent_ptr_set & domain::get_fluent_set() const {
+	return m_fluent_ptr_set;
 }
 
 unsigned int domain::get_fluent_number() const {
-	return(m_fluents.size() / 2);
+	return(m_fluent_set.size() / 2);
 }
 
 unsigned int domain::get_size_fluent()  const {
-	auto fluent_first = m_fluents.begin();
-	return(fluent_first->size());
+	return(m_fluent_set.begin()->size());
 }
 
 const action_set & domain::get_actions() const {
-	return m_actions;
+	return m_action_set;
 }
 
-const agent_set & domain::get_agents() const {
-	return m_agents;
+const agent_ptr_set & domain::get_agent_set() const {
+	return m_agent_ptr_set;
+}
+
+const finitary_theory &domain::get_finitary_theory() const {
+    return m_finitary_theory;
 }
 
 const initially & domain::get_initial_description() const {
@@ -86,16 +93,17 @@ void domain::build_agents(const reader &reader) {
 	int agents_length = helper::lenght_to_power_two(reader.m_agents.size());
 
 	for (it_agents = reader.m_agents.begin(); it_agents != reader.m_agents.end(); it_agents++) {
-		boost::dynamic_bitset<> agent(agents_length, i);
-		domain_agent_map.insert(agent_map::value_type(*it_agents, agent));
-		m_agents.insert(agent);
-		if (config.is_debug()) {
-			std::cout << "Agent " << *it_agents << " is " << agent << std::endl;
+		const agent ag(agents_length, i);
+        m_agent_set.insert(ag);
+        domain_agent_map.insert(agent_map::value_type(*it_agents, &ag));
+
+		if (m_config.is_debug()) {
+			std::cout << "Agent " << *it_agents << " is " << ag << std::endl;
 
 		}
 		i++;
 	}
-	domain::domain_grounder.set_agent_map(domain_agent_map);
+	domain::m_grounder.set_agent_map(domain_agent_map);
 }
 
 void domain::build_fluents(const reader &reader) {
@@ -108,35 +116,35 @@ void domain::build_fluents(const reader &reader) {
 	int i = 0;
 	int bit_size = helper::lenght_to_power_two(reader.m_fluents.size());
 	//todo prende numero fluenti*2 e generare i bit necessari
-	for (it_fluents = reader.m_fluents.begin();
-		it_fluents != reader.m_fluents.end(); it_fluents++) {
-		boost::dynamic_bitset<> fluentReal(bit_size + 1, i);
+	for (it_fluents = reader.m_fluents.begin(); it_fluents != reader.m_fluents.end(); it_fluents++) {
+        // todo: chiedi a Francesco come gestisce i fluenti
+		fluent fluentReal(bit_size + 1, i);
 		fluentReal.set(fluentReal.size() - 1, 0);
-		domain_fluent_map.insert(fluent_map::value_type(*it_fluents, fluentReal));
-		m_fluents.insert(fluentReal);
+		domain_fluent_map.insert(fluent_map::value_type(*it_fluents, &fluentReal));
+		m_fluent_set.insert(fluentReal);
 
-		if (config.is_debug()) {
+		if (m_config.is_debug()) {
 			std::cout << "Literal " << *it_fluents << " is " << " " << fluentReal << std::endl;
 		}
 
-		boost::dynamic_bitset<> fluent_negate_real(bit_size + 1, i);
+        fluent fluent_negate_real(bit_size + 1, i);
 		fluent_negate_real.set(fluent_negate_real.size() - 1, 1);
-		domain_fluent_map.insert(fluent_map::value_type(NEGATION_SYMBOL + *it_fluents, fluent_negate_real));
-		m_fluents.insert(fluent_negate_real);
+		domain_fluent_map.insert(fluent_map::value_type(NEGATION_SYMBOL + *it_fluents, &fluent_negate_real));
+		m_fluent_set.insert(fluent_negate_real);
 		i++;
-		if (config.is_debug()) {
+		if (m_config.is_debug()) {
 			std::cout << "Literal not " << *it_fluents << " is " << (i - 1) << " " << fluent_negate_real << std::endl;
 		}
 	}
-	domain::domain_grounder.set_fluent_map(domain_fluent_map);
+	domain::m_grounder.set_fluent_map(domain_fluent_map);
 }
 
 void domain::build_actions(const grounder &grounder, reader &reader) {
 	/*
 	 * This function set the grounder action map with the correct values.
 	 */
-	auto tot_ags = get_agents();
-	auto tot_fluents = get_fluents();
+	auto tot_ags = get_agent_set();
+	auto tot_fluents = get_fluent_set();
 	action_name_map domain_action_name_map;
 	std::cout << "\nBuilding action list..." << std::endl;
 	string_set::const_iterator it_actions_name;
@@ -147,26 +155,26 @@ void domain::build_actions(const grounder &grounder, reader &reader) {
 	for (it_actions_name = reader.m_actions.begin();
 		it_actions_name != reader.m_actions.end(); it_actions_name++) {
 		boost::dynamic_bitset<> action_bitset(bit_size, i);
-		action tmp_action(*it_actions_name, action_bitset, m_fluents, m_agents, 0);     // \todo: ***FIX*** AGENT GROUPS NUMBER
+		action tmp_action(*it_actions_name, action_bitset, m_fluent_set, m_agent_set, 0);     // \todo: ***FIX*** AGENT GROUPS NUMBER
 		domain_action_name_map.insert(action_name_map::value_type(*it_actions_name, action_bitset));
 		i++;
-		m_actions.insert(tmp_action);
-		if (config.is_debug()) {
+		m_action_set.insert(tmp_action);
+		if (m_config.is_debug()) {
 			std::cout << "Action " << tmp_action.get_name() << " is " << tmp_action.get_id() << std::endl;
 		}
 	}
 
-	domain::domain_grounder.set_action_name_map(domain_action_name_map);
+	domain::m_grounder.set_action_name_map(domain_action_name_map);
 //	printer::get_instance().set_grounder(domain::domain_grounder);
 
     build_propositions(grounder, reader);
 
-	if (config.is_debug()) {
+	if (m_config.is_debug()) {
 		std::cout << "\nPrinting complete action list..." << std::endl;
 		action_set::const_iterator it_actions;
 
-		for (it_actions = m_actions.begin();
-			it_actions != m_actions.end(); it_actions++) {
+		for (it_actions = m_action_set.begin();
+             it_actions != m_action_set.end(); it_actions++) {
 			it_actions->print();
 		}
 	}
@@ -180,19 +188,19 @@ void domain::build_propositions(const grounder &grounder, reader &reader) {
 	action_id action_to_modify;
 	for (it_prop = reader.m_propositions.begin();
 		it_prop != reader.m_propositions.end(); it_prop++) {
-		action_to_modify = domain::domain_grounder.ground_action(it_prop->get_action_name());
+		action_to_modify = domain::m_grounder.ground_action(it_prop->get_action_name());
 		//To change remove and add the updated --> @TODO: find better like queue
 
-		for (std::set<action>::iterator actionsList = m_actions.begin();
-			actionsList != m_actions.end(); actionsList++) {
+		for (std::set<action>::iterator actionsList = m_action_set.begin();
+             actionsList != m_action_set.end(); actionsList++) {
 			action_id actionTemp = action_to_modify;
 			actionTemp.set(actionTemp.size() - 1, 0);
-			if (m_actions.size() > actionTemp.to_ulong() && actionsList->get_id() == action_to_modify) {
+			if (m_action_set.size() > actionTemp.to_ulong() && actionsList->get_id() == action_to_modify) {
 				action_set::iterator it_action_set = actionsList;
 				action tmp = *it_action_set;
 				tmp.add_proposition(grounder,*it_prop);
-				m_actions.erase(it_action_set);
-				m_actions.insert(tmp);
+				m_action_set.erase(it_action_set);
+				m_action_set.insert(tmp);
 				break;
 			}
 		}
@@ -211,7 +219,7 @@ void domain::build_initially(const grounder &grounder, reader &reader, const pri
             case FLUENT_FORMULA: {
                 m_intial_description.add_pointed_condition(it_fl->get_fluent_formula());
 
-                if (config.is_debug()) {
+                if (m_config.is_debug()) {
                     std::cout << "	Pointed world: ";
                     printer.print_list(it_fl->get_fluent_formula());
                     std::cout << std::endl;
@@ -228,8 +236,8 @@ void domain::build_initially(const grounder &grounder, reader &reader, const pri
             case BELIEF_FORMULA:
                 //No more S5
             case E_FORMULA: {
-                m_intial_description.add_initial_condition(config.get_initial_state_mode(), *it_fl);
-                if (config.is_debug()) {
+                m_intial_description.add_initial_condition(m_config.get_initial_state_mode(), *it_fl);
+                if (m_config.is_debug()) {
                     std::cout << "Added to initial conditions: ";
                     it_fl->print();
                     std::cout << std::endl;
@@ -245,9 +253,9 @@ void domain::build_initially(const grounder &grounder, reader &reader, const pri
 	}
 
 	// Given the initial state mode, the initial state might need different function
-	switch (config.get_initial_state_mode()) {
+	switch (m_config.get_initial_state_mode()) {
         case Initial_State_Mode::FINITARY_S5_THEORY: {
-            m_intial_description.set_ff_forS5(config.get_initial_state_mode());
+            m_intial_description.set_ff_forS5(m_config.get_initial_state_mode());
             break;
         }
         case Initial_State_Mode::CUSTOM_INITIAL_STATE:
@@ -264,7 +272,7 @@ void domain::build_goal(const grounder &grounder, reader &reader) {
 	for (it_fl = reader.m_bf_goal.begin(); it_fl != reader.m_bf_goal.end(); it_fl++) {
         it_fl->ground(grounder);
         m_goal_description.push_back(*it_fl);
-        if (config.is_debug()) {
+        if (m_config.is_debug()) {
             std::cout << "	";
             it_fl->print();
             std::cout << std::endl;

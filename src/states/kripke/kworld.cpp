@@ -14,12 +14,12 @@ kworld::kworld() :
     m_event(nullptr),
     m_id(0) {}
 
-kworld::kworld(const fluent_set *fluent_set, const cevent *event, const unsigned long id) :
+kworld::kworld(const fluent_ptr_set *fluent_set, const cevent *event, const unsigned long id) :
     m_fluent_set(fluent_set),
     m_event(event),
     m_id(id) {}
 
-const fluent_set * kworld::get_fluent_set() const {
+const fluent_ptr_set * kworld::get_fluent_set() const {
     return m_fluent_set;
 }
 

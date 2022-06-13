@@ -20,12 +20,15 @@
 #include <iostream>
 #include <cstdlib>
 #include <cstring>
+#include <map>
 
 #include "../../include/definitions/define.h"
 #include "../../include/definitions/bisimulation_def.h"
+#include "../../include/definitions/domain_def.h"
+#include "../../include/definitions/kripke_models.h"
 //#include "../../src/domain/domain.h"
-#include "../../src/states/kripke/kworld.h"
-#include "../../src/states/kripke/kstate.h"
+
+class kstate;
 
 //STRUCTURE DECLARATION
 //index is the type of the implicit pointers to the array

@@ -17,14 +17,17 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
 
-#include "../../include/definitions/domain_def.h"
+//#include "../../include/definitions/domain_def.h"
 #include "../../include/definitions/actions.h"
+#include "../formulae/formula.h"
 #include "domain_config.h"
 #include "grounder.h"
 #include "initially.h"
 #include "../utilities/reader.h"
+#include "../formulae/finitary_theory/finitary_theory.h"
 //#include "../actions/custom_event_models/cem_store.h"
 
+class finitary_theory;
 
 class domain {
 private:
@@ -33,17 +36,22 @@ private:
      m_actions -> all the actions 
      m_agents -> all the agents.*/
     /** \brief Set containing all the (grounded) \ref fluent of the domain.*/
-    fluent_set m_fluents;
-    /** \brief Set containing all the \ref action (with effects, conditions, obsv etc.) of the domain.*/
-    action_set m_actions;
+    fluent_set m_fluent_set;
     /** \brief Set containing all the (grounded) \ref agent of the domain.*/
-    agent_set m_agents;
+    agent_set m_agent_set;
+    /** \brief Set containing all the \ref action (with effects, conditions, obsv etc.) of the domain.*/
+    action_set m_action_set;
+
+    fluent_ptr_set m_fluent_ptr_set;
+    agent_ptr_set m_agent_ptr_set;
+
+    finitary_theory m_finitary_theory;
 
     cem_store m_store;
 
-    domain_config config;
+    domain_config m_config;
 
-    grounder domain_grounder;
+    grounder m_grounder;
 
     /** \brief The description of the initial state.*/
     initially m_intial_description;
@@ -71,7 +79,7 @@ private:
     void build_goal(const grounder &grounder, reader &reader);
 
 public:
-    domain();
+    domain(domain_config config, cem_store store, finitary_theory theory);
 
     domain(domain const&) = delete;
     domain(domain const&&) = delete;
@@ -99,7 +107,13 @@ public:
     /** \brief Getter of the field \ref m_fluents.
      *
      * @return the ref to \ref m_fluents.*/
-    const fluent_set & get_fluents() const;
+    const fluent_ptr_set & get_fluent_set() const;
+
+    /** \brief Getter of the field \ref m_agents.
+     *
+     * @return the ref to \ref m_agents.*/
+    const agent_ptr_set & get_agent_set() const;
+
     /** \brief Function that return the number of \ref fluent in the domain.
      *
      * @return the number of \ref fluent.*/
@@ -112,10 +126,7 @@ public:
      * @return the ref to \ref m_actions.*/
     const action_set & get_actions() const;
 
-    /** \brief Getter of the field \ref m_agents.
-     *
-     * @return the ref to \ref m_agents.*/
-    const agent_set & get_agents() const;
+    const finitary_theory & get_finitary_theory() const;
 
     /** \brief Getter of the field \ref m_intial_description.
      *
