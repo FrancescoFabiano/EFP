@@ -191,12 +191,13 @@ void pstate::filter_no_good_edges(const domain &domain, pedge_map &no_goods) {
         ng_ag_worlds = no_goods[w1];
 
         for (const auto& ag : domain.get_agent_set()) {
-//            ws = ag_worlds[ag];
+            ws = ag_worlds[ag];
             ng_ws = ng_ag_worlds[ag];
 
             // We store only edges that are *not* in the no-goods map
-//            std::set_difference(m_worlds.begin(), m_worlds.end(), ng_ws.begin(), ng_ws.end(), ag_worlds[ag].begin());
-            // todo: SISTEMA
+            std::set_difference(m_worlds.begin(), m_worlds.end(),
+                                ng_ws.begin(), ng_ws.end(),
+                                std::inserter(ws, ws.end()));
         }
     }
 }
