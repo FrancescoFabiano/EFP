@@ -85,12 +85,13 @@ public:
     /**Function print out the solution time.
      * 
      * @param[in] elapsed_seconds: the time of the search.
+     * @param[in] expanded_nodes: nodes expanded by the search algorithm.
      * @param[in] goal: the goal state.
      * @param[in] results_file: if true print the plan time in a file to easy the confrontation with the old version.
      * @param[in] givenplan: if true changes the name of the output folder for the comparison time.
      * @param[in] used_search: The type of serach used.
      * @param[in] used_heur: which heuristic has been used.*/
-    void print_results(std::chrono::duration<double> elapsed_seconds, T goal, bool results_file, bool givenplan, search_type used_serach, heuristics used_heur = NO_H);
+    void print_results(std::chrono::duration<double> elapsed_seconds, int expanded_nodes, T goal, bool results_file, bool givenplan, search_type used_serach, heuristics used_heur = NO_H);
 
 
     /**Function that searches on m_search_space using the given actions.

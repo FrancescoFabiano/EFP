@@ -8,12 +8,12 @@ if [ -f out/EFP_comparison/findingplan/"${@##*/}" ] ; then
     rm out/EFP_comparison/findingplan/"${@##*/}"
 fi
 
-TIMEOUT="10m";
+TIMEOUT="30";
 
-heuristics=("NONE" "S_PG" "SUBGOALS"); #"L_PG" "C_PG"
+heuristics=("NONE" "S_PG" "L_PG" "C_PG" "SUBGOALS"); 
 
 for heur in "${heuristics[@]}"; do
-  timeout $TIMEOUT bin/efp.out $@ -results_file -check_visited -st POSS -bis FB -h $heur > findingplan_comparison.tmp
+  timeout $TIMEOUT bin/efp.out $@ -results_file -check_visited -st POSS -h $heur > findingplan_comparison.tmp
   exit_status=$?;
 
 	if [[ $exit_status -eq 124 ]]; then
@@ -23,11 +23,13 @@ for heur in "${heuristics[@]}"; do
 	else
 		grep -w "Executed actions:" findingplan_comparison.tmp >> out/EFP_comparison/findingplan/"${@##*/}";
     grep -w "Plan Length:" findingplan_comparison.tmp  >> out/EFP_comparison/findingplan/"${@##*/}";
+    grep -w "Expanded Nodes:" findingplan_comparison.tmp  >> out/EFP_comparison/findingplan/"${@##*/}";
+
 	fi;
 
     echo $'\n' >> out/EFP_comparison/findingplan/"${@##*/}";
 
-    sleep 10s;
+    sleep 5s;
 done;
 
 rm findingplan_comparison.tmp;

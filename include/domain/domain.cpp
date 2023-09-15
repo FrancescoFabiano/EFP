@@ -142,7 +142,8 @@ void domain::build()
 	//std::cout << "Initilly" <<std::endl;
 	build_initially();
 	//
-	build_attitudes();
+	if (has_attitudes())
+		{build_attitudes();}
 	// std::cout << "Goal" <<std::endl;
 	build_goal();
 }
