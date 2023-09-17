@@ -3,6 +3,9 @@ import pandas as pd
 from pathlib import Path
 
 
+heur_number = 5
+field_number = 3
+
 def loopPrintLaTeX(line,narg,tableFile):
     for k in range(narg):
         print(line,file=tableFile,end="")
@@ -14,14 +17,51 @@ def loopPrintLaTeXArray(line_before,endline,endSequence,array,tableFile):
 
 def loopPrintLaTeXArrayTime(line_before,endline,endSequence,array,tableFile):
     decimals=3
+    timeInit = 2
+    nodeInit = timeInit + heur_number
+    legthInit = nodeInit + heur_number
     countprint = 0
-    for elem in array[:-1]:
-        countprint+=1
-        if countprint > 2 and countprint < 8:
-            time = elem
+    minTime = sys.maxsize
+    minNodes = sys.maxsize
+    minLength = sys.maxsize
+    for elem in array:
+        if countprint >= timeInit and countprint < nodeInit:
             if elem != "TO":
-                elem = round(float(elem),decimals)
+                if float(elem) < minTime:
+                    minTime = float(elem)
+        elif countprint >=nodeInit and countprint < legthInit:
+            if elem != "-":
+                if int(elem) < minNodes:
+                        minNodes = int(elem)
+        elif countprint >= legthInit:
+            if elem != "-":
+                if int(elem) < minLength:
+                        minLength = int(elem)
+        countprint+=1
+
+
+    #print(f"Min time is {minTime}, min nodes is {minNodes}, and minLength is {minLength}")
+    countprint = 0
+    
+    for elem in array[:-1]:
+        if countprint >= timeInit and countprint < nodeInit:
+            if elem != "TO":
+                if float(elem) == minTime:
+                    elem = round(float(elem),decimals)
+                    elem = "\\textbf{"+str(elem)+"}"
+                else:
+                    elem = round(float(elem),decimals)
+        elif countprint >=nodeInit and countprint < legthInit:
+            if elem != "-":
+                if int(elem) == minNodes:
+                    elem = "\\textbf{"+elem+"}"
+        elif countprint >= legthInit:
+            if elem != "-":
+                if int(elem) == minLength:
+                    elem = "\\textbf{"+elem+"}"
         print(line_before + str(elem),file=tableFile,end=endline)
+        countprint+=1
+
     print(line_before + str(array[-1]),file=tableFile,end=endSequence)
 
 if __name__ == '__main__':
@@ -40,8 +80,6 @@ if __name__ == '__main__':
     table_path="out/Heur-tests/Table/"
     Path(table_path).mkdir(parents=True,exist_ok=True)
 
-    heur_number = 5
-    field_number = 3
     with open(table_path+"table.tex", "w") as tableFile:
         #Preamble
         print('\\documentclass[12pt,a4paper]{standalone}\n\\usepackage{hhline}\n\\usepackage{tabularx}\n\\begin{document}',file=tableFile)
