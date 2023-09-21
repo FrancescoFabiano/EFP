@@ -1,14 +1,13 @@
 #!/usr/bin/env bash
-#This script prints out the time for executing a plan on the same domain with the two version of EFP
-#USAGE EXAMPLE (from the project root folder): ". scripts/comparison.sh exp/paper/CC/CC_2_2_3.txt"
-#	where "exp/paper/CC/CC_2_2_3.txt" is the path to the domain name
+#This script prints out the time for executing a plan on the same domain with all the heuristics of EFP
+#USAGE EXAMPLE (from the project root folder): ". scripts/comparison_heuristics.sh"
 
 #REMOVE OLD COPIES
 if [ -f out/EFP_comparison/findingplan/"${@##*/}" ] ; then
     rm out/EFP_comparison/findingplan/"${@##*/}"
 fi
 
-TIMEOUT="600";
+TIMEOUT="60";
 
 heuristics=("NONE" "S_PG" "L_PG" "C_PG" "SUBGOALS"); 
 
@@ -29,7 +28,7 @@ for heur in "${heuristics[@]}"; do
 
     echo $'\n' >> out/EFP_comparison/findingplan/"${@##*/}";
 
-    sleep 5s;
+    sleep 2s;
 done;
 
 rm findingplan_comparison.tmp;
