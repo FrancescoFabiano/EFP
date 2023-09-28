@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #Just Run
-RESPATH="out/Heur-tests/";
+RESPATH="out/Heur-tests_parallel/";
 DOMAIN_EXT=".txt"; # Name of the domain
 
 #mv $OUTPATH_FINDINGPLAN $OUTPATH$DOMAIN_NAME$DOMAIN_EXT;
@@ -55,7 +55,7 @@ for dir in $RESPATH*; do
 					for heur in "${heuristics[@]}"; do
 					
 						while read line; do					
-							if [[ $line == *"$heur"* ]]; then
+							if [[ $line == *"EFP Version 2.0"*"$heur"* ]]; then
 
 								if [[ $line == *"TIMED-OUT"* ]]; then
 									num="TO";
@@ -73,12 +73,17 @@ for dir in $RESPATH*; do
 									fi 
 
 								else
-									read line
-									read line
+									length="-1"
+									nodes="-1"
+									while read line_nested; do
+										if [[ $line_nested == *"[$heur]Plan Length"* ]]; then
+											length=$( echo $line_nested | tr -d -c 0-9 )
+										fi
 
-									length=$( echo $line | tr -d -c 0-9 )
-									read line
-        							nodes=$( echo $line | tr -d -c 0-9 )
+										if [[ $line_nested == *"[$heur]Expanded Nodes"* ]]; then
+											nodes=$( echo $line_nested | tr -d -c 0-9 )
+										fi
+									done < $file;        							
 
 									if [[ $heur == $lastHeur ]]; then
 										echo "$num,$nodes,$length" >> "$RESPATH/graphres.csv";
