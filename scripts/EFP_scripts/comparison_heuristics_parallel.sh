@@ -14,7 +14,7 @@ heuristics=("NONE" "S_PG" "L_PG" "C_PG" "SUBGOALS");
 cleanup(){
   myPID=$BASHPID
   # use mkdir as a mutex between the child processes
-  if mkdir lock.tmp
+  if mkdir mutex_lock_directory
   then
     # when the mutex is aquired (this process finished first) kill all other processes doing heuristics
     echo "$myPID has aquired the lock"
@@ -26,7 +26,7 @@ cleanup(){
       fi
     done < pids.tmp
     # unlock the mutex by destroying lock.tmp
-    rm -r lock.tmp
+    rm -r mutex_lock_directory
   # process finished, but not first. wait to be killed. (wait instead of self terminating so that the pid remains taken and another process is not assigned it only to be killed by the first heuristic to complete.)
   else  
     echo "$BASHPID cannot aquire the lock."
@@ -77,7 +77,7 @@ func(){
 
 
 declare -a pids_array=()
-rm -r lock.tmp &>/dev/null #silenced output
+rm -r mutex_lock_directory &>/dev/null #silenced output
 rm -rf pids.tmp &>/dev/null #silenced output
 for heur in "${heuristics[@]}"; do
   func $1 $heur $2 &
@@ -89,7 +89,7 @@ wait
 
 rm findingplan_comparison_*.tmp &>/dev/null #silenced output
 rm pids.tmp &>/dev/null #silenced output
-rm -r lock.tmp &>/dev/null #silenced output
+rm -r mutex_lock_directory &>/dev/null #silenced output
 
 
 # cd /mnt/d/Documents/NMSU/Research/Parallel\ Programming/Codebase/EFP/
