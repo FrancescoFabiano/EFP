@@ -3,8 +3,12 @@
 
 # if the first parameter of this shell script it -p, run the parallel version.
 isParallel=""
+isFast="f"
 if [ "$1" = "-p" ]; then
     isParallel="_parallel"
+    if [ "$2" = "-l" ]; then
+        isFast="t"
+    fi
 fi
 
 INPATH="exp/Heur-tests${isParallel}/"; #Path of the domain
@@ -36,7 +40,7 @@ for dir in $INPATH*; do
             i="1";
             while [[ $i -le $ITERATIONS ]]; do
                 start=$SECONDS;
-                . scripts/EFP_scripts/comparison_heuristics${isParallel}.sh "$file";
+                . scripts/EFP_scripts/comparison_heuristics${isParallel}.sh "$file" "$isFast";
 
 				duration=$(( SECONDS - start ));
                 #mv $OUTPATH_FINDINGPLAN"$(basename $file)" $OUTPATH"$(basename $dir)"/"$(basename $file)"
