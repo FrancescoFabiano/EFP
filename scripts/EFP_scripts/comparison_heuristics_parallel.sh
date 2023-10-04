@@ -7,7 +7,7 @@ if [ -f out/EFP_comparison/findingplan/"${@##*/}" ] ; then
     rm out/EFP_comparison/findingplan/"${@##*/}"
 fi
 
-TIMEOUT="600";
+TIMEOUT="30";
 
 heuristics=("NONE" "S_PG" "L_PG" "C_PG" "SUBGOALS"); 
 

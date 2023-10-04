@@ -16,7 +16,7 @@ mkdir -p $OUTPATH
 DOMAIN_EXT=".txt"; # Name of the domain
 
 ITERATIONS=1;
-MAX_TIME_PER_ITERATION=590;
+MAX_TIME_PER_ITERATION=20;
 
 
 
