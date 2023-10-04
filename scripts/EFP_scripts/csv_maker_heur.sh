@@ -5,7 +5,7 @@ DOMAIN_EXT=".txt"; # Name of the domain
 
 #mv $OUTPATH_FINDINGPLAN $OUTPATH$DOMAIN_NAME$DOMAIN_EXT;
 
-heuristics=('BFS' 'SUM_PG' 'LENGTH_PG' 'CLASSIC_PG' 'SUBGOALS')
+heuristics=('BFS' 'SUM_PG' 'LENGTH_PG' 'CLASSI_PG' 'SUBGOALS')
 heuristics_TO=('NONE' 'S_PG' 'L_PG' 'C_PG' 'SUBGOALS')
 posHeur=$(( ${#heuristics[*]} - 1 ))
 lastHeur="${heuristics[$posHeur]}"

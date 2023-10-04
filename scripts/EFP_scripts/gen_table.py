@@ -54,11 +54,11 @@ def loopPrintLaTeXArrayTime(line_before,endline,endSequence,array,tableFile):
         elif countprint >=nodeInit and countprint < legthInit:
             if elem != "-":
                 if int(elem) == minNodes:
-                    elem = "\\textbf{"+elem+"}"
+                    elem = "\\textbf{"+str(elem)+"}"
         elif countprint >= legthInit:
             if elem != "-":
                 if int(elem) == minLength:
-                    elem = "\\textbf{"+elem+"}"
+                    elem = "\\textbf{"+str(elem)+"}"
         print(line_before + str(elem),file=tableFile,end=endline)
         countprint+=1
 
@@ -66,18 +66,18 @@ def loopPrintLaTeXArrayTime(line_before,endline,endSequence,array,tableFile):
 
 if __name__ == '__main__':
 
-
-    filename='out/Heur-tests/graphres.csv'
+    init_path='out/Heur-tests_parallel/'
+    filename=init_path+'graphres.csv'
     # Read csv / tab-delimited in this example
     df = pd.read_csv(filename, sep=',')
     
-    df = df[['Domain', 'Instance', 'Time-BFS', 'Time-LENGTH_PG', 'Time-SUM_PG', 'Time-CLASSIC_PG', 'Time-SUBGOALS', 'Nodes-BFS', 'Nodes-LENGTH_PG', 'Nodes-SUM_PG', 'Nodes-CLASSIC_PG', 'Nodes-SUBGOALS', 'Length-BFS', 'Length-LENGTH_PG', 'Length-SUM_PG', 'Length-CLASSIC_PG', 'Length-SUBGOALS']]
+    df = df[['Domain', 'Instance', 'Time-BFS', 'Time-LENGTH_PG', 'Time-SUM_PG', 'Time-CLASSI_PG', 'Time-SUBGOALS', 'Nodes-BFS', 'Nodes-LENGTH_PG', 'Nodes-SUM_PG', 'Nodes-CLASSI_PG', 'Nodes-SUBGOALS', 'Length-BFS', 'Length-LENGTH_PG', 'Length-SUM_PG', 'Length-CLASSI_PG', 'Length-SUBGOALS']]
 
     # Write csv
     df.to_csv(filename, sep=',',index=False)
 
     #Create LaTeX Table
-    table_path="out/Heur-tests/Table/"
+    table_path=init_path+"/Table/"
     Path(table_path).mkdir(parents=True,exist_ok=True)
 
     with open(table_path+"table.tex", "w") as tableFile:
@@ -144,7 +144,7 @@ if __name__ == '__main__':
 
         data = data.replace("LENGTH_PG", "L_PG")
         data = data.replace("SUM_PG", "S_PG")
-        data = data.replace("CLASSIC_PG", "C_PG")
+        data = data.replace("CLASSI_PG", "C_PG")
         data = data.replace("SUBGOALS", "SUB")
 
         data = data.replace("_", "\\_")
