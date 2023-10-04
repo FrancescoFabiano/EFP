@@ -3,7 +3,7 @@
 #USAGE EXAMPLE (from the project root folder): ". scripts/comparison_heuristics.sh"
 
 #REMOVE OLD COPIES
-if [ -f out/EFP_comparison/findingplan/"${@##*/}" ] ; then
+if [[ -f out/EFP_comparison/findingplan/"${@##*/}" ]] ; then
     rm out/EFP_comparison/findingplan/"${@##*/}"
 fi
 
