@@ -3,8 +3,11 @@
 #USAGE EXAMPLE (from the project root folder): ". scripts/comparison_heuristics.sh"
 
 #REMOVE OLD COPIES
-if [[ -f out/EFP_comparison/findingplan/"${@##*/}" ]] ; then
-    rm out/EFP_comparison/findingplan/"${@##*/}"
+
+file=$1
+
+if [[ -f out/EFP_comparison/findingplan/"${file##*/}" ]] ; then
+    rm out/EFP_comparison/findingplan/"${file##*/}"
 fi
 
 TIMEOUT="600";
@@ -18,15 +21,15 @@ for heur in "${heuristics[@]}"; do
 	if [[ $exit_status -eq 124 ]]; then
 
         TOPRINT="EFP Version 2.0 (on POSS and fast Bisimulation) with $heur and VISTED-STATE TIMED-OUT"
-        echo -e "$TOPRINT" >> out/EFP_comparison/findingplan/"${@##*/}";
+        echo -e "$TOPRINT" >> out/EFP_comparison/findingplan/"${file##*/}";
 	else
-		grep -w "Executed actions:" findingplan_comparison.tmp >> out/EFP_comparison/findingplan/"${@##*/}";
-    grep -w "Plan Length:" findingplan_comparison.tmp  >> out/EFP_comparison/findingplan/"${@##*/}";
-    grep -w "Expanded Nodes:" findingplan_comparison.tmp  >> out/EFP_comparison/findingplan/"${@##*/}";
+		grep -w "Executed actions:" findingplan_comparison.tmp >> "out/EFP_comparison/findingplan/${file##*/}";
+    grep -w "Plan Length:" findingplan_comparison.tmp  >> "out/EFP_comparison/findingplan/${file##*/}";
+    grep -w "Expanded Nodes:" findingplan_comparison.tmp  >> "out/EFP_comparison/findingplan/${file##*/}";
 
 	fi;
 
-    echo $'\n' >> out/EFP_comparison/findingplan/"${@##*/}";
+    echo $'\n' >> "out/EFP_comparison/findingplan/${file##*/}";
 
     sleep 2s;
 done;

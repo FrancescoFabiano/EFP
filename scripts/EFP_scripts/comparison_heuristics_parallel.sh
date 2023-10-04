@@ -3,10 +3,11 @@
 #USAGE EXAMPLE (from the project root folder): ". scripts/comparison_heuristics.sh"
 
 #REMOVE OLD COPIES
-echo "DEBUG: Test 1"
 
-if [[ -f out/EFP_comparison/findingplan/"${@##*/}" ]] ; then
-    rm out/EFP_comparison/findingplan/"${@##*/}"
+file=$1
+
+if [[ -f out/EFP_comparison/findingplan/"${file##*/}" ]] ; then
+    rm out/EFP_comparison/findingplan/"${file##*/}"
 fi
 
 TIMEOUT="30";
@@ -44,7 +45,6 @@ func(){
   # echo "1##*/ is ${1##*/}"
   # echo "-------------------"
 
-  file=$1
   heur=$2
   cleaner=$3
   if [ $cleaner = "f" ]; then
@@ -66,12 +66,12 @@ func(){
 
 	if [[ $exit_status -eq 124 ]]; then
         header="EFP Version 2.0 (on POSS and fast Bisimulation) with $heur and VISTED-STATE TIMED-OUT \n"
-        echo -e "$header" >> out/EFP_comparison/findingplan/"${1##*/}";
+        echo -e "$header" >> out/EFP_comparison/findingplan/"${file##*/}";
 	else
 		body=" [$heur]$(grep -w "Executed actions:" "$tmp_output")"
     body="$body \n [$heur]$(grep -w "Plan Length:" "$tmp_output")"
     body="$body \n [$heur]$(grep -w "Expanded Nodes:" "$tmp_output") \n"
-    echo -e "$body" >> out/EFP_comparison/findingplan/"${1##*/}";
+    echo -e "$body" >> out/EFP_comparison/findingplan/"${file##*/}";
 	fi;
   # sleep 2s;
   # rm "$tmp_output"
