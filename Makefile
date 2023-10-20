@@ -25,7 +25,7 @@ ifeq ($(BUILD),valgrind)
 endif
 
 
-CFLAGS := -g -Wall -ansi -Wfatal-errors -std=c++14
+CFLAGS := -g -Wall -ansi -Wfatal-errors -std=c++14 -pthread -lpthread -lrt
 
 dir_guard = @mkdir -p $(@D)
 BUILD_DIR = build

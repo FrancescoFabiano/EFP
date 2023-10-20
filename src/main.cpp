@@ -39,6 +39,7 @@ bool is_global_obsv = true;
 bool check_visited = false;
 bool has_attitudes = false;
 bis_type bisimulation = BIS_NONE;
+parallel_input pin;
 heuristics used_heur = NO_H;
 search_type used_search = BFS;
 state_type state_struc = POSSIBILITIES; //default
@@ -130,6 +131,16 @@ void print_usage(char* prog_name)
 	std::cout << "		S_PG: A planning graph is used to calculate the sum of each sub-goal distance starting from the state." << std::endl;
 	std::cout << "		C_PG: A single planning graph is used to calculate the sum of each 'grounded' belief formula." << std::endl;
 	std::cout << "		SUBGOALS: We select the state with the highest number of satisfied subgoals." << std::endl;
+
+	std::cout << "-parallel @ptype @pwait" << std::endl;
+	std::cout << "	The planner will run all heuristics (NONE, L_PG, S_PG, C_PG, SUBGOALS) in parallel. (This overrides the heuristic and search flags)." << std::endl;
+	std::cout << "	Possible @ptype:" << std::endl;
+	std::cout << "		SERIAL: The planner will be solved serially. (default)" << std::endl;
+	std::cout << "		PTHREAD: There will be one posix-thread assigned per heuristic" << std::endl;
+	std::cout << "		FORK: There will be one forked process assigned per heuristic" << std::endl;
+	std::cout << "	Possible @pwait:" << std::endl;
+	std::cout << "		NONE: The planner will end once the fastest thread/process has concluded (default)" << std::endl;
+	std::cout << "		WAIT: The planner will wait for all threads/processes to conclude" << std::endl;
 
 
 
@@ -345,6 +356,40 @@ void manage_arguments(int argc, char** argv)
 					<< std::endl;
 				exit(1);
 			}
+		} else if (strcmp(argv[i], "-parallel") == 0) { /**future work: additionally run BFS, DFS, and I_DFS in parallel*/
+			i++;
+			if (i >= argc) {
+				std::cerr << "-parallel needs specification (pthread, fork)." << std::endl;
+				exit(1);
+			} else if (strcmp(argv[i], "SERIAL") == 0) {
+				std::cout << "The solving process will run serially. (Default)" << std::endl;
+				pin.ptype = P_SERIAL;
+			} else if (strcmp(argv[i], "PTHREAD") == 0) {
+				std::cout << "The solving process will run heuristics in parallel using posix-threads." << std::endl;
+				pin.ptype = P_PTHREAD;
+			} else if (strcmp(argv[i], "FORK") == 0) {
+				std::cout << "The solving process will run heuristics in parallel using forked processes. " << std::endl;
+				pin.ptype = P_FORK;
+			} else {
+				std::cerr << "Wrong specification for '-parallel @ptype'; use 'SERIAL' or 'PTHREAD' or 'FORK'."
+					<< std::endl;
+				exit(1);
+			}	
+			i++;
+			if (i >= argc) {
+				std::cerr << "-parallel needs specification (NONE, WAIT)." << std::endl;
+				exit(1);
+			} else if (strcmp(argv[i], "NONE") == 0) {
+				std::cout << "The planner will conclude once the fastest parallel process has concluded computation. (Default)" << std::endl;
+				pin.pwait = false;
+			} else if (strcmp(argv[i], "WAIT") == 0) {
+				std::cout << "The planner will wait for all parallel processes to finish before concluding computation. " << std::endl;
+				pin.pwait = true;
+			} else {
+				std::cerr << "Wrong specification for '-parallel @pwait'; use 'NONE' or 'WAIT'."
+					<< std::endl;
+				exit(1);
+			}
 		} else if (strcmp(argv[i], "-bis") == 0) {
 			i++;
 			if (i >= argc) {
@@ -383,7 +428,7 @@ void manage_arguments(int argc, char** argv)
 
 }
 
-void launch_search(state_type state_struc, bool execute_given_action, bool results_file, heuristics used_heur, search_type used_search, std::vector<std::string> given_actions, short max_depth, short step)
+void launch_search(state_type state_struc, bool execute_given_action, bool results_file, parallel_input pin, heuristics used_heur, search_type used_search, std::vector<std::string> given_actions, short max_depth, short step)
 {
 	switch ( state_struc ) {
 	case KRIPKE:
@@ -391,13 +436,13 @@ void launch_search(state_type state_struc, bool execute_given_action, bool resul
 		planner< state<kstate> > m_planner;
 		if (execute_given_action) {
 			if (results_file) {
-				m_planner.execute_given_actions_timed(given_actions);
+				m_planner.execute_given_actions_timed(given_actions,pin.ptype);
 			} else {
 				m_planner.execute_given_actions(given_actions);
 			}
 			std::cout << "\n\n\n*****THE END*****\n";
 		} else {
-			if (m_planner.search(results_file, used_heur, used_search, max_depth, step)) {
+			if (m_planner.search(results_file, pin, used_heur, used_search, max_depth, step)) {
 				std::cout << "\n\n\n*****THE END*****\n";
 			} else {
 				std::cout << "\n\n\n*****THE SAD END*****\n";
@@ -410,13 +455,13 @@ void launch_search(state_type state_struc, bool execute_given_action, bool resul
 		planner< state<pstate> > m_planner;
 		if (execute_given_action) {
 			if (results_file) {
-				m_planner.execute_given_actions_timed(given_actions);
+				m_planner.execute_given_actions_timed(given_actions,pin.ptype);
 			} else {
 				m_planner.execute_given_actions(given_actions);
 			}
 			std::cout << "\n\n\n*****THE END*****\n";
 		} else {
-			if (m_planner.search(results_file, used_heur, used_search, max_depth, step)) {
+			if (m_planner.search(results_file, pin, used_heur, used_search, max_depth, step)) {
 				std::cout << "\n\n\n*****THE END*****\n";
 			} else {
 				std::cout << "\n\n\n*****THE SAD END*****\n";
@@ -487,7 +532,7 @@ int main(int argc, char** argv)
 	//domain::get_instance().get_attitudes().print();
 
 	//launch search planner
-	launch_search(state_struc, execute_given_actions, results_file, used_heur, used_search, given_actions, max_depth, step);
+	launch_search(state_struc, execute_given_actions, results_file, pin, used_heur, used_search, given_actions, max_depth, step);
 
 	//timer.end(READ_TIMER);
 	//planner.main();

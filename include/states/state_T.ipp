@@ -226,15 +226,20 @@ bool state<T>::is_goal() const
 }
 
 template <class T>
-void state<T>::print() const
+void state<T>::print(parallel_type ptype, heuristics h) const
 {
+	std::string parallel_handler = "";
+	if(ptype==P_CHILD){
+		std::string heuristic_names[5] = {"NO_H","L_PG","S_PG","C_PG","SUBGOALS"};
+		parallel_handler = "[" + heuristic_names[(int)h] + "] " ;
+	}
 	std::cout << "\n";
 	if (domain::get_instance().get_debug()) {
 		m_representation.print();
 	}
 	//ret.set_representation(get_representation().compute_succ(act));
-	std::cout << "Plan Length: " << get_plan_length();
-	std::cout << "\n\nExecuted actions: ";
+	std::cout << parallel_handler+"Plan Length: " << get_plan_length();
+	std::cout << "\n\n"+parallel_handler+"Executed actions: ";
 	printer::get_instance().print_list(get_executed_actions());
 	//std::cout << "\nHeuristic Value Length: " << get_heuristic_value();
 }

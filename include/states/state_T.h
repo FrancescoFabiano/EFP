@@ -280,7 +280,7 @@ public:
 
 
     /** \brief Function that prints the information of *this*.*/
-    void print() const;
+    void print(parallel_type ptype = P_SERIAL,heuristics h=NO_H) const;
 
     /** \brief Function that prints the information of *this* in a Graphviz file.
      *

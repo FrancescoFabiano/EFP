@@ -9,11 +9,22 @@
 #include <algorithm>
 #include "planner.h"
 
+// when running parallel, [heur] is printed at the start of each line so that it can easily be seen what heuristical thread is printing what output.
+// this function just takes a ptype and heuristic, and returns "[heur] " if the ptype is P_CHILD, or "" otherwise.
+std::string child_string(parallel_type ptype, heuristics used_heur){
+	if(ptype!=P_CHILD) return "";
+	std::string heuristic_names[5] = {"[NO_H] ","[L_PG] ","[S_PG] ","[C_PG] ","[SUBGOALS] "};
+	return heuristic_names[used_heur];
+}
+
 template <class T>
-void planner<T>::print_results(std::chrono::duration<double> elapsed_seconds, int expanded_nodes, T goal, bool results_file, bool givenplan, search_type used_search, heuristics used_heur)
+void planner<T>::print_results(std::chrono::duration<double> elapsed_seconds, int expanded_nodes, T goal, bool results_file, bool givenplan, search_type used_search, heuristics used_heur, parallel_type ptype)
 {
-	std::cout << "\n\n\nWell Done, Goal found in " << elapsed_seconds.count() << " with " << expanded_nodes << " expanded nodes" << " :)\n";
-	goal.print();
+	std::string child_notice = "\n\n\n";
+	child_notice = child_notice + child_string(ptype,used_heur);
+
+	std::cout << child_notice +"Well Done, Goal found in " << elapsed_seconds.count() << " with " << expanded_nodes << " expanded nodes" << " :)\n";
+	goal.print(ptype,used_heur);
 	std::cout << "\n\nExpanded Nodes: " << expanded_nodes << std::endl;
 
 	if (results_file) {
@@ -25,7 +36,12 @@ void planner<T>::print_results(std::chrono::duration<double> elapsed_seconds, in
 			folder = folder + "findingplan/";
 		}
 		system(("mkdir -p " + folder).c_str());
-		result.open(folder + domain::get_instance().get_name() + ".txt", std::ofstream::out | std::ofstream::app);
+		std::string file_extension = ".txt";
+		if(ptype == P_CHILD) { //if using parallelism, modify the result file's name to be unique for each item.
+			std::string file_details = "_parallel_heur" + std::to_string(used_heur);
+			file_extension = file_details + file_extension;
+		}
+		result.open(folder + domain::get_instance().get_name() + file_extension, std::ofstream::out | std::ofstream::app);
 		result << "EFP Version 2.0 (";
 		switch ( domain::get_instance().get_stype() ) {
 		case KRIPKE:
@@ -101,21 +117,24 @@ void planner<T>::print_results(std::chrono::duration<double> elapsed_seconds, in
 }
 
 template <class T>
-bool planner<T>::search(bool results_file, heuristics used_heur, search_type used_search, short IDFS_d, short IDFS_s)
+bool planner<T>::search(bool results_file, parallel_input pin, heuristics used_heur, search_type used_search, short IDFS_d, short IDFS_s)
 {
-
-	if (used_heur == NO_H) {
-		switch ( used_search ) {
-		case DFS:
-			return search_DFS(results_file);
-		case I_DFS:
-			return search_IterativeDFS(results_file, IDFS_d, IDFS_s);
-		case BFS:
-		default:
-			return search_BFS(results_file);
+	if(pin.ptype == P_SERIAL || pin.ptype == P_CHILD){
+		if (used_heur == NO_H) {
+			switch ( used_search ) {
+			case DFS:
+				return search_DFS(results_file, pin.ptype);
+			case I_DFS:
+				return search_IterativeDFS(results_file, IDFS_d, IDFS_s, pin.ptype);
+			case BFS:
+			default:
+				return search_BFS(results_file, pin.ptype);
+			}
+		} else {
+			return search_heur(results_file, used_heur, pin.ptype);
 		}
 	} else {
-		return search_heur(results_file, used_heur);
+		return parallel_search(results_file, pin, used_heur, used_search, IDFS_d, IDFS_s);
 	}
 
 	//non arrivo mai qui.
@@ -123,7 +142,108 @@ bool planner<T>::search(bool results_file, heuristics used_heur, search_type use
 }
 
 template <class T>
-bool planner<T>::search_BFS(bool results_file)
+static void* my_search_thread(void *args)
+{
+	pthread_params *params = (pthread_params *)args;
+	planner<T> tmpObj;
+	tmpObj.search(params->results_file, params->pin       , params->used_heur   , params->used_search    , params->IDFS_d, params->IDFS_s);
+}
+
+template <class T>
+bool planner<T>::parallel_search(bool results_file, parallel_input pin, heuristics used_heur, search_type used_search, short IDFS_d, short IDFS_s)
+{
+	int num_heuristics = 5;
+	heuristics heur_list[num_heuristics]   = { NO_H ,  L_PG ,  S_PG ,  C_PG ,  SUBGOALS };
+	std::string heur_names[num_heuristics] = {"NO_H", "L_PG", "S_PG", "C_PG", "SUBGOALS"};
+	parallel_type ptype = pin.ptype;
+	bool pwait = pin.pwait;
+	
+	if(ptype == P_PTHREAD){
+		pthread_t tid[num_heuristics];
+		pthread_params *params;
+		params = (pthread_params*)malloc(num_heuristics*sizeof(pthread_params));
+		for(int index = 0; index<num_heuristics ; index++){
+			//set up the parameter structure for this thread
+			params[index].results_file = results_file;
+			params[index].pin.ptype = P_CHILD;
+			params[index].used_heur = heur_list[index];
+			params[index].used_search = used_search;
+			params[index].IDFS_d = IDFS_d;
+			params[index].IDFS_s = IDFS_s;
+
+			int isBroken = pthread_create(&tid[index], NULL, my_search_thread<T>, &params[index]);
+			if( !isBroken ){
+				std::cout << "created thread tid: ["<< tid[index] <<"] for heuristic: ["<< heur_names[index] <<"]" << std::endl;
+			} else {
+				std::cout << "Failed to spawn pthread in parallel_search()" << std::endl;
+				return false;
+			}
+		}
+
+		//wait for all threads to terminate.
+		if(pwait)
+			for(int index=0;index<num_heuristics;index++)
+				pthread_join(tid[index],NULL);
+		//loop until one thread terminates.
+		else{
+			int running = 1;
+			while(running!=0){
+				for(int index=0;index<num_heuristics;index++){
+					running = pthread_tryjoin_np(tid[index], NULL);
+					if(running==0) break;
+				}
+			}
+			for(int index=0 ; index < num_heuristics ; index++)
+				pthread_cancel(tid[index]);
+		}
+		
+		
+	} else if(ptype == P_FORK){
+		int fork_id = -1;
+		int pids[num_heuristics];
+		for(int index = 0; index<num_heuristics ; index++){
+			//attempt to create a forked process.
+			if((fork_id = fork()) < 0){
+				std::cout << "Failed to fork process in parallel_search()" << std::endl;
+				return false;
+			}
+
+			//parent saves child id
+			if(fork_id){ 
+				std::cout << "Forked process pid: ["<< fork_id <<"] for heuristic: ["<< heur_names[index] <<"]" << std::endl;
+				pids[index]=fork_id; 
+			}
+
+			 //child launches search serially
+			else{
+				parallel_input pin_child;
+				pin_child.ptype=P_CHILD;
+				search(results_file, pin_child, heur_list[index], used_search, IDFS_d, IDFS_s);
+				exit(0);
+			}
+		}
+		//wait for all children to terminate
+		if(pwait)
+			for(int index=0 ; index < num_heuristics ; index++)
+				waitpid(pids[index],NULL,0);
+		//loop until one child terminates, then terminate them all.
+		else{
+			waitpid(0,NULL,0);
+			for(int index=0 ; index < num_heuristics ; index++)
+				kill(pids[index], SIGTERM);
+
+		}
+
+	} else { //this should never occur. 
+		std::cout << "Illegal ptype in parallel_search()" << std::endl;
+		return false;
+	}
+
+	return true;
+}
+
+template <class T>
+bool planner<T>::search_BFS(bool results_file, parallel_type ptype)
 {
 
 	int expanded_nodes = 0;
@@ -147,7 +267,7 @@ bool planner<T>::search_BFS(bool results_file)
 	auto end_timing = std::chrono::system_clock::now();
 	std::chrono::duration<double> elapsed_seconds = end_timing - start_timing;
 
-	std::cout << "\nInitial Built in " << elapsed_seconds.count() << " seconds" << std::endl;
+	std::cout << "\n"+child_string(ptype,NO_H)+"Initial Built in " << elapsed_seconds.count() << " seconds" << std::endl;
 
 	action_set actions = domain::get_instance().get_actions();
 	action_set::const_iterator it_acset;
@@ -159,7 +279,7 @@ bool planner<T>::search_BFS(bool results_file)
 	if (initial.is_goal()) {
 		end_timing = std::chrono::system_clock::now();
 		elapsed_seconds = end_timing - start_timing;
-		print_results(elapsed_seconds, expanded_nodes, initial, results_file, false, BFS, NO_H);
+		print_results(elapsed_seconds, expanded_nodes, initial, results_file, false, BFS, NO_H, ptype);
 
 		return true;
 	}
@@ -189,7 +309,7 @@ bool planner<T>::search_BFS(bool results_file)
 				if (tmp_state.is_goal()) {
 					end_timing = std::chrono::system_clock::now();
 					elapsed_seconds = end_timing - start_timing;
-					print_results(elapsed_seconds, expanded_nodes, tmp_state, results_file, false, BFS, NO_H);
+					print_results(elapsed_seconds, expanded_nodes, tmp_state, results_file, false, BFS, NO_H,ptype);
 					return true;
 				}
 				if (!check_visited || visited_states.insert(tmp_state).second) {
@@ -210,7 +330,7 @@ bool planner<T>::search_BFS(bool results_file)
 }
 
 template <class T>
-bool planner<T>::search_IterativeDFS(bool results_file, short maxDepth_, short step_)
+bool planner<T>::search_IterativeDFS(bool results_file, short maxDepth_, short step_, parallel_type ptype)
 {
 	int expanded_nodes = 0;
 	//stack di supporto per i risultati della ricerca.
@@ -248,7 +368,7 @@ bool planner<T>::search_IterativeDFS(bool results_file, short maxDepth_, short s
 	if (initial.is_goal()) {
 		end_timing = std::chrono::system_clock::now();
 		elapsed_seconds = end_timing - start_timing;
-		print_results(elapsed_seconds, expanded_nodes, initial, results_file, false, I_DFS, NO_H);
+		print_results(elapsed_seconds, expanded_nodes, initial, results_file, false, I_DFS, NO_H,ptype);
 
 		return true;
 	}
@@ -278,7 +398,7 @@ bool planner<T>::search_IterativeDFS(bool results_file, short maxDepth_, short s
 					if (tmp_state.is_goal()) {
 						end_timing = std::chrono::system_clock::now();
 						elapsed_seconds = end_timing - start_timing;
-						print_results(elapsed_seconds, expanded_nodes, tmp_state, results_file, false, I_DFS, NO_H);
+						print_results(elapsed_seconds, expanded_nodes, tmp_state, results_file, false, I_DFS, NO_H,ptype);
 						return true;
 					}
 
@@ -298,7 +418,7 @@ bool planner<T>::search_IterativeDFS(bool results_file, short maxDepth_, short s
 }
 
 template <class T>
-bool planner<T>::search_DFS(bool results_file)
+bool planner<T>::search_DFS(bool results_file, parallel_type ptype)
 {
 	int expanded_nodes = 0;
 	T initial;
@@ -331,7 +451,7 @@ bool planner<T>::search_DFS(bool results_file)
 	if (initial.is_goal()) {
 		end_timing = std::chrono::system_clock::now();
 		elapsed_seconds = end_timing - start_timing;
-		print_results(elapsed_seconds, expanded_nodes, initial, results_file, false, DFS, NO_H);
+		print_results(elapsed_seconds, expanded_nodes, initial, results_file, false, DFS, NO_H,ptype);
 
 		return true;
 	}
@@ -355,7 +475,7 @@ bool planner<T>::search_DFS(bool results_file)
 				if (tmp_state.is_goal()) {
 					end_timing = std::chrono::system_clock::now();
 					elapsed_seconds = end_timing - start_timing;
-					print_results(elapsed_seconds, expanded_nodes, tmp_state, results_file, false, DFS, NO_H);
+					print_results(elapsed_seconds, expanded_nodes, tmp_state, results_file, false, DFS, NO_H,ptype);
 					return true;
 				}
 
@@ -371,7 +491,7 @@ bool planner<T>::search_DFS(bool results_file)
 }
 
 template <class T>
-bool planner<T>::search_heur(bool results_file, heuristics used_heur)
+bool planner<T>::search_heur(bool results_file, heuristics used_heur, parallel_type ptype)
 {
 	int expanded_nodes = 0;
 
@@ -389,13 +509,13 @@ bool planner<T>::search_heur(bool results_file, heuristics used_heur)
 	auto end_timing = std::chrono::system_clock::now();
 	std::chrono::duration<double> elapsed_seconds = end_timing - start_timing;
 
-	std::cout << "\nInitial Built in " << elapsed_seconds.count() << " seconds\n";
+	std::cout << "\n"+child_string(ptype,used_heur)+"Initial Built in " << elapsed_seconds.count() << " seconds\n";
 
 	start_timing = std::chrono::system_clock::now();
 	heuristics_manager h_manager(used_heur, initial);
 	end_timing = std::chrono::system_clock::now();
 	elapsed_seconds = end_timing - start_timing;
-	std::cout << "\nHeuristic Built in " << elapsed_seconds.count() << " seconds\n";
+	std::cout << "\n"+child_string(ptype,used_heur)+"Heuristic Built in " << elapsed_seconds.count() << " seconds\n";
 
 
 	action_set actions = domain::get_instance().get_actions();
@@ -408,7 +528,7 @@ bool planner<T>::search_heur(bool results_file, heuristics used_heur)
 	if (initial.is_goal()) {
 		end_timing = std::chrono::system_clock::now();
 		elapsed_seconds = end_timing - start_timing;
-		print_results(elapsed_seconds, expanded_nodes, initial, results_file, false, BFS, used_heur);
+		print_results(elapsed_seconds, expanded_nodes, initial, results_file, false, BFS, used_heur,ptype);
 		return true;
 	}
 
@@ -432,7 +552,7 @@ bool planner<T>::search_heur(bool results_file, heuristics used_heur)
 				if (tmp_state.is_goal()) {
 					end_timing = std::chrono::system_clock::now();
 					elapsed_seconds = end_timing - start_timing;
-					print_results(elapsed_seconds, expanded_nodes, tmp_state, results_file, false, BFS, used_heur);
+					print_results(elapsed_seconds, expanded_nodes, tmp_state, results_file, false, BFS, used_heur,ptype);
 					return true;
 				}
 				if (!check_visited || visited_states.insert(tmp_state).second) {
@@ -446,7 +566,7 @@ bool planner<T>::search_heur(bool results_file, heuristics used_heur)
 			}
 		}
 	}
-	std::cout << "\n\nIt does not exists any Plan for this domain instance:(\n";
+	std::cout << "\n\n"+child_string(ptype,used_heur)+"It does not exists any Plan for this domain instance:(\n";
 	return false;
 }
 
@@ -557,7 +677,7 @@ void planner<T>::execute_given_actions(std::vector<std::string>& act_name)
 
 template <class T>
 /**\todo just for confrontation with old*/
-void planner<T>::execute_given_actions_timed(std::vector<std::string>& act_name)
+void planner<T>::execute_given_actions_timed(std::vector<std::string>& act_name, parallel_type ptype)
 {
 	check_actions_names(act_name);
 

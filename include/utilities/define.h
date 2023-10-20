@@ -21,6 +21,8 @@
 #include <memory>
 #include <list>
 #include <boost/dynamic_bitset.hpp>
+#include <pthread.h>
+#include <unistd.h>
 
 
 
@@ -180,6 +182,34 @@ enum action_check
     EXE_POINTED__COND_WORLD, /**< \brief The executionability is checked only on the state but the conditional effects are checked in every worlds.*/
     EXE_WORLD__COND_WORLD/**< \brief Both the executability and the conditional effects are checked in every world.*/
 };
+
+
+/*****************Parallelism*****************/
+
+/** \brief The possible implementations of parallelism*/
+enum parallel_type
+{
+    P_SERIAL, /**< Parallelism is disabled.*/
+    P_PTHREAD, /**< parallelism is implemented using posix threads.*/
+    P_FORK, /**< parallelism is implemented using forked processes.*/
+    P_CHILD /**< denotes that the current process is a child*/
+};
+
+typedef struct {
+    parallel_type ptype = P_SERIAL;
+    bool pwait = false;
+} parallel_input;
+
+typedef struct {
+    bool results_file;
+    parallel_input pin;
+    heuristics used_heur;
+    search_type used_search;
+    short IDFS_d;
+    short IDFS_s;
+    } pthread_params;
+
+
 
 /****************** Agent's Attitudes related *******************/
 
