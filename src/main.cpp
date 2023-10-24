@@ -359,36 +359,55 @@ void manage_arguments(int argc, char** argv)
 		} else if (strcmp(argv[i], "-parallel") == 0) { /**future work: additionally run BFS, DFS, and I_DFS in parallel*/
 			i++;
 			if (i >= argc) {
-				std::cerr << "-parallel needs specification (pthread, fork)." << std::endl;
-				exit(1);
-			} else if (strcmp(argv[i], "SERIAL") == 0) {
-				std::cout << "The solving process will run serially. (Default)" << std::endl;
-				pin.ptype = P_SERIAL;
-			} else if (strcmp(argv[i], "PTHREAD") == 0) {
-				std::cout << "The solving process will run heuristics in parallel using posix-threads." << std::endl;
+				std::cout << "The planner will run heuristics in parallel using posix-threads. (Default)" << std::endl;
 				pin.ptype = P_PTHREAD;
-			} else if (strcmp(argv[i], "FORK") == 0) {
-				std::cout << "The solving process will run heuristics in parallel using forked processes. " << std::endl;
-				pin.ptype = P_FORK;
-			} else {
-				std::cerr << "Wrong specification for '-parallel @ptype'; use 'SERIAL' or 'PTHREAD' or 'FORK'."
-					<< std::endl;
-				exit(1);
-			}	
+			} else if(i < argc) {
+				std::string s{argv[i][0]};
+				if(!s.compare("-")){
+					std::cout << "The planner will run heuristics in parallel using posix-threads. (Default)" << std::endl;
+					pin.ptype = P_PTHREAD;
+					i--;
+				} else if (strcmp(argv[i], "SERIAL") == 0) {
+					std::cout << "The planner will run serially." << std::endl;
+					pin.ptype = P_SERIAL;
+				} else if (strcmp(argv[i], "PTHREAD") == 0) {
+					std::cout << "The planner will run heuristics in parallel using posix-threads. (Default)" << std::endl;
+					pin.ptype = P_PTHREAD;
+				} else if (strcmp(argv[i], "FORK") == 0) {
+					std::cout << "The planner will run heuristics in parallel using forked processes. " << std::endl;
+					pin.ptype = P_FORK;
+				} else {
+					if(strcmp(argv[i], "NONE") == 0 || strcmp(argv[i], "WAIT") == 0){
+						std::cout << "The planner will run heuristics in parallel using posix-threads. (Default)" << std::endl;
+						pin.ptype = P_PTHREAD;
+						i--;
+					}
+					else{
+						std::cout << "Wrong specification for '-parallel' @ptype; use 'SERIAL' or 'PTHREAD' or 'FORK'." << std::endl;
+						exit(1);
+					}
+				}
+			}
 			i++;
-			if (i >= argc) {
-				std::cerr << "-parallel needs specification (NONE, WAIT)." << std::endl;
-				exit(1);
-			} else if (strcmp(argv[i], "NONE") == 0) {
+			if (i >= argc){
 				std::cout << "The planner will conclude once the fastest parallel process has concluded computation. (Default)" << std::endl;
 				pin.pwait = false;
-			} else if (strcmp(argv[i], "WAIT") == 0) {
-				std::cout << "The planner will wait for all parallel processes to finish before concluding computation. " << std::endl;
-				pin.pwait = true;
-			} else {
-				std::cerr << "Wrong specification for '-parallel @pwait'; use 'NONE' or 'WAIT'."
-					<< std::endl;
-				exit(1);
+			} else if (i < argc) {
+				std::string s{argv[i][0]};
+				if(!s.compare("-")){
+					std::cout << "The planner will conclude once the fastest parallel process has concluded computation. (Default)" << std::endl;
+					pin.pwait = false;
+					i--;
+				} else if (strcmp(argv[i], "NONE") == 0) {
+					std::cout << "The planner will conclude once the fastest parallel process has concluded computation. (Default) " << std::endl;
+					pin.pwait = false;
+				} else if (strcmp(argv[i], "WAIT") == 0) {
+					std::cout << "The planner will wait for all parallel processeses to finish before concluding computation. " << std::endl;
+					pin.pwait = true;
+				} else {
+					std::cout << "Wrong specification for '-parallel' @pwait; use 'NONE' or 'WAIT'." << std::endl;
+					exit(1);
+				}
 			}
 		} else if (strcmp(argv[i], "-bis") == 0) {
 			i++;
