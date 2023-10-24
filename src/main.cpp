@@ -135,8 +135,8 @@ void print_usage(char* prog_name)
 	std::cout << "-parallel @ptype @pwait" << std::endl;
 	std::cout << "	The planner will run all heuristics (NONE, L_PG, S_PG, C_PG, SUBGOALS) in parallel. (This overrides the heuristic and search flags)." << std::endl;
 	std::cout << "	Possible @ptype:" << std::endl;
-	std::cout << "		SERIAL: The planner will be solved serially. (default)" << std::endl;
-	std::cout << "		PTHREAD: There will be one posix-thread assigned per heuristic" << std::endl;
+	std::cout << "		SERIAL: The planner will be solved serially." << std::endl;
+	std::cout << "		PTHREAD: There will be one posix-thread assigned per heuristic (default)" << std::endl;
 	std::cout << "		FORK: There will be one forked process assigned per heuristic" << std::endl;
 	std::cout << "	Possible @pwait:" << std::endl;
 	std::cout << "		NONE: The planner will end once the fastest thread/process has concluded (default)" << std::endl;
