@@ -10,7 +10,7 @@ if [[ -f out/EFP_comparison/findingplan/"${file##*/}" ]] ; then
     rm out/EFP_comparison/findingplan/"${file##*/}"
 fi
 
-TIMEOUT="30";
+TIMEOUT="120";
 
 heuristics=("NONE" "S_PG" "L_PG" "C_PG" "SUBGOALS"); 
 
