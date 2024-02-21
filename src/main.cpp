@@ -13,7 +13,7 @@
 #include <memory>
 #include <vector>
 
-
+ 
 #include "../include/search/planner.ipp"
 
 #include "../include/utilities/asp_maker.h"
@@ -42,6 +42,7 @@ bis_type bisimulation = BIS_NONE;
 parallel_input pin;
 heuristics used_heur = NO_H;
 search_type used_search = BFS;
+ML_Dataset_Params ML_dataset;
 state_type state_struc = POSSIBILITIES; //default
 domain_restriction ini_restriction = S5; //default
 domain_restriction goal_restriction = NONE; //default
@@ -115,6 +116,13 @@ void print_usage(char* prog_name)
 	std::cout << "-attitudes" << std::endl;
 	std::cout << "	The planner will use the updated semantics with attitudes (by default it does not)." << std::endl;
 
+	std::cout << "-generate_dataset @type @max_depth" << std::endl;
+	std::cout << "	The planner will generate a dataset for the machine learning heuristic (Work In Progress). (This overrides heuristic, search, and parallel settings)." << std::endl;
+	std::cout << "	@type determines whether DFS or BFS is used to generate this dataset." << std::endl;
+	std::cout << "	Possible @type:" << std::endl;
+	std::cout << "		DFS: A depth-first search algorithm will be used to generate the dataset. (Default)" << std::endl;
+	std::cout << "		BFS: A breadth-first search algorithm will be used to generate the dataset." << std::endl;
+	std::cout << "	@max_depth is an integer denoting the maximum depth for the tree in generating this dataset. (Default: 10)" << std::endl;
 
 	std::cout << "-search @search_type" << std::endl;
 	std::cout << "	Set the @search_type to use during the planning (Breadth First is default)." << std::endl;
@@ -229,6 +237,60 @@ void manage_arguments(int argc, char** argv)
 			std::cout << "The planner will use the updated semantics with attitudes" << std::endl;
 			has_attitudes = true;
 
+		} else if (strcmp(argv[i], "-generate_dataset") == 0) {
+			i++;
+			ML_dataset.generate = true;
+			// '-generate_dataset' was the last CLI ; use default values
+			if (i >= argc) {
+				std::cout << "The planner will generate a dataset for the ML_HEUR using DFS. (Default)" << std::endl;
+			} 
+			// '-generate_dataset' was not the last CLI ; check if not using default values.
+			else if(i < argc) {
+				std::string s{argv[i][0]};
+				//case: no parameters for '-generate_dataset' are supplied (do default)
+				if(!s.compare("-")){
+					std::cout << "The planner will generate a dataset for the ML_HEUR using DFS. (Default)" << std::endl;
+					i--;
+				} 
+				//case: at least one parameter for '-generate_dataset'is supplied
+				else if (strcmp(argv[i], "DFS") == 0) {
+					std::cout << "The planner will generate a dataset for the ML_HEUR using DFS." << std::endl;
+					ML_dataset.useDFS = true;
+				} else if (strcmp(argv[i], "BFS") == 0) {
+					std::cout << "The planner will generate a dataset for the ML_HEUR using BFS." << std::endl;
+					ML_dataset.useDFS = false;
+				} else{
+					//check if the argument is supposed to be the depth limit
+					ML_dataset.depth = atoi(argv[i]);
+					if(ML_dataset.depth > 0){
+						std::cout << "The planner will generate a dataset for the ML_HEUR using DFS. (Default)" << std::endl;
+						std::cout << "The planner will generate a dataset for the ML_HEUR using depth: "<< ML_dataset.depth << std::endl;
+					}else{
+						std::cout << "Wrong specification for '-generate_dataset' @type; expected 'DFS' or 'BFS' but got '"<<argv[i]<<"' instead." << std::endl;
+						exit(1);
+					}
+				}
+			}
+			if(ML_dataset.depth == 10){
+				i++;
+				if (i >= argc){
+					std::cout << "The planner will generate a dataset for the ML_HEUR using depth: 10 (Default)" << std::endl;
+				} else if (i < argc) {
+					std::string s{argv[i][0]};
+					if(!s.compare("-")){
+						std::cout << "The planner will generate a dataset for the ML_HEUR using depth: 10 (Default)" << std::endl;
+						i--;
+					} else{
+						ML_dataset.depth = atoi(argv[i]);
+						if(ML_dataset.depth > 0){
+							std::cout << "The planner will generate a dataset for the ML_HEUR using depth: "<< ML_dataset.depth << std::endl;
+						}else{
+							std::cout << "Wrong specification for '-generate_dataset' @depth; expected positive integer but got '" << argv[i] << "' instead." << std::endl;
+							exit(1);
+						}
+					}
+				}
+			}
 		} else if (strcmp(argv[i], "-st") == 0) {
 			i++;
 			if (i >= argc) {
@@ -447,7 +509,7 @@ void manage_arguments(int argc, char** argv)
 
 }
 
-void launch_search(state_type state_struc, bool execute_given_action, bool results_file, parallel_input pin, heuristics used_heur, search_type used_search, std::vector<std::string> given_actions, short max_depth, short step)
+void launch_search(state_type state_struc, bool execute_given_action, bool results_file, parallel_input pin, heuristics used_heur, search_type used_search, ML_Dataset_Params ML_dataset, std::vector<std::string> given_actions, short max_depth, short step)
 {
 	switch ( state_struc ) {
 	case KRIPKE:
@@ -461,7 +523,7 @@ void launch_search(state_type state_struc, bool execute_given_action, bool resul
 			}
 			std::cout << "\n\n\n*****THE END*****\n";
 		} else {
-			if (m_planner.search(results_file, pin, used_heur, used_search, max_depth, step)) {
+			if (m_planner.search(results_file, pin, used_heur, used_search, ML_dataset, max_depth, step)) {
 				std::cout << "\n\n\n*****THE END*****\n";
 			} else {
 				std::cout << "\n\n\n*****THE SAD END*****\n";
@@ -480,7 +542,7 @@ void launch_search(state_type state_struc, bool execute_given_action, bool resul
 			}
 			std::cout << "\n\n\n*****THE END*****\n";
 		} else {
-			if (m_planner.search(results_file, pin, used_heur, used_search, max_depth, step)) {
+			if (m_planner.search(results_file, pin, used_heur, used_search, ML_dataset, max_depth, step)) {
 				std::cout << "\n\n\n*****THE END*****\n";
 			} else {
 				std::cout << "\n\n\n*****THE SAD END*****\n";
@@ -551,7 +613,7 @@ int main(int argc, char** argv)
 	//domain::get_instance().get_attitudes().print();
 
 	//launch search planner
-	launch_search(state_struc, execute_given_actions, results_file, pin, used_heur, used_search, given_actions, max_depth, step);
+	launch_search(state_struc, execute_given_actions, results_file, pin, used_heur, used_search, ML_dataset, given_actions, max_depth, step);
 
 	//timer.end(READ_TIMER);
 	//planner.main();

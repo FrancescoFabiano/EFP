@@ -209,6 +209,12 @@ typedef struct {
     short IDFS_s;
     } pthread_params;
 
+typedef struct {
+    bool generate = false;
+    bool useDFS   = true; // true denotes DFS while false denotes BFS
+    int  depth    = 10;
+    } ML_Dataset_Params; 
+
 
 
 /****************** Agent's Attitudes related *******************/

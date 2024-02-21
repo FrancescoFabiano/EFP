@@ -117,25 +117,27 @@ void planner<T>::print_results(std::chrono::duration<double> elapsed_seconds, in
 }
 
 template <class T>
-bool planner<T>::search(bool results_file, parallel_input pin, heuristics used_heur, search_type used_search, short IDFS_d, short IDFS_s)
+bool planner<T>::search(bool results_file, parallel_input pin, heuristics used_heur, search_type used_search, ML_Dataset_Params ML_dataset, short IDFS_d, short IDFS_s)
 {
-	if(pin.ptype == P_SERIAL || pin.ptype == P_CHILD){
-		if (used_heur == NO_H) {
-			switch ( used_search ) {
-			case DFS:
-				return search_DFS(results_file, pin.ptype);
-			case I_DFS:
-				return search_IterativeDFS(results_file, IDFS_d, IDFS_s, pin.ptype);
-			case BFS:
-			default:
-				return search_BFS(results_file, pin.ptype);
+	if(ML_dataset.generate){ML_dataset_creation(&ML_dataset);}
+	else
+		if(pin.ptype == P_SERIAL || pin.ptype == P_CHILD){
+			if (used_heur == NO_H) {
+				switch ( used_search ) {
+				case DFS:
+					return search_DFS(results_file, pin.ptype);
+				case I_DFS:
+					return search_IterativeDFS(results_file, IDFS_d, IDFS_s, pin.ptype);
+				case BFS:
+				default:
+					return search_BFS(results_file, pin.ptype);
+				}
+			} else {
+				return search_heur(results_file, used_heur, pin.ptype);
 			}
 		} else {
-			return search_heur(results_file, used_heur, pin.ptype);
+			return parallel_search(results_file, pin, used_heur, used_search, IDFS_d, IDFS_s);
 		}
-	} else {
-		return parallel_search(results_file, pin, used_heur, used_search, IDFS_d, IDFS_s);
-	}
 
 	//non arrivo mai qui.
 	return false;
@@ -146,7 +148,9 @@ static void* my_search_thread(void *args)
 {
 	pthread_params *params = (pthread_params *)args;
 	planner<T> tmpObj;
-	tmpObj.search(params->results_file, params->pin       , params->used_heur   , params->used_search    , params->IDFS_d, params->IDFS_s);
+	ML_Dataset_Params tmp_ml;
+	
+	tmpObj.search(params->results_file, params->pin, params->used_heur, params->used_search, tmp_ml, params->IDFS_d, params->IDFS_s);
 }
 
 template <class T>
@@ -218,7 +222,8 @@ bool planner<T>::parallel_search(bool results_file, parallel_input pin, heuristi
 			else{
 				parallel_input pin_child;
 				pin_child.ptype=P_CHILD;
-				search(results_file, pin_child, heur_list[index], used_search, IDFS_d, IDFS_s);
+				ML_Dataset_Params tmp_ml;
+				search(results_file, pin_child, heur_list[index], used_search, tmp_ml, IDFS_d, IDFS_s);
 				exit(0);
 			}
 		}
@@ -731,6 +736,155 @@ void planner<T>::check_actions_names(std::vector<std::string>& act_name)
 			exit(1);
 		}
 	}
+}
+
+
+
+template <class T>
+bool planner<T>::ML_dataset_creation(ML_Dataset_Params *ML_dataset){
+	std::string folder = "out/ML_HEUR_datasets/";
+	if (ML_dataset->useDFS) {
+		folder = folder + "DFS/";
+	} else {
+		folder = folder + "BFS/";
+	}
+	system(("mkdir -p " + folder).c_str());
+	
+	std::string fname      = domain::get_instance().get_name();
+	fname = fname + "_d_" + std::to_string(ML_dataset->depth);
+	std::string file_extension = ".csv";
+
+	std::string fpath = folder + fname + file_extension;
+
+	std::ofstream result;
+	result.open(fpath);
+	result << "State, Distance From Goal, Depth" << std::endl;
+	result.close();
+
+
+
+	std::cout << "NOTICE: creation of the ML dataset with BFS and DFS is a work in progress. Currently only -1 (not goal) and 0 (goal) values are represented." << std::endl; //TODO - remove this line when DFS is implemented.
+	return create_dataset(ML_dataset->depth, fpath, ML_dataset->useDFS);	
+}
+
+template <class T>
+void planner<T>::append_to_dataset(mlds_struct current, std::string fpath){
+	//initialize values
+	std::string comma = " , ";
+	std::ofstream result;
+	std::streambuf *backup, *psbuf;
+	backup= std::cout.rdbuf();
+	psbuf = result.rdbuf();
+
+	//write opening quotation mark so csv file can identify state.print as one cell
+	result.open(fpath, std::ofstream::app);
+	result << "\"";
+	result.close();
+
+	//redirect state.print output from std::cout to the file at fpath
+	result.open(fpath, std::ofstream::app);
+	psbuf = result.rdbuf();
+	std::cout.rdbuf(psbuf); 
+	current.state.print();
+	std::cout.rdbuf(backup);
+	result.close();
+	
+	//write closing quotation mark for state.print, as well as the distance to goal and depth values.
+	result.open(fpath, std::ofstream::app);
+	result << "\n\"" << comma << current.dist_goal << comma << current.depth << std::endl;
+	result.close();
+}
+
+template <class T>
+bool planner<T>::create_dataset(int depth, std::string fpath, bool useDFS){
+	//initialization
+	int numGoals = 0;
+	int expanded_nodes = 0;
+	bool plan_found = false;
+	mlds_struct initial_struct;
+	initial_struct.depth = 0;
+	bool check_visited = domain::get_instance().check_visited();
+	bool bisimulation = false;
+	if (domain::get_instance().get_bisimulation() != BIS_NONE) { bisimulation = true; }
+	bisimulation = false;
+	std::set<T> visited_states;
+	auto start_timing = std::chrono::system_clock::now();
+	initial_struct.state.build_initial();
+	if (bisimulation) { initial_struct.state.calc_min_bisimilar(); }
+	auto end_timing = std::chrono::system_clock::now();
+	std::chrono::duration<double> elapsed_seconds = end_timing - start_timing;
+	std::cout << "\nInitial Built in " << elapsed_seconds.count() << " seconds" << std::endl;
+
+	//post-initialization
+	action_set actions = domain::get_instance().get_actions();
+	action_set::const_iterator it_acset;
+	action tmp_action;
+	start_timing = std::chrono::system_clock::now();
+
+	//if root is the goal
+	if (initial_struct.state.is_goal()) {
+		initial_struct.dist_goal = 0;
+		end_timing = std::chrono::system_clock::now();
+		elapsed_seconds = end_timing - start_timing;
+		plan_found = true;
+		numGoals++;
+	}
+
+	//push the initial struct to the stack
+	if(useDFS) mlds_DFS_structure.push(initial_struct);
+	else	   mlds_BFS_structure.push(initial_struct);
+	if (check_visited) { visited_states.insert(initial_struct.state); }
+	
+	//while there are states to be searched
+	while (!mlds_DFS_structure.empty() || !mlds_BFS_structure.empty()) {
+		mlds_struct popped_struct;
+		if(useDFS) {
+			popped_struct = mlds_DFS_structure.top();
+			mlds_DFS_structure.pop();
+		}else{
+		    popped_struct = mlds_BFS_structure.front();
+			mlds_BFS_structure.pop();
+		}
+		append_to_dataset(popped_struct, fpath);
+		if(popped_struct.depth >= depth){continue;}
+		expanded_nodes++;
+
+		//loop through the set of actions available to the problem 
+		for (it_acset = actions.begin(); it_acset != actions.end(); it_acset++) {
+			mlds_struct tmp_struct;
+			tmp_action = *it_acset;
+
+			//if this state can take the action tmp_action
+			if (popped_struct.state.is_executable(tmp_action)) {
+
+				//by taking tmp_action in this state, we get the next state: tmp_state
+				tmp_struct.state     = popped_struct.state.compute_succ(tmp_action);
+				tmp_struct.depth     = popped_struct.depth + 1;
+				if (bisimulation) { tmp_struct.state.calc_min_bisimilar(); }
+
+				//if tmp_state is a goal 
+				if (tmp_struct.state.is_goal()) {
+					tmp_struct.dist_goal = 0;
+					end_timing = std::chrono::system_clock::now();
+					elapsed_seconds = end_timing - start_timing;
+					plan_found = true;
+					numGoals++;
+				}
+
+				// mark tmp_state as visited and push it to the search space
+				if (!check_visited || visited_states.insert(tmp_struct.state).second) { 
+					if(useDFS) mlds_DFS_structure.push(tmp_struct); 
+					else       mlds_BFS_structure.push(tmp_struct); 
+				}
+			}
+		}
+	}
+
+	//print end of dataset creation information
+	end_timing = std::chrono::system_clock::now();
+	elapsed_seconds = end_timing - start_timing;
+	std::cout << "Completed dataset creation in " << elapsed_seconds.count() << " seconds. This dataset contains " << numGoals << " goals, and " << expanded_nodes << " instances." << std::endl;
+	return plan_found;
 }
 
 /*\ IMPLEMENTATION OF OTHER TEMPLATIC FUNCTIONS INSTANCIATED WITH A TEMPLATIC STATE*/

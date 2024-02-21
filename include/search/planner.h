@@ -20,7 +20,7 @@
 #include <sys/wait.h>
 #include <pthread.h>
 #include <unistd.h>
-
+ 
 
 #include "../domain/domain.h"
 #include "../heuristics/heuristics_manager.h"
@@ -63,6 +63,23 @@ private:
     //i nostri step in profondità
     bool search_IterativeDFS(bool results_file, short maxDepth, short step, parallel_type ptype = P_SERIAL);
 
+
+    /**The queue that contains all the states<T> yet to be visited. Modified to keep track of depth and distance from goals for the machine learning dataset (mlds)*/
+    typedef struct {
+        T state;
+        int depth = -1;
+        int dist_goal = -1;         
+    } mlds_struct;
+
+    std::stack< mlds_struct > mlds_DFS_structure;
+	std::queue< mlds_struct > mlds_BFS_structure;   
+
+    /**DFS Search that generates dataset*/
+    bool ML_dataset_creation(ML_Dataset_Params *ML_dataset);
+    void append_to_dataset(mlds_struct current, std::string fpath);
+    bool create_dataset(int depth, std::string fpath, bool useDFS);
+
+
     /**Function that launches all heuristic searches within either threads or forked processes
      * 
      * Calls either \ref search_thread(pthread_params *params) or \ref search(bool results_file, parallel_input pin, heuristics used_heur, search_type used_search, short IDFS_d, short IDFS_s)
@@ -99,7 +116,7 @@ public:
      * @param[in] IDFS_d: used as initial "max depth" parameter by I_DFS.
      * @param[in] IDFS_s: used "step" parameter by I_DFS.
      * @return true if a plan is found.*/
-    bool search(bool results_file, parallel_input pin, heuristics used_heur, search_type used_search, short IDFS_d, short IDFS_s);
+    bool search(bool results_file, parallel_input pin, heuristics used_heur, search_type used_search, ML_Dataset_Params generate_heur_ML_data, short IDFS_d, short IDFS_s);
 
     /**Function print out the solution time.
      * 
