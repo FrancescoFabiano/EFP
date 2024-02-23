@@ -64,20 +64,13 @@ private:
     bool search_IterativeDFS(bool results_file, short maxDepth, short step, parallel_type ptype = P_SERIAL);
 
 
-    /**The queue that contains all the states<T> yet to be visited. Modified to keep track of depth and distance from goals for the machine learning dataset (mlds)*/
-    typedef struct {
-        T state;
-        int depth = -1;
-        int dist_goal = -1;         
-    } mlds_struct;
-
-    std::stack< mlds_struct > mlds_DFS_structure;
-	std::queue< mlds_struct > mlds_BFS_structure;   
-
-    /**DFS Search that generates dataset*/
+    /**Search that generates dataset*/
     bool ML_dataset_creation(ML_Dataset_Params *ML_dataset);
-    void append_to_dataset(mlds_struct current, std::string fpath);
-    bool create_dataset(int depth, std::string fpath, bool useDFS);
+    void append_to_dataset(std::string fpath, T state, int depth, int score);
+
+    bool dataset_launcher( std::string fpath, int max_depth, bool useDFS);
+    int  dataset_DFS_recur(std::string fpath, int max_depth, int depth, T state, bool bisimulation, action_set *actions);
+    int  dataset_BFS_recur(std::string fpath, int max_depth, int depth, T state, bool bisimulation, action_set *actions);
 
 
     /**Function that launches all heuristic searches within either threads or forked processes

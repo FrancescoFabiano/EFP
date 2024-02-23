@@ -761,14 +761,11 @@ bool planner<T>::ML_dataset_creation(ML_Dataset_Params *ML_dataset){
 	result << "State, Distance From Goal, Depth" << std::endl;
 	result.close();
 
-
-
-	std::cout << "NOTICE: creation of the ML dataset with BFS and DFS is a work in progress. Currently only -1 (not goal) and 0 (goal) values are represented." << std::endl; //TODO - remove this line when DFS is implemented.
-	return create_dataset(ML_dataset->depth, fpath, ML_dataset->useDFS);	
+	return dataset_launcher(fpath, ML_dataset->depth, ML_dataset->useDFS);	
 }
 
 template <class T>
-void planner<T>::append_to_dataset(mlds_struct current, std::string fpath){
+void planner<T>::append_to_dataset(std::string fpath, T state, int depth, int score){
 	//initialize values
 	std::string comma = " , ";
 	std::ofstream result;
@@ -785,106 +782,131 @@ void planner<T>::append_to_dataset(mlds_struct current, std::string fpath){
 	result.open(fpath, std::ofstream::app);
 	psbuf = result.rdbuf();
 	std::cout.rdbuf(psbuf); 
-	current.state.print();
+	state.print();
 	std::cout.rdbuf(backup);
 	result.close();
 	
 	//write closing quotation mark for state.print, as well as the distance to goal and depth values.
 	result.open(fpath, std::ofstream::app);
-	result << "\n\"" << comma << current.dist_goal << comma << current.depth << std::endl;
+	result << "\n\"" << comma << score << comma << depth << std::endl;
 	result.close();
 }
 
 template <class T>
-bool planner<T>::create_dataset(int depth, std::string fpath, bool useDFS){
+bool planner<T>::dataset_launcher(std::string fpath, int max_depth, bool useDFS){
 	//initialization
-	int numGoals = 0;
-	int expanded_nodes = 0;
-	bool plan_found = false;
-	mlds_struct initial_struct;
-	initial_struct.depth = 0;
-	bool check_visited = domain::get_instance().check_visited();
+	T initial;
 	bool bisimulation = false;
 	if (domain::get_instance().get_bisimulation() != BIS_NONE) { bisimulation = true; }
 	bisimulation = false;
-	std::set<T> visited_states;
 	auto start_timing = std::chrono::system_clock::now();
-	initial_struct.state.build_initial();
-	if (bisimulation) { initial_struct.state.calc_min_bisimilar(); }
+	initial.build_initial();
+	if (bisimulation) { initial.calc_min_bisimilar(); }
 	auto end_timing = std::chrono::system_clock::now();
 	std::chrono::duration<double> elapsed_seconds = end_timing - start_timing;
 	std::cout << "\nInitial Built in " << elapsed_seconds.count() << " seconds" << std::endl;
 
 	//post-initialization
 	action_set actions = domain::get_instance().get_actions();
-	action_set::const_iterator it_acset;
-	action tmp_action;
 	start_timing = std::chrono::system_clock::now();
 
-	//if root is the goal
-	if (initial_struct.state.is_goal()) {
-		initial_struct.dist_goal = 0;
-		end_timing = std::chrono::system_clock::now();
-		elapsed_seconds = end_timing - start_timing;
-		plan_found = true;
-		numGoals++;
+	//recursively search the tree, creating the dataset.
+	int retval;
+	if(useDFS){
+		retval = dataset_DFS_recur(fpath, max_depth, 0, initial, bisimulation, &actions);
+	}else{
+		retval = dataset_BFS_recur(fpath, max_depth, 0, initial, bisimulation, &actions);
 	}
 
-	//push the initial struct to the stack
-	if(useDFS) mlds_DFS_structure.push(initial_struct);
-	else	   mlds_BFS_structure.push(initial_struct);
-	if (check_visited) { visited_states.insert(initial_struct.state); }
+
+	//end the timer and finish
+	end_timing = std::chrono::system_clock::now();
+	elapsed_seconds = end_timing - start_timing;
+	std::cout << "\nDataset Generated in " << elapsed_seconds.count() << " seconds" << std::endl;
+	//if -1 at initial, then no goal was found in the entire search.
+	if(retval == -1)
+		return false;
+	return true;
+}
+
+template <class T>
+int planner<T>::dataset_DFS_recur(std::string fpath, int max_depth, int depth, T state, bool bisimulation, action_set *actions){
+	action_set::const_iterator it_acset;
+	action tmp_action;
+
+	//initialize score and determine if this state is goal
+	int score = -1;
+	if(state.is_goal()){ 
+		score = 0; 
+	}
 	
-	//while there are states to be searched
-	while (!mlds_DFS_structure.empty() || !mlds_BFS_structure.empty()) {
-		mlds_struct popped_struct;
-		if(useDFS) {
-			popped_struct = mlds_DFS_structure.top();
-			mlds_DFS_structure.pop();
-		}else{
-		    popped_struct = mlds_BFS_structure.front();
-			mlds_BFS_structure.pop();
-		}
-		append_to_dataset(popped_struct, fpath);
-		if(popped_struct.depth >= depth){continue;}
-		expanded_nodes++;
-
+	//if not yet past max_depth
+	if(depth < max_depth){
 		//loop through the set of actions available to the problem 
-		for (it_acset = actions.begin(); it_acset != actions.end(); it_acset++) {
-			mlds_struct tmp_struct;
+		for (it_acset = actions->begin(); it_acset != actions->end(); it_acset++) {
 			tmp_action = *it_acset;
-
+			// std::cout << "action found at depth " << depth << " ";
 			//if this state can take the action tmp_action
-			if (popped_struct.state.is_executable(tmp_action)) {
+			if (state.is_executable(tmp_action)) {
+				T next_state;
+				int next_score;
+				
 
-				//by taking tmp_action in this state, we get the next state: tmp_state
-				tmp_struct.state     = popped_struct.state.compute_succ(tmp_action);
-				tmp_struct.depth     = popped_struct.depth + 1;
-				if (bisimulation) { tmp_struct.state.calc_min_bisimilar(); }
+				//by taking tmp_action in this state, we get the next state
+				next_state     = state.compute_succ(tmp_action);
+				if (bisimulation) { next_state.calc_min_bisimilar(); }
 
-				//if tmp_state is a goal 
-				if (tmp_struct.state.is_goal()) {
-					tmp_struct.dist_goal = 0;
-					end_timing = std::chrono::system_clock::now();
-					elapsed_seconds = end_timing - start_timing;
-					plan_found = true;
-					numGoals++;
-				}
+				// mark next_state as visited and search it
+				
 
-				// mark tmp_state as visited and push it to the search space
-				if (!check_visited || visited_states.insert(tmp_struct.state).second) { 
-					if(useDFS) mlds_DFS_structure.push(tmp_struct); 
-					else       mlds_BFS_structure.push(tmp_struct); 
+				next_score = dataset_DFS_recur(fpath, max_depth, depth+1, next_state, bisimulation, actions);
+				if(score != 0 && next_score != -1 && (score ==-1 || score > next_score+1)){
+					score = next_score+1;
 				}
 			}
 		}
 	}
 
-	//print end of dataset creation information
-	end_timing = std::chrono::system_clock::now();
-	elapsed_seconds = end_timing - start_timing;
-	std::cout << "Completed dataset creation in " << elapsed_seconds.count() << " seconds. This dataset contains " << numGoals << " goals, and " << expanded_nodes << " instances." << std::endl;
-	return plan_found;
+	//after looping through all child nodes (or breaking early from depth) print to dataset
+	append_to_dataset(fpath, state, depth, score);
+	return score;
+}
+
+template <class T>
+int planner<T>::dataset_BFS_recur(std::string fpath, int max_depth, int depth, T state, bool bisimulation, action_set *actions){
+	action_set::const_iterator it_acset;
+	action tmp_action;
+
+	//initialize score and determine if this state is goal
+	int score = -1;
+	if(state.is_goal()){ score = 0; }
+	
+	//if not yet past max_depth
+	if(depth < max_depth){
+		//loop through the set of actions available to the problem 
+		for (it_acset = actions->begin(); it_acset != actions->end(); it_acset++) {
+			//if this state can take the action tmp_action
+			if (state.is_executable(tmp_action)) {
+				T next_state;
+				int next_score;
+				tmp_action = *it_acset;
+
+				//by taking tmp_action in this state, we get the next state
+				next_state     = state.compute_succ(tmp_action);
+				if (bisimulation) { next_state.calc_min_bisimilar(); }
+
+				// mark next_state as visited and search it
+				next_score = dataset_DFS_recur(fpath, max_depth, depth+1, next_state, bisimulation, actions);
+				if(score != 0 && (score ==-1 || score > next_score+1)){
+					score = next_score+1;
+				}
+			}
+		}
+	}
+
+	//after looping through all child nodes (or breaking early from depth) print to dataset
+	append_to_dataset(fpath, state, depth, score);
+	return score;
 }
 
 /*\ IMPLEMENTATION OF OTHER TEMPLATIC FUNCTIONS INSTANCIATED WITH A TEMPLATIC STATE*/
