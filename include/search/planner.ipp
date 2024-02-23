@@ -765,7 +765,7 @@ bool planner<T>::ML_dataset_creation(ML_Dataset_Params *ML_dataset){
 }
 
 template <class T>
-void planner<T>::append_to_dataset(std::string fpath, T state, int depth, int score){
+void planner<T>::append_to_dataset(std::string fpath, T *state, int depth, int score){
 	//initialize values
 	std::string comma = " , ";
 	std::ofstream result;
@@ -782,7 +782,7 @@ void planner<T>::append_to_dataset(std::string fpath, T state, int depth, int sc
 	result.open(fpath, std::ofstream::app);
 	psbuf = result.rdbuf();
 	std::cout.rdbuf(psbuf); 
-	state.print();
+	state->get_representation().print();
 	std::cout.rdbuf(backup);
 	result.close();
 	
@@ -868,7 +868,7 @@ int planner<T>::dataset_DFS_recur(std::string fpath, int max_depth, int depth, T
 	}
 
 	//after looping through all child nodes (or breaking early from depth) print to dataset
-	append_to_dataset(fpath, state, depth, score);
+	append_to_dataset(fpath, &state, depth, score);
 	return score;
 }
 
@@ -905,7 +905,7 @@ int planner<T>::dataset_BFS_recur(std::string fpath, int max_depth, int depth, T
 	}
 
 	//after looping through all child nodes (or breaking early from depth) print to dataset
-	append_to_dataset(fpath, state, depth, score);
+	append_to_dataset(fpath, &state, depth, score);
 	return score;
 }
 
