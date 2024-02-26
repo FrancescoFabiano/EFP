@@ -758,7 +758,7 @@ bool planner<T>::ML_dataset_creation(ML_Dataset_Params *ML_dataset){
 
 	std::ofstream result;
 	result.open(fpath);
-	result << "State, Distance From Goal, Depth" << std::endl;
+	result << "State, Path, Distance From Goal, Depth" << std::endl;
 	result.close();
 
 	return dataset_launcher(fpath, ML_dataset->depth, ML_dataset->useDFS);	
@@ -773,22 +773,25 @@ void planner<T>::append_to_dataset(std::string fpath, T *state, int depth, int s
 	backup= std::cout.rdbuf();
 	psbuf = result.rdbuf();
 
-	//write opening quotation mark so csv file can identify state.print as one cell
-	result.open(fpath, std::ofstream::app);
-	result << "\"";
-	result.close();
-
 	//redirect state.print output from std::cout to the file at fpath
 	result.open(fpath, std::ofstream::app);
 	psbuf = result.rdbuf();
 	std::cout.rdbuf(psbuf); 
+
+	result << "\"";
 	state->get_representation().print();
+
+	std::cout << "\"" << comma <<"\"";
+
+	state->print();
+	result << "\"";
+
 	std::cout.rdbuf(backup);
 	result.close();
 	
 	//write closing quotation mark for state.print, as well as the distance to goal and depth values.
 	result.open(fpath, std::ofstream::app);
-	result << "\n\"" << comma << score << comma << depth << std::endl;
+	result << comma << score << comma << depth << std::endl;
 	result.close();
 }
 
@@ -872,6 +875,7 @@ int planner<T>::dataset_DFS_recur(std::string fpath, int max_depth, int depth, T
 	return score;
 }
 
+//does not work, do not run.
 template <class T>
 int planner<T>::dataset_BFS_recur(std::string fpath, int max_depth, int depth, T state, bool bisimulation, action_set *actions){
 	action_set::const_iterator it_acset;
