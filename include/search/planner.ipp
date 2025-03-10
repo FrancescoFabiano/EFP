@@ -767,7 +767,7 @@ bool planner<T>::ML_dataset_creation(ML_Dataset_Params *ML_dataset){
 template <class T>
 void planner<T>::append_to_dataset(std::string fpath, T *state, int depth, int score){
 	//initialize values
-	std::string comma = " , ";
+	std::string comma = ",";
 	std::ofstream result;
 	std::streambuf *backup, *psbuf;
 	backup= std::cout.rdbuf();
@@ -779,11 +779,11 @@ void planner<T>::append_to_dataset(std::string fpath, T *state, int depth, int s
 	std::cout.rdbuf(psbuf); 
 
 	result << "\"";
-	state->get_representation().print();
+	state->get_representation().print_ML_dataset();
 
 	std::cout << "\"" << comma <<"\"";
-
-	state->print();
+	printer::get_instance().print_list(state->get_executed_actions());
+	//state->print();
 	result << "\"";
 
 	std::cout.rdbuf(backup);

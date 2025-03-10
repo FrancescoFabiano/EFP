@@ -1139,6 +1139,74 @@ void pstate::print() const
 	std::cout << "*******************************************************************" << std::endl;
 }
 
+
+void pstate::print_ML_dataset() const
+{
+	//World list; Pointed world; Edges
+	// Mapping worlds using fluent set and repetition as unique key
+	std::map<std::pair<std::set<fluent>, int>, int> world_map;
+	int counter = 1;
+
+	pworld_ptr_set::const_iterator it_pwset;
+	for (it_pwset = get_worlds().begin(); it_pwset != get_worlds().end(); it_pwset++) {
+		std::pair<std::set<fluent>, int> key = {it_pwset->get_fluent_set(), it_pwset->get_repetition()};
+		world_map[key] = counter; // Store W-number
+		if (counter > 1){
+			std::cout << std::endl;
+		}
+		std::cout << "W" << counter << ":";
+		printer::get_instance().print_list(it_pwset->get_fluent_set());
+		std::cout << " rep:" << it_pwset->get_repetition();
+		counter++;
+	}
+	std::cout << ";" << std::endl;
+
+	// Print pointed world using W-number
+	pworld_ptr pointed = get_pointed();
+	std::pair<std::set<fluent>, int> pointed_key = {pointed.get_fluent_set(), pointed.get_repetition()};
+	std::cout << "P:W" << world_map[pointed_key] << ";" << std::endl;
+
+	// Unifying edges by grouping agents
+	std::map<std::pair<int, int>, std::set<agent>> edge_map;
+	pworld_transitive_map::const_iterator it_pwtm;
+	pworld_map::const_iterator it_pwm;
+	for (it_pwtm = get_beliefs().begin(); it_pwtm != get_beliefs().end(); it_pwtm++) {
+		pworld_ptr from = it_pwtm->first;
+		pworld_map from_map = it_pwtm->second;
+
+		for (it_pwm = from_map.begin(); it_pwm != from_map.end(); it_pwm++) {
+			agent ag = it_pwm->first;
+			pworld_ptr_set to_set = it_pwm->second;
+
+			for (it_pwset = to_set.begin(); it_pwset != to_set.end(); it_pwset++) {
+				pworld_ptr to = *it_pwset;
+				std::pair<std::set<fluent>, int> from_key = {from.get_fluent_set(), from.get_repetition()};
+				std::pair<std::set<fluent>, int> to_key = {to.get_fluent_set(), to.get_repetition()};
+				
+				std::pair<int, int> edge_key = {world_map[from_key], world_map[to_key]};
+				edge_map[edge_key].insert(ag);
+			}
+		}
+	}
+
+	// Print unified edges
+	counter = 1;
+	for (const auto& entry : edge_map) {
+		if (counter > 1){
+			std::cout << std::endl;
+		}
+		std::cout << "E" << counter << ":W" << entry.first.first << "->W" << entry.first.second << " {";
+		bool first = true;
+		for (const auto& ag : entry.second) {
+			if (!first) std::cout << ",";
+			std::cout << domain::get_instance().get_grounder().deground_agent(ag);
+			first = false;
+		}
+		std::cout << "}";
+		counter++;
+	}
+}
+
 void pstate::print_graphviz(std::ostream & graphviz) const
 {
 	string_set::const_iterator it_st_set;

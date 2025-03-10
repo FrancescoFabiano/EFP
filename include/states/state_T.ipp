@@ -70,6 +70,7 @@ const T & state<T>::get_representation() const
 	return m_representation;
 }
 
+
 template <class T>
 bool state<T>::operator=(const state<T> & given_state)
 {

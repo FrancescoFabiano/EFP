@@ -1682,6 +1682,50 @@ void kstate::print() const
 	std::cout << "*******************************************************************" << std::endl;
 }
 
+
+
+void kstate::print_ML_dataset() const
+{
+	//Pointed world; World list; Edges
+	int counter = 1;
+	std::cout << std::endl;
+	printer::get_instance().print_list(get_pointed().get_fluent_set());
+	std::cout << std::endl;
+	std::cout << ";" << std::endl;
+
+	kworld_ptr_set::const_iterator it_kwset;
+
+	for (it_kwset = get_worlds().begin(); it_kwset != get_worlds().end(); it_kwset++) {
+		std::cout << "W-" << counter << ": ";
+		printer::get_instance().print_list(it_kwset->get_fluent_set());
+		std::cout << " rep:" << it_kwset->get_repetition();
+		std::cout << std::endl;
+		counter++;
+	}
+	counter = 1;
+	std::cout << ";" << std::endl;
+
+	kedge_ptr_set::const_iterator it_keset;
+	std::cout << "Edge List:" << std::endl;
+	for (it_keset = get_edges().begin(); it_keset != get_edges().end(); it_keset++) {
+
+
+		if (counter > 1){
+			std::cout << std::endl;
+		}
+		std::cout << "E-" << counter << ": (";
+		printer::get_instance().print_list(it_keset->get_from().get_fluent_set());
+		std::cout << "," << it_keset->get_from().get_repetition();
+		std::cout << ") - (";
+		printer::get_instance().print_list(it_keset->get_to().get_fluent_set());
+		std::cout << "," << it_keset->get_to().get_repetition();
+		std::cout << ") ag:" << domain::get_instance().get_grounder().deground_agent(it_keset->get_label());
+		counter++;
+
+	}
+}
+
+
 void kstate::print_graphviz(std::ostream & graphviz) const
 {
 	string_set::const_iterator it_st_set;
