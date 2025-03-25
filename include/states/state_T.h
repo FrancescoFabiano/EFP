@@ -289,6 +289,8 @@ public:
     void print_graphviz(std::string postfix = "") const;
 
 
+    const std::string print_graphviz_ML_dataset(std::string postfix = "") const;
+
     /**Function that add retrieve the fully_obs attitude w.r.t \ref executor and the current state
      *
      * @param[in] executor: the agent executing the action.

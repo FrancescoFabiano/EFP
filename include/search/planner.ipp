@@ -758,7 +758,7 @@ bool planner<T>::ML_dataset_creation(ML_Dataset_Params *ML_dataset){
 
 	std::ofstream result;
 	result.open(fpath);
-	result << "State, Path, Distance From Goal, Depth" << std::endl;
+	result << "State, Path, Depth, Distance From Goal" << std::endl;
 	result.close();
 
 	return dataset_launcher(fpath, ML_dataset->depth, ML_dataset->useDFS);	
@@ -766,32 +766,31 @@ bool planner<T>::ML_dataset_creation(ML_Dataset_Params *ML_dataset){
 
 template <class T>
 void planner<T>::append_to_dataset(std::string fpath, T *state, int depth, int score){
-	//initialize values
 	std::string comma = ",";
 	std::ofstream result;
 	std::streambuf *backup, *psbuf;
-	backup= std::cout.rdbuf();
+	backup = std::cout.rdbuf();
 	psbuf = result.rdbuf();
 
-	//redirect state.print output from std::cout to the file at fpath
+	// Redirect state.print output from std::cout to the file at fpath
 	result.open(fpath, std::ofstream::app);
 	psbuf = result.rdbuf();
-	std::cout.rdbuf(psbuf); 
+	std::cout.rdbuf(psbuf);
 
-	result << "\"";
-	state->get_representation().print_ML_dataset();
 
-	std::cout << "\"" << comma <<"\"";
+	// Exclude graphviz output but store the filename
+	std::string graphviz_filename = state->print_graphviz_ML_dataset(""); // Store the filename
+
+	std::cout <<"\"";
 	printer::get_instance().print_list(state->get_executed_actions());
-	//state->print();
 	result << "\"";
 
 	std::cout.rdbuf(backup);
 	result.close();
-	
-	//write closing quotation mark for state.print, as well as the distance to goal and depth values.
+
+	// Write the Graphviz filename before the score and depth values.
 	result.open(fpath, std::ofstream::app);
-	result << comma << score << comma << depth << std::endl;
+	result << comma << graphviz_filename << comma << depth << comma << score << std::endl;
 	result.close();
 }
 
