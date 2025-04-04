@@ -645,6 +645,11 @@ public:
      * @param[in] graphviz: the ostream where to print the info of *this*.*/
     void print_graphviz(std::ostream& graphviz) const;
 
+    /** \brief Function that prints the information of *this* in a Graphviz file.
+     *
+     * @param[in] graphviz: the ostream where to print the info of *this*.*/
+    void print_graphviz_explicit(std::ostream& graphviz) const;
+
 
     /*fluent_formula get_sensing_effects_if_entailed(const effects_map & map, const pworld_ptr & start) const;*/
 

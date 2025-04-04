@@ -331,7 +331,7 @@ const std::string state<T>::print_graphviz_ML_dataset(std::string postfix) const
 	graphviz << "digraph K_structure{\n";
 	graphviz << "	rankdir=BT;\n";
 	graphviz << "	size=\"8,5\"\n";
-	m_representation.print_graphviz(graphviz);
+	m_representation.print_graphviz_explicit(graphviz);
 	graphviz << "}";
 	graphviz.close();
 	//std::cout << postfix << " done.";

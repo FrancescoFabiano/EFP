@@ -1726,6 +1726,12 @@ void kstate::print_ML_dataset() const
 }
 
 
+void kstate::print_graphviz_explicit(std::ostream & graphviz) const
+{
+	return;
+}
+
+
 void kstate::print_graphviz(std::ostream & graphviz) const
 {
 	string_set::const_iterator it_st_set;

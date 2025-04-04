@@ -1390,6 +1390,178 @@ void pstate::print_graphviz(std::ostream & graphviz) const
 
 }
 
+
+void pstate::print_graphviz_explicit(std::ostream & graphviz) const
+{
+	string_set::const_iterator it_st_set;
+	fluent_set::const_iterator it_fs;
+
+
+	graphviz << "//WORLDS List:" << std::endl;
+	std::map<fluent_set, std::string> map_world_to_index;
+	std::map<unsigned short, int> map_rep_to_name;
+	int found_rep = 0;
+	int found_fs = 0;
+	fluent_set tmp_fs;
+	char tmp_unsh;
+	string_set tmp_stset;
+	bool print_first;
+	pworld_ptr_set::const_iterator it_pwset;
+	for (it_pwset = get_worlds().begin(); it_pwset != get_worlds().end(); it_pwset++) {
+		if (*it_pwset == get_pointed())
+			graphviz << "	node [shape = doublecircle] ";
+		else
+			graphviz << "	node [shape = circle] ";
+
+		print_first = false;
+		tmp_fs = it_pwset->get_fluent_set();
+		std::string world_value = "";
+		if (map_world_to_index.count(tmp_fs) == 0) {
+			
+			tmp_stset = domain::get_instance().get_grounder().deground_fluent(tmp_fs);
+			for (it_st_set = tmp_stset.begin(); it_st_set != tmp_stset.end(); it_st_set++) {
+				if (print_first) {
+					world_value += ",";
+				}
+				print_first = true;
+				world_value += *it_st_set;
+			}
+
+			map_world_to_index[tmp_fs] = world_value;
+			found_fs++;
+		}
+		tmp_unsh = it_pwset->get_repetition();
+		if (map_rep_to_name.count(tmp_unsh) == 0) {
+			map_rep_to_name[tmp_unsh] = found_rep;
+			found_rep++;
+		}
+		graphviz << "\"" << map_rep_to_name[tmp_unsh] << "_" << map_world_to_index[tmp_fs] << "\";";
+		graphviz << "// (";
+		tmp_stset = domain::get_instance().get_grounder().deground_fluent(tmp_fs);
+		for (it_st_set = tmp_stset.begin(); it_st_set != tmp_stset.end(); it_st_set++) {
+			if (print_first) {
+				graphviz << ",";
+			}
+			print_first = true;
+			graphviz << *it_st_set;
+		}
+		graphviz << ")\n";
+	}
+
+	graphviz << "\n\n";
+	graphviz << "//RANKS List:" << std::endl;
+
+	std::map<int, pworld_ptr_set> for_rank_print;
+	for (it_pwset = get_worlds().begin(); it_pwset != get_worlds().end(); it_pwset++) {
+		for_rank_print[it_pwset->get_repetition()].insert(*it_pwset);
+	}
+
+	std::map<int, pworld_ptr_set>::const_iterator it_map_rank;
+	for (it_map_rank = for_rank_print.begin(); it_map_rank != for_rank_print.end(); it_map_rank++) {
+		graphviz << "	{rank = same; ";
+		for (it_pwset = it_map_rank->second.begin(); it_pwset != it_map_rank->second.end(); it_pwset++) {
+			graphviz << "\"" << map_rep_to_name[it_pwset->get_repetition()] << "_" << map_world_to_index[it_pwset->get_fluent_set()] << "\"; ";
+		}
+		graphviz << "}\n";
+	}
+
+
+	graphviz << "\n\n";
+	graphviz << "//EDGES List:" << std::endl;
+
+	std::map < std::tuple<std::string, std::string>, std::set<std::string> > edges;
+
+	pworld_transitive_map::const_iterator it_pwtm;
+	pworld_map::const_iterator it_pwm;
+	std::tuple<std::string, std::string> tmp_tuple;
+	std::string tmp_string = "";
+
+	for (it_pwtm = get_beliefs().begin(); it_pwtm != get_beliefs().end(); it_pwtm++) {
+		pworld_ptr from = it_pwtm->first;
+		pworld_map from_map = it_pwtm->second;
+
+		for (it_pwm = from_map.begin(); it_pwm != from_map.end(); it_pwm++) {
+			agent ag = it_pwm->first;
+			pworld_ptr_set to_set = it_pwm->second;
+
+			for (it_pwset = to_set.begin(); it_pwset != to_set.end(); it_pwset++) {
+				pworld_ptr to = *it_pwset;
+
+				tmp_string = std::to_string(map_rep_to_name[from.get_repetition()]);
+				tmp_string += "_" + map_world_to_index[from.get_fluent_set()];
+				//tmp_string.insert(0, 1, std::to_string(map_rep_to_name[from.get_repetition()]));
+				std::get<0>(tmp_tuple) = tmp_string;
+
+				tmp_string = std::to_string(map_rep_to_name[to.get_repetition()]);
+				tmp_string += "_" + map_world_to_index[to.get_fluent_set()];
+				//tmp_string.insert(0, 1, map_rep_to_name[to.get_repetition()]);
+				std::get<1>(tmp_tuple) = tmp_string;
+
+				edges[tmp_tuple].insert(domain::get_instance().get_grounder().deground_agent(ag));
+
+			}
+		}
+	}
+
+	std::map < std::tuple<std::string, std::string>, std::set < std::string>>::iterator it_map;
+	std::map < std::tuple<std::string, std::string>, std::set < std::string>>::const_iterator it_map_2;
+
+	std::map < std::tuple<std::string, std::string>, std::set < std::string>> to_print_double;
+	for (it_map = edges.begin(); it_map != edges.end(); it_map++) {
+		for (it_map_2 = it_map; it_map_2 != edges.end(); it_map_2++) {
+			if (std::get<0>(it_map->first).compare(std::get<1>(it_map_2->first)) == 0) {
+				if (std::get<1>(it_map->first).compare(std::get<0>(it_map_2->first)) == 0) {
+					if (it_map->second == it_map_2->second) {
+						if (std::get<0>(it_map->first).compare(std::get<1>(it_map->first)) != 0) {
+							to_print_double[it_map->first] = it_map->second;
+							//std::cerr << std::get<0>(it_map->first) << " " << std::get<0>(it_map_2->first) << "\n";
+							it_map_2 = edges.erase(it_map_2);
+							it_map = edges.erase(it_map);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	std::set<std::string>::const_iterator it_stset;
+	for (it_map = edges.begin(); it_map != edges.end(); it_map++) {
+		graphviz << "	\"";
+		graphviz << std::get<0>(it_map->first);
+		graphviz << "\" -> \"";
+		graphviz << std::get<1>(it_map->first);
+		graphviz << "\" ";
+		graphviz << "[ label = \"";
+		tmp_string = "";
+		for (it_stset = it_map->second.begin(); it_stset != it_map->second.end(); it_stset++) {
+			tmp_string += *it_stset;
+			tmp_string += ",";
+		}
+		tmp_string.pop_back();
+		graphviz << tmp_string;
+		graphviz << "\" ];\n";
+	}
+
+	for (it_map = to_print_double.begin(); it_map != to_print_double.end(); it_map++) {
+		graphviz << "	\"";
+		graphviz << std::get<0>(it_map->first);
+		graphviz << "\" -> \"";
+		graphviz << std::get<1>(it_map->first);
+		graphviz << "\" ";
+		graphviz << "[ dir=both label = \"";
+		tmp_string = "";
+		for (it_stset = it_map->second.begin(); it_stset != it_map->second.end(); it_stset++) {
+
+			tmp_string += *it_stset;
+			tmp_string += ",";
+		}
+		tmp_string.pop_back();
+		graphviz << tmp_string;
+		graphviz << "\" ];\n";
+	}
+
+}
+
 /***************ATTITUDES REASONING***************/
 agents_attitudes pstate::get_attitude(agent m_agent, agent executor, const complete_attitudes_map & table, bool is_fully) const
 {

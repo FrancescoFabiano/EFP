@@ -644,6 +644,11 @@ public:
      * @param[in] graphviz: the ostream where to print the info of *this*.*/
     void print_graphviz(std::ostream& graphviz) const;
 
+    /** \brief Function that prints the information of *this* in a Graphviz file.
+     *
+     * @param[in] graphviz: the ostream where to print the info of *this*.*/
+    void print_graphviz_explicit(std::ostream& graphviz) const;
+
     /** \brief Function that return the sum_set of the two parameters by modifying the first one.
      *
      *  
