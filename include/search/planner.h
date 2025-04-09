@@ -66,10 +66,10 @@ private:
 
     /**Search that generates dataset*/
     bool ML_dataset_creation(ML_Dataset_Params *ML_dataset);
-    void append_to_dataset(std::string fpath, T *state, int depth, int score);
+    void append_to_dataset(std::string fpath, T *state, int depth, int score, const std::string & goal_to_print);
 
-    bool dataset_launcher( std::string fpath, int max_depth, bool useDFS);
-    int  dataset_DFS_recur(std::string fpath, int max_depth, int depth, T state, bool bisimulation, action_set *actions);
+    bool dataset_launcher( std::string fpath, int max_depth, bool useDFS, const std::string & goal_to_print);
+    int  dataset_DFS_recur(std::string fpath, int max_depth, int depth, T state, bool bisimulation, action_set *actions, const std::string & goal_to_print);
     int  dataset_BFS_recur(std::string fpath, int max_depth, int depth, T state, bool bisimulation, action_set *actions);
 
 

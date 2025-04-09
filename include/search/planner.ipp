@@ -758,14 +758,45 @@ bool planner<T>::ML_dataset_creation(ML_Dataset_Params *ML_dataset){
 
 	std::ofstream result;
 	result.open(fpath);
-	result << "State, Path, Depth, Distance From Goal" << std::endl;
+	result << "State, Path, Depth, Distance From Goal, Goal" << std::endl;
 	result.close();
 
-	return dataset_launcher(fpath, ML_dataset->depth, ML_dataset->useDFS);	
+	auto goal_to_print_list = domain::get_instance().get_goal_description();
+	std::string goal_to_print = "";
+	bool first_print = true;
+	formula_list::const_iterator it_sll;
+
+
+	// Create a stringstream to capture the output
+	std::stringstream buffer;
+
+	// Save the original std::cout buffer
+	std::streambuf* original_cout_buf = std::cout.rdbuf();
+
+	// Redirect std::cout to our stringstream
+	std::cout.rdbuf(buffer.rdbuf());
+
+	// Now execute the original code
+	for (auto it_sll = goal_to_print_list.begin(); it_sll != goal_to_print_list.end(); ++it_sll) {
+		if (!first_print) {
+			std::cout << " AND ";
+		}
+		first_print = false;
+		it_sll->print();  // Output goes into the buffer now
+	}
+
+	// Restore std::cout back to its original state
+	std::cout.rdbuf(original_cout_buf);
+
+	// Assign the captured output to the string
+	goal_to_print = buffer.str();
+
+
+	return dataset_launcher(fpath, ML_dataset->depth, ML_dataset->useDFS, goal_to_print);	
 }
 
 template <class T>
-void planner<T>::append_to_dataset(std::string fpath, T *state, int depth, int score){
+void planner<T>::append_to_dataset(std::string fpath, T *state, int depth, int score, const std::string & goal_to_print){
 	std::string comma = ",";
 	std::ofstream result;
 	std::streambuf *backup, *psbuf;
@@ -790,12 +821,12 @@ void planner<T>::append_to_dataset(std::string fpath, T *state, int depth, int s
 
 	// Write the Graphviz filename before the score and depth values.
 	result.open(fpath, std::ofstream::app);
-	result << comma << graphviz_filename << comma << depth << comma << score << std::endl;
+	result << comma << graphviz_filename << comma << depth << comma << score << comma << goal_to_print << std::endl;
 	result.close();
 }
 
 template <class T>
-bool planner<T>::dataset_launcher(std::string fpath, int max_depth, bool useDFS){
+bool planner<T>::dataset_launcher(std::string fpath, int max_depth, bool useDFS, const std::string & goal_to_print){
 	//initialization
 	T initial;
 	bool bisimulation = false;
@@ -815,7 +846,7 @@ bool planner<T>::dataset_launcher(std::string fpath, int max_depth, bool useDFS)
 	//recursively search the tree, creating the dataset.
 	int retval;
 	if(useDFS){
-		retval = dataset_DFS_recur(fpath, max_depth, 0, initial, bisimulation, &actions);
+		retval = dataset_DFS_recur(fpath, max_depth, 0, initial, bisimulation, &actions, goal_to_print);
 	}else{
 		retval = dataset_BFS_recur(fpath, max_depth, 0, initial, bisimulation, &actions);
 	}
@@ -832,7 +863,7 @@ bool planner<T>::dataset_launcher(std::string fpath, int max_depth, bool useDFS)
 }
 
 template <class T>
-int planner<T>::dataset_DFS_recur(std::string fpath, int max_depth, int depth, T state, bool bisimulation, action_set *actions){
+int planner<T>::dataset_DFS_recur(std::string fpath, int max_depth, int depth, T state, bool bisimulation, action_set *actions, const std::string & goal_to_print){
 	action_set::const_iterator it_acset;
 	action tmp_action;
 
@@ -861,7 +892,7 @@ int planner<T>::dataset_DFS_recur(std::string fpath, int max_depth, int depth, T
 				// mark next_state as visited and search it
 				
 
-				next_score = dataset_DFS_recur(fpath, max_depth, depth+1, next_state, bisimulation, actions);
+				next_score = dataset_DFS_recur(fpath, max_depth, depth+1, next_state, bisimulation, actions, goal_to_print);
 				if(score != 0 && next_score != -1 && (score ==-1 || score > next_score+1)){
 					score = next_score+1;
 				}
@@ -870,7 +901,7 @@ int planner<T>::dataset_DFS_recur(std::string fpath, int max_depth, int depth, T
 	}
 
 	//after looping through all child nodes (or breaking early from depth) print to dataset
-	append_to_dataset(fpath, &state, depth, score);
+	append_to_dataset(fpath, &state, depth, score, goal_to_print);
 	return score;
 }
 
@@ -899,7 +930,7 @@ int planner<T>::dataset_BFS_recur(std::string fpath, int max_depth, int depth, T
 				if (bisimulation) { next_state.calc_min_bisimilar(); }
 
 				// mark next_state as visited and search it
-				next_score = dataset_DFS_recur(fpath, max_depth, depth+1, next_state, bisimulation, actions);
+				next_score = dataset_BFS_recur(fpath, max_depth, depth+1, next_state, bisimulation, actions);
 				if(score != 0 && (score ==-1 || score > next_score+1)){
 					score = next_score+1;
 				}
@@ -908,7 +939,7 @@ int planner<T>::dataset_BFS_recur(std::string fpath, int max_depth, int depth, T
 	}
 
 	//after looping through all child nodes (or breaking early from depth) print to dataset
-	append_to_dataset(fpath, &state, depth, score);
+	append_to_dataset(fpath, &state, depth, score, "");
 	return score;
 }
 
