@@ -5,6 +5,8 @@ heuristics_manager::heuristics_manager(heuristics used_heur)
 	set_used_h(used_heur);
 	m_goals = domain::get_instance().get_goal_description();
 	switch ( m_used_heur ) {
+	case GNN:
+		break;
 	case L_PG:
 	case S_PG:
 	{

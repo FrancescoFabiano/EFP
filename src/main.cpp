@@ -138,6 +138,7 @@ void print_usage(char* prog_name)
 	std::cout << "		L_PG: A planning graph is used to calculate the distance of each state from the goal." << std::endl;
 	std::cout << "		S_PG: A planning graph is used to calculate the sum of each sub-goal distance starting from the state." << std::endl;
 	std::cout << "		C_PG: A single planning graph is used to calculate the sum of each 'grounded' belief formula." << std::endl;
+	std::cout << "		GNN: Use of GNN to emulate perfect heuristics.";
 	std::cout << "		SUBGOALS: We select the state with the highest number of satisfied subgoals." << std::endl;
 
 	std::cout << "-parallel @ptype @pwait" << std::endl;
@@ -395,6 +396,9 @@ void manage_arguments(int argc, char** argv)
 			} else if (strcmp(argv[i], "SUBGOALS") == 0) {
 				std::cout << "We select the state with the highest number of satisfied subgoals." << std::endl;
 				used_heur = SUBGOALS;
+			} else if (strcmp(argv[i], "GNN") == 0) {
+				std::cout << "We select the state that is best according to the GNN that approximates the perfect heuristics." << std::endl;
+				used_heur = GNN;
 			} else {
 				std::cerr << "Wrong specification for '-h'; use 'NONE' or 'L_PG' or 'S_PG' or 'C_PG' or 'SUBGOALS'." << std::endl;
 				exit(1);

@@ -122,9 +122,12 @@ enum heuristics
                     * 
                     * This follows the idea of converting belief formula in fluent and just execute classical planning graph.
                     * .*/
-    SUBGOALS /**< For each state is calculate dthe number of (found or) missing subgoals
+    SUBGOALS, /**< For each state is calculate dthe number of (found or) missing subgoals
                     * 
                     * The group operator C is splitted in more belief_formulae.*/
+    GNN /**< For each state a GNN is called to check against the perfect heuristics (training)
+    * 
+    * Work with Giovanni and Francois.*/
 };
 
 enum search_type
