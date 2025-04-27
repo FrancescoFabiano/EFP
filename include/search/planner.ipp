@@ -753,7 +753,7 @@ bool planner<T>::ML_dataset_creation(ML_Dataset_Params* ML_dataset) {
         std::cerr << "Error opening file: " << fpath << std::endl;
         return false;
     }
-    result << "State,Path,Depth,Distance From Goal,Goal" << std::endl;
+    result << "Path,Depth,Distance From Goal,Goal" << std::endl;
     result.close();
 
     auto goal_list = domain::get_instance().get_goal_description();
@@ -811,62 +811,66 @@ bool planner<T>::dataset_launcher(const std::string& fpath, int max_depth, bool 
     return result;
 }
 
+
 template <class T>
 bool planner<T>::dataset_DFS_serial(T& initial_state, int max_depth, action_set* actions, const std::string& goal_str, std::vector<std::string>& global_dataset, bool bisimulation) {
+    
     m_visited_states_ML.clear();
-	int initial_score = -1;
-	if (initial_state.is_goal()) {
-		initial_score = 0;
+
+    int branching_factor = actions->size();
+	if (branching_factor <= 1) {
+        m_total_possible_nodes_log_ML = log(max_depth+1);
+    }
+	else{
+		// Calculate expected log of total nodes
+		double numerator_log = (max_depth + 1) * std::log(branching_factor);
+		double denominator_log = std::log(branching_factor - 1);
+		m_total_possible_nodes_log_ML = numerator_log - denominator_log;
 	}
+
 	
-	bool has_successor = false;
-	int best_successor_score = -1;
-    for (const auto& action : *actions) {
-        if (initial_state.is_executable(action)) {
-            T next_state = initial_state.compute_succ(action);
+	std::cout << "Total possible nodes exceed threshold." << std::endl;
+	std::cout << "Approximate number of nodes (exp(log)) = " << std::exp(m_total_possible_nodes_log_ML) << std::endl;
+	std::cout << "Threshold number of nodes = " << m_threshold_node_generation_ML << std::endl;
+	if (m_total_possible_nodes_log_ML > m_threshold_node_generation_log_ML) {
+		std::cout << "Decision: using SPARSE DFS." << std::endl;
+	} else {
+		std::cout << "Decision: using COMPLETE DFS." << std::endl;
+	}
 
-            if (bisimulation) {
-                next_state.calc_min_bisimilar();
-            }
-
-            int child_score = dataset_DFS_worker(next_state, 1, max_depth, actions, goal_str, global_dataset, bisimulation);
-
-            if (child_score >= 0) {
-            	if (!has_successor || child_score < best_successor_score) {
-                	best_successor_score = child_score;
-                }
-            	has_successor = true;
-            };
-        }
-    }
-
-	if (initial_score == -1 && has_successor) {
-        initial_score = best_successor_score + 1;
-    }
-
-
-	global_dataset.push_back(format_row(initial_state, 0, initial_score, goal_str));
+    dataset_DFS_worker(initial_state, 0, max_depth, actions, goal_str, global_dataset, bisimulation);
 
     return !global_dataset.empty();
 }
 
+
+
 template <class T>
 int planner<T>::dataset_DFS_worker(T& state, int depth, int max_depth, action_set* actions, const std::string& goal_str, std::vector<std::string>& global_dataset, bool bisimulation) {
 
+    if (m_current_nodes_ML >= m_threshold_node_generation_ML) {
+		if (state.is_goal()) {
+			global_dataset.push_back(format_row(state, depth, 0, goal_str));
+        	return 0;
+		}
+        return -1;
+    } 
+	m_current_nodes_ML++;
+
+
     int current_score = -1;
-    
-    // Check if state was already visited
+
     if (m_visited_states_ML.count(state)) {
-        return m_states_scores[state]; // Already visited
+        return m_states_scores[state];
     }
 
     if (state.is_goal()) {
         current_score = 0;
+		m_goal_recently_found_ML = true;
     }
 
-    int best_successor_score = -1; // Will track best among successors
-
-    bool has_successor = false; // Track if at least one valid successor
+    int best_successor_score = -1;
+    bool has_successor = false;
 
     for (const auto& action : *actions) {
         if (state.is_executable(action)) {
@@ -877,12 +881,35 @@ int planner<T>::dataset_DFS_worker(T& state, int depth, int max_depth, action_se
             }
 
             if (depth >= max_depth) {
-                // Reached max depth, treat it as a leaf
-                global_dataset.push_back(format_row(state, depth, current_score, goal_str));
-				m_visited_states_ML.insert(state); 
-                m_states_scores[state] = current_score;
-                return current_score;
+                break;
             } else {
+                double discard_probability = 0.0;
+				// Only start discarding if total search space is big
+				if (m_total_possible_nodes_log_ML > m_threshold_node_generation_log_ML) {
+
+					double depth_ratio = (double)depth / (double)max_depth;
+					double fullness_ratio = (double)m_current_nodes_ML / (double)m_threshold_node_generation_ML;
+				
+					// Start discard_probability low, increase as depth grows
+					discard_probability = 0.2 * depth_ratio; 
+				
+					// Slightly boost as dataset fills up
+					discard_probability += 0.2 * fullness_ratio;
+				
+					// Boost if a nearby goal was found
+					if (m_goal_recently_found_ML) {
+						discard_probability += 0.2;
+					}
+				
+					// Clamp between [0, 0.8] (still allow deeper exploration)
+					discard_probability = std::min(discard_probability, 0.8);
+				}
+
+                if (dis(gen) < discard_probability) {
+					m_goal_recently_found_ML = false;
+                    continue; // Randomly skip exploration
+                }
+
                 int child_score = dataset_DFS_worker(next_state, depth + 1, max_depth, actions, goal_str, global_dataset, bisimulation);
 
                 if (child_score >= 0) {
@@ -895,14 +922,14 @@ int planner<T>::dataset_DFS_worker(T& state, int depth, int max_depth, action_se
         }
     }
 
-    // Now, set current_score based on best successor
     if (current_score == -1 && has_successor) {
         current_score = best_successor_score + 1;
     }
 
     global_dataset.push_back(format_row(state, depth, current_score, goal_str));
-	m_visited_states_ML.insert(state); 
+    m_visited_states_ML.insert(state);
     m_states_scores[state] = current_score;
+
     return current_score;
 }
 
