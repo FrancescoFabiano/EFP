@@ -328,11 +328,14 @@ const std::string state<T>::print_graphviz_ML_dataset(std::string postfix) const
 	}
 	system(("mkdir -p " + folder).c_str());
 	graphviz.open(folder + "/" + exec_act_names + postfix + ".dot");
-	graphviz << "digraph K_structure{\n";
+	/*graphviz << "digraph K_structure{\n";
 	graphviz << "	rankdir=BT;\n";
 	graphviz << "	size=\"8,5\"\n";
 	m_representation.print_graphviz_explicit(graphviz);
-	graphviz << "}";
+	graphviz << "}"; */
+
+	m_representation.print_ML_dataset(graphviz);
+
 	graphviz.close();
 	//std::cout << postfix << " done.";
 

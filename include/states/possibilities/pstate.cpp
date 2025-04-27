@@ -10,6 +10,9 @@
 #include <iostream>
 #include <tuple>
 #include <boost/dynamic_bitset.hpp>
+#include <boost/functional/hash.hpp>
+#include <unordered_map>
+#include <set>
 
 #include "pstate.h"
 #include "../../utilities/helper_t.ipp"
@@ -1139,8 +1142,7 @@ void pstate::print() const
 	std::cout << "*******************************************************************" << std::endl;
 }
 
-
-void pstate::print_ML_dataset() const
+/* void pstate::print_ML_dataset_unoptimized() const
 {
 	//World list; Pointed world; Edges
 	// Mapping worlds using fluent set and repetition as unique key
@@ -1206,7 +1208,7 @@ void pstate::print_ML_dataset() const
 		counter++;
 	}
 }
-
+ */
 
 void pstate::print_graphviz(std::ostream & graphviz) const
 {
@@ -1388,6 +1390,96 @@ void pstate::print_graphviz(std::ostream & graphviz) const
 	graphviz << "	</table>>]\n";
 	graphviz << "	{rank = max; description};\n";
 
+}
+
+
+struct WorldHash {
+    std::size_t operator()(const std::pair<std::set<fluent>, int>& p) const {
+        std::size_t seed = 0;
+        for (const auto& f : p.first) {
+            boost::hash_combine(seed, boost::hash_value(f));
+        }
+        boost::hash_combine(seed, std::hash<int>{}(p.second));
+        return seed;
+    }
+};
+
+
+std::string to_base36(int num) {
+    const char* digits = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    if (num == 0) return "0";
+    std::string result;
+    while (num > 0) {
+        result = digits[num % 36] + result;
+        num /= 36;
+    }
+    return result;
+}
+
+void pstate::print_ML_dataset(std::ostream & graphviz) const
+{
+    graphviz << "digraph G {" << std::endl;
+
+    std::unordered_map<std::size_t, int> world_map;
+    int world_counter = 1;
+
+    // Assign IDs
+    for (const auto& pw : get_worlds()) {
+        std::pair<std::set<fluent>, int> world_key = {pw.get_fluent_set(), pw.get_repetition()};
+        std::size_t hash_value = WorldHash{}(world_key);
+
+        if (world_map.find(hash_value) == world_map.end()) {
+            world_map[hash_value] = world_counter++;
+        }
+    }
+
+    // Print nodes
+    for (const auto& [hash, id] : world_map) {
+        graphviz << to_base36(id) << ";" << std::endl;
+    }
+
+    // (Optional) Pointed world node decoration
+    {
+        std::pair<std::set<fluent>, int> pointed_key = {get_pointed().get_fluent_set(), get_pointed().get_repetition()};
+        std::size_t pointed_hash = WorldHash{}(pointed_key);
+        graphviz <<  to_base36(world_map[pointed_hash]) << " [shape=doublecircle];" << std::endl;
+    }
+
+    // Belief edges
+    std::map<std::pair<int, int>, std::set<agent>> edge_map;
+    for (const auto& [from_pw, from_map] : get_beliefs()) {
+        for (const auto& [ag, to_set] : from_map) {
+            for (const auto& to_pw : to_set) {
+                std::pair<std::set<fluent>, int> from_key = {from_pw.get_fluent_set(), from_pw.get_repetition()};
+                std::pair<std::set<fluent>, int> to_key = {to_pw.get_fluent_set(), to_pw.get_repetition()};
+
+                std::size_t from_hash = WorldHash{}(from_key);
+                std::size_t to_hash = WorldHash{}(to_key);
+
+                int from_id = world_map[from_hash];
+                int to_id = world_map[to_hash];
+                edge_map[{from_id, to_id}].insert(ag);
+            }
+        }
+    }
+
+    // Print edges
+    for (const auto& [edge, agents] : edge_map) {
+        graphviz <<  to_base36(edge.first)
+                  << " ->" << to_base36(edge.second)
+                  << " [label=\"";
+
+        bool first_ag = true;
+        for (const auto& ag : agents) {
+            if (!first_ag) graphviz << ",";
+            graphviz << domain::get_instance().get_grounder().deground_agent(ag);
+            first_ag = false;
+        }
+
+        graphviz << "\"];" << std::endl;
+    }
+
+    graphviz << "}" << std::endl;
 }
 
 

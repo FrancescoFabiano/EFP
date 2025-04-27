@@ -739,208 +739,183 @@ void planner<T>::check_actions_names(std::vector<std::string>& act_name)
 }
 
 
-
 template <class T>
-bool planner<T>::ML_dataset_creation(ML_Dataset_Params *ML_dataset){
-	std::string folder = "out/ML_HEUR_datasets/";
-	if (ML_dataset->useDFS) {
-		folder = folder + "DFS/";
-	} else {
-		folder = folder + "BFS/";
-	}
-	system(("mkdir -p " + folder).c_str());
-	
-	std::string fname      = domain::get_instance().get_name();
-	fname = fname + "_d_" + std::to_string(ML_dataset->depth);
-	std::string file_extension = ".csv";
+bool planner<T>::ML_dataset_creation(ML_Dataset_Params* ML_dataset) {
+    std::string folder = "out/ML_HEUR_datasets/";
+    folder += (ML_dataset->useDFS) ? "DFS/" : "BFS/";
+    system(("mkdir -p " + folder).c_str());
 
-	std::string fpath = folder + fname + file_extension;
+    std::string fname = domain::get_instance().get_name() + "_d_" + std::to_string(ML_dataset->depth) + ".csv";
+    std::string fpath = folder + fname;
 
-	std::ofstream result;
-	result.open(fpath);
-	result << "State, Path, Depth, Distance From Goal, Goal" << std::endl;
-	result.close();
+    std::ofstream result(fpath);
+    if (!result.is_open()) {
+        std::cerr << "Error opening file: " << fpath << std::endl;
+        return false;
+    }
+    result << "State,Path,Depth,Distance From Goal,Goal" << std::endl;
+    result.close();
 
-	auto goal_to_print_list = domain::get_instance().get_goal_description();
-	std::string goal_to_print = "";
-	bool first_print = true;
-	formula_list::const_iterator it_sll;
+    auto goal_list = domain::get_instance().get_goal_description();
+    std::stringstream buffer;
+    auto original_buf = std::cout.rdbuf(buffer.rdbuf());
 
+    bool first = true;
+    for (auto& goal : goal_list) {
+        if (!first) std::cout << " AND ";
+        first = false;
+        goal.print();
+    }
+    std::cout.rdbuf(original_buf);
+    std::string goal_str = buffer.str();
 
-	// Create a stringstream to capture the output
-	std::stringstream buffer;
-
-	// Save the original std::cout buffer
-	std::streambuf* original_cout_buf = std::cout.rdbuf();
-
-	// Redirect std::cout to our stringstream
-	std::cout.rdbuf(buffer.rdbuf());
-
-	// Now execute the original code
-	for (auto it_sll = goal_to_print_list.begin(); it_sll != goal_to_print_list.end(); ++it_sll) {
-		if (!first_print) {
-			std::cout << " AND ";
-		}
-		first_print = false;
-		it_sll->print();  // Output goes into the buffer now
-	}
-
-	// Restore std::cout back to its original state
-	std::cout.rdbuf(original_cout_buf);
-
-	// Assign the captured output to the string
-	goal_to_print = buffer.str();
-
-
-	return dataset_launcher(fpath, ML_dataset->depth, ML_dataset->useDFS, goal_to_print);	
+    return dataset_launcher(fpath, ML_dataset->depth, ML_dataset->useDFS, goal_str);
 }
 
 template <class T>
-void planner<T>::append_to_dataset(std::string fpath, T *state, int depth, int score, const std::string & goal_to_print){
-	std::string comma = ",";
-	std::ofstream result;
-	std::streambuf *backup, *psbuf;
-	backup = std::cout.rdbuf();
-	psbuf = result.rdbuf();
+bool planner<T>::dataset_launcher(const std::string& fpath, int max_depth, bool useDFS, const std::string& goal_str) {
+    T initial;
+    initial.build_initial();
 
-	// Redirect state.print output from std::cout to the file at fpath
-	result.open(fpath, std::ofstream::app);
-	psbuf = result.rdbuf();
-	std::cout.rdbuf(psbuf);
+    bool bisimulation = (domain::get_instance().get_bisimulation() != BIS_NONE);
 
+    if (bisimulation) {
+        initial.calc_min_bisimilar();
+    }
 
-	// Exclude graphviz output but store the filename
-	std::string graphviz_filename = state->print_graphviz_ML_dataset(""); // Store the filename
+    action_set actions = domain::get_instance().get_actions();
 
-	std::cout <<"\"";
-	printer::get_instance().print_list(state->get_executed_actions());
-	result << "\"";
+    auto start_time = std::chrono::system_clock::now();
 
-	std::cout.rdbuf(backup);
-	result.close();
+    std::vector<std::string> global_dataset;
+    global_dataset.reserve(100000);
 
-	// Write the Graphviz filename before the score and depth values.
-	result.open(fpath, std::ofstream::app);
-	result << comma << graphviz_filename << comma << depth << comma << score << comma << goal_to_print << std::endl;
-	result.close();
+    bool result;
+    if (useDFS) {
+        result = dataset_DFS_serial(initial, max_depth, &actions, goal_str, global_dataset, bisimulation);
+    } else {
+        std::cerr << "Recursion through BFS is not implemented yet for ML dataset generation.\n";
+        exit(1);
+    }
+
+    auto end_time = std::chrono::system_clock::now();
+    std::chrono::duration<double> elapsed = end_time - start_time;
+    std::cout << "\nDataset Generated in " << elapsed.count() << " seconds" << std::endl;
+
+    std::ofstream result_file(fpath, std::ofstream::app);
+    for (const auto& row : global_dataset) {
+        result_file << row << "\n";
+    }
+    result_file.close();
+
+    return result;
 }
 
 template <class T>
-bool planner<T>::dataset_launcher(std::string fpath, int max_depth, bool useDFS, const std::string & goal_to_print){
-	//initialization
-	T initial;
-	bool bisimulation = false;
-	if (domain::get_instance().get_bisimulation() != BIS_NONE) { bisimulation = true; }
-	bisimulation = false;
-	auto start_timing = std::chrono::system_clock::now();
-	initial.build_initial();
-	if (bisimulation) { initial.calc_min_bisimilar(); }
-	auto end_timing = std::chrono::system_clock::now();
-	std::chrono::duration<double> elapsed_seconds = end_timing - start_timing;
-	std::cout << "\nInitial Built in " << elapsed_seconds.count() << " seconds" << std::endl;
-
-	//post-initialization
-	action_set actions = domain::get_instance().get_actions();
-	start_timing = std::chrono::system_clock::now();
-
-	//recursively search the tree, creating the dataset.
-	int retval;
-	if(useDFS){
-		retval = dataset_DFS_recur(fpath, max_depth, 0, initial, bisimulation, &actions, goal_to_print);
-	}else{
-		retval = dataset_BFS_recur(fpath, max_depth, 0, initial, bisimulation, &actions);
-	}
-
-
-	//end the timer and finish
-	end_timing = std::chrono::system_clock::now();
-	elapsed_seconds = end_timing - start_timing;
-	std::cout << "\nDataset Generated in " << elapsed_seconds.count() << " seconds" << std::endl;
-	//if -1 at initial, then no goal was found in the entire search.
-	if(retval == -1)
-		return false;
-	return true;
-}
-
-template <class T>
-int planner<T>::dataset_DFS_recur(std::string fpath, int max_depth, int depth, T state, bool bisimulation, action_set *actions, const std::string & goal_to_print){
-	action_set::const_iterator it_acset;
-	action tmp_action;
-
-	//initialize score and determine if this state is goal
-	int score = -1;
-	if(state.is_goal()){ 
-		score = 0; 
+bool planner<T>::dataset_DFS_serial(T& initial_state, int max_depth, action_set* actions, const std::string& goal_str, std::vector<std::string>& global_dataset, bool bisimulation) {
+    m_visited_states_ML.clear();
+	int initial_score = -1;
+	if (initial_state.is_goal()) {
+		initial_score = 0;
 	}
 	
-	//if not yet past max_depth
-	if(depth < max_depth){
-		//loop through the set of actions available to the problem 
-		for (it_acset = actions->begin(); it_acset != actions->end(); it_acset++) {
-			tmp_action = *it_acset;
-			// std::cout << "action found at depth " << depth << " ";
-			//if this state can take the action tmp_action
-			if (state.is_executable(tmp_action)) {
-				T next_state;
-				int next_score;
-				
+	bool has_successor = false;
+	int best_successor_score = -1;
+    for (const auto& action : *actions) {
+        if (initial_state.is_executable(action)) {
+            T next_state = initial_state.compute_succ(action);
 
-				//by taking tmp_action in this state, we get the next state
-				next_state     = state.compute_succ(tmp_action);
-				if (bisimulation) { next_state.calc_min_bisimilar(); }
+            if (bisimulation) {
+                next_state.calc_min_bisimilar();
+            }
 
-				// mark next_state as visited and search it
-				
+            int child_score = dataset_DFS_worker(next_state, 1, max_depth, actions, goal_str, global_dataset, bisimulation);
 
-				next_score = dataset_DFS_recur(fpath, max_depth, depth+1, next_state, bisimulation, actions, goal_to_print);
-				if(score != 0 && next_score != -1 && (score ==-1 || score > next_score+1)){
-					score = next_score+1;
-				}
-			}
-		}
-	}
+            if (child_score >= 0) {
+            	if (!has_successor || child_score < best_successor_score) {
+                	best_successor_score = child_score;
+                }
+            	has_successor = true;
+            };
+        }
+    }
 
-	//after looping through all child nodes (or breaking early from depth) print to dataset
-	append_to_dataset(fpath, &state, depth, score, goal_to_print);
-	return score;
+	if (initial_score == -1 && has_successor) {
+        initial_score = best_successor_score + 1;
+    }
+
+
+	global_dataset.push_back(format_row(initial_state, 0, initial_score, goal_str));
+
+    return !global_dataset.empty();
 }
 
-//does not work, do not run.
 template <class T>
-int planner<T>::dataset_BFS_recur(std::string fpath, int max_depth, int depth, T state, bool bisimulation, action_set *actions){
-	action_set::const_iterator it_acset;
-	action tmp_action;
+int planner<T>::dataset_DFS_worker(T& state, int depth, int max_depth, action_set* actions, const std::string& goal_str, std::vector<std::string>& global_dataset, bool bisimulation) {
 
-	//initialize score and determine if this state is goal
-	int score = -1;
-	if(state.is_goal()){ score = 0; }
-	
-	//if not yet past max_depth
-	if(depth < max_depth){
-		//loop through the set of actions available to the problem 
-		for (it_acset = actions->begin(); it_acset != actions->end(); it_acset++) {
-			//if this state can take the action tmp_action
-			if (state.is_executable(tmp_action)) {
-				T next_state;
-				int next_score;
-				tmp_action = *it_acset;
+    int current_score = -1;
+    
+    // Check if state was already visited
+    if (m_visited_states_ML.count(state)) {
+        return m_states_scores[state]; // Already visited
+    }
 
-				//by taking tmp_action in this state, we get the next state
-				next_state     = state.compute_succ(tmp_action);
-				if (bisimulation) { next_state.calc_min_bisimilar(); }
+    if (state.is_goal()) {
+        current_score = 0;
+    }
 
-				// mark next_state as visited and search it
-				next_score = dataset_BFS_recur(fpath, max_depth, depth+1, next_state, bisimulation, actions);
-				if(score != 0 && (score ==-1 || score > next_score+1)){
-					score = next_score+1;
-				}
-			}
-		}
-	}
+    int best_successor_score = -1; // Will track best among successors
 
-	//after looping through all child nodes (or breaking early from depth) print to dataset
-	append_to_dataset(fpath, &state, depth, score, "");
-	return score;
+    bool has_successor = false; // Track if at least one valid successor
+
+    for (const auto& action : *actions) {
+        if (state.is_executable(action)) {
+            T next_state = state.compute_succ(action);
+
+            if (bisimulation) {
+                next_state.calc_min_bisimilar();
+            }
+
+            if (depth >= max_depth) {
+                // Reached max depth, treat it as a leaf
+                global_dataset.push_back(format_row(state, depth, current_score, goal_str));
+				m_visited_states_ML.insert(state); 
+                m_states_scores[state] = current_score;
+                return current_score;
+            } else {
+                int child_score = dataset_DFS_worker(next_state, depth + 1, max_depth, actions, goal_str, global_dataset, bisimulation);
+
+                if (child_score >= 0) {
+                    if (!has_successor || child_score < best_successor_score) {
+                        best_successor_score = child_score;
+                    }
+                    has_successor = true;
+                }
+            }
+        }
+    }
+
+    // Now, set current_score based on best successor
+    if (current_score == -1 && has_successor) {
+        current_score = best_successor_score + 1;
+    }
+
+    global_dataset.push_back(format_row(state, depth, current_score, goal_str));
+	m_visited_states_ML.insert(state); 
+    m_states_scores[state] = current_score;
+    return current_score;
+}
+
+
+template <class T>
+std::string planner<T>::format_row(T& state, int depth, int score, const std::string& goal_str) {
+    std::stringstream ss;
+    //ss << "\"";
+    //printer::get_instance().print_list(state.get_executed_actions());
+    //ss << "\",";
+    std::string graphviz_filename = state.print_graphviz_ML_dataset("");
+    ss << graphviz_filename << "," << depth << "," << score << "," << goal_str;
+    return ss.str();
 }
 
 /*\ IMPLEMENTATION OF OTHER TEMPLATIC FUNCTIONS INSTANCIATED WITH A TEMPLATIC STATE*/
