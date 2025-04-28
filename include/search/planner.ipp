@@ -891,10 +891,12 @@ int planner<T>::dataset_DFS_worker(T& state, int depth, int max_depth, action_se
 					double fullness_ratio = (double)m_current_nodes_ML / (double)m_threshold_node_generation_ML;
 				
 					// Start discard_probability low, increase as depth grows
-					discard_probability = 0.2 * depth_ratio; 
+					discard_probability = 0.2 * std::pow(depth_ratio, 2);
 				
 					// Slightly boost as dataset fills up
 					discard_probability += 0.2 * fullness_ratio;
+
+					discard_probability += std::min(0.01 * std::pow(static_cast<double>(m_discard_augmentation_factor_ML) / (3*max_depth), 2), 0.1);
 				
 					// Boost if a nearby goal was found
 					if (m_goal_recently_found_ML) {
@@ -907,9 +909,13 @@ int planner<T>::dataset_DFS_worker(T& state, int depth, int max_depth, action_se
 
                 if (dis(gen) < discard_probability) {
 					m_goal_recently_found_ML = false;
+					m_discard_augmentation_factor_ML = 0.0;
                     continue; // Randomly skip exploration
                 }
 
+				// Increase the augmentation factor for non-discarded seires
+                m_discard_augmentation_factor_ML++;
+				
                 int child_score = dataset_DFS_worker(next_state, depth + 1, max_depth, actions, goal_str, global_dataset, bisimulation);
 
                 if (child_score >= 0) {
