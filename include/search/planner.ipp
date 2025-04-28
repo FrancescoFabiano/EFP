@@ -872,18 +872,24 @@ int planner<T>::dataset_DFS_worker(T& state, int depth, int max_depth, action_se
     int best_successor_score = -1;
     bool has_successor = false;
 
-    for (const auto& action : *actions) {
-        if (state.is_executable(action)) {
-            T next_state = state.compute_succ(action);
+	// Create a local vector from action_set
+	std::vector<action> local_actions(actions->begin(), actions->end());
 
-            if (bisimulation) {
-                next_state.calc_min_bisimilar();
-            }
+	// Shuffle local_actions
+	std::shuffle(local_actions.begin(), local_actions.end(), gen);
 
-            if (depth >= max_depth) {
-                break;
-            } else {
-                double discard_probability = 0.0;
+	for (const auto& action : local_actions) {
+		if (state.is_executable(action)) {
+			T next_state = state.compute_succ(action);
+
+			if (bisimulation) {
+				next_state.calc_min_bisimilar();
+			}
+
+			if (depth >= max_depth) {
+				break;
+			} else {
+				double discard_probability = 0.0;
 				// Only start discarding if total search space is big
 				if (m_total_possible_nodes_log_ML > m_threshold_node_generation_log_ML) {
 
@@ -907,26 +913,26 @@ int planner<T>::dataset_DFS_worker(T& state, int depth, int max_depth, action_se
 					discard_probability = std::min(discard_probability, 0.8);
 				}
 
-                if (dis(gen) < discard_probability) {
+				if (dis(gen) < discard_probability) {
 					m_goal_recently_found_ML = false;
 					m_discard_augmentation_factor_ML = 0.0;
-                    continue; // Randomly skip exploration
-                }
+					continue; // Randomly skip exploration
+				}
 
-				// Increase the augmentation factor for non-discarded seires
-                m_discard_augmentation_factor_ML++;
+				// Increase the augmentation factor for non-discarded series
+				m_discard_augmentation_factor_ML++;
 				
-                int child_score = dataset_DFS_worker(next_state, depth + 1, max_depth, actions, goal_str, global_dataset, bisimulation);
+				int child_score = dataset_DFS_worker(next_state, depth + 1, max_depth, actions, goal_str, global_dataset, bisimulation);
 
-                if (child_score >= 0) {
-                    if (!has_successor || child_score < best_successor_score) {
-                        best_successor_score = child_score;
-                    }
-                    has_successor = true;
-                }
-            }
-        }
-    }
+				if (child_score >= 0) {
+					if (!has_successor || child_score < best_successor_score) {
+						best_successor_score = child_score;
+					}
+					has_successor = true;
+				}
+			}
+		}
+	}
 
     if (current_score == -1 && has_successor) {
         current_score = best_successor_score + 1;
