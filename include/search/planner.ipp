@@ -788,7 +788,7 @@ bool planner<T>::dataset_launcher(const std::string& fpath, int max_depth, bool 
     auto start_time = std::chrono::system_clock::now();
 
     std::vector<std::string> global_dataset;
-    global_dataset.reserve(100000);
+    global_dataset.reserve(m_threshold_node_generation_ML);
 
     bool result;
     if (useDFS) {

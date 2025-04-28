@@ -2992,27 +2992,29 @@ pstate pstate::execute_announcement_dox(const action & act) const
 /****************BISIMULATION********************/
 void pstate::get_all_reachable_worlds(const pworld_ptr & pw, pworld_ptr_set & reached_worlds, pworld_transitive_map & reached_edges) const
 {
-
-	//std::cerr << "\nDEBUG: QUI 1\n" << std::flush;
-
 	pworld_ptr_set::const_iterator it_pwps;
 	pworld_ptr_set pw_list;
 
-	//reached_worlds.insert(kw);
 	auto ag_set = domain::get_instance().get_agents();
 	auto ag_it = ag_set.begin();
 	for (; ag_it != ag_set.end(); ag_it++) {
-		//std::cerr << "\nDEBUG: QUI 2\n" << std::flush;
 
-		pw_list = m_beliefs.at(pw).at(*ag_it);
-		//std::cerr << "\nDEBUG: QUI 3\n" << std::flush;
+		try {
+			pw_list = m_beliefs.at(pw).at(*ag_it);
+		} catch (const std::out_of_range& e) {
+			//std::cerr << "[ERROR] Key not found in m_beliefs or inner map for agent " << *ag_it << ": " << e.what() << std::endl;
+			pw_list.clear();
+		}
 
 		for (it_pwps = pw_list.begin(); it_pwps != pw_list.end(); it_pwps++) {
 			if (reached_worlds.insert(*it_pwps).second) {
-				//std::cerr << "\nDEBUG: QUI 4\n" << std::flush;
-
 				get_all_reachable_worlds(*it_pwps, reached_worlds, reached_edges);
-				reached_edges.insert(std::make_pair(*it_pwps, m_beliefs.at(*it_pwps)));
+				try {
+					reached_edges.insert(std::make_pair(*it_pwps, m_beliefs.at(*it_pwps)));
+				} catch (const std::out_of_range& e) {
+					//std::cerr << "[ERROR] Key not found in m_beliefs during reachable worlds exploration: " << e.what() << std::endl;
+					// Nothing else needed here
+				}
 			}
 		}
 	}
@@ -3026,8 +3028,12 @@ void pstate::clean_unreachable_pworlds()
 	pworld_transitive_map reached_edges;
 
 	reached_worlds.insert(get_pointed());
-	reached_edges.insert(std::make_pair(get_pointed(), m_beliefs.at(get_pointed())));
-	//std::cerr << "\nDEBUG: CLEAN 1 EXTRA PSTATE\n" << std::flush;
+	try {
+		reached_edges.insert(std::make_pair(get_pointed(), m_beliefs.at(get_pointed())));
+	} catch (const std::out_of_range& e) {
+		//std::cerr << "[ERROR] Key not found in m_beliefs for pointed world: " << e.what() << std::endl;
+		//exit(1);
+	}	//std::cerr << "\nDEBUG: CLEAN 1 EXTRA PSTATE\n" << std::flush;
 
 	get_all_reachable_worlds(get_pointed(), reached_worlds, reached_edges);
 
