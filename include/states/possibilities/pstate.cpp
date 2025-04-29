@@ -1406,14 +1406,14 @@ struct WorldHash {
 
 
 std::string to_base36(int num) {
-    const char* digits = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    /*const char* digits = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     if (num == 0) return "0";
     std::string result;
     while (num > 0) {
         result = digits[num % 36] + result;
         num /= 36;
-    }
-    return result;
+    } For now we keep the information in integer for better compatibility with GNNs*/
+    return std::to_string(num);
 }
 
 void pstate::print_ML_dataset(std::ostream & graphviz) const
