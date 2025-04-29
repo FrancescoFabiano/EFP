@@ -83,8 +83,10 @@ def create_data_from_graph(G: nx.DiGraph, dist_from_goal: int, depth: int) -> Da
     # 2) NODE FEATURES
     # Example: each node gets [1.0, depth]
     x_list = []
+    # count = 0
     for node, idx in node_to_idx.items():
-        x_list.append([1.0, float(depth)])
+        x_list.append([int(node), int(depth)])
+        # count += 1
     x = torch.tensor(x_list, dtype=torch.float)  # shape: [num_nodes, 2]
 
     # 3) EDGE INDEX
@@ -96,8 +98,8 @@ def create_data_from_graph(G: nx.DiGraph, dist_from_goal: int, depth: int) -> Da
     # Gather all edge_attr_matrix rows in one NumPy array:
     src_indices, tgt_indices = edge_index_np
     edge_attr_np = edge_attr_matrix[
-        src_indices, tgt_indices, :
-    ]  # shape: [num_edges, num_labels]
+                   src_indices, tgt_indices, :
+                   ]  # shape: [num_edges, num_labels]
     edge_attr = torch.from_numpy(edge_attr_np).float()
 
     # 5) TARGET
@@ -110,25 +112,23 @@ def create_data_from_graph(G: nx.DiGraph, dist_from_goal: int, depth: int) -> Da
 
 
 def predict_from_graph(
-    model: torch.nn.Module,
-    graph_path: str,
-    depth: int,
-    device: torch.device = "cuda",
+        model: torch.nn.Module,
+        G: nx.DiGraph,
+        depth: int,
+        device: torch.device = "cuda",
 ) -> float:
     """
     Loads a graph from a file, processes it, and runs inference with the trained model.
 
     Args:
         model (torch.nn.Module): The trained GNN model.
-        graph_path (str): Path to the .dot file of the graph.
+        G (nx.DiGraph): graph.
         depth (int): Depth to include as node feature.
         device (torch.device): The device to run inference on.
 
     Returns:
         float: The predicted distance from the goal.
     """
-    # 1. Load the graph from the .dot file
-    G = nx.Graph(nx.nx_pydot.read_dot(graph_path))
 
     # 2. Dummy target value (not used for inference, just for Data creation)
     dummy_dist_from_goal = 0
