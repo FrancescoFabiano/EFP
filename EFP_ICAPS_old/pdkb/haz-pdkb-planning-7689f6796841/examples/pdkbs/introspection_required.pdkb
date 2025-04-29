@@ -1,6 +1,0 @@
-2 2 p,q
-B1 q
-B1 B2 !q
-END
-
-Without positive and negative introspection, this PEKB fails the test.

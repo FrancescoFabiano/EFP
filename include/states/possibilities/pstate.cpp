@@ -10,6 +10,9 @@
 #include <iostream>
 #include <tuple>
 #include <boost/dynamic_bitset.hpp>
+#include <boost/functional/hash.hpp>
+#include <unordered_map>
+#include <set>
 
 #include "pstate.h"
 #include "../../utilities/helper_t.ipp"
@@ -1139,8 +1142,7 @@ void pstate::print() const
 	std::cout << "*******************************************************************" << std::endl;
 }
 
-
-void pstate::print_ML_dataset() const
+/* void pstate::print_ML_dataset_unoptimized() const
 {
 	//World list; Pointed world; Edges
 	// Mapping worlds using fluent set and repetition as unique key
@@ -1206,7 +1208,7 @@ void pstate::print_ML_dataset() const
 		counter++;
 	}
 }
-
+ */
 
 void pstate::print_graphviz(std::ostream & graphviz) const
 {
@@ -1388,6 +1390,96 @@ void pstate::print_graphviz(std::ostream & graphviz) const
 	graphviz << "	</table>>]\n";
 	graphviz << "	{rank = max; description};\n";
 
+}
+
+
+struct WorldHash {
+    std::size_t operator()(const std::pair<std::set<fluent>, int>& p) const {
+        std::size_t seed = 0;
+        for (const auto& f : p.first) {
+            boost::hash_combine(seed, boost::hash_value(f));
+        }
+        boost::hash_combine(seed, std::hash<int>{}(p.second));
+        return seed;
+    }
+};
+
+
+std::string to_base36(int num) {
+    const char* digits = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    if (num == 0) return "0";
+    std::string result;
+    while (num > 0) {
+        result = digits[num % 36] + result;
+        num /= 36;
+    }
+    return result;
+}
+
+void pstate::print_ML_dataset(std::ostream & graphviz) const
+{
+    graphviz << "digraph G {" << std::endl;
+
+    std::unordered_map<std::size_t, int> world_map;
+    int world_counter = 1;
+
+    // Assign IDs
+    for (const auto& pw : get_worlds()) {
+        std::pair<std::set<fluent>, int> world_key = {pw.get_fluent_set(), pw.get_repetition()};
+        std::size_t hash_value = WorldHash{}(world_key);
+
+        if (world_map.find(hash_value) == world_map.end()) {
+            world_map[hash_value] = world_counter++;
+        }
+    }
+
+    // Print nodes
+    for (const auto& [hash, id] : world_map) {
+        graphviz << to_base36(id) << ";" << std::endl;
+    }
+
+    // (Optional) Pointed world node decoration
+    {
+        std::pair<std::set<fluent>, int> pointed_key = {get_pointed().get_fluent_set(), get_pointed().get_repetition()};
+        std::size_t pointed_hash = WorldHash{}(pointed_key);
+        graphviz <<  to_base36(world_map[pointed_hash]) << " [shape=doublecircle];" << std::endl;
+    }
+
+    // Belief edges
+    std::map<std::pair<int, int>, std::set<agent>> edge_map;
+    for (const auto& [from_pw, from_map] : get_beliefs()) {
+        for (const auto& [ag, to_set] : from_map) {
+            for (const auto& to_pw : to_set) {
+                std::pair<std::set<fluent>, int> from_key = {from_pw.get_fluent_set(), from_pw.get_repetition()};
+                std::pair<std::set<fluent>, int> to_key = {to_pw.get_fluent_set(), to_pw.get_repetition()};
+
+                std::size_t from_hash = WorldHash{}(from_key);
+                std::size_t to_hash = WorldHash{}(to_key);
+
+                int from_id = world_map[from_hash];
+                int to_id = world_map[to_hash];
+                edge_map[{from_id, to_id}].insert(ag);
+            }
+        }
+    }
+
+    // Print edges
+    for (const auto& [edge, agents] : edge_map) {
+        graphviz <<  to_base36(edge.first)
+                  << " ->" << to_base36(edge.second)
+                  << " [label=\"";
+
+        bool first_ag = true;
+        for (const auto& ag : agents) {
+            if (!first_ag) graphviz << ",";
+            graphviz << domain::get_instance().get_grounder().deground_agent(ag);
+            first_ag = false;
+        }
+
+        graphviz << "\"];" << std::endl;
+    }
+
+    graphviz << "}" << std::endl;
 }
 
 
@@ -2900,27 +2992,29 @@ pstate pstate::execute_announcement_dox(const action & act) const
 /****************BISIMULATION********************/
 void pstate::get_all_reachable_worlds(const pworld_ptr & pw, pworld_ptr_set & reached_worlds, pworld_transitive_map & reached_edges) const
 {
-
-	//std::cerr << "\nDEBUG: QUI 1\n" << std::flush;
-
 	pworld_ptr_set::const_iterator it_pwps;
 	pworld_ptr_set pw_list;
 
-	//reached_worlds.insert(kw);
 	auto ag_set = domain::get_instance().get_agents();
 	auto ag_it = ag_set.begin();
 	for (; ag_it != ag_set.end(); ag_it++) {
-		//std::cerr << "\nDEBUG: QUI 2\n" << std::flush;
 
-		pw_list = m_beliefs.at(pw).at(*ag_it);
-		//std::cerr << "\nDEBUG: QUI 3\n" << std::flush;
+		try {
+			pw_list = m_beliefs.at(pw).at(*ag_it);
+		} catch (const std::out_of_range& e) {
+			//std::cerr << "[ERROR] Key not found in m_beliefs or inner map for agent " << *ag_it << ": " << e.what() << std::endl;
+			pw_list.clear();
+		}
 
 		for (it_pwps = pw_list.begin(); it_pwps != pw_list.end(); it_pwps++) {
 			if (reached_worlds.insert(*it_pwps).second) {
-				//std::cerr << "\nDEBUG: QUI 4\n" << std::flush;
-
 				get_all_reachable_worlds(*it_pwps, reached_worlds, reached_edges);
-				reached_edges.insert(std::make_pair(*it_pwps, m_beliefs.at(*it_pwps)));
+				try {
+					reached_edges.insert(std::make_pair(*it_pwps, m_beliefs.at(*it_pwps)));
+				} catch (const std::out_of_range& e) {
+					//std::cerr << "[ERROR] Key not found in m_beliefs during reachable worlds exploration: " << e.what() << std::endl;
+					// Nothing else needed here
+				}
 			}
 		}
 	}
@@ -2934,8 +3028,12 @@ void pstate::clean_unreachable_pworlds()
 	pworld_transitive_map reached_edges;
 
 	reached_worlds.insert(get_pointed());
-	reached_edges.insert(std::make_pair(get_pointed(), m_beliefs.at(get_pointed())));
-	//std::cerr << "\nDEBUG: CLEAN 1 EXTRA PSTATE\n" << std::flush;
+	try {
+		reached_edges.insert(std::make_pair(get_pointed(), m_beliefs.at(get_pointed())));
+	} catch (const std::out_of_range& e) {
+		//std::cerr << "[ERROR] Key not found in m_beliefs for pointed world: " << e.what() << std::endl;
+		//exit(1);
+	}	//std::cerr << "\nDEBUG: CLEAN 1 EXTRA PSTATE\n" << std::flush;
 
 	get_all_reachable_worlds(get_pointed(), reached_worlds, reached_edges);
 
