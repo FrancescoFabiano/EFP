@@ -224,22 +224,24 @@ def main_prediction():
     parser = argparse.ArgumentParser(description='Process a graph file path and a depth value.')
     parser.add_argument('path', type=str, help='Path to the graph file')
     parser.add_argument('depth', type=int, help='Depth for graph traversal or analysis')
+    parser.add_argument('n_agents', type=int, help='Number of agents in the domain')
 
     args = parser.parse_args()
 
     graph_path = args.path
     depth = args.depth
+    n_agents = args.n_agents
 
     subpath = graph_path.split("out/state/")[1]
     model_path = "lib/RL/results/" + subpath.split('/')[0]
 
     graph = nx.DiGraph(nx.nx_pydot.read_dot(graph_path))
 
-    loaded_samples = torch.load(
+    """loaded_samples = torch.load(
         f"{model_path}/complete_dataset.pt", weights_only=False
     )
-    example_data = loaded_samples[0]
-    edge_input_dim = example_data.edge_attr.size(1)  # num_labels
+    example_data = loaded_samples[0]"""
+    edge_input_dim = n_agents # example_data.edge_attr.size(1)  # num_labels
 
     model = GNN(
         node_input_dim=2,

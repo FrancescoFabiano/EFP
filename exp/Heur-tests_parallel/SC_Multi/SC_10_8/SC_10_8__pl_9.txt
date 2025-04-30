@@ -147,4 +147,4 @@ initially C([a,b,c,d,e,f,g,h],-at_9);
 initially C([a,b,c,d,e,f,g,h],-at_10);
 
 % 9 actions
-goal B(b,B(g,q));
+goal B(a,B(g,q));
