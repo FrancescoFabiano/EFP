@@ -840,6 +840,12 @@ bool planner<T>::dataset_DFS_serial(T& initial_state, int max_depth, action_set*
 
     dataset_DFS_worker(initial_state, 0, max_depth, actions, goal_str, global_dataset, bisimulation);
 
+	if (m_goal_founds_ML > 0) {
+		std::cout << "Number of goals found: "<< m_goal_founds_ML << std::endl;
+	} else {
+		std::cout << "No goals found, this is not a good training set (recreate it)." << std::endl;
+	}
+
     return !global_dataset.empty();
 }
 
@@ -866,6 +872,7 @@ int planner<T>::dataset_DFS_worker(T& state, int depth, int max_depth, action_se
 
     if (state.is_goal()) {
         current_score = 0;
+		m_goal_founds_ML++;
 		m_goal_recently_found_ML = true;
     }
 
