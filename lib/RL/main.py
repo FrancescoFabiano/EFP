@@ -248,6 +248,13 @@ def return_nx_graph(orig_path):
     # 4) Now load it into NetworkX
     graph = nx.DiGraph(nx.nx_pydot.read_dot(new_path))
 
+    # 5) Delete the temp .dot now that 'graph' is in memory
+    try:
+        os.remove(new_path)
+    except OSError as e:
+        # optionally log or ignore if it’s already gone
+        print(f"Warning: could not delete {new_path}: {e}")
+
     return graph
 
 def main_prediction():
