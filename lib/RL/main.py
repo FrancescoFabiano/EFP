@@ -1,3 +1,4 @@
+import hashlib
 import json
 import os
 from datetime import datetime
@@ -217,6 +218,38 @@ def main_training():
     print("Pred: :", pred)
     print("True: :", true)
 
+
+def _compress_graph_path(graph_path_original: str) -> str:
+    dirpath, filename = os.path.split(graph_path_original)
+    _, ext = os.path.splitext(filename)
+    digest = hashlib.md5(graph_path_original.encode('utf-8')).hexdigest()
+    return os.path.join(dirpath, f"{digest}{ext}")
+
+def _generate_dot_for_state(graph_path: str) -> str:
+    """
+    Read the DOT file at `graph_path` and return its contents
+    as a single string.
+    """
+    with open(graph_path, 'r', encoding='utf-8') as f:
+        return f.read()
+
+def return_nx_graph(orig_path):
+    # 1) Read the existing .dot file
+    dot_str = _generate_dot_for_state(orig_path)
+
+    # 2) Compute the short hashed filename
+    new_path = _compress_graph_path(orig_path)
+    os.makedirs(os.path.dirname(new_path), exist_ok=True)
+
+    # 3) Write the same DOT text to the new, short-named file
+    with open(new_path, 'w', encoding='utf-8') as f:
+        f.write(dot_str)
+
+    # 4) Now load it into NetworkX
+    graph = nx.DiGraph(nx.nx_pydot.read_dot(new_path))
+
+    return graph
+
 def main_prediction():
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -235,13 +268,9 @@ def main_prediction():
     subpath = graph_path.split("out/state/")[1]
     model_path = "lib/RL/results/" + subpath.split('/')[0]
 
-    graph = nx.DiGraph(nx.nx_pydot.read_dot(graph_path))
+    graph = return_nx_graph(graph_path)
 
-    """loaded_samples = torch.load(
-        f"{model_path}/complete_dataset.pt", weights_only=False
-    )
-    example_data = loaded_samples[0]"""
-    edge_input_dim = n_agents # example_data.edge_attr.size(1)  # num_labels
+    edge_input_dim = n_agents # example_data.edge_attr.size(1)
 
     model = GNN(
         node_input_dim=2,
