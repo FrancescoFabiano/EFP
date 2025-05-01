@@ -169,7 +169,7 @@ unsigned short get_gnn_score(const T & eState)
     }
 
     infile.close();
-	std::cout << "Current Value is " << std::to_string(valueFromFile) << std::endl;
+	// std::cout << "Current Value is " << std::to_string(valueFromFile) << std::endl;
 
 	return valueFromFile;
 }
