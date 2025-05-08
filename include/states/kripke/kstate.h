@@ -637,7 +637,7 @@ public:
     void print() const;
 
     /** \brief Function that prints the information of *this* in the format for ML dataset.*/
-    void print_ML_dataset_dual(std::ostream& graphviz) const;
+    void print_ML_dataset_dual(const std::string& folder, const std::string& base_filename) const;
 
     /** \brief Function that prints the information of *this* in a Graphviz file.
      *

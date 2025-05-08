@@ -753,7 +753,7 @@ bool planner<T>::ML_dataset_creation(ML_Dataset_Params* ML_dataset) {
         std::cerr << "Error opening file: " << fpath << std::endl;
         return false;
     }
-    result << "Path Hash,Path Explicit,Depth,Distance From Goal,Goal" << std::endl;
+    result << "Path Hash,Path Mapped,Depth,Distance From Goal,Goal" << std::endl;
     result.close();
 
     auto goal_list = domain::get_instance().get_goal_description();

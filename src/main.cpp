@@ -300,6 +300,9 @@ void manage_arguments(int argc, char** argv)
 						exit(1);
 					}
 				}
+				else if (i >= argc)
+				{std::cerr << "Invalid node label mode for '-generate_dataset'. Expected 'M', 'H', or 'B', but got nothing'." << std::endl;
+					exit(1);}
 			}
 		} else if (strcmp(argv[i], "-st") == 0) {
 			i++;
