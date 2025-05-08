@@ -67,7 +67,15 @@ EFP_ICAPS_old/tok.h
 #Other files
 
 #Results
-results/
+# Ignore everything under lib/RL
+lib/RL/**
+
+# But do NOT ignore the base lib/RL directory itself
+!lib/RL/
+!lib/RL/results/
+!lib/RL/results/**/
+!lib/RL/results/**/gnn_predictor.pt
+
 .idea_original/tools/External Tools.xml
 .idea/workspace.xml
 .idea_original/customTargets.xml

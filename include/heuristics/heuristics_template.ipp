@@ -142,8 +142,8 @@ unsigned short get_gnn_score(const T & eState)
 {
 
 	std::string graphviz_filename = eState.print_graphviz_ML_dataset(""); // Store the filename
-
-	std::string command = "./lib/RL/run_python_script.sh " + graphviz_filename + " " + std::to_string(eState.get_plan_length());
+	int n_agents = domain::get_instance().get_agents().size();
+	std::string command = "./lib/RL/run_python_script.sh " + graphviz_filename + " " + std::to_string(eState.get_plan_length()) + " " + std::to_string(n_agents);
 
     int ret = system(command.c_str()); // blocks until script (and Python) finishes
 
@@ -169,7 +169,7 @@ unsigned short get_gnn_score(const T & eState)
     }
 
     infile.close();
-	std::cout << "Current Value is " << std::to_string(valueFromFile) << std::endl;
+	// std::cout << "Current Value is " << std::to_string(valueFromFile) << std::endl;
 
 	return valueFromFile;
 }
