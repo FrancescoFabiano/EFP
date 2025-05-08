@@ -113,6 +113,9 @@ private:
     /** Formats a single row of the dataset CSV file. */
     std::string format_row(T& state, int depth, int score, const std::string& goal_str);
 
+    const std::string & generate_goal_tree() const;
+    
+
 public:
     /** Launches the search process based on given parameters. */
     bool search(bool results_file, parallel_input pin, heuristics used_heur, search_type used_search, ML_Dataset_Params generate_heur_ML_data, short IDFS_d, short IDFS_s);

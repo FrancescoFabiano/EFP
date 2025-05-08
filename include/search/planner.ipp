@@ -756,7 +756,8 @@ bool planner<T>::ML_dataset_creation(ML_Dataset_Params* ML_dataset) {
     result << "Path Hash,Path Mapped,Depth,Distance From Goal,Goal" << std::endl;
     result.close();
 
-    auto goal_list = domain::get_instance().get_goal_description();
+/*     auto goal_list = domain::get_instance().get_goal_description();
+
     std::stringstream buffer;
     auto original_buf = std::cout.rdbuf(buffer.rdbuf());
 
@@ -767,10 +768,74 @@ bool planner<T>::ML_dataset_creation(ML_Dataset_Params* ML_dataset) {
         goal.print();
     }
     std::cout.rdbuf(original_buf);
-    std::string goal_str = buffer.str();
+    std::string goal_str = buffer.str(); */
 
-    return dataset_launcher(fpath, ML_dataset->depth, ML_dataset->useDFS, goal_str);
+	goal_file_name = generate_goal_tree();
+
+    return dataset_launcher(fpath, ML_dataset->depth, ML_dataset->useDFS, goal_file_name);
 }
+
+template <class T>
+const std::string & planner<T>::generate_goal_tree(const belief_formula &bf, const std::string &parent = "(init)") const {
+		static int node_id = 0;
+		std::string current_label;
+		
+		switch (bf.get_formula_type()) {
+			case FLUENT_FORMULA:
+				current_label = bf.get_fluent_formula().to_string(); // assuming it returns string
+				break;
+	
+			case BELIEF_FORMULA:
+				current_label = "B(" + bf.get_agent().name + ")";
+				break;
+	
+			case C_FORMULA:
+				current_label = "C";
+				break;
+	
+			case PROPOSITIONAL_FORMULA:
+				switch (bf.get_operator()) {
+					case BF_NOT:
+						current_label = "not";
+						break;
+					case BF_OR:
+						current_label = "or";
+						break;
+					case BF_AND:
+						current_label = "and";
+						break;
+					default:
+						current_label = "???";
+				}
+				break;
+	
+			case BF_EMPTY:
+				current_label = "EMPTY";
+				break;
+	
+			default:
+				current_label = "UNKNOWN";
+		}
+	
+		std::string this_node = "(" + current_label + ")";
+		std::cout << parent << "-" << edge_num << "->" << this_node << std::endl;
+	
+		// Recurse into children
+		switch (bf.get_formula_type()) {
+			case BELIEF_FORMULA:
+			case C_FORMULA:
+				print_formula_tree(bf.get_bf1(), this_node, 1);
+				break;
+			case PROPOSITIONAL_FORMULA:
+				print_formula_tree(bf.get_bf1(), this_node, 1);
+				if (bf.get_operator() == BF_OR || bf.get_operator() == BF_AND)
+					print_formula_tree(bf.get_bf2(), this_node, 2);
+				break;
+			default:
+				break;
+		}
+	}
+	
 
 template <class T>
 bool planner<T>::dataset_launcher(const std::string& fpath, int max_depth, bool useDFS, const std::string& goal_str) {
