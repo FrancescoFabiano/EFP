@@ -361,6 +361,10 @@ private:
 
     //  bool check_reached(agent ag, const pworld_ptr & start, const pworld_ptr & end) const;
 
+
+    // Shared helper that actually writes the Graphviz data
+    void write_graphviz_dataset(std::ostream& out, bool use_hash) const;
+    
 public:
 
     /** \brief Setter of the field \ref m_worlds.
@@ -637,8 +641,14 @@ public:
     /** \brief Function that prints the information of *this*.*/
     void print() const;
 
-    /** \brief Function that prints the information of *this* in the format for ML dataset.*/
-    void print_ML_dataset(std::ostream& graphviz) const;
+    // Generates ML dataset graph using emap-style compact IDs (base36)
+    void print_ML_dataset_emap(const std::string& folder, const std::string& base_filename) const;
+
+    // Generates ML dataset graph using raw hash values as node IDs
+    void print_ML_dataset_hash(const std::string& folder, const std::string& base_filename) const;
+
+    // Optional: Combined function to generate both
+    void print_ML_dataset_dual(const std::string& folder, const std::string& base_filename) const;
 
     /** \brief Function that prints the information of *this* in a Graphviz file.
      *

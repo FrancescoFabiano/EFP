@@ -753,7 +753,7 @@ bool planner<T>::ML_dataset_creation(ML_Dataset_Params* ML_dataset) {
         std::cerr << "Error opening file: " << fpath << std::endl;
         return false;
     }
-    result << "Path,Depth,Distance From Goal,Goal" << std::endl;
+    result << "Path Hash,Path Explicit,Depth,Distance From Goal,Goal" << std::endl;
     result.close();
 
     auto goal_list = domain::get_instance().get_goal_description();
@@ -959,8 +959,23 @@ std::string planner<T>::format_row(T& state, int depth, int score, const std::st
     //ss << "\"";
     //printer::get_instance().print_list(state.get_executed_actions());
     //ss << "\",";
-    std::string graphviz_filename = state.print_graphviz_ML_dataset("");
-    ss << graphviz_filename << "," << depth << "," << score << "," << goal_str;
+	auto [folder, base_filename] = state.print_graphviz_ML_dataset("");
+
+	std::string folder_hash = folder + "/hash/";
+	std::string folder_emap = folder + "/emap/";
+	
+	std::string filename_hash = folder_hash + base_filename + "_hash.dot";
+	std::string filename_emap = folder_emap + base_filename + "_emap.dot";
+
+	if (!domain::get_instance().is_gnn_mapped_enabled() && !domain::get_instance().is_gnn_both_enabled()){
+		filename_hash = "NOT CALCULATED";
+	}
+	if (domain::get_instance().is_gnn_mapped_enabled() && !domain::get_instance().is_gnn_both_enabled()){
+		filename_emap = "NOT CALCULATED";
+	}
+	
+	ss << filename_hash << "," << filename_emap << "," << depth << "," << score << "," << goal_str;
+	
     return ss.str();
 }
 

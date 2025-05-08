@@ -140,8 +140,23 @@ unsigned short satisfied_goals::get_satisfied_goals(const T & eState) const
 template <class T>
 unsigned short get_gnn_score(const T & eState)
 {
+	std::string graphviz_filename = "";
+	auto [folder, base_filename] = eState.print_graphviz_ML_dataset("inf");
+	
+	if (domain::get_instance().is_gnn_both_enabled()){
+		std::cerr << "Cannot deduce heuristics when both GNN and GNN_MAPPED are used\n";
+		exit(1);
+	}
+	else if (domain::get_instance().is_gnn_mapped_enabled()){
+		std::string folder_emap = folder + "/emap/";
+		graphviz_filename = folder_emap + base_filename + "_emap.dot";
+	}
+	else{
+		std::string folder_hash = folder + "/hash/";
+		graphviz_filename = folder_hash + base_filename + "_hash.dot";
+	}
 
-	std::string graphviz_filename = eState.print_graphviz_ML_dataset(""); // Store the filename
+	
 	int n_agents = domain::get_instance().get_agents().size();
 	std::string command = "./lib/RL/run_python_script.sh " + graphviz_filename + " " + std::to_string(eState.get_plan_length()) + " " + std::to_string(n_agents);
 

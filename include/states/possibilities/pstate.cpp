@@ -1416,71 +1416,100 @@ std::string to_base36(int num) {
     return std::to_string(num);
 }
 
-void pstate::print_ML_dataset(std::ostream & graphviz) const
+void pstate::write_graphviz_dataset(std::ostream& out, bool use_hash) const
 {
-    graphviz << "digraph G {" << std::endl;
-
     std::unordered_map<std::size_t, int> world_map;
     int world_counter = 1;
 
-    // Assign IDs
+    // Assign compact IDs
     for (const auto& pw : get_worlds()) {
-        std::pair<std::set<fluent>, int> world_key = {pw.get_fluent_set(), pw.get_repetition()};
-        std::size_t hash_value = WorldHash{}(world_key);
-
-        if (world_map.find(hash_value) == world_map.end()) {
-            world_map[hash_value] = world_counter++;
+        auto key = std::make_pair(pw.get_fluent_set(), pw.get_repetition());
+        std::size_t hash = WorldHash{}(key);
+        if (world_map.find(hash) == world_map.end()) {
+            world_map[hash] = world_counter++;
         }
     }
 
+    out << "digraph G {" << std::endl;
+
     // Print nodes
     for (const auto& [hash, id] : world_map) {
-        graphviz << to_base36(id) << ";" << std::endl;
+        out << (use_hash ? std::to_string(hash) : to_base36(id)) << ";" << std::endl;
     }
 
-    // (Optional) Pointed world node decoration
-    {
-        std::pair<std::set<fluent>, int> pointed_key = {get_pointed().get_fluent_set(), get_pointed().get_repetition()};
-        std::size_t pointed_hash = WorldHash{}(pointed_key);
-        graphviz <<  to_base36(world_map[pointed_hash]) << " [shape=doublecircle];" << std::endl;
-    }
+    // Pointed world
+    auto pointed_key = std::make_pair(get_pointed().get_fluent_set(), get_pointed().get_repetition());
+    std::size_t pointed_hash = WorldHash{}(pointed_key);
+    out << (use_hash ? std::to_string(pointed_hash) : to_base36(world_map[pointed_hash]))
+        << " [shape=doublecircle];" << std::endl;
 
-    // Belief edges
-    std::map<std::pair<int, int>, std::set<agent>> edge_map;
+    // Edges
+    std::map<std::pair<std::size_t, std::size_t>, std::set<agent>> edge_map;
     for (const auto& [from_pw, from_map] : get_beliefs()) {
         for (const auto& [ag, to_set] : from_map) {
             for (const auto& to_pw : to_set) {
-                std::pair<std::set<fluent>, int> from_key = {from_pw.get_fluent_set(), from_pw.get_repetition()};
-                std::pair<std::set<fluent>, int> to_key = {to_pw.get_fluent_set(), to_pw.get_repetition()};
+                auto from_key = std::make_pair(from_pw.get_fluent_set(), from_pw.get_repetition());
+                auto to_key = std::make_pair(to_pw.get_fluent_set(), to_pw.get_repetition());
 
                 std::size_t from_hash = WorldHash{}(from_key);
                 std::size_t to_hash = WorldHash{}(to_key);
 
-                int from_id = world_map[from_hash];
-                int to_id = world_map[to_hash];
-                edge_map[{from_id, to_id}].insert(ag);
+                edge_map[{from_hash, to_hash}].insert(ag);
             }
         }
     }
 
-    // Print edges
     for (const auto& [edge, agents] : edge_map) {
-        graphviz <<  to_base36(edge.first)
-                  << " ->" << to_base36(edge.second)
-                  << " [label=\"";
+        auto from_label = use_hash ? std::to_string(edge.first) : to_base36(world_map[edge.first]);
+        auto to_label = use_hash ? std::to_string(edge.second) : to_base36(world_map[edge.second]);
 
-        bool first_ag = true;
+        out << from_label << " -> " << to_label << " [label=\"";
+        bool first = true;
         for (const auto& ag : agents) {
-            if (!first_ag) graphviz << ",";
-            graphviz << domain::get_instance().get_grounder().deground_agent(ag);
-            first_ag = false;
+            if (!first) out << ",";
+            out << domain::get_instance().get_grounder().deground_agent(ag);
+            first = false;
         }
-
-        graphviz << "\"];" << std::endl;
+        out << "\"];" << std::endl;
     }
 
-    graphviz << "}" << std::endl;
+    out << "}" << std::endl;
 }
+
+
+void pstate::print_ML_dataset_emap(const std::string& folder, const std::string& base_filename) const
+{
+    std::string folder_emap = folder + "/emap/";
+    system(("mkdir -p " + folder_emap).c_str());
+    std::string filename_emap = folder_emap + base_filename + "_emap.dot";
+
+    std::ofstream out(filename_emap);
+    write_graphviz_dataset(out, false); // false = use emap IDs
+    out.close();
+}
+
+void pstate::print_ML_dataset_hash(const std::string& folder, const std::string& base_filename) const
+{
+    std::string folder_hash = folder + "/hash/";
+    system(("mkdir -p " + folder_hash).c_str());
+    std::string filename_hash = folder_hash + base_filename + "_hash.dot";
+
+    std::ofstream out(filename_hash);
+    write_graphviz_dataset(out, true); // true = use hash values
+    out.close();
+}
+
+void pstate::print_ML_dataset_dual(const std::string& folder, const std::string& base_filename) const
+{
+
+	if (domain::get_instance().is_gnn_mapped_enabled() || domain::get_instance().is_gnn_both_enabled()){
+		print_ML_dataset_emap(folder, base_filename);
+	}
+	if (!domain::get_instance().is_gnn_mapped_enabled() || domain::get_instance().is_gnn_both_enabled()){
+		print_ML_dataset_hash(folder, base_filename);
+	}
+}
+
 
 
 void pstate::print_graphviz_explicit(std::ostream & graphviz) const

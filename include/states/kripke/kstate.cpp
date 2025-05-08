@@ -1684,7 +1684,7 @@ void kstate::print() const
 
 
 
-void kstate::print_ML_dataset(std::ostream& graphviz) const
+void kstate::print_ML_dataset_dual(std::ostream& graphviz) const
 {
 	std::cerr << "Function print_ML_dataset not yet implmented for K structures.";
 	exit(1);

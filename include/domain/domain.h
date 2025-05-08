@@ -82,6 +82,10 @@ private:
     /** \brief If we are considering the updatede semantics with attitudes or not.*/
     bool m_has_attitudes;
 
+    int m_file_counter = 0;
+    bool m_gnn_both = true;
+    bool m_gnn_mapped = false;
+
     /** \brief Function that from the file stores the \ref agent information.*/
     void build_agents();
     /** \brief Function that from the file stores the \ref fluent information.*/
@@ -137,7 +141,7 @@ public:
      * @param[in] check_visited: If the \ref search process should check for already visited_states.
      * @param[in] bisimulation: If the \ref states are reduced in size with bisimulation.
      * @param[in] has_attitudes: True if we are considering the updated semantics with attitudes.*/
-    void set_domain(std::string name, bool debug, state_type stype, bool k_opt, boost::shared_ptr<reader> reader, domain_restriction ini_res, domain_restriction goal_res, bool is_global_obsv, action_check act_check, bool check_visited, bis_type bisimulation, bool has_attitudes);
+    void set_domain(std::string name, bool debug, state_type stype, bool k_opt, boost::shared_ptr<reader> reader, domain_restriction ini_res, domain_restriction goal_res, bool is_global_obsv, action_check act_check, bool check_visited, bis_type bisimulation, bool has_attitudes, bool gnn_both, bool gnn_mapped);
 
     /** \brief Function that builds all the domain information.
      *
@@ -226,7 +230,17 @@ public:
      * @return the ref to \ref m_goal_description.*/
     const formula_list & get_goal_description();
 
+    // Getter for file_counter
+    int get_file_counter() const;
 
+    // Increments file_counter and returns the new value
+    int increment_file_counter();
+
+    // Getter for gnn_both
+    bool is_gnn_both_enabled() const;
+
+    // Getter for gnn_mapped
+    bool is_gnn_mapped_enabled() const;
 
     /** \brief Copy constructor removed since is Singleton class. */
     domain(domain const&) = delete;

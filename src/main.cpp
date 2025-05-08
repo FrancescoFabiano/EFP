@@ -47,6 +47,9 @@ state_type state_struc = POSSIBILITIES; //default
 domain_restriction ini_restriction = S5; //default
 domain_restriction goal_restriction = NONE; //default
 action_check act_check = EXE_POINTED__COND_WORLD; //default
+bool gnn_both = true;
+bool gnn_mapped = false;
+
 
 bool execute_given_actions = false;
 bool kopt = false;
@@ -116,13 +119,14 @@ void print_usage(char* prog_name)
 	std::cout << "-attitudes" << std::endl;
 	std::cout << "	The planner will use the updated semantics with attitudes (by default it does not)." << std::endl;
 
-	std::cout << "-generate_dataset @type @max_depth" << std::endl;
+	std::cout << "-generate_dataset @type @max_depth @node_labels" << std::endl;
 	std::cout << "	The planner will generate a dataset for the machine learning heuristic (Work In Progress). (This overrides heuristic, search, and parallel settings)." << std::endl;
 	std::cout << "	@type determines whether DFS or BFS is used to generate this dataset." << std::endl;
 	std::cout << "	Possible @type:" << std::endl;
 	std::cout << "		DFS: A depth-first search algorithm will be used to generate the dataset. (Default)" << std::endl;
 	std::cout << "		BFS: A breadth-first search algorithm will be used to generate the dataset." << std::endl;
 	std::cout << "	@max_depth is an integer denoting the maximum depth for the tree in generating this dataset. (Default: 10)" << std::endl;
+	std::cout << "	@node_labels specifies whether to generate the dataset with mapped IDs (M), hashed IDs only (H), or both (B)." << std::endl;
 
 	std::cout << "-search @search_type" << std::endl;
 	std::cout << "	Set the @search_type to use during the planning (Breadth First is default)." << std::endl;
@@ -138,8 +142,9 @@ void print_usage(char* prog_name)
 	std::cout << "		L_PG: A planning graph is used to calculate the distance of each state from the goal." << std::endl;
 	std::cout << "		S_PG: A planning graph is used to calculate the sum of each sub-goal distance starting from the state." << std::endl;
 	std::cout << "		C_PG: A single planning graph is used to calculate the sum of each 'grounded' belief formula." << std::endl;
-	std::cout << "		GNN: Use of GNN to emulate perfect heuristics.";
 	std::cout << "		SUBGOALS: We select the state with the highest number of satisfied subgoals." << std::endl;
+	std::cout << "		GNN: Use of GNN to emulate perfect heuristics." << std::endl;
+	std::cout << "			If GNN is selected, please specify a value (H or M) to indicate whether to use the version with explicit IDs (based on hashes) or the mapped version with compact IDs. (M default)" << std::endl;
 
 	std::cout << "-parallel @ptype @pwait" << std::endl;
 	std::cout << "	The planner will run all heuristics (NONE, L_PG, S_PG, C_PG, SUBGOALS) in parallel. (This overrides the heuristic and search flags)." << std::endl;
@@ -241,54 +246,58 @@ void manage_arguments(int argc, char** argv)
 		} else if (strcmp(argv[i], "-generate_dataset") == 0) {
 			i++;
 			ML_dataset.generate = true;
-			// '-generate_dataset' was the last CLI ; use default values
-			if (i >= argc) {
-				std::cout << "The planner will generate a dataset for the ML_HEUR using DFS. (Default)" << std::endl;
-			} 
-			// '-generate_dataset' was not the last CLI ; check if not using default values.
-			else if(i < argc) {
-				std::string s{argv[i][0]};
-				//case: no parameters for '-generate_dataset' are supplied (do default)
-				if(!s.compare("-")){
-					std::cout << "The planner will generate a dataset for the ML_HEUR using DFS. (Default)" << std::endl;
-					i--;
-				} 
-				//case: at least one parameter for '-generate_dataset'is supplied
-				else if (strcmp(argv[i], "DFS") == 0) {
-					std::cout << "The planner will generate a dataset for the ML_HEUR using DFS." << std::endl;
+		
+			// Default values
+			ML_dataset.useDFS = true;
+			ML_dataset.depth = 10;
+			gnn_mapped = true;
+			gnn_both =true; // Default to both
+		
+			if (i >= argc || argv[i][0] == '-') {
+				std::cout << "The planner will generate a dataset for the ML_HEUR using DFS and depth 10. (Default)" << std::endl;
+				i--; // Rewind so next flag is correctly read
+			} else {
+				// Try reading search type
+				if (strcmp(argv[i], "DFS") == 0) {
 					ML_dataset.useDFS = true;
+					std::cout << "The planner will generate a dataset for the ML_HEUR using DFS." << std::endl;
+					i++;
 				} else if (strcmp(argv[i], "BFS") == 0) {
-					std::cout << "The planner will generate a dataset for the ML_HEUR using BFS." << std::endl;
 					ML_dataset.useDFS = false;
-				} else{
-					//check if the argument is supposed to be the depth limit
-					ML_dataset.depth = atoi(argv[i]);
-					if(ML_dataset.depth > 0){
-						std::cout << "The planner will generate a dataset for the ML_HEUR using DFS. (Default)" << std::endl;
-						std::cout << "The planner will generate a dataset for the ML_HEUR using depth: "<< ML_dataset.depth << std::endl;
-					}else{
-						std::cout << "Wrong specification for '-generate_dataset' @type; expected 'DFS' or 'BFS' but got '"<<argv[i]<<"' instead." << std::endl;
-						exit(1);
+					std::cout << "The planner will generate a dataset for the ML_HEUR using BFS." << std::endl;
+					i++;
+				}
+		
+				// Check if next value is depth
+				if (i < argc && argv[i][0] != '-') {
+					int depth = atoi(argv[i]);
+					if (depth > 0) {
+						ML_dataset.depth = depth;
+						std::cout << "The planner will generate a dataset for the ML_HEUR using depth: " << ML_dataset.depth << std::endl;
+						i++;
 					}
 				}
-			}
-			if(ML_dataset.depth == 10){
-				i++;
-				if (i >= argc){
-					std::cout << "The planner will generate a dataset for the ML_HEUR using depth: 10 (Default)" << std::endl;
-				} else if (i < argc) {
-					std::string s{argv[i][0]};
-					if(!s.compare("-")){
-						std::cout << "The planner will generate a dataset for the ML_HEUR using depth: 10 (Default)" << std::endl;
-						i--;
-					} else{
-						ML_dataset.depth = atoi(argv[i]);
-						if(ML_dataset.depth > 0){
-							std::cout << "The planner will generate a dataset for the ML_HEUR using depth: "<< ML_dataset.depth << std::endl;
-						}else{
-							std::cout << "Wrong specification for '-generate_dataset' @depth; expected positive integer but got '" << argv[i] << "' instead." << std::endl;
-							exit(1);
-						}
+		
+				// Check for optional node label mode
+				if (i < argc && argv[i][0] != '-') {
+					std::string mode = argv[i];
+					if (mode == "M") {
+						gnn_mapped = true;
+						gnn_both =false;
+						std::cout << "Dataset will use mapped (compact) node labels only." << std::endl;
+						i++;
+					} else if (mode == "H") {
+						gnn_mapped = true;
+						gnn_both =false;
+						std::cout << "Dataset will use hashed node labels only." << std::endl;
+						i++;
+					} else if (mode == "B") {
+						gnn_both =true;
+						std::cout << "Dataset will use both mapped and hashed node labels." << std::endl;
+						i++;
+					} else {
+						std::cerr << "Invalid node label mode for '-generate_dataset'. Expected 'M', 'H', or 'B', but got '" << mode << "'." << std::endl;
+						exit(1);
 					}
 				}
 			}
@@ -399,6 +408,21 @@ void manage_arguments(int argc, char** argv)
 			} else if (strcmp(argv[i], "GNN") == 0) {
 				std::cout << "We select the state that is best according to the GNN that approximates the perfect heuristics." << std::endl;
 				used_heur = GNN;
+				gnn_both = false;
+				gnn_mapped = true;
+				// Check if there is a next argument
+				if (i + 1 < argc) {
+					std::string next_arg = argv[i + 1];
+			
+					if (next_arg == "M") {
+						gnn_mapped = true;
+						++i; // consume the next argument
+					} else if (next_arg == "H") {
+						gnn_mapped = false;
+						++i; // consume the next argument
+					}
+					// else: not H or M — do not consume the argument
+				}
 			} else {
 				std::cerr << "Wrong specification for '-h'; use 'NONE' or 'L_PG' or 'S_PG' or 'C_PG' or 'SUBGOALS'." << std::endl;
 				exit(1);
@@ -580,7 +604,7 @@ void generate_domain(char** argv)
 	//		domain_reader->print();
 	//	}
 	//Domain building
-	domain::get_instance().set_domain(domain_name, debug, state_struc, kopt, domain_reader, ini_restriction, goal_restriction, is_global_obsv, act_check, check_visited, bisimulation, has_attitudes);
+	domain::get_instance().set_domain(domain_name, debug, state_struc, kopt, domain_reader, ini_restriction, goal_restriction, is_global_obsv, act_check, check_visited, bisimulation, has_attitudes, gnn_both, gnn_mapped);
 
 	domain::get_instance().build();
 }

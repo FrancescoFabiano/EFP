@@ -293,26 +293,15 @@ void state<T>::print_graphviz(std::string postfix) const
 
 
 template <class T>
-const std::string state<T>::print_graphviz_ML_dataset(std::string postfix) const
+const std::pair<std::string, std::string> state<T>::print_graphviz_ML_dataset(std::string postfix) const
 {
-	//std::cout << "\nGraphviz-Printing of ";
-	//printer::get_instance().print_list(get_executed_actions());
-	std::string exec_act_names;
-	action_id_list::const_iterator it_act;
-	if (get_executed_actions().size() == 0) {
-		exec_act_names = "ini";
-	} else {
-		for (it_act = get_executed_actions().begin(); it_act != get_executed_actions().end(); it_act++) {
-			exec_act_names += domain::get_instance().get_grounder().deground_action(*it_act);
-			exec_act_names += "_";
-		}
-		exec_act_names.pop_back();
-	}
+	std::ostringstream filename_stream;
+	filename_stream << std::setw(5) << std::setfill('0') << domain::get_instance().increment_file_counter(); // e.g., 00001
 
-	std::ofstream graphviz;
 	std::string folder = "out/state/";
 	folder += domain::get_instance().get_name();
-	switch ( domain::get_instance().get_stype() ) {
+
+	switch (domain::get_instance().get_stype()) {
 	case KRIPKE:
 		folder += "_kripke";
 		if (domain::get_instance().get_k_optimized()) {
@@ -326,21 +315,13 @@ const std::string state<T>::print_graphviz_ML_dataset(std::string postfix) const
 		folder += "_unknown";
 		break;
 	}
-	system(("mkdir -p " + folder).c_str());
-	graphviz.open(folder + "/" + exec_act_names + postfix + ".dot");
-	/*graphviz << "digraph K_structure{\n";
-	graphviz << "	rankdir=BT;\n";
-	graphviz << "	size=\"8,5\"\n";
-	m_representation.print_graphviz_explicit(graphviz);
-	graphviz << "}"; */
 
-	m_representation.print_ML_dataset(graphviz);
+	// Call dual-output function
+	m_representation.print_ML_dataset_dual(folder, filename_stream.str() + postfix);
 
-	graphviz.close();
-	//std::cout << postfix << " done.";
 
-	return folder + "/" + exec_act_names + postfix + ".dot";
-
+	// Return (folder, filename without extension)
+	return std::make_pair(folder, filename_stream.str() + postfix);
 }
 
 template <class T>

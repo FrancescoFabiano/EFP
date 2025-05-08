@@ -19,7 +19,7 @@ domain& domain::get_instance()
 	return instance;
 }
 
-void domain::set_domain(std::string name, bool debug, state_type stype, bool k_opt, boost::shared_ptr<reader> reader, domain_restriction ini_res, domain_restriction goal_res, bool is_global_obsv, action_check act_check, bool check_visited, bis_type bisimulation, bool has_attitudes)
+void domain::set_domain(std::string name, bool debug, state_type stype, bool k_opt, boost::shared_ptr<reader> reader, domain_restriction ini_res, domain_restriction goal_res, bool is_global_obsv, action_check act_check, bool check_visited, bis_type bisimulation, bool has_attitudes, bool gnn_both, bool gnn_mapped)
 {
 	m_name = name;
 	m_debug = debug;
@@ -33,6 +33,9 @@ void domain::set_domain(std::string name, bool debug, state_type stype, bool k_o
 	m_check_visited = check_visited;
 	m_bisimulation = bisimulation;
 	m_has_attitudes = has_attitudes;
+	m_file_counter = 0;
+    m_gnn_both = gnn_both;
+    m_gnn_mapped = gnn_mapped;
 }
 
 const state_type & domain::get_stype()
@@ -466,6 +469,25 @@ bool domain::check_goal_restriction(const belief_formula& bf)//Apply the restric
 
 
 
+// Getter for file_counter
+int domain::get_file_counter() const {
+    return m_file_counter;
+}
+
+// Increments file_counter and returns the new value
+int domain::increment_file_counter() {
+    return ++m_file_counter;
+}
+
+// Getter for gnn_both
+bool domain::is_gnn_both_enabled() const {
+    return m_gnn_both;
+}
+
+// Getter for gnn_mapped
+bool domain::is_gnn_mapped_enabled() const {
+    return m_gnn_mapped;
+}
 /*std::string domain::get_name();
 formula_list domain::get_initial_description();
 formula_list domain::get_goal_description();
