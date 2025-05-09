@@ -109,13 +109,21 @@ const belief_formula & belief_formula::get_bf1() const
 
 const belief_formula & belief_formula::get_bf2() const
 {
-	if (m_bf2 == nullptr) {
+	if (is_bf2_null()) {
 		std::cerr << "\nError in declaring a belief_formula ";
 		std::cerr << "a second nested belief formula has not been declared.";
 		std::cerr << std::endl;
 		exit(1);
 	}
 	return *m_bf2;
+}
+
+bool belief_formula::is_bf2_null() const
+{
+	if (m_bf2 == nullptr) {
+		return true;
+	}
+	return false;
 }
 
 void belief_formula::set_operator(bf_operator to_set)

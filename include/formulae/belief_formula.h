@@ -257,6 +257,10 @@ public:
     /** \brief Getter of the \ref belief_formula pointed by \ref m_bf2.
      *
      * @return the \ref belief_formula pointed by \ref m_bf2.*/
+
+    bool is_bf2_null() const;
+
+
     const belief_formula & get_bf2() const;
     /** \brief Getter for the field \ref m_operator.
      *

@@ -738,7 +738,6 @@ void planner<T>::check_actions_names(std::vector<std::string>& act_name)
 	}
 }
 
-
 template <class T>
 bool planner<T>::ML_dataset_creation(ML_Dataset_Params* ML_dataset) {
     std::string folder = "out/ML_HEUR_datasets/";
@@ -770,72 +769,207 @@ bool planner<T>::ML_dataset_creation(ML_Dataset_Params* ML_dataset) {
     std::cout.rdbuf(original_buf);
     std::string goal_str = buffer.str(); */
 
-	goal_file_name = generate_goal_tree();
+	std::string goal_dot_file = domain::get_instance().get_name() + "_goal_tree.dot";
+	std::string goal_file_path =  folder + goal_dot_file;
+	generate_goal_tree(goal_file_path);
 
-    return dataset_launcher(fpath, ML_dataset->depth, ML_dataset->useDFS, goal_file_name);
+    return dataset_launcher(fpath, ML_dataset->depth, ML_dataset->useDFS, goal_file_path);
 }
 
 template <class T>
-const std::string & planner<T>::generate_goal_tree(const belief_formula &bf, const std::string &parent = "(init)") const {
-		static int node_id = 0;
-		std::string current_label;
-		
-		switch (bf.get_formula_type()) {
-			case FLUENT_FORMULA:
-				current_label = bf.get_fluent_formula().to_string(); // assuming it returns string
-				break;
+int planner<T>::get_id_from_map(const std::map<boost::dynamic_bitset<>, int>& id_map, const boost::dynamic_bitset<>& key, const std::string& type_name) {
+    auto it = id_map.find(key);
+    if (it != id_map.end()) {
+        return it->second;
+    } else {
+        throw std::runtime_error(type_name + " not found in map");
+    }
+}
+
+template <class T>
+void planner<T>::populate_ids_from_bitset(const std::set<boost::dynamic_bitset<>>& keys_set, std::map<boost::dynamic_bitset<>, int>& id_map, int start_id) {
+	int current_id = start_id;
+	for (const auto& key : keys_set) {
+        id_map[key] = current_id++;
+    }
+}
+
+template <class T>
+int planner<T>::get_unique_f_id_from_map(fluent fl) {
+    return get_id_from_map(m_fluent_to_id, fl, "Fluent");
+}
+
+template <class T>
+int planner<T>::get_unique_a_id_from_map(agent ag) {
+    return get_id_from_map(m_agent_to_id, ag, "Agent");
+}
+
+template <class T>
+void planner<T>::populate_fluent_ids(int start_id) {
+    populate_ids_from_bitset(domain::get_instance().get_fluents(), m_fluent_to_id, start_id);
+}
+
+template <class T>
+void planner<T>::populate_agent_ids(int start_id) {
+    populate_ids_from_bitset(domain::get_instance().get_agents(), m_agent_to_id, start_id);
+}
+
+template <class T>
+const std::string & planner<T>::generate_goal_tree(const std::string & goal_file_name) {
+	auto goal_list = domain::get_instance().get_goal_description();
+	int goal_counter = 0;
 	
-			case BELIEF_FORMULA:
-				current_label = "B(" + bf.get_agent().name + ")";
-				break;
-	
-			case C_FORMULA:
-				current_label = "C";
-				break;
-	
-			case PROPOSITIONAL_FORMULA:
-				switch (bf.get_operator()) {
-					case BF_NOT:
-						current_label = "not";
-						break;
-					case BF_OR:
-						current_label = "or";
-						break;
-					case BF_AND:
-						current_label = "and";
-						break;
-					default:
-						current_label = "???";
+    std::ofstream dot_file(goal_file_name);
+    if (!dot_file.is_open()) {
+        std::cerr << "Unable to open output file.\n";
+        exit(1);
+    }
+
+    dot_file << "digraph G {\n";
+
+	// Populate fluent and agent ID maps
+
+	populate_fluent_ids(0);
+	populate_agent_ids(static_cast<int>(m_fluent_to_id.size())+1);
+
+	int next_id = m_fluent_to_id.size() + m_agent_to_id.size() + 2;
+
+	// Print fluent nodes (only by ID)
+	/* for (const auto& [fluent_index, fluent_id] : m_fluent_to_id) {
+		dot_file << "  F" << fluent_id << " [label=\"" << fluent_id << "\"];\n";
+	}
+
+	// Print agent nodes (only by ID)
+	for (const auto& [agent_index, agent_id] : m_agent_to_id) {
+		dot_file << "  A" << agent_id << " [label=\"" << agent_id << "\", shape=box];\n";
+	}*/
+
+	std::string parent_name = "init";
+	for (auto& goal : goal_list) {
+		print_goal_subtree(goal, ++goal_counter, next_id, parent_name,dot_file);
+	}
+
+
+    dot_file << "}\n";
+    dot_file.close();
+
+    std::cout << "DOT file 'graph.dot' created.\n";
+	return goal_file_name;
+}		
+
+template <class T>
+void planner<T>::print_goal_subtree(const belief_formula & to_print, int goal_counter, int & next_id, const std::string & parent_node, std::ofstream& dot_file) {
+
+
+	int current_node_id = ++next_id;
+	std::string node_name;
+
+	switch (to_print.get_formula_type()) {
+		case FLUENT_FORMULA: {
+			std::string m_parent_node = parent_node;
+			if  (to_print.get_fluent_formula().size() > 1) {
+				node_name = "F_OR" + std::to_string(current_node_id);
+				current_node_id = ++next_id;
+				//dot_file << "  " << node_name << " [label=\"" << current_node_id << "\"];\n";
+				dot_file << "  " << parent_node << " -> " << node_name << " [label=\"" << goal_counter << "\"];\n";
+				m_parent_node = node_name;
+			}
+
+			for (const auto& fls_set : to_print.get_fluent_formula()) {
+					
+				std::string m_m_parent_node = m_parent_node;
+
+				if  (fls_set.size() > 1) {
+					node_name = "F_AND" + std::to_string(current_node_id);
+					current_node_id = ++next_id;
+					//dot_file << "  " << node_name << " [label=\"" << current_node_id << "\"];\n";
+					dot_file << "  " << m_parent_node << " -> " << node_name << " [label=\"" << goal_counter << "\"];\n";
+					m_m_parent_node = node_name;
 				}
-				break;
-	
-			case BF_EMPTY:
-				current_label = "EMPTY";
-				break;
-	
-			default:
-				current_label = "UNKNOWN";
+
+				for (const auto& fl : fls_set) {
+					dot_file << "  " << m_m_parent_node << " -> F" << get_unique_f_id_from_map(fl) << " [label=\"" << goal_counter << "\"];\n";
+				} 
+			}
+			break;
 		}
-	
-		std::string this_node = "(" + current_label + ")";
-		std::cout << parent << "-" << edge_num << "->" << this_node << std::endl;
-	
-		// Recurse into children
-		switch (bf.get_formula_type()) {
-			case BELIEF_FORMULA:
-			case C_FORMULA:
-				print_formula_tree(bf.get_bf1(), this_node, 1);
-				break;
-			case PROPOSITIONAL_FORMULA:
-				print_formula_tree(bf.get_bf1(), this_node, 1);
-				if (bf.get_operator() == BF_OR || bf.get_operator() == BF_AND)
-					print_formula_tree(bf.get_bf2(), this_node, 2);
-				break;
-			default:
-				break;
+
+		case BELIEF_FORMULA: {
+			node_name = "B" + std::to_string(current_node_id);
+			//dot_file << "  " << node_name << " [label=\"" << current_node_id << "\"];\n";
+			dot_file << "  " << parent_node << " -> " << node_name << " [label=\"" << goal_counter << "\"];\n";
+			dot_file << "  " << node_name << " -> A" << get_unique_a_id_from_map(to_print.get_agent()) << " [label=\"" << goal_counter << "\"];\n";
+			dot_file << "  A" << get_unique_a_id_from_map(to_print.get_agent()) << " -> " << node_name << " [label=\"" << goal_counter << "\"];\n";
+
+			print_goal_subtree(to_print.get_bf1(), goal_counter, next_id, node_name,dot_file);
+			break;
+		}
+
+		case C_FORMULA: {
+			node_name = "C" + std::to_string(current_node_id);
+			//dot_file << "  " << node_name << " [label=\"" << current_node_id << "\"];\n";
+			dot_file << "  " << parent_node << " -> " << node_name << " [label=\"" << goal_counter << "\"];\n";
+
+			for (const auto& ag : to_print.get_group_agents()) {
+				dot_file << "  " << node_name << " -> A" << get_unique_a_id_from_map(ag) << " [label=\"" << goal_counter << "\"];\n";
+				dot_file << "  A" << get_unique_a_id_from_map(ag) << " -> " << node_name << " [label=\"" << goal_counter << "\"];\n";
+			}
+
+			print_goal_subtree(to_print.get_bf1(), goal_counter, next_id, node_name,dot_file);
+			break;
+		}
+
+		case PROPOSITIONAL_FORMULA: {
+			switch (to_print.get_operator()) {
+				case BF_NOT: {
+					node_name = "NOT";
+					break;
+				}
+
+				case BF_AND: {
+					node_name = "AND";
+					break;
+				}
+
+				case BF_OR: {
+					node_name = "OR";
+					break;
+				}
+
+				case BF_FAIL:
+				default: {
+					std::cerr << "\n ERROR IN DECLARATION\n.";
+					exit(1);
+					break;
+				}
+			}
+
+			/* if (m_node_printed.find(node_name) == m_node_printed.end() || m_node_printed[node_name] == false){
+				dot_file << "  " << node_name << " [label=\"" << m_special_nodes[node_name] << "\"];\n";
+				m_node_printed[node_name] = true;
+			} */
+
+			node_name = node_name + std::to_string(current_node_id);
+			//dot_file << "  " << node_name << " [label=\"" << current_node_id << "\"];\n";
+			dot_file << "  " << parent_node << " -> " << node_name << " [label=\"" << goal_counter << "\"];\n";
+			print_goal_subtree(to_print.get_bf1(), goal_counter, next_id, node_name,dot_file);
+
+			if (!to_print.is_bf2_null()) {
+				print_goal_subtree(to_print.get_bf2(), goal_counter, next_id, node_name,dot_file);
+			}
+
+			break;
+		}
+
+		case BF_EMPTY:
+		case BF_TYPE_FAIL:
+		default: {
+			std::cerr << "\n Unknown belief_formula type.";
+			exit(1);
+			break;
 		}
 	}
-	
+}
 
 template <class T>
 bool planner<T>::dataset_launcher(const std::string& fpath, int max_depth, bool useDFS, const std::string& goal_str) {
@@ -913,8 +1047,6 @@ bool planner<T>::dataset_DFS_serial(T& initial_state, int max_depth, action_set*
 
     return !global_dataset.empty();
 }
-
-
 
 template <class T>
 int planner<T>::dataset_DFS_worker(T& state, int depth, int max_depth, action_set* actions, const std::string& goal_str, std::vector<std::string>& global_dataset, bool bisimulation) {

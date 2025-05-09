@@ -78,6 +78,20 @@ private:
     double m_discard_augmentation_factor_ML = 0; // Tracks augmentation for non-discarded paths
     int m_goal_founds_ML = 0;
 
+
+/*     std::unordered_map<std::string, int> m_special_nodes = {
+        {"AND", 0},
+        {"OR", 1},
+        {"NOT", 2},
+        {"F_AND", 3},
+        {"F_OR", 4}
+    }; */
+    //std::unordered_map<std::string, bool> m_node_printed;
+    std::map<fluent, int> m_fluent_to_id;
+    std::map<agent, int> m_agent_to_id;
+
+
+
     /** Function that searches on m_search_space using BFS.
      * 
      * @param[in] results_file Whether to print results to a file.
@@ -113,8 +127,26 @@ private:
     /** Formats a single row of the dataset CSV file. */
     std::string format_row(T& state, int depth, int score, const std::string& goal_str);
 
-    const std::string & generate_goal_tree() const;
     
+    // Function declarations
+    int get_id_from_map(const std::map<boost::dynamic_bitset<>, int>& id_map,
+                        const boost::dynamic_bitset<>& key,
+                        const std::string& type_name);
+
+    void populate_ids_from_bitset(const std::set<boost::dynamic_bitset<>>& keys_set,
+                                  std::map<boost::dynamic_bitset<>, int>& id_map,
+                                  int start_id);
+
+    int get_unique_f_id_from_map(fluent fl);
+    int get_unique_a_id_from_map(agent ag);
+
+    void populate_fluent_ids(int start_id);
+    void populate_agent_ids(int start_id);
+
+    const std::string& generate_goal_tree(const std::string& goal_file_name);
+
+    void print_goal_subtree(const belief_formula& to_print, int goal_counter, int& next_id,
+                            const std::string& parent_node, std::ofstream&);
 
 public:
     /** Launches the search process based on given parameters. */
