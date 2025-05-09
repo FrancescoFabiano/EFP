@@ -283,12 +283,12 @@ void manage_arguments(int argc, char** argv)
 					std::string mode = argv[i];
 					if (mode == "M") {
 						gnn_mapped = true;
-						gnn_both =false;
+						gnn_both = false;
 						std::cout << "Dataset will use mapped (compact) node labels only." << std::endl;
 						i++;
 					} else if (mode == "H") {
-						gnn_mapped = true;
-						gnn_both =false;
+						gnn_mapped = false;
+						gnn_both = false;
 						std::cout << "Dataset will use hashed node labels only." << std::endl;
 						i++;
 					} else if (mode == "B") {

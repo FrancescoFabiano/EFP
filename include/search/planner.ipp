@@ -1165,10 +1165,10 @@ std::string planner<T>::format_row(T& state, int depth, int score, const std::st
 	std::string filename_emap = folder_emap + base_filename + "_emap.dot";
 
 	if (!domain::get_instance().is_gnn_mapped_enabled() && !domain::get_instance().is_gnn_both_enabled()){
-		filename_hash = "NOT CALCULATED";
+		filename_emap = "NOT CALCULATED";
 	}
 	if (domain::get_instance().is_gnn_mapped_enabled() && !domain::get_instance().is_gnn_both_enabled()){
-		filename_emap = "NOT CALCULATED";
+		filename_hash = "NOT CALCULATED";
 	}
 	
 	ss << filename_hash << "," << filename_emap << "," << depth << "," << score << "," << goal_str;
