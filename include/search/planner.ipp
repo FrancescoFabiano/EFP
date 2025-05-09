@@ -868,7 +868,8 @@ void planner<T>::print_goal_subtree(const belief_formula & to_print, int goal_co
 		case FLUENT_FORMULA: {
 			std::string m_parent_node = parent_node;
 			if  (to_print.get_fluent_formula().size() > 1) {
-				node_name = "F_OR" + std::to_string(current_node_id);
+				//REMOVE LETTERS node_name = "F_OR" + std::to_string(current_node_id);
+				node_name = std::to_string(current_node_id);
 				current_node_id = ++next_id;
 				//dot_file << "  " << node_name << " [label=\"" << current_node_id << "\"];\n";
 				dot_file << "  " << parent_node << " -> " << node_name << " [label=\"" << goal_counter << "\"];\n";
@@ -880,7 +881,8 @@ void planner<T>::print_goal_subtree(const belief_formula & to_print, int goal_co
 				std::string m_m_parent_node = m_parent_node;
 
 				if  (fls_set.size() > 1) {
-					node_name = "F_AND" + std::to_string(current_node_id);
+					//REMOVE LETTERS node_name = "F_AND" + std::to_string(current_node_id);
+					node_name = std::to_string(current_node_id);
 					current_node_id = ++next_id;
 					//dot_file << "  " << node_name << " [label=\"" << current_node_id << "\"];\n";
 					dot_file << "  " << m_parent_node << " -> " << node_name << " [label=\"" << goal_counter << "\"];\n";
@@ -888,31 +890,38 @@ void planner<T>::print_goal_subtree(const belief_formula & to_print, int goal_co
 				}
 
 				for (const auto& fl : fls_set) {
-					dot_file << "  " << m_m_parent_node << " -> F" << get_unique_f_id_from_map(fl) << " [label=\"" << goal_counter << "\"];\n";
+					//REMOVE LETTERS dot_file << "  " << m_m_parent_node << " -> F" << get_unique_f_id_from_map(fl) << " [label=\"" << goal_counter << "\"];\n";
+					dot_file << "  " << m_m_parent_node << " -> " << get_unique_f_id_from_map(fl) << " [label=\"" << goal_counter << "\"];\n";
 				} 
 			}
 			break;
 		}
 
 		case BELIEF_FORMULA: {
-			node_name = "B" + std::to_string(current_node_id);
+			//REMOVE LETTERS node_name = "B" + std::to_string(current_node_id);
+			node_name = std::to_string(current_node_id);
 			//dot_file << "  " << node_name << " [label=\"" << current_node_id << "\"];\n";
 			dot_file << "  " << parent_node << " -> " << node_name << " [label=\"" << goal_counter << "\"];\n";
-			dot_file << "  " << node_name << " -> A" << get_unique_a_id_from_map(to_print.get_agent()) << " [label=\"" << goal_counter << "\"];\n";
-			dot_file << "  A" << get_unique_a_id_from_map(to_print.get_agent()) << " -> " << node_name << " [label=\"" << goal_counter << "\"];\n";
+			//REMOVE LETTERS dot_file << "  " << node_name << " -> A" << get_unique_a_id_from_map(to_print.get_agent()) << " [label=\"" << goal_counter << "\"];\n";
+			//REMOVE LETTERS dot_file << "  A" << get_unique_a_id_from_map(to_print.get_agent()) << " -> " << node_name << " [label=\"" << goal_counter << "\"];\n";
+			dot_file << "  " << node_name << " -> " << get_unique_a_id_from_map(to_print.get_agent()) << " [label=\"" << goal_counter << "\"];\n";
+			dot_file << "  " << get_unique_a_id_from_map(to_print.get_agent()) << " -> " << node_name << " [label=\"" << goal_counter << "\"];\n";
 
 			print_goal_subtree(to_print.get_bf1(), goal_counter, next_id, node_name,dot_file);
 			break;
 		}
 
 		case C_FORMULA: {
-			node_name = "C" + std::to_string(current_node_id);
+			//REMOVE LETTERS node_name = "C" + std::to_string(current_node_id);
+			node_name = std::to_string(current_node_id);
 			//dot_file << "  " << node_name << " [label=\"" << current_node_id << "\"];\n";
 			dot_file << "  " << parent_node << " -> " << node_name << " [label=\"" << goal_counter << "\"];\n";
 
 			for (const auto& ag : to_print.get_group_agents()) {
-				dot_file << "  " << node_name << " -> A" << get_unique_a_id_from_map(ag) << " [label=\"" << goal_counter << "\"];\n";
-				dot_file << "  A" << get_unique_a_id_from_map(ag) << " -> " << node_name << " [label=\"" << goal_counter << "\"];\n";
+				//REMOVE LETTERS dot_file << "  " << node_name << " -> A" << get_unique_a_id_from_map(ag) << " [label=\"" << goal_counter << "\"];\n";
+				//REMOVE LETTERS dot_file << "  A" << get_unique_a_id_from_map(ag) << " -> " << node_name << " [label=\"" << goal_counter << "\"];\n";
+				dot_file << "  " << node_name << " -> " << get_unique_a_id_from_map(ag) << " [label=\"" << goal_counter << "\"];\n";
+				dot_file << "  " << get_unique_a_id_from_map(ag) << " -> " << node_name << " [label=\"" << goal_counter << "\"];\n";
 			}
 
 			print_goal_subtree(to_print.get_bf1(), goal_counter, next_id, node_name,dot_file);
@@ -949,7 +958,8 @@ void planner<T>::print_goal_subtree(const belief_formula & to_print, int goal_co
 				m_node_printed[node_name] = true;
 			} */
 
-			node_name = node_name + std::to_string(current_node_id);
+			//REMOVE LETTERS node_name = node_name + std::to_string(current_node_id);
+			node_name = std::to_string(current_node_id);
 			//dot_file << "  " << node_name << " [label=\"" << current_node_id << "\"];\n";
 			dot_file << "  " << parent_node << " -> " << node_name << " [label=\"" << goal_counter << "\"];\n";
 			print_goal_subtree(to_print.get_bf1(), goal_counter, next_id, node_name,dot_file);
