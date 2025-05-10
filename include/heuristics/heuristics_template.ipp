@@ -156,9 +156,13 @@ unsigned short get_gnn_score(const T & eState)
 		graphviz_filename = folder_hash + base_filename + "_hash.dot";
 	}
 
+	//This is brutally copied from planner.ipp, make sure to remove all of this from planner and make a specific calss
+	std::string folder_goal = "out/ML_HEUR_datasets/DFS/";
+	std::string goal_dot_file = domain::get_instance().get_name() + "_goal_tree.dot";
+	std::string goal_graph_file =  folder_goal + goal_dot_file;
 	
 	int n_agents = domain::get_instance().get_agents().size();
-	std::string command = "./lib/RL/run_python_script.sh " + graphviz_filename + " " + std::to_string(eState.get_plan_length()) + " " + std::to_string(n_agents);
+	std::string command = "./lib/RL/run_python_script.sh " + graphviz_filename + " " + std::to_string(eState.get_plan_length()) + " " + std::to_string(n_agents) + " " + goal_graph_file;
 
     int ret = system(command.c_str()); // blocks until script (and Python) finishes
 

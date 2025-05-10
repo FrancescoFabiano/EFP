@@ -129,7 +129,11 @@ def main_prediction() -> None:
     parser.add_argument("path",     type=str, help="Path (long) to graph file")
     parser.add_argument("depth",    type=int, help="Depth parameter")
     parser.add_argument("n_agents", type=int, help="Number of agents")
+    parser.add_argument("goal_file", type=int, help="The file containing the goal description in graph format")
     args = parser.parse_args()
+
+    #Giovanni I've added the parsing of the goal file path as well. This does not need to be executed on every run for the prediction as it is shared in the problem
+    adding compilation error so you notice this line above:)
 
     # 1) Resolve filename safely
     dot_path = resolve_dot_path(args.path)

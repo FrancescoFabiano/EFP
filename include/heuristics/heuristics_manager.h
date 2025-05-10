@@ -29,6 +29,7 @@ private:
     /*A map which contains the value of each "grounded" bf w.r.t. the classical planning graph.*/
     // pg_bfs_score m_bf_score;
 
+    std::string m_goal_graph_file="";
 
     /** \brief Function that expands the group formulae to have more sub_goals
      * 
@@ -56,6 +57,28 @@ private:
     void produce_subgoals(unsigned short nesting, unsigned short depth, const belief_formula & to_explore, const agent_set & agents);
 
 
+    //This is brutally copied from planner.ipp, make sure to remove all of this from planner and make a specific calss
+    std::map<fluent, int> m_fluent_to_id;
+    std::map<agent, int> m_agent_to_id;
+
+    int get_id_from_map(const std::map<boost::dynamic_bitset<>, int>& id_map,
+                        const boost::dynamic_bitset<>& key,
+                        const std::string& type_name);
+
+    void populate_ids_from_bitset(const std::set<boost::dynamic_bitset<>>& keys_set,
+                                  std::map<boost::dynamic_bitset<>, int>& id_map,
+                                  int start_id);
+
+    int get_unique_f_id_from_map(fluent fl);
+    int get_unique_a_id_from_map(agent ag);
+
+    void populate_fluent_ids(int start_id);
+    void populate_agent_ids(int start_id);
+
+    void print_goal_subtree(const belief_formula& to_print, int goal_counter, int& next_id,
+                            const std::string& parent_node, std::ofstream&);
+
+    const std::string& generate_goal_tree_h(const std::string& goal_file_name);
 
 public:
     /** \brief Class constructor that uses the chosen heuristic to perform the operation
