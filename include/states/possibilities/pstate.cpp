@@ -1413,7 +1413,21 @@ std::string to_base36(int num) {
         result = digits[num % 36] + result;
         num /= 36;
     } For now we keep the information in integer for better compatibility with GNNs*/
-    return std::to_string(num);
+    return std::to_string(num + domain::get_instance().get_agents().size());
+}
+
+int agent_to_int(const agent& ag) {
+    try {
+        // If agent is boost::dynamic_bitset<>
+        unsigned long val = ag.to_ulong();
+        if (val > static_cast<unsigned long>(std::numeric_limits<int>::max())) {
+            throw std::overflow_error("Agent value exceeds int max");
+        }
+        return static_cast<int>(val);
+    } catch (const std::overflow_error& e) {
+        std::cerr << "Error: agent bitset too large to fit in int (" << e.what() << ")\n";
+        exit(1);
+    }
 }
 
 void pstate::write_graphviz_dataset(std::ostream& out, bool use_hash) const
@@ -1459,7 +1473,7 @@ void pstate::write_graphviz_dataset(std::ostream& out, bool use_hash) const
         }
     }
 
-    for (const auto& [edge, agents] : edge_map) {
+/*     for (const auto& [edge, agents] : edge_map) {
         auto from_label = use_hash ? std::to_string(edge.first) : to_base36(world_map[edge.first]);
         auto to_label = use_hash ? std::to_string(edge.second) : to_base36(world_map[edge.second]);
 
@@ -1471,7 +1485,19 @@ void pstate::write_graphviz_dataset(std::ostream& out, bool use_hash) const
             first = false;
         }
         out << "\"];" << std::endl;
-    }
+    } */
+
+	//One edge per agent
+	for (const auto& [edge, agents] : edge_map) {
+    auto from_label = use_hash ? std::to_string(edge.first) : to_base36(world_map[edge.first]);
+    auto to_label = use_hash ? std::to_string(edge.second) : to_base36(world_map[edge.second]);
+
+    for (const auto& ag : agents) {
+        out << from_label << " -> " << to_label << " [label=\""
+            << agent_to_int(ag)
+            << "\"];" << std::endl;
+		}
+	}
 
     out << "}" << std::endl;
 }
