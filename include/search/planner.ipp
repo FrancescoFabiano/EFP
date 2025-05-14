@@ -844,7 +844,7 @@ const std::string & planner<T>::generate_goal_tree(const std::string & goal_file
 		dot_file << "  A" << agent_id << " [label=\"" << agent_id << "\", shape=box];\n";
 	}*/
 
-	std::string parent_name = "init";
+	std::string parent_name = "-1";
 	for (auto& goal : goal_list) {
 		print_goal_subtree(goal, ++goal_counter, next_id, parent_name,dot_file);
 	}
