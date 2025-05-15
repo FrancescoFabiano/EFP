@@ -162,7 +162,15 @@ unsigned short get_gnn_score(const T & eState)
 	std::string goal_graph_file =  folder_goal + goal_dot_file;
 	
 	int n_agents = domain::get_instance().get_agents().size();
-	std::string command = "./lib/RL/run_python_script.sh " + graphviz_filename + " " + std::to_string(eState.get_plan_length()) + " " + std::to_string(n_agents) + " " + goal_graph_file;
+
+	std::string ml_states_encoding = "M"; //M is for map and H is for hashing
+
+	if (!domain::get_instance().is_gnn_mapped_enabled())
+	{
+		ml_states_encoding = "H";
+	}
+
+	std::string command = "./lib/RL/run_python_script.sh " + graphviz_filename + " " + std::to_string(eState.get_plan_length()) + " " + std::to_string(n_agents) + " " + goal_graph_file + " ";
 
     int ret = system(command.c_str()); // blocks until script (and Python) finishes
 
