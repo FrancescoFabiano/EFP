@@ -170,7 +170,7 @@ unsigned short get_gnn_score(const T & eState)
 		ml_states_encoding = "H";
 	}
 
-	std::string command = "./lib/RL/run_python_script.sh " + graphviz_filename + " " + std::to_string(eState.get_plan_length()) + " " + std::to_string(n_agents) + " " + goal_graph_file + " ";
+	std::string command = "./lib/RL/run_python_script.sh " + graphviz_filename + " " + std::to_string(eState.get_plan_length()) + " " + std::to_string(n_agents) + " " + goal_graph_file + " " + ml_states_encoding;
 
     int ret = system(command.c_str()); // blocks until script (and Python) finishes
 
