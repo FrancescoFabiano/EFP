@@ -1,5 +1,13 @@
 # EFP
 
+# Outdated Repository
+This repository is no longer maintained.  
+A new version of this solver, with **cleaner code, more functionality, and novel results**, is available here:
+
+[FrancescoFabiano/deep](https://github.com/FrancescoFabiano/deep)  
+
+Please refer to the new repository if you wish to use or extend this code.  
+
 ## Thesis - Related
 The repository, for a brief period of time, will store previous versions of the planner that match the implementation of some foundamental features.
 The planner, at the moment, is not completly able to manage the various versions.
@@ -111,3 +119,4 @@ In Proceedings of the 34th Italian Conference on Computational Logic.
 Le, T.; Fabiano, F.; Son, T. C.; and Pontelli, E. 2018.
 EFP and PG-EFP: Epistemic forward search planners in multiagent domains.
 In Proceedings of the Twenty-Eighth International Conference on Automated Planning and Scheduling.
+
