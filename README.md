@@ -1,5 +1,3 @@
-# EFP
-
 # Outdated Repository
 This repository is no longer maintained.  
 A new version of this solver, with **cleaner code, more functionality, and novel results**, is available here:
@@ -8,17 +6,9 @@ A new version of this solver, with **cleaner code, more functionality, and novel
 
 Please refer to the new repository if you wish to use or extend this code.  
 
-## Thesis - Related
-The repository, for a brief period of time, will store previous versions of the planner that match the implementation of some foundamental features.
-The planner, at the moment, is not completly able to manage the various versions.
-These versions will be merged in the next future and we will provide a unique solver that would allow, through parameters, to try different configurations.
+---
 
-As a temporary solution we store in the folder "Thesis Code" four archives:
-- EFP2-0.zip: Contains the code of EFP 2.0 presented at (Fabiano et al. 2020)
-- EFP2-1.zip: Contains the code of EFP 2.1 that is EFP 2.0 optimized -- this version works only with Possibilities and also allows to play with small variation of the classical actions
-- EFP-att.zip: Contains the code where EFP is able to deal with agents attitudes (Fabiano et al. 2021) -- the example files contains the line to execute to generate the graphical states representation
-- EFP-customEve.zip: Contains the code where it is possible to play with custom event model
-- PLATO.zip: The ASP planner based on (Burigana et al. 2020)
+# EFP (Old ReadMe)
 
 ## Goal
 Realize a scalable Epistemic Forward Planner that bases its concept on different states representations such as:
@@ -90,6 +80,18 @@ At the moment we implemented:
 - The repository include project settings and various profile to works on ide (CLion), profiles available: Build, Build Clean, Execute, Execute and Build
 - Now can debug at run time with debugger (Clion), profiling with CLion profiler integrated (Callstack, Memory, CPU usage and More)
 
+## Thesis - Related
+The repository, for a brief period of time, will store previous versions of the planner that match the implementation of some foundamental features.
+The planner, at the moment, is not completly able to manage the various versions.
+These versions will be merged in the next future and we will provide a unique solver that would allow, through parameters, to try different configurations.
+
+As a temporary solution we store in the folder "Thesis Code" four archives:
+- EFP2-0.zip: Contains the code of EFP 2.0 presented at (Fabiano et al. 2020)
+- EFP2-1.zip: Contains the code of EFP 2.1 that is EFP 2.0 optimized -- this version works only with Possibilities and also allows to play with small variation of the classical actions
+- EFP-att.zip: Contains the code where EFP is able to deal with agents attitudes (Fabiano et al. 2021) -- the example files contains the line to execute to generate the graphical states representation
+- EFP-customEve.zip: Contains the code where it is possible to play with custom event model
+- PLATO.zip: The ASP planner based on (Burigana et al. 2020)
+
 #### Bibliography
 Baral, C.; Gelfond, G.; Pontelli, E.; and Son, T. C. 2015.
 An action language for multi-agent domains: Foundations.
@@ -119,4 +121,5 @@ In Proceedings of the 34th Italian Conference on Computational Logic.
 Le, T.; Fabiano, F.; Son, T. C.; and Pontelli, E. 2018.
 EFP and PG-EFP: Epistemic forward search planners in multiagent domains.
 In Proceedings of the Twenty-Eighth International Conference on Automated Planning and Scheduling.
+
 
